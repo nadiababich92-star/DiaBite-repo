@@ -9,7 +9,7 @@ therapy and must never be used to calculate insulin doses.
 ## What works today
 
 **Can I eat this?** — the core loop. Type a meal in plain words; the agent
-(an n8n workflow) looks foods up in the verified database, computes the
+(in Azure Foundry) looks foods up in the verified database, computes the
 glycemic load against today's remaining budget, and answers with a verdict, the
 numbers, a reason and a next step. Every number is checked by the verifier
 against the tool results before it is shown. "Show calculation" opens the
@@ -52,24 +52,18 @@ Type-check without running: `npm run typecheck`.
 
 ### Running the whole loop
 
-Three processes: the engine, a tunnel so n8n Cloud can reach it, and the app.
-
-```bash
-npm run server
-```
-
-```bash
-npm run tunnel
-```
+The agent and the engine both run in Azure, so the app alone is enough:
 
 ```bash
 npm run dev
 ```
 
-In dev the app calls `/agent`, which Vite proxies to the published n8n webhook
-(`AGENT_WEBHOOK` env overrides it). For a production build set `VITE_AGENT_URL`
-to the webhook directly. The n8n build
-guide is in `n8n/SETUP.md`.
+In dev the app calls `/agent`, which Vite proxies to `/agent/ask` on the
+deployed engine (`AGENT_WEBHOOK` overrides the target — point it at
+`http://localhost:8787/agent/ask` with `npm run server` to work against a
+local engine). For a production build set `VITE_AGENT_URL`. The Foundry setup
+is described in `agent/SETUP.md`; `n8n/SETUP.md` documents the workflow this
+replaced.
 
 ## Layout
 
@@ -82,7 +76,7 @@ src/
   lib/profile.ts       Mifflin-St Jeor, macro split, glycemic-load ceiling
   lib/menu.ts          weekly menu generator and shopping list
   lib/storage.ts       localStorage persistence
-  lib/agent.ts         client for the n8n agent webhook; reads the tool trace into a receipt
+  lib/agent.ts         client for /agent/ask; reads the tool trace into a receipt
   lib/diary.ts         one reader for diary entries, hand-logged or agent-logged
   components/          pages: Ask (the core loop), Diary, Menu, Profile
 server/
@@ -93,13 +87,18 @@ server/
   resolve.ts           resolve_foods: phrases -> records with a confidence band
   compute.ts           compute_meal, get_day_state, find_alternatives
   verify.ts            the verifier: every number in an answer must trace to a tool result
-n8n/                   workflow build guide, node code, system prompt
+  agent.ts             one turn: safety gate, Foundry run, verifier, trace
+  safety.ts            the safety gate: dosing refusals and red-flag escalation
+  sessions.ts          day state and thread, kept out of the model's hands
+  openapi.ts           the OpenAPI spec Foundry's tool reads
+agent/                 system prompt, provisioning, Foundry setup guide
+n8n/                   the workflow this replaced, kept for reference
 ```
 
 `lib/` and `data/` are pure TypeScript with no React dependency. The React
 frontend imports them directly for the diary's calculations, and the same
-modules are deployed as a small HTTP service that the n8n agent calls as tools.
-One source, two deploy targets.
+modules are deployed as a small HTTP service that the Foundry agent calls as
+tools. One source, two deploy targets.
 
 Key formulas:
 
@@ -144,3 +143,22 @@ only valid when available carbohydrate is near zero.
 - The dish set still reflects Eastern European cooking (pearl barley, kefir,
   mackerel) and needs re-curating for the US market.
 - No barcode scanning, no food photos, no glucose-meter import.
+
+## Feedback → Supabase
+
+The Feedback button in the navbar opens a form (rating 1–5 and a comment are
+required, name and email optional) that writes one row to `public.feedback` in
+the Supabase project **DiaBite-feedback**.
+
+- Schema and policies: `supabase/migrations/20260922173000_create_feedback_table.sql`.
+  Row-level security allows the browser to insert a feedback row and nothing
+  else — reading rows back needs a privileged key, so one visitor can never see
+  another's feedback.
+- Config: copy `.env.example` to `.env.local` and fill in the project URL and
+  the **publishable** key (`sb_publishable_…`). A service-role key must never go
+  in a `VITE_*` variable — Vite inlines those into the shipped bundle.
+- Without `.env.local` the form still works end to end and keeps submissions in
+  localStorage, so the UI can be developed without the database.
+- Typing `trigger error` as the comment forces the error state, for testing.
+
+Read submissions in the Supabase dashboard (Table editor → `feedback`).
