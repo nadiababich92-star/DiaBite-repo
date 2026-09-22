@@ -22,7 +22,7 @@ import { DefaultAzureCredential } from '@azure/identity'
 import { openApiSpec } from './openapi'
 import { safetyGate } from './safety'
 import { verify } from './verify'
-import { putSession } from './sessions'
+import { putSession, rememberThread, threadFor } from './sessions'
 import type { DayBudget, MealItemInput } from './contract'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -215,7 +215,9 @@ export async function ask(req: AskRequest): Promise<AskResponse> {
 
   const c = agentsClient()
   const agentId = await ensureAgent()
-  const threadId = req.threadId ?? (await c.threads.create()).id
+  // Same conversation, same thread: that is what carried memory in n8n.
+  const threadId = req.threadId ?? threadFor(req.sessionId) ?? (await c.threads.create()).id
+  rememberThread(req.sessionId, threadId)
 
   await c.messages.create(
     threadId,

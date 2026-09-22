@@ -1,10 +1,13 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// The agent lives in n8n Cloud. In dev, /agent is proxied there so the browser
-// never deals with CORS. The workflow is published, so the production URL is
-// the default; the test URL (/webhook-test/diabite) answers once per "Execute workflow".
-const AGENT_WEBHOOK = process.env.AGENT_WEBHOOK ?? 'https://n-babich.app.n8n.cloud/webhook/diabite'
+// The agent runs in Azure Foundry, behind /agent/ask on the engine's Container
+// App. In dev, /agent is proxied there so the browser never deals with CORS.
+// Point AGENT_WEBHOOK at http://localhost:8787/agent/ask to run against a local
+// engine instead.
+const AGENT_WEBHOOK =
+  process.env.AGENT_WEBHOOK ??
+  'https://diabite-engine.greenglacier-ab5551c6.swedencentral.azurecontainerapps.io/agent/ask'
 
 export default defineConfig({
   plugins: [react()],

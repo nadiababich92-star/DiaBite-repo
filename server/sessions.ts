@@ -13,7 +13,11 @@
  * model.
  *
  * In-memory with a TTL: day state is per-conversation and cheap to re-send.
- * Swap for Redis when the service runs on more than one replica.
+ *
+ * This is why the service runs on a single replica. The agent's tool call
+ * arrives through the public ingress, which would load-balance it to whichever
+ * replica it liked — and a day state parked on one replica is a 404 on the
+ * other. Redis behind this module is what lifts that limit.
  */
 import type { DayBudget, MealItemInput } from './contract'
 
@@ -45,4 +49,26 @@ export function getSession(id: string): SessionState | undefined {
 export function sessionCount(): number {
   sweep()
   return store.size
+}
+
+// ── Threads ───────────────────────────────────────────────────────────────
+
+/**
+ * Which Foundry thread belongs to a conversation.
+ *
+ * n8n keyed its memory by the session id; a Foundry thread is the same idea
+ * with a different name, so the mapping lives here rather than asking the
+ * frontend to carry a thread id it has no use for.
+ */
+const threads = new Map<string, { threadId: string; storedAt: number }>()
+
+export function threadFor(sessionId: string): string | undefined {
+  const t = threads.get(sessionId)
+  if (!t) return undefined
+  if (Date.now() - t.storedAt > TTL_MS) { threads.delete(sessionId); return undefined }
+  return t.threadId
+}
+
+export function rememberThread(sessionId: string, threadId: string): void {
+  threads.set(sessionId, { threadId, storedAt: Date.now() })
 }
