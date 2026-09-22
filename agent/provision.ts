@@ -12,7 +12,7 @@
  *
  * Authenticates as whoever is logged in to the Azure CLI.
  */
-import { ensureAgent, systemPrompt } from '../server/agent'
+import { publishAgentVersion, systemPrompt } from '../server/agent'
 import { openApiSpec } from '../server/openapi'
 
 const spec = openApiSpec() as { servers: { url: string }[]; paths: Record<string, unknown> }
@@ -24,5 +24,5 @@ console.log('auth      ', process.env.ENGINE_CONNECTION_ID ? `connection "${proc
 console.log('operations', Object.keys(spec.paths).length)
 console.log('prompt    ', systemPrompt().length, 'chars')
 
-const id = await ensureAgent()
-console.log('\nagent ready:', id)
+const version = await publishAgentVersion()
+console.log('\nagent published, version', version)

@@ -8,7 +8,7 @@ const r = await ask({
   entries: [{ foodId: 'seed:rice-white', grams: 180 }, { foodId: 'seed:chicken', grams: 150 }],
 })
 console.log('--- ANSWER ---\n' + r.answer)
-console.log('\nrun:', r.runStatus, '| blocked:', r.blocked, '| verified:', r.verified)
+console.log('\nattempts:', r.attempts, '| templated:', r.templated, '| blocked:', r.blocked, '| verified:', r.verified)
 console.log('matched:', JSON.stringify(r.matchedNumbers), '| unmatched:', JSON.stringify(r.unmatchedNumbers))
 console.log('tool calls:', r.toolCalls)
 for (const t of r.trace) {

@@ -51,24 +51,24 @@ export function sessionCount(): number {
   return store.size
 }
 
-// ── Threads ───────────────────────────────────────────────────────────────
+// ── Conversation continuity ───────────────────────────────────────────────
 
 /**
- * Which Foundry thread belongs to a conversation.
+ * Where a conversation left off.
  *
- * n8n keyed its memory by the session id; a Foundry thread is the same idea
- * with a different name, so the mapping lives here rather than asking the
- * frontend to carry a thread id it has no use for.
+ * n8n keyed its memory by the session id. The Responses API continues a
+ * conversation by quoting the previous response's id, so that is what we keep
+ * — the frontend carries nothing it has no use for.
  */
-const threads = new Map<string, { threadId: string; storedAt: number }>()
+const lastResponse = new Map<string, { responseId: string; storedAt: number }>()
 
-export function threadFor(sessionId: string): string | undefined {
-  const t = threads.get(sessionId)
-  if (!t) return undefined
-  if (Date.now() - t.storedAt > TTL_MS) { threads.delete(sessionId); return undefined }
-  return t.threadId
+export function previousResponseFor(sessionId: string): string | undefined {
+  const r = lastResponse.get(sessionId)
+  if (!r) return undefined
+  if (Date.now() - r.storedAt > TTL_MS) { lastResponse.delete(sessionId); return undefined }
+  return r.responseId
 }
 
-export function rememberThread(sessionId: string, threadId: string): void {
-  threads.set(sessionId, { threadId, storedAt: Date.now() })
+export function rememberResponse(sessionId: string, responseId: string): void {
+  lastResponse.set(sessionId, { responseId, storedAt: Date.now() })
 }
