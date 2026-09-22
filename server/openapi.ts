@@ -14,8 +14,6 @@
 
 const SERVER_URL = process.env.PUBLIC_URL ?? 'http://localhost:8787'
 
-/** Security is declared only when the engine is actually protected by a key. */
-const secured = Boolean(process.env.ENGINE_API_KEY)
 
 export function openApiSpec() {
   const spec: Record<string, unknown> = {
@@ -152,11 +150,14 @@ export function openApiSpec() {
     },
   }
 
-  if (secured) {
-    spec.components = {
-      securitySchemes: { apiKeyHeader: { type: 'apiKey', name: 'x-api-key', in: 'header' } },
-    }
-    spec.security = [{ apiKeyHeader: [] }]
+  // Declared unconditionally, and on purpose. Foundry only attaches the key
+  // from its project connection when the spec both defines the scheme and
+  // requires it; making that conditional on this process holding the key is
+  // how you ship a spec that silently gets 401s. An unprotected engine simply
+  // ignores the header.
+  spec.components = {
+    securitySchemes: { apiKeyHeader: { type: 'apiKey', name: 'x-api-key', in: 'header' } },
   }
+  spec.security = [{ apiKeyHeader: [] }]
   return spec
 }

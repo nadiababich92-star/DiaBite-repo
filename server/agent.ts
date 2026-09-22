@@ -32,6 +32,17 @@ const MODEL_DEPLOYMENT = process.env.MODEL_DEPLOYMENT_NAME ?? 'gpt-5-mini'
 const AGENT_NAME = process.env.AGENT_NAME ?? 'diabite-agent'
 /** Name of the Foundry project connection holding the engine's x-api-key. */
 const ENGINE_CONNECTION = process.env.ENGINE_CONNECTION_ID ?? ''
+/**
+ * Where the engine lives, when it is not this very process. In production the
+ * wrapper and the engine are one service and the session store is shared
+ * memory; running the wrapper on a laptop against the deployed engine, it is
+ * not, and the session has to be parked over HTTP or the agent's
+ * get_day_state call meets a 404.
+ */
+const ENGINE_URL = process.env.ENGINE_URL ?? ''
+/** The data-plane API version used for the raw run-steps read below. */
+const API_VERSION = process.env.FOUNDRY_API_VERSION ?? '2025-05-01'
+const ENGINE_KEY = process.env.ENGINE_API_KEY ?? ''
 
 export const systemPrompt = () => readFileSync(join(ROOT, 'agent', 'system-prompt.md'), 'utf8')
 
@@ -45,7 +56,7 @@ function agentsClient(): AgentsClient {
 /** The OpenAPI tool definition: the whole engine, as one tool, four operations. */
 export function engineTool() {
   const auth = ENGINE_CONNECTION
-    ? { type: 'connection', security_scheme: { project_connection_id: ENGINE_CONNECTION } }
+    ? { type: 'connection', securityScheme: { connectionId: ENGINE_CONNECTION } }
     : { type: 'anonymous' }
   return ToolUtility.createOpenApiTool({
     name: 'diabite_engine',
@@ -109,26 +120,63 @@ export interface AskResponse {
   runStatus?: string
 }
 
-function parseMaybeJson(value: unknown): unknown {
-  if (typeof value !== 'string') return value
-  try { return JSON.parse(value) } catch { return value }
+/**
+ * Foundry returns an OpenAPI tool's output as a Python literal — single-quoted
+ * strings, True/False/None — not as JSON. Convert it rather than eyeballing a
+ * regex: a naive quote swap breaks on any apostrophe, and the recipe names in
+ * our own database have them.
+ */
+function parsePythonish(text: string): unknown {
+  try { return JSON.parse(text) } catch { /* not JSON; convert below */ }
+  let out = ''
+  let inStr = false
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
+    if (inStr) {
+      if (ch === '\\') { out += text[i + 1] === "'" ? "'" : ch + text[i + 1]; i++; continue }
+      if (ch === "'") { out += '"'; inStr = false; continue }
+      if (ch === '"') { out += '\\"'; continue }
+      out += ch
+      continue
+    }
+    if (ch === "'") { out += '"'; inStr = true; continue }
+    if (/[A-Za-z]/.test(ch)) {
+      const word = text.slice(i).match(/^(True|False|None)\b/)
+      if (word) { out += { True: 'true', False: 'false', None: 'null' }[word[1] as 'True']; i += word[1].length - 1; continue }
+    }
+    out += ch
+  }
+  try { return JSON.parse(out) } catch { return text }
 }
 
-/** Pull the tool calls and their outputs out of a finished run, for the verifier and the UI. */
-async function traceOf(c: AgentsClient, threadId: string, runId: string): Promise<ToolCallTrace[]> {
+const credential = new DefaultAzureCredential()
+
+/**
+ * The tool calls and their outputs, read straight from the REST API.
+ *
+ * Not through the SDK: its typed model for a step of type "openapi" carries
+ * only the call's id, dropping the arguments and the output. Those are exactly
+ * what the verifier checks the answer against, so the raw response it is.
+ */
+async function traceOf(threadId: string, runId: string): Promise<ToolCallTrace[]> {
+  const token = (await credential.getToken('https://ai.azure.com/.default'))!.token
+  const url = `${PROJECT_ENDPOINT}/threads/${threadId}/runs/${runId}/steps?api-version=${API_VERSION}&order=asc`
+  const res = await fetch(url, { headers: { authorization: `Bearer ${token}` } })
+  if (!res.ok) throw new Error(`could not read run steps: ${res.status} ${await res.text()}`)
+  const body = (await res.json()) as {
+    data: { type: string; step_details?: { tool_calls?: { type: string; function?: { name?: string; arguments?: string; output?: string } }[] } }[]
+  }
+
   const trace: ToolCallTrace[] = []
-  for await (const step of c.runSteps.list(threadId, runId)) {
-    const details = step.stepDetails as { type?: string; toolCalls?: unknown[] } | undefined
-    if (details?.type !== 'tool_calls' || !Array.isArray(details.toolCalls)) continue
-    for (const raw of details.toolCalls) {
-      const call = raw as Record<string, any>
-      // OpenAPI tool calls carry { openapi: { name, arguments, output } }; function
-      // calls carry { function: {...} }. Read whichever is present.
-      const body = call.openapi ?? call.openApi ?? call.function ?? call
+  for (const step of body.data) {
+    if (step.type !== 'tool_calls') continue
+    for (const call of step.step_details?.tool_calls ?? []) {
+      const fn = call.function
+      if (!fn) continue
       trace.push({
-        tool: String(body.name ?? call.type ?? 'unknown'),
-        input: parseMaybeJson(body.arguments ?? body.input),
-        result: parseMaybeJson(body.output ?? body.result),
+        tool: fn.name ?? call.type,
+        input: fn.arguments ? parsePythonish(fn.arguments) : null,
+        result: fn.output ? parsePythonish(fn.output) : null,
       })
     }
   }
@@ -152,7 +200,18 @@ export async function ask(req: AskRequest): Promise<AskResponse> {
   }
 
   // Park the day state before the run. The agent is handed the id, never the numbers.
-  if (req.budget && req.entries) putSession(req.sessionId, req.budget, req.entries)
+  if (req.budget && req.entries) {
+    if (ENGINE_URL) {
+      const r = await fetch(`${ENGINE_URL}/session/${encodeURIComponent(req.sessionId)}`, {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...(ENGINE_KEY ? { 'x-api-key': ENGINE_KEY } : {}) },
+        body: JSON.stringify({ budget: req.budget, entries: req.entries }),
+      })
+      if (!r.ok) throw new Error(`could not park the day state: ${r.status} ${await r.text()}`)
+    } else {
+      putSession(req.sessionId, req.budget, req.entries)
+    }
+  }
 
   const c = agentsClient()
   const agentId = await ensureAgent()
@@ -168,7 +227,7 @@ export async function ask(req: AskRequest): Promise<AskResponse> {
     pollingOptions: { intervalInMs: 1000 },
   })
 
-  const trace = await traceOf(c, threadId, run.id)
+  const trace = await traceOf(threadId, run.id)
 
   let answer = ''
   for await (const m of c.messages.list(threadId, { order: 'desc', limit: 10 })) {
