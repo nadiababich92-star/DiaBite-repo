@@ -1,0 +1,12 @@
+node_modules
+dist
+.DS_Store
+*.local
+
+.cache
+
+# nested clone of this same repo, created by GitHub Desktop
+DiaBite-repo/
+
+# build artifacts
+tsconfig.tsbuildinfo
