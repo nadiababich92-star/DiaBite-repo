@@ -1,0 +1,62 @@
+# Build the engine image and push it to Azure Container Registry.
+#
+# The build runs here rather than in Azure because ACR Tasks (the cloud build
+# behind `az containerapp up --source`) is not permitted on a Free Trial
+# subscription. GitHub's runners are amd64, which is what Container Apps wants —
+# building on an Apple Silicon laptop would mean emulation.
+name: build-engine
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'server/**'
+      - 'agent/**'
+      - 'src/types.ts'
+      - 'src/lib/glycemic.ts'
+      - 'src/lib/profile.ts'
+      - 'src/data/foods.ts'
+      - 'data/recipes-db/ingredients.json'
+      - 'data/recipes-db/recipes_db.json'
+      - 'data/recipes-db/embeddings.bin'
+      - 'data/recipes-db/embeddings.ids.json'
+      - '.github/workflows/build-engine.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ca83d2041d5eacr.azurecr.io
+  IMAGE: diabite-engine
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Sign in to the registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Report the tag
+        run: echo "pushed ${{ env.REGISTRY }}/${{ env.IMAGE }}:${{ github.sha }}" >> $GITHUB_STEP_SUMMARY

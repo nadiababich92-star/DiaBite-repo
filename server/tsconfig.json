@@ -13,5 +13,5 @@
     "esModuleInterop": true,
     "noEmit": true
   },
-  "include": ["./**/*.ts", "../src/lib/**/*.ts", "../src/types.ts"]
+  "include": ["./**/*.ts", "../src/lib/glycemic.ts", "../src/lib/profile.ts", "../src/data/foods.ts", "../src/types.ts"]
 }

@@ -10,3 +10,4 @@ DiaBite-repo/
 
 # build artifacts
 tsconfig.tsbuildinfo
+.engine-api-key
