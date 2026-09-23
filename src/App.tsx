@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import AskPage from './components/AskPage'
 import DiaryPage from './components/DiaryPage'
+import FeedbackModal from './components/FeedbackModal'
 import MenuPage from './components/MenuPage'
 import ProfilePage from './components/ProfilePage'
 import { calculateTargets } from './lib/profile'
@@ -18,6 +19,7 @@ const TABS: { id: Tab; label: string }[] = [
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('ask')
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [profile, setProfile] = useState<Profile>(loadProfile)
   const [diary, setDiary] = useState<DiaryEntry[]>(loadDiary)
 
@@ -40,17 +42,20 @@ export default function App() {
         diet with your clinician.
       </div>
 
-      <nav className="tabs" role="tablist">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            role="tab"
-            aria-selected={tab === t.id}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
+      <nav className="tabs">
+        <div className="tab-row" role="tablist">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              role="tab"
+              aria-selected={tab === t.id}
+              onClick={() => setTab(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <button className="tab-action" onClick={() => setFeedbackOpen(true)}>Feedback</button>
       </nav>
 
       {tab === 'ask' && (
@@ -63,6 +68,8 @@ export default function App() {
       {tab === 'profile' && (
         <ProfilePage profile={profile} targets={targets} onChange={setProfile} />
       )}
+
+      {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
     </div>
   )
 }

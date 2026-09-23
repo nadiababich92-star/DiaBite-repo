@@ -11,3 +11,7 @@ DiaBite-repo/
 # build artifacts
 tsconfig.tsbuildinfo
 .engine-api-key
+
+# local secrets
+.env.local
+.env*.local
