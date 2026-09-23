@@ -12,7 +12,8 @@
     "typecheck:server": "tsc -p server/tsconfig.json",
     "engine": "tsx server/index.ts",
     "tunnel": "ngrok http 8787 --url https://tinkling-grievance-brink.ngrok-free.dev",
-    "eval:dataset": "tsx eval/build-dataset.ts"
+    "eval:dataset": "tsx eval/build-dataset.ts",
+    "eval:agent": "tsx eval/run-cases.ts"
   },
   "dependencies": {
     "@azure/ai-agents": "^1.1.0",

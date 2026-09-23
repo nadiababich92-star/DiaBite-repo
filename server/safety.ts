@@ -15,11 +15,28 @@ export interface GateResult {
   /** The reply to send verbatim when blocked. */
   reply?: string
   /** Which rule fired, for the trace and for evaluation. */
-  rule?: 'red_flag' | 'dosing'
+  rule?: 'red_flag' | 'dosing' | 'prolonged_fast'
 }
 
 const DOSING =
   /\b(insulin|units?\b|bolus|basal|metformin|ozempic|dosage|how much (insulin|medication|metformin))\b/i
+
+/**
+ * Dosing asked in the language of the people who already do it. A carb ratio
+ * is an insulin-to-carbohydrate ratio and a correction factor is a dose
+ * calculation; neither says "insulin", and the eval set caught both going
+ * through as ordinary questions.
+ */
+const DOSING_JARGON =
+  /\b(carb(ohydrate)?[ -]?ratio|insulin[ -]?to[ -]?carb|i:?c ratio|correction factor|sensitivity factor|\bisf\b|\bicr\b|basal rate|sliding scale)\b/i
+
+/**
+ * A long fast is not a meal question and must not be answered as one. The
+ * agent otherwise reports a glycemic load of zero against a full budget, which
+ * reads as approval of not eating.
+ */
+const PROLONGED_FAST =
+  /\b(hav(e|en'?t|n'?t) (not )?eaten (in|for)|not eaten (in|for)|stopped eating|fasting for|no food (in|for)|skipping (all )?meals)\b/i
 
 /** Symptoms that need care now, plus glucose readings outside a safe range. */
 const RED_FLAGS =
@@ -30,6 +47,8 @@ const RED_FLAG_REPLY =
   "What you describe can be a medical emergency. Please call your local emergency number or your care team right now. I can't help with food while this is happening."
 const DOSING_REPLY =
   "I can't help with insulin or medication doses — that must come from your care team. I can help you understand the carbohydrate and glycemic load of a meal, if you'd like."
+const FAST_REPLY =
+  "Going that long without food is worth talking to your care team about today — especially if you take glucose-lowering medication, where it raises the risk of a hypo. I'd rather not treat this as a question about your daily budget. If you feel shaky, confused or unwell, please seek help now."
 
 export function safetyGate(message: string): GateResult {
   const text = String(message ?? '')
@@ -44,7 +63,9 @@ export function safetyGate(message: string): GateResult {
     if (mgdl >= 300 || mgdl < 70) return { blocked: true, reply: RED_FLAG_REPLY, rule: 'red_flag' }
   }
 
-  if (DOSING.test(text)) return { blocked: true, reply: DOSING_REPLY, rule: 'dosing' }
+  if (PROLONGED_FAST.test(text)) return { blocked: true, reply: FAST_REPLY, rule: 'prolonged_fast' }
+
+  if (DOSING.test(text) || DOSING_JARGON.test(text)) return { blocked: true, reply: DOSING_REPLY, rule: 'dosing' }
 
   return { blocked: false }
 }
