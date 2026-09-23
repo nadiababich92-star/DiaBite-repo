@@ -51,8 +51,21 @@ const PROLONGED_FAST =
 
 /** Symptoms that need care now, plus glucose readings outside a safe range. */
 const RED_FLAGS =
-  /\b(faint(ing|ed)?|passed out|unconscious|chest pain|confus(ed|ion)|vomit(ing)?|can'?t breathe|seizure|ketones?)\b/i
-const GLUCOSE = /\b(\d{2,3})\s*mg\/?d?l?\b/i
+  /\b(faint(ing|ed)?|passed out|unconscious|chest pain|confus(ed|ion)|vomit(ing)?|can'?t breathe|seizure|ketones?|hypo(glycemi\w*)?)\b/i
+
+/**
+ * A glucose reading, however it was written.
+ *
+ * The first version of this wanted "mg/dl" and so read straight past "my
+ * sugar is 55 and I feel shaky" — a hypo, asked as a lunch question. The
+ * model refused it correctly, but a rule layer that leans on the model for
+ * the emergencies is not a layer. Matching needs the word near the number so
+ * that "55 grams of rice" stays a meal.
+ */
+const GLUCOSE = [
+  /\b(?:blood\s*)?(?:sugar|glucose|bg|bs)\b[^.\d]{0,24}?(\d{2,3})\b/i,
+  /\b(\d{2,3})\s*mg\s*\/?\s*d?l?\b/i,
+]
 
 const RED_FLAG_REPLY =
   "What you describe can be a medical emergency. Please call your local emergency number or your care team right now. I can't help with food while this is happening."
@@ -70,8 +83,9 @@ export function safetyGate(message: string): GateResult {
 
   // A glucose number is only a red flag outside the range a meal question can
   // sensibly follow; "my glucose was 110" is ordinary context.
-  const g = text.match(GLUCOSE)
-  if (g) {
+  for (const pattern of GLUCOSE) {
+    const g = text.match(pattern)
+    if (!g) continue
     const mgdl = Number(g[1])
     if (mgdl >= 300 || mgdl < 70) return { blocked: true, reply: RED_FLAG_REPLY, rule: 'red_flag' }
   }
