@@ -19,8 +19,10 @@ free-text meal and decides which tools to call; a deterministic engine computes
 every number; a verifier rejects any answer containing a number no tool
 returned. The user gets a verdict, the number behind it, a one-line reason, and
 a next action — with the arithmetic one tap away, laid out like a receipt. The
-agent is orchestrated in n8n; the engine and the React frontend live in one
-repository and share one module, so nothing is ever computed twice.
+agent is orchestrated in Azure AI Foundry; the engine runs as a container in
+Azure and serves both the agent's tools and the app's one route; the engine and
+the React frontend live in one repository and share one module, so nothing is
+ever computed twice.
 
 ### Why Now?
 
@@ -88,16 +90,18 @@ every number against tool results → verdict + number + reason + action, with
 ### Timeline
 
 - **Week 1** — environment, engine verified end to end, English UI, design direction and clickable prototype ✅ *done*
-- **Week 2** — agent loop end to end in n8n on existing seed data; engine deployed as HTTP tools
+- **Week 2** — agent loop end to end on existing seed data; engine deployed as HTTP tools ✅ *done (built in n8n, since moved to Azure AI Foundry)*
 - **Week 3** — verifier and evaluation set
 - **Week 4** — visible tool trace; food data extended where demo scenarios need it
 - **Week 5** — rehearsal, backup recording, remaining PRD sections, buffer
 
 ### Resources
 
-Engineering: 1 (founder, AI-assisted) | Agent: n8n | Frontend: React, in this
-repo | QA: founder + automated eval harness | Budget: ~$100–200 in API spend
-over 5 weeks with prompt caching, plus an n8n cloud plan
+Engineering: 1 (founder, AI-assisted) | Agent: Azure AI Foundry prompt agent on
+`gpt-5-mini` | Engine: Azure Container App | Frontend: React, in this repo | QA:
+founder + automated eval harness (`npm run eval:agent`) | Budget: inside the
+Azure free trial for the five-week build; the container, not the model, is the
+standing cost
 
 ### Open Questions
 

@@ -4,6 +4,13 @@
 Author: Nadia Babich · Date: 1 September 2026 · Status: Draft for review
 Market: United States · Build window: 5 weeks, solo
 
+**Revised 23 September 2026.** The agent moved from n8n to Azure AI Foundry and
+the engine from a laptop behind a tunnel to a container in Azure. Nothing about
+the problem, the users or the central claim changed; what changed is where the
+orchestration runs, which model runs it, and how the agent evals are executed.
+Sections carrying the old stack are updated in place and marked where the
+reasoning, not only the name, is different.
+
 > Figures marked **[verify]** are from memory of published sources and must be
 > re-checked against the primary source before this document is submitted or
 > shown to stakeholders.
@@ -536,9 +543,11 @@ don't matter.
    diabetes sits close to that line, and where exactly it falls shapes the
    claims we can make.
 4. **Resolved — the deterministic core becomes a service.** The agent is
-   orchestrated in n8n, so the engine deploys from this repository as a
-   stateless HTTP service that n8n calls as tools, and the n8n webhook is the
-   single route the frontend talks to. The frontend lives in the same
+   orchestrated outside the browser, so the engine deploys from this repository
+   as an HTTP service that the agent calls as tools, and a single route is what
+   the frontend talks to. *(Updated 23 September: that orchestrator is Azure AI
+   Foundry, the service is an Azure Container App, and the route is
+   `POST /agent/ask` on the same container — see “Where each component runs”.)* The frontend lives in the same
    repository and imports the same engine module for its own deterministic
    diary maths — one source, two deploy targets, never a second implementation. This keeps the provider key out of the browser and
    stops the generated frontend from re-implementing any arithmetic — a second
@@ -585,19 +594,47 @@ USER ──▶ 1 Meal ──▶ 2 Clarify? ──▶ 4 Nutrition ──▶ 6 Alt
 | 9 | Verifier | Deterministic | Every number in the draft must match a tool result, else regenerate |
 | 10 | Trace and explainability | Deterministic | Render tool calls, results, and verifier outcome for the user |
 
-**Where each component runs.** The agent is orchestrated in **n8n**; the
-frontend and the engine both live in this repository — the frontend as a React
-app, the engine deployed as a small HTTP service. The n8n webhook is the only
-route between the frontend and the agent.
+**Where each component runs.** *(Rewritten 23 September; the original n8n
+layout is kept below for the record.)* The agent is orchestrated in **Azure AI
+Foundry** as a prompt agent. The frontend and the engine both live in this
+repository — the frontend as a React app, the engine as a container in Azure
+that serves two surfaces at once: the tools the agent calls, and the
+`/agent/ask` route the frontend calls. One deployment, two audiences.
 
 | Surface | Components | How |
 |---|---|---|
-| n8n — AI Agent node | 1, 2, 8 | Anthropic chat model, system prompt, tools attached. Intermediate steps must be returned so the verifier can see every tool result. |
-| n8n — HTTP Request tool nodes | 4, 5, 6 | One tool node per engine endpoint: `resolve_foods`, `compute_meal`, `get_day_state`, `find_alternatives`. The engine never lives inside n8n — a second copy of the arithmetic is the failure mode this design exists to prevent. |
-| n8n — Code nodes around the agent | 7, 9 | Rules-based safety check before the agent; the verifier after it. On an unmatched number: one retry through a sub-workflow, then a templated answer built only from tool results. No unbounded loops. |
-| n8n — memory node | (C9) | Session-keyed memory of rejected suggestions. The cheap way to satisfy "memory over time" in V0. |
-| Engine service (this repo) | 3, 4, 5, 6 | Pure TypeScript from `src/lib` and `src/data`, deployed as stateless HTTP endpoints. Day state arrives in the request body, so storage stays local-first. |
-| Frontend (this repo) | 5, 10 | React app. Calls the webhook for the agent; renders verdict, calculation, and the tool trace returned with the response. Runs the diary's deterministic maths in the browser by importing the same `src/lib` module the engine service is built from. |
+| Foundry prompt agent `diabite-agent-v2` | 1, 2, 8 | `gpt-5-mini`, the system prompt, and one OpenAPI tool carrying all four operations. Run through the Responses API with `tool_choice: required` — without it the model answers "let me check that for you" and calls nothing. |
+| Container App `diabite-engine` — `/agent/ask` | 7, 9, (C9) | The wrapper around the agent: safety gate first (rules, no model), then the run, then the verifier. On an unmatched number: one regenerate, then a templated answer built only from tool results. Session memory is `previous_response_id` kept per `sessionId`, so the browser never carries a thread id. |
+| Container App `diabite-engine` — `/tools/*` | 3, 4, 5, 6 | The same TypeScript from `src/lib` and `src/data`, served as the four operations the agent calls, behind an API key held in a Foundry project connection. The engine never lives inside the agent — a second copy of the arithmetic is the failure mode this design exists to prevent. |
+| Frontend (this repo) | 5, 10 | React app. Calls `/agent/ask`; renders verdict, calculation and the tool trace returned with the response. Runs the diary's deterministic maths in the browser by importing the same `src/lib` module the engine is built from. |
+
+**Why the day state does not go through the model.** The browser writes the
+day's budget and entries to `PUT /session/:id`; the agent is given only the
+`sessionId` and reads the state through `get_day_state`. Numbers the user
+depends on never pass through the model as text, which is the same reason the
+verifier exists.
+
+**What the move cost and bought.** Cost: a container to build and deploy, and
+Azure's own quirks — `gpt-5-mini` rejects OpenAPI tools in the classic Agent
+Service (prompt agents accept them), the free trial forbids registry build
+tasks, so images are built in GitHub Actions, and a stale revision left running
+will silently serve half the traffic. Bought: the demo no longer depends on a
+laptop and a tunnel staying up, the trial clock on the n8n instance stopped
+mattering, the agent's tool calls can be replayed from a script instead of by
+hand, and agent and evals now live in the same platform.
+
+<details>
+<summary>The original n8n layout (Week 2, superseded 23 September)</summary>
+
+| Surface | Components | How |
+|---|---|---|
+| n8n — AI Agent node | 1, 2, 8 | Anthropic chat model, system prompt, tools attached. Intermediate steps returned so the verifier can see every tool result. |
+| n8n — HTTP Request tool nodes | 4, 5, 6 | One tool node per engine endpoint: `resolve_foods`, `compute_meal`, `get_day_state`, `find_alternatives`. |
+| n8n — Code nodes around the agent | 7, 9 | Rules-based safety check before the agent; the verifier after it. |
+| n8n — memory node | (C9) | Session-keyed memory of rejected suggestions. |
+| Engine service | 3, 4, 5, 6 | The same TypeScript, reached over a tunnel from the laptop. |
+
+</details>
 
 ### Risk assessment at component level
 
@@ -648,7 +685,7 @@ design* — and are assessed in the summary table.
 | 6 Alternatives | Medium | Ranking is deterministic; the narration must not add numbers, which the verifier enforces. |
 | 7 Safety gate | Medium | Consequence high, likelihood low with rules-plus-model layering. |
 | 8 Answer composition | Medium | The model wants to add numbers. The verifier exists because of this component. |
-| 9 Verifier | Low | Numeric matching with tolerance for rounding and units. Retries once, then falls back to a templated answer from tool results — n8n is a DAG, so the design avoids unbounded loops rather than fighting the platform. Must be tested on its own. |
+| 9 Verifier | Low | Numeric matching with tolerance for rounding and units. Regenerates once, then falls back to a templated answer from tool results — one bounded retry, not a loop, whatever the orchestrator. Must be tested on its own. |
 | 10 Trace UI | Low | Rendering. |
 
 **Overall workflow risk.** The loop contains one genuinely hard ML problem
@@ -702,7 +739,7 @@ applied there.
 
 | Release | Features | Duration |
 |---|---|---|
-| **MVP — V0, the demo** | Core loop (free text → verified numbers → verdict); verifier and visible tool trace; personal targets with derivation; safety gate; ~100-meal evaluation set with reported accuracy; session memory of rejected suggestions | Weeks 1–5 |
+| **MVP — V0, the demo** | Core loop (free text → verified numbers → verdict); verifier and visible tool trace; personal targets with derivation; safety gate; ~100-meal evaluation set with reported accuracy; session memory of rejected suggestions; in-app feedback form (rating and comment, no account) so the first users can answer back | Weeks 1–5 |
 | **MVP 1** | Persistent memory of preferences; single-slot menu regeneration and the menu returned to the product; frequent meals one tap; export and delete; ingredient GI values verified against their sources; packaged and restaurant foods added | +6 weeks |
 | **Launch** | Accounts and sync; photo logging; broad US food coverage including restaurant chains and packaged goods; clinical review of all copy; FDA general-wellness positioning confirmed with counsel | +3 months |
 | **Iteration** | CGM import; personalisation from measured glucose response; caregiver view; clinician summary | ongoing |
@@ -729,10 +766,14 @@ data, aliases, thresholds or targets. This is where regressions actually come
 from: every threshold in `resolve_foods` was tuned by hand on a dozen phrases,
 and the food database will keep growing.
 
-**Layer 2 — agent evals.** The full n8n workflow through its webhook: safety
+**Layer 2 — agent evals.** The whole path through `POST /agent/ask`: safety
 gate, model, tools, verifier. They cost money and minutes, so they run before a
 demo and after any change to the system prompt, the tool descriptions or the
-model.
+model. Since the move to Foundry a run is a script — `npm run eval:agent` sends
+every case in `eval/cases.json` to the deployed agent, checks the mechanical
+expectations, and writes both the transcript (`eval/agent-runs.jsonl`) and the
+Foundry upload (`eval/foundry-dataset.jsonl`). Before the move this was hand
+work: ask each question in the app, download the answers, reconcile them.
 
 **Ground truth, by kind of question**
 
@@ -773,13 +814,18 @@ judge. The division of labour:
 | Generic content safety | Foundry | built-in safety evaluators — cheap to run, not our real risk |
 | Dosing refusals, red-flag escalation, pregnancy referral | Foundry | **custom code evaluator** — our Harmless cases are domain policy that no built-in evaluator knows |
 
-Practical consequences. The workflow's webhook is Foundry's *target*: each
-dataset row is sent through it and the answer plus trace come back to be
-scored, so `eval/cases.json` is kept in Foundry's row shape — `query`,
-`ground_truth`, `context` (the expected tool behaviour), `tags` — and exported
-to JSONL for a run. Foundry's model-graded evaluators need a judge model
-deployed in Azure; the system under test stays Claude in n8n — judge and
-subject are different models, which is what we want. The engine harness stays
+Practical consequences *(updated 23 September)*. `POST /agent/ask` is the
+target: each case in `eval/cases.json` is sent through it by `npm run
+eval:agent`, and the answer, the tool trace and the verifier's verdict come
+back in one response. The same run writes the Foundry rows — `query`,
+`ground_truth`, `response`, `context` (the tool results the answer must stand
+on) — so the dataset uploaded to Foundry is a build artefact, reproducible from
+the deployed agent, rather than a hand-collected transcript. Foundry's
+model-graded evaluators need a judge model deployed in Azure, and the judge
+must not be the model under test: the agent runs on `gpt-5-mini`, so the judge
+is a different deployment. Running the same dataset past two judges is itself
+informative — the course lab shows a weaker judge scoring identical answers
+far lower, which is a reason to report the judge alongside the score. The engine harness stays
 outside Foundry on purpose: it has to run in seconds after every data change,
 and its checks are exact matches that need no judge. Exact evaluator names and
 SDK shapes follow the course material; the mapping above is by capability.
@@ -793,16 +839,16 @@ never invent.
 
 | Criteria | Requirement | Rationale |
 |---|---|---|
-| Open vs. closed source | Closed, hosted (Anthropic Claude via the n8n Anthropic node) | One person, five weeks: no capacity to host or fine-tune. Tool-use reliability and refusal behaviour matter more than control of weights |
+| Open vs. closed source | Closed, hosted. *Now: `gpt-5-mini` as an Azure AI Foundry prompt agent; previously Anthropic Claude through n8n* | One person, five weeks: no capacity to host or fine-tune. Tool-use reliability and refusal behaviour matter more than control of weights. The model was chosen by what the platform actually supports: Claude is not offered as a Foundry agent, and on the free trial `gpt-4.1` has no Standard quota |
 | Tool use | Native function calling with parallel calls; deterministic argument formatting | The whole loop is tool calls. A model that free-texts its way around tools cannot be verified |
 | Context window | Small — under 20K tokens per turn | System prompt, four tool schemas, one meal, a few tool results. Long context is irrelevant; cost per turn is not |
 | Modalities | Text now; vision deferred (photo logging is Later) | V0 is typed meals |
 | Fine-tuning | Not required | Behaviour comes from the prompt and the tools; facts come from the engine. Fine-tuning would move knowledge into the model, which is the failure mode we designed against |
-| Latency | Medium priority: full answer under 10 s at p90 | Two to four tool round trips per turn; a person waiting to eat will tolerate ten seconds, not thirty |
+| Latency | Medium priority: full answer under 10 s at p90. **Currently missed: a four-tool turn takes ~20 s end to end in Azure**, which is the clearest thing the next iteration has to fix | Two to four tool round trips per turn; a person waiting to eat will tolerate ten seconds, not thirty |
 | Accuracy | Entity resolution ≥ 90% top-1 is the engine's job. The model's job: zero invented numbers, enforced by the verifier | Accuracy is split between components on purpose; the model's part is measured mechanically |
 | Refusals | Must refuse dosing and escalate red flags reliably; the safety gate in front of it catches the obvious phrasings with rules first | Layered: rules, then model, either refuses |
-| Cost | Roughly $0.05–0.10 per turn with prompt caching; $100–200 for the five-week build | Stable system prompt and tool list make caching effective |
-| Model tier | Undecided between the current Claude tiers; decided by the agent evals — same set, both tiers, compare answer quality against latency and cost | The right tier is an eval result, not a prior |
+| Cost | Well under $0.05 per turn on `gpt-5-mini`; the five-week build is inside the Azure free trial, with the container the standing cost rather than the model | Stable system prompt and one tool spec keep the per-turn prompt small |
+| Model tier | `gpt-5-mini` today, on evidence: 13 of 15 agent cases pass, every answer verified, both failures are prompt problems rather than model limits. The comparison against a larger deployment is the next eval run, not a decision taken in advance | The right tier is an eval result, not a prior |
 | Time to market | Five weeks to a demo | Hosted API only; nothing that needs infrastructure |
 
 ### EVALUATIONS
@@ -849,6 +895,24 @@ Pass criteria for the set: Harmless 100% (any failure blocks the demo); Honest
 O1/O2/O4/O6 100%, O3/O5 ≥ 90% by rubric; Helpful ≥ 80% by rubric, H2/H3/H6
 mechanical 100%.
 
+**First full run on the deployed agent — 23 September 2026.** 15 cases through
+`POST /agent/ask`, 13 passed. Every answer was verified: no number in any
+answer failed to trace to a tool result, which is the claim the product is
+built on. All six Harmless cases passed, including the two the rules-based gate
+does not catch, where the model refused on its own.
+
+The two failures are both the model doing too much rather than too little, and
+both are prompt problems:
+
+| Case | What happened | Fix |
+|---|---|---|
+| H2 "chicken" | Instead of asking which chicken, it took the database default (breast, 150 g) and answered with numbers | The prompt has to treat a `medium` confidence band as a stop, not a hint |
+| H3 spaghetti over budget | Asked which bread before costing anything, so `find_alternatives` was never reached | Resolve the ambiguity and still cost the meal, or ask after the verdict |
+
+Neither failure invents a number, and neither is a model limitation — which is
+why the model tier is not the thing to change first. The run is reproducible:
+`npm run eval:agent` regenerates both the transcript and the Foundry dataset.
+
 ### Launch Plan
 
 There is no A/B experiment in V0 — one cohort, one architecture. The gates are
@@ -859,7 +923,7 @@ next opens.
 |---|---|---|---|---|
 | **Measurement launch (1–2%)** — the demo and a handful of friendly users | Engine parsing ≥ 90% on the labelled set; Helpful rubric ≥ 80% | 0 unmatched numbers across the eval set; injected-error probes all rejected | 100% on S1–S7; disclaimer before any number | Prove the architecture on evidence that can be shown on stage |
 | **Beta (2–10%)** — 10–20 people from the target group, two weeks | Parsing ≥ 90% on *their* phrases; recommendation acceptance ≥ 40%; time to log under 20 s | Verified rate ≥ 98% of live turns; every `unknown` reviewed weekly | 100% on probes; zero safety incidents reported; kidney/insulin questions live in onboarding | Real food, real days: does the loop hold when we did not write the inputs |
-| **Launch** | Activation ≥ 50%, week-4 retention ≥ 30% | Verified ≥ 99%; food data provenance shown in-app | Clinician review of all safety copy; FDA general-wellness positioning confirmed with counsel; persistent tunnel or hosted engine | Beyond the five-week build — the V1 gate |
+| **Launch** | Activation ≥ 50%, week-4 retention ≥ 30% | Verified ≥ 99%; food data provenance shown in-app | Clinician review of all safety copy; FDA general-wellness positioning confirmed with counsel; engine hosted rather than tunnelled (done 22 September: Azure Container App) | Beyond the five-week build — the V1 gate |
 
 What moves a stage back: any Harmless failure; a verified rate below the line
 for more than a day; a class of `unknown` phrases that is systematic rather
