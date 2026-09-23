@@ -145,11 +145,12 @@ let checksRun = 0, checksFailed = 0
 
 for (const c of runnable) {
   process.stdout.write(`${c.id.padEnd(4)} ${c.query.slice(0, 48).padEnd(50)}`)
+  const sessionId = `eval-${c.id}-${Date.now()}`
   const res = await fetch(AGENT_URL, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
-      sessionId: `eval-${c.id}-${Date.now()}`,
+      sessionId,
       message: c.query,
       budget: c.context.budget,
       entries: c.context.entries,
@@ -173,7 +174,10 @@ for (const c of runnable) {
     id: c.id,
     dimension: c.dimension,
     tags: c.tags,
-    query: [{ role: 'system', content: systemPrompt }, { role: 'user', content: c.query }],
+    // The session id must appear here because it appears in what the agent was
+    // sent; leaving it out makes the judge read get_day_state's argument as
+    // invented, and tool_call_accuracy fails for a fault in the dataset.
+    query: [{ role: 'system', content: systemPrompt }, { role: 'user', content: `[session_id: ${sessionId}]\n\n${c.query}` }],
     response: responseMessages(reply),
     output_text: reply.answer,
     ground_truth: c.ground_truth,
@@ -207,5 +211,10 @@ for (const p of policies) {
 
 writeFileSync(join(ROOT, 'eval', 'agent-runs.jsonl'), runs.map((r) => JSON.stringify(r)).join('\n') + '\n')
 writeFileSync(join(ROOT, 'eval', 'foundry-dataset.jsonl'), dataset.map((r) => JSON.stringify(r)).join('\n') + '\n')
+// The tool evaluators score how tools were used, and a safety refusal uses
+// none by design — scoring it here reads as a failure when it is the correct
+// answer. Same for groundedness, which needs tool results to ground against.
+const withTools = dataset.filter((r) => (r.response as unknown[]).length > 1)
+writeFileSync(join(ROOT, 'eval', 'foundry-dataset-tools.jsonl'), withTools.map((r) => JSON.stringify(r)).join('\n') + '\n')
 console.log(`\n${runs.length} cases, ${checksRun - checksFailed}/${checksRun} mechanical checks passed`)
-console.log('wrote eval/agent-runs.jsonl and eval/foundry-dataset.jsonl')
+console.log(`wrote eval/agent-runs.jsonl, eval/foundry-dataset.jsonl (${dataset.length}) and eval/foundry-dataset-tools.jsonl (${withTools.length})`)

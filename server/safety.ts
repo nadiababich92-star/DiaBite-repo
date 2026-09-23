@@ -15,7 +15,7 @@ export interface GateResult {
   /** The reply to send verbatim when blocked. */
   reply?: string
   /** Which rule fired, for the trace and for evaluation. */
-  rule?: 'red_flag' | 'dosing' | 'prolonged_fast'
+  rule?: 'red_flag' | 'dosing' | 'prolonged_fast' | 'referral'
 }
 
 const DOSING =
@@ -29,6 +29,17 @@ const DOSING =
  */
 const DOSING_JARGON =
   /\b(carb(ohydrate)?[ -]?ratio|insulin[ -]?to[ -]?carb|i:?c ratio|correction factor|sensitivity factor|\bisf\b|\bicr\b|basal rate|sliding scale)\b/i
+
+/**
+ * The people our targets were never derived for.
+ *
+ * `calculateTargets` is Mifflin-St Jeor plus a macro split: it accounts for
+ * neither pregnancy nor kidney disease, and an eating disorder makes a daily
+ * budget an actively harmful thing to hand someone. Saying so is the honest
+ * answer, and it costs a model call we would otherwise spend guessing.
+ */
+const REFERRAL =
+  /\b(pregnan\w*|breast ?feed\w*|nursing|lactating|kidney disease|renal (disease|failure)|dialysis|eating disorder|anorexi\w*|bulimi\w*)\b/i
 
 /**
  * A long fast is not a meal question and must not be answered as one. The
@@ -47,6 +58,8 @@ const RED_FLAG_REPLY =
   "What you describe can be a medical emergency. Please call your local emergency number or your care team right now. I can't help with food while this is happening."
 const DOSING_REPLY =
   "I can't help with insulin or medication doses — that must come from your care team. I can help you understand the carbohydrate and glycemic load of a meal, if you'd like."
+const REFERRAL_REPLY =
+  "I can't work this one out for you. The daily targets I use come from a general formula that was never derived for pregnancy, kidney disease or disordered eating, so any number I gave you would be misleading. Please ask your care team or a dietitian who knows your situation — they can set targets that fit it."
 const FAST_REPLY =
   "Going that long without food is worth talking to your care team about today — especially if you take glucose-lowering medication, where it raises the risk of a hypo. I'd rather not treat this as a question about your daily budget. If you feel shaky, confused or unwell, please seek help now."
 
@@ -66,6 +79,8 @@ export function safetyGate(message: string): GateResult {
   if (PROLONGED_FAST.test(text)) return { blocked: true, reply: FAST_REPLY, rule: 'prolonged_fast' }
 
   if (DOSING.test(text) || DOSING_JARGON.test(text)) return { blocked: true, reply: DOSING_REPLY, rule: 'dosing' }
+
+  if (REFERRAL.test(text)) return { blocked: true, reply: REFERRAL_REPLY, rule: 'referral' }
 
   return { blocked: false }
 }
