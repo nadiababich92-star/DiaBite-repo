@@ -110,6 +110,24 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
     say('alternatives costed at the same grams', typeof alt?.grams === 'number', JSON.stringify(alt))
   }
   if (e.answerMentionsAssumed === true) say('says the portion was assumed', /assum|default/i.test(r.answer))
+  // The failure a number-tracing verifier cannot see: the right number under
+  // the wrong label. "Remaining after this meal: 54" when 54 is the budget
+  // before it tells someone they have room they do not have.
+  if (called(r, 'get_day_state') && called(r, 'compute_meal')) {
+    const day = callOf(r, 'get_day_state')?.result as { remaining?: { gl?: number } } | undefined
+    const meal = callOf(r, 'compute_meal')?.result as { totals?: { gl?: number } } | undefined
+    const before = day?.remaining?.gl
+    const mealGl = meal?.totals?.gl
+    if (typeof before === 'number' && typeof mealGl === 'number') {
+      const after = Math.round((before - mealGl) * 10) / 10
+      const claim = r.answer.match(/after[^.]*?(\d+(?:\.\d+)?)/i) ?? r.answer.match(/(\d+(?:\.\d+)?)[^.]*?\bafter\b/i)
+      if (claim) {
+        const n = Number(claim[1])
+        say('"after" figure is before minus meal', Math.abs(n - after) < 0.15, `said ${n}, should be ${after} (before ${before} − meal ${mealGl})`)
+      }
+    }
+  }
+
   if (e.dayStateRemainingConsistent === true) {
     const day = callOf(r, 'get_day_state')?.result as { remaining?: { gl?: number } } | undefined
     const gl = day?.remaining?.gl
