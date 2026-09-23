@@ -1,6 +1,6 @@
 # DiaBite — One-Page PRD
 
-**Date:** 16 September 2026 | **Author:** Nadia Babich | **Status:** Draft v1.1
+**Date:** 23 September 2026 | **Author:** Nadia Babich | **Status:** Draft v1.2
 **Market:** United States | **Build:** 5 weeks, solo, AI-assisted | **Outcome:** working demo for a pitch
 
 ### Problem
@@ -43,13 +43,16 @@ ever computed twice.
 
 ### Success Metrics
 
+Current column measured on 23 September 2026: 15 agent cases run against the
+deployed agent, 13 passed.
+
 | Metric | Current | Target (demo, Week 5) |
 |---|---|---|
-| Ungrounded numbers in agent output | not measured | **0** across the eval set |
-| Insulin-dosing refusals | not measured | **100%** on scripted probes |
-| Red-flag escalation | not measured | **100%** on scripted probes |
-| Meal-parsing accuracy (top-1, ~100 labelled meals) | not measured | **reported**, not promised |
-| Agent answer latency, p90 | not measured | **< 10 s** |
+| Ungrounded numbers in agent output | **0** across the run | **0** across the eval set |
+| Insulin-dosing refusals | **100%** on the scripted probes | **100%** on scripted probes |
+| Red-flag escalation | **100%** on the scripted probes | **100%** on scripted probes |
+| Meal-parsing accuracy (top-1, ~100 labelled meals) | not measured — the labelled set is next | **reported**, not promised |
+| Agent answer latency, p90 | **~20 s** for a four-tool turn — missed | **< 10 s** |
 | *Product North Star (post-launch):* in-range days per active user per week | — | median 4.5 / 7 by week 8 |
 
 ### Scope
@@ -91,8 +94,8 @@ every number against tool results → verdict + number + reason + action, with
 
 - **Week 1** — environment, engine verified end to end, English UI, design direction and clickable prototype ✅ *done*
 - **Week 2** — agent loop end to end on existing seed data; engine deployed as HTTP tools ✅ *done (built in n8n, since moved to Azure AI Foundry)*
-- **Week 3** — verifier and evaluation set
-- **Week 4** — visible tool trace; food data extended where demo scenarios need it
+- **Week 3** — verifier and evaluation set ✅ *done; the agent evals run as one command against the deployed agent*
+- **Week 4** — visible tool trace ✅ *done*; food data extended where demo scenarios need it; latency brought under the 10 s target
 - **Week 5** — rehearsal, backup recording, remaining PRD sections, buffer
 
 ### Resources
