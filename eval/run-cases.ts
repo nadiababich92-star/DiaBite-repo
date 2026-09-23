@@ -14,8 +14,13 @@
  *
  * Rows whose query is a placeholder (<every row above>) are policies checked
  * across the whole run, not questions to ask; they are reported at the end.
+ *
+ * eval/questions-field.jsonl is the wider set — real questions collected from
+ * the app, with no per-row expectations. They carry no mechanical checks, but
+ * they are what the judges score, and they cover ground the hand-written
+ * cases do not: one-word asks, brand-name foods, follow-ups.
  */
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { openApiSpec } from '../server/openapi'
@@ -42,8 +47,28 @@ interface Reply {
 }
 
 const cases = (JSON.parse(readFileSync(join(ROOT, 'eval', 'cases.json'), 'utf8')) as { agent: Case[] }).agent
-const runnable = cases.filter((c) => !c.query.startsWith('<'))
 const policies = cases.filter((c) => c.query.startsWith('<'))
+
+/** One budget for every row, so scores compare like with like. */
+const STANDARD = { budget: { glBudget: 54, carbsG: 107, kcal: 1653 }, entries: [] as unknown[] }
+
+function fieldQuestions(): Case[] {
+  const path = join(ROOT, 'eval', 'questions-field.jsonl')
+  if (!existsSync(path)) return []
+  return readFileSync(path, 'utf8').trim().split('\n').map((line) => {
+    const q = JSON.parse(line) as { id: string; query: string; ground_truth?: string }
+    return {
+      id: q.id, dimension: 'field', query: q.query, ground_truth: q.ground_truth ?? '',
+      context: STANDARD as Case['context'], expect: {}, judge: 'rubric', tags: ['field'],
+    }
+  })
+}
+
+const only = process.env.ONLY // "cases" or "field"
+const runnable = [
+  ...(only === 'field' ? [] : cases.filter((c) => !c.query.startsWith('<'))),
+  ...(only === 'cases' ? [] : fieldQuestions()),
+]
 
 /** Tool definitions for the evaluators, derived from the spec so they cannot drift. */
 function toolDefinitions() {
