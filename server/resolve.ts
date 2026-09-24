@@ -38,15 +38,43 @@ const CATEGORY_WORDS = new Set([
   'cheese', 'yogurt', 'greens', 'berries', 'squash', 'seeds',
 ])
 
+/**
+ * A record's name with its negations removed.
+ *
+ * "Chicken Tortilla Soup (No Chips)" contains the word "chips", so a lexical
+ * score that reads it as a match hands "tortilla chips" a confident answer for
+ * a soup. Recipe names use negation freely — "(no chips)", ", no sugar added"
+ * — and a bag of words cannot see it, so the negated part is cut before any
+ * matching. The same cut makes "Salsa, no sugar added" match the phrase
+ * "salsa" exactly, which is what it is.
+ */
+const plainName = (name: string) =>
+  name
+    .replace(/\([^)]*\b(no|without|free)\b[^)]*\)/gi, ' ')
+    .replace(/,\s*(no|without)\b[^,]*/gi, ' ')
+
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim()
 const STOP = new Set(['a', 'an', 'the', 'of', 'with', 'and', 'some', 'my', 'plate', 'bowl', 'cup', 'slice', 'slices', 'piece', 'pieces'])
 const tokens = (s: string) => norm(s).split(' ').filter((t) => t && !STOP.has(t))
+
+/**
+ * Words that describe what was done to a food, not which food it is.
+ *
+ * "Frozen yogurt" is not yogurt, "fried rice" is not rice, and the vectors
+ * put them next to each other anyway. If the phrase carries one of these and
+ * the record's name does not, the record is a different food — no confidence
+ * band, however high the cosine, can make it the right answer.
+ */
+const STATE_WORDS = new Set([
+  'frozen', 'fried', 'deep', 'breaded', 'battered', 'candied', 'dried', 'crispy',
+  'chips', 'crisps', 'smoothie', 'pickled', 'smoked', 'jerky', 'powdered', 'instant',
+])
 
 /** How much of the phrase the record's name accounts for, and what that is worth. */
 function lexicalScore(phrase: string, name: string): number {
   const ts = tokens(phrase)
   if (ts.length === 0) return 0
-  const n = norm(name)
+  const n = norm(plainName(name))
   const coverage = ts.filter((t) => n.includes(t)).length / ts.length
   if (coverage === 1) return LEXICAL_BOOST
   return coverage * LEXICAL_BOOST * 0.5 - (1 - coverage) * MISSING_TOKEN_PENALTY
@@ -60,7 +88,7 @@ function kindPrior(phrase: string, kind: string): number {
 }
 
 /** Two records that are really the same food (e.g. seed and ingredient copies) are not competitors. */
-function sameFood(a: string, b: string): boolean {
+export function sameFood(a: string, b: string): boolean {
   const ta = new Set(tokens(a)), tb = new Set(tokens(b))
   const inter = [...ta].filter((t) => tb.has(t)).length
   return inter / Math.max(1, Math.min(ta.size, tb.size)) >= 0.75
@@ -69,6 +97,12 @@ function sameFood(a: string, b: string): boolean {
 function band(phrase: string, cands: ResolveCandidate[]): Confidence {
   const top = cands[0]
   if (!top || top.score < LOW_MAX) return 'low'
+  // A preparation the record never mentions makes it a different food.
+  const stated = tokens(phrase).filter((t) => STATE_WORDS.has(t))
+  if (stated.length) {
+    const n = norm(plainName(top.name))
+    if (stated.some((t) => !n.includes(t))) return 'low'
+  }
   // A category word is never certain, however well it matched.
   if (tokens(phrase).every((t) => CATEGORY_WORDS.has(t))) return 'medium'
   const rival = cands.slice(1).find((c) => !sameFood(c.name, top.name))
@@ -110,7 +144,7 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
     const candidates: ResolveCandidate[] = hits
       .map((h) => {
         const rec = byId.get(h.id)!
-        const exact = rec.aliases?.includes(norm(phrase)) || norm(rec.name) === norm(phrase)
+        const exact = rec.aliases?.includes(norm(phrase)) || norm(plainName(rec.name)) === norm(phrase)
         const score = exact
           ? Math.max(ALIAS_SCORE, h.score)
           : Math.min(1, h.score + lexicalScore(phrase, rec.name) + kindPrior(phrase, rec.kind))
