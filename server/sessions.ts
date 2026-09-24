@@ -19,11 +19,14 @@
  * replica it liked — and a day state parked on one replica is a 404 on the
  * other. Redis behind this module is what lifts that limit.
  */
+import type { AvoidList } from './avoid'
 import type { DayBudget, MealItemInput } from './contract'
 
 export interface SessionState {
   budget: DayBudget
   entries: MealItemInput[]
+  /** Allergens and exclusions, parked with the day state for the same reason. */
+  avoid?: AvoidList
   storedAt: number
 }
 
@@ -34,9 +37,11 @@ function sweep(now = Date.now()) {
   for (const [id, s] of store) if (now - s.storedAt > TTL_MS) store.delete(id)
 }
 
-export function putSession(id: string, budget: DayBudget, entries: MealItemInput[]): SessionState {
+export function putSession(
+  id: string, budget: DayBudget, entries: MealItemInput[], avoid?: AvoidList,
+): SessionState {
   sweep()
-  const state: SessionState = { budget, entries, storedAt: Date.now() }
+  const state: SessionState = { budget, entries, avoid, storedAt: Date.now() }
   store.set(id, state)
   return state
 }

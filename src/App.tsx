@@ -79,7 +79,7 @@ export default function App() {
       </nav>
 
       {tab === 'ask' && (
-        <AskPage targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} />
+        <AskPage profile={profile} targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} />
       )}
       {tab === 'diary' && (
         <DiaryPage targets={targets} diary={diary} onChange={setDiary} />

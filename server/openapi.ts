@@ -124,7 +124,7 @@ export function openApiSpec() {
           operationId: 'find_alternatives',
           summary: 'Find lower-glycemic-load alternatives to a food',
           description:
-            'Return alternatives whose glycemic load is at or under `maxGL`. Use it when a meal does not fit the remaining budget. Pass the `foodId` of the item with the largest glycemic load, its `grams` so alternatives are costed at the same weight, and the remaining glycemic load as `maxGL`.',
+            'Return alternatives whose glycemic load is at or under `maxGL`. Use it when a meal does not fit the remaining budget. Pass the `foodId` of the item with the largest glycemic load, its `grams` so alternatives are costed at the same weight, the remaining glycemic load as `maxGL`, and always the `sessionId` — the engine uses it to drop anything the person cannot eat.',
           requestBody: {
             required: true,
             content: {
@@ -138,6 +138,7 @@ export function openApiSpec() {
                     maxGL: { type: 'number', description: 'Highest acceptable glycemic load — usually the remaining budget from get_day_state.' },
                     grams: { type: 'number', description: 'Portion of the food being replaced, so alternatives are compared at the same weight.' },
                     sameCategory: { type: 'boolean', description: 'Keep alternatives in the same food category. Usually true.' },
+                    sessionId: { type: 'string', description: 'The session id you were given. Always pass it: allergens and excluded foods are filtered out server-side.' },
                     topK: { type: 'integer', description: 'How many to return. Default 3.' },
                   },
                 },

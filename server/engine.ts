@@ -13,7 +13,9 @@
  *   POST /tools/find_alternatives   { foodId? | query?, maxGL, topK?, sameCategory? }
  *   POST /verify                    { answer, toolResults: [...], userText? }
  *   POST /agent/ask                 { sessionId, message, budget?, entries?, threadId? }
- *   PUT  /session/:id               { budget, entries }  — day state, kept out of the model's hands
+ *   PUT  /session/:id               { budget, entries, avoid? }  — day state and the
+ *                                   person's allergens/exclusions, both kept
+ *                                   out of the model's hands
  *   GET  /health · GET /foods/:id · GET /openapi.json
  *
  * Index: 350 ingredients + 86 everyday foods + 1,000 recipes, embedded locally
@@ -81,9 +83,9 @@ async function main() {
 
   /** The client parks the day's budget and log here, then hands the agent only the id. */
   app.put('/session/:id', (req, res) => {
-    const { budget, entries } = req.body ?? {}
+    const { budget, entries, avoid } = req.body ?? {}
     if (!budget || !Array.isArray(entries)) return res.status(400).json({ error: 'budget and entries required' })
-    putSession(req.params.id, budget, entries)
+    putSession(req.params.id, budget, entries, avoid)
     res.json({ ok: true, sessionId: req.params.id, entries: entries.length })
   })
 
@@ -127,7 +129,10 @@ async function main() {
   app.post('/tools/find_alternatives', async (req, res) => {
     const body = req.body as AlternativesRequest
     if (typeof body?.maxGL !== 'number') return res.status(400).json({ error: 'maxGL required' })
-    res.json({ alternatives: await findAlternatives(store, body) })
+    // The allergy filter lives here rather than in the prompt: an option the
+    // person must not eat should never reach the model in the first place.
+    const avoid = body.sessionId ? getSession(body.sessionId)?.avoid : undefined
+    res.json({ alternatives: await findAlternatives(store, body, avoid) })
   })
 
   app.post('/verify', (req, res) => {

@@ -3,6 +3,7 @@
  * All formulas live in src/lib/glycemic.ts and are shared with the browser.
  */
 import { availableCarbs, dayGlLevel, glLevel, glycemicLoad, nutrientsFor } from '../src/lib/glycemic'
+import { isAvoided, type AvoidList } from './avoid'
 import { asFood, getRecord, loadFoods, summary } from './foods'
 import { embed, type VectorStore } from './embeddings'
 import type {
@@ -84,7 +85,9 @@ function costOf(id: string, grams?: number): { gl: number; kcal: number; availab
   return { gl: it.gl, kcal: it.kcal, availableCarbs: it.availableCarbs, portion: rec.kind === 'ingredient' ? it.grams : (it.servings ?? 1) }
 }
 
-export async function findAlternatives(store: VectorStore, req: AlternativesRequest): Promise<Alternative[]> {
+export async function findAlternatives(
+  store: VectorStore, req: AlternativesRequest, avoid?: AvoidList,
+): Promise<Alternative[]> {
   const { byId } = loadFoods()
   const topK = req.topK ?? 5
   let query: Float32Array | undefined
@@ -95,7 +98,10 @@ export async function findAlternatives(store: VectorStore, req: AlternativesRequ
 
   const filter = (id: string) => {
     if (anchor && id === anchor.id) return false
-    if (req.sameCategory && anchor) return byId.get(id)?.category === anchor.category
+    const rec = byId.get(id)
+    // Dropped before ranking, not after: an allergen is not a tie-breaker.
+    if (rec && isAvoided(rec, avoid)) return false
+    if (req.sameCategory && anchor) return rec?.category === anchor.category
     return true
   }
   // Over-fetch, then keep only what fits the budget.

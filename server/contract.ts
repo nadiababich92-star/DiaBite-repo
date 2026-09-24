@@ -101,6 +101,9 @@ export interface DayBudget {
   kcal: number
 }
 
+import type { AvoidList } from './avoid'
+export type { AvoidList }
+
 export interface DayStateRequest {
   budget: DayBudget
   /** Everything logged today. The server keeps no state. */
@@ -130,6 +133,12 @@ export interface AlternativesRequest {
    */
   grams?: number
   topK?: number
+  /**
+   * The day-state session. Passing it lets the engine drop anything the person
+   * avoids before an option is ever offered — the filter must not depend on the
+   * model remembering an allergy.
+   */
+  sessionId?: string
   sameCategory?: boolean
 }
 

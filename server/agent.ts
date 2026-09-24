@@ -24,6 +24,7 @@ import { DefaultAzureCredential } from '@azure/identity'
 import { openApiSpec } from './openapi'
 import { safetyGate } from './safety'
 import { verify } from './verify'
+import type { AvoidList } from './avoid'
 import { previousResponseFor, putSession, rememberResponse } from './sessions'
 import type { DayBudget, MealItemInput } from './contract'
 
@@ -102,6 +103,8 @@ export interface AskRequest {
   message: string
   budget?: DayBudget
   entries?: MealItemInput[]
+  /** Allergens and excluded foods; parked with the day state, never shown to the model. */
+  avoid?: AvoidList
 }
 
 export interface ToolCallTrace {
@@ -272,11 +275,11 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
 /** Park the day state where only the engine can read it. */
 async function parkDayState(req: AskRequest): Promise<void> {
   if (!req.budget || !req.entries) return
-  if (!ENGINE_URL) { putSession(req.sessionId, req.budget, req.entries); return }
+  if (!ENGINE_URL) { putSession(req.sessionId, req.budget, req.entries, req.avoid); return }
   const r = await fetch(`${ENGINE_URL}/session/${encodeURIComponent(req.sessionId)}`, {
     method: 'PUT',
     headers: { 'content-type': 'application/json', ...(ENGINE_KEY ? { 'x-api-key': ENGINE_KEY } : {}) },
-    body: JSON.stringify({ budget: req.budget, entries: req.entries }),
+    body: JSON.stringify({ budget: req.budget, entries: req.entries, avoid: req.avoid }),
   })
   if (!r.ok) throw new Error(`could not park the day state: ${r.status} ${await r.text()}`)
 }
