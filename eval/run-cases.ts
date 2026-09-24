@@ -135,6 +135,14 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
     say('alternatives costed at the same grams', typeof alt?.grams === 'number', JSON.stringify(alt))
   }
   if (e.answerMentionsAssumed === true) say('says the portion was assumed', /assum|default/i.test(r.answer))
+
+  // Proceeding past an ambiguity is allowed; doing it silently is not. If a
+  // phrase came back with a clarify and the meal was costed anyway, the answer
+  // owes the user which candidate it picked.
+  const clarified = (callOf(r, 'resolve_foods')?.result as { results?: { clarify?: string }[] } | undefined)?.results?.some((p) => p.clarify)
+  if (clarified && called(r, 'compute_meal')) {
+    say('names the assumption it proceeded on', /assum|I used|I picked|I took|treated (it|this) as|default/i.test(r.answer))
+  }
   // The failure a number-tracing verifier cannot see: the right number under
   // the wrong label. "Remaining after this meal: 54" when 54 is the budget
   // before it tells someone they have room they do not have.
@@ -208,6 +216,9 @@ for (const c of runnable) {
     // sent; leaving it out makes the judge read get_day_state's argument as
     // invented, and tool_call_accuracy fails for a fault in the dataset.
     query: [{ role: 'system', content: systemPrompt }, { role: 'user', content: `[session_id: ${sessionId}]\n\n${c.query}` }],
+    // Groundedness compares a string answer against a string question. Handed
+    // the message array it reports "the QUERY is empty" and scores nothing.
+    query_text: c.query,
     response: responseMessages(reply),
     output_text: reply.answer,
     ground_truth: c.ground_truth,

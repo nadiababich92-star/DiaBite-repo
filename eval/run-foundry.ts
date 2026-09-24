@@ -101,6 +101,6 @@ await score('foundry-dataset-tools.jsonl', 'tools', [
     query: '{{item.query}}', response: '{{item.response}}', tool_definitions: '{{item.tool_definitions}}',
   }),
   criterion('groundedness', 'builtin.groundedness', {
-    query: '{{item.query}}', response: '{{item.output_text}}', context: '{{item.context}}',
+    query: '{{item.query_text}}', response: '{{item.output_text}}', context: '{{item.context}}',
   }),
 ])
