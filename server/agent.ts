@@ -126,6 +126,34 @@ export interface AskResponse {
   templated?: boolean
 }
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+/**
+ * Run a turn, waiting out the model's per-minute token limit.
+ *
+ * The deployment allows 50k tokens a minute and a turn spends several
+ * thousand — the system prompt and the whole OpenAPI spec travel with every
+ * one of the four tool round trips. A burst is enough to go negative, and
+ * without this the user gets a 502 for a queue they cannot see. The window is
+ * a minute, so waiting is the right move; failing after two is also right,
+ * because a third wait is longer than anyone will sit through.
+ */
+async function withRateLimitRetry<T>(run: () => Promise<T>): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await run()
+    } catch (e) {
+      const err = e as { status?: number; code?: string; headers?: Record<string, string> }
+      const limited = err.status === 429 || err.code === 'rate_limit_exceeded'
+      if (!limited || attempt >= 2) throw e
+      const reset = Number(err.headers?.['x-ratelimit-reset-tokens'])
+      const wait = Number.isFinite(reset) && reset > 0 ? Math.min(reset, 65) * 1000 : (attempt + 1) * 8000
+      console.warn(`rate limited, waiting ${Math.round(wait / 1000)}s`)
+      await sleep(wait)
+    }
+  }
+}
+
 function parseJson(text: string): unknown {
   try { return JSON.parse(text) } catch { return text }
 }
@@ -286,7 +314,7 @@ async function answer(req: AskRequest): Promise<AskResponse> {
   // unbounded "try again" loop is how a wrong number becomes a long wait.
   while (attempts < 2) {
     attempts++
-    const res = (await openai.responses.create(
+    const res = (await withRateLimitRetry(() => openai.responses.create(
       { input, ...(previous ? { previous_response_id: previous } : {}) } as never,
       {
         body: {
@@ -297,7 +325,7 @@ async function answer(req: AskRequest): Promise<AskResponse> {
           tool_choice: 'required',
         },
       } as never,
-    )) as unknown as { id?: string; output_text?: string; output?: unknown[] }
+    ))) as unknown as { id?: string; output_text?: string; output?: unknown[] }
 
     responseId = res.id
     previous = res.id

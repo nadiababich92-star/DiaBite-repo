@@ -173,6 +173,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
 
 /** The PRD's target is a p90 under 10 s, and until now nothing measured it. */
 const latencies: number[] = []
+const failures: string[] = []
 const runs: Record<string, unknown>[] = []
 const dataset: Record<string, unknown>[] = []
 const tools = toolDefinitions()
@@ -192,7 +193,13 @@ for (const c of runnable) {
       entries: c.context.entries,
     }),
   })
-  if (!res.ok) { console.log(`HTTP ${res.status}`); continue }
+  if (!res.ok) {
+    // A dropped row shrinks the sample every metric below is computed over,
+    // so it is counted and named rather than skipped past.
+    failures.push(`${c.id} HTTP ${res.status}`)
+    console.log(`HTTP ${res.status}`)
+    continue
+  }
   const reply = (await res.json()) as Reply
   const ms = Date.now() - startedAt
   latencies.push(ms)
@@ -260,5 +267,9 @@ writeFileSync(join(ROOT, 'eval', 'foundry-dataset-tools.jsonl'), withTools.map((
 const sorted = [...latencies].sort((a, b) => a - b)
 const pct = (q: number) => sorted.length ? Math.round(sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * q))] / 100) / 10 : 0
 console.log(`\nlatency  median ${pct(0.5)}s   p90 ${pct(0.9)}s   max ${pct(0.999)}s   (target p90 < 10s)`)
-console.log(`\n${runs.length} cases, ${checksRun - checksFailed}/${checksRun} mechanical checks passed`)
+console.log(`\n${runs.length}/${runnable.length} cases answered, ${checksRun - checksFailed}/${checksRun} mechanical checks passed`)
+if (failures.length) {
+  console.log(`\n${failures.length} rows never answered — every number above is over the rest:`)
+  failures.forEach((f) => console.log('  ' + f))
+}
 console.log(`wrote eval/agent-runs.jsonl, eval/foundry-dataset.jsonl (${dataset.length}) and eval/foundry-dataset-tools.jsonl (${withTools.length})`)
