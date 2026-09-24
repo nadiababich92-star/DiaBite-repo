@@ -27,11 +27,26 @@ const criterion = (name: string, evaluator: string, mapping: Record<string, stri
   data_mapping: mapping,
 })
 
-async function score(dataset: string, label: string, criteria: unknown[]) {
+/**
+ * Upload every dataset before scoring any of it.
+ *
+ * Scoring a run takes tens of minutes, and uploading the second file only
+ * when the first has finished means a run of eval/run-cases.ts in between
+ * swaps the data underneath — which is how one comparison here ended up
+ * scoring nine rows against the other's seventy.
+ */
+const uploaded = new Map<string, string>()
+async function upload(dataset: string) {
   const file = await openai.files.create({
     file: createReadStream(join(ROOT, 'eval', dataset)),
     purpose: 'evals' as never,
   })
+  uploaded.set(dataset, file.id)
+  console.log(`uploaded ${dataset} as ${file.id}`)
+}
+
+async function score(dataset: string, label: string, criteria: unknown[]) {
+  const fileId = uploaded.get(dataset)!
   const evaluation = await openai.evals.create({
     name: `diabite-${label}-${new Date().toISOString().slice(0, 16)}`,
     data_source_config: { type: 'custom', item_schema: { type: 'object' }, include_sample_schema: false } as never,
@@ -39,7 +54,7 @@ async function score(dataset: string, label: string, criteria: unknown[]) {
   })
   const run = await openai.evals.runs.create(evaluation.id, {
     name: label,
-    data_source: { type: 'jsonl', source: { type: 'file_id', id: file.id } } as never,
+    data_source: { type: 'jsonl', source: { type: 'file_id', id: fileId } } as never,
   } as never)
   console.log(`\n${label}: ${dataset}`)
 
@@ -69,6 +84,9 @@ async function score(dataset: string, label: string, criteria: unknown[]) {
     console.log(`  ${name.padEnd(20)} ${b.pass}/${b.pass + b.fail} pass   mean ${mean}${b.failed.length ? '   failed: ' + b.failed.join(', ') : ''}`)
   }
 }
+
+await upload('foundry-dataset.jsonl')
+await upload('foundry-dataset-tools.jsonl')
 
 // Every row can be judged on whether the agent understood the ask and obeyed
 // its instructions — including the refusals, where obeying is the whole point.
