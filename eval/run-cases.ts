@@ -163,6 +163,8 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
 
 // ── run ───────────────────────────────────────────────────────────────────
 
+/** The PRD's target is a p90 under 10 s, and until now nothing measured it. */
+const latencies: number[] = []
 const runs: Record<string, unknown>[] = []
 const dataset: Record<string, unknown>[] = []
 const tools = toolDefinitions()
@@ -171,6 +173,7 @@ let checksRun = 0, checksFailed = 0
 for (const c of runnable) {
   process.stdout.write(`${c.id.padEnd(4)} ${c.query.slice(0, 48).padEnd(50)}`)
   const sessionId = `eval-${c.id}-${Date.now()}`
+  const startedAt = Date.now()
   const res = await fetch(AGENT_URL, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -183,6 +186,8 @@ for (const c of runnable) {
   })
   if (!res.ok) { console.log(`HTTP ${res.status}`); continue }
   const reply = (await res.json()) as Reply
+  const ms = Date.now() - startedAt
+  latencies.push(ms)
 
   const results = check(c, reply)
   const failed = results.filter((r) => !r.ok)
@@ -190,7 +195,7 @@ for (const c of runnable) {
   checksFailed += failed.length
   console.log(
     `${reply.blocked ? 'blocked' : `${reply.toolCalls} tools`}`.padEnd(10) +
-    `verified=${reply.verified} attempts=${reply.attempts ?? '-'}  ` +
+    `verified=${reply.verified} ${String(Math.round(ms / 100) / 10).padStart(4)}s  ` +
     (results.length === 0 ? '(no mechanical checks)' : failed.length === 0 ? `${results.length}/${results.length} checks` : `FAIL ${failed.map((f) => f.name + (f.note ? ` [${f.note}]` : '')).join('; ')}`),
   )
 
@@ -241,5 +246,8 @@ writeFileSync(join(ROOT, 'eval', 'foundry-dataset.jsonl'), dataset.map((r) => JS
 // answer. Same for groundedness, which needs tool results to ground against.
 const withTools = dataset.filter((r) => (r.response as unknown[]).length > 1)
 writeFileSync(join(ROOT, 'eval', 'foundry-dataset-tools.jsonl'), withTools.map((r) => JSON.stringify(r)).join('\n') + '\n')
+const sorted = [...latencies].sort((a, b) => a - b)
+const pct = (q: number) => sorted.length ? Math.round(sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * q))] / 100) / 10 : 0
+console.log(`\nlatency  median ${pct(0.5)}s   p90 ${pct(0.9)}s   max ${pct(0.999)}s   (target p90 < 10s)`)
 console.log(`\n${runs.length} cases, ${checksRun - checksFailed}/${checksRun} mechanical checks passed`)
 console.log(`wrote eval/agent-runs.jsonl, eval/foundry-dataset.jsonl (${dataset.length}) and eval/foundry-dataset-tools.jsonl (${withTools.length})`)

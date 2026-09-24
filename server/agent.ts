@@ -44,6 +44,14 @@ const ENGINE_KEY = process.env.ENGINE_API_KEY ?? ''
  * field that describes what someone ate, so it can be switched off.
  */
 const LOG_QUESTIONS = process.env.LOG_QUESTIONS !== 'false'
+/**
+ * How hard the model thinks before it acts. The work here is mostly deciding
+ * which tool to call next, which is not where deep reasoning pays: "low"
+ * answered the same burrito bowl correctly, with the same four tool calls,
+ * four seconds faster. Measured on the case set before it was made the
+ * default — see the PRD's latency target.
+ */
+const REASONING_EFFORT = process.env.REASONING_EFFORT ?? 'low'
 
 export const systemPrompt = () => readFileSync(join(ROOT, 'agent', 'system-prompt.md'), 'utf8')
 
@@ -83,6 +91,7 @@ export async function publishAgentVersion(): Promise<string> {
     model: MODEL_DEPLOYMENT,
     instructions: systemPrompt(),
     tools: [engineTool()],
+    reasoning: { effort: REASONING_EFFORT },
   } as never)
   return (agent as { version?: string }).version ?? '?'
 }
