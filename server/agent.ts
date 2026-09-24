@@ -37,6 +37,13 @@ const ENGINE_CONNECTION = process.env.ENGINE_CONNECTION_ID ?? ''
 /** Where the engine lives when it is not this very process (local dev). */
 const ENGINE_URL = process.env.ENGINE_URL ?? ''
 const ENGINE_KEY = process.env.ENGINE_API_KEY ?? ''
+/**
+ * The question is the most useful field in the log — every food we do not
+ * have becomes a candidate for the labelled set, and the eval set grows from
+ * what people actually type rather than what we imagined. It is also the one
+ * field that describes what someone ate, so it can be switched off.
+ */
+const LOG_QUESTIONS = process.env.LOG_QUESTIONS !== 'false'
 
 export const systemPrompt = () => readFileSync(join(ROOT, 'agent', 'system-prompt.md'), 'utf8')
 
@@ -154,6 +161,36 @@ function traceOf(output: unknown[] | undefined): ToolCallTrace[] {
   return order.map((id) => calls.get(id)!).filter(Boolean)
 }
 
+/**
+ * One line per turn, for the metrics the PRD asks for: verified rate,
+ * unmatched count, share of unknown resolutions, share of clarifying
+ * questions, latency p90. It goes to stdout, which on Container Apps means
+ * Log Analytics — no extra service, and nothing here is worth a database yet.
+ */
+function logTurn(req: AskRequest, res: AskResponse, ms: number): void {
+  const resolve = res.trace.find((t) => t.tool.endsWith('resolve_foods'))?.result as
+    | { results?: { confidence?: string; unknown?: boolean; clarify?: string }[] }
+    | undefined
+  const phrases = resolve?.results ?? []
+  console.log(JSON.stringify({
+    evt: 'turn',
+    at: new Date().toISOString(),
+    session: req.sessionId,
+    ...(LOG_QUESTIONS ? { question: req.message } : { questionLength: req.message.length }),
+    ms,
+    blocked: res.blocked,
+    rule: res.blockedRule ?? null,
+    verified: res.verified,
+    unmatched: res.unmatchedNumbers,
+    attempts: res.attempts ?? 0,
+    templated: res.templated ?? false,
+    tools: res.trace.map((t) => t.tool.replace('diabite_engine_', '')),
+    phrases: phrases.length,
+    unknownPhrases: phrases.filter((p) => p.unknown).length,
+    clarified: phrases.filter((p) => p.clarify).length,
+  }))
+}
+
 /** The last call to an operation, whatever prefix Foundry gave it. */
 function lastCall(trace: ToolCallTrace[], operation: string): ToolCallTrace | undefined {
   return [...trace].reverse().find((t) => t.tool === operation || t.tool.endsWith(`_${operation}`))
@@ -208,6 +245,13 @@ async function parkDayState(req: AskRequest): Promise<void> {
 }
 
 export async function ask(req: AskRequest): Promise<AskResponse> {
+  const started = Date.now()
+  const res = await answer(req)
+  logTurn(req, res, Date.now() - started)
+  return res
+}
+
+async function answer(req: AskRequest): Promise<AskResponse> {
   const gate = safetyGate(req.message)
   if (gate.blocked) {
     // No model call at all: the refusal is the product's answer, not a draft.
