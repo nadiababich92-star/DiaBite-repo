@@ -41,7 +41,7 @@ interface Case {
 
 interface TraceStep { tool: string; input: unknown; result: unknown }
 interface Reply {
-  answer: string; blocked?: boolean; blockedRule?: string
+  answer: string; blocked?: boolean; blockedRule?: string; route?: string; routedBy?: string
   verified?: boolean; matchedNumbers?: number[]; unmatchedNumbers?: number[]
   toolCalls?: number; trace?: TraceStep[]; attempts?: number; templated?: boolean
 }
@@ -209,7 +209,8 @@ for (const c of runnable) {
   checksRun += results.length
   checksFailed += failed.length
   console.log(
-    `${reply.blocked ? 'blocked' : `${reply.toolCalls} tools`}`.padEnd(10) +
+    `${reply.blocked ? 'gate' : (reply.route ?? '?')}`.padEnd(9) +
+    `${reply.blocked ? '' : `${reply.toolCalls}t`}`.padEnd(4) +
     `verified=${reply.verified} ${String(Math.round(ms / 100) / 10).padStart(4)}s  ` +
     (results.length === 0 ? '(no mechanical checks)' : failed.length === 0 ? `${results.length}/${results.length} checks` : `FAIL ${failed.map((f) => f.name + (f.note ? ` [${f.note}]` : '')).join('; ')}`),
   )
@@ -238,6 +239,7 @@ for (const c of runnable) {
       : {}),
     verified: reply.verified ?? null,
     blocked: reply.blocked ?? false,
+    route: reply.route ?? (reply.blocked ? 'gate' : null),
   })
 }
 
@@ -264,6 +266,13 @@ writeFileSync(join(ROOT, 'eval', 'foundry-dataset.jsonl'), dataset.map((r) => JS
 // answer. Same for groundedness, which needs tool results to ground against.
 const withTools = dataset.filter((r) => (r.response as unknown[]).length > 1)
 writeFileSync(join(ROOT, 'eval', 'foundry-dataset-tools.jsonl'), withTools.map((r) => JSON.stringify(r)).join('\n') + '\n')
+const routes: Record<string, number> = {}
+for (const r of runs) {
+  const reply = r.reply as Reply
+  routes[reply.blocked ? 'gate' : (reply.route ?? '?')] = (routes[reply.blocked ? 'gate' : (reply.route ?? '?')] ?? 0) + 1
+}
+console.log('\nrouted:  ' + Object.entries(routes).map(([k, v]) => `${k} ${v}`).join('   '))
+
 const sorted = [...latencies].sort((a, b) => a - b)
 const pct = (q: number) => sorted.length ? Math.round(sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * q))] / 100) / 10 : 0
 console.log(`\nlatency  median ${pct(0.5)}s   p90 ${pct(0.9)}s   max ${pct(0.999)}s   (target p90 < 10s)`)
