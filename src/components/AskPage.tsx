@@ -1,11 +1,12 @@
 import { useMemo, useRef, useState } from 'react'
-import { askAgent, budgetOf, engineId, receiptFrom, type AgentResponse, type Receipt, type TraceStep } from '../lib/agent'
+import { askAgent, avoidOf, budgetOf, engineId, receiptFrom, type AgentResponse, type Receipt, type TraceStep } from '../lib/agent'
 import { viewEntry } from '../lib/diary'
 import { todayISO } from '../lib/storage'
 import { downloadResponses, saveResponse, savedCount } from '../lib/responses'
-import type { DiaryEntry, MealType, Targets } from '../types'
+import type { DiaryEntry, MealType, Profile, Targets } from '../types'
 
 interface Props {
+  profile: Profile
   targets: Targets
   diary: DiaryEntry[]
   onLog: (entries: DiaryEntry[]) => void
@@ -108,7 +109,7 @@ function summarize(step: TraceStep): string {
   }
 }
 
-export default function AskPage({ targets, diary, onLog }: Props) {
+export default function AskPage({ profile, targets, diary, onLog }: Props) {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -143,6 +144,7 @@ export default function AskPage({ targets, diary, onLog }: Props) {
         sessionId: fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId(),
         message: q,
         budget: budgetOf(targets),
+        avoid: avoidOf(profile),
         entries: fresh ? [] : todayEntries.map((e) => (e.snapshot?.servings
           ? { foodId: engineId(e), servings: e.snapshot.servings }
           : { foodId: engineId(e), grams: e.grams })),

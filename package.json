@@ -1,0 +1,43 @@
+{
+  "name": "diabite",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit && tsc -p server/tsconfig.json",
+    "typecheck:server": "tsc -p server/tsconfig.json",
+    "server": "tsx server/engine.ts",
+    "engine": "tsx server/index.ts",
+    "tunnel": "ngrok http 8787 --url https://tinkling-grievance-brink.ngrok-free.dev",
+    "eval": "tsx eval/run-engine.ts",
+    "eval:agent": "tsx eval/run-cases.ts",
+    "eval:dataset": "tsx eval/build-dataset.ts",
+    "deploy": "bash scripts/deploy.sh"
+  },
+  "dependencies": {
+    "@azure/ai-agents": "^1.1.0",
+    "@azure/ai-projects": "^2.7.0",
+    "@azure/identity": "^4.13.3",
+    "@huggingface/transformers": "^4.3.0",
+    "@supabase/supabase-js": "^2.117.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "openai": "^7.21.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsx": "^4.23.13"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.20.3",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}

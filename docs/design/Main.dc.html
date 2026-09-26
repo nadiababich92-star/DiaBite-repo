@@ -1,0 +1,335 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+    body { margin: 0; background: #f3f6f4; font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif; color: #131c18; -webkit-font-smoothing: antialiased; }
+    a { color: #1c6b49; } a:hover { color: #155a3d; }
+    button { font-family: inherit; cursor: pointer; }
+    input { font-family: inherit; }
+    input::placeholder { color: #93a29b; }
+    .verdict { font-family: 'Literata', Georgia, serif; }
+    .mono { font-family: 'IBM Plex Mono', Menlo, monospace; font-variant-numeric: tabular-nums; }
+  </style>
+</helmet>
+
+<div style="width: 390px; height: 844px; background: #f3f6f4; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+
+  <!-- header: ambient budget -->
+  <div style="padding: 58px 20px 14px; display: flex; justify-content: space-between; align-items: flex-end;">
+    <div style="display: flex; flex-direction: column; gap: 2px;">
+      <div style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #7d8b84; font-weight: 500;">Today · Tuesday</div>
+      <div class="verdict" style="font-size: 22px; font-weight: 600; letter-spacing: -0.01em;">DiaBite</div>
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+      <div style="font-size: 12px; color: #7d8b84;">glycemic load left</div>
+      <div class="mono" style="font-size: 22px; font-weight: 500; color: #1c6b49;">{{ left }} <span style="font-size: 13px; color: #7d8b84;">of 54</span></div>
+    </div>
+  </div>
+
+  <!-- scrollable body -->
+  <div style="flex: 1; overflow-y: auto; padding: 4px 16px 120px; display: flex; flex-direction: column; gap: 12px;">
+
+    <!-- INPUT -->
+    <sc-if value="{{ isInput }}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 14px; padding-top: 28px;">
+        <div class="verdict" style="font-size: 30px; line-height: 1.15; font-weight: 600; letter-spacing: -0.02em; text-wrap: balance; max-width: 300px;">What are you about to eat?</div>
+        <div style="font-size: 15px; color: #57655e; line-height: 1.5;">Say it the way you'd say it to a friend. I'll do the counting.</div>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+          <div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #7d8b84; font-weight: 500;">Try one</div>
+          <sc-for list="{{ chips }}" as="chip" hint-placeholder-count="3">
+            <button onClick="{{ chip.pick }}" style="text-align: left; background: #ffffff; border: 1px solid #d9e1dd; border-radius: 12px; padding: 14px 16px; font-size: 15px; color: #131c18; line-height: 1.4; min-height: 48px;">{{ chip.text }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- CLARIFY -->
+    <sc-if value="{{ isClarify }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 16px; padding-top: 20px;">
+        <div style="background: #ffffff; border: 1px solid #d9e1dd; border-radius: 14px; padding: 16px; font-size: 15px; color: #57655e; line-height: 1.5;">{{ query }}</div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #1c6b49; font-weight: 500;">One question first</div>
+          <div class="verdict" style="font-size: 26px; line-height: 1.2; font-weight: 600; letter-spacing: -0.015em;">Regular bowl or large?</div>
+          <div style="font-size: 14px; color: #57655e; line-height: 1.5;">The rice is most of the load, and the size changes it by half.</div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button onClick="{{ pickRegular }}" style="flex: 1; background: #1c6b49; color: #ffffff; border: none; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 600; min-height: 48px;">Regular</button>
+          <button onClick="{{ pickLarge }}" style="flex: 1; background: #ffffff; color: #131c18; border: 1px solid #d9e1dd; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 600; min-height: 48px;">Large</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ANSWER -->
+    <sc-if value="{{ isAnswer }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 12px; padding-top: 12px;">
+        <div style="font-size: 14px; color: #7d8b84; line-height: 1.5; padding: 0 4px;">{{ query }}</div>
+
+        <div style="background: #ffffff; border: 1px solid #d9e1dd; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-flex; width: 22px; height: 22px; border-radius: 50%; background: {{ a.badgeBg }}; align-items: center; justify-content: center;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{ a.badgeFg }}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ a.badgePath }}"></path></svg>
+            </span>
+            <span style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: {{ a.badgeFg }}; font-weight: 600;">{{ a.badgeLabel }}</span>
+          </div>
+          <div class="verdict" style="font-size: 28px; line-height: 1.15; font-weight: 600; letter-spacing: -0.02em; text-wrap: balance;">{{ a.verdict }}</div>
+          <div class="mono" style="font-size: 15px; color: #1c6b49; font-weight: 500;">{{ a.number }}</div>
+          <div style="font-size: 15px; color: #57655e; line-height: 1.55;">{{ a.reason }}</div>
+
+          <sc-if value="{{ showAlt }}" hint-placeholder-val="{{ false }}">
+            <div style="border-top: 1px solid #e7edea; padding-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+              <div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #7d8b84; font-weight: 500;">Other ways in</div>
+              <sc-for list="{{ a.alts }}" as="alt" hint-placeholder-count="2">
+                <div style="display: flex; justify-content: space-between; gap: 12px; font-size: 14px; line-height: 1.4;">
+                  <span style="color: #131c18;">{{ alt.text }}</span>
+                  <span class="mono" style="color: #1c6b49; white-space: nowrap;">GL {{ alt.gl }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <button onClick="{{ logIt }}" style="flex: 1; background: #1c6b49; color: #ffffff; border: none; border-radius: 12px; padding: 13px; font-size: 15px; font-weight: 600; min-height: 46px;">{{ a.logLabel }}</button>
+          <button onClick="{{ toggleAlt }}" style="flex: 1; background: #ffffff; color: #131c18; border: 1px solid #d9e1dd; border-radius: 12px; padding: 13px; font-size: 15px; font-weight: 500; min-height: 46px;">Another option</button>
+        </div>
+
+        <!-- RECEIPT -->
+        <button onClick="{{ toggleReceipt }}" style="display: flex; justify-content: space-between; align-items: center; width: 100%; background: transparent; border: none; padding: 10px 6px; font-size: 14px; font-weight: 500; color: #131c18; min-height: 44px;">
+          <span>Show calculation</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7d8b84" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate({{ receiptDeg }}deg);"><path d="M6 9l6 6 6-6"></path></svg>
+        </button>
+
+        <sc-if value="{{ showReceipt }}" hint-placeholder-val="{{ false }}">
+          <div class="mono" style="background: #ffffff; border: 1px solid #d9e1dd; border-radius: 14px; padding: 16px; font-size: 12.5px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; color: #7d8b84; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding-bottom: 8px; border-bottom: 1px dashed #d9e1dd;">
+              <span>food · grams</span><span>avail carbs · GI · GL</span>
+            </div>
+            <sc-for list="{{ a.lines }}" as="ln" hint-placeholder-count="4">
+              <div style="display: flex; justify-content: space-between; gap: 10px; line-height: 1.5;">
+                <span style="color: #131c18;">{{ ln.food }} <span style="color: #7d8b84;">{{ ln.grams }} g</span></span>
+                <span style="color: #57655e; white-space: nowrap;">{{ ln.carbs }} · {{ ln.gi }} · <span style="color: #131c18; font-weight: 500;">{{ ln.gl }}</span></span>
+              </div>
+            </sc-for>
+            <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px dashed #d9e1dd; font-weight: 500;">
+              <span>Meal glycemic load</span><span>{{ a.total }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; color: #57655e;">
+              <span>Left before this meal</span><span>{{ left }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; color: {{ a.afterColor }}; font-weight: 500;">
+              <span>Left after</span><span>{{ a.after }}</span>
+            </div>
+            <div style="font-size: 11px; color: #7d8b84; line-height: 1.5; padding-top: 6px; border-top: 1px dashed #d9e1dd;">GL = GI × available carbs ÷ 100. Available carbs = total − fibre. GI from International Tables (2021).</div>
+          </div>
+
+          <!-- TRACE -->
+          <div style="display: flex; flex-direction: column; gap: 8px; padding: 4px 6px 0;">
+            <div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #7d8b84; font-weight: 500;">How this answer was made</div>
+            <sc-for list="{{ a.trace }}" as="t" hint-placeholder-count="4">
+              <div style="display: flex; gap: 10px; align-items: flex-start;">
+                <span style="display: inline-flex; width: 18px; height: 18px; border-radius: 50%; background: #e3f0e8; align-items: center; justify-content: center; flex: none; margin-top: 1px;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#2f7d57" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                </span>
+                <div style="display: flex; flex-direction: column; gap: 1px;">
+                  <span class="mono" style="font-size: 12.5px; color: #131c18;">{{ t.tool }}</span>
+                  <span style="font-size: 12.5px; color: #57655e; line-height: 1.4;">{{ t.result }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- REFUSAL -->
+    <sc-if value="{{ isRefusal }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 12px; padding-top: 12px;">
+        <div style="font-size: 14px; color: #7d8b84; line-height: 1.5; padding: 0 4px;">{{ query }}</div>
+        <div style="background: #ffffff; border: 1px solid #d9e1dd; border-left: 3px solid #a9443b; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #a9443b; font-weight: 600;">Not something I'll answer</div>
+          <div class="verdict" style="font-size: 24px; line-height: 1.2; font-weight: 600; letter-spacing: -0.015em; text-wrap: balance;">Insulin doses are between you and your clinician.</div>
+          <div style="font-size: 15px; color: #57655e; line-height: 1.55;">The right amount depends on your prescription and your glucose right now — neither of which I should guess at. What I can tell you is what the pasta does to today's budget.</div>
+        </div>
+        <button onClick="{{ askPasta }}" style="background: #1c6b49; color: #ffffff; border: none; border-radius: 12px; padding: 13px; font-size: 15px; font-weight: 600; min-height: 46px;">Ask about the pasta instead</button>
+      </div>
+    </sc-if>
+
+    <!-- UNKNOWN -->
+    <sc-if value="{{ isUnknown }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 12px; padding-top: 12px;">
+        <div style="font-size: 14px; color: #7d8b84; line-height: 1.5; padding: 0 4px;">{{ query }}</div>
+        <div style="background: #ffffff; border: 1px solid #d9e1dd; border-left: 3px solid #91650f; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #91650f; font-weight: 600;">No verified numbers for this</div>
+          <div class="verdict" style="font-size: 24px; line-height: 1.2; font-weight: 600; letter-spacing: -0.015em; text-wrap: balance;">I don't have {{ unk.food }} in my verified data — and I won't guess.</div>
+          <div style="font-size: 15px; color: #57655e; line-height: 1.55;">Closest verified match is {{ unk.match }} at <span class="mono" style="color: #131c18;">GL {{ unk.gl }}</span> a serving. Use that, or tell me what's in yours and I'll work it out from the ingredients.</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button onClick="{{ reset }}" style="flex: 1; background: #1c6b49; color: #ffffff; border: none; border-radius: 12px; padding: 13px; font-size: 15px; font-weight: 600; min-height: 46px;">Use {{ unk.match }}</button>
+          <button onClick="{{ reset }}" style="flex: 1; background: #ffffff; color: #131c18; border: 1px solid #d9e1dd; border-radius: 12px; padding: 13px; font-size: 15px; font-weight: 500; min-height: 46px;">Describe it</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- LOGGED -->
+    <sc-if value="{{ isLogged }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 16px; padding-top: 40px; align-items: center; text-align: center;">
+        <span style="display: inline-flex; width: 56px; height: 56px; border-radius: 50%; background: #e3f0e8; align-items: center; justify-content: center;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2f7d57" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+        </span>
+        <div class="verdict" style="font-size: 26px; line-height: 1.2; font-weight: 600; letter-spacing: -0.015em;">Logged.</div>
+        <div style="font-size: 15px; color: #57655e; line-height: 1.5; max-width: 280px;">{{ loggedNote }}</div>
+        <button onClick="{{ reset }}" style="margin-top: 8px; background: #ffffff; color: #131c18; border: 1px solid #d9e1dd; border-radius: 12px; padding: 13px 22px; font-size: 15px; font-weight: 500; min-height: 46px;">Back to today</button>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <!-- composer (input state only) -->
+  <sc-if value="{{ isInput }}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 16px 30px; background: linear-gradient(180deg, rgba(243,246,244,0) 0%, #f3f6f4 30%);">
+      <div style="display: flex; gap: 8px; align-items: center; background: #ffffff; border: 1px solid #d9e1dd; border-radius: 16px; padding: 6px 6px 6px 16px;">
+        <input value="{{ text }}" onChange="{{ onType }}" placeholder="e.g. two slices of pepperoni pizza" style="flex: 1; border: none; outline: none; font-size: 15px; color: #131c18; background: transparent; min-height: 40px;">
+        <button onClick="{{ ask }}" aria-label="Ask" style="width: 44px; height: 44px; border-radius: 12px; background: #1c6b49; border: none; display: inline-flex; align-items: center; justify-content: center; flex: none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </button>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { view: 'input', text: '', scenario: null, size: null, showReceipt: false, showAlt: false, left: 21 };
+  }
+
+  chips() {
+    const set = (text, scenario) => () => this.setState({ text, scenario });
+    return [
+      { text: 'Burrito bowl with rice, black beans, chicken and guac', pick: set('Burrito bowl with rice, black beans, chicken and guac', 'bowl') },
+      { text: 'How many units of insulin should I take before pasta?', pick: set('How many units of insulin should I take before pasta?', 'dose') },
+      { text: "A slice of grandma's kugel", pick: set("A slice of grandma's kugel", 'unknown') },
+    ];
+  }
+
+  answerFor(size) {
+    if (size === 'pasta') {
+      return {
+        badgeLabel: 'Not as-is', badgeBg: '#f7e5e2', badgeFg: '#a9443b', badgePath: 'M18 6L6 18M6 6l12 12',
+        verdict: 'Not a full plate — two thirds of it fits.',
+        number: 'GL 27 of 21 left · full plate',
+        reason: 'A full plate overshoots by 6. Two thirds of the pasta with the same sauce lands at 19. And cook it al dente — overcooked pasta raises the GI by about a third.',
+        logLabel: 'Log two thirds',
+        alts: [ { text: 'Two-thirds plate, same sauce', gl: 19 }, { text: 'Half plate plus a side salad', gl: 14 } ],
+        lines: [
+          { food: 'Spaghetti, al dente', grams: 180, carbs: '52.6', gi: '48', gl: '25.2' },
+          { food: 'Tomato sauce', grams: 120, carbs: '6.2', gi: '35', gl: '2.2' },
+        ],
+        total: '27.4', after: '−6', afterColor: '#a9443b',
+        trace: [
+          { tool: 'resolve_foods', result: '2 foods matched · portion assumed 180 g, editable' },
+          { tool: 'compute_meal', result: 'GL 27.4 full plate · 18.6 at two thirds' },
+          { tool: 'get_day_state', result: '21 of 54 left before this meal' },
+          { tool: 'verifier', result: '4 numbers in the answer · 4 matched tool results' },
+        ],
+        logged: 'Two thirds of a plate of spaghetti. 2 of 54 left today.', leftAfter: 2,
+      };
+    }
+    if (size === 'large') {
+      return {
+        badgeLabel: 'Not as-is', badgeBg: '#f7e5e2', badgeFg: '#a9443b', badgePath: 'M18 6L6 18M6 6l12 12',
+        verdict: 'Not as-is — but a swap makes it work.',
+        number: 'GL 29 of 21 left · even with half rice',
+        reason: 'A large bowl overshoots what you have left by 8. Swap the rice for extra beans and lettuce and the whole bowl lands at 7 — with room to spare.',
+        logLabel: 'Log the swap',
+        alts: [ { text: 'Skip the rice, keep everything else', gl: 7 }, { text: 'Regular bowl, half rice', gl: 19 } ],
+        lines: [
+          { food: 'Chicken breast', grams: 180, carbs: '0.0', gi: '—', gl: '0.0' },
+          { food: 'White rice, half', grams: 112, carbs: '31.1', gi: '73', gl: '22.7' },
+          { food: 'Black beans', grams: 135, carbs: '20.7', gi: '30', gl: '6.2' },
+          { food: 'Guacamole', grams: 90, carbs: '2.1', gi: '15', gl: '0.3' },
+        ],
+        total: '29.2', after: '−8', afterColor: '#a9443b',
+        trace: [
+          { tool: 'resolve_foods', result: '4 foods matched · 1 question asked (size)' },
+          { tool: 'compute_meal', result: 'GL 29.2 with half rice · 7.1 with the swap' },
+          { tool: 'get_day_state', result: '21 of 54 left before this meal' },
+          { tool: 'verifier', result: '4 numbers in the answer · 4 matched tool results' },
+        ],
+        logged: 'Rice swapped for beans and lettuce. 14 of 54 left today.', leftAfter: 14,
+      };
+    }
+    return {
+      badgeLabel: 'Yes, with one change', badgeBg: '#e3f0e8', badgeFg: '#2f7d57', badgePath: 'M20 6L9 17l-5-5',
+      verdict: 'Yes — ask for half rice.',
+      number: 'GL 19 of 21 left today',
+      reason: 'Full rice alone would be GL 30. Half rice brings the whole bowl to 19. Eat the chicken and guac first — rice last blunts the peak.',
+      logLabel: 'Log it',
+      alts: [ { text: 'Skip the rice entirely', gl: 4 }, { text: 'Swap rice for cauliflower rice', gl: 5 } ],
+      lines: [
+        { food: 'Chicken breast', grams: 120, carbs: '0.0', gi: '—', gl: '0.0' },
+        { food: 'White rice, half', grams: 75, carbs: '20.7', gi: '73', gl: '15.1' },
+        { food: 'Black beans', grams: 90, carbs: '13.8', gi: '30', gl: '4.1' },
+        { food: 'Guacamole', grams: 60, carbs: '1.4', gi: '15', gl: '0.2' },
+      ],
+      total: '19.4', after: '2', afterColor: '#2f7d57',
+      trace: [
+        { tool: 'resolve_foods', result: '4 foods matched · 1 question asked (size)' },
+        { tool: 'compute_meal', result: 'GL 19.4 with half rice · 30.2 with full rice' },
+        { tool: 'get_day_state', result: '21 of 54 left before this meal' },
+        { tool: 'verifier', result: '3 numbers in the answer · 3 matched tool results' },
+      ],
+      logged: 'Burrito bowl, half rice. 2 of 54 left today — a light dinner tonight.', leftAfter: 2,
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const a = this.answerFor(s.size);
+    const scenarioFromText = () => {
+      const t = (s.text || '').toLowerCase();
+      if (s.scenario) return s.scenario;
+      if (t.includes('insulin') || t.includes('units') || t.includes('dose')) return 'dose';
+      if (t.includes('burrito')) return 'bowl';
+      return 'unknown';
+    };
+    return {
+      left: s.left,
+      text: s.text,
+      chips: this.chips(),
+      isInput: s.view === 'input', isClarify: s.view === 'clarify', isAnswer: s.view === 'answer',
+      isRefusal: s.view === 'refusal', isUnknown: s.view === 'unknown', isLogged: s.view === 'logged',
+      query: s.text,
+      a,
+      showReceipt: s.showReceipt, receiptDeg: s.showReceipt ? 180 : 0,
+      showAlt: s.showAlt,
+      loggedNote: s.loggedNote || '',
+      unk: { food: 'kugel', match: 'noodle casserole', gl: 24 },
+      onType: (e) => this.setState({ text: e.target.value, scenario: null }),
+      ask: () => {
+        if (!(s.text || '').trim()) return;
+        const sc = scenarioFromText();
+        this.setState({ view: sc === 'bowl' ? 'clarify' : sc === 'dose' ? 'refusal' : 'unknown', showReceipt: false, showAlt: false });
+      },
+      pickRegular: () => this.setState({ view: 'answer', size: 'regular' }),
+      pickLarge: () => this.setState({ view: 'answer', size: 'large' }),
+      toggleReceipt: () => this.setState({ showReceipt: !s.showReceipt }),
+      toggleAlt: () => this.setState({ showAlt: !s.showAlt }),
+      logIt: () => this.setState({ view: 'logged', loggedNote: a.logged, left: a.leftAfter }),
+      askPasta: () => this.setState({ view: 'answer', size: 'pasta', text: 'A plate of spaghetti with tomato sauce', showReceipt: false, showAlt: false }),
+      reset: () => this.setState({ view: 'input', text: '', scenario: null, size: null, showReceipt: false, showAlt: false, left: 21 }),
+    };
+  }
+}
+</script>
+</body>
+</html>

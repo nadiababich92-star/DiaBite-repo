@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "diabite",
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": [
+        "-c",
+        "export PATH=/opt/homebrew/bin:$PATH && exec npm run dev"
+      ],
+      "port": 5173
+    },
+    {
+      "name": "diabite-mock",
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": [
+        "-c",
+        "export PATH=/opt/homebrew/bin:$PATH && AGENT_WEBHOOK=http://localhost:8790/diabite exec npm run dev"
+      ],
+      "port": 5173
+    }
+  ]
+}

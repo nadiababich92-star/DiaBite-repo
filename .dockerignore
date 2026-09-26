@@ -1,0 +1,26 @@
+# Keep the build context small: the image needs the engine, its data and the
+# sentence model, nothing else.
+node_modules
+dist
+.git
+.claude
+docs
+eval
+n8n
+src/components
+src/App.tsx
+src/main.tsx
+src/styles.css
+src/lib/agent.ts
+src/lib/diary.ts
+src/lib/menu.ts
+src/lib/responses.ts
+src/lib/storage.ts
+*.xlsx
+*.tsbuildinfo
+config.json
+index.html
+vite.config.ts
+data/recipes-db/*.jsonl
+data/recipes-db/*.csv
+data/recipes-db/*.py

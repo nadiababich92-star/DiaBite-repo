@@ -1,0 +1,10 @@
+{
+  "sessionId": "demo3",
+  "message": "I had a bowl of oatmeal with a banana for breakfast. Was that ok?",
+  "budget": {
+    "glBudget": 48,
+    "carbsG": 107,
+    "kcal": 1653
+  },
+  "entries": []
+}

@@ -1,0 +1,332 @@
+[
+ {
+  "key": "carrot",
+  "name": "Carrot",
+  "now": 39,
+  "ev": 32,
+  "tier": "ISO",
+  "n": 11,
+  "rng": "16-92",
+  "rec": 93
+ },
+ {
+  "key": "monk_fruit_sweetener",
+  "name": "Monk fruit/erythritol sweetener",
+  "now": 0,
+  "ev": 15,
+  "tier": "ISO+dev",
+  "n": 2,
+  "rng": "8-22",
+  "rec": 89
+ },
+ {
+  "key": "chickpeas",
+  "name": "Chickpeas, cooked",
+  "now": 28,
+  "ev": 38,
+  "tier": "ISO",
+  "n": 13,
+  "rng": "5-51",
+  "rec": 47
+ },
+ {
+  "key": "lentils",
+  "name": "Lentils, cooked",
+  "now": 29,
+  "ev": 36,
+  "tier": "ISO",
+  "n": 9,
+  "rng": "16-57",
+  "rec": 19
+ },
+ {
+  "key": "blueberries",
+  "name": "Blueberries",
+  "now": 53,
+  "ev": 40,
+  "tier": "ISO+dev",
+  "n": 2,
+  "rng": "28-53",
+  "rec": 16
+ },
+ {
+  "key": "green_peas",
+  "name": "Green peas",
+  "now": 51,
+  "ev": 38,
+  "tier": "ISO+dev",
+  "n": 8,
+  "rng": "9-54",
+  "rec": 13
+ },
+ {
+  "key": "hummus",
+  "name": "Hummus",
+  "now": 15,
+  "ev": 10,
+  "tier": "ISO+dev",
+  "n": 3,
+  "rng": "6-15",
+  "rec": 9
+ },
+ {
+  "key": "dark_chocolate",
+  "name": "Dark chocolate 85%",
+  "now": 23,
+  "ev": 34,
+  "tier": "ISO",
+  "n": 5,
+  "rng": "23-56",
+  "rec": 9
+ },
+ {
+  "key": "ezekiel_bread",
+  "name": "Sprouted grain bread (Ezekiel-style)",
+  "now": 55,
+  "ev": 62,
+  "tier": "ISO",
+  "n": 4,
+  "rng": "55-67",
+  "rec": 8
+ },
+ {
+  "key": "kidney_beans",
+  "name": "Kidney beans, cooked",
+  "now": 24,
+  "ev": 34,
+  "tier": "ISO+dev",
+  "n": 14,
+  "rng": "9-70",
+  "rec": 8
+ },
+ {
+  "key": "pear",
+  "name": "Pear",
+  "now": 38,
+  "ev": 28,
+  "tier": "ISO",
+  "n": 7,
+  "rng": "24-43",
+  "rec": 8
+ },
+ {
+  "key": "pistachios",
+  "name": "Pistachios, shelled",
+  "now": 15,
+  "ev": 28,
+  "tier": "ISO+dev",
+  "n": 1,
+  "rng": "28-28",
+  "rec": 8
+ },
+ {
+  "key": "pinto_beans",
+  "name": "Pinto beans, cooked",
+  "now": 39,
+  "ev": 33,
+  "tier": "ISO+dev",
+  "n": 5,
+  "rng": "14-45",
+  "rec": 6
+ },
+ {
+  "key": "peach",
+  "name": "Peach",
+  "now": 42,
+  "ev": 57,
+  "tier": "ISO+dev",
+  "n": 1,
+  "rng": "57-57",
+  "rec": 6
+ },
+ {
+  "key": "mango",
+  "name": "Mango",
+  "now": 51,
+  "ev": 42,
+  "tier": "ISO",
+  "n": 9,
+  "rng": "33-60",
+  "rec": 6
+ },
+ {
+  "key": "brown_rice",
+  "name": "Brown rice, cooked",
+  "now": 55,
+  "ev": 68,
+  "tier": "ISO",
+  "n": 10,
+  "rng": "51-95",
+  "rec": 5
+ },
+ {
+  "key": "pumpkin_puree",
+  "name": "Pumpkin puree, canned",
+  "now": 64,
+  "ev": 75,
+  "tier": "ISO+dev",
+  "n": 1,
+  "rng": "75-75",
+  "rec": 5
+ },
+ {
+  "key": "cherries",
+  "name": "Cherries, pitted",
+  "now": 38,
+  "ev": 29,
+  "tier": "ISO+dev",
+  "n": 3,
+  "rng": "22-63",
+  "rec": 5
+ },
+ {
+  "key": "whole_wheat_english_muffin",
+  "name": "Whole wheat English muffin",
+  "now": 50,
+  "ev": 45,
+  "tier": "ISO+dev",
+  "n": 1,
+  "rng": "45-45",
+  "rec": 4
+ },
+ {
+  "key": "new_potato",
+  "name": "New potatoes, boiled & cooled",
+  "now": 56,
+  "ev": 71,
+  "tier": "ISO",
+  "n": 12,
+  "rng": "23-87",
+  "rec": 4
+ },
+ {
+  "key": "barley",
+  "name": "Pearl barley, cooked",
+  "now": 28,
+  "ev": 44,
+  "tier": "ISO+dev",
+  "n": 5,
+  "rng": "23-58",
+  "rec": 3
+ },
+ {
+  "key": "kefir",
+  "name": "Kefir, plain",
+  "now": 27,
+  "ev": 36,
+  "tier": "ISO+dev",
+  "n": 1,
+  "rng": "36-36",
+  "rec": 3
+ },
+ {
+  "key": "red_lentils",
+  "name": "Red lentils, cooked",
+  "now": 26,
+  "ev": 21,
+  "tier": "ISO+dev",
+  "n": 5,
+  "rng": "18-32",
+  "rec": 2
+ },
+ {
+  "key": "honey",
+  "name": "Honey (small amount)",
+  "now": 61,
+  "ev": 54,
+  "tier": "ISO",
+  "n": 8,
+  "rng": "35-87",
+  "rec": 2
+ },
+ {
+  "key": "cashews",
+  "name": "Cashews",
+  "now": 22,
+  "ev": 27,
+  "tier": "ISO+dev",
+  "n": 1,
+  "rng": "27-27",
+  "rec": 2
+ },
+ {
+  "key": "whole_wheat_pasta",
+  "name": "Whole wheat pasta, cooked al dente",
+  "now": 42,
+  "ev": 54,
+  "tier": "ISO",
+  "n": 6,
+  "rng": "33-62",
+  "rec": 1
+ },
+ {
+  "key": "split_peas",
+  "name": "Split peas, cooked",
+  "now": 25,
+  "ev": 32,
+  "tier": "ISO+dev",
+  "n": 3,
+  "rng": "25-61",
+  "rec": 1
+ },
+ {
+  "key": "popcorn",
+  "name": "Popcorn, air-popped",
+  "now": 65,
+  "ev": 70,
+  "tier": "ISO+dev",
+  "n": 3,
+  "rng": "55-89",
+  "rec": 0
+ },
+ {
+  "key": "black_eyed_peas",
+  "name": "Black-eyed peas, cooked",
+  "now": 42,
+  "ev": 50,
+  "tier": "ISO+dev",
+  "n": 3,
+  "rng": "33-52",
+  "rec": 0
+ },
+ {
+  "key": "plum",
+  "name": "Plum",
+  "now": 40,
+  "ev": 32,
+  "tier": "ISO+dev",
+  "n": 3,
+  "rng": "24-53",
+  "rec": 0
+ },
+ {
+  "key": "pineapple",
+  "name": "Pineapple",
+  "now": 59,
+  "ev": 70,
+  "tier": "ISO+dev",
+  "n": 5,
+  "rng": "39-82",
+  "rec": 0
+ },
+ {
+  "key": "dates",
+  "name": "Medjool dates (small amount)",
+  "now": 42,
+  "ev": 54,
+  "tier": "ISO",
+  "n": 52,
+  "rng": "29-75",
+  "rec": 0
+ },
+ {
+  "key": "soy_milk",
+  "name": "Soy milk, unsweetened",
+  "now": 30,
+  "ev": 36,
+  "tier": "ISO",
+  "n": 11,
+  "rng": "17-44",
+  "rec": 0
+ }
+]
