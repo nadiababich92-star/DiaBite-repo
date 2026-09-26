@@ -82,7 +82,15 @@ function toolDefinitions() {
   }))
 }
 
-const systemPrompt = readFileSync(join(ROOT, 'agent', 'system-prompt.md'), 'utf8')
+/**
+ * The system message a judge should read is the one the agent that answered
+ * was actually given — the meal specialist and the advisor are held to
+ * different rules, and judging an advisor answer against the meal prompt
+ * would mark every missing number as a failure.
+ */
+const prompts = Object.fromEntries(
+  ['meal', 'advisor', 'triage'].map((r) => [r, readFileSync(join(ROOT, 'agent', 'prompts', `${r}.md`), 'utf8')]),
+)
 
 /** The turn as OpenAI messages: what the evaluators read. */
 function responseMessages(reply: Reply) {
@@ -223,7 +231,10 @@ for (const c of runnable) {
     // The session id must appear here because it appears in what the agent was
     // sent; leaving it out makes the judge read get_day_state's argument as
     // invented, and tool_call_accuracy fails for a fault in the dataset.
-    query: [{ role: 'system', content: systemPrompt }, { role: 'user', content: `[session_id: ${sessionId}]\n\n${c.query}` }],
+    query: [
+      { role: 'system', content: prompts[reply.route ?? 'meal'] ?? prompts.meal },
+      { role: 'user', content: `[session_id: ${sessionId}]\n\n${c.query}` },
+    ],
     // Groundedness compares a string answer against a string question. Handed
     // the message array it reports "the QUERY is empty" and scores nothing.
     query_text: c.query,
