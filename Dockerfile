@@ -18,7 +18,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 # The engine, the two pure modules it shares with the frontend, and its data.
 COPY server ./server
-COPY agent/system-prompt.md ./agent/system-prompt.md
+COPY agent/prompts ./agent/prompts
 COPY src/types.ts ./src/types.ts
 COPY src/lib/glycemic.ts ./src/lib/glycemic.ts
 COPY src/lib/profile.ts ./src/lib/profile.ts

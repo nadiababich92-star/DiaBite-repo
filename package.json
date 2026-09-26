@@ -14,7 +14,8 @@
     "tunnel": "ngrok http 8787 --url https://tinkling-grievance-brink.ngrok-free.dev",
     "eval": "tsx eval/run-engine.ts",
     "eval:agent": "tsx eval/run-cases.ts",
-    "eval:dataset": "tsx eval/build-dataset.ts"
+    "eval:dataset": "tsx eval/build-dataset.ts",
+    "deploy": "bash scripts/deploy.sh"
   },
   "dependencies": {
     "@azure/ai-agents": "^1.1.0",
