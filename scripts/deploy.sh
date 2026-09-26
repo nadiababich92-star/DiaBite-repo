@@ -11,12 +11,23 @@ RG=${RG:-rg-nadia.babich92-5702}
 APP=${APP:-diabite-engine}
 REGISTRY=${REGISTRY:-ca83d2041d5eacr.azurecr.io}
 REPO=${REPO:-nadiababich92-star/DiaBite-repo}
-SHA=$(git rev-parse HEAD)
-
-echo "commit  $SHA"
 git diff --quiet || { echo "working tree is dirty — commit first"; exit 1; }
 
-echo "waiting for the build of this commit…"
+# The workflow only builds when the image's inputs change, so a commit that
+# touches docs or .gitignore never produces a run. Deploy the image of the
+# most recent commit that did: its contents are what HEAD would produce.
+SHA=""
+for candidate in $(git log -20 --format=%H); do
+  if gh run list --repo "$REPO" --workflow build-engine --commit "$candidate" --limit 1 \
+       --json status -q '.[0].status' 2>/dev/null | grep -q .; then
+    SHA=$candidate
+    break
+  fi
+done
+[ -n "$SHA" ] || { echo "no build found for HEAD or the 20 commits before it"; exit 1; }
+[ "$SHA" = "$(git rev-parse HEAD)" ] && echo "commit  $SHA" || echo "commit  $SHA (HEAD changed nothing the image is built from)"
+
+echo "waiting for that build…"
 for _ in $(seq 1 60); do
   read -r STATUS CONCLUSION <<<"$(gh run list --repo "$REPO" --workflow build-engine --commit "$SHA" \
     --limit 1 --json status,conclusion -q '.[0] | "\(.status) \(.conclusion // "-")"' 2>/dev/null || echo "missing -")"
