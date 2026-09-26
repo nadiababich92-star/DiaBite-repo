@@ -12,7 +12,7 @@
  *
  * Authenticates as whoever is logged in to the Azure CLI.
  */
-import { publishAgentVersion, systemPrompt } from '../server/agent'
+import { publishAgentVersion, systemPrompt, type Role } from '../server/agent'
 import { openApiSpec } from '../server/openapi'
 
 const spec = openApiSpec() as { servers: { url: string }[]; paths: Record<string, unknown> }
@@ -22,7 +22,10 @@ console.log('model     ', process.env.MODEL_DEPLOYMENT_NAME ?? 'gpt-5-mini')
 console.log('engine    ', spec.servers[0].url)
 console.log('auth      ', process.env.ENGINE_CONNECTION_ID ? `connection "${process.env.ENGINE_CONNECTION_ID}"` : 'anonymous')
 console.log('operations', Object.keys(spec.paths).length)
-console.log('prompt    ', systemPrompt().length, 'chars')
+for (const role of ['triage', 'meal', 'advisor'] as Role[]) {
+  console.log(`prompt ${role.padEnd(8)}`, systemPrompt(role).length, 'chars')
+}
 
-const version = await publishAgentVersion()
-console.log('\nagent published, version', version)
+const versions = await publishAgentVersion()
+console.log('\npublished:')
+for (const [role, v] of Object.entries(versions)) console.log(`  ${role.padEnd(8)} version ${v}`)

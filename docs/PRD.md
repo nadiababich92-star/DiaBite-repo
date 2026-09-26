@@ -938,9 +938,23 @@ than incidental (a whole cuisine, a whole food category).
 The data is the product's moat and its largest standing risk, so this section
 states plainly what exists, where it came from, and what it is not.
 
-**Three layers, 1,436 records.** 350 ingredients with nutrients per 100 g from
+**Four layers, 14,520 records.** A food-coverage layer of **13,169 generic US foods**
+built 26 Sep 2026 from USDA FoodData Central — Survey/FNDDS 2021-2023 (5,431 "foods as
+eaten", including mixed and restaurant-style dishes), SR Legacy (7,637) and Foundation
+Foods (101), all public domain — each with nutrients per 100 g, household portions, and a
+glycemic index assigned by the five-level confidence scheme of Aston et al.
+(*Obes Rev* 2010;11:92-100). Levels 1-3 are measured, published, or computed from the
+dish's own USDA ingredient breakdown; level 4 is a category estimate used only where the
+category is homogeneous; **level 5 is deliberately left empty** — Aston assigns a nominal
+GI of 70 there, and this product answers "unknown" instead. Result: on 40 phrases a US
+user would plausibly type, the food is identified 40/40 times and a usable GI exists for
+31/40; across all foods holding at least 2 g of available carbohydrate, 67% carry a GI.
+Files: `data/foods-usda/`.
+
+**Three recipe/ingredient layers, 1,351 records.** 350 ingredients with nutrients per 100 g from
 USDA FoodData Central and glycemic index from the International Tables of
-Glycemic Index (2021, University of Sydney); 86 seed foods that cover the
+Glycemic Index 2021 (Atkinson et al., Am J Clin Nutr), each value tagged with
+its evidence tier and citation; 86 seed foods that cover the
 everyday items the ingredient table lacks (white rice, pasta, pizza, bread);
 1,000 recipes whose nutrients are summed from their ingredients and whose
 dish-level GI is a carbohydrate-weighted mean of ingredient GI
@@ -952,6 +966,34 @@ exported.
 would make every downstream number unverifiable and void the one claim the
 product exists to make. Where a value is missing, the food is `unknown` and the
 agent says so.
+
+**Every GI value carries its provenance.** On 26 Sep 2026 the whole ingredient
+table was re-derived from the supplemental tables of Atkinson FS et al.,
+*International tables of glycemic index and glycemic load values 2021*
+(Am J Clin Nutr 2021;114:1625-32) — 4,015 of 4,018 published entries extracted,
+split into Supplemental Table 1 (method consistent with ISO 26642:2010) and
+Supplemental Table 2 (method deviations). The selection rule is fixed and
+reproducible: the median of ISO-compliant measurements wins; failing that the
+median of both tables; failing that the University of Sydney online database.
+Each ingredient now stores `gi_confidence`, `gi_source`, `gi_evidence_basis`
+and `gi_citation` (`data/recipes-db/gi_sources.py`, surfaced in the workbook's
+Ingredients sheet), and each recipe stores the share of its available
+carbohydrate that comes from ingredients with a *measured* GI — 69% on average
+for dishes above 20 g net carbohydrate, and low for near-zero-carb dishes where
+GI is meaningless and glycemic load is the number to read.
+
+**Open question for launch: two databases we do not yet hold.** Two sources
+would materially improve this layer and neither is freely downloadable:
+
+| Source | Scale | Why it matters | Blocker |
+|---|---|---|---|
+| 2024 US national GI database (Sheng et al., Am J Clin Nutr 2024) | 10,978 food descriptions mapped to 7,976 USDA FNDDS codes | The only source that joins GI directly to the US food-coding system this product's market eats from; would remove most hand-matching | Paywalled; data available on request from the authors |
+| Diogenes GI database | 18,808 entries | Largest existing compilation; would raise measured coverage of minor ingredients | Distributed on request via the Diogenes consortium; commercial licence unclear |
+
+Separately, the University of Sydney's terms permit free copying with
+attribution but require written permission before the data is included in a
+product sold for money (glycemic.index@gmail.com). Decide before launch whether
+to license, to restrict citations to the peer-reviewed tables, or both.
 
 ### Model fine-tuning
 

@@ -1,0 +1,2518 @@
+[
+ {
+  "key": "rolled_oats",
+  "name": "Rolled oats, dry",
+  "current": 57,
+  "recommended": 57,
+  "basis": "ISO",
+  "pref_western": true,
+  "iso": {
+   "n": 3,
+   "median": 57,
+   "min": 50.0,
+   "max": 59.0
+  },
+  "deviation": {
+   "n": 4,
+   "median": 54,
+   "min": 49.0,
+   "max": 70.0
+  },
+  "sydney": {
+   "n": 3,
+   "median": 57,
+   "min": 49.0,
+   "max": 59.0
+  },
+  "delta": 0,
+  "examples": [
+   "50 — Porridge, made from rolled oats Porridge oats (Freedom Foods, Australia) (Australia 2007)",
+   "57 — Porridge, Traditional Rolled Oats (Woolworths Select brand, Australia) (Australia 2008)",
+   "59 — Oats, rolled, uncooked (Lowan's Whole Foods, Box Hill, Australia) (Australia 2003)"
+  ]
+ },
+ {
+  "key": "steel_cut_oats",
+  "name": "Steel-cut oats, dry",
+  "current": 52,
+  "recommended": 52,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 5,
+   "median": 52,
+   "min": 48.0,
+   "max": 57.0
+  },
+  "deviation": {
+   "n": 1,
+   "median": 60,
+   "min": 60.0,
+   "max": 60.0
+  },
+  "sydney": {
+   "n": 6,
+   "median": 52,
+   "min": 48.0,
+   "max": 60.0
+  },
+  "delta": 0,
+  "examples": [
+   "48 — Porridge, made from steel-cut oats Porridge, made from steel-cut oats, cooked in (Australia 2003)",
+   "51 — Porridge, made from steel-cut oats, Moulamein™, cooked in water (Australia 2016)",
+   "52 — Porridge, made from steel-cut oats, cooked in water (USA 2003)",
+   "53 — Porridge, made from steel-cut oats, cooked in water (Meebags, Sunny Internationa (Australia 2019)",
+   "57 — Porridge, made from old-Fashioned Steel Cut Oats, President's Choice® Blue Menu™ (Canada 2007)"
+  ]
+ },
+ {
+  "key": "oat_bran",
+  "name": "Oat bran, dry",
+  "current": 55,
+  "recommended": 56,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 2,
+   "median": 56,
+   "min": 51.0,
+   "max": 60.0
+  },
+  "sydney": {
+   "n": 2,
+   "median": 56,
+   "min": 51.0,
+   "max": 60.0
+  },
+  "delta": 1,
+  "examples": [
+   "51 — Oat bran, raw (Quaker Oats Co., Canada)29 (Canada 1984- 1992)",
+   "60 — Oat bran, raw (Canada 1984)"
+  ]
+ },
+ {
+  "key": "oat_flour",
+  "name": "Oat flour",
+  "current": 55,
+  "recommended": 55,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "quinoa",
+  "name": "Quinoa, cooked",
+  "current": 53,
+  "recommended": 53,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 4,
+   "median": 53,
+   "min": 50.0,
+   "max": 54.0
+  },
+  "deviation": null,
+  "sydney": {
+   "n": 5,
+   "median": 53,
+   "min": 45.0,
+   "max": 54.0
+  },
+  "delta": 0,
+  "examples": [
+   "50 — Quinoa Quinoa, white, cooked in boiling water for 15 min (Nutritious Foods, Aust (Australia 2017)",
+   "53 — Quinoa, retort product, Coles Simply Gluten Free Quinoa Cups, microwaved for 70  (Australia 2013)",
+   "53 — Quinoa, cooked, refrigerated, reheated in microwave for 1.5 min (Nature First Or (Australia 2003)",
+   "54 — Quinoa, red, cooked in boiling water for 15 min (Nutritious Foods, Australia) Qu (Australia 2017)"
+  ]
+ },
+ {
+  "key": "brown_rice",
+  "name": "Brown rice, cooked",
+  "current": 68,
+  "recommended": 68,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 6,
+   "median": 68,
+   "min": 51.0,
+   "max": 87.0
+  },
+  "deviation": {
+   "n": 4,
+   "median": 72,
+   "min": 52.0,
+   "max": 95.0
+  },
+  "sydney": {
+   "n": 12,
+   "median": 66,
+   "min": 48.0,
+   "max": 95.0
+  },
+  "delta": 0,
+  "examples": [
+   "51 — Rice, brown Brown Doongara rice (SunRice; Ricegrowers Ltd., NSW, Australia) (Australia 2016)",
+   "58 — Brown rice (0% polished), prepared from the Indian rice variety \"Bapatla\" (BPT-5 (India 2017*)",
+   "65 — Brown rice (SunRice, Ricegrowers Ltd., NSW, Australia)13 (Australia 2013*)",
+   "72 — Brown rice, boiled in excess water for 25 min (SunRice brand, Rice Growers Co-op (Australia International tables 2005 of glycemic)",
+   "78 — Brown rice (SunRice, Ricegrowers Ltd., NSW, Australia)13 (Australia 2013*)"
+  ]
+ },
+ {
+  "key": "wild_rice",
+  "name": "Wild rice, cooked",
+  "current": 57,
+  "recommended": 57,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "barley",
+  "name": "Pearl barley, cooked",
+  "current": 44,
+  "recommended": 44,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 5,
+   "median": 44,
+   "min": 23.0,
+   "max": 58.0
+  },
+  "sydney": {
+   "n": 9,
+   "median": 35,
+   "min": 23.0,
+   "max": 58.0
+  },
+  "delta": 0,
+  "examples": [
+   "23 — Pearl Barley Barley, pearled18 (Canada 1985)",
+   "35 — Barley, pearled, boiled 60 min (UK 2005)",
+   "44 — Barley, pearled (Canada 2011)",
+   "47 — Barley, pearled (Canada 2011)",
+   "58 — Barley, pearled (Canada 2011)"
+  ]
+ },
+ {
+  "key": "farro",
+  "name": "Farro (pearled spelt), cooked",
+  "current": 63,
+  "recommended": 63,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 63,
+   "min": 63.0,
+   "max": 63.0
+  },
+  "deviation": null,
+  "sydney": {
+   "n": 1,
+   "median": 63,
+   "min": 63.0,
+   "max": 63.0
+  },
+  "delta": 0,
+  "examples": [
+   "63 — Spelt, pearled (Farro, Barilla, Italy) (Italy 2009)"
+  ]
+ },
+ {
+  "key": "bulgur",
+  "name": "Bulgur, cooked",
+  "current": 46,
+  "recommended": 46,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 4,
+   "median": 46,
+   "min": 46.0,
+   "max": 53.0
+  },
+  "sydney": {
+   "n": 5,
+   "median": 46,
+   "min": 46.0,
+   "max": 53.0
+  },
+  "delta": 0,
+  "examples": [
+   "46 — Bulgur, boiled in 800 mL water 20 min (Canada 1985)",
+   "46 — Bulgur, boiled (Canada 1984)",
+   "46 — Bulgur, boiled 20 min (Canada 1985)",
+   "53 — Bulgur, boiled 20 min Semolina (Triticum aestivum) (Canada 1985)"
+  ]
+ },
+ {
+  "key": "buckwheat",
+  "name": "Buckwheat groats, cooked",
+  "current": 51,
+  "recommended": 50,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 4,
+   "median": 50,
+   "min": 46.0,
+   "max": 64.0
+  },
+  "sydney": {
+   "n": 2,
+   "median": 48,
+   "min": 46.0,
+   "max": 51.0
+  },
+  "delta": -1,
+  "examples": [
+   "46 — Buckwheat groats, hydrothermally treated, dehusked, boiled 12 min (Sweden 2001)",
+   "50 — Buckwheat (Canada 1985)",
+   "51 — Buckwheat, boiled in water with 2 g salt (Canada 1981)",
+   "64 — Buckwheat (Canada 1985)"
+  ]
+ },
+ {
+  "key": "whole_wheat_pasta",
+  "name": "Whole wheat pasta, cooked al dente",
+  "current": 54,
+  "recommended": 54,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 2,
+   "median": 54,
+   "min": 45.0,
+   "max": 62.0
+  },
+  "deviation": {
+   "n": 4,
+   "median": 49,
+   "min": 33.0,
+   "max": 59.0
+  },
+  "sydney": {
+   "n": 5,
+   "median": 56,
+   "min": 33.0,
+   "max": 62.0
+  },
+  "delta": 0,
+  "examples": [
+   "45 — Spaghetti, wholemeal, boiled President's Choice® Blue Menu™ Whole Wheat spaghett (Canada 2004- 2007)",
+   "62 — Wholemeal spaghetti, boiled for 8 min Wholemeal spaghetti, boiled, mean of five  (Australia 2012)"
+  ]
+ },
+ {
+  "key": "chickpea_pasta",
+  "name": "Chickpea pasta, cooked",
+  "current": 30,
+  "recommended": 30,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "lentil_pasta",
+  "name": "Red lentil pasta, cooked",
+  "current": 30,
+  "recommended": 22,
+  "basis": "sydney",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": {
+   "n": 1,
+   "median": 22,
+   "min": 22.0,
+   "max": 22.0
+  },
+  "delta": -8,
+  "examples": [
+   "22 — Pasta, made from 100% red lentil flour, boiled in unsalted water for 8 min (Italy 2019)"
+  ]
+ },
+ {
+  "key": "soba",
+  "name": "Soba (buckwheat) noodles, cooked",
+  "current": 46,
+  "recommended": 59,
+  "basis": "sydney",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": {
+   "n": 1,
+   "median": 59,
+   "min": 59.0,
+   "max": 59.0
+  },
+  "delta": 13,
+  "examples": [
+   "59 — Buckwheat noodles (China 2005)"
+  ]
+ },
+ {
+  "key": "whole_grain_bread",
+  "name": "Whole wheat bread (100% whole wheat)",
+  "current": 71,
+  "recommended": 67,
+  "basis": "ISO",
+  "pref_western": true,
+  "iso": {
+   "n": 6,
+   "median": 67,
+   "min": 59.0,
+   "max": 88.0
+  },
+  "deviation": {
+   "n": 10,
+   "median": 70,
+   "min": 65.0,
+   "max": 96.0
+  },
+  "sydney": {
+   "n": 17,
+   "median": 70,
+   "min": 59.0,
+   "max": 96.0
+  },
+  "delta": -4,
+  "examples": [
+   "59 — Whole grain bread, Hunger Filler™ (Natural Ovens, USA) (USA 1999)",
+   "59 — Whole grain bread, Nutty Natural™ (Natural Ovens, USA) (USA 1999)",
+   "64 — Wholemeal bread, smooth milled, Ploughman's™ (Quality Bakers, Australia) (Australia 1996)",
+   "70 — Whole grain bread, Stay Trim™ (Natural Ovens, USA) (USA 1999)",
+   "80 — Wholemeal bread, long whole meal (50% whole meal wheat, 50% white wheat, Baker’s (New Zealand 2010*)"
+  ]
+ },
+ {
+  "key": "ezekiel_bread",
+  "name": "Sprouted grain bread (Ezekiel-style)",
+  "current": 62,
+  "recommended": 62,
+  "basis": "ISO",
+  "pref_western": true,
+  "iso": {
+   "n": 4,
+   "median": 62,
+   "min": 55.0,
+   "max": 67.0
+  },
+  "deviation": null,
+  "sydney": {
+   "n": 4,
+   "median": 62,
+   "min": 55.0,
+   "max": 67.0
+  },
+  "delta": 0,
+  "examples": [
+   "55 — Sprouted wheat bread, Sprouted 3 Grains bread (Stonemill Bread, Toronto, Canada) (Canada 2007)",
+   "61 — Sprouted rye bread (Australia 2008)",
+   "62 — Sprouted Spelt bread (Australia 2008)",
+   "67 — Sprouted kamut bread (Australia 2008)"
+  ]
+ },
+ {
+  "key": "rye_bread",
+  "name": "Pumpernickel / whole rye bread",
+  "current": 50,
+  "recommended": 52,
+  "basis": "ISO+deviation",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 49,
+   "min": 49.0,
+   "max": 49.0
+  },
+  "deviation": {
+   "n": 8,
+   "median": 56,
+   "min": 41.0,
+   "max": 65.0
+  },
+  "sydney": {
+   "n": 11,
+   "median": 57,
+   "min": 41.0,
+   "max": 67.0
+  },
+  "delta": 2,
+  "examples": [
+   "49 — Pumpernickel Rye bread (Van der Meulen BV, Netherlands) (Netherlands 2015)"
+  ]
+ },
+ {
+  "key": "corn_tortilla",
+  "name": "Corn tortilla",
+  "current": 52,
+  "recommended": 54,
+  "basis": "ISO+deviation",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 52,
+   "min": 52.0,
+   "max": 52.0
+  },
+  "deviation": {
+   "n": 2,
+   "median": 56,
+   "min": 52.0,
+   "max": 60.0
+  },
+  "sydney": {
+   "n": 4,
+   "median": 52,
+   "min": 49.0,
+   "max": 60.0
+  },
+  "delta": 2,
+  "examples": [
+   "52 — Corn tortilla, made from white corn, gluten-free, Mission® (Mission Foods Austra (Australia 2010)"
+  ]
+ },
+ {
+  "key": "whole_wheat_pita",
+  "name": "Whole wheat pita",
+  "current": 57,
+  "recommended": 56,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 56,
+   "min": 56.0,
+   "max": 56.0
+  },
+  "deviation": null,
+  "sydney": {
+   "n": 1,
+   "median": 56,
+   "min": 56.0,
+   "max": 56.0
+  },
+  "delta": -1,
+  "examples": [
+   "56 — Pita bread, wholemeal (UK 2005)"
+  ]
+ },
+ {
+  "key": "whole_wheat_english_muffin",
+  "name": "Whole wheat English muffin",
+  "current": 45,
+  "recommended": 45,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 45,
+   "min": 45.0,
+   "max": 45.0
+  },
+  "deviation": null,
+  "sydney": {
+   "n": 2,
+   "median": 53,
+   "min": 45.0,
+   "max": 61.0
+  },
+  "delta": 0,
+  "examples": [
+   "45 — English Muffin, Whole Grain Multigrain, President's Choice® Blue Menu™ (Loblaw B (Canada 2007)"
+  ]
+ },
+ {
+  "key": "popcorn",
+  "name": "Popcorn, air-popped",
+  "current": 70,
+  "recommended": 70,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 3,
+   "median": 70,
+   "min": 55.0,
+   "max": 89.0
+  },
+  "sydney": {
+   "n": 3,
+   "median": 70,
+   "min": 55.0,
+   "max": 89.0
+  },
+  "delta": 0,
+  "examples": [
+   "55 — Popcorn, plain, cooked in microwave oven (Green's Foods, Glendenning, NSW, Austr (Australia J. International 1995 tables)",
+   "70 — Popcorn, maize grains puffed for 10 min (South Korea 2018)",
+   "89 — Popcorn, plain, cooked in microwave oven (Uncle Toby's, Australia) Potato crisps (Australia 1999)"
+  ]
+ },
+ {
+  "key": "whole_grain_crackers",
+  "name": "Whole grain seed crackers",
+  "current": 55,
+  "recommended": 53,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 2,
+   "median": 53,
+   "min": 53.0,
+   "max": 53.0
+  },
+  "deviation": {
+   "n": 1,
+   "median": 60,
+   "min": 60.0,
+   "max": 60.0
+  },
+  "sydney": {
+   "n": 3,
+   "median": 53,
+   "min": 53.0,
+   "max": 60.0
+  },
+  "delta": -2,
+  "examples": [
+   "53 — Crispbread, soft wheat flour (54%), rye flour (36%), pumpkin seeds (7.5%) (Spian (Italy 2012)",
+   "53 — Wholegrain crackers with sesame seeds and rosemary (UK 2006)"
+  ]
+ },
+ {
+  "key": "arrowroot",
+  "name": "Arrowroot starch",
+  "current": 65,
+  "recommended": 63,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 2,
+   "median": 63,
+   "min": 62.0,
+   "max": 64.0
+  },
+  "sydney": {
+   "n": 2,
+   "median": 63,
+   "min": 62.0,
+   "max": 64.0
+  },
+  "delta": -2,
+  "examples": [
+   "62 — Arrowroot plus (McCormick's, Canada) (Canada 1984- 1992)",
+   "64 — Arrowroot (McCormick's, Interbare Foods, Toronto, Canada) (Canada 1984- 1992)"
+  ]
+ },
+ {
+  "key": "coconut_flour",
+  "name": "Coconut flour",
+  "current": 45,
+  "recommended": 45,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "lentils",
+  "name": "Lentils, cooked",
+  "current": 36,
+  "recommended": 36,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 3,
+   "median": 36,
+   "min": 16.0,
+   "max": 57.0
+  },
+  "deviation": {
+   "n": 6,
+   "median": 34,
+   "min": 22.0,
+   "max": 53.0
+  },
+  "sydney": {
+   "n": 9,
+   "median": 37,
+   "min": 22.0,
+   "max": 57.0
+  },
+  "delta": 0,
+  "examples": [
+   "16 — Lentils, boiled, mean of eight foods Lentils, brown, canned, drained, Edgell's™  (Australia 2008)",
+   "36 — Lentils, Quinoa & Beans Superblend Protein, dried, cooked in boiling water for 1 (Australia 2017)",
+   "57 — Lentil, ready-to-serve, President's Choice® Blue Menu™ (Loblaw Brands Limited, C (Canada 2004- 2007)"
+  ]
+ },
+ {
+  "key": "red_lentils",
+  "name": "Red lentils, cooked",
+  "current": 21,
+  "recommended": 21,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 5,
+   "median": 21,
+   "min": 18.0,
+   "max": 32.0
+  },
+  "sydney": {
+   "n": 6,
+   "median": 26,
+   "min": 18.0,
+   "max": 68.0
+  },
+  "delta": 0,
+  "examples": [
+   "18 — Lentils, red Lentils, red, dried, boiled (Canada 1986)",
+   "21 — Lentils, red, dried, boiled (Canada 1985)",
+   "21 — Lentils, red, split, dried, boiled 25 min (UK 2005)",
+   "31 — Lentils, red, dried, boiled (Canada 1983)",
+   "32 — Lentils, red, dried, boiled (Canada 1985)"
+  ]
+ },
+ {
+  "key": "chickpeas",
+  "name": "Chickpeas, cooked",
+  "current": 38,
+  "recommended": 38,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 3,
+   "median": 38,
+   "min": 22.0,
+   "max": 39.0
+  },
+  "deviation": {
+   "n": 10,
+   "median": 34,
+   "min": 5.0,
+   "max": 51.0
+  },
+  "sydney": {
+   "n": 17,
+   "median": 33,
+   "min": 5.0,
+   "max": 51.0
+  },
+  "delta": 0,
+  "examples": [
+   "22 — Chickpea Hommus dip, Chris' Traditional brand (Capitol Chilled Foods Pty Ltd, AC (Australia 2007)",
+   "38 — Chickpeas (Garbanzo beans, Bengal gram), canned, drained, Edgell's™ brand (Simpl (Australia 2003)",
+   "39 — Chickpeas, dried, roasted (‘chicknuts’) (Crete 2006)"
+  ]
+ },
+ {
+  "key": "black_beans",
+  "name": "Black beans, cooked",
+  "current": 30,
+  "recommended": 26,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 2,
+   "median": 26,
+   "min": 20.0,
+   "max": 31.0
+  },
+  "sydney": {
+   "n": 2,
+   "median": 26,
+   "min": 20.0,
+   "max": 31.0
+  },
+  "delta": -4,
+  "examples": [
+   "20 — Black beans Black bean (Phaseolus vulgaris Linn), soaked overnight, cooked 40 mi (Philippines 1995)",
+   "31 — Black Beans (Mexico 1991)"
+  ]
+ },
+ {
+  "key": "kidney_beans",
+  "name": "Kidney beans, cooked",
+  "current": 34,
+  "recommended": 34,
+  "basis": "ISO+deviation",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 36,
+   "min": 36.0,
+   "max": 36.0
+  },
+  "deviation": {
+   "n": 13,
+   "median": 32,
+   "min": 9.0,
+   "max": 70.0
+  },
+  "sydney": {
+   "n": 14,
+   "median": 34,
+   "min": 9.0,
+   "max": 70.0
+  },
+  "delta": 0,
+  "examples": [
+   "36 — Red Kidney beans, canned, drained, Edgell's™ brand (Simplot Australia, Australia (Australia 2003)"
+  ]
+ },
+ {
+  "key": "pinto_beans",
+  "name": "Pinto beans, cooked",
+  "current": 33,
+  "recommended": 33,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 5,
+   "median": 33,
+   "min": 14.0,
+   "max": 45.0
+  },
+  "sydney": {
+   "n": 5,
+   "median": 33,
+   "min": 14.0,
+   "max": 45.0
+  },
+  "delta": 0,
+  "examples": [
+   "14 — Pinto beans, boiled in salted water (Mexico 1999)",
+   "28 — Pinto beans (Phaseolus vulgaris), boiled in salted water (Mexico 2000)",
+   "33 — Pinto beans, steamed (USA 1981)",
+   "39 — Pinto beans, dried, boiled (Canada 1986)",
+   "45 — Pinto beans, canned in brine (Lancia-Bravo Foods Ltd., Canada) Pole Sitao (Snake (Canada 1986)"
+  ]
+ },
+ {
+  "key": "white_beans",
+  "name": "Cannellini beans, cooked",
+  "current": 31,
+  "recommended": 31,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 31,
+   "min": 31.0,
+   "max": 31.0
+  },
+  "deviation": null,
+  "sydney": {
+   "n": 1,
+   "median": 31,
+   "min": 31.0,
+   "max": 31.0
+  },
+  "delta": 0,
+  "examples": [
+   "31 — Cannellini beans, canned, drained, Edgell's™ brand (Simplot Australia, Cheltenha (Australia 2003)"
+  ]
+ },
+ {
+  "key": "navy_beans",
+  "name": "Navy beans, cooked",
+  "current": 31,
+  "recommended": 31,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "lima_beans",
+  "name": "Lima beans, cooked",
+  "current": 32,
+  "recommended": 34,
+  "basis": "ISO+deviation",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 36,
+   "min": 36.0,
+   "max": 36.0
+  },
+  "deviation": {
+   "n": 9,
+   "median": 31,
+   "min": 26.0,
+   "max": 54.0
+  },
+  "sydney": {
+   "n": 10,
+   "median": 32,
+   "min": 26.0,
+   "max": 54.0
+  },
+  "delta": 2,
+  "examples": [
+   "36 — Butter beans, canned, drained, Edgell's™ brand (Simplot Australia, Cheltenham, A (Australia 2003)"
+  ]
+ },
+ {
+  "key": "black_eyed_peas",
+  "name": "Black-eyed peas, cooked",
+  "current": 50,
+  "recommended": 50,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 3,
+   "median": 50,
+   "min": 33.0,
+   "max": 52.0
+  },
+  "sydney": {
+   "n": 3,
+   "median": 50,
+   "min": 33.0,
+   "max": 52.0
+  },
+  "delta": 0,
+  "examples": [
+   "33 — Blackeyed beans/peas (Cowpeas), boiled Blackeyed beans, boiled in water with 2 g (Canada 1981)",
+   "50 — Blackeyed beans/peas (Cowpeas), boiled (Canada 1983)",
+   "52 — Blackeyed peas (Vigna unguiculata), boiled (Nigeria 1989)"
+  ]
+ },
+ {
+  "key": "split_peas",
+  "name": "Split peas, cooked",
+  "current": 32,
+  "recommended": 32,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 3,
+   "median": 32,
+   "min": 25.0,
+   "max": 61.0
+  },
+  "sydney": {
+   "n": 3,
+   "median": 32,
+   "min": 25.0,
+   "max": 61.0
+  },
+  "delta": 0,
+  "examples": [
+   "25 — Split peas, yellow, dried, soaked overnight, boiled 55 min (UK 2005)",
+   "32 — Split peas, yellow, boiled 20 min (Nupack, Mississauga, Canada)18 (Canada 1984- 1992)",
+   "61 — Split Pea (Wil-Pak Foods, USA) (USA 1984- 1992)"
+  ]
+ },
+ {
+  "key": "refried_beans",
+  "name": "Refried beans, fat-free",
+  "current": 38,
+  "recommended": 38,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "hummus",
+  "name": "Hummus",
+  "current": 15,
+  "recommended": 10,
+  "basis": "ISO+deviation",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 15,
+   "min": 15.0,
+   "max": 15.0
+  },
+  "deviation": {
+   "n": 2,
+   "median": 6,
+   "min": 6.0,
+   "max": 6.0
+  },
+  "sydney": {
+   "n": 3,
+   "median": 6,
+   "min": 6.0,
+   "max": 15.0
+  },
+  "delta": -5,
+  "examples": [
+   "15 — Hummus (Sabra Classic Hummus; Sabra Dipping Co., S. Chesterfield, VA) Kidney Bea (USA 2016)"
+  ]
+ },
+ {
+  "key": "edamame",
+  "name": "Edamame, shelled, cooked",
+  "current": 18,
+  "recommended": 18,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "tofu",
+  "name": "Tofu, extra-firm",
+  "current": 15,
+  "recommended": 15,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "tempeh",
+  "name": "Tempeh",
+  "current": 15,
+  "recommended": 15,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "sweet_potato",
+  "name": "Sweet potato, boiled/simmered",
+  "current": 46,
+  "recommended": 47,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 13,
+   "median": 47,
+   "min": 41.0,
+   "max": 75.0
+  },
+  "deviation": {
+   "n": 4,
+   "median": 54,
+   "min": 44.0,
+   "max": 71.0
+  },
+  "sydney": {
+   "n": 17,
+   "median": 48,
+   "min": 41.0,
+   "max": 75.0
+  },
+  "delta": 1,
+  "examples": [
+   "41 — Sweet potato (Ipomoea batatas), Ganja cultivar, peeled, cut into 25 mm slices, b (Jamaica 2008)",
+   "43 — Sweet potato (Ipomoea batatas), Watson cultivar, peeled, cut into 25 mm slices,  (Jamaica 2008)",
+   "45 — Sweet potato (Ipomoea batatas), Ms Mac cultivar, peeled, cut into 25 mm slices,  (Jamaica 2008)",
+   "46 — Sweet potato (Ipomoea batatas), Clarendon cultivar, peeled, cut into 25 mm slice (Jamaica 2008)",
+   "46 — Sweet potato (Ipomoea batatas), Fire on Land cultivar, peeled, cut into 25 mm sl (Jamaica 2008)"
+  ]
+ },
+ {
+  "key": "sweet_potato_roasted",
+  "name": "Sweet potato, baked/roasted",
+  "current": 85,
+  "recommended": 86,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 22,
+   "median": 86,
+   "min": 79.0,
+   "max": 94.0
+  },
+  "deviation": {
+   "n": 1,
+   "median": 91,
+   "min": 91.0,
+   "max": 91.0
+  },
+  "sydney": {
+   "n": 24,
+   "median": 86,
+   "min": 51.0,
+   "max": 94.0
+  },
+  "delta": 1,
+  "examples": [
+   "79 — Sweet potato (Ipomoea batatas), Ganja cultivar, skin on, roasted on pre-heated c (Jamaica 2008)",
+   "81 — Sweet potato (Ipomoea batatas), Clarendon cultivar, skin on, roasted on pre-heat (Jamaica 2008)",
+   "82 — Sweet potato (Ipomoea batatas), Ganja cultivar, baked with skin on at 175oC for  (Jamaica 2008)",
+   "82 — Sweet potato (Ipomoea batatas), NS, peeled, roasted on preheated charcoal (Jamaica 2005)",
+   "83 — Sweet potato (Ipomoea batatas), Dor cultivar, baked with skin on at 175oC for 45 (Jamaica 2008)"
+  ]
+ },
+ {
+  "key": "new_potato",
+  "name": "New potatoes, boiled",
+  "current": 71,
+  "recommended": 71,
+  "basis": "ISO",
+  "pref_western": true,
+  "iso": {
+   "n": 6,
+   "median": 71,
+   "min": 56.0,
+   "max": 79.0
+  },
+  "deviation": {
+   "n": 6,
+   "median": 64,
+   "min": 23.0,
+   "max": 87.0
+  },
+  "sydney": {
+   "n": 9,
+   "median": 70,
+   "min": 44.0,
+   "max": 79.0
+  },
+  "delta": 0,
+  "examples": [
+   "56 — Potato, red, cubed, boiled in salted water 12 min, stored overnight in refrigera (Canada 2005)",
+   "58 — Potato, novel clone, selection 4 (F03028, grown in New Brunswick), boiled 15 min (Canada 2009)",
+   "70 — Potato, frozen peeled cubes, boiled (McCain Purely Potato Cubes, McCains, Wendou (Australia 2010)",
+   "72 — Potato, novel clone, selection 4 (F03028, grown in New Brunswick), unpeeled, cut (Canada 2009)",
+   "79 — Potato, novel clone, selection 3 (F03031, grown in New Brunswick), unpeeled, cut (Canada 2009)"
+  ]
+ },
+ {
+  "key": "carrot",
+  "name": "Carrot",
+  "current": 39,
+  "recommended": 32,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 3,
+   "median": 32,
+   "min": 31.0,
+   "max": 32.0
+  },
+  "deviation": {
+   "n": 8,
+   "median": 37,
+   "min": 16.0,
+   "max": 92.0
+  },
+  "sydney": {
+   "n": 10,
+   "median": 34,
+   "min": 16.0,
+   "max": 92.0
+  },
+  "delta": -7,
+  "examples": [
+   "31 — Carrots, diced, frozen (Talleys Group Ltd) 13 (New Zealand 2011*)",
+   "32 — Carrots, unpeeled, boiled (Australia 2020)",
+   "32 — Carrots, mean of two foods Parsnips, peeled, boiled (Australia 2007)"
+  ]
+ },
+ {
+  "key": "beet",
+  "name": "Beets",
+  "current": 64,
+  "recommended": 64,
+  "basis": "sydney",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": {
+   "n": 1,
+   "median": 64,
+   "min": 64.0,
+   "max": 64.0
+  },
+  "delta": 0,
+  "examples": [
+   "64 — Beetroot, boiled in water with 2 g salt # (Canada 1981)"
+  ]
+ },
+ {
+  "key": "corn",
+  "name": "Sweet corn kernels",
+  "current": 52,
+  "recommended": 53,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 4,
+   "median": 53,
+   "min": 51.0,
+   "max": 55.0
+  },
+  "deviation": {
+   "n": 18,
+   "median": 52,
+   "min": 37.0,
+   "max": 62.0
+  },
+  "sydney": {
+   "n": 22,
+   "median": 52,
+   "min": 37.0,
+   "max": 62.0
+  },
+  "delta": 1,
+  "examples": [
+   "51 — Sweet corn Sweet corn, cooked in microwave for 1.5 min (Australia 2015)",
+   "51 — Sweet corn, cooked in microwave for 1.5 min (Australia 2015)",
+   "55 — Sweet corn, cooked Couscous (China 2005)",
+   "55 — Sweet corn Sweet corn, mean of two foods FS, Brand-Miller JC, Foster-Powell K, B (China International tables 2005 of glycemic)"
+  ]
+ },
+ {
+  "key": "green_peas",
+  "name": "Green peas",
+  "current": 38,
+  "recommended": 38,
+  "basis": "ISO+deviation",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 42,
+   "min": 42.0,
+   "max": 42.0
+  },
+  "deviation": {
+   "n": 7,
+   "median": 35,
+   "min": 9.0,
+   "max": 54.0
+  },
+  "sydney": {
+   "n": 8,
+   "median": 37,
+   "min": 9.0,
+   "max": 54.0
+  },
+  "delta": 0,
+  "examples": [
+   "42 — Peas, frozen, heated in the microwave (McCain Foods Aust. Pty Ltd, Australia) Pe (Australia 2020)"
+  ]
+ },
+ {
+  "key": "butternut_squash",
+  "name": "Butternut squash",
+  "current": 51,
+  "recommended": 51,
+  "basis": "sydney",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": {
+   "n": 1,
+   "median": 51,
+   "min": 51.0,
+   "max": 51.0
+  },
+  "delta": 0,
+  "examples": [
+   "51 — Butternut pumpkin, boiled (Australia 2006)"
+  ]
+ },
+ {
+  "key": "pumpkin_puree",
+  "name": "Pumpkin puree, canned",
+  "current": 75,
+  "recommended": 75,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 1,
+   "median": 75,
+   "min": 75.0,
+   "max": 75.0
+  },
+  "sydney": {
+   "n": 2,
+   "median": 64,
+   "min": 52.0,
+   "max": 75.0
+  },
+  "delta": 0,
+  "examples": [
+   "75 — Pumpkin, boiled for 30 min in water with 2 g salt, tested in young adults (17-18 (South Africa 1984)"
+  ]
+ },
+ {
+  "key": "turnip",
+  "name": "Turnip (GI of swede/rutabaga, closest tested)",
+  "current": 72,
+  "recommended": 72,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 1,
+   "median": 72,
+   "min": 72.0,
+   "max": 72.0
+  },
+  "sydney": {
+   "n": 1,
+   "median": 72,
+   "min": 72.0,
+   "max": 72.0
+  },
+  "delta": 0,
+  "examples": [
+   "72 — Swede (rutabaga), boiled in water with 2 g salt (Canada 1981)"
+  ]
+ },
+ {
+  "key": "okra",
+  "name": "Okra",
+  "current": 20,
+  "recommended": 20,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "water_chestnuts",
+  "name": "Water chestnuts, canned",
+  "current": 45,
+  "recommended": 45,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "jicama",
+  "name": "Jicama",
+  "current": 15,
+  "recommended": 15,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "apple",
+  "name": "Apple",
+  "current": 36,
+  "recommended": 40,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 8,
+   "median": 40,
+   "min": 32.0,
+   "max": 45.0
+  },
+  "sydney": {
+   "n": 13,
+   "median": 41,
+   "min": 28.0,
+   "max": 67.0
+  },
+  "delta": 4,
+  "examples": [
+   "32 — Apple, Braeburn (New Zealand 1991)",
+   "34 — Apple (Germany 1980)",
+   "39 — Apple, Golden Delicious (Canada 1981)",
+   "39 — Apple, Golab, raw (Iran 2009)",
+   "40 — Apple (USA 1986)"
+  ]
+ },
+ {
+  "key": "pear",
+  "name": "Pear",
+  "current": 28,
+  "recommended": 28,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 2,
+   "median": 28,
+   "min": 24.0,
+   "max": 33.0
+  },
+  "deviation": {
+   "n": 5,
+   "median": 34,
+   "min": 26.0,
+   "max": 43.0
+  },
+  "sydney": {
+   "n": 8,
+   "median": 33,
+   "min": 18.0,
+   "max": 43.0
+  },
+  "delta": 0,
+  "examples": [
+   "24 — Pears Pear, Williams, raw, under ripe/crunchy (Australia 2015)",
+   "33 — Pear, Williams, raw, ripe/soft (Australia 2015)"
+  ]
+ },
+ {
+  "key": "orange",
+  "name": "Orange",
+  "current": 43,
+  "recommended": 44,
+  "basis": "ISO+deviation",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 45,
+   "min": 45.0,
+   "max": 45.0
+  },
+  "deviation": {
+   "n": 8,
+   "median": 44,
+   "min": 31.0,
+   "max": 52.0
+  },
+  "sydney": {
+   "n": 9,
+   "median": 45,
+   "min": 31.0,
+   "max": 52.0
+  },
+  "delta": 1,
+  "examples": [
+   "45 — Orange Oranges, navel (Australia 2020)"
+  ]
+ },
+ {
+  "key": "grapefruit",
+  "name": "Grapefruit",
+  "current": 25,
+  "recommended": 26,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 1,
+   "median": 26,
+   "min": 26.0,
+   "max": 26.0
+  },
+  "sydney": {
+   "n": 1,
+   "median": 26,
+   "min": 26.0,
+   "max": 26.0
+  },
+  "delta": 1,
+  "examples": [
+   "26 — Grapefruit Grapefruit, raw (Germany 1977)"
+  ]
+ },
+ {
+  "key": "peach",
+  "name": "Peach",
+  "current": 57,
+  "recommended": 57,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 1,
+   "median": 57,
+   "min": 57.0,
+   "max": 57.0
+  },
+  "sydney": {
+   "n": 4,
+   "median": 52,
+   "min": 28.0,
+   "max": 76.0
+  },
+  "delta": 0,
+  "examples": [
+   "57 — Peach, raw (Italy 1995)"
+  ]
+ },
+ {
+  "key": "plum",
+  "name": "Plum",
+  "current": 32,
+  "recommended": 32,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 3,
+   "median": 32,
+   "min": 24.0,
+   "max": 53.0
+  },
+  "sydney": {
+   "n": 3,
+   "median": 32,
+   "min": 24.0,
+   "max": 53.0
+  },
+  "delta": 0,
+  "examples": [
+   "24 — Plum, raw Plum (Germany 1977)",
+   "32 — Plum, Bau Kul variety (Zizyphus mauritiana), raw16 (Bangladesh 2011)",
+   "53 — Plum, NS Pomelo (Italy 1995)"
+  ]
+ },
+ {
+  "key": "cherries",
+  "name": "Cherries, pitted",
+  "current": 29,
+  "recommended": 29,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 3,
+   "median": 29,
+   "min": 22.0,
+   "max": 63.0
+  },
+  "sydney": {
+   "n": 3,
+   "median": 29,
+   "min": 22.0,
+   "max": 63.0
+  },
+  "delta": 0,
+  "examples": [
+   "22 — Cherries, raw, sour (Germany 1977)",
+   "29 — Cherries Cherries, raw (Iran 2009)",
+   "63 — Cherries, dark, raw, pitted (Australia 2003)"
+  ]
+ },
+ {
+  "key": "kiwi",
+  "name": "Kiwi",
+  "current": 50,
+  "recommended": 47,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 4,
+   "median": 47,
+   "min": 47.0,
+   "max": 58.0
+  },
+  "sydney": {
+   "n": 4,
+   "median": 47,
+   "min": 47.0,
+   "max": 58.0
+  },
+  "delta": -3,
+  "examples": [
+   "47 — Kiwi fruit, Hayward (New Zealand 1991)",
+   "47 — Kiwifruit, Golden, raw FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke (Taiwan J. International 2010 tables)",
+   "47 — Kiwifruit, Golden, raw (Taiwan 2010)",
+   "58 — Kiwi fruit, NS Lychee, raw (Australia 1994)"
+  ]
+ },
+ {
+  "key": "banana",
+  "name": "Banana (small amount)",
+  "current": 51,
+  "recommended": 55,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 6,
+   "median": 55,
+   "min": 47.0,
+   "max": 61.0
+  },
+  "deviation": {
+   "n": 22,
+   "median": 48,
+   "min": 30.0,
+   "max": 75.0
+  },
+  "sydney": {
+   "n": 28,
+   "median": 49,
+   "min": 30.0,
+   "max": 75.0
+  },
+  "delta": 4,
+  "examples": [
+   "47 — Banana, raw Banana, raw (Australia 2008)",
+   "49 — Banana, lady finger (Moraitis, Australia) (Australia 2014)",
+   "53 — Banana, lady finger (Moraitis, Australia) (Australia 2014)",
+   "57 — Banana, raw, overripe FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke  (Australia International tables 2008 of glycemic)",
+   "61 — Banana Fruit Fingers, Heinz Kidz™ (HJ Heinz, Australia) (Australia 2000)"
+  ]
+ },
+ {
+  "key": "mango",
+  "name": "Mango",
+  "current": 42,
+  "recommended": 42,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 3,
+   "median": 42,
+   "min": 33.0,
+   "max": 48.0
+  },
+  "deviation": {
+   "n": 6,
+   "median": 42,
+   "min": 33.0,
+   "max": 60.0
+  },
+  "sydney": {
+   "n": 9,
+   "median": 42,
+   "min": 33.0,
+   "max": 60.0
+  },
+  "delta": 0,
+  "examples": [
+   "33 — Mango, 1.8% fat (Nestlé, Australia), prepared from commercial mousse mix with wa (Australia 2000)",
+   "42 — Mango, low-fat frozen fruit dessert, Frutia™ (Weis Frozen Foods, Toowong, Austra (Australia 2000)",
+   "48 — Mango Mango, raw (Chin-Hwang Mango) (Taiwan 2010*)"
+  ]
+ },
+ {
+  "key": "pineapple",
+  "name": "Pineapple",
+  "current": 70,
+  "recommended": 70,
+  "basis": "ISO+deviation",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 82,
+   "min": 82.0,
+   "max": 82.0
+  },
+  "deviation": {
+   "n": 4,
+   "median": 58,
+   "min": 39.0,
+   "max": 66.0
+  },
+  "sydney": {
+   "n": 5,
+   "median": 65,
+   "min": 39.0,
+   "max": 82.0
+  },
+  "delta": 0,
+  "examples": [
+   "82 — Pineapple Pineapple, raw (Ananas comosa) (Malaysia 2008*)"
+  ]
+ },
+ {
+  "key": "pomegranate",
+  "name": "Pomegranate arils",
+  "current": 53,
+  "recommended": 53,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "cranberries",
+  "name": "Cranberries, fresh",
+  "current": 45,
+  "recommended": 45,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "applesauce",
+  "name": "Applesauce, unsweetened",
+  "current": 40,
+  "recommended": 40,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "dates",
+  "name": "Medjool dates (small amount)",
+  "current": 54,
+  "recommended": 54,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 30,
+   "median": 54,
+   "min": 37.0,
+   "max": 75.0
+  },
+  "deviation": {
+   "n": 22,
+   "median": 52,
+   "min": 29.0,
+   "max": 62.0
+  },
+  "sydney": {
+   "n": 52,
+   "median": 52,
+   "min": 29.0,
+   "max": 75.0
+  },
+  "delta": 0,
+  "examples": [
+   "37 — Dates, Khalas (Rutab, soft early ripened) (91.1 g), eaten with full-fat plain yo (UAE 2002)",
+   "43 — Dates, Shaqra cultivar, Tamer stage (Saudi Arabia 2016*)",
+   "43 — Dates, Sukkary cultivar, Tamer stage (Saudi Arabia 2016*)",
+   "44 — Dates, Tinissine variety Dates, mean of 11 foods (Algeria 2016*)",
+   "45 — Dates, Khalas (Tamer, sun dried stored in traditional Bedu manner) variety (UAE 2002)"
+  ]
+ },
+ {
+  "key": "blueberries",
+  "name": "Blueberries",
+  "current": 53,
+  "recommended": 40,
+  "basis": "ISO+deviation",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 53,
+   "min": 53.0,
+   "max": 53.0
+  },
+  "deviation": {
+   "n": 1,
+   "median": 28,
+   "min": 28.0,
+   "max": 28.0
+  },
+  "sydney": {
+   "n": 2,
+   "median": 40,
+   "min": 28.0,
+   "max": 53.0
+  },
+  "delta": -13,
+  "examples": [
+   "53 — Blueberries Blueberries, wild (Wild Blueberries Association, Canada) (Canada 2004- 2007)"
+  ]
+ },
+ {
+  "key": "strawberries",
+  "name": "Strawberries",
+  "current": 40,
+  "recommended": 40,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 3,
+   "median": 40,
+   "min": 32.0,
+   "max": 55.0
+  },
+  "deviation": null,
+  "sydney": {
+   "n": 4,
+   "median": 36,
+   "min": 29.0,
+   "max": 55.0
+  },
+  "delta": 0,
+  "examples": [
+   "32 — Strawberry, 2.3% fat (Nestlé, Australia), prepared from commercial mousse mix wi (Australia 2000)",
+   "40 — Strawberries Strawberries, fresh, raw (Australia 2001)",
+   "55 — Strawberry Banana frozen yoghurt, President's Choice® Blue Menu™ brand (Loblaw B (Canada 2004- 2007)"
+  ]
+ },
+ {
+  "key": "raspberries",
+  "name": "Raspberries",
+  "current": 32,
+  "recommended": 32,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "blackberries",
+  "name": "Blackberries",
+  "current": 25,
+  "recommended": 25,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "mixed_berries",
+  "name": "Mixed berries, frozen",
+  "current": 40,
+  "recommended": 40,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "milk",
+  "name": "Milk, 2%",
+  "current": 27,
+  "recommended": 30,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 3,
+   "median": 30,
+   "min": 26.0,
+   "max": 34.0
+  },
+  "deviation": {
+   "n": 10,
+   "median": 32,
+   "min": 23.0,
+   "max": 40.0
+  },
+  "sydney": {
+   "n": 13,
+   "median": 32,
+   "min": 23.0,
+   "max": 48.0
+  },
+  "delta": 3,
+  "examples": [
+   "26 — Milk, reduced-fat, low fat or skim Milk, reduced fat (Dairy Farmers Ltd, Austral (Australia 2006)",
+   "30 — Milk, full-fat Full-fat, milk (Australia 2018)",
+   "34 — Milk, semi-skimmed, pasteurized, organic (Arla, UK) (UK 2005)"
+  ]
+ },
+ {
+  "key": "greek_yogurt",
+  "name": "Greek yogurt, plain 2%",
+  "current": 11,
+  "recommended": 14,
+  "basis": "ISO+deviation",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 17,
+   "min": 17.0,
+   "max": 17.0
+  },
+  "deviation": {
+   "n": 1,
+   "median": 12,
+   "min": 12.0,
+   "max": 12.0
+  },
+  "sydney": {
+   "n": 1,
+   "median": 12,
+   "min": 12.0,
+   "max": 12.0
+  },
+  "delta": 3,
+  "examples": [
+   "17 — Yoghurt, natural No Added Sugar Natural yoghurt (Tamar Valley Dairy, Australia) (Australia 2010)"
+  ]
+ },
+ {
+  "key": "kefir",
+  "name": "Kefir, plain",
+  "current": 36,
+  "recommended": 36,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 36,
+   "min": 36.0,
+   "max": 36.0
+  },
+  "deviation": null,
+  "sydney": {
+   "n": 1,
+   "median": 36,
+   "min": 36.0,
+   "max": 36.0
+  },
+  "delta": 0,
+  "examples": [
+   "36 — Kefir, low-fat, plain (Lifeway Foods, Chicago, USA) (USA 2012*)"
+  ]
+ },
+ {
+  "key": "cottage_cheese",
+  "name": "Cottage cheese, low-fat",
+  "current": 10,
+  "recommended": 10,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "soy_milk",
+  "name": "Soy milk, unsweetened",
+  "current": 36,
+  "recommended": 36,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 11,
+   "median": 36,
+   "min": 17.0,
+   "max": 44.0
+  },
+  "deviation": null,
+  "sydney": {
+   "n": 11,
+   "median": 36,
+   "min": 17.0,
+   "max": 45.0
+  },
+  "delta": 0,
+  "examples": [
+   "17 — Soy milk, reduced-fat (1.5%), Vitasoy® So Milky Lite (National Foods Ltd, Austra (Australia 2008)",
+   "18 — Soy milk, reduced-fat (1.8%), 120 mg calcium, Vitasoy® Premium Vitality+ (Nation (Australia 2005)",
+   "21 — Soy milk, Vitasoy® So Milky Regular (National Foods Ltd, Australia) (Australia 2008)",
+   "31 — Soy milk, full-fat, with sucrose (Sanitarium, Australia) (Australia 1997)",
+   "31 — Soy milk, reduced-fat (1.5%), Vitasoy® Lush, Vanilla (National Foods Ltd, Austra (Australia 2008)"
+  ]
+ },
+ {
+  "key": "almond_milk",
+  "name": "Almond milk, unsweetened",
+  "current": 25,
+  "recommended": 25,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "coconut_milk",
+  "name": "Coconut milk, canned full-fat",
+  "current": 35,
+  "recommended": 35,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "coconut_milk_light",
+  "name": "Coconut milk, canned light",
+  "current": 35,
+  "recommended": 35,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "honey",
+  "name": "Honey (small amount)",
+  "current": 54,
+  "recommended": 54,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 2,
+   "median": 54,
+   "min": 35.0,
+   "max": 74.0
+  },
+  "deviation": {
+   "n": 6,
+   "median": 60,
+   "min": 49.0,
+   "max": 87.0
+  },
+  "sydney": {
+   "n": 7,
+   "median": 61,
+   "min": 49.0,
+   "max": 87.0
+  },
+  "delta": 0,
+  "examples": [
+   "35 — Honey Yellow box honey (46% fructose) (Australia 2001)",
+   "74 — Honey (China 2005)"
+  ]
+ },
+ {
+  "key": "maple_syrup",
+  "name": "Pure maple syrup (small amount)",
+  "current": 54,
+  "recommended": 54,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 54,
+   "min": 54.0,
+   "max": 54.0
+  },
+  "deviation": null,
+  "sydney": {
+   "n": 1,
+   "median": 54,
+   "min": 54.0,
+   "max": 54.0
+  },
+  "delta": 0,
+  "examples": [
+   "54 — Maple syrup, pure Canadian (Queen Foods, Australia) (Canada 2003)"
+  ]
+ },
+ {
+  "key": "dark_chocolate",
+  "name": "Dark chocolate 85%",
+  "current": 23,
+  "recommended": 34,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 2,
+   "median": 34,
+   "min": 23.0,
+   "max": 44.0
+  },
+  "deviation": {
+   "n": 3,
+   "median": 44,
+   "min": 35.0,
+   "max": 56.0
+  },
+  "sydney": {
+   "n": 2,
+   "median": 34,
+   "min": 23.0,
+   "max": 44.0
+  },
+  "delta": 11,
+  "examples": [
+   "23 — Chocolate, dark, Dove® (M&M/Mars, USA) (USA 2005)",
+   "44 — Chocolate, dark, 74% Cocoa (Alpes d'Or, Hangzhou Qiaokemei, China) (China 2019)"
+  ]
+ },
+ {
+  "key": "cocoa_powder",
+  "name": "Cocoa powder, unsweetened",
+  "current": 20,
+  "recommended": 20,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "sugar_free_chocolate_chips",
+  "name": "Stevia-sweetened dark chocolate chips",
+  "current": 20,
+  "recommended": 23,
+  "basis": "sydney",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": {
+   "n": 1,
+   "median": 23,
+   "min": 23.0,
+   "max": 23.0
+  },
+  "delta": 3,
+  "examples": [
+   "23 — Chocolate candy, sugar free, Dove® (USA 2005)"
+  ]
+ },
+ {
+  "key": "monk_fruit_sweetener",
+  "name": "Monk fruit/erythritol sweetener",
+  "current": 0,
+  "recommended": 15,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 2,
+   "median": 15,
+   "min": 8.0,
+   "max": 22.0
+  },
+  "sydney": {
+   "n": 2,
+   "median": 15,
+   "min": 8.0,
+   "max": 22.0
+  },
+  "delta": 15,
+  "examples": [
+   "8 — SUITENA™ sweetener (Fiatec Biosystem Sdn Bhd, Malaysia), containing erythritol,  (Malaysia 2019)",
+   "22 — Zùsto® sweetener (Zùsto, NV), containing polydextrose, erythritol, inulin, fruct (Belgium 2017)"
+  ]
+ },
+ {
+  "key": "stevia",
+  "name": "Stevia (liquid)",
+  "current": 0,
+  "recommended": 0,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "tahini",
+  "name": "Tahini",
+  "current": 40,
+  "recommended": 40,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "peanut_butter",
+  "name": "Peanut butter, natural",
+  "current": 14,
+  "recommended": 14,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "peanuts",
+  "name": "Peanuts, dry roasted",
+  "current": 14,
+  "recommended": 18,
+  "basis": "ISO+deviation",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 30,
+   "min": 30.0,
+   "max": 30.0
+  },
+  "deviation": {
+   "n": 5,
+   "median": 7,
+   "min": 5.0,
+   "max": 23.0
+  },
+  "sydney": {
+   "n": 5,
+   "median": 7,
+   "min": 5.0,
+   "max": 23.0
+  },
+  "delta": 4,
+  "examples": [
+   "30 — Peanut Candy Protein Muesli (Herman Brot Pty Ltd, Australia) (Australia 2016)"
+  ]
+ },
+ {
+  "key": "cashews",
+  "name": "Cashews",
+  "current": 27,
+  "recommended": 27,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 1,
+   "median": 27,
+   "min": 27.0,
+   "max": 27.0
+  },
+  "sydney": {
+   "n": 3,
+   "median": 25,
+   "min": 22.0,
+   "max": 27.0
+  },
+  "delta": 0,
+  "examples": [
+   "27 — Cashew nut halves (UK 2005)"
+  ]
+ },
+ {
+  "key": "almonds",
+  "name": "Almonds",
+  "current": 15,
+  "recommended": 15,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "walnuts",
+  "name": "Walnuts",
+  "current": 15,
+  "recommended": 15,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "pistachios",
+  "name": "Pistachios, shelled",
+  "current": 28,
+  "recommended": 28,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 1,
+   "median": 28,
+   "min": 28.0,
+   "max": 28.0
+  },
+  "sydney": {
+   "n": 1,
+   "median": 28,
+   "min": 28.0,
+   "max": 28.0
+  },
+  "delta": 0,
+  "examples": [
+   "28 — Pistachio nuts (Canada 2014)"
+  ]
+ },
+ {
+  "key": "sesame_seeds",
+  "name": "Sesame seeds",
+  "current": 35,
+  "recommended": 35,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "chia_seeds",
+  "name": "Chia seeds",
+  "current": 15,
+  "recommended": 15,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "flaxseed",
+  "name": "Ground flaxseed",
+  "current": 15,
+  "recommended": 15,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "sunflower_seeds",
+  "name": "Sunflower seeds",
+  "current": 15,
+  "recommended": 15,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "pumpkin_seeds",
+  "name": "Pumpkin seeds (pepitas)",
+  "current": 15,
+  "recommended": 15,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "almond_flour",
+  "name": "Almond flour",
+  "current": 15,
+  "recommended": 15,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "coconut_shredded",
+  "name": "Coconut, unsweetened shredded",
+  "current": 45,
+  "recommended": 45,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "salsa",
+  "name": "Salsa, no sugar added",
+  "current": 30,
+  "recommended": 30,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "marinara",
+  "name": "Marinara sauce, no sugar added",
+  "current": 35,
+  "recommended": 35,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 35,
+   "min": 35.0,
+   "max": 35.0
+  },
+  "deviation": null,
+  "sydney": {
+   "n": 1,
+   "median": 35,
+   "min": 35.0,
+   "max": 35.0
+  },
+  "delta": 0,
+  "examples": [
+   "35 — Tomato sauce, with extra cheese (Pasta Bake, Dolmio, Mars Foods, New Zealand) 13 (New Zealand 2011*)"
+  ]
+ },
+ {
+  "key": "tomato_sauce",
+  "name": "Tomato sauce, canned, no sugar added",
+  "current": 35,
+  "recommended": 35,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "miso",
+  "name": "White miso paste",
+  "current": 30,
+  "recommended": 30,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "soy_sauce",
+  "name": "Soy sauce, low sodium",
+  "current": 20,
+  "recommended": 20,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "balsamic_vinegar",
+  "name": "Balsamic vinegar",
+  "current": 35,
+  "recommended": 35,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "low_carb_tortilla",
+  "name": "Low-carb high-fiber tortilla",
+  "current": 30,
+  "recommended": 30,
+  "basis": "none",
+  "pref_western": false,
+  "iso": null,
+  "deviation": null,
+  "sydney": null,
+  "delta": 0,
+  "examples": []
+ },
+ {
+  "key": "whey_protein",
+  "name": "Whey protein powder, unsweetened",
+  "current": 30,
+  "recommended": 31,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 1,
+   "median": 31,
+   "min": 31.0,
+   "max": 31.0
+  },
+  "sydney": {
+   "n": 1,
+   "median": 31,
+   "min": 31.0,
+   "max": 31.0
+  },
+  "delta": 1,
+  "examples": [
+   "31 — Whey protein, consumed with 19.4 g lactose in water (Sweden 2004)"
+  ]
+ }
+]

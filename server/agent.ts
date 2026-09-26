@@ -5,10 +5,23 @@
  *
  *   Webhook              -> POST /agent/ask on this service
  *   Code "Safety"        -> safetyGate(), still before the model
- *   AI Agent node        -> a Foundry prompt agent: model deployment, the same
- *                           system prompt, one OpenAPI tool with four operations
+ *   AI Agent node        -> three Foundry prompt agents behind a router
  *   Simple Memory        -> previous_response_id, keyed by session id
  *   Code "Verifier"      -> verify(), still after the model, unchanged
+ *
+ * The three agents and why they are three:
+ *
+ *   triage   decides which specialist answers. No tools, a nine-line prompt.
+ *   meal     the original agent: four tools, tool_choice required, and the
+ *            long prompt about budgets and assumptions.
+ *   advisor  no tools and no numbers, for the questions that need neither —
+ *            "is brown rice better than white", "did you calculate that".
+ *
+ * The split came from the evaluation set rather than from a diagram. Forcing
+ * a tool call on every turn is what made the single agent answer "is this
+ * meal good for my kidneys?" by reciting a budget; and the meal prompt, which
+ * has to travel with all four tool round trips, is most of what exhausts the
+ * deployment's tokens per minute. An advisor turn now carries neither.
  *
  * The verifier is why this wrapper exists. Foundry will happily return the
  * model's prose; the product's claim is that every number in it traces to a
@@ -32,7 +45,9 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 
 const PROJECT_ENDPOINT = process.env.PROJECT_ENDPOINT ?? ''
 const MODEL_DEPLOYMENT = process.env.MODEL_DEPLOYMENT_NAME ?? 'gpt-5-mini'
-const AGENT_NAME = process.env.AGENT_NAME ?? 'diabite-agent-v2'
+const AGENT_PREFIX = process.env.AGENT_PREFIX ?? 'diabite'
+export type Role = 'triage' | 'meal' | 'advisor'
+const agentName = (role: Role) => `${AGENT_PREFIX}-${role}`
 /** ARM id of the Foundry project connection holding the engine's x-api-key. */
 const ENGINE_CONNECTION = process.env.ENGINE_CONNECTION_ID ?? ''
 /** Where the engine lives when it is not this very process (local dev). */
@@ -54,7 +69,7 @@ const LOG_QUESTIONS = process.env.LOG_QUESTIONS !== 'false'
  */
 const REASONING_EFFORT = process.env.REASONING_EFFORT ?? 'low'
 
-export const systemPrompt = () => readFileSync(join(ROOT, 'agent', 'system-prompt.md'), 'utf8')
+export const systemPrompt = (role: Role) => readFileSync(join(ROOT, 'agent', 'prompts', `${role}.md`), 'utf8')
 
 let project: AIProjectClient | null = null
 function projectClient(): AIProjectClient {
@@ -79,22 +94,30 @@ export function engineTool() {
   }
 }
 
+/** Only the meal specialist has the engine; the other two have nothing to call. */
+const TOOLS: Record<Role, unknown[]> = { triage: [], meal: [], advisor: [] }
+
 /**
- * Publish a new version of the agent from this repository.
+ * Publish a new version of each agent from this repository.
  *
  * Versions are immutable, so this is a deploy step rather than something a
- * request does: `agent/provision.ts` calls it after the prompt or the spec
- * changes, and a turn simply references the agent by name.
+ * request does: `agent/provision.ts` calls it after a prompt or the spec
+ * changes, and a turn simply references an agent by name.
  */
-export async function publishAgentVersion(): Promise<string> {
-  const agent = await projectClient().agents.createVersion(AGENT_NAME, {
-    kind: 'prompt',
-    model: MODEL_DEPLOYMENT,
-    instructions: systemPrompt(),
-    tools: [engineTool()],
-    reasoning: { effort: REASONING_EFFORT },
-  } as never)
-  return (agent as { version?: string }).version ?? '?'
+export async function publishAgentVersion(): Promise<Record<Role, string>> {
+  TOOLS.meal = [engineTool()]
+  const out = {} as Record<Role, string>
+  for (const role of ['triage', 'meal', 'advisor'] as Role[]) {
+    const agent = await projectClient().agents.createVersion(agentName(role), {
+      kind: 'prompt',
+      model: MODEL_DEPLOYMENT,
+      instructions: systemPrompt(role),
+      tools: TOOLS[role],
+      reasoning: { effort: REASONING_EFFORT },
+    } as never)
+    out[role] = (agent as { version?: string }).version ?? '?'
+  }
+  return out
 }
 
 export interface AskRequest {
@@ -127,6 +150,9 @@ export interface AskResponse {
   attempts?: number
   /** True when both attempts failed the verifier and this text came from tool results. */
   templated?: boolean
+  /** Which specialist answered, and what the router decided. */
+  route?: Role
+  routedBy?: 'triage' | 'gate' | 'fallback'
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -220,6 +246,8 @@ function logTurn(req: AskRequest, res: AskResponse, ms: number): void {
     ms,
     blocked: res.blocked,
     rule: res.blockedRule ?? null,
+    route: res.route ?? null,
+    routedBy: res.routedBy ?? null,
     verified: res.verified,
     unmatched: res.unmatchedNumbers,
     attempts: res.attempts ?? 0,
@@ -284,6 +312,47 @@ async function parkDayState(req: AskRequest): Promise<void> {
   if (!r.ok) throw new Error(`could not park the day state: ${r.status} ${await r.text()}`)
 }
 
+interface Turn { id?: string; output_text?: string; output?: unknown[] }
+
+/** One request to one agent, waiting out the per-minute token limit. */
+async function runAgent(role: Role, input: string, previous?: string, forceTools = false): Promise<Turn> {
+  const openai = projectClient().getOpenAIClient()
+  return (await withRateLimitRetry(() => openai.responses.create(
+    { input, ...(previous ? { previous_response_id: previous } : {}) } as never,
+    {
+      body: {
+        agent_reference: { name: agentName(role), type: 'agent_reference' },
+        // Only the meal specialist is made to call something. Every answer it
+        // gives is grounded in the engine, so a turn that calls nothing there
+        // is a turn that guessed; the advisor has nothing to call at all.
+        ...(forceTools ? { tool_choice: 'required' } : {}),
+      },
+    } as never,
+  ))) as unknown as Turn
+}
+
+/**
+ * Which specialist should answer.
+ *
+ * The router is an agent rather than a regex because the distinction is about
+ * meaning: "rice" is a meal, "is rice bad for me" is not, and they differ by
+ * one word. It answers in one word and costs about a second; anything it
+ * garbles falls through to the meal specialist, which is the one that can ask
+ * a question and the one with the database.
+ */
+async function route(message: string): Promise<{ role: Role; by: 'triage' | 'fallback' }> {
+  try {
+    const turn = await runAgent('triage', message)
+    const said = (turn.output_text ?? '').toLowerCase()
+    if (said.includes('advice')) return { role: 'advisor', by: 'triage' }
+    if (said.includes('meal')) return { role: 'meal', by: 'triage' }
+    console.warn(`triage said "${said.slice(0, 40)}", defaulting to meal`)
+  } catch (e) {
+    console.warn('triage failed, defaulting to meal:', (e as Error).message)
+  }
+  return { role: 'meal', by: 'fallback' }
+}
+
 export async function ask(req: AskRequest): Promise<AskResponse> {
   const started = Date.now()
   const res = await answer(req)
@@ -298,12 +367,14 @@ async function answer(req: AskRequest): Promise<AskResponse> {
     return {
       answer: gate.reply!, blocked: true, blockedRule: gate.rule,
       verified: true, unmatchedNumbers: [], matchedNumbers: [], toolCalls: 0, trace: [],
+      routedBy: 'gate',
     }
   }
 
-  await parkDayState(req)
+  const { role, by } = await route(req.message)
+  // Only a meal turn needs the day's budget parked for the engine to read.
+  if (role === 'meal') await parkDayState(req)
 
-  const openai = projectClient().getOpenAIClient()
   let previous = previousResponseFor(req.sessionId)
   let input = `[session_id: ${req.sessionId}]\n\n${req.message}`
 
@@ -317,18 +388,7 @@ async function answer(req: AskRequest): Promise<AskResponse> {
   // unbounded "try again" loop is how a wrong number becomes a long wait.
   while (attempts < 2) {
     attempts++
-    const res = (await withRateLimitRetry(() => openai.responses.create(
-      { input, ...(previous ? { previous_response_id: previous } : {}) } as never,
-      {
-        body: {
-          agent_reference: { name: AGENT_NAME, type: 'agent_reference' },
-          // Every answer this product gives is grounded in the engine, so a
-          // turn that calls nothing is a turn that guessed. Without this the
-          // model happily replies "let me check that for you" and stops.
-          tool_choice: 'required',
-        },
-      } as never,
-    ))) as unknown as { id?: string; output_text?: string; output?: unknown[] }
+    const res = await runAgent(role, input, previous, role === 'meal')
 
     responseId = res.id
     previous = res.id
@@ -362,5 +422,6 @@ async function answer(req: AskRequest): Promise<AskResponse> {
     answer, blocked: false,
     verified: v.ok, unmatchedNumbers: v.unmatched, matchedNumbers: v.matched,
     toolCalls: trace.length, trace, responseId, attempts, templated,
+    route: role, routedBy: by,
   }
 }

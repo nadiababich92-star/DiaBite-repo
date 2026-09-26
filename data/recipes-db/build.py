@@ -13,6 +13,7 @@ from openpyxl.formatting.rule import CellIsRule
 from openpyxl.worksheet.table import Table, TableStyleInfo
 sys.path.insert(0, os.path.dirname(__file__))
 from ingredients import ING, MEAT, FISH, DAIRY, EGG, GLUTEN, NUTS
+from gi_sources import GI_SOURCE
 
 OUT_DIR = os.path.join(os.path.dirname(__file__), "..", "..")
 OUT_XLSX = os.path.join(OUT_DIR, "DiaBite_Recipes_1000.xlsx")
@@ -41,7 +42,7 @@ assert len(recipes) == 1000, len(recipes)
 rows = []
 for i, r in enumerate(recipes, 1):
     tot = dict(kcal=0.0, protein=0.0, fat=0.0, carbs=0.0, fiber=0.0)
-    gi_num = 0.0; avail_total = 0.0
+    gi_num = 0.0; avail_total = 0.0; measured_carbs = 0.0
     ing_lines = []; ing_json = []; keys = set()
     for it in r["ing"]:
         key, grams = it[0], float(it[1])
@@ -52,6 +53,8 @@ for i, r in enumerate(recipes, 1):
         tot["carbs"] += c * k; tot["fiber"] += fib * k
         avail = max(0.0, (c - fib) * k)
         gi_num += gi * avail; avail_total += avail
+        if GI_SOURCE.get(key, {}).get("confidence") in ("high", "medium"):
+            measured_carbs += avail
         keys.add(key)
         oz = grams / 28.35
         disp = f"{name} — {grams:g} g ({oz:.1f} oz)" + (f" [{note}]" if note else "")
@@ -62,6 +65,9 @@ for i, r in enumerate(recipes, 1):
     net = max(0.0, per["carbs"] - per["fiber"])
     gi = round(gi_num / avail_total) if avail_total > 0.5 else 0
     gl = round(gi * net / 100, 1)
+    share = round(100 * measured_carbs / avail_total) if avail_total > 0.5 else 100
+    gi_evidence = (f"{share}% of this dish's available carbohydrate comes from ingredients with a published, "
+                   f"measured GI; the rest uses conventional placeholders (see Ingredients sheet)")
     note = ""
     if net < 5:
         note = "Negligible carbohydrate (<5 g net/serving): GI has little practical meaning, glycemic load is what matters."
@@ -104,6 +110,8 @@ for i, r in enumerate(recipes, 1):
         "glycemic_load": gl,
         "gl_category": gl_cat(gl),
         "gi_note": note,
+        "gi_evidence": gi_evidence,
+        "gi_measured_carb_share_pct": share,
         "diet_tags": ", ".join(tags),
         "instructions": "\n".join(f"{n}. {st}" for n, st in enumerate(steps, 1)),
         "steps_json": json.dumps(steps, ensure_ascii=False),
@@ -141,20 +149,20 @@ headers = list(rows[0].keys())
 widths = {"id":9,"name":38,"category":18,"cuisine":16,"servings":9,"prep_min":9,"cook_min":9,"total_min":9,
           "photo_file":34,"photo_keywords":40,"photo_url":18,"ingredients":58,"ingredients_json":30,
           "kcal":8,"protein_g":10,"fat_g":8,"carbs_g":9,"fiber_g":9,"net_carbs_g":11,"glycemic_index":11,
-          "gi_category":11,"glycemic_load":11,"gl_category":11,"gi_note":40,"diet_tags":36,"instructions":80,"steps_json":30}
+          "gi_category":11,"glycemic_load":11,"gl_category":11,"gi_note":40,"gi_evidence":46,"gi_measured_carb_share_pct":12,"diet_tags":36,"instructions":80,"steps_json":30}
 ws.append(headers); style_header(ws, len(headers))
 ws.row_dimensions[1].height = 32
 for r in rows:
     ws.append([r[h] for h in headers])
 for ci, h in enumerate(headers, 1):
     ws.column_dimensions[get_column_letter(ci)].width = widths.get(h, 14)
-wrap_cols = {"ingredients","instructions","gi_note","diet_tags","photo_keywords","name"}
+wrap_cols = {"ingredients","instructions","gi_note","gi_evidence","diet_tags","photo_keywords","name"}
 for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
     for cell in row:
         cell.font = body_font; cell.border = border
         h = headers[cell.column - 1]
         cell.alignment = Alignment(vertical="top", wrap_text=(h in wrap_cols),
-                                   horizontal="center" if h in ("id","servings","prep_min","cook_min","total_min","kcal","protein_g","fat_g","carbs_g","fiber_g","net_carbs_g","glycemic_index","gi_category","glycemic_load","gl_category") else "left")
+                                   horizontal="center" if h in ("id","servings","prep_min","cook_min","total_min","kcal","protein_g","fat_g","carbs_g","fiber_g","net_carbs_g","glycemic_index","gi_category","glycemic_load","gl_category","gi_measured_carb_share_pct") else "left")
         if h in ("protein_g","fat_g","carbs_g","fiber_g","net_carbs_g","glycemic_load"): cell.number_format = "0.0"
 for rr in range(2, ws.max_row + 1):
     ws.row_dimensions[rr].height = 96
@@ -175,21 +183,71 @@ ws.conditional_formatting.add(rng, CellIsRule(operator="greaterThanOrEqual", for
 
 # Sheet 2: Ingredients master
 wi = wb.create_sheet("Ingredients")
-ih = ["ingredient_id","name","group","kcal_per_100g","protein_g","fat_g","carbs_g","fiber_g","net_carbs_g","glycemic_index","gi_source"]
+ih = ["ingredient_id","name","group","kcal_per_100g","protein_g","fat_g","carbs_g","fiber_g","net_carbs_g",
+      "glycemic_index","gi_confidence","gi_source","gi_evidence_basis","gi_value_in_sources","gi_citation",
+      "nutrient_source","last_checked"]
 wi.append(ih); style_header(wi, len(ih))
 for key, (name, kcal, p, fat, c, fib, gi, group) in ING.items():
-    if gi == 0:
-        src = "No available carbohydrate (protein / fat / water) → GI 0"
-    elif gi == 15 and group in ("veg","herb","spice","nut","seed","legume") and key not in ("tofu","tempeh"):
-        src = "Conventional placeholder 15: too little carbohydrate to test (non-starchy vegetable, nut, seed, herb)"
-    else:
-        src = "International Tables of Glycemic Index 2021 (Atkinson et al.) / University of Sydney GI database"
-    wi.append([key, name, group, kcal, p, fat, c, fib, round(max(0, c - fib), 1), gi, src])
-for ci, w in enumerate([24,42,12,13,10,10,10,10,12,12,70], 1):
+    g = GI_SOURCE.get(key, {})
+    wi.append([key, name, group, kcal, p, fat, c, fib, round(max(0, c - fib), 1), gi,
+               g.get("confidence", ""), g.get("gi_source", ""), g.get("evidence", ""),
+               g.get("candidate_from_evidence", ""), g.get("citation", ""),
+               g.get("nutrients_source", ""), g.get("checked", "")])
+for ci, w in enumerate([24,42,12,13,10,10,10,10,12,12,18,54,34,15,62,40,12], 1):
     wi.column_dimensions[get_column_letter(ci)].width = w
 for row in wi.iter_rows(min_row=2):
-    for cell in row: cell.font = body_font; cell.border = border
+    for cell in row:
+        cell.font = body_font; cell.border = border
+        cell.alignment = Alignment(vertical="top", wrap_text=cell.column in (12, 13, 15, 16))
+conf_col = get_column_letter(ih.index("gi_confidence") + 1)
+rng = f"{conf_col}2:{conf_col}{wi.max_row}"
+wi.conditional_formatting.add(rng, CellIsRule(operator="equal", formula=['"high"'], fill=green))
+wi.conditional_formatting.add(rng, CellIsRule(operator="equal", formula=['"medium"'], fill=yellow))
+wi.conditional_formatting.add(rng, CellIsRule(operator="containsText", formula=[f'NOT(ISERROR(SEARCH("placeholder",{conf_col}2)))'], fill=red))
 wi.freeze_panes = "B2"; wi.auto_filter.ref = wi.dimensions
+
+# Sheet 2b: Sources (evidence base and what is NOT in it)
+wsrc = wb.create_sheet("Sources")
+wsrc.column_dimensions["A"].width = 6; wsrc.column_dimensions["B"].width = 44
+wsrc.column_dimensions["C"].width = 14; wsrc.column_dimensions["D"].width = 96
+wsrc.append(["#", "Source", "Used here", "What it gives / why it is or is not in this build"])
+style_header(wsrc, 4)
+SOURCES = [
+ (1, "Diogenes GI database (18,808 entries)", "нет",
+  "Крупнейшая сводка ГИ, собрана в проекте Diogenes (EU FP6). Не в открытом доступе: распространяется по запросу к авторам консорциума. Не использована — данных нет на руках."),
+ (2, "2024 US national GI database (10,978 описаний / 7,976 кодов USDA)", "нет",
+  "Sheng X. et al. Development of a national database for dietary glycemic index and load for nutritional epidemiologic studies in the United States. Am J Clin Nutr 2024. Это именно то, что нужно рынку США: ГИ, сопоставленный с кодами USDA FNDDS. Полный текст и приложения за пейволом Elsevier (403 при загрузке); данные — по запросу к авторам. Рекомендую запросить: это лучший источник для v2."),
+ (3, "2021 International Tables (4,018 значений)", "ДА — основной",
+  "Atkinson FS et al. Am J Clin Nutr 2021;114:1625-32. Suppl. Table 1 = 2,091 значение, метод соответствует ISO 26642:2010 (золотой стандарт). Suppl. Table 2 = 1,924 значения с отклонениями метода. Извлечено 4,015 из 4,018 строк (99.9%) из присланных PDF — файл data/gi-evidence/intl_tables_2021.json. По PRISMA-схеме (Suppl. Fig. 1) за этими значениями стоят 253 отобранных исследования из 3 717 просмотренных записей: 102 исследования в Таблице 1 и 151 в Таблице 2; исключены, в частности, 161 работа по смешанным приёмам пищи и 27 измерений in vitro."),
+ (4, "Компендиум 940 незападных продуктов", "нет",
+  "Региональные измерения (Азия, Африка, Латинская Америка). Для меню рынка США нужен мало; большая часть этих значений всё равно вошла в таблицы 2021 года."),
+ (5, "2008 International Tables (~2,480)", "частично",
+  "Atkinson FS et al. Diabetes Care 2008;31:2281-3. Исторический предшественник; значения перенесены и переоценены в редакции 2021 года, поэтому отдельно не загружались."),
+ (6, "Первичная литература", "точечно",
+  "Каждое значение в таблицах 2021 года несёт номер ссылки (колонка ref_no в intl_tables_2021.json) — по нему можно поднять исходный эксперимент, если понадобится проверка."),
+ (7, "CENTRAL / MEDLINE / EMBASE", "нет",
+  "Поиск исследований. PRISMA-схема присланного приложения показывает, что авторы 2021 года уже прочесали эти базы; дублировать поиск смысла нет."),
+ (8, "USDA FoodData Central", "ДА — основной",
+  "Все нутриенты (ккал, белки, жиры, углеводы, клетчатка) на 100 г. ГИ оттуда не берётся — его там нет."),
+ (9, "University of Sydney GI database (4,384 записи)", "ДА — сверка",
+  "glycemicindex.com/gi-search, выгружено 2026-09-16 (data/recipes-db/sydney_gi_db.json). Онлайн-версия тех же данных плюс записи после 2021 года. Используется, когда в таблицах 2021 года продукта нет. Для платного продукта нужно разрешение: glycemic.index@gmail.com."),
+]
+for r in SOURCES:
+    wsrc.append(list(r))
+for row in wsrc.iter_rows(min_row=2):
+    for cell in row:
+        cell.font = body_font; cell.border = border
+        cell.alignment = Alignment(vertical="top", wrap_text=True)
+    row[2].alignment = Alignment(vertical="top", horizontal="center")
+wsrc.append([])
+wsrc.append(["", "Правило выбора значения (v1, 26.09.2026)", "",
+ "1) Если в Suppl. Table 1 (ISO-метод) есть >= 2 измерения — берём их медиану. 2) Иначе медиана Table 1 + Table 2. "
+ "3) Иначе онлайн-база Сиднея. 4) Если измерений нет вообще — условное значение 15 для продуктов с ничтожным "
+ "количеством углеводов и 0 для чистого белка/жира; в колонке gi_confidence это помечено как placeholder. "
+ "Колонка gi_value_in_sources на листе Ingredients показывает, что дают источники, даже если принятое значение отличается."])
+for cell in wsrc[wsrc.max_row]:
+    cell.font = body_font; cell.alignment = Alignment(vertical="top", wrap_text=True)
+wsrc[wsrc.max_row][1].font = Font(name=FONT, bold=True, size=10)
 
 # Sheet 3: Summary (live formulas)
 wsum = wb.create_sheet("Summary")
@@ -233,7 +291,9 @@ legend = [
  ("glycemic_load", "ГН порции = ГИ × net_carbs_g / 100."),
  ("gl_category", "low ≤ 10, medium 11–19, high ≥ 20 на порцию."),
  ("gi_note", "Пояснение: у блюд с < 5 г усвояемых углеводов ГИ практически не имеет смысла (ориентируйтесь на ГН); у блюд со средним ГИ — рекомендация по порции."),
- ("Сверка с glycemicindex.com", "16.09.2026 таблица Ingredients сверена с базой University of Sydney (glycemicindex.com/gi-search, 4 384 записи; выгрузка — data/recipes-db/sydney_gi_db.json, отчёт — gi_crosscheck.json). По итогам исправлены: цельнозерновой хлеб 51→71, пророщенный хлеб 36→55, фарро 40→63, дикий рис 45→57, гречка 45→51, овсяные хлопья 55→57, попкорн 55→65, хумус 25→15, чёрноглазая фасоль 33→42, мёд 58→61, вишня 22→38, репа 30→72 (значение брюквы — ближайший протестированный аналог). Батат разделён на варёный (GI 46) и запечённый (GI 85) — способ приготовления меняет ГИ почти вдвое; в фаршированных бататах рецепт переведён на варку."),
+ ("ИСТОЧНИКИ И ПРАВИЛО ВЫБОРА", "Полный разбор — на листе Sources. Коротко: значение ГИ каждого ингредиента взято из измерений, приоритет 1) 2021 International Tables, Suppl. Table 1 (метод по ISO 26642:2010), 2) Suppl. Tables 1+2, 3) онлайн-база University of Sydney. Из присланных PDF извлечено 4 015 из 4 018 записей. Колонки gi_confidence / gi_source / gi_evidence_basis / gi_citation на листе Ingredients показывают происхождение каждого значения; gi_value_in_sources — что дают источники, даже если принято другое число."),
+ ("Пересмотр 26.09.2026", "По правилу «побеждают измерения» изменены 28 значений (нут 28→38, чечевица 29→36, бурый рис 55→68, ячмень 28→44, финики 42→54, зелёный горошек 51→38, груша 38→28, манго 51→42, картофель 56→71, паста цельнозерновая 42→54 и др.). Пять значений сохранены намеренно: морковь 39, monk fruit 0, черника 53, хумус 15, тёмный шоколад 23 — причины в gi_source соответствующей строки листа Ingredients."),
+ ("Честность про охват", "Колонка gi_measured_carb_share_pct показывает, какая доля усвояемых углеводов блюда приходится на ингредиенты с опубликованным измеренным ГИ. В блюдах с ≥20 г углеводов это в среднем 69 %, в блюдах 10–20 г — 39 %, в блюдах <10 г — 14 % (там почти все углеводы из некрахмалистых овощей, у которых ГИ не измеряют; для таких блюд ориентируйтесь на гликемическую нагрузку, а не на ГИ)."),
  ("", ""),
  ("ОГРАНИЧЕНИЯ МЕТОДА", "1) Взвешенный ГИ — оценка, а не лабораторное измерение: белок, жир, кислота и клетчатка в блюде обычно снижают реальный гликемический ответ, поэтому расчёт консервативен (завышает). 2) Способ приготовления меняет ГИ (паста al dente, остывший картофель, замачивание овсянки) — учтено выбором значений для типичной формы. 3) Разброс между источниками ±10–15 пунктов — это нормально. Перед публикацией сверить таблицу Ingredients с выбранным источником (см. README проекта, раздел Data source)."),
  ("", ""),
