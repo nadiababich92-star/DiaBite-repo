@@ -44,7 +44,21 @@ import type { DayBudget, MealItemInput } from './contract'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 
 const PROJECT_ENDPOINT = process.env.PROJECT_ENDPOINT ?? ''
-const MODEL_DEPLOYMENT = process.env.MODEL_DEPLOYMENT_NAME ?? 'gpt-5-mini'
+/**
+ * A model per specialist, because the three jobs are not the same job.
+ *
+ * The router emits one word: nano is enough, and it stops the router
+ * competing with the meal agent for the same tokens per minute — which is
+ * what made ten of seventy questions fail with 502 in an earlier run.
+ * The advisor writes prose with no tools and no numbers. Only the meal agent
+ * has to pick four tools in order and keep arithmetic discipline, and it is
+ * the one the evaluations validated, so it does not move without a run.
+ */
+const MODELS: Record<string, string> = {
+  triage: process.env.MODEL_TRIAGE ?? 'gpt-54-nano',
+  meal: process.env.MODEL_MEAL ?? process.env.MODEL_DEPLOYMENT_NAME ?? 'gpt-5-mini',
+  advisor: process.env.MODEL_ADVISOR ?? 'gpt-54-mini',
+}
 const AGENT_PREFIX = process.env.AGENT_PREFIX ?? 'diabite'
 export type Role = 'triage' | 'meal' | 'advisor'
 const agentName = (role: Role) => `${AGENT_PREFIX}-${role}`
@@ -110,7 +124,7 @@ export async function publishAgentVersion(): Promise<Record<Role, string>> {
   for (const role of ['triage', 'meal', 'advisor'] as Role[]) {
     const agent = await projectClient().agents.createVersion(agentName(role), {
       kind: 'prompt',
-      model: MODEL_DEPLOYMENT,
+      model: MODELS[role],
       instructions: systemPrompt(role),
       tools: TOOLS[role],
       reasoning: { effort: REASONING_EFFORT },

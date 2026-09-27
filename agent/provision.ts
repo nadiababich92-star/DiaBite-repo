@@ -18,12 +18,12 @@ import { openApiSpec } from '../server/openapi'
 const spec = openApiSpec() as { servers: { url: string }[]; paths: Record<string, unknown> }
 
 console.log('project   ', process.env.PROJECT_ENDPOINT || '(PROJECT_ENDPOINT not set)')
-console.log('model     ', process.env.MODEL_DEPLOYMENT_NAME ?? 'gpt-5-mini')
+
 console.log('engine    ', spec.servers[0].url)
 console.log('auth      ', process.env.ENGINE_CONNECTION_ID ? `connection "${process.env.ENGINE_CONNECTION_ID}"` : 'anonymous')
 console.log('operations', Object.keys(spec.paths).length)
 for (const role of ['triage', 'meal', 'advisor'] as Role[]) {
-  console.log(`prompt ${role.padEnd(8)}`, systemPrompt(role).length, 'chars')
+  console.log(`${role.padEnd(8)}`, String(systemPrompt(role).length).padStart(5), 'chars')
 }
 
 const versions = await publishAgentVersion()
