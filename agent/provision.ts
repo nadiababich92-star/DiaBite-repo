@@ -12,7 +12,10 @@
  *
  * Authenticates as whoever is logged in to the Azure CLI.
  */
-import { publishAgentVersion, systemPrompt, type Role } from '../server/agent'
+import { readdirSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
+import { ensureKnowledgeBase, ensureMemoryStore, publishAgentVersion, systemPrompt, type Role } from '../server/agent'
 import { openApiSpec } from '../server/openapi'
 
 const spec = openApiSpec() as { servers: { url: string }[]; paths: Record<string, unknown> }
@@ -26,6 +29,21 @@ for (const role of ['triage', 'meal', 'advisor'] as Role[]) {
   console.log(`${role.padEnd(8)}`, String(systemPrompt(role).length).padStart(5), 'chars')
 }
 
-const versions = await publishAgentVersion()
+// The advisor's two extras, created once and reused: a knowledge base of our
+// own documents, and a memory store holding food preferences and nothing else.
+// fileURLToPath, not url.pathname: this repository lives in a directory whose
+// name has a space in it, and pathname keeps it percent-encoded.
+const KB_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'docs', 'kb')
+const kbFiles = readdirSync(KB_DIR).filter((f) => f.endsWith('.md')).map((f) => join(KB_DIR, f))
+const kbId = await ensureKnowledgeBase(kbFiles).catch((e: Error) => {
+  console.log('knowledge base skipped:', e.message.slice(0, 120))
+  return null
+})
+const memoryStore = await ensureMemoryStore().catch((e: Error) => {
+  console.log('memory store skipped:', e.message.slice(0, 120))
+  return undefined
+})
+
+const versions = await publishAgentVersion({ kbId: kbId ?? undefined, memoryStore })
 console.log('\npublished:')
 for (const [role, v] of Object.entries(versions)) console.log(`  ${role.padEnd(8)} version ${v}`)

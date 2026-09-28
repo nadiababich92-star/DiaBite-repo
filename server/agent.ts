@@ -29,7 +29,7 @@
  * the turn is regenerated once, and failing that the answer is assembled from
  * the tool results directly.
  */
-import { readFileSync } from 'node:fs'
+import { createReadStream, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { AIProjectClient } from '@azure/ai-projects'
@@ -112,18 +112,126 @@ export function engineTool() {
 const TOOLS: Record<Role, unknown[]> = { triage: [], meal: [], advisor: [] }
 
 /**
+ * The content-safety policy each agent version declares; the platform layer.
+ *
+ * The service wants the policy's full ARM id, not its name, so it is built
+ * from the account this project lives in — which the connection id already
+ * names, sparing another environment variable to get out of step.
+ */
+const RAI_POLICY_NAME = process.env.RAI_POLICY ?? 'Microsoft.DefaultV2'
+function raiPolicyId(): string | null {
+  if (RAI_POLICY_NAME.startsWith('/subscriptions/')) return RAI_POLICY_NAME
+  const account = ENGINE_CONNECTION.match(/^(.*\/accounts\/[^/]+)/)?.[1]
+  return account ? `${account}/raiPolicies/${RAI_POLICY_NAME}` : null
+}
+
+/** Where the advisor's memory of a person's preferences lives. */
+export const MEMORY_STORE = process.env.MEMORY_STORE ?? 'diabite-preferences'
+/** The knowledge base the advisor may quote from: our own documents, nothing clinical. */
+export const KB_NAME = process.env.KB_NAME ?? 'diabite-docs'
+
+/**
+ * A memory store for the advisor, created once.
+ *
+ * Deliberately narrow. Chat summaries are off, so what a person ate and what
+ * their numbers were is never written down; only a profile of food
+ * preferences, and only for 90 days. The advisor is the one agent with no
+ * database and no calculator, so a preference is all it could use anyway —
+ * and the diary stays where the PRD put it, in the browser.
+ */
+export async function ensureMemoryStore(log = console.log): Promise<string> {
+  const client = projectClient() as unknown as {
+    beta: { memoryStores: { get(name: string): Promise<unknown>; create(name: string, def: unknown, options?: unknown): Promise<unknown> } }
+  }
+  try {
+    await client.beta.memoryStores.get(MEMORY_STORE)
+    log(`memory    store "${MEMORY_STORE}" already exists`)
+    return MEMORY_STORE
+  } catch {
+    await client.beta.memoryStores.create(MEMORY_STORE, {
+      kind: 'default',
+      chat_model: MODELS.advisor,
+      embedding_model: process.env.EMBEDDING_DEPLOYMENT ?? 'text-embedding-3-large',
+      options: {
+        user_profile_enabled: true,
+        user_profile_details:
+          'Food likes, dislikes, cuisines and cooking habits only. Never store medical information, medications, lab values, weight, or what the person ate.',
+        chat_summary_enabled: false,
+        procedural_memory_enabled: false,
+        default_ttl_seconds: 60 * 60 * 24 * 90,
+      },
+    }, { description: 'Food preferences only, for the DiaBite advisor. No health data, expires after 90 days.' })
+    log(`memory    store "${MEMORY_STORE}" created`)
+    return MEMORY_STORE
+  }
+}
+
+/**
+ * The advisor's knowledge base: what this product does, how its targets are
+ * computed, where its data comes from, and what it refuses.
+ *
+ * Our own documents on purpose. Clinical guidelines are not in here and should
+ * not be: an advisor quoting ADA standards is giving medical advice, which is
+ * the line the safety policy exists to hold.
+ */
+export async function ensureKnowledgeBase(files: string[], log = console.log): Promise<string | null> {
+  const openai = projectClient().getOpenAIClient() as unknown as {
+    files: { create(body: unknown): Promise<{ id: string }> }
+    vectorStores: {
+      list(): Promise<{ data: { id: string; name?: string }[] }>
+      create(body: unknown): Promise<{ id: string }>
+    }
+  }
+  const existing = (await openai.vectorStores.list()).data.find((v) => v.name === KB_NAME)
+  if (existing) {
+    log(`knowledge base "${KB_NAME}" already exists`)
+    return existing.id
+  }
+  const ids: string[] = []
+  for (const path of files) {
+    const uploaded = await openai.files.create({ file: createReadStream(path), purpose: 'assistants' })
+    ids.push(uploaded.id)
+  }
+  const store = await openai.vectorStores.create({ name: KB_NAME, file_ids: ids })
+  log(`knowledge base "${KB_NAME}" created from ${ids.length} files`)
+  return store.id
+}
+
+/**
  * Publish a new version of each agent from this repository.
  *
  * Versions are immutable, so this is a deploy step rather than something a
  * request does: `agent/provision.ts` calls it after a prompt or the spec
  * changes, and a turn simply references an agent by name.
  */
-export async function publishAgentVersion(): Promise<Record<Role, string>> {
+export async function publishAgentVersion(opts: { memoryStore?: string; kbId?: string } = {}): Promise<Record<Role, string>> {
   TOOLS.meal = [engineTool()]
+  // The advisor has no engine and no numbers. What it gets instead: our own
+  // documents to ground an explanation, and a memory of what this person likes.
+  TOOLS.advisor = [
+    ...(opts.kbId ? [{ type: 'file_search', vector_store_ids: [opts.kbId] }] : []),
+    ...(opts.memoryStore
+      ? [{
+          type: 'memory_search_preview',
+          memory_store_name: opts.memoryStore,
+          // One namespace per conversation id, which is what this product has
+          // instead of accounts: memories cannot leak between people, and a
+          // scope can be deleted outright when someone asks.
+          scope: '{{$conversationId}}',
+          search_options: { max_memories: 5 },
+        }]
+      : []),
+  ]
   const out = {} as Record<Role, string>
   for (const role of ['triage', 'meal', 'advisor'] as Role[]) {
     const agent = await projectClient().agents.createVersion(agentName(role), {
       kind: 'prompt',
+      // The platform's content filter, declared rather than inherited: an
+      // agent version that names its policy cannot quietly lose it. Our own
+      // guardrails — the rules before the model and the verifier after it —
+      // sit outside this and catch what no generic filter knows, like a
+      // question about a carbohydrate ratio.
+      ...(raiPolicyId() ? { rai_config: { rai_policy_name: raiPolicyId()! } } : {}),
       model: MODELS[role],
       instructions: systemPrompt(role),
       tools: TOOLS[role],
@@ -333,8 +441,30 @@ async function parkDayState(req: AskRequest): Promise<void> {
 
 interface Turn { id?: string; output_text?: string; output?: unknown[] }
 
+/**
+ * The advisor's memory namespace for this conversation.
+ *
+ * The version declares `{{$conversationId}}`, which the portal and the workflow
+ * substitute for themselves. This path calls the Responses API directly, where
+ * nothing substitutes it and the literal braces are rejected — so the scope is
+ * supplied per request, from the session id the browser already uses. One
+ * namespace per conversation means memories cannot cross between people, and a
+ * person's can be deleted outright.
+ */
+const memoryScope = (sessionId: string) => sessionId.replace(/[^A-Za-z0-9_\-.%+@/]/g, '-').slice(0, 256)
+
+function advisorTools(sessionId: string): unknown[] | undefined {
+  if (!MEMORY_STORE) return undefined
+  return [{
+    type: 'memory_search_preview',
+    memory_store_name: MEMORY_STORE,
+    scope: memoryScope(sessionId),
+    search_options: { max_memories: 5 },
+  }]
+}
+
 /** One request to one agent, waiting out the per-minute token limit. */
-async function runAgent(role: Role, input: string, previous?: string, forceTools = false): Promise<Turn> {
+async function runAgent(role: Role, input: string, previous?: string, forceTools = false, sessionId?: string): Promise<Turn> {
   const openai = projectClient().getOpenAIClient()
   return (await withRateLimitRetry(() => openai.responses.create(
     { input, ...(previous ? { previous_response_id: previous } : {}) } as never,
@@ -345,6 +475,10 @@ async function runAgent(role: Role, input: string, previous?: string, forceTools
         // gives is grounded in the engine, so a turn that calls nothing there
         // is a turn that guessed; the advisor has nothing to call at all.
         ...(forceTools ? { tool_choice: 'required' } : {}),
+        // The advisor's memory tool, with this conversation's namespace filled
+        // in. The knowledge base stays on the version, where it needs nothing
+        // from the caller.
+        ...(role === 'advisor' && sessionId ? { tools: advisorTools(sessionId) } : {}),
       },
     } as never,
   ))) as unknown as Turn
@@ -407,7 +541,7 @@ async function answer(req: AskRequest): Promise<AskResponse> {
   // unbounded "try again" loop is how a wrong number becomes a long wait.
   while (attempts < 2) {
     attempts++
-    const res = await runAgent(role, input, previous, role === 'meal')
+    const res = await runAgent(role, input, previous, role === 'meal', req.sessionId)
 
     responseId = res.id
     previous = res.id
