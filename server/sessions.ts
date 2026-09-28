@@ -77,3 +77,24 @@ export function previousResponseFor(sessionId: string): string | undefined {
 export function rememberResponse(sessionId: string, responseId: string): void {
   lastResponse.set(sessionId, { responseId, storedAt: Date.now() })
 }
+
+/**
+ * The advisor's conversation, one per session.
+ *
+ * Its id is what the memory tool's `{{$conversationId}}` resolves to, so it is
+ * also the namespace a person's remembered preferences live under. Kept here
+ * rather than sent to the browser for the same reason as everything else in
+ * this file: the client should not be able to name someone else's.
+ */
+const conversations = new Map<string, { id: string; storedAt: number }>()
+
+export function conversationFor(sessionId: string): string | undefined {
+  const c = conversations.get(sessionId)
+  if (!c) return undefined
+  if (Date.now() - c.storedAt > TTL_MS) { conversations.delete(sessionId); return undefined }
+  return c.id
+}
+
+export function rememberConversation(sessionId: string, id: string): void {
+  conversations.set(sessionId, { id, storedAt: Date.now() })
+}

@@ -38,7 +38,7 @@ import { openApiSpec } from './openapi'
 import { safetyGate } from './safety'
 import { verify } from './verify'
 import type { AvoidList } from './avoid'
-import { previousResponseFor, putSession, rememberResponse } from './sessions'
+import { conversationFor, previousResponseFor, putSession, rememberConversation, rememberResponse } from './sessions'
 import type { DayBudget, MealItemInput } from './contract'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -453,21 +453,45 @@ interface Turn { id?: string; output_text?: string; output?: unknown[] }
  */
 const memoryScope = (sessionId: string) => sessionId.replace(/[^A-Za-z0-9_\-.%+@/]/g, '-').slice(0, 256)
 
-function advisorTools(sessionId: string): unknown[] | undefined {
-  if (!MEMORY_STORE) return undefined
-  return [{
-    type: 'memory_search_preview',
-    memory_store_name: MEMORY_STORE,
-    scope: memoryScope(sessionId),
-    search_options: { max_memories: 5 },
-  }]
+/**
+ * The conversation an advisor turn runs in, created once per session.
+ *
+ * Tools cannot be overridden on a request that names an agent ("Not allowed
+ * when agent is specified"), so the scope cannot be passed per call — the
+ * version's `{{$conversationId}}` has to resolve instead, and it only resolves
+ * when the turn belongs to a conversation. Hence this: the advisor runs inside
+ * one, and its id becomes the namespace for that person's remembered
+ * preferences.
+ */
+async function conversationForSession(sessionId: string): Promise<string | undefined> {
+  const existing = conversationFor(sessionId)
+  if (existing) return existing
+  try {
+    const openai = projectClient().getOpenAIClient() as unknown as {
+      conversations: { create(body: unknown): Promise<{ id: string }> }
+    }
+    const c = await openai.conversations.create({ metadata: { session: memoryScope(sessionId) } })
+    rememberConversation(sessionId, c.id)
+    return c.id
+  } catch (e) {
+    // Without a conversation the advisor still answers; it just answers
+    // without remembering, which is the safer way to fail.
+    console.warn(`[memory] no conversation for this turn: ${(e as Error).message.slice(0, 120)}`)
+    return undefined
+  }
 }
 
 /** One request to one agent, waiting out the per-minute token limit. */
 async function runAgent(role: Role, input: string, previous?: string, forceTools = false, sessionId?: string): Promise<Turn> {
   const openai = projectClient().getOpenAIClient()
+  const conversation = role === 'advisor' && sessionId ? await conversationForSession(sessionId) : undefined
   return (await withRateLimitRetry(() => openai.responses.create(
-    { input, ...(previous ? { previous_response_id: previous } : {}) } as never,
+    {
+      input,
+      // A conversation and a previous response are two ways of saying the same
+      // thing, and the service takes one at a time.
+      ...(conversation ? { conversation } : previous ? { previous_response_id: previous } : {}),
+    } as never,
     {
       body: {
         agent_reference: { name: agentName(role), type: 'agent_reference' },
@@ -475,10 +499,6 @@ async function runAgent(role: Role, input: string, previous?: string, forceTools
         // gives is grounded in the engine, so a turn that calls nothing there
         // is a turn that guessed; the advisor has nothing to call at all.
         ...(forceTools ? { tool_choice: 'required' } : {}),
-        // The advisor's memory tool, with this conversation's namespace filled
-        // in. The knowledge base stays on the version, where it needs nothing
-        // from the caller.
-        ...(role === 'advisor' && sessionId ? { tools: advisorTools(sessionId) } : {}),
       },
     } as never,
   ))) as unknown as Turn
