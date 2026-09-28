@@ -108,7 +108,9 @@ export async function findAlternatives(
   const hits = await store.search(query, topK * 8, filter)
   const out: Alternative[] = []
   for (const h of hits) {
-    const rec = byId.get(h.id)!
+    // Same reason as in resolve: the store may know an id this build does not.
+    const rec = byId.get(h.id)
+    if (!rec) continue
     const cost = costOf(rec.id, req.grams)
     if (cost.gl > req.maxGL) continue
     out.push({ ...summary(rec), score: Math.round(h.score * 1000) / 1000, ...cost })

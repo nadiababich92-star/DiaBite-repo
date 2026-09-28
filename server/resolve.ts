@@ -87,6 +87,21 @@ function kindPrior(phrase: string, kind: string): number {
   return 0
 }
 
+/**
+ * Ids the catalogue in this build does not hold, named once each.
+ *
+ * Silence here would hide a half-finished deploy; a line per query would bury
+ * everything else.
+ */
+const warned = new Set<string>()
+function unknownId(id: string): false {
+  if (!warned.has(id)) {
+    warned.add(id)
+    console.warn(`[resolve] ${id} is in the vector store but not in this build's food table — skipped`)
+  }
+  return false
+}
+
 /** Two records that are really the same food (e.g. seed and ingredient copies) are not competitors. */
 export function sameFood(a: string, b: string): boolean {
   const ta = new Set(tokens(a)), tb = new Set(tokens(b))
@@ -142,6 +157,11 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
     if (named && !hits.some((h) => h.id === named)) hits.unshift({ id: named, score: ALIAS_SCORE })
 
     const candidates: ResolveCandidate[] = hits
+      // A store can hold an id this build does not know: the vectors live in
+      // Postgres and the records in the image, so a food added to the table
+      // before a deploy would otherwise crash the tool — and a 500 from a tool
+      // costs the whole answer.
+      .filter((h) => byId.has(h.id) || unknownId(h.id))
       .map((h) => {
         const rec = byId.get(h.id)!
         const exact = rec.aliases?.includes(norm(phrase)) || norm(plainName(rec.name)) === norm(phrase)
