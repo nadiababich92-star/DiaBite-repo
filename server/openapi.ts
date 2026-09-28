@@ -115,7 +115,7 @@ export function openApiSpec() {
               },
             },
           },
-          responses: { '200': { description: 'Consumed totals, remaining budget and the day level.' } },
+          responses: { '200': { description: 'Consumed totals, remaining budget and the day level; or `unknown: true` when no day state is held for that id.' } },
         },
       },
 
@@ -145,7 +145,7 @@ export function openApiSpec() {
               },
             },
           },
-          responses: { '200': { description: 'Ranked alternatives with their glycemic load.' } },
+          responses: { '200': { description: 'Ranked alternatives with their glycemic load. A bad call returns 200 with an `error` field to read and act on.' } },
         },
       },
     },

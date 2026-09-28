@@ -169,6 +169,24 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
     }
   }
 
+  // A verdict is a comparison against what is left of the day. With no day
+  // state there is nothing to compare against, and "fits" is a claim the
+  // answer cannot support — the failure the verifier cannot see, because no
+  // number is wrong.
+  const dayUnknown = (callOf(r, 'get_day_state')?.result as { unknown?: boolean } | undefined)?.unknown === true
+  if (dayUnknown && !r.blocked) {
+    const claims = /\b(it )?(fits|does not fit|doesn'?t fit|over budget|within (your )?budget)\b/i.test(r.answer)
+    const admits = /(don'?t|do not|cannot|can'?t) (have|know|say)|no (recorded )?budget|budget (is )?unknown|without (today'?s )?budget/i.test(r.answer)
+    say('no verdict without a budget', !claims || admits, r.answer.slice(0, 80))
+  }
+
+  // A tool that answered with an error means the turn ran on less than it
+  // should have; the answer must not paper over it with numbers of its own.
+  const toolErrors = (r.trace ?? []).filter((t) => (t.result as { error?: string })?.error)
+  if (toolErrors.length) {
+    say('no tool call returned an error', false, toolErrors.map((t) => `${t.tool}: ${(t.result as { error?: string }).error}`).join('; ').slice(0, 120))
+  }
+
   if (e.dayStateRemainingConsistent === true) {
     const day = callOf(r, 'get_day_state')?.result as { remaining?: { gl?: number } } | undefined
     const gl = day?.remaining?.gl
@@ -197,8 +215,8 @@ for (const c of runnable) {
     body: JSON.stringify({
       sessionId,
       message: c.query,
-      budget: c.context.budget,
-      entries: c.context.entries,
+      budget: c.context?.budget,
+      entries: c.context?.entries,
     }),
   })
   if (!res.ok) {

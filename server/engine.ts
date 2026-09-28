@@ -96,17 +96,30 @@ async function main() {
 
   app.post('/tools/resolve_foods', async (req, res) => {
     const body = req.body as ResolveRequest
-    if (!Array.isArray(body?.phrases)) return res.status(400).json({ error: 'phrases: string[] required' })
+    // Model-facing tools answer 200 even when the call was wrong. Foundry turns
+    // any non-2xx from an OpenAPI tool into a `tool_user_error` that kills the
+    // whole response, so a 400 costs the user their answer and tells the model
+    // nothing it can act on. The error travels in the body instead, where the
+    // model can read it and fix the call.
+    if (!Array.isArray(body?.phrases)) {
+      return res.json({ results: [], error: 'phrases must be a list of food names, e.g. ["oatmeal", "banana"].' })
+    }
     res.json({ results: await resolvePhrases(store, body.phrases, body.topK) })
   })
 
   app.post('/tools/compute_meal', (req, res) => {
     const body = req.body as ComputeMealRequest
-    if (!Array.isArray(body?.items) || body.items.length === 0) return res.status(400).json({ error: 'items required (non-empty)' })
+    if (!Array.isArray(body?.items) || body.items.length === 0) {
+      return res.json({ error: 'items must be a non-empty list of { foodId, grams } — call resolve_foods first to get the ids.' })
+    }
     const bad = body.items.find((it) => (it.grams !== undefined && !(it.grams > 0)) || (it.servings !== undefined && !(it.servings > 0)))
-    if (bad) return res.status(400).json({ error: `grams/servings must be positive: ${bad.foodId}` })
+    if (bad) {
+      return res.json({ error: `grams and servings must be positive numbers; ${bad.foodId} had none. Use the defaultPortion from resolve_foods when the user gave no amount.` })
+    }
     try { res.json(computeMeal(body.items)) }
-    catch (e) { res.status(400).json({ error: (e as Error).message }) }
+    // An id the database does not hold is the common case here, and it is the
+    // model's to correct: resolve the phrase again rather than lose the turn.
+    catch (e) { res.json({ error: `${(e as Error).message}. Use an id that resolve_foods returned, and never invent one.` }) }
   })
 
   app.post('/tools/get_day_state', (req, res) => {
@@ -132,12 +145,14 @@ async function main() {
     }
     if (!budget || !Array.isArray(entries)) return res.status(400).json({ error: 'sessionId, or budget and entries, required' })
     try { res.json(dayState(budget, entries)) }
-    catch (e) { res.status(400).json({ error: (e as Error).message }) }
+    catch (e) { res.json({ unknown: true, error: (e as Error).message }) }
   })
 
   app.post('/tools/find_alternatives', async (req, res) => {
     const body = req.body as AlternativesRequest
-    if (typeof body?.maxGL !== 'number') return res.status(400).json({ error: 'maxGL required' })
+    if (typeof body?.maxGL !== 'number') {
+      return res.json({ alternatives: [], error: 'maxGL is required — pass the remaining glycemic load from get_day_state.' })
+    }
     // The allergy filter lives here rather than in the prompt: an option the
     // person must not eat should never reach the model in the first place.
     const avoid = body.sessionId ? getSession(body.sessionId)?.avoid : undefined
