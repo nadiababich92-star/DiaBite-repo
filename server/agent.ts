@@ -38,7 +38,7 @@ import { openApiSpec } from './openapi'
 import { safetyGate } from './safety'
 import { verify } from './verify'
 import type { AvoidList } from './avoid'
-import { conversationFor, previousResponseFor, putSession, rememberConversation, rememberResponse } from './sessions'
+import { previousResponseFor, putSession, rememberResponse } from './sessions'
 import type { DayBudget, MealItemInput } from './contract'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -208,20 +208,13 @@ export async function publishAgentVersion(opts: { memoryStore?: string; kbId?: s
   TOOLS.meal = [engineTool()]
   // The advisor has no engine and no numbers. What it gets instead: our own
   // documents to ground an explanation, and a memory of what this person likes.
-  TOOLS.advisor = [
-    ...(opts.kbId ? [{ type: 'file_search', vector_store_ids: [opts.kbId] }] : []),
-    ...(opts.memoryStore
-      ? [{
-          type: 'memory_search_preview',
-          memory_store_name: opts.memoryStore,
-          // One namespace per conversation id, which is what this product has
-          // instead of accounts: memories cannot leak between people, and a
-          // scope can be deleted outright when someone asks.
-          scope: '{{$conversationId}}',
-          search_options: { max_memories: 5 },
-        }]
-      : []),
-  ]
+  // The knowledge base rides on the version, where it needs nothing from the
+  // caller. Memory does not: its tool wants a `scope`, the version can only
+  // hold `{{$conversationId}}`, and nothing substitutes that on this path —
+  // while a request that names an agent may not override tools at all. So the
+  // server reads and writes the memory store itself, which also means we
+  // decide what is remembered rather than hoping the extractor agrees.
+  TOOLS.advisor = opts.kbId ? [{ type: 'file_search', vector_store_ids: [opts.kbId] }] : []
   const out = {} as Record<Role, string>
   for (const role of ['triage', 'meal', 'advisor'] as Role[]) {
     const agent = await projectClient().agents.createVersion(agentName(role), {
@@ -453,45 +446,65 @@ interface Turn { id?: string; output_text?: string; output?: unknown[] }
  */
 const memoryScope = (sessionId: string) => sessionId.replace(/[^A-Za-z0-9_\-.%+@/]/g, '-').slice(0, 256)
 
-/**
- * The conversation an advisor turn runs in, created once per session.
- *
- * Tools cannot be overridden on a request that names an agent ("Not allowed
- * when agent is specified"), so the scope cannot be passed per call — the
- * version's `{{$conversationId}}` has to resolve instead, and it only resolves
- * when the turn belongs to a conversation. Hence this: the advisor runs inside
- * one, and its id becomes the namespace for that person's remembered
- * preferences.
- */
-async function conversationForSession(sessionId: string): Promise<string | undefined> {
-  const existing = conversationFor(sessionId)
-  if (existing) return existing
-  try {
-    const openai = projectClient().getOpenAIClient() as unknown as {
-      conversations: { create(body: unknown): Promise<{ id: string }> }
+function memoryStores() {
+  return (projectClient() as unknown as {
+    beta: {
+      memoryStores: {
+        searchMemories(name: string, scope: string, options?: unknown): Promise<{ memories?: { content?: string }[] }>
+        updateMemories(name: string, scope: string, options?: unknown): { pollUntilDone(): Promise<unknown> }
+      }
     }
-    const c = await openai.conversations.create({ metadata: { session: memoryScope(sessionId) } })
-    rememberConversation(sessionId, c.id)
-    return c.id
+  }).beta.memoryStores
+}
+
+/**
+ * What this person has told us they like, in their own words.
+ *
+ * Read before an advisory turn and pasted into the prompt, because the memory
+ * tool cannot be scoped from here: its `scope` lives on the agent version, and
+ * a request that names an agent may not override tools. Doing it ourselves is
+ * the better bargain anyway — we choose what goes in, what comes out and when
+ * it is deleted, which is what a health product should be able to say.
+ */
+async function recallPreferences(sessionId: string, message: string): Promise<string> {
+  try {
+    const res = await memoryStores().searchMemories(MEMORY_STORE, memoryScope(sessionId), {
+      items: [{ role: 'user', type: 'message', content: message }],
+      options: { max_memories: 5 },
+    })
+    const lines = (res.memories ?? []).map((m) => m.content).filter(Boolean) as string[]
+    return lines.length ? `\n\nWhat this person has told you before: ${lines.join('; ')}` : ''
   } catch (e) {
-    // Without a conversation the advisor still answers; it just answers
-    // without remembering, which is the safer way to fail.
-    console.warn(`[memory] no conversation for this turn: ${(e as Error).message.slice(0, 120)}`)
-    return undefined
+    console.warn(`[memory] recall skipped: ${(e as Error).message.slice(0, 120)}`)
+    return ''
   }
+}
+
+/**
+ * Remember the food preferences in this exchange, and nothing else.
+ *
+ * Fire and forget: a turn must not wait on it, and a failure must not cost the
+ * answer. The store keeps profile items only — chat summaries are off — and
+ * everything expires after 90 days.
+ */
+function rememberPreferences(sessionId: string, message: string, answer: string): void {
+  memoryStores()
+    .updateMemories(MEMORY_STORE, memoryScope(sessionId), {
+      items: [
+        { role: 'user', type: 'message', content: message },
+        { role: 'assistant', type: 'message', content: answer },
+      ],
+    })
+    .pollUntilDone()
+    .catch((e: Error) => console.warn(`[memory] update skipped: ${e.message.slice(0, 120)}`))
 }
 
 /** One request to one agent, waiting out the per-minute token limit. */
 async function runAgent(role: Role, input: string, previous?: string, forceTools = false, sessionId?: string): Promise<Turn> {
   const openai = projectClient().getOpenAIClient()
-  const conversation = role === 'advisor' && sessionId ? await conversationForSession(sessionId) : undefined
+  void sessionId
   return (await withRateLimitRetry(() => openai.responses.create(
-    {
-      input,
-      // A conversation and a previous response are two ways of saying the same
-      // thing, and the service takes one at a time.
-      ...(conversation ? { conversation } : previous ? { previous_response_id: previous } : {}),
-    } as never,
+    { input, ...(previous ? { previous_response_id: previous } : {}) } as never,
     {
       body: {
         agent_reference: { name: agentName(role), type: 'agent_reference' },
@@ -549,7 +562,11 @@ async function answer(req: AskRequest): Promise<AskResponse> {
   if (role === 'meal') await parkDayState(req)
 
   let previous = previousResponseFor(req.sessionId)
-  let input = `[session_id: ${req.sessionId}]\n\n${req.message}`
+  // Advisory turns carry what this person has said they like; meal turns do
+  // not, because their answer is arithmetic and a preference cannot change a
+  // number.
+  const recalled = role === 'advisor' ? await recallPreferences(req.sessionId, req.message) : ''
+  let input = `[session_id: ${req.sessionId}]\n\n${req.message}${recalled}`
 
   const trace: ToolCallTrace[] = []
   let answer = ''
@@ -590,6 +607,9 @@ async function answer(req: AskRequest): Promise<AskResponse> {
   }
 
   if (responseId) rememberResponse(req.sessionId, responseId)
+  // Food preferences only, and only from advisory turns — the ones without a
+  // diary, a budget or a number in them.
+  if (role === 'advisor' && answer) rememberPreferences(req.sessionId, req.message, answer)
 
   return {
     answer, blocked: false,
