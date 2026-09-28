@@ -9,10 +9,15 @@
  * food data or to the embedding model; it is idempotent, and it deletes rows
  * that no longer exist so a removed food cannot linger in search results.
  *
- * It needs a privileged connection because the table is readable by everyone
- * and writable by nobody: get the URI from Supabase → Project Settings →
- * Database → Connection string → URI, and keep it in .env.local, which is
- * gitignored.
+ * It needs a privileged key because the table is readable by everyone and
+ * writable by nobody. Either works, and both belong in .env.local, which is
+ * gitignored:
+ *
+ *   SUPABASE_SERVICE_KEY  a secret key (sb_secret_…) — Project Settings → API
+ *                         Keys. Writes over PostgREST, no database password.
+ *   SUPABASE_DB_URL       a connection string — Project Settings → Database.
+ *                         Faster for a full rewrite, and the only way to drop
+ *                         stale rows in one statement.
  */
 import { readFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -20,24 +25,33 @@ import { dirname, join } from 'node:path'
 import postgres from 'postgres'
 import { loadFoods } from '../server/foods'
 
+type Row = Record<string, unknown>
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const BIN = join(ROOT, 'data', 'recipes-db', 'embeddings.bin')
 const IDS = join(ROOT, 'data', 'recipes-db', 'embeddings.ids.json')
 const DIM = 384
 const BATCH = 200
 
-function connectionString(): string {
-  const fromEnv = process.env.SUPABASE_DB_URL
-  if (fromEnv) return fromEnv
+/** Env first, then .env.local, which is where these live during development. */
+function fromEnvOrFile(name: string): string | undefined {
+  if (process.env[name]) return process.env[name]
   const local = join(ROOT, '.env.local')
-  if (existsSync(local)) {
-    const line = readFileSync(local, 'utf8').split('\n').find((l) => l.startsWith('SUPABASE_DB_URL='))
-    if (line) return line.slice('SUPABASE_DB_URL='.length).trim().replace(/^["']|["']$/g, '')
-  }
+  if (!existsSync(local)) return undefined
+  const line = readFileSync(local, 'utf8').split('\n').find((l) => l.startsWith(`${name}=`))
+  return line?.slice(name.length + 1).trim().replace(/^["']|["']$/g, '')
+}
+
+function credentials(): { dbUrl?: string; restUrl?: string; serviceKey?: string } {
+  const dbUrl = fromEnvOrFile('SUPABASE_DB_URL')
+  const serviceKey = fromEnvOrFile('SUPABASE_SERVICE_KEY')
+  const restUrl = fromEnvOrFile('SUPABASE_URL')
+  if (dbUrl || (serviceKey && restUrl)) return { dbUrl, restUrl, serviceKey }
   console.error(
-    'SUPABASE_DB_URL is not set.\n' +
-    'Supabase → Project Settings → Database → Connection string → URI,\n' +
-    'then add it to .env.local as SUPABASE_DB_URL=postgresql://…  (.env.local is gitignored).',
+    'No privileged credentials found.\n' +
+    'Add ONE of these to .env.local (gitignored):\n' +
+    '  SUPABASE_SERVICE_KEY=sb_secret_…   (Project Settings → API Keys) plus SUPABASE_URL\n' +
+    '  SUPABASE_DB_URL=postgresql://…     (Project Settings → Database → Connection string)',
   )
   process.exit(1)
 }
@@ -66,47 +80,91 @@ if (missing.length) {
 const literal = (i: number) =>
   `[${Array.from(vectors.subarray(i * DIM, (i + 1) * DIM), (v) => v.toFixed(6)).join(',')}]`
 
-const sql = postgres(connectionString(), { prepare: false })
+const creds = credentials()
 
-try {
-  const rows = ids.map((id, i) => {
-    const r = byId.get(id)!
-    return {
-      id,
-      kind: r.kind,
-      name: r.name,
-      category: r.category ?? null,
-      gi: r.gi ?? null,
-      unit: r.unit ?? null,
-      default_portion: r.defaultPortion ?? null,
-      aliases: r.aliases ?? [],
-      ingredient_names: r.ingredientNames ?? [],
-      search_text: r.searchText,
-      embedding: literal(i),
-    }
-  })
-
+/** PostgREST upsert, for when only a secret key is at hand. */
+async function pushOverRest(rows: Row[]): Promise<void> {
+  const { restUrl, serviceKey } = creds
   for (let i = 0; i < rows.length; i += BATCH) {
     const chunk = rows.slice(i, i + BATCH)
-    await sql`
-      insert into public.foods ${sql(chunk, 'id', 'kind', 'name', 'category', 'gi', 'unit', 'default_portion', 'aliases', 'ingredient_names', 'search_text', 'embedding')}
-      on conflict (id) do update set
-        kind = excluded.kind, name = excluded.name, category = excluded.category,
-        gi = excluded.gi, unit = excluded.unit, default_portion = excluded.default_portion,
-        aliases = excluded.aliases, ingredient_names = excluded.ingredient_names,
-        search_text = excluded.search_text, embedding = excluded.embedding,
-        updated_at = now()
-    `
+    const res = await fetch(`${restUrl}/rest/v1/foods?on_conflict=id`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        apikey: serviceKey!,
+        authorization: `Bearer ${serviceKey}`,
+        prefer: 'resolution=merge-duplicates,return=minimal',
+      },
+      body: JSON.stringify(chunk),
+    })
+    if (!res.ok) throw new Error(`upsert failed: ${res.status} ${(await res.text()).slice(0, 200)}`)
     process.stdout.write(`\r  upserted ${Math.min(i + BATCH, rows.length)}/${rows.length}`)
   }
   process.stdout.write('\n')
 
-  const [{ count: gone }] = await sql<{ count: number }[]>`
-    with removed as (delete from public.foods where id <> all(${ids}) returning 1)
-    select count(*)::int as count from removed
-  `
-  const [{ count: total }] = await sql<{ count: number }[]>`select count(*)::int as count from public.foods`
-  console.log(`synced ${rows.length} records${gone ? `, removed ${gone} stale` : ''}; table now holds ${total}`)
-} finally {
-  await sql.end()
+  // Stale rows, deleted by the ids that should no longer be there. PostgREST
+  // has no "delete where not in this list", so the list is computed here.
+  const have = await fetch(`${restUrl}/rest/v1/foods?select=id`, {
+    headers: { apikey: serviceKey!, authorization: `Bearer ${serviceKey}` },
+  }).then((r) => r.json() as Promise<{ id: string }[]>)
+  const wanted = new Set(rows.map((r) => r.id as string))
+  const stale = have.map((r) => r.id).filter((id) => !wanted.has(id))
+  for (let i = 0; i < stale.length; i += BATCH) {
+    const chunk = stale.slice(i, i + BATCH).map((id) => `"${id}"`).join(',')
+    const res = await fetch(`${restUrl}/rest/v1/foods?id=in.(${encodeURIComponent(chunk)})`, {
+      method: 'DELETE',
+      headers: { apikey: serviceKey!, authorization: `Bearer ${serviceKey}`, prefer: 'return=minimal' },
+    })
+    if (!res.ok) throw new Error(`delete failed: ${res.status} ${(await res.text()).slice(0, 200)}`)
+  }
+  console.log(`synced ${rows.length} records${stale.length ? `, removed ${stale.length} stale` : ''} over PostgREST`)
+}
+
+const rows: Row[] = ids.map((id, i) => {
+  const r = byId.get(id)!
+  return {
+    id,
+    kind: r.kind,
+    name: r.name,
+    category: r.category ?? null,
+    gi: r.gi ?? null,
+    unit: r.unit ?? null,
+    default_portion: r.defaultPortion ?? null,
+    aliases: r.aliases ?? [],
+    ingredient_names: r.ingredientNames ?? [],
+    search_text: r.searchText,
+    embedding: literal(i),
+  }
+})
+
+if (creds.dbUrl) {
+  // The connection string does the whole thing in two statements, including
+  // dropping rows that no longer exist.
+  const sql = postgres(creds.dbUrl, { prepare: false })
+  try {
+    for (let i = 0; i < rows.length; i += BATCH) {
+      const chunk = rows.slice(i, i + BATCH)
+      await sql`
+        insert into public.foods ${sql(chunk as never[], 'id', 'kind', 'name', 'category', 'gi', 'unit', 'default_portion', 'aliases', 'ingredient_names', 'search_text', 'embedding')}
+        on conflict (id) do update set
+          kind = excluded.kind, name = excluded.name, category = excluded.category,
+          gi = excluded.gi, unit = excluded.unit, default_portion = excluded.default_portion,
+          aliases = excluded.aliases, ingredient_names = excluded.ingredient_names,
+          search_text = excluded.search_text, embedding = excluded.embedding,
+          updated_at = now()
+      `
+      process.stdout.write(`\r  upserted ${Math.min(i + BATCH, rows.length)}/${rows.length}`)
+    }
+    process.stdout.write('\n')
+    const [{ count: gone }] = await sql<{ count: number }[]>`
+      with removed as (delete from public.foods where id <> all(${ids}) returning 1)
+      select count(*)::int as count from removed
+    `
+    const [{ count: total }] = await sql<{ count: number }[]>`select count(*)::int as count from public.foods`
+    console.log(`synced ${rows.length} records${gone ? `, removed ${gone} stale` : ''}; table now holds ${total}`)
+  } finally {
+    await sql.end()
+  }
+} else {
+  await pushOverRest(rows)
 }

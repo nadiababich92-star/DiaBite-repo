@@ -21,7 +21,7 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { loadFoods } from '../server/foods'
-import { loadOrBuildIndex } from '../server/embeddings'
+import { openStore } from '../server/embeddings'
 import { resolvePhrases } from '../server/resolve'
 import { verify } from '../server/verify'
 import type { VerifyRequest } from '../server/contract'
@@ -39,7 +39,9 @@ const cases = JSON.parse(readFileSync(join(ROOT, 'eval', 'cases.json'), 'utf8'))
 
 const t0 = Date.now()
 const { records } = loadFoods()
-const store = await loadOrBuildIndex(records, () => {})
+// Whichever store the engine itself would open, so the same cases prove the
+// database returns what the embedded index does.
+const store = await openStore(records, (m: string) => { if (/pg-store|pgvector/.test(m)) console.log(m) })
 console.log(`engine ready: ${records.length} records in ${Date.now() - t0} ms\n`)
 
 const fail = <T>(list: T[], label: string) => { if (list.length) console.log(`  ${label}: ${list.length}`) }

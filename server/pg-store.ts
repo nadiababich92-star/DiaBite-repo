@@ -19,7 +19,11 @@ const DIM = 384
 export interface PgStoreConfig {
   url: string
   key: string
-  /** Past this, the query is abandoned and the in-memory index answers. */
+  /**
+   * Past this, the query is abandoned and the in-memory index answers.
+   * Measured cross-region: median 72 ms, worst seen 415 ms, so the default
+   * leaves room for a cold connection without waiting on a sleeping project.
+   */
   timeoutMs?: number
 }
 
@@ -42,7 +46,7 @@ export class PgVectorStore implements VectorStore {
         authorization: `Bearer ${this.cfg.key}`,
       },
       body: JSON.stringify(body),
-      signal: AbortSignal.timeout(this.cfg.timeoutMs ?? 400),
+      signal: AbortSignal.timeout(this.cfg.timeoutMs ?? 1500),
     })
     if (!res.ok) throw new Error(`${fn}: ${res.status} ${(await res.text()).slice(0, 120)}`)
     return (await res.json()) as T
