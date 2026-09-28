@@ -100,6 +100,8 @@ export interface Receipt {
   total: number
   leftBefore: number | null
   leftAfter: number | null
+  /** Where the numbers in this receipt came from, and whether anyone checked them (PRD E3). */
+  sources: { text: string; verified: boolean }[]
 }
 
 interface MealResult {
@@ -136,6 +138,21 @@ export function receiptFrom(trace: TraceStep[] | undefined): Receipt | null {
   const day = trace.find((t) => isCall(t, 'get_day_state'))
   const d = day ? (unwrap(day.result) as DayStateResult) : null
   const leftBefore = typeof d?.remaining?.gl === 'number' ? d.remaining.gl : null
+  // Provenance for exactly the foods in this receipt: resolve_foods carries it
+  // on each candidate, and the meal names the ids that were actually used.
+  const used = new Set(m.items.map((it) => it.foodId))
+  const sources = new Map<string, boolean>()
+  for (const step of trace) {
+    if (!isCall(step, 'resolve_foods')) continue
+    const res = unwrap(step.result) as { results?: { candidates?: { id: string; source?: string; verifiedAt?: string }[] }[] }
+    for (const phrase of res?.results ?? []) {
+      for (const c of phrase.candidates ?? []) {
+        if (!used.has(c.id) || !c.source) continue
+        sources.set(c.source, (sources.get(c.source) ?? false) || !!c.verifiedAt)
+      }
+    }
+  }
+
   const lines: ReceiptLine[] = m.items.map((it) => ({
     foodId: it.foodId, name: it.name,
     portion: it.servings ? `${it.servings} serving${it.servings === 1 ? '' : 's'}` : `${it.grams} g`,
@@ -146,5 +163,6 @@ export function receiptFrom(trace: TraceStep[] | undefined): Receipt | null {
   return {
     lines, total: m.totals.gl, leftBefore,
     leftAfter: leftBefore === null ? null : Math.round((leftBefore - m.totals.gl) * 10) / 10,
+    sources: [...sources].map(([text, verified]) => ({ text, verified })),
   }
 }

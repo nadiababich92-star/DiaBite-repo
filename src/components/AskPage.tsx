@@ -79,7 +79,18 @@ function ReceiptView({ r }: { r: Receipt }) {
           <div className={`receipt-line ${(r.leftAfter ?? 0) < 0 ? 'over' : 'ok'}`}><span>Left after</span><span>{r.leftAfter?.toFixed(1)}</span></div>
         </>
       )}
-      <div className="receipt-foot">GL = GI × available carbs ÷ 100. Available carbs = total − fibre. GI from International Tables (2021).</div>
+      <div className="receipt-foot">
+        GL = GI × available carbs ÷ 100. Available carbs = total − fibre.
+        {r.sources.length > 0 && (
+          <ul className="receipt-sources">
+            {r.sources.map((s) => (
+              <li key={s.text}>
+                <span className={`pill ${s.verified ? 'low' : 'none'}`}>{s.verified ? 'checked' : 'unverified'}</span> {s.text}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   )
 }

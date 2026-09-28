@@ -10,7 +10,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { env, pipeline, type FeatureExtractionPipeline } from '@huggingface/transformers'
-import type { FoodRecord } from './foods'
+import { adoptCatalogue, type FoodRecord } from './foods'
 import { PgVectorStore, pgConfigFromEnv } from './pg-store'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -91,6 +91,15 @@ export async function openStore(records: FoodRecord[], log = console.log): Promi
   if (!cfg) return memory
   const pg = new PgVectorStore(cfg, memory, log)
   if (!(await pg.check())) return memory
+
+  // The catalogue comes from the same place as the vectors, or from neither:
+  // a build searching the database's ids against the image's records is the
+  // mismatch that skips foods silently.
+  try {
+    await adoptCatalogue(await pg.catalogue(), log)
+  } catch (e) {
+    log(`[foods] could not read the catalogue (${(e as Error).message}) — keeping the one from the image`)
+  }
   log('vector search: Supabase pgvector, with the embedded index as fallback')
   return pg
 }

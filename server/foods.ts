@@ -96,6 +96,61 @@ export interface FoodRecord extends FoodSummary {
   /** Recipes: nutrients per serving, plus its computed GL. */
   perServing?: Nutrients & { availableCarbs: number; gl: number }
   ingredientNames?: string[]
+  /** Where the numbers came from, in words a user can read (PRD E3). */
+  source?: string
+  /** When a human last checked them against that source; absent means nobody has. */
+  verifiedAt?: string
+}
+
+/** A record as `public.foods` stores it. */
+interface FoodRow {
+  id: string; kind: FoodKind; name: string; category: string | null; cuisine: string | null
+  gi: number | string | null; unit: string | null; default_portion: number | string | null
+  aliases: string[] | null; ingredient_names: string[] | null; search_text: string
+  per100: Nutrients | null
+  per_serving: (Nutrients & { availableCarbs: number; gl: number }) | null
+  source: string | null; verified_at: string | null
+}
+
+const num = (v: number | string | null): number | null => (v === null ? null : Number(v))
+
+function fromRow(r: FoodRow): FoodRecord {
+  const gi = num(r.gi)
+  return {
+    id: r.id, kind: r.kind, name: r.name, gi, giLevel: giLevel(gi),
+    category: (r.category ?? '') as FoodRecord['category'], cuisine: r.cuisine ?? undefined,
+    unit: (r.unit ?? 'g') as FoodRecord['unit'], defaultPortion: num(r.default_portion) ?? 100,
+    searchText: r.search_text,
+    aliases: r.aliases ?? undefined,
+    ingredientNames: r.ingredient_names ?? undefined,
+    per100: r.per100 ?? undefined,
+    perServing: r.per_serving ?? undefined,
+    source: r.source ?? undefined,
+    verifiedAt: r.verified_at ?? undefined,
+  }
+}
+
+/**
+ * Take the catalogue from the database instead of the files in the image.
+ *
+ * The point of the table is that food can be added without a deploy, and that
+ * only works if the records live there too — vectors alone find an id the
+ * build cannot describe. Called once at startup; anything wrong with the
+ * answer leaves the file-built catalogue in place, because a half-loaded food
+ * table is worse than an old one.
+ */
+export async function adoptCatalogue(rows: unknown[], log = console.log): Promise<boolean> {
+  const inImage = loadFoods().records.length
+  const built = (rows as FoodRow[]).filter((r) => r && r.id && r.search_text).map(fromRow)
+  // Fewer records than the image holds means a truncated read, not a smaller
+  // database — the file version is the safer of the two.
+  if (built.length < inImage) {
+    log(`[foods] the database returned ${built.length} records against ${inImage} in the image — keeping the image's`)
+    return false
+  }
+  cache = { records: built, byId: new Map(built.map((r) => [r.id, r])) }
+  log(`[foods] catalogue from the database: ${built.length} records`)
+  return true
 }
 
 /** Map the ingredient table's groups onto the app's coarser categories. */
@@ -165,8 +220,11 @@ export function getRecord(id: string): FoodRecord {
 }
 
 export function summary(rec: FoodRecord): FoodSummary {
-  const { id, kind, name, gi, giLevel: lvl, category, cuisine, unit, defaultPortion } = rec
-  return { id, kind, name, gi, giLevel: lvl, category, cuisine, unit, defaultPortion }
+  const { id, kind, name, gi, giLevel: lvl, category, cuisine, unit, defaultPortion, source, verifiedAt } = rec
+  // Provenance travels with the record rather than being looked up later: the
+  // claim "these numbers are not invented" is only as good as the user's
+  // ability to see where each one came from.
+  return { id, kind, name, gi, giLevel: lvl, category, cuisine, unit, defaultPortion, source, verifiedAt }
 }
 
 /** Ingredient record as the `Food` shape the shared glycemic maths expects. */

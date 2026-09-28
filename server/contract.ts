@@ -23,6 +23,10 @@ export interface FoodSummary {
   unit: 'g' | 'serving'
   /** Sensible default portion in that unit. */
   defaultPortion: number
+  /** Where these numbers came from, in words a user can read (PRD E3). */
+  source?: string
+  /** When a human last checked them against that source; absent means nobody has. */
+  verifiedAt?: string
 }
 
 // ── resolve_foods ──────────────────────────────────────────────────────────

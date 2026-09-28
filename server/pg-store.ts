@@ -97,6 +97,36 @@ export class PgVectorStore implements VectorStore {
     }
   }
 
+  /**
+   * Every record, without the vectors — 1,436 rows of JSON, one request.
+   *
+   * The embeddings stay out of it: they are 2 MB of float text that the engine
+   * already has in the image, and it needs them only to search, which the
+   * database does.
+   */
+  async catalogue(): Promise<unknown[]> {
+    const cols = 'id,kind,name,category,cuisine,gi,unit,default_portion,aliases,ingredient_names,search_text,per100,per_serving,source,verified_at'
+    // PostgREST caps a response at 1,000 rows and says nothing about it, which
+    // is how a 1,436-record catalogue quietly became 1,000. Pages until a page
+    // comes back short.
+    const PAGE = 1000
+    const all: unknown[] = []
+    for (let from = 0; ; from += PAGE) {
+      const res = await fetch(`${this.cfg.url}/rest/v1/foods?select=${cols}&order=id`, {
+        headers: {
+          apikey: this.cfg.key,
+          authorization: `Bearer ${this.cfg.key}`,
+          range: `${from}-${from + PAGE - 1}`,
+        },
+        signal: AbortSignal.timeout(15_000),
+      })
+      if (!res.ok) throw new Error(`catalogue: ${res.status} ${(await res.text()).slice(0, 120)}`)
+      const page = (await res.json()) as unknown[]
+      all.push(...page)
+      if (page.length < PAGE) return all
+    }
+  }
+
   /** One query at startup, so a broken configuration is loud rather than gradual. */
   async check(): Promise<boolean> {
     try {

@@ -19,7 +19,7 @@
  *                         Faster for a full rewrite, and the only way to drop
  *                         stale rows in one statement.
  */
-import { readFileSync, existsSync } from 'node:fs'
+import { readFileSync, existsSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import postgres from 'postgres'
@@ -120,6 +120,39 @@ async function pushOverRest(rows: Row[]): Promise<void> {
   console.log(`synced ${rows.length} records${stale.length ? `, removed ${stale.length} stale` : ''} over PostgREST`)
 }
 
+/**
+ * Where a record's numbers come from, and when anyone last checked them.
+ *
+ * The cross-check file is the only real verification this data has had: 88
+ * ingredient GI values compared against published tables. Everything else is
+ * unverified, and says so rather than borrowing the credibility of the ones
+ * that were checked.
+ */
+const CROSSCHECK = join(ROOT, 'data', 'recipes-db', 'gi_crosscheck.json')
+const checked = new Map<string, string>()
+if (existsSync(CROSSCHECK)) {
+  const when = new Date(statSync(CROSSCHECK).mtime).toISOString().slice(0, 10)
+  for (const row of JSON.parse(readFileSync(CROSSCHECK, 'utf8')) as { key: string; flag: string }[]) {
+    if (row.flag === '') checked.set(`ing:${row.key}`, when)
+  }
+}
+
+function provenance(id: string): { source: string; verified_at: string | null } {
+  if (id.startsWith('rec:')) {
+    return {
+      source: 'Computed from its ingredients: nutrients summed, glycemic index as a carbohydrate-weighted mean (Wolever & Jenkins).',
+      verified_at: null,
+    }
+  }
+  if (id.startsWith('seed:')) {
+    return { source: 'Seed food table: published averages for everyday US foods.', verified_at: null }
+  }
+  return {
+    source: 'Nutrients from USDA FoodData Central; glycemic index from the International Tables of Glycemic Index (2021).',
+    verified_at: checked.get(id) ?? null,
+  }
+}
+
 const rows: Row[] = ids.map((id, i) => {
   const r = byId.get(id)!
   return {
@@ -127,12 +160,16 @@ const rows: Row[] = ids.map((id, i) => {
     kind: r.kind,
     name: r.name,
     category: r.category ?? null,
+    cuisine: r.cuisine ?? null,
     gi: r.gi ?? null,
     unit: r.unit ?? null,
     default_portion: r.defaultPortion ?? null,
     aliases: r.aliases ?? [],
     ingredient_names: r.ingredientNames ?? [],
     search_text: r.searchText,
+    per100: r.per100 ?? null,
+    per_serving: r.perServing ?? null,
+    ...provenance(id),
     embedding: literal(i),
   }
 })
@@ -145,13 +182,15 @@ if (creds.dbUrl) {
     for (let i = 0; i < rows.length; i += BATCH) {
       const chunk = rows.slice(i, i + BATCH)
       await sql`
-        insert into public.foods ${sql(chunk as never[], 'id', 'kind', 'name', 'category', 'gi', 'unit', 'default_portion', 'aliases', 'ingredient_names', 'search_text', 'embedding')}
+        insert into public.foods ${sql(chunk as never[], 'id', 'kind', 'name', 'category', 'cuisine', 'gi', 'unit', 'default_portion', 'aliases', 'ingredient_names', 'search_text', 'per100', 'per_serving', 'source', 'verified_at', 'embedding')}
         on conflict (id) do update set
           kind = excluded.kind, name = excluded.name, category = excluded.category,
-          gi = excluded.gi, unit = excluded.unit, default_portion = excluded.default_portion,
-          aliases = excluded.aliases, ingredient_names = excluded.ingredient_names,
-          search_text = excluded.search_text, embedding = excluded.embedding,
-          updated_at = now()
+          cuisine = excluded.cuisine, gi = excluded.gi, unit = excluded.unit,
+          default_portion = excluded.default_portion, aliases = excluded.aliases,
+          ingredient_names = excluded.ingredient_names, search_text = excluded.search_text,
+          per100 = excluded.per100, per_serving = excluded.per_serving,
+          source = excluded.source, verified_at = excluded.verified_at,
+          embedding = excluded.embedding, updated_at = now()
       `
       process.stdout.write(`\r  upserted ${Math.min(i + BATCH, rows.length)}/${rows.length}`)
     }

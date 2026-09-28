@@ -227,6 +227,9 @@ tr:last-child td { border-bottom: none; }
 .receipt-line.over { color: var(--high); font-weight: 500; }
 .receipt-total { display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px dashed var(--border); font-weight: 500; }
 .receipt-foot { font-size: 11px; color: var(--text-faint); line-height: 1.5; padding-top: 8px; border-top: 1px dashed var(--border); font-family: var(--font); }
+.receipt-sources { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.receipt-sources li { display: flex; gap: 7px; align-items: flex-start; line-height: 1.45; }
+.receipt-sources .pill { flex: none; }
 
 .trace { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .trace li { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: baseline; font-size: 13.5px; color: var(--text-dim); }
