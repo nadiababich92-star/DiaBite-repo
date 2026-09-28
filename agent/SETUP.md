@@ -77,7 +77,21 @@ and the full tool trace.
 **`tool_choice` must be `required`.** Without it gpt-5-mini answers "I'll check
 that for you — one moment" and stops, having called nothing. Every answer this
 product gives is grounded in the engine, so a turn that calls no tool is a turn
-that guessed.
+that guessed. It is set in two places on purpose: in this server's request, and
+in the agent version itself (`publishAgentVersion`). The version is what other
+callers get — the Foundry workflow and the portal's playground send no
+`tool_choice` of their own, and the workflow's first run reproduced exactly that
+failure.
+
+**A tool must not answer with a non-2xx.** Foundry turns any error status from
+an OpenAPI tool into a `tool_user_error` that kills the whole response: the user
+sees an empty bubble, not a worse answer. `get_day_state` used to 404 on a
+session it did not hold, which meant a workflow run (no session id at all) and
+any conversation older than the one-hour session TTL both died there. It now
+returns `unknown: true` with a 200, and the prompt says to cost the meal anyway
+and say the budget is not known. `compute_meal` and `resolve_foods` still 400 on
+bad input — their ids come from `resolve_foods`, so it is rarer, but it is the
+same trap.
 
 **The tool's auth type is `project_connection`, not `connection`,** and the id
 is the connection's full ARM id. Get either wrong and the call reaches the
