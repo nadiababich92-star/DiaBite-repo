@@ -115,9 +115,18 @@ async function main() {
     const body = req.body as DayStateRequest & { sessionId?: string }
     let budget = body?.budget
     let entries = body?.entries
-    if (body?.sessionId) {
-      const s = getSession(body.sessionId)
-      if (!s) return res.status(404).json({ error: `unknown sessionId: ${body.sessionId}` })
+    // The agent always arrives by session id; the frontend always arrives with
+    // a budget. Which key is present tells the two apart, and an empty id
+    // counts as present — the agent is told to send one rather than invent it.
+    if (body && 'sessionId' in body) {
+      const s = body.sessionId ? getSession(body.sessionId) : undefined
+      // A session we do not hold is answered, not refused. Foundry turns any
+      // non-2xx from a tool into a `tool_user_error` that kills the whole
+      // response, so a 404 here costs the user the answer to a question the
+      // engine could otherwise mostly answer — and sessions expire after an
+      // hour. Saying "no day state" lets the model cost the meal and admit it
+      // does not know the budget.
+      if (!s) return res.json({ unknown: true, sessionId: body.sessionId ?? '' })
       budget = s.budget
       entries = s.entries
     }

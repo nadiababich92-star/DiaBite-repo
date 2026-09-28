@@ -110,6 +110,12 @@ export interface DayStateRequest {
   entries: MealItemInput[]
 }
 
+/** Returned instead of the day state when the session id is not held. */
+export interface DayStateUnknown {
+  unknown: true
+  sessionId: string
+}
+
 export interface DayStateResponse {
   consumed: MealTotals
   remaining: { gl: number; carbsG: number; kcal: number }

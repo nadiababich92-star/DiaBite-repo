@@ -128,6 +128,11 @@ export async function publishAgentVersion(): Promise<Record<Role, string>> {
       instructions: systemPrompt(role),
       tools: TOOLS[role],
       reasoning: { effort: REASONING_EFFORT },
+      // Carried in the version, not only in our own request. A caller that is
+      // not this server — the Foundry workflow, the portal's playground —
+      // sends no `tool_choice`, and without it the meal agent answers "I'll
+      // check those foods first" having called nothing.
+      ...(role === 'meal' ? { tool_choice: 'required' } : {}),
     } as never)
     out[role] = (agent as { version?: string }).version ?? '?'
   }

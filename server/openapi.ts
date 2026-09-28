@@ -97,7 +97,7 @@ export function openApiSpec() {
           operationId: 'get_day_state',
           summary: 'Get what is left of the daily budget',
           description:
-            'Return what the user has already eaten today and how much of their daily budget is left (glycemic load, carbohydrate, calories). Call this before judging whether a meal fits. The only argument is the session id given to you in the conversation — the budget itself is held server-side, so never type budget numbers yourself.',
+            'Return what the user has already eaten today and how much of their daily budget is left (glycemic load, carbohydrate, calories). Call this before judging whether a meal fits. The only argument is the session id given to you in the conversation — the budget itself is held server-side, so never type budget numbers yourself. A reply of `unknown: true` means no day state is recorded for that session: give the meal\'s own numbers and say the daily budget is not available, rather than inventing one.',
           requestBody: {
             required: true,
             content: {
