@@ -92,7 +92,7 @@ export async function findAlternatives(
   const topK = req.topK ?? 5
   let query: Float32Array | undefined
   let anchor = req.foodId ? byId.get(req.foodId) : undefined
-  if (anchor) query = store.vectorOf(anchor.id)
+  if (anchor) query = await store.vectorOf(anchor.id)
   else if (req.query) [query] = await embed([req.query])
   if (!query) return []
 
@@ -105,7 +105,7 @@ export async function findAlternatives(
     return true
   }
   // Over-fetch, then keep only what fits the budget.
-  const hits = store.search(query, topK * 8, filter)
+  const hits = await store.search(query, topK * 8, filter)
   const out: Alternative[] = []
   for (const h of hits) {
     const rec = byId.get(h.id)!

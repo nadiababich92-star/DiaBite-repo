@@ -135,8 +135,8 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
   if (clean.length === 0) return []
   const vectors = await embed(clean)
 
-  return clean.map((phrase, i) => {
-    const hits = store.search(vectors[i], Math.max(topK * 3, 15))
+  return Promise.all(clean.map(async (phrase, i) => {
+    const hits = await store.search(vectors[i], Math.max(topK * 3, 15))
     // An exact everyday name belongs in the running whatever the vectors said.
     const named = aliasesOf().get(norm(phrase))
     if (named && !hits.some((h) => h.id === named)) hits.unshift({ id: named, score: ALIAS_SCORE })
@@ -162,5 +162,5 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
       clarify = rival ? `Did you mean ${candidates[0].name} or ${rival.name}?` : undefined
     }
     return { phrase, confidence, candidates, clarify, unknown }
-  })
+  }))
 }

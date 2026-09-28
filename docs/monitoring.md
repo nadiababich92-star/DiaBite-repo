@@ -80,3 +80,37 @@ to a user account. It is operational telemetry for deciding whether the agent
 is behaving, and the feed that keeps the eval set honest. Storing meals
 against identified people is a different decision with a different bar —
 see the Responsible AI section of the PRD.
+
+---
+
+# The food index in Postgres
+
+The engine can read its food index from Supabase (`pgvector`) instead of the
+2 MB index built into the image. It does so when `SUPABASE_URL` and
+`SUPABASE_PUBLISHABLE_KEY` are set **and** a probe query answers at startup;
+otherwise it says so once and runs on the embedded index, which holds the same
+data. Every later fallback is logged too — a database that has gone quiet
+should be visible, not invisible.
+
+Both keys are browser-safe: `public.foods` is reference data about food, with
+row-level security allowing `select` and nothing else.
+
+**The repository stays the source of truth.** `data/recipes-db` plus
+`src/data/foods.ts` and the embeddings built from them are what the table is
+filled from, so a row edited by hand in Supabase is lost at the next sync.
+
+```bash
+npm run sync:foods    # needs SUPABASE_DB_URL in .env.local
+```
+
+The script upserts every record with its vector and deletes rows that no longer
+exist, so a food removed from the repository cannot linger in search results.
+Run it after any change to the food data, the aliases or the embedding model.
+
+**Why a database at all**, when 1,436 vectors search in five milliseconds in
+memory: food coverage is the part of the product that will change most often,
+and in the table it changes without rebuilding an image; and the filters that
+used to run in code after over-fetching (`topK × 8`) can run in the query.
+Neither reason is speed, and the fallback exists because a free project pauses
+after a week of quiet — a sleeping database should cost a few hundred
+milliseconds, not the demo.

@@ -24,7 +24,7 @@
 import express from 'express'
 import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
-import { loadOrBuildIndex, type VectorStore } from './embeddings'
+import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
 import { computeMeal, dayState, findAlternatives } from './compute'
 import { verify } from './verify'
@@ -41,7 +41,7 @@ async function main() {
   const t0 = Date.now()
   const { records } = loadFoods()
   console.log(`foods loaded: ${records.length} records`)
-  const store: VectorStore = await loadOrBuildIndex(records)
+  const store: VectorStore = await openStore(records)
   console.log(`ready in ${Date.now() - t0} ms`)
 
   const app = express()

@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { env, pipeline, type FeatureExtractionPipeline } from '@huggingface/transformers'
 import type { FoodRecord } from './foods'
+import { PgVectorStore, pgConfigFromEnv } from './pg-store'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(here, '..')
@@ -35,9 +36,15 @@ export async function embed(texts: string[]): Promise<Float32Array[]> {
 
 export interface SearchHit { id: string; score: number }
 
+/**
+ * Where vectors live.
+ *
+ * Async because one implementation is a database: the in-memory one answers
+ * immediately and simply resolves.
+ */
 export interface VectorStore {
-  search(query: Float32Array, k: number, filter?: (id: string) => boolean): SearchHit[]
-  vectorOf(id: string): Float32Array | undefined
+  search(query: Float32Array, k: number, filter?: (id: string) => boolean): Promise<SearchHit[]>
+  vectorOf(id: string): Promise<Float32Array | undefined>
 }
 
 export class MemoryVectorStore implements VectorStore {
@@ -46,12 +53,12 @@ export class MemoryVectorStore implements VectorStore {
     ids.forEach((id, i) => this.index.set(id, i))
   }
 
-  vectorOf(id: string) {
+  async vectorOf(id: string) {
     const i = this.index.get(id)
     return i === undefined ? undefined : this.vectors.subarray(i * DIM, (i + 1) * DIM)
   }
 
-  search(query: Float32Array, k: number, filter?: (id: string) => boolean): SearchHit[] {
+  async search(query: Float32Array, k: number, filter?: (id: string) => boolean): Promise<SearchHit[]> {
     const hits: SearchHit[] = []
     for (let i = 0; i < this.ids.length; i++) {
       const id = this.ids[i]
@@ -70,6 +77,24 @@ const BIN = join(ROOT, 'data', 'recipes-db', 'embeddings.bin')
 const IDS = join(ROOT, 'data', 'recipes-db', 'embeddings.ids.json')
 
 /** Load the persisted index if it matches the current records, else build and persist it. */
+/**
+ * The store the engine will use.
+ *
+ * The embedded index is built or loaded either way — it is the fallback, and it
+ * costs 2 MB in the image. If a Supabase project is configured and answers a
+ * probe, queries go there; if it does not, the engine says so once and runs on
+ * the embedded index, which is the same data.
+ */
+export async function openStore(records: FoodRecord[], log = console.log): Promise<VectorStore> {
+  const memory = await loadOrBuildIndex(records, log)
+  const cfg = pgConfigFromEnv()
+  if (!cfg) return memory
+  const pg = new PgVectorStore(cfg, memory, log)
+  if (!(await pg.check())) return memory
+  log('vector search: Supabase pgvector, with the embedded index as fallback')
+  return pg
+}
+
 export async function loadOrBuildIndex(records: FoodRecord[], log = console.log): Promise<VectorStore> {
   const wantIds = records.map((r) => r.id)
   if (existsSync(BIN) && existsSync(IDS)) {
