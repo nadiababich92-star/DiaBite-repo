@@ -497,10 +497,17 @@ function memoryStores() {
  */
 async function recallPreferences(sessionId: string, message: string): Promise<string> {
   try {
-    const res = await memoryStores().searchMemories(MEMORY_STORE, memoryScope(sessionId), {
-      items: [{ role: 'user', type: 'message', content: message }],
-      options: { max_memories: 5 },
-    })
+    // Bounded, because this is a nicety. The memory store is reached with the
+    // managed identity, and when that path is unhealthy the call does not fail
+    // fast — it hangs, and an advisory turn hangs with it. Three seconds of
+    // waiting for a preference is already more than a preference is worth.
+    const res = await Promise.race([
+      memoryStores().searchMemories(MEMORY_STORE, memoryScope(sessionId), {
+        items: [{ role: 'user', type: 'message', content: message }],
+        options: { max_memories: 5 },
+      }),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('memory search timed out')), 3000)),
+    ])
     const lines = (res.memories ?? []).map((m) => m.content).filter(Boolean) as string[]
     return lines.length ? `\n\nWhat this person has told you before: ${lines.join('; ')}` : ''
   } catch (e) {
