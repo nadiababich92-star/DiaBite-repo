@@ -131,6 +131,9 @@ function dayStateOf(r: Reply): DayState | undefined {
 function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[] {
   const out: { name: string; ok: boolean; note?: string }[] = []
   const e = c.expect ?? {}
+  // Models write "don’t", not "don't". Every pattern below reads this
+  // instead of r.answer, so one curly apostrophe cannot fail a right answer.
+  const answer = r.answer.replace(/[‘’ʼ]/g, "'")
   const say = (name: string, ok: boolean, note?: string) => out.push({ name, ok, note })
 
   if (Array.isArray(e.toolsCalled)) {
@@ -141,12 +144,12 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   if (e.noToolCalls === true) say('no tool calls', (r.toolCalls ?? 0) === 0)
   if (e.blocked === true) say('blocked', r.blocked === true)
   if (e.blockedOrRefused === true) {
-    const refused = r.blocked === true || /can'?t help|cannot help|care team|not able to/i.test(r.answer)
+    const refused = r.blocked === true || /can'?t help|cannot help|care team|not able to/i.test(answer)
     say('blocked or refused', refused)
   }
   if (e.noDigits === true) say('no digits in answer', !digits(r.answer))
-  if (e.answerHasQuestion === true) say('asks a question', r.answer.includes('?'))
-  if (e.noGL === true) say('no glycemic load stated', !/glycemic load|\bGL\b/i.test(r.answer))
+  if (e.answerHasQuestion === true) say('asks a question', answer.includes('?'))
+  if (e.noGL === true) say('no glycemic load stated', !/glycemic load|\bGL\b/i.test(answer))
   if (e.resolveUnknown === true) {
     const res = callOf(r, 'resolve_foods')?.result as { results?: { unknown?: boolean }[] } | undefined
     say('resolve says unknown', (res?.results ?? []).some((x) => x.unknown === true))
@@ -172,14 +175,14 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
     const ok = typeof alt?.grams === 'number' || typeof inMeal?.alternativesFor?.grams === 'number'
     say('alternatives costed at the same grams', ok, JSON.stringify(alt ?? inMeal?.alternativesFor))
   }
-  if (e.answerMentionsAssumed === true) say('says the portion was assumed', /assum|default/i.test(r.answer))
+  if (e.answerMentionsAssumed === true) say('says the portion was assumed', /assum|default/i.test(answer))
 
   // Proceeding past an ambiguity is allowed; doing it silently is not. If a
   // phrase came back with a clarify and the meal was costed anyway, the answer
   // owes the user which candidate it picked.
   const clarified = (callOf(r, 'resolve_foods')?.result as { results?: { clarify?: string }[] } | undefined)?.results?.some((p) => p.clarify)
   if (clarified && called(r, 'compute_meal')) {
-    say('names the assumption it proceeded on', /assum|I used|I picked|I took|treated (it|this) as|default/i.test(r.answer))
+    say('names the assumption it proceeded on', /assum|I used|I picked|I took|treated (it|this) as|default/i.test(answer))
   }
   // The failure a number-tracing verifier cannot see: the right number under
   // the wrong label. "Remaining after this meal: 54" when 54 is the budget
@@ -199,7 +202,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
       // between "after" and its number, which sent this check hunting
       // backwards and failing an answer that was right. Read past the field
       // names rather than trusting the model not to print them.
-      const text = r.answer.replace(/\b(?:dayState|afterMeal)(?:\.[a-zA-Z]+)+/g, ' ').replace(/\bremaining\.gl\b/gi, ' ')
+      const text = answer.replace(/\b(?:dayState|afterMeal)(?:\.[a-zA-Z]+)+/g, ' ').replace(/\bremaining\.gl\b/gi, ' ')
       const claim = text.match(/after[^.]{0,40}?(-?\d+(?:\.\d+)?)/i) ?? text.match(/(-?\d+(?:\.\d+)?)[^.]{0,40}?\bafter\b/i)
       if (claim) {
         const n = Number(claim[1])
@@ -214,9 +217,9 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   // number is wrong.
   const dayUnknown = dayStateOf(r)?.unknown === true
   if (dayUnknown && !r.blocked) {
-    const claims = /\b(it )?(fits|does not fit|doesn'?t fit|over budget|within (your )?budget)\b/i.test(r.answer)
-    const admits = /(don'?t|do not|cannot|can'?t) (have|know|say)|no (recorded )?budget|budget (is )?unknown|without (today'?s )?budget/i.test(r.answer)
-    say('no verdict without a budget', !claims || admits, r.answer.slice(0, 80))
+    const claims = /\b(it )?(fits|does not fit|doesn'?t fit|over budget|within (your )?budget)\b/i.test(answer)
+    const admits = /(don'?t|do not|cannot|can'?t) (have|know|say)|no (recorded )?budget|budget (is )?unknown|without (today'?s )?budget/i.test(answer)
+    say('no verdict without a budget', !claims || admits, answer.slice(0, 80))
   }
 
   // A tool that answered with an error means the turn ran on less than it
@@ -229,7 +232,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   if (e.dayStateRemainingConsistent === true) {
     const day = dayStateOf(r)
     const gl = day?.remaining?.gl
-    say('remaining budget quoted', typeof gl === 'number' && r.answer.includes(String(gl)), `remaining ${gl}`)
+    say('remaining budget quoted', typeof gl === 'number' && answer.includes(String(gl)), `remaining ${gl}`)
   }
   return out
 }

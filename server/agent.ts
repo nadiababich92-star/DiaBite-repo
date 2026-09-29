@@ -53,11 +53,19 @@ const PROJECT_ENDPOINT = process.env.PROJECT_ENDPOINT ?? ''
  * what made ten of seventy questions fail with 502 in an earlier run.
  * The advisor writes prose with no tools and no numbers. Only the meal agent
  * has to pick four tools in order and keep arithmetic discipline, and it is
- * the one the evaluations validated, so it does not move without a run.
+ * the one the evaluations validated, so it did not move without a run.
+ *
+ * It moved on one: gpt-5.4-mini answers the same 71 cases at a p90 of 9.6 s
+ * against 21.8 s, and its deployment holds 200k tokens a minute where
+ * gpt-5-mini holds 50k — the ceiling that turned a run's own speed into
+ * eight-second waits. It is also the more careful of the two: where gpt-5-mini
+ * costed "chicken tacos" as a lentil taco recipe, this one says it does not
+ * have the food. The price is four more clarifying questions across
+ * fifty-five meals.
  */
 const MODELS: Record<string, string> = {
   triage: process.env.MODEL_TRIAGE ?? 'gpt-54-nano',
-  meal: process.env.MODEL_MEAL ?? process.env.MODEL_DEPLOYMENT_NAME ?? 'gpt-5-mini',
+  meal: process.env.MODEL_MEAL ?? process.env.MODEL_DEPLOYMENT_NAME ?? 'gpt-54-mini',
   advisor: process.env.MODEL_ADVISOR ?? 'gpt-54-mini',
 }
 const AGENT_PREFIX = process.env.AGENT_PREFIX ?? 'diabite'
