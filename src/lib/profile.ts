@@ -294,6 +294,7 @@ export const DEFAULT_PROFILE: Profile = {
   kidney: 'none',
   comorbidities: [],
   allergens: [],
+  pattern: 'none',
   units: 'imperial',
   onboarded: false,
 }

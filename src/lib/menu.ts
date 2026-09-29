@@ -1,4 +1,5 @@
 import { DISHES } from '../data/dishes'
+import { dietaryReason } from './dietary'
 import { getFood } from '../data/foods'
 import type { Dish, FoodCategory, MealType, Nutrients, Profile, Targets } from '../types'
 import { glycemicLoad, nutrientsFor, sumNutrients, weightedGI } from './glycemic'
@@ -43,6 +44,8 @@ export interface PlannedDay {
 export interface WeekPlan {
   days: PlannedDay[]
   seed: number
+  /** How many dishes survived this person's restrictions, out of the library. */
+  pool: { available: number; total: number }
 }
 
 /** Deterministic PRNG, so the same seed reproduces the same menu. */
@@ -111,7 +114,19 @@ export function generateWeek(profile: Profile, targets: Targets, seed = Date.now
   const rnd = mulberry32(seed)
   const excluded = new Set(profile.excludedFoodIds)
 
-  const available = DISHES.filter((d) => !d.items.some((it) => excluded.has(it.foodId)))
+  // A week of meals has to respect the same answers the agent respects. It did
+  // not: onboarding has been collecting allergens and an eating pattern while
+  // this filtered on the hand-picked exclusions alone, so a celiac could be
+  // handed a week with pasta in it.
+  const avoid = { allergens: profile.allergens, pattern: profile.pattern }
+  const forbidden = (d: (typeof DISHES)[number]) => {
+    if (d.items.some((it) => excluded.has(it.foodId))) return true
+    const text = [d.name, ...d.items.map((it) => getFood(it.foodId)?.name ?? '')].join(' ')
+    return dietaryReason(text, avoid) !== null
+  }
+
+  const available = DISHES.filter((d) => !forbidden(d))
+  const pool = { available: available.length, total: DISHES.length }
 
   /** dishId -> index of the day the dish was last used. */
   const lastUsed = new Map<string, number>()
@@ -174,7 +189,7 @@ export function generateWeek(profile: Profile, targets: Targets, seed = Date.now
     })
   }
 
-  return { days, seed }
+  return { days, seed, pool }
 }
 
 /** Aggregated weekly shopping list: food -> total grams. */

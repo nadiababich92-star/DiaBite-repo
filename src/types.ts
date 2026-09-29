@@ -96,8 +96,8 @@ export type Med = 'metformin' | 'sulfonylurea' | 'sglt2' | 'glp1' | 'other'
 export type Kidney = 'none' | 'mentioned' | 'ckd' | 'dialysis'
 export type Comorbidity =
   | 'htn' | 'ascvd' | 'masld' | 'gout' | 'gastroparesis' | 'celiac' | 'pcos' | 'eatingDisorder'
-export type Allergen =
-  | 'milk' | 'egg' | 'fish' | 'shellfish' | 'treenuts' | 'peanuts' | 'wheat' | 'soy' | 'sesame' | 'gluten' | 'lactose'
+import type { Allergen, Pattern } from './lib/dietary'
+export type { Allergen, Pattern }
 
 /** Why a target is not the formula's raw output. Shown to the user, never hidden. */
 export interface Constraint {
@@ -131,6 +131,8 @@ export interface Profile {
   kidney: Kidney
   comorbidities: Comorbidity[]
   allergens: Allergen[]
+  /** Vegetarian, vegan, halal, kosher — filtered out of every suggestion. */
+  pattern: Pattern
   /** Inches and pounds on screen; the stored values stay metric. */
   units: 'imperial' | 'metric'
   /** The disclaimer was acknowledged and onboarding finished (PRD A4). */

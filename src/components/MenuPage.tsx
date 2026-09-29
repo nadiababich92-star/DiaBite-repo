@@ -30,6 +30,12 @@ export default function MenuPage({ profile, targets }: Props) {
               Averaging {avgKcal.toFixed(0)} kcal and GL {avgGL.toFixed(0)} a day, against a target of{' '}
               {targets.kcal} kcal and GL {targets.glBudget}.
             </p>
+            {plan.pool.available < plan.pool.total && (
+              <p className="muted" style={{ margin: '4px 0 0' }}>
+                {plan.pool.available} of {plan.pool.total} dishes fit what you avoid
+                {plan.pool.available < 12 && ' — too few for a week without repeats, so the same meals come round quickly. More recipes are the fix, not fewer restrictions.'}
+              </p>
+            )}
           </div>
           <div className="row">
             <button className="ghost" onClick={() => setShowList((v) => !v)}>

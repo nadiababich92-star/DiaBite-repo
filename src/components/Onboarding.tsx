@@ -4,8 +4,9 @@ import {
   EXIT_COPY, GOAL_LABELS, INSULIN_LABELS, KIDNEY_LABELS, MED_LABELS,
   calculateTargets, carbApproachBlocked, cmToFtIn, exitReason, ftInToCm, kgToLb, lbToKg,
 } from '../lib/profile'
+import { PATTERN_LABELS } from '../lib/dietary'
 import type {
-  Activity, Allergen, CarbApproach, Comorbidity, Condition, Goal, Insulin, Kidney, Med, Profile, Sex,
+  Activity, Allergen, CarbApproach, Comorbidity, Condition, Goal, Insulin, Kidney, Med, Pattern, Profile, Sex,
 } from '../types'
 
 interface Props {
@@ -24,6 +25,7 @@ const KIDNEYS: Kidney[] = ['none', 'mentioned', 'ckd', 'dialysis']
 const COMORBIDITIES: Comorbidity[] = ['htn', 'ascvd', 'masld', 'gout', 'gastroparesis', 'celiac', 'pcos', 'eatingDisorder']
 const ALLERGENS: Allergen[] = ['milk', 'egg', 'fish', 'shellfish', 'treenuts', 'peanuts', 'wheat', 'soy', 'sesame', 'gluten', 'lactose']
 const APPROACHES: CarbApproach[] = ['moderate', 'low', 'verylow']
+const PATTERNS: Pattern[] = ['none', 'vegetarian', 'vegan', 'halal', 'kosher']
 const GOALS: Goal[] = ['lose', 'maintain', 'gain']
 
 /** Toggle membership in a list-valued profile field. */
@@ -258,6 +260,16 @@ export default function Onboarding({ initial, onDone, onCancel }: Props) {
                       aria-pressed={p.comorbidities.includes(c)}
                       onClick={() => set('comorbidities', toggle(p.comorbidities, c))}>
                       {COMORBIDITY_LABELS[c]}
+                    </button>
+                  ))}
+                </div>
+
+                <h3>How you eat</h3>
+                <div className="chips">
+                  {PATTERNS.map((v) => (
+                    <button key={v} className={`chip-toggle${p.pattern === v ? ' on' : ''}`}
+                      aria-pressed={p.pattern === v} onClick={() => set('pattern', v)}>
+                      {PATTERN_LABELS[v]}
                     </button>
                   ))}
                 </div>
