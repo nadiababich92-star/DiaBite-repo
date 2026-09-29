@@ -488,15 +488,23 @@ async function recallPreferences(sessionId: string, message: string): Promise<st
  * everything expires after 90 days.
  */
 function rememberPreferences(sessionId: string, message: string, answer: string): void {
-  memoryStores()
-    .updateMemories(MEMORY_STORE, memoryScope(sessionId), {
+  // `updateDelayInSecs: 0` writes now instead of five minutes from now. The
+  // default exists so a chatty conversation is summarised once rather than per
+  // turn; here a turn is the whole conversation, and a delayed operation is one
+  // the poller cannot find yet ("DoesNotExist").
+  try {
+    const poller = memoryStores().updateMemories(MEMORY_STORE, memoryScope(sessionId), {
       items: [
         { role: 'user', type: 'message', content: message },
         { role: 'assistant', type: 'message', content: answer },
       ],
+      updateDelayInSecs: 0,
     })
-    .pollUntilDone()
-    .catch((e: Error) => console.warn(`[memory] update skipped: ${e.message.slice(0, 120)}`))
+    // Started, not awaited: the answer is already on its way to the browser.
+    void poller.pollUntilDone().catch((e: Error) => console.warn(`[memory] update skipped: ${e.message.slice(0, 140)}`))
+  } catch (e) {
+    console.warn(`[memory] update skipped: ${(e as Error).message.slice(0, 140)}`)
+  }
 }
 
 /** One request to one agent, waiting out the per-minute token limit. */
