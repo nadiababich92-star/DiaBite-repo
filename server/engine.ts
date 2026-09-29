@@ -52,7 +52,7 @@ async function main() {
   // OpenAPI tool and by nothing else, so it carries a shared key. The product
   // surface (/agent/ask) is called by the browser, which cannot hold a secret.
   const API_KEY = process.env.ENGINE_API_KEY
-  const GUARDED = /^\/(tools|session|verify)\b/
+  const GUARDED = /^\/(tools|session|verify|diag)\b/
   if (API_KEY) {
     app.use((req, res, next) => {
       if (!GUARDED.test(req.path)) return next()
