@@ -89,6 +89,47 @@ async function main() {
     res.json({ ok: true, sessionId: req.params.id, entries: entries.length })
   })
 
+  /**
+   * Can this process reach Foundry, and how fast?
+   *
+   * Added because the same call takes 17 seconds from a laptop and hangs for
+   * eight minutes from inside the container. Three timings separate the
+   * possible culprits: DNS and TLS to the endpoint, a cheap authenticated read,
+   * and one real agent turn.
+   */
+  app.get('/diag/foundry', async (_req, res) => {
+    const endpoint = process.env.PROJECT_ENDPOINT ?? ''
+    const key = process.env.PROJECT_API_KEY ?? ''
+    const out: Record<string, unknown> = { endpoint: endpoint.replace(/https:\/\/([^.]+).*/, '$1…'), key: key ? `${key.length} chars` : 'none' }
+
+    const timed = async (name: string, run: () => Promise<string>) => {
+      const t0 = Date.now()
+      try { out[name] = { ms: Date.now() - t0, result: await run() } }
+      catch (e) { out[name] = { ms: Date.now() - t0, error: (e as Error).message.slice(0, 160) } }
+    }
+
+    await timed('reach', async () => {
+      const r = await fetch(`${endpoint}/openai/v1/models`, {
+        headers: key ? { 'api-key': key } : {},
+        signal: AbortSignal.timeout(10_000),
+      })
+      return `${r.status}`
+    })
+
+    await timed('turn', async () => {
+      const r = await fetch(`${endpoint}/openai/v1/responses`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...(key ? { 'api-key': key } : {}) },
+        body: JSON.stringify({ input: 'hello', agent_reference: { name: 'diabite-triage', type: 'agent_reference' } }),
+        signal: AbortSignal.timeout(45_000),
+      })
+      const text = await r.text()
+      return `${r.status} ${text.slice(0, 80)}`
+    })
+
+    res.json(out)
+  })
+
   app.get('/foods/:id', (req, res) => {
     try { res.json(summary(getRecord(req.params.id))) }
     catch (e) { res.status(404).json({ error: (e as Error).message }) }
