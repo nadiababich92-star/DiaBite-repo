@@ -61,7 +61,7 @@ export function openApiSpec() {
           operationId: 'compute_meal',
           summary: 'Compute the nutrition and glycemic load of a meal',
           description:
-            'Compute calories, carbohydrate, fibre, available carbohydrate, glycemic index and glycemic load for a set of portions. This is the only source of numbers for a meal. Give `grams` for ingredients and `servings` for recipes, using the ids from resolve_foods.',
+            'Compute calories, carbohydrate, fibre, available carbohydrate, glycemic index and glycemic load for a set of portions. This is the only source of numbers for a meal. Give `grams` for ingredients and `servings` for recipes, using the ids from resolve_foods. With a session id the reply also carries `dayState` (the budget before the meal) and `afterMeal` — what is left once this meal is counted, and `fits`, which is the verdict. Nothing else has to be fetched or worked out after this call.',
           requestBody: {
             required: true,
             content: {
@@ -91,7 +91,7 @@ export function openApiSpec() {
               },
             },
           },
-          responses: { '200': { description: 'Per-item numbers and totals.' } },
+          responses: { '200': { description: 'Per-item numbers and totals, plus `dayState`, `afterMeal` and any `alternatives` when a session id was passed.' } },
         },
       },
 

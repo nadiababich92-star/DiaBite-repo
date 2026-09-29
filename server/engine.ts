@@ -205,6 +205,18 @@ async function main() {
       // Swaps in the same breath, but only when the meal needs them: over what
       // is left of the day, or heavy on its own. Asking for them on a meal that
       // fits would spend a search to print nothing.
+      // The one number the model kept making a third call to look for: what
+      // is left once this meal is counted. Negative means over budget, and is
+      // returned as such — "fits" is the engine's verdict, not the model's.
+      if (day && !('unknown' in day)) {
+        const after = {
+          gl: Math.round((day.remaining.gl - meal.totals.gl) * 10) / 10,
+          carbsG: Math.round((day.remaining.carbsG - meal.totals.carbs) * 10) / 10,
+          kcal: Math.round(day.remaining.kcal - meal.totals.kcal),
+        }
+        out.afterMeal = { remaining: after, fits: after.gl >= 0 }
+      }
+
       const remaining = day && !('unknown' in day) ? day.remaining.gl : undefined
       const needsHelp = meal.totals.glLevel === 'high' || (remaining !== undefined && meal.totals.gl > remaining)
       if (body.withAlternatives && needsHelp) {

@@ -113,6 +113,13 @@ export interface ComputeMealResponse {
   totals: MealTotals
   /** Today's budget, when a session id came with the request. */
   dayState?: DayStateResponse | DayStateUnknown
+  /**
+   * What would be left of the day if this meal were eaten, and whether it
+   * fits. The verdict is the first thing the answer has to state, so the
+   * engine states it rather than letting the model subtract — and rather than
+   * letting it spend a round trip looking for a number nobody returned.
+   */
+  afterMeal?: { remaining: { gl: number; carbsG: number; kcal: number }; fits: boolean }
   /** Swaps for the heaviest item, when the meal needed them. */
   alternatives?: Alternative[]
   /** Which item the alternatives replace. */
