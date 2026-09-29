@@ -104,8 +104,15 @@ async function main() {
 
     const timed = async (name: string, run: () => Promise<string>) => {
       const t0 = Date.now()
-      try { out[name] = { ms: Date.now() - t0, result: await run() } }
-      catch (e) { out[name] = { ms: Date.now() - t0, error: (e as Error).message.slice(0, 160) } }
+      // The elapsed time is read after the call, not built into the object
+      // literal beside the await — which is how the first version of this
+      // endpoint reported every call as taking zero milliseconds.
+      try {
+        const result = await run()
+        out[name] = { ms: Date.now() - t0, result }
+      } catch (e) {
+        out[name] = { ms: Date.now() - t0, error: (e as Error).message.slice(0, 160) }
+      }
     }
 
     await timed('reach', async () => {
@@ -115,6 +122,26 @@ async function main() {
       })
       return `${r.status}`
     })
+
+    // The tool-using turn, which is the one that hangs in the real path. Same
+    // agent, same key, a plain fetch from this process: if this answers and the
+    // engine's own turn does not, the difference is ours, not Foundry's.
+    if ('meal' in _req.query) {
+      await timed('meal', async () => {
+        const r = await fetch(`${endpoint}/openai/v1/responses`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', ...(key ? { 'api-key': key } : {}) },
+          body: JSON.stringify({
+            input: '[session_id: diag]\n\ngreek yogurt with blueberries',
+            agent_reference: { name: 'diabite-meal', type: 'agent_reference' },
+            tool_choice: 'required',
+          }),
+          signal: AbortSignal.timeout(120_000),
+        })
+        const body = (await r.json()) as { output?: { type?: string }[] }
+        return `${r.status} items: ${(body.output ?? []).map((o) => o.type).join(',').slice(0, 120)}`
+      })
+    }
 
     await timed('turn', async () => {
       const r = await fetch(`${endpoint}/openai/v1/responses`, {
