@@ -156,6 +156,13 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
     const band = res?.results?.[0]?.confidence
     say(`resolve band ${e.resolveBand}`, band === e.resolveBand, `got ${band}`)
   }
+  if (e.alternativesReturned === true) {
+    // Swaps arrive either way now: with the meal, or from a call of their own.
+    const inMeal = (callOf(r, 'compute_meal')?.result as { alternatives?: unknown[] } | undefined)?.alternatives
+    const own = (callOf(r, 'find_alternatives')?.result as { alternatives?: unknown[] } | undefined)?.alternatives
+    const n = (inMeal?.length ?? 0) + (own?.length ?? 0)
+    say('a swap was offered', n > 0, `${n} alternatives`)
+  }
   if (e.alternativesGramsPassed === true) {
     // Either the agent asked for swaps itself at the right weight, or the meal
     // call returned them — in which case the engine costed them at the item's
@@ -179,15 +186,24 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   // before it tells someone they have room they do not have.
   if (called(r, 'compute_meal')) {
     const day = dayStateOf(r)
-    const meal = callOf(r, 'compute_meal')?.result as { totals?: { gl?: number } } | undefined
+    const meal = callOf(r, 'compute_meal')?.result as
+      { totals?: { gl?: number }; afterMeal?: { remaining?: { gl?: number } } } | undefined
     const before = day?.remaining?.gl
     const mealGl = meal?.totals?.gl
-    if (typeof before === 'number' && typeof mealGl === 'number') {
-      const after = Math.round((before - mealGl) * 10) / 10
-      const claim = r.answer.match(/after[^.]*?(\d+(?:\.\d+)?)/i) ?? r.answer.match(/(\d+(?:\.\d+)?)[^.]*?\bafter\b/i)
+    // The engine returns the after-figure now; subtracting is the fallback for
+    // a reply that predates it.
+    const after = meal?.afterMeal?.remaining?.gl
+      ?? (typeof before === 'number' && typeof mealGl === 'number' ? Math.round((before - mealGl) * 10) / 10 : undefined)
+    if (typeof after === 'number') {
+      // A model that writes the field name — "remaining.gl 48.9" — put a dot
+      // between "after" and its number, which sent this check hunting
+      // backwards and failing an answer that was right. Read past the field
+      // names rather than trusting the model not to print them.
+      const text = r.answer.replace(/\b(?:dayState|afterMeal)(?:\.[a-zA-Z]+)+/g, ' ').replace(/\bremaining\.gl\b/gi, ' ')
+      const claim = text.match(/after[^.]{0,40}?(-?\d+(?:\.\d+)?)/i) ?? text.match(/(-?\d+(?:\.\d+)?)[^.]{0,40}?\bafter\b/i)
       if (claim) {
         const n = Number(claim[1])
-        say('"after" figure is before minus meal', Math.abs(n - after) < 0.15, `said ${n}, should be ${after} (before ${before} − meal ${mealGl})`)
+        say('"after" figure matches the engine', Math.abs(n - after) < 0.15, `said ${n}, should be ${after}`)
       }
     }
   }
@@ -228,6 +244,14 @@ const dataset: Record<string, unknown>[] = []
 const tools = toolDefinitions()
 let checksRun = 0, checksFailed = 0
 
+// Say where the run is pointed. A `npm run eval:agent` with no AGENT_URL
+// silently answered against a dev server left running on 8787, which has no
+// Foundry credentials: the safety rows passed on the rules gate and every
+// other row came back 502, and the run still wrote a dataset. Naming the
+// target — and stopping when the first rows all fail at the transport — makes
+// that a message instead of twelve minutes and a misleading file.
+console.log(`asking ${AGENT_URL}\n`)
+
 for (const c of runnable) {
   process.stdout.write(`${c.id.padEnd(4)} ${c.query.slice(0, 48).padEnd(50)}`)
   const sessionId = `eval-${c.id}-${Date.now()}`
@@ -247,6 +271,10 @@ for (const c of runnable) {
     // so it is counted and named rather than skipped past.
     failures.push(`${c.id} HTTP ${res.status}`)
     console.log(`HTTP ${res.status}`)
+    if (failures.length === 3 && latencies.length === 0) {
+      console.error(`\nthe first three questions all failed at ${AGENT_URL} — nothing to measure. Point AGENT_URL at a running agent.`)
+      process.exit(1)
+    }
     continue
   }
   const reply = (await res.json()) as Reply
