@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import AskPage from './components/AskPage'
 import DiaryPage from './components/DiaryPage'
+import FeedbackModal from './components/FeedbackModal'
+import Onboarding from './components/Onboarding'
 import MenuPage from './components/MenuPage'
 import ProfilePage from './components/ProfilePage'
 import { calculateTargets } from './lib/profile'
@@ -18,6 +20,10 @@ const TABS: { id: Tab; label: string }[] = [
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('ask')
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
+  // Onboarding is the first screen until it has been completed once (PRD A4);
+  // afterwards it can be reopened from the profile tab.
+  const [onboarding, setOnboarding] = useState(false)
   const [profile, setProfile] = useState<Profile>(loadProfile)
   const [diary, setDiary] = useState<DiaryEntry[]>(loadDiary)
 
@@ -25,6 +31,22 @@ export default function App() {
   useEffect(() => saveDiary(diary), [diary])
 
   const targets = useMemo(() => calculateTargets(profile), [profile])
+
+  if (!profile.onboarded || onboarding) {
+    return (
+      <div className="app">
+        <header className="masthead">
+          <h1>DiaBite</h1>
+          <p>Nutrition for type 2 diabetes and insulin resistance</p>
+        </header>
+        <Onboarding
+          initial={profile}
+          onDone={(p) => { setProfile(p); setOnboarding(false) }}
+          onCancel={profile.onboarded ? () => setOnboarding(false) : undefined}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="app">
@@ -40,29 +62,39 @@ export default function App() {
         diet with your clinician.
       </div>
 
-      <nav className="tabs" role="tablist">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            role="tab"
-            aria-selected={tab === t.id}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
+      <nav className="tabs">
+        <div className="tab-row" role="tablist">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              role="tab"
+              aria-selected={tab === t.id}
+              onClick={() => setTab(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <button className="tab-action" onClick={() => setFeedbackOpen(true)}>Feedback</button>
       </nav>
 
       {tab === 'ask' && (
-        <AskPage targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} />
+        <AskPage profile={profile} targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} />
       )}
       {tab === 'diary' && (
         <DiaryPage targets={targets} diary={diary} onChange={setDiary} />
       )}
       {tab === 'menu' && <MenuPage profile={profile} targets={targets} />}
       {tab === 'profile' && (
-        <ProfilePage profile={profile} targets={targets} onChange={setProfile} />
+        <ProfilePage
+          profile={profile}
+          targets={targets}
+          onChange={setProfile}
+          onRedoOnboarding={() => setOnboarding(true)}
+        />
       )}
+
+      {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
     </div>
   )
 }

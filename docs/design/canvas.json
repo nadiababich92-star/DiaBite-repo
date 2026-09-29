@@ -1,0 +1,71 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Can I eat this? (prototype)",
+      "is_interactive": true
+    },
+    {
+      "file": "Day.dc.html",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Today"
+    },
+    {
+      "file": "Targets.dc.html",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Targets, with reasons"
+    },
+    {
+      "file": "DirectionB.dc.html",
+      "x": 0,
+      "y": 1000,
+      "w": 390,
+      "h": 844,
+      "title": "Direction B — data-first"
+    },
+    {
+      "file": "DirectionC.dc.html",
+      "x": 470,
+      "y": 1000,
+      "w": 390,
+      "h": 844,
+      "title": "Direction C — chat-first"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "lead-direction",
+      "x": 1410,
+      "y": 0,
+      "w": 300,
+      "text": "Lead direction — the receipt.\n\nNo app on the market shows its arithmetic. Levels and ZOE give a score you can't question; MyFitnessPal gives a database and 3–5 minutes of work per meal. The gap is a legible answer.\n\nVerdict first, in a human voice. Then the number. The receipt on demand — every line traceable. No rings, streaks or scores.\n\nType and colour follow the PRD identity: Literata, IBM Plex, deep green."
+    },
+    {
+      "id": "prototype-note",
+      "x": 1410,
+      "y": 300,
+      "w": 300,
+      "text": "The prototype is clickable. Try all three chips: the bowl asks one question and branches on the answer; the insulin question is refused; kugel gets an honest 'no verified data'. Show calculation opens the receipt and the tool trace.\n\nEvery scenario starts from the same moment of the day — 21 of 54 left — so the answers stay comparable.\n\nAll numbers are sample values computed by hand from the seed database — not model output."
+    },
+    {
+      "id": "alternates",
+      "x": 940,
+      "y": 1000,
+      "w": 300,
+      "text": "Two other directions, low-fi.\n\nB puts the numbers first — honest, but it looks like every tracker people have quit.\n\nC leans into the conversation — the agent is visible, but the receipt and the day fight for room in a chat column.\n\nThe lead borrows from both: text-first input from C, the receipt's rigour from B."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

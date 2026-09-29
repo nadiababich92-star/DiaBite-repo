@@ -12,9 +12,11 @@ interface Props {
   profile: Profile
   targets: Targets
   onChange: (p: Profile) => void
+  /** Reopens the onboarding flow, where the medical answers live. */
+  onRedoOnboarding: () => void
 }
 
-export default function ProfilePage({ profile, targets, onChange }: Props) {
+export default function ProfilePage({ profile, targets, onChange, onRedoOnboarding }: Props) {
   const [query, setQuery] = useState('')
 
   const set = <K extends keyof Profile>(key: K, value: Profile[K]) =>
@@ -143,11 +145,32 @@ export default function ProfilePage({ profile, targets, onChange }: Props) {
             <div className="sub">daily ceiling</div>
           </div>
         </div>
-        <p className="muted" style={{ marginBottom: 0 }}>
+        <p className="muted">
           Calories use Mifflin-St Jeor with an activity factor. Carbohydrate is a share of that
           energy, set by the approach you chose. The glycemic-load ceiling is derived so the diet
           holds a mean GI of about {profile.condition === 't1' || profile.condition === 't2' ? 45 : 50}.
         </p>
+
+        {targets.constraints.length > 0 && (
+          <>
+            <h3>What your answers changed</h3>
+            <ul className="why-list">
+              {targets.constraints.map((c) => (
+                <li key={c.id}>
+                  <span className={`pill ${c.field === 'none' ? 'none' : 'medium'}`}>
+                    {c.field === 'none' ? 'advice' : c.field}
+                  </span>{' '}
+                  {c.reason}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+
+        <div className="row" style={{ marginTop: 14 }}>
+          <button className="ghost" onClick={onRedoOnboarding}>Review my medical answers</button>
+          <span className="muted">Insulin, medicines, kidneys, other conditions</span>
+        </div>
       </section>
 
       <section className="card">

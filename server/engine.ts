@@ -1,0 +1,171 @@
+/**
+ * DiaBite engine service — vector-search edition.
+ *
+ * Every endpoint is a tool the n8n agent can call, and the source of every
+ * number the frontend shows. Stateless: the day's log arrives in the request.
+ *
+ *   npm run server   -> http://localhost:8787
+ *
+ * Endpoints (JSON in / JSON out):
+ *   POST /tools/resolve_foods       { phrases: string[], topK? }
+ *   POST /tools/compute_meal        { items: [{ foodId, grams? | servings? }] }
+ *   POST /tools/get_day_state       { sessionId } | { budget: { glBudget, carbsG, kcal }, entries: [...] }
+ *   POST /tools/find_alternatives   { foodId? | query?, maxGL, topK?, sameCategory? }
+ *   POST /verify                    { answer, toolResults: [...], userText? }
+ *   POST /agent/ask                 { sessionId, message, budget?, entries?, threadId? }
+ *   PUT  /session/:id               { budget, entries, avoid? }  — day state and the
+ *                                   person's allergens/exclusions, both kept
+ *                                   out of the model's hands
+ *   GET  /health · GET /foods/:id · GET /openapi.json
+ *
+ * Index: 350 ingredients + 86 everyday foods + 1,000 recipes, embedded locally
+ * (see embeddings.ts). See contract.ts for the exact shapes.
+ */
+import express from 'express'
+import cors from 'cors'
+import { loadFoods, getRecord, summary } from './foods'
+import { openStore, type VectorStore } from './embeddings'
+import { resolvePhrases } from './resolve'
+import { computeMeal, dayState, findAlternatives } from './compute'
+import { verify } from './verify'
+import { getSession, putSession, sessionCount } from './sessions'
+import { openApiSpec } from './openapi'
+import { ask, type AskRequest } from './agent'
+import type {
+  AlternativesRequest, ComputeMealRequest, DayStateRequest, ResolveRequest, VerifyRequest,
+} from './contract'
+
+const PORT = Number(process.env.PORT ?? 8787)
+
+async function main() {
+  const t0 = Date.now()
+  const { records } = loadFoods()
+  console.log(`foods loaded: ${records.length} records`)
+  const store: VectorStore = await openStore(records)
+  console.log(`ready in ${Date.now() - t0} ms`)
+
+  const app = express()
+  app.use(cors())
+  app.use(express.json({ limit: '1mb' }))
+
+  // Two surfaces, two audiences. The tool surface is called by Foundry's
+  // OpenAPI tool and by nothing else, so it carries a shared key. The product
+  // surface (/agent/ask) is called by the browser, which cannot hold a secret.
+  const API_KEY = process.env.ENGINE_API_KEY
+  const GUARDED = /^\/(tools|session|verify)\b/
+  if (API_KEY) {
+    app.use((req, res, next) => {
+      if (!GUARDED.test(req.path)) return next()
+      if (req.get('x-api-key') === API_KEY) return next()
+      res.status(401).json({ error: 'x-api-key required' })
+    })
+  }
+
+  app.get('/health', (_req, res) => res.json({ ok: true, records: records.length, sessions: sessionCount() }))
+
+  app.get('/openapi.json', (_req, res) => res.json(openApiSpec()))
+
+  /**
+   * One turn of the agent: safety gate, Foundry run, verifier, trace.
+   * This is what the frontend talks to — the replacement for the n8n webhook.
+   */
+  app.post('/agent/ask', async (req, res) => {
+    const body = req.body as AskRequest
+    if (!body?.sessionId || typeof body.message !== 'string') {
+      return res.status(400).json({ error: 'sessionId and message required' })
+    }
+    try { res.json(await ask(body)) }
+    catch (e) {
+      console.error('agent/ask failed:', e)
+      res.status(502).json({ error: (e as Error).message })
+    }
+  })
+
+  /** The client parks the day's budget and log here, then hands the agent only the id. */
+  app.put('/session/:id', (req, res) => {
+    const { budget, entries, avoid } = req.body ?? {}
+    if (!budget || !Array.isArray(entries)) return res.status(400).json({ error: 'budget and entries required' })
+    putSession(req.params.id, budget, entries, avoid)
+    res.json({ ok: true, sessionId: req.params.id, entries: entries.length })
+  })
+
+  app.get('/foods/:id', (req, res) => {
+    try { res.json(summary(getRecord(req.params.id))) }
+    catch (e) { res.status(404).json({ error: (e as Error).message }) }
+  })
+
+  app.post('/tools/resolve_foods', async (req, res) => {
+    const body = req.body as ResolveRequest
+    // Model-facing tools answer 200 even when the call was wrong. Foundry turns
+    // any non-2xx from an OpenAPI tool into a `tool_user_error` that kills the
+    // whole response, so a 400 costs the user their answer and tells the model
+    // nothing it can act on. The error travels in the body instead, where the
+    // model can read it and fix the call.
+    if (!Array.isArray(body?.phrases)) {
+      return res.json({ results: [], error: 'phrases must be a list of food names, e.g. ["oatmeal", "banana"].' })
+    }
+    res.json({ results: await resolvePhrases(store, body.phrases, body.topK) })
+  })
+
+  app.post('/tools/compute_meal', (req, res) => {
+    const body = req.body as ComputeMealRequest
+    if (!Array.isArray(body?.items) || body.items.length === 0) {
+      return res.json({ error: 'items must be a non-empty list of { foodId, grams } — call resolve_foods first to get the ids.' })
+    }
+    const bad = body.items.find((it) => (it.grams !== undefined && !(it.grams > 0)) || (it.servings !== undefined && !(it.servings > 0)))
+    if (bad) {
+      return res.json({ error: `grams and servings must be positive numbers; ${bad.foodId} had none. Use the defaultPortion from resolve_foods when the user gave no amount.` })
+    }
+    try { res.json(computeMeal(body.items)) }
+    // An id the database does not hold is the common case here, and it is the
+    // model's to correct: resolve the phrase again rather than lose the turn.
+    catch (e) { res.json({ error: `${(e as Error).message}. Use an id that resolve_foods returned, and never invent one.` }) }
+  })
+
+  app.post('/tools/get_day_state', (req, res) => {
+    // Two callers, two shapes. The agent sends a session id and never sees the
+    // budget; the frontend, which owns the profile, may pass it directly.
+    const body = req.body as DayStateRequest & { sessionId?: string }
+    let budget = body?.budget
+    let entries = body?.entries
+    // The agent always arrives by session id; the frontend always arrives with
+    // a budget. Which key is present tells the two apart, and an empty id
+    // counts as present — the agent is told to send one rather than invent it.
+    if (body && 'sessionId' in body) {
+      const s = body.sessionId ? getSession(body.sessionId) : undefined
+      // A session we do not hold is answered, not refused. Foundry turns any
+      // non-2xx from a tool into a `tool_user_error` that kills the whole
+      // response, so a 404 here costs the user the answer to a question the
+      // engine could otherwise mostly answer — and sessions expire after an
+      // hour. Saying "no day state" lets the model cost the meal and admit it
+      // does not know the budget.
+      if (!s) return res.json({ unknown: true, sessionId: body.sessionId ?? '' })
+      budget = s.budget
+      entries = s.entries
+    }
+    if (!budget || !Array.isArray(entries)) return res.status(400).json({ error: 'sessionId, or budget and entries, required' })
+    try { res.json(dayState(budget, entries)) }
+    catch (e) { res.json({ unknown: true, error: (e as Error).message }) }
+  })
+
+  app.post('/tools/find_alternatives', async (req, res) => {
+    const body = req.body as AlternativesRequest
+    if (typeof body?.maxGL !== 'number') {
+      return res.json({ alternatives: [], error: 'maxGL is required — pass the remaining glycemic load from get_day_state.' })
+    }
+    // The allergy filter lives here rather than in the prompt: an option the
+    // person must not eat should never reach the model in the first place.
+    const avoid = body.sessionId ? getSession(body.sessionId)?.avoid : undefined
+    res.json({ alternatives: await findAlternatives(store, body, avoid) })
+  })
+
+  app.post('/verify', (req, res) => {
+    const body = req.body as VerifyRequest
+    if (typeof body?.answer !== 'string') return res.status(400).json({ error: 'answer required' })
+    res.json(verify(body))
+  })
+
+  app.listen(PORT, '0.0.0.0', () => console.log(`engine (vector) listening on port ${PORT}`))
+}
+
+main().catch((e) => { console.error(e); process.exit(1) })

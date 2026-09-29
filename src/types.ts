@@ -85,9 +85,29 @@ export interface DiaryEntry {
   }
 }
 
-export type Sex = 'female' | 'male'
+export type Sex = 'female' | 'male' | 'unspecified'
 export type Activity = 'sedentary' | 'light' | 'moderate' | 'high'
-export type Condition = 't1' | 't2' | 'prediabetes' | 'ir'
+export type Condition = 't1' | 't2' | 'prediabetes' | 'ir' | 'gestational' | 'unsure'
+
+/** Insulin therapy, the field that decides whether this product is for you at all. */
+export type Insulin = 'none' | 'basal' | 'mealtime_or_pump'
+/** Drug classes, not drugs: the engine only ever needs the class. */
+export type Med = 'metformin' | 'sulfonylurea' | 'sglt2' | 'glp1' | 'other'
+export type Kidney = 'none' | 'mentioned' | 'ckd' | 'dialysis'
+export type Comorbidity =
+  | 'htn' | 'ascvd' | 'masld' | 'gout' | 'gastroparesis' | 'celiac' | 'pcos' | 'eatingDisorder'
+export type Allergen =
+  | 'milk' | 'egg' | 'fish' | 'shellfish' | 'treenuts' | 'peanuts' | 'wheat' | 'soy' | 'sesame' | 'gluten' | 'lactose'
+
+/** Why a target is not the formula's raw output. Shown to the user, never hidden. */
+export interface Constraint {
+  /** Stable rule id, for tests and logs. */
+  id: string
+  /** Which target it changed, or 'none' when it only changes advice. */
+  field: 'kcal' | 'carbsG' | 'proteinG' | 'fiberG' | 'glBudget' | 'none'
+  /** One sentence, in the second person, saying what changed and why. */
+  reason: string
+}
 export type Goal = 'lose' | 'maintain' | 'gain'
 /** How hard we restrict carbohydrate. */
 export type CarbApproach = 'moderate' | 'low' | 'verylow'
@@ -103,6 +123,18 @@ export interface Profile {
   carbApproach: CarbApproach
   /** Food ids the user excludes: allergy, intolerance, or simply dislike. */
   excludedFoodIds: string[]
+
+  // ── Onboarding: everything below maps to a rule in `calculateTargets`.
+  insulin: Insulin
+  meds: Med[]
+  pregnantOrBreastfeeding: boolean
+  kidney: Kidney
+  comorbidities: Comorbidity[]
+  allergens: Allergen[]
+  /** Inches and pounds on screen; the stored values stay metric. */
+  units: 'imperial' | 'metric'
+  /** The disclaimer was acknowledged and onboarding finished (PRD A4). */
+  onboarded: boolean
 }
 
 /** Computed daily targets. */
@@ -114,4 +146,6 @@ export interface Targets {
   fiberG: number
   /** Daily glycemic-load ceiling. */
   glBudget: number
+  /** Rules that changed a number, each with the reason to show the user. */
+  constraints: Constraint[]
 }

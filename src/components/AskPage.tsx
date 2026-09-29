@@ -1,11 +1,12 @@
 import { useMemo, useRef, useState } from 'react'
-import { askAgent, budgetOf, engineId, receiptFrom, type AgentResponse, type Receipt, type TraceStep } from '../lib/agent'
+import { askAgent, avoidOf, budgetOf, engineId, receiptFrom, type AgentResponse, type Receipt, type TraceStep } from '../lib/agent'
 import { viewEntry } from '../lib/diary'
 import { todayISO } from '../lib/storage'
 import { downloadResponses, saveResponse, savedCount } from '../lib/responses'
-import type { DiaryEntry, MealType, Targets } from '../types'
+import type { DiaryEntry, MealType, Profile, Targets } from '../types'
 
 interface Props {
+  profile: Profile
   targets: Targets
   diary: DiaryEntry[]
   onLog: (entries: DiaryEntry[]) => void
@@ -78,7 +79,18 @@ function ReceiptView({ r }: { r: Receipt }) {
           <div className={`receipt-line ${(r.leftAfter ?? 0) < 0 ? 'over' : 'ok'}`}><span>Left after</span><span>{r.leftAfter?.toFixed(1)}</span></div>
         </>
       )}
-      <div className="receipt-foot">GL = GI × available carbs ÷ 100. Available carbs = total − fibre. GI from International Tables (2021).</div>
+      <div className="receipt-foot">
+        GL = GI × available carbs ÷ 100. Available carbs = total − fibre.
+        {r.sources.length > 0 && (
+          <ul className="receipt-sources">
+            {r.sources.map((s) => (
+              <li key={s.text}>
+                <span className={`pill ${s.verified ? 'low' : 'none'}`}>{s.verified ? 'checked' : 'unverified'}</span> {s.text}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   )
 }
@@ -108,7 +120,7 @@ function summarize(step: TraceStep): string {
   }
 }
 
-export default function AskPage({ targets, diary, onLog }: Props) {
+export default function AskPage({ profile, targets, diary, onLog }: Props) {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -143,6 +155,7 @@ export default function AskPage({ targets, diary, onLog }: Props) {
         sessionId: fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId(),
         message: q,
         budget: budgetOf(targets),
+        avoid: avoidOf(profile),
         entries: fresh ? [] : todayEntries.map((e) => (e.snapshot?.servings
           ? { foodId: engineId(e), servings: e.snapshot.servings }
           : { foodId: engineId(e), grams: e.grams })),
