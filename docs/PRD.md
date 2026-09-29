@@ -1,6 +1,6 @@
 # DiaBite — an agentic nutrition copilot for type 2 diabetes and insulin resistance
 
-**PRD · Weeks 1–4 — Problem, Solution, Prioritization, Roadmap, Implementation Plan, Data & Responsible AI**
+**PRD · Weeks 1–5 — Problem, Solution, Prioritization, Roadmap, Implementation Plan, Data & Responsible AI, Fine-tuning**
 Author: Nadia Babich · Date: 1 September 2026 · Status: Draft for review
 Market: United States · Build window: 5 weeks, solo
 
@@ -1271,3 +1271,102 @@ revisions served traffic at once and half the answers came from the old build.
 verified rate below the line for more than a day moves a launch stage back. If
 a user was shown a number that should not have been shown, the product says so
 in plain language — the credibility of every other number depends on it.
+
+---
+
+# Week 5
+
+## TECHNICAL: FINE-TUNING AND THE MOAT
+
+The question the course puts this week is whether fine-tuning is what makes a
+product defensible — LoRA and PEFT having made it cheap enough that every firm
+can have its own tuned model. For this product the answer is **no for the part
+everyone would fine-tune, and yes for a part nobody would think of**, and the
+reasoning is worth stating because it is the same reasoning the whole
+architecture rests on.
+
+### Where the moat actually is
+
+A tuned model is a moat when the valuable thing is *how the model answers*.
+Here the valuable thing is that **the model does not answer at all** where it
+matters: it reads language, chooses tools, and narrates numbers it did not
+produce. Four things carry the defensibility, and none of them is weights:
+
+| What | Why it is hard to copy |
+|---|---|
+| The deterministic engine | Same meal, same number, every time, with the arithmetic on screen. A tuned model cannot promise that; it can only be usually right |
+| The glycemic data layer | 1,436 records with provenance, built from USDA plus the International Tables and a carbohydrate-weighted method. No public database carries GI, so this is slow work rather than a download |
+| The verifier | Every number must trace to a tool result. It is the product's only unconditional promise, and it is code |
+| The safety envelope | Dosing refused, red flags escalated, phrasings collected from real failures. A rule set that grows from evidence, in front of a model that also refuses |
+
+Fine-tuning a model to be *better at nutrition* would move facts into weights,
+where they cannot be traced to a source, updated when a source changes, or
+shown to a user who asks why. That is not a moat for a health product; it is
+the failure mode this design exists to prevent, bought at the price of a GPU.
+
+### The lecture's own test, applied honestly
+
+The deck lists five conditions where fine-tuning is the wrong tool. Four of
+them describe us:
+
+| Condition | Us |
+|---|---|
+| **Factual knowledge acquisition** | Exactly what we must not do. Glycemic values belong in a table with a source and a date, not in weights |
+| **Limited training data** | 108 labelled engine cases and 19 agent cases. Enough to *evaluate*, nowhere near enough to *train* |
+| **Short-term task retention** | The day's budget and a person's preferences change hourly; that is state, not a weight |
+| **Computational constraints** | One person, five weeks, a free Azure trial. Even LoRA's modest cost is real when nothing else in the stack needs a GPU |
+| Task domain mismatch | The one that does *not* apply: food language is a genuine domain, which is why the next section exists |
+
+### Where fine-tuning would earn its place
+
+One component is a real candidate, and it is not the agent: **food-phrase
+resolution**. Turning "the usual burrito bowl" or "мамины сырники" into a
+record id is pattern matching over a domain vocabulary — precisely what a small
+tuned model is good at, and precisely where our current approach shows its
+limits.
+
+What the evidence says today: resolution scores 80 of 81 on the labelled set,
+but that set is ours, and the failures are instructive. "Tortilla chips" once
+matched a soup whose name contained "no chips"; "frozen yogurt" sat next to
+yogurt in embedding space; "pad thai" lands on a zoodle recipe. Each was fixed
+with a written rule — negation stripping, preparation words, an alias layer —
+and every rule is a small admission that a general-purpose embedding model does
+not know this vocabulary.
+
+**The shape of the work, if we do it.** Fine-tune the embedding model (or a
+small cross-encoder reranker) with LoRA on pairs of *what people typed* and
+*the record that was right*, drawn from the collection loop that already runs:
+every `unknown` a user hits, every correction at the confirmation step. Keep
+the engine, the verifier and the data exactly as they are — the tuned model
+would choose a record, never a number.
+
+**What would have to be true first:**
+
+1. **300–500 labelled phrase → record pairs**, against roughly 100 today, and
+   drawn from real usage rather than our imagination. This is the gate; a model
+   tuned on invented phrases would be tuned on our blind spots.
+2. **A measurable gap that rules cannot close.** Each of the last three
+   failures cost a rule and took an hour. When a class of failure resists that
+   treatment — a whole cuisine, or dish names the alias layer cannot enumerate
+   — the case for tuning is made.
+3. **A gate to ship against.** The same 81 cases, run against both the current
+   resolver and the tuned one, with the tuned version required to win on
+   `unknown` detection as well as on matches. A model that resolves more
+   phrases by guessing more is a regression here, not an improvement.
+
+**Cost, honestly.** A LoRA adapter on a sentence-transformer of this size is a
+single-GPU-hour class of job — tens of dollars, not thousands, which is the
+lecture's point. The real cost is the labelled set and the evaluation
+discipline around it, and both are worth paying for regardless of whether a
+tuned model ever ships.
+
+### What we do instead, and why it is not a cop-out
+
+The same defect classes are currently handled by cheaper, inspectable
+mechanisms, and each one is visible in the repository rather than in a
+checkpoint: an alias layer for everyday names, a lexical score that reads
+negation, a kind prior, confidence bands that ask when a phrase is ambiguous,
+and a policy of naming an unknown food rather than guessing it. These can be
+read, argued with and reverted in a commit. A tuned model is a better answer
+only when the rules stop scaling — and the evaluation harness is what will tell
+us, rather than a hunch.

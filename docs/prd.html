@@ -308,7 +308,7 @@ a { color: var(--accent); }
 <div class="page">
 
 <header class="masthead">
-  <p class="kicker">Product Requirements · Weeks 1–4</p>
+  <p class="kicker">Product Requirements · Weeks 1–5</p>
   <h1>DiaBite</h1>
   <p class="standfirst">An agentic nutrition copilot for type&nbsp;2 diabetes, prediabetes, and insulin resistance.</p>
   <div class="byline">
@@ -349,6 +349,7 @@ a { color: var(--accent); }
     <li><a href="#data">Data requirements</a></li>
     <li><a href="#prompts">Prompt strategy</a></li>
     <li><a href="#responsible">Responsible AI</a></li>
+    <li><a href="#finetuning">Fine-tuning and the moat</a></li>
   </ol>
 </nav>
 
@@ -1508,5 +1509,62 @@ Aggregated shopping list</div>
   <p><strong>Recovery.</strong> The verifier regenerates once, then falls back to a templated answer from tool results. If the engine is unreachable the agent says it cannot check rather than estimating. Deployments are revisions: a bad one is rolled back by shifting traffic to the previous image — a discipline learned when two revisions served traffic at once and half the answers came from the old build.</p>
   <p><strong>Monitoring and communication.</strong> Daily: verified rate, unmatched count, <code>unknown</code> and clarify rates, latency p90, blocked-question counts by rule. A verified rate below the line for more than a day moves a launch stage back. If a user was shown a number that should not have been shown, the product says so in plain language — the credibility of every other number depends on it.</p>
 </section>
+
+<hr class="rule">
+
+<!-- ══ WEEK 5 · FINE-TUNING AND THE MOAT ══════════════ -->
+
+<section id="finetuning">
+  <p class="eyebrow">Week 5 · Technical</p>
+  <h2 class="sec">Fine-tuning and the moat</h2>
+
+  <p>The question this week is whether fine-tuning is what makes a product defensible — LoRA and PEFT having made it cheap enough that every firm can have its own tuned model. For this product the answer is <strong>no for the part everyone would fine-tune, and yes for a part nobody would think of</strong>.</p>
+
+  <h3>Where the moat actually is</h3>
+  <p>A tuned model is a moat when the valuable thing is <em>how the model answers</em>. Here the valuable thing is that <strong>the model does not answer at all</strong> where it matters: it reads language, chooses tools, and narrates numbers it did not produce. Four things carry the defensibility, and none of them is weights.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th style="width:30%">What</th><th>Why it is hard to copy</th></tr></thead>
+      <tbody>
+        <tr><td><strong>The deterministic engine</strong></td><td>Same meal, same number, every time, with the arithmetic on screen. A tuned model cannot promise that; it can only be usually right</td></tr>
+        <tr><td><strong>The glycemic data layer</strong></td><td>1,436 records with provenance, from USDA plus the International Tables and a carbohydrate-weighted method. No public database carries GI, so this is slow work rather than a download</td></tr>
+        <tr><td><strong>The verifier</strong></td><td>Every number must trace to a tool result. The product's only unconditional promise, and it is code</td></tr>
+        <tr><td><strong>The safety envelope</strong></td><td>Dosing refused, red flags escalated, phrasings collected from real failures — a rule set that grows from evidence, in front of a model that also refuses</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Fine-tuning a model to be <em>better at nutrition</em> would move facts into weights, where they cannot be traced to a source, updated when a source changes, or shown to a user who asks why. That is not a moat for a health product; it is the failure mode this design exists to prevent, bought at the price of a GPU.</p>
+
+  <h3>The lecture's own test, applied honestly</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th style="width:34%">Condition where fine-tuning is the wrong tool</th><th>Us</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Factual knowledge acquisition</strong></td><td>Exactly what we must not do. Glycemic values belong in a table with a source and a date, not in weights</td></tr>
+        <tr><td><strong>Limited training data</strong></td><td>108 labelled engine cases and 19 agent cases — enough to <em>evaluate</em>, nowhere near enough to <em>train</em></td></tr>
+        <tr><td><strong>Short-term task retention</strong></td><td>The day's budget and a person's preferences change hourly; that is state, not a weight</td></tr>
+        <tr><td><strong>Computational constraints</strong></td><td>One person, five weeks, a free Azure trial. Even LoRA's modest cost is real when nothing else in the stack needs a GPU</td></tr>
+        <tr><td>Task domain mismatch</td><td>The one that does <em>not</em> apply: food language is a genuine domain, which is why the next section exists</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Where fine-tuning would earn its place</h3>
+  <p>One component is a real candidate, and it is not the agent: <strong>food-phrase resolution</strong>. Turning "the usual burrito bowl" into a record id is pattern matching over a domain vocabulary — what a small tuned model is good at, and where our current approach shows its limits.</p>
+  <p>Resolution scores 80 of 81 on the labelled set, but the failures are instructive. "Tortilla chips" once matched a soup whose name contained "no chips"; "frozen yogurt" sits next to yogurt in embedding space; "pad thai" lands on a zoodle recipe. Each was fixed with a written rule — negation stripping, preparation words, an alias layer — and every rule is a small admission that a general-purpose embedding model does not know this vocabulary.</p>
+  <p><strong>The shape of the work.</strong> A LoRA adapter on the embedding model, or a small cross-encoder reranker, trained on pairs of <em>what people typed</em> and <em>the record that was right</em> — drawn from the collection loop that already runs: every <code>unknown</code> a user hits, every correction at the confirmation step. The engine, the verifier and the data stay exactly as they are; the tuned model would choose a record, never a number.</p>
+
+  <div class="note">
+    <p><strong>What would have to be true first.</strong> (1) 300–500 labelled phrase → record pairs against roughly 100 today, drawn from real usage rather than our imagination — a model tuned on invented phrases is tuned on our blind spots. (2) A measurable gap that rules cannot close: each of the last three failures cost a rule and an hour, and the case for tuning is made when a class of failure resists that treatment. (3) A gate to ship against: the same 81 cases against both resolvers, with the tuned one required to win on <code>unknown</code> detection as well as on matches — a model that resolves more phrases by guessing more is a regression here.</p>
+  </div>
+
+  <p><strong>Cost, honestly.</strong> A LoRA adapter on a sentence-transformer of this size is a single-GPU-hour job — tens of dollars, not thousands, which is the lecture's point. The real cost is the labelled set and the evaluation discipline around it, and both are worth paying for whether or not a tuned model ever ships.</p>
+
+  <p><strong>What we do instead, and why it is not a cop-out.</strong> The same defect classes are handled today by cheaper, inspectable mechanisms, each visible in the repository rather than in a checkpoint: an alias layer for everyday names, a lexical score that reads negation, a kind prior, confidence bands that ask when a phrase is ambiguous, and a policy of naming an unknown food rather than guessing it. These can be read, argued with and reverted in a commit. A tuned model is a better answer only when the rules stop scaling — and the evaluation harness is what will tell us, rather than a hunch.</p>
+</section>
+
+
 
 </div>
