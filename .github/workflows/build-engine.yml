@@ -19,6 +19,7 @@ on:
       - 'src/types.ts'
       - 'src/lib/glycemic.ts'
       - 'src/lib/profile.ts'
+      - 'src/lib/dietary.ts'
       - 'src/data/foods.ts'
       - 'data/recipes-db/ingredients.json'
       - 'data/recipes-db/recipes_db.json'

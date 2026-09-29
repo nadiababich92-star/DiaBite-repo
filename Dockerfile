@@ -22,6 +22,10 @@ COPY agent/prompts ./agent/prompts
 COPY src/types.ts ./src/types.ts
 COPY src/lib/glycemic.ts ./src/lib/glycemic.ts
 COPY src/lib/profile.ts ./src/lib/profile.ts
+# Shared with the browser: the allergen and eating-pattern rules the engine
+# filters suggestions with. Copying files one by one keeps the image small and
+# makes a forgotten one a crash at boot rather than a wrong answer later.
+COPY src/lib/dietary.ts ./src/lib/dietary.ts
 COPY src/data/foods.ts ./src/data/foods.ts
 COPY data/recipes-db/ingredients.json data/recipes-db/recipes_db.json ./data/recipes-db/
 COPY data/recipes-db/embeddings.bin data/recipes-db/embeddings.ids.json ./data/recipes-db/
