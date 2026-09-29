@@ -34,6 +34,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { AIProjectClient } from '@azure/ai-projects'
 import { DefaultAzureCredential } from '@azure/identity'
+import OpenAI from 'openai'
 import { openApiSpec } from './openapi'
 import { safetyGate } from './safety'
 import { verify } from './verify'
@@ -85,6 +86,31 @@ const REASONING_EFFORT = process.env.REASONING_EFFORT ?? 'low'
 
 export const systemPrompt = (role: Role) => readFileSync(join(ROOT, 'agent', 'prompts', `${role}.md`), 'utf8')
 
+/**
+ * A key for the agents API, used instead of this service's managed identity.
+ *
+ * Both are supposed to work and only one does: from inside the container the
+ * identity started answering "500 Unable to get resource information" for every
+ * agent call, while the same call with a key — and the same call from a laptop
+ * with a user token — went through. Rather than keep a demo hostage to that,
+ * the key wins when it is set. The identity is still what reads memories and
+ * publishes versions, where a failure costs a feature rather than the product.
+ */
+const PROJECT_API_KEY = process.env.PROJECT_API_KEY ?? ''
+
+let keyClient: OpenAI | null = null
+function agentClient(): OpenAI {
+  if (!PROJECT_API_KEY) return projectClient().getOpenAIClient() as unknown as OpenAI
+  if (!keyClient) {
+    keyClient = new OpenAI({
+      baseURL: `${PROJECT_ENDPOINT}/openai/v1`,
+      apiKey: PROJECT_API_KEY,
+      defaultHeaders: { 'api-key': PROJECT_API_KEY },
+    })
+  }
+  return keyClient
+}
+
 let project: AIProjectClient | null = null
 function projectClient(): AIProjectClient {
   if (!PROJECT_ENDPOINT) throw new Error('PROJECT_ENDPOINT is not set')
@@ -120,6 +146,9 @@ const TOOLS: Record<Role, unknown[]> = { triage: [], meal: [], advisor: [] }
  */
 const RAI_POLICY_NAME = process.env.RAI_POLICY ?? 'Microsoft.DefaultV2'
 function raiPolicyId(): string | null {
+  // An empty RAI_POLICY publishes versions without a policy reference, which is
+  // how you find out whether the reference itself is what a caller cannot read.
+  if (!RAI_POLICY_NAME) return null
   if (RAI_POLICY_NAME.startsWith('/subscriptions/')) return RAI_POLICY_NAME
   const account = ENGINE_CONNECTION.match(/^(.*\/accounts\/[^/]+)/)?.[1]
   return account ? `${account}/raiPolicies/${RAI_POLICY_NAME}` : null
@@ -509,20 +538,19 @@ function rememberPreferences(sessionId: string, message: string, answer: string)
 
 /** One request to one agent, waiting out the per-minute token limit. */
 async function runAgent(role: Role, input: string, previous?: string, forceTools = false, sessionId?: string): Promise<Turn> {
-  const openai = projectClient().getOpenAIClient()
   void sessionId
-  return (await withRateLimitRetry(() => openai.responses.create(
-    { input, ...(previous ? { previous_response_id: previous } : {}) } as never,
-    {
-      body: {
-        agent_reference: { name: agentName(role), type: 'agent_reference' },
-        // Only the meal specialist is made to call something. Every answer it
-        // gives is grounded in the engine, so a turn that calls nothing there
-        // is a turn that guessed; the advisor has nothing to call at all.
-        ...(forceTools ? { tool_choice: 'required' } : {}),
-      },
-    } as never,
-  ))) as unknown as Turn
+  const payload = {
+    input,
+    ...(previous ? { previous_response_id: previous } : {}),
+    agent_reference: { name: agentName(role), type: 'agent_reference' },
+    // Only the meal specialist is made to call something. Every answer it gives
+    // is grounded in the engine, so a turn that calls nothing there is a turn
+    // that guessed; the advisor has nothing to call at all.
+    ...(forceTools ? { tool_choice: 'required' } : {}),
+  }
+  return (await withRateLimitRetry(() =>
+    agentClient().responses.create(payload as never),
+  )) as unknown as Turn
 }
 
 /**
