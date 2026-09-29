@@ -1334,10 +1334,10 @@
    "expect": {
     "toolsCalled": [
      "resolve_foods",
-     "get_day_state",
      "compute_meal"
     ],
-    "verified": true
+    "verified": true,
+    "dayStateRemainingConsistent": false
    },
    "judge": "rubric+mechanical",
    "tags": []

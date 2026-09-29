@@ -110,6 +110,24 @@ const called = (r: Reply, op: string) => (r.trace ?? []).some((t) => t.tool === 
 const callOf = (r: Reply, op: string) => (r.trace ?? []).find((t) => t.tool === op || t.tool.endsWith(`_${op}`))
 const digits = (s: string) => /\d/.test(s.replace(/\b(type\s*)?[12]\b(?=\s*diabet)/gi, ''))
 
+/**
+ * Today's budget, from whichever call carried it.
+ *
+ * It used to come only from `get_day_state`. Now `resolve_foods` and
+ * `compute_meal` return it too, and the meal agent no longer has the separate
+ * operation — so a check that only looked there would quietly stop checking.
+ */
+type DayState = { remaining?: { gl?: number }; unknown?: boolean }
+function dayStateOf(r: Reply): DayState | undefined {
+  for (const op of ['get_day_state', 'compute_meal', 'resolve_foods']) {
+    const res = callOf(r, op)?.result as { remaining?: { gl?: number }; unknown?: boolean; dayState?: DayState } | undefined
+    if (!res) continue
+    if (op === 'get_day_state' && (res.remaining || res.unknown)) return res
+    if (res.dayState) return res.dayState
+  }
+  return undefined
+}
+
 function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[] {
   const out: { name: string; ok: boolean; note?: string }[] = []
   const e = c.expect ?? {}
@@ -139,8 +157,13 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
     say(`resolve band ${e.resolveBand}`, band === e.resolveBand, `got ${band}`)
   }
   if (e.alternativesGramsPassed === true) {
+    // Either the agent asked for swaps itself at the right weight, or the meal
+    // call returned them — in which case the engine costed them at the item's
+    // own grams, which is the thing this check exists to protect.
     const alt = callOf(r, 'find_alternatives')?.input as { grams?: number } | undefined
-    say('alternatives costed at the same grams', typeof alt?.grams === 'number', JSON.stringify(alt))
+    const inMeal = callOf(r, 'compute_meal')?.result as { alternativesFor?: { grams?: number } } | undefined
+    const ok = typeof alt?.grams === 'number' || typeof inMeal?.alternativesFor?.grams === 'number'
+    say('alternatives costed at the same grams', ok, JSON.stringify(alt ?? inMeal?.alternativesFor))
   }
   if (e.answerMentionsAssumed === true) say('says the portion was assumed', /assum|default/i.test(r.answer))
 
@@ -154,8 +177,8 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   // The failure a number-tracing verifier cannot see: the right number under
   // the wrong label. "Remaining after this meal: 54" when 54 is the budget
   // before it tells someone they have room they do not have.
-  if (called(r, 'get_day_state') && called(r, 'compute_meal')) {
-    const day = callOf(r, 'get_day_state')?.result as { remaining?: { gl?: number } } | undefined
+  if (called(r, 'compute_meal')) {
+    const day = dayStateOf(r)
     const meal = callOf(r, 'compute_meal')?.result as { totals?: { gl?: number } } | undefined
     const before = day?.remaining?.gl
     const mealGl = meal?.totals?.gl
@@ -173,7 +196,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   // state there is nothing to compare against, and "fits" is a claim the
   // answer cannot support — the failure the verifier cannot see, because no
   // number is wrong.
-  const dayUnknown = (callOf(r, 'get_day_state')?.result as { unknown?: boolean } | undefined)?.unknown === true
+  const dayUnknown = dayStateOf(r)?.unknown === true
   if (dayUnknown && !r.blocked) {
     const claims = /\b(it )?(fits|does not fit|doesn'?t fit|over budget|within (your )?budget)\b/i.test(r.answer)
     const admits = /(don'?t|do not|cannot|can'?t) (have|know|say)|no (recorded )?budget|budget (is )?unknown|without (today'?s )?budget/i.test(r.answer)
@@ -188,7 +211,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   }
 
   if (e.dayStateRemainingConsistent === true) {
-    const day = callOf(r, 'get_day_state')?.result as { remaining?: { gl?: number } } | undefined
+    const day = dayStateOf(r)
     const gl = day?.remaining?.gl
     say('remaining budget quoted', typeof gl === 'number' && r.answer.includes(String(gl)), `remaining ${gl}`)
   }

@@ -119,14 +119,28 @@ function projectClient(): AIProjectClient {
 }
 
 /** The whole engine as one tool, four operations. */
+/**
+ * The engine as the meal agent sees it.
+ *
+ * `get_day_state` is left out on purpose. Both of the operations the agent
+ * actually uses return the day state when they are given the session id, and
+ * with the operation still on the list the model called it anyway — a third
+ * round trip, five seconds, for a number it already had. A tool that cannot be
+ * called is a firmer instruction than a sentence asking it not to.
+ *
+ * The operation stays on the engine: the workflow and the portal call it, and
+ * so does the frontend's own day view.
+ */
 export function engineTool() {
+  const spec = openApiSpec() as { paths: Record<string, unknown> }
+  delete spec.paths['/tools/get_day_state']
   return {
     type: 'openapi',
     openapi: {
       name: 'diabite_engine',
       description:
-        'The DiaBite nutrition engine. Resolve foods, compute a meal, read the remaining daily budget, and find lower-glycemic-load alternatives.',
-      spec: openApiSpec(),
+        'The DiaBite nutrition engine. Resolve foods with today\u2019s budget, compute a meal with its swaps, and find lower-glycemic-load alternatives.',
+      spec,
       auth: ENGINE_CONNECTION
         ? { type: 'project_connection', security_scheme: { project_connection_id: ENGINE_CONNECTION } }
         : { type: 'anonymous' },
