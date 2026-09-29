@@ -35,6 +35,12 @@ export interface ResolveRequest {
   /** Short food phrases the agent extracted from the user's text. */
   phrases: string[]
   topK?: number
+  /**
+   * The day-state session. Passing it returns today's budget with the
+   * resolution, which saves a whole model round trip — and a round trip is
+   * four seconds of someone standing in a kitchen.
+   */
+  sessionId?: string
 }
 
 export interface ResolveCandidate extends FoodSummary {
@@ -56,6 +62,8 @@ export interface ResolvedPhrase {
 
 export interface ResolveResponse {
   results: ResolvedPhrase[]
+  /** Today's budget, when a session id came with the request. */
+  dayState?: DayStateResponse | DayStateUnknown
 }
 
 // ── compute_meal / get_day_state ──────────────────────────────────────────
@@ -90,11 +98,25 @@ export interface MealTotals extends Nutrients {
 
 export interface ComputeMealRequest {
   items: MealItemInput[]
+  /** Returns the day state with the meal, saving another round trip. */
+  sessionId?: string
+  /**
+   * Ask for swaps in the same call. The engine only looks for them when the
+   * meal actually needs them — over the remaining budget, or a high load — so
+   * asking costs nothing on a meal that fits.
+   */
+  withAlternatives?: boolean
 }
 
 export interface ComputeMealResponse {
   items: MealItemResult[]
   totals: MealTotals
+  /** Today's budget, when a session id came with the request. */
+  dayState?: DayStateResponse | DayStateUnknown
+  /** Swaps for the heaviest item, when the meal needed them. */
+  alternatives?: Alternative[]
+  /** Which item the alternatives replace. */
+  alternativesFor?: { foodId: string; name: string; grams: number }
   /** The arithmetic, stated so the UI can show it verbatim. */
   formula: string
 }

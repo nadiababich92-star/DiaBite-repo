@@ -162,6 +162,14 @@ async function main() {
     catch (e) { res.status(404).json({ error: (e as Error).message }) }
   })
 
+  /** Today's budget for a session, or the marker that says we do not hold it. */
+  const dayStateFor = (sessionId: string | undefined) => {
+    if (sessionId === undefined) return undefined
+    const held = sessionId ? getSession(sessionId) : undefined
+    if (!held) return { unknown: true as const, sessionId: sessionId ?? '' }
+    return dayState(held.budget, held.entries)
+  }
+
   app.post('/tools/resolve_foods', async (req, res) => {
     const body = req.body as ResolveRequest
     // Model-facing tools answer 200 even when the call was wrong. Foundry turns
@@ -172,10 +180,15 @@ async function main() {
     if (!Array.isArray(body?.phrases)) {
       return res.json({ results: [], error: 'phrases must be a list of food names, e.g. ["oatmeal", "banana"].' })
     }
-    res.json({ results: await resolvePhrases(store, body.phrases, body.topK) })
+    // The day state rides along when asked for: one model round trip fewer,
+    // and the budget is the thing the next step needs anyway.
+    res.json({
+      results: await resolvePhrases(store, body.phrases, body.topK),
+      ...(body.sessionId !== undefined ? { dayState: dayStateFor(body.sessionId) } : {}),
+    })
   })
 
-  app.post('/tools/compute_meal', (req, res) => {
+  app.post('/tools/compute_meal', async (req, res) => {
     const body = req.body as ComputeMealRequest
     if (!Array.isArray(body?.items) || body.items.length === 0) {
       return res.json({ error: 'items must be a non-empty list of { foodId, grams } — call resolve_foods first to get the ids.' })
@@ -184,7 +197,31 @@ async function main() {
     if (bad) {
       return res.json({ error: `grams and servings must be positive numbers; ${bad.foodId} had none. Use the defaultPortion from resolve_foods when the user gave no amount.` })
     }
-    try { res.json(computeMeal(body.items)) }
+    try {
+      const meal = computeMeal(body.items)
+      const day = dayStateFor(body.sessionId)
+      const out: Record<string, unknown> = { ...meal, ...(day ? { dayState: day } : {}) }
+
+      // Swaps in the same breath, but only when the meal needs them: over what
+      // is left of the day, or heavy on its own. Asking for them on a meal that
+      // fits would spend a search to print nothing.
+      const remaining = day && !('unknown' in day) ? day.remaining.gl : undefined
+      const needsHelp = meal.totals.glLevel === 'high' || (remaining !== undefined && meal.totals.gl > remaining)
+      if (body.withAlternatives && needsHelp) {
+        const heaviest = [...meal.items].sort((a, b) => b.gl - a.gl)[0]
+        if (heaviest) {
+          const avoid = body.sessionId ? getSession(body.sessionId)?.avoid : undefined
+          out.alternatives = await findAlternatives(store, {
+            foodId: heaviest.foodId,
+            grams: heaviest.grams,
+            maxGL: remaining !== undefined ? Math.max(0, remaining) : heaviest.gl,
+            topK: 3,
+          }, avoid)
+          out.alternativesFor = { foodId: heaviest.foodId, name: heaviest.name, grams: heaviest.grams }
+        }
+      }
+      res.json(out)
+    }
     // An id the database does not hold is the common case here, and it is the
     // model's to correct: resolve the phrase again rather than lose the turn.
     catch (e) { res.json({ error: `${(e as Error).message}. Use an id that resolve_foods returned, and never invent one.` }) }

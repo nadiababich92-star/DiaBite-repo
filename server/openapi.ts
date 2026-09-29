@@ -29,7 +29,7 @@ export function openApiSpec() {
       '/tools/resolve_foods': {
         post: {
           operationId: 'resolve_foods',
-          summary: 'Look up foods in the verified database',
+          summary: 'Look up foods in the verified database, and read today\u2019s budget',
           description:
             'Resolve the food phrases from the user\'s message to database records. Always call this first, and pass every food from the message in one call. For each phrase you get back: `confidence` (high / medium / low), `unknown` (true means the food is not in the database — say so plainly and never substitute a similar food), an optional `clarify` question to ask when the match is ambiguous, and `candidates`. Use `candidates[0].id` as the `foodId` for the other operations, and `candidates[0].defaultPortion` with `candidates[0].unit` (g for ingredients, serving for recipes) when the user gave no portion.',
           requestBody: {
@@ -40,6 +40,7 @@ export function openApiSpec() {
                   type: 'object',
                   required: ['phrases'],
                   properties: {
+                    sessionId: { type: 'string', description: 'The session id you were given. Pass it and today\u2019s budget comes back with the foods, so get_day_state is not needed.' },
                     phrases: {
                       type: 'array',
                       items: { type: 'string' },
@@ -51,7 +52,7 @@ export function openApiSpec() {
               },
             },
           },
-          responses: { '200': { description: 'Resolved phrases with candidates.' } },
+          responses: { '200': { description: 'Resolved phrases with candidates, and `dayState` when a session id was passed.' } },
         },
       },
 
@@ -69,6 +70,8 @@ export function openApiSpec() {
                   type: 'object',
                   required: ['items'],
                   properties: {
+                    sessionId: { type: 'string', description: 'The session id you were given. Pass it and today\u2019s budget comes back with the meal, so get_day_state is not needed.' },
+                    withAlternatives: { type: 'boolean', description: 'Ask for swaps in the same call. They come back only when the meal is over the remaining budget or carries a high load, so passing true every time is safe.' },
                     items: {
                       type: 'array',
                       minItems: 1,
