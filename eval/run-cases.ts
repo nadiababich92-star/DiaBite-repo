@@ -209,6 +209,19 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
       say('names the food driving the load', named, `driver ${head}`)
     }
   }
+  // The product's oldest promise, made mechanical on every turn: a food the
+  // database does not have never enters the meal under a neighbour's name.
+  // A prompt line asking for partial meals was enough to make the model cost
+  // "chicken tacos" as a lentil taco recipe and ask whether that was right.
+  if (called(r, 'compute_meal')) {
+    const res = (callOf(r, 'resolve_foods')?.result as { results?: { phrase?: string; unknown?: boolean; candidates?: { id?: string }[] }[] } | undefined)?.results ?? []
+    const items = (callOf(r, 'compute_meal')?.input as { items?: { foodId?: string }[] } | undefined)?.items ?? []
+    const sent = new Set(items.map((i) => i.foodId))
+    for (const phrase of res.filter((x) => x.unknown)) {
+      const substituted = (phrase.candidates ?? []).map((c) => c.id).filter((id) => id && sent.has(id))
+      say('no unknown food was costed', substituted.length === 0, `${phrase.phrase} -> ${substituted.join(', ')}`)
+    }
+  }
   // A weight printed beside a food's name is a claim about that food. "I took
   // the broccoli as 100 g" when the call costed 150 g passes the verifier —
   // 100 is a number some tool returned, just not for that item — and tells
@@ -218,7 +231,9 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   // almonds" as the apple weighing 25 g, because a name will always find
   // *some* number within a few words of it if you let it look. It now matches
   // only where the two are joined: "apple (100 g)", "apple at 100 g",
-  // "100 g of apple". A list is not a pairing.
+  // "100 g of apple", "200 g oatmeal". A list is not a pairing — "200 g
+  // oatmeal, 120 g banana" gave the oatmeal the banana’s weight while a
+  // comma counted as joining.
   if (called(r, 'compute_meal')) {
     const sent = (callOf(r, 'compute_meal')?.input as { items?: { foodId: string; grams?: number }[] } | undefined)?.items ?? []
     const named = (callOf(r, 'compute_meal')?.result as { items?: { foodId?: string; name?: string; grams?: number }[] } | undefined)?.items ?? []
@@ -227,7 +242,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
       const grams = it.grams ?? sent.find((x) => x.foodId === it.foodId)?.grams
       if (!head || typeof grams !== 'number') continue
       const esc = head.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-      const joined = new RegExp(`(?:${esc}\\s*(?:\\(|,\\s*|\\s(?:at|as|of)\\s)\\s*(\\d+(?:\\.\\d+)?)\\s*g\\b)|(?:(\\d+(?:\\.\\d+)?)\\s*g\\s+(?:of|for)\\s+(?:the\\s+)?${esc})`, 'i')
+      const joined = new RegExp(`(?:${esc}\\s*(?:\\(|\\s(?:at|as|of)\\s)\\s*(\\d+(?:\\.\\d+)?)\\s*g\\b)|(?:(\\d+(?:\\.\\d+)?)\\s*g\\s+(?:of\\s+|for\\s+)?(?:the\\s+)?${esc})`, 'i')
       const m = joined.exec(answer)
       const stated = m?.[1] ?? m?.[2]
       if (stated === undefined) continue
