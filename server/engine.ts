@@ -21,6 +21,9 @@
  * Index: 350 ingredients + 86 everyday foods + 1,000 recipes, embedded locally
  * (see embeddings.ts). See contract.ts for the exact shapes.
  */
+import { existsSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 import express from 'express'
 import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
@@ -303,6 +306,29 @@ async function main() {
     if (typeof body?.answer !== 'string') return res.status(400).json({ error: 'answer required' })
     res.json(verify(body))
   })
+
+  /**
+   * The app itself, when the image was built with it.
+   *
+   * One container, one address: the browser app is served from the same origin
+   * as the agent it talks to, which is why it needs no CORS, no second
+   * service, and no laptop running a dev server. The API routes are declared
+   * above this line and win; everything else falls through to index.html
+   * because the app routes in the browser.
+   *
+   * An image built without `dist` simply skips it — the engine's own job does
+   * not depend on there being a frontend.
+   */
+  const dist = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist')
+  if (existsSync(join(dist, 'index.html'))) {
+    app.use(express.static(dist, { index: false, maxAge: '1h' }))
+    app.use((req, res, next) => {
+      if (req.method !== 'GET' && req.method !== 'HEAD') return next()
+      if (/^\/(tools|session|verify|diag|agent|foods|health|openapi)\b/.test(req.path)) return next()
+      res.sendFile(join(dist, 'index.html'))
+    })
+    console.log('serving the app from ./dist')
+  }
 
   app.listen(PORT, '0.0.0.0', () => console.log(`engine (vector) listening on port ${PORT}`))
 }

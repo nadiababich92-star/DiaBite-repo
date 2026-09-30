@@ -16,11 +16,13 @@ on:
       - 'package-lock.json'
       - 'server/**'
       - 'agent/**'
-      - 'src/types.ts'
-      - 'src/lib/glycemic.ts'
-      - 'src/lib/profile.ts'
-      - 'src/lib/dietary.ts'
-      - 'src/data/foods.ts'
+      # The image serves the browser app as well as the engine, so a change
+      # to either rebuilds it. This used to be a careful list of the few
+      # frontend files the engine shares; it is the whole app now.
+      - 'src/**'
+      - 'index.html'
+      - 'vite.config.ts'
+      - 'tsconfig.json'
       - 'data/recipes-db/ingredients.json'
       - 'data/recipes-db/recipes_db.json'
       - 'data/recipes-db/embeddings.bin'
@@ -66,6 +68,14 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE }}:${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.IMAGE }}:latest
+          # Vite inlines these at build time, so they have to be here rather
+          # than in the container's environment. Both are publishable values —
+          # the project URL and the anon key, which the browser would show
+          # anyone who opened dev tools. Without them the app still works and
+          # the feedback form is simply inert.
+          build-args: |
+            VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
+            VITE_SUPABASE_PUBLISHABLE_KEY=${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

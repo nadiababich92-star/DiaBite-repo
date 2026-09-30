@@ -7,6 +7,27 @@
 # The sentence model is fetched at build time (~87 MB) and baked into the image.
 # Downloading it on first request instead would make a cold start depend on
 # Hugging Face being up, and the first user pay for it.
+# ── the browser app, built once and served by the engine ──────────────────
+# One container and one address: the app is served from the same origin as the
+# agent it calls, so there is no CORS to configure, no second service to pay
+# for, and no laptop running a dev server for the product to be reachable.
+FROM node:22-slim AS web
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci && npm cache clean --force
+COPY index.html vite.config.ts tsconfig.json tsconfig.server.json ./
+COPY src ./src
+COPY data/recipes-db/ingredients.json data/recipes-db/recipes_db.json ./data/recipes-db/
+# In dev, Vite proxies /agent to the engine's /agent/ask. Served from the
+# engine there is no proxy, so the path is the real one.
+ENV VITE_AGENT_URL=/agent/ask
+ARG VITE_SUPABASE_URL=""
+ARG VITE_SUPABASE_PUBLISHABLE_KEY=""
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY
+RUN npm run build
+
+# ── the engine ────────────────────────────────────────────────────────────
 FROM node:22-slim
 
 ENV NODE_ENV=production
@@ -32,6 +53,8 @@ COPY data/recipes-db/embeddings.bin data/recipes-db/embeddings.ids.json ./data/r
 # Warm the model cache in the image. The local .cache is gitignored, so the
 # build fetches the model rather than copying it — same result, no 87 MB in git.
 RUN node -e "import('@huggingface/transformers').then(async (m) => { m.env.cacheDir = '/app/.cache/transformers'; await m.pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', { dtype: 'fp32' }); console.log('model cached'); })"
+
+COPY --from=web /app/dist ./dist
 
 # Container Apps injects PORT; 8787 is the local default.
 ENV PORT=8787
