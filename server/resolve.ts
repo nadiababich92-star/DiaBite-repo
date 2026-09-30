@@ -96,12 +96,33 @@ const STATE_WORDS = new Set([
   'chips', 'crisps', 'smoothie', 'pickled', 'smoked', 'jerky', 'powdered', 'instant',
 ])
 
+/**
+ * Singular and plural are the same food.
+ *
+ * The catalogue names some foods one way and some the other — "Carrot",
+ * "Almonds", "Strawberries" — and people type whichever they please. Matching
+ * the letters exactly meant "carrots" covered none of "Carrot", took the
+ * missing-token penalty, and came back as a food we do not have, while
+ * "carrot" resolved with high confidence. Only the plural forms a catalogue
+ * actually uses are handled: the naive rule would turn "grits" into "grit".
+ */
+const SAME_WORD = new Set(['grits', 'oats', 'greens', 'chips', 'crisps', 'molasses', 'hummus', 'couscous', 'asparagus'])
+function stem(t: string): string {
+  if (t.length <= 3 || SAME_WORD.has(t)) return t
+  if (t.endsWith('ies')) return `${t.slice(0, -3)}y`
+  if (t.endsWith('es') && t.length > 4) return t.slice(0, -2)
+  if (t.endsWith('s')) return t.slice(0, -1)
+  return t
+}
+
 /** How much of the phrase the record's name accounts for, and what that is worth. */
 function lexicalScore(phrase: string, name: string): number {
   const ts = tokens(phrase)
   if (ts.length === 0) return 0
   const n = norm(plainName(name))
-  const coverage = ts.filter((t) => n.includes(t)).length / ts.length
+  const stems = new Set(n.split(' ').map(stem))
+  const covered = (t: string) => n.includes(t) || stems.has(stem(t))
+  const coverage = ts.filter(covered).length / ts.length
   if (coverage === 1) return LEXICAL_BOOST
   return coverage * LEXICAL_BOOST * 0.5 - (1 - coverage) * MISSING_TOKEN_PENALTY
 }
