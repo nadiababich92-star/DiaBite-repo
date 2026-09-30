@@ -8,21 +8,37 @@ yes to.
 
 ---
 
-## The connection note (LinkedIn, 300 characters)
+## The connection note (LinkedIn caps these at 200 characters)
 
-**To a physician — endocrinologist or diabetologist**
+Counts below are with a four-letter name in place; swap in a longer one and
+check. Em dashes and quotation marks each count as one.
 
-> Hi Dr [Name] — I'm a product manager building a nutrition tool for people
-> with type 2 diabetes. I'd rather a clinician told me my numbers are wrong now
-> than after people start relying on them. Could I send you the logic to pick
-> apart? A 40-minute read, and I'm not selling anything.
+**A — to a physician (190)**
 
-**To a registered dietitian or CDCES**
+> Hi Dr [Name] — I build a nutrition tool for type 2 diabetes and I'd rather a
+> clinician told me my numbers are wrong now than later. Could I send you the
+> logic? 40-minute read, nothing to sell.
 
-> Hi [Name] — I'm building a tool that answers "can I eat this?" for people
-> managing type 2 diabetes, and the part I'm least sure of is the daily
-> targets. Would you be willing to tear into the logic? It's written up in one
-> document, about 40 minutes, and I'm not asking for an endorsement.
+**B — to a dietitian or CDCES (185)**
+
+> Hi [Name] — I'm building a "can I eat this?" tool for type 2 diabetes. The
+> daily targets are the part I trust least. Would you tear into the logic? One
+> doc, 40 min, no endorsement needed.
+
+**C — shortest, when the name is long (160)**
+
+> Hi Dr [Name] — I build a nutrition tool for type 2 diabetes and need a
+> clinician to tell me what's wrong with my targets. 40-minute read, no pitch.
+> May I send it?
+
+**D — when you have a real hook (179)**
+
+> Hi Dr [Name] — your talk on [subject] is why I'm writing. I build a nutrition
+> tool for type 2 diabetes and need someone to tell me where my targets are
+> wrong. 40-min read?
+
+D is the one that gets answered, when it is true. Everything specific you know
+about them is worth more than anything clever about you.
 
 **If you have something specific in common** — replace the first line with it.
 A talk of theirs, a paper, their clinic's population. One true specific beats
