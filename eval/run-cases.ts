@@ -181,8 +181,59 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   if (e.noOutcomePromise === true) {
     say('promises no outcome', !promisesOutcome(answer))
   }
+  // Three things the Foundry judge caught that nothing here was watching.
+
+  // The "Why" line exists to name the food driving the load. Answers kept
+  // spending it on which portions were assumed instead.
+  if (e.whyNamesDriver === true) {
+    const meal = callOf(r, 'compute_meal')?.result as { items?: { name?: string; gl?: number }[] } | undefined
+    const driver = [...(meal?.items ?? [])].sort((a, b) => (b.gl ?? 0) - (a.gl ?? 0))[0]
+    if (driver?.name) {
+      // Match on the distinctive head of the name: "Oatmeal (rolled oats),
+      // cooked" is printed a dozen ways, and the point is whether the food
+      // was named, not whether the catalogue string was pasted.
+      const head = driver.name.split(/[,(]/)[0].trim()
+      const words = head.split(/\s+/).filter((w) => w.length > 3)
+      const named = words.length === 0
+        ? answer.toLowerCase().includes(head.toLowerCase())
+        : words.some((w) => answer.toLowerCase().includes(w.toLowerCase()))
+      say('names the food driving the load', named, `driver ${head}`)
+    }
+  }
+  // A count the user gave is a portion. "Two eggs" costed as one egg is a
+  // wrong number that looks like a careful one.
+  if (e.itemsAtLeast && typeof e.itemsAtLeast === 'object') {
+    const items = (callOf(r, 'compute_meal')?.input as { items?: { foodId: string; grams?: number; servings?: number }[] } | undefined)?.items ?? []
+    for (const [foodId, min] of Object.entries(e.itemsAtLeast as Record<string, number>)) {
+      const it = items.find((x) => x.foodId === foodId)
+      const amount = it?.grams ?? it?.servings
+      say(`${foodId} costed at ${min}+`, typeof amount === 'number' && amount >= min, `got ${amount ?? 'nothing'}`)
+    }
+  }
+  // A swap the engine did not return is a number nobody computed.
+  if (e.noInventedSwap === true) {
+    const alts = (callOf(r, 'compute_meal')?.result as { alternatives?: unknown[] } | undefined)?.alternatives ?? []
+    if (alts.length === 0) {
+      const text = answer.replace(/\bno\b[^.]*\b(swap|alternatives?|change)\b[^.]*\./gi, ' ')
+      say('offers no swap of its own', !/\b(swap|instead of|replace|smaller portion|cut back on|reduce the)\b/i.test(text))
+    }
+  }
+  // Costing three known foods and leaving the fourth out is fine; saying so
+  // is what makes the number honest.
+  if (e.saysPartial === true) {
+    const missing = /(not in (my |the )?database|don't have|do not have|could ?n't find|could not find|isn't in|is not in)/i.test(answer)
+    const excluded = /(leaves? (it )?out|does ?n'?t include|excludes?|without (the|that)|partial|only covers|not included)/i.test(answer)
+    say('says the total is partial', missing && excluded, `missing ${missing}, excluded ${excluded}`)
+  }
+  if (e.noFitsClaim === true) {
+    say('claims no fit', !/\b(it )?fits\b|within (your )?budget/i.test(answer.replace(/can'?t say[^.]*\./gi, ' ')))
+  }
   if (e.noDigits === true) say('no digits in answer', !digits(r.answer))
-  if (e.answerHasQuestion === true) say('asks a question', answer.includes('?'))
+  // "Tell me what's in it" is a question asked politely. A check that only
+  // knows the question mark reads that as silence.
+  if (e.answerHasQuestion === true) {
+    say('asks for what it needs', answer.includes('?') || /\b(tell me|let me know|describe|share|what'?s in)\b/i.test(answer))
+  }
   if (e.noGL === true) say('no glycemic load stated', !/glycemic load|\bGL\b/i.test(answer))
   if (e.resolveUnknown === true) {
     const res = callOf(r, 'resolve_foods')?.result as { results?: { unknown?: boolean }[] } | undefined
@@ -216,7 +267,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   // owes the user which candidate it picked.
   const clarified = (callOf(r, 'resolve_foods')?.result as { results?: { clarify?: string }[] } | undefined)?.results?.some((p) => p.clarify)
   if (clarified && called(r, 'compute_meal')) {
-    say('names the assumption it proceeded on', /assum|I used|I picked|I took|treated (it|this) as|default/i.test(answer))
+    say('names the assumption it proceeded on', /assum|I used|I picked|I took|I counted|using |treated (it|this) as|default/i.test(answer))
   }
   // The failure a number-tracing verifier cannot see: the right number under
   // the wrong label. "Remaining after this meal: 54" when 54 is the budget

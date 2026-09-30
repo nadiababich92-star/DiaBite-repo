@@ -2055,6 +2055,125 @@
       },
       "judge": "mechanical",
       "tags": []
+    },
+    {
+      "id": "H8",
+      "dimension": "helpful",
+      "query": "Two eggs, avocado and a slice of rye bread",
+      "ground_truth": "Two eggs costed as two: the count the user gave is the portion, not a reason to use one default.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [
+          {
+            "foodId": "seed:greekyogurt",
+            "grams": 150
+          }
+        ]
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "itemsAtLeast": {
+          "seed:egg": 110
+        },
+        "whyNamesDriver": true
+      },
+      "judge": "mechanical",
+      "tags": []
+    },
+    {
+      "id": "H9",
+      "dimension": "honest",
+      "query": "Chicken tacos with corn tortillas, pinto beans and salsa",
+      "ground_truth": "Costs the three foods it has, names chicken tacos as the one it does not, says the total leaves it out, and claims no fit on a partial total.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [
+          {
+            "foodId": "seed:greekyogurt",
+            "grams": 150
+          }
+        ]
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "saysPartial": true,
+        "noFitsClaim": true,
+        "answerHasQuestion": true
+      },
+      "judge": "mechanical",
+      "tags": []
+    },
+    {
+      "id": "H10",
+      "dimension": "honest",
+      "query": "General Tso's chicken and fried rice",
+      "ground_truth": "Both come back unknown — \"fried\" changes a food enough that the engine will not call it white rice — so the answer says so and asks for the ingredients. A high lexical score is not a match.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [
+          {
+            "foodId": "seed:greekyogurt",
+            "grams": 150
+          }
+        ]
+      },
+      "expect": {
+        "resolveUnknown": true,
+        "noComputeMeal": true,
+        "answerHasQuestion": true
+      },
+      "judge": "mechanical",
+      "tags": []
+    },
+    {
+      "id": "H11",
+      "dimension": "helpful",
+      "query": "Grilled salmon with quinoa and broccoli",
+      "ground_truth": "A meal that fits and returns no alternatives: the next action says none is needed rather than inventing a smaller portion.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [
+          {
+            "foodId": "seed:greekyogurt",
+            "grams": 150
+          }
+        ]
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "noInventedSwap": true,
+        "whyNamesDriver": true
+      },
+      "judge": "mechanical",
+      "tags": []
     }
   ]
 }

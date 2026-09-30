@@ -53,6 +53,32 @@ const plainName = (name: string) =>
     .replace(/\([^)]*\b(no|without|free)\b[^)]*\)/gi, ' ')
     .replace(/,\s*(no|without)\b[^,]*/gi, ' ')
 
+/**
+ * How much of a food there was, cut from the phrase before anything tries to
+ * identify it.
+ *
+ * "two eggs" resolved to nothing while "eggs" resolved with high confidence:
+ * the count is a token the record's name cannot contain, so it cost coverage
+ * in the lexical score and pushed a common breakfast under the unknown
+ * threshold. The quantity is the model's business — it multiplies the default
+ * portion by the count — and identity is this file's, so they are separated
+ * here rather than argued about downstream.
+ *
+ * A digit against a percent sign stays: "2% milk" is a food's name, not an
+ * amount of milk.
+ */
+const COUNT_WORD = /^(a|an|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|half|couple|pair)\b\s*(of\s+)?/i
+const AMOUNT = /^\s*\d+(?:[.,]\d+)?\s*(?!%)(g|gram|grams|kg|oz|ounces?|lb|ml|l|cups?|tbsp|tablespoons?|tsp|teaspoons?|slices?|pieces?|servings?|portions?|bowls?|plates?|glass(?:es)?)?\b\s*(of\s+)?/i
+export function withoutQuantity(phrase: string): string {
+  let out = phrase.trim()
+  for (let i = 0; i < 3; i++) {
+    const next = out.replace(AMOUNT, '').replace(COUNT_WORD, '').trim()
+    if (next === out || next === '') break
+    out = next
+  }
+  return out || phrase.trim()
+}
+
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim()
 const STOP = new Set(['a', 'an', 'the', 'of', 'with', 'and', 'some', 'my', 'plate', 'bowl', 'cup', 'slice', 'slices', 'piece', 'pieces'])
 const tokens = (s: string) => norm(s).split(' ').filter((t) => t && !STOP.has(t))
@@ -146,8 +172,11 @@ function aliasesOf(): Map<string, string> {
 
 export async function resolvePhrases(store: VectorStore, phrases: string[], topK = 5): Promise<ResolvedPhrase[]> {
   const { byId } = loadFoods()
-  const clean = phrases.map((p) => p.trim()).filter(Boolean)
-  if (clean.length === 0) return []
+  const given = phrases.map((p) => p.trim()).filter(Boolean)
+  if (given.length === 0) return []
+  // Identify the food, not the amount of it. The phrase the user typed is
+  // still what comes back, so the answer can echo their words.
+  const clean = given.map(withoutQuantity)
   const vectors = await embed(clean)
 
   return Promise.all(clean.map(async (phrase, i) => {
@@ -181,6 +210,6 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
       const rival = candidates.slice(1).find((c) => !sameFood(c.name, candidates[0].name))
       clarify = rival ? `Did you mean ${candidates[0].name} or ${rival.name}?` : undefined
     }
-    return { phrase, confidence, candidates, clarify, unknown }
+    return { phrase: given[i], confidence, candidates, clarify, unknown }
   }))
 }
