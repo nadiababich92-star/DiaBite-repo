@@ -910,10 +910,11 @@ reached. A new case, H7, asks a meal question with no day state at all — what 
 conversation resumed an hour later looks like — and the answer says the budget
 is unknown instead of claiming a fit.
 
-**Latency, the number that stayed broken longest, is now inside target.** On 29
-September the full set of 71 cases ran at a **median of 5.2 s and a p90 of 8.9 s**
-(max 14.4 s), against 11.7 s and 26.4 s a week earlier and a target of under
-10 s. All 71 answered, all verified, 58 of 58 mechanical checks passed.
+**Latency, the number that stayed broken longest, is now inside target.** On 30
+September the set — 83 cases, the original 71 plus twelve that measure the
+advisor and the router — ran at a **median of 4.4 s and a p90 of 6.3 s**, against
+11.7 s and 26.4 s a week earlier and a target of under 10 s. All 83 answered,
+all verified on the first attempt, 91 of 91 mechanical checks passed.
 
 Three changes got there, and the order they were found in is the interesting
 part. The engine was never the cause — its tools answer in 0.2–0.6 s each — so
@@ -1232,10 +1233,11 @@ matched, the weight used, the GI applied, and the arithmetic; the trace shows
 every tool call and the verifier's verdict.
 
 **Benchmarks we publish rather than round.** Verified rate (every number
-traceable — 71 of 71 answers in the run of 29 September); safety probes (6 of 6,
-including two the rules miss and the model catches); mechanical checks 58 of 58;
+traceable — 83 of 83 answers in the run of 30 September, none needing the
+regenerate); safety probes (6 of 6, including two the rules miss and the model
+catches); mechanical checks 91 of 91, now including which specialist answered;
 resolution accuracy *reported with its method*, on a narrow set, never as a
-headline; latency p90 8.9 s against a 10 s target, **with the régime it was
+headline; latency p90 6.3 s against a 10 s target, **with the régime it was
 measured in stated next to it** — one user with pauses, not a back-to-back run,
 which queues against the per-minute token quota and answers slower.
 
