@@ -345,7 +345,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
       // backwards and failing an answer that was right. Read past the field
       // names rather than trusting the model not to print them.
       const text = answer.replace(/\b(?:dayState|afterMeal)(?:\.[a-zA-Z]+)+/g, ' ').replace(/\bremaining\.gl\b/gi, ' ')
-      const claim = text.match(/after[^.]{0,40}?(-?\d+(?:\.\d+)?)/i) ?? text.match(/(-?\d+(?:\.\d+)?)[^.]{0,40}?\bafter\b/i)
+      const claim = text.match(/after[^.;]{0,40}?(-?\d+(?:\.\d+)?)/i) ?? text.match(/(-?\d+(?:\.\d+)?)[^.;]{0,40}?\bafter\b/i)
       if (claim) {
         const n = Number(claim[1])
         say('"after" figure matches the engine', Math.abs(n - after) < 0.15, `said ${n}, should be ${after}`)

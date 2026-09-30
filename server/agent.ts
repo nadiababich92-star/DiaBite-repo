@@ -611,6 +611,26 @@ export async function ask(req: AskRequest): Promise<AskResponse> {
   return res
 }
 
+/**
+ * Cut the knowledge base's citation markers out of the prose.
+ *
+ * An advisor answer that used `file_search` ended with a run of private-use
+ * characters wrapping "filecite turn0file1 turn0file2" — the annotation the
+ * Responses API writes into the text so a client can render a footnote. We
+ * render no footnotes, so it reached the user as mojibake, and the digits in
+ * "turn0file1" reached the verifier as numbers no tool returned, which cost
+ * the answer its badge as well. The markers sit between U+E200 and U+E201,
+ * with U+E202 separating the parts.
+ */
+export function stripCitations(text: string): string {
+  return text
+    .replace(/[^]*/g, '')
+    .replace(/[-]/g, '')
+    .replace(/[ \t]+([.,;:!?])/g, '$1')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trimEnd()
+}
+
 async function answer(req: AskRequest): Promise<AskResponse> {
   const gate = safetyGate(req.message)
   if (gate.blocked) {
@@ -648,7 +668,7 @@ async function answer(req: AskRequest): Promise<AskResponse> {
     responseId = res.id
     previous = res.id
     trace.push(...traceOf(res.output))
-    answer = res.output_text ?? ''
+    answer = stripCitations(res.output_text ?? '')
 
     v = verify({ answer, toolResults: trace.map((t) => t.result), userText: req.message })
     if (v.ok) break
