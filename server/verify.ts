@@ -9,13 +9,15 @@ const NUM = /-?\d+(?:[.,]\d+)?/g
 
 /**
  * Digits that are part of a name, not a claim: "type 2 diabetes", "type 1",
- * "A1c", "HbA1c", "omega-3". Left in, they are numbers no tool returned, so an
- * advisor answer — which calls no tools at all — failed verification for
- * saying "type 2 diabetes", spent a regenerate, and still reached the user
- * wearing an unverified badge. The verifier exists to catch invented
- * quantities; a disease's name is not one.
+ * "A1c", "HbA1c", "omega-3", "GLP-1", "SGLT2". Left in, they are numbers no
+ * tool returned, so an advisor answer — which calls no tools at all — failed
+ * verification for saying "type 2 diabetes", spent a regenerate, and still
+ * reached the user wearing an unverified badge. Naming the drug class a
+ * question turns on ("keto needs clinician input on an SGLT2 inhibitor") did
+ * the same. The verifier exists to catch invented quantities; a disease's
+ * name is not one, and neither is a drug's.
  */
-const NAMED = /\b(type\s*)?[12]\b(?=\s*diabet)|\bhba1c\b|\ba1c\b|\bomega[-\s]?3\b/gi
+const NAMED = /\b(type\s*)?[12]\b(?=\s*diabet)|\bhba1c\b|\ba1c\b|\bomega[-\s]?[36]\b|\bglp[-\s]?1\b|\bsglt[-\s]?2\b|\bb ?12\b|\bcovid[-\s]?19\b/gi
 
 function numbersIn(text: string): number[] {
   return (text.replace(NAMED, ' ').match(NUM) ?? []).map((t) => parseFloat(t.replace(',', '.'))).filter((n) => Number.isFinite(n))

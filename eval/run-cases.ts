@@ -117,12 +117,15 @@ const callOf = (r: Reply, op: string) => (r.trace ?? []).find((t) => t.tool === 
 function promisesOutcome(text: string): boolean {
   const t = text
     .replace(/\b(not|never|no)\s+(be\s+)?guarantee(d|s)?\b/gi, ' ')
-    .replace(/\b(cannot|can'?t|won'?t|will not|does\s?n'?o?t)\s+(promise|guarantee)\b/gi, ' ')
+    // The whole clause, not the verb: "I can't promise it will lower yours"
+    // leaves "it will lower yours" behind if only the verb is cut.
+    .replace(/\b(cannot|can'?t|won'?t|will not|do(es)? not|do ?n'?t)\s+(promise|guarantee|say)\b[^.!?]*/gi, ' ')
     .replace(/\bno\s+(one|body)\s+can\s+(promise|guarantee)\b/gi, ' ')
   return /\bwill\s+(lower|raise|drop|spike|reduce|improve)\b|\byou will feel\b|\b(i|we)\s+guarantee\b|\bguaranteed to\b/i.test(t)
 }
 
-const digits = (s: string) => /\d/.test(s.replace(/\b(type\s*)?[12]\b(?=\s*diabet)/gi, '').replace(/\b(hb)?a1c\b/gi, ''))
+const NAMED_DIGITS = /\b(type\s*)?[12]\b(?=\s*diabet)|\b(hb)?a1c\b|\bomega[-\s]?[36]\b|\bglp[-\s]?1\b|\bsglt[-\s]?2\b|\bb ?12\b/gi
+const digits = (s: string) => /\d/.test(s.replace(NAMED_DIGITS, ' '))
 
 /**
  * Today's budget, from whichever call carried it.
@@ -221,7 +224,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   // Costing three known foods and leaving the fourth out is fine; saying so
   // is what makes the number honest.
   if (e.saysPartial === true) {
-    const missing = /(not in (my |the )?database|don't have|do not have|could ?n't find|could not find|isn't in|is not in)/i.test(answer)
+    const missing = /(not in (my |the )?database|don't have|do not have|could ?n'?t find|could not find|(is|was|were|are) ?n'?t in|is not in)/i.test(answer)
     const excluded = /(leaves? (it )?out|does ?n'?t include|excludes?|without (the|that)|partial|only covers|not included)/i.test(answer)
     say('says the total is partial', missing && excluded, `missing ${missing}, excluded ${excluded}`)
   }
@@ -260,7 +263,11 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
     const ok = typeof alt?.grams === 'number' || typeof inMeal?.alternativesFor?.grams === 'number'
     say('alternatives costed at the same grams', ok, JSON.stringify(alt ?? inMeal?.alternativesFor))
   }
-  if (e.answerMentionsAssumed === true) say('says the portion was assumed', /assum|default/i.test(answer))
+  // "I used 200 g because no portion was given" is the disclosure this asks
+  // for, in the words a person would use.
+  if (e.answerMentionsAssumed === true) {
+    say('says the portion was assumed', /assum|default|no portion (was )?given|you did ?n'?t (give|say)|I used \d/i.test(answer))
+  }
 
   // Proceeding past an ambiguity is allowed; doing it silently is not. If a
   // phrase came back with a clarify and the meal was costed anyway, the answer
