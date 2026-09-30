@@ -12,20 +12,25 @@ should be re-run rather than trusted.
 
 ## Before you start
 
-**Fifteen minutes before, not five.** The container sleeps when idle and the
-first request after a quiet hour pays for the wake-up.
+**Fifteen minutes before, not five.**
 
 1. Open the app and ask any question — "oatmeal" will do. Throw the answer
-   away. This is a warm-up, not a rehearsal: it wakes the container, opens the
-   connection to Foundry, and turns the first slow answer into one nobody saw.
+   away. The container itself never sleeps (it is pinned to one replica), so
+   this is not a wake-up call; it is proof that the whole chain — browser,
+   engine, Foundry, the tools — is answering today, taken while there is still
+   time to do something about it.
 2. Check the health line: `/health` should say `records: 1436`. A smaller
    number means the database did not load and the answers will be wrong in a
    way that looks right.
-3. Set the profile up **as the person you are about to describe**. The script
+3. Open **the hosted address**, not a dev server on your laptop:
+   `https://diabite-engine.greenglacier-ab5551c6.swedencentral.azurecontainerapps.io`.
+   The app is served by the same container that answers, so there is no laptop
+   in the path and nothing to start.
+4. Set the profile up **as the person you are about to describe**. The script
    below assumes: type 2 diabetes, metformin, no insulin, peanut allergy, lose
    weight, low carb → a budget of **48 GL**. Log one breakfast (Greek yogurt)
    so the day has something in it; a day at zero looks like a fresh install.
-4. Have the backup recording open in another tab, minimised. You will not need
+5. Have the backup recording open in another tab, minimised. You will not need
    it, and that is exactly why it should be open.
 
 **Do not** clear the browser between rehearsal and the real thing — the profile
