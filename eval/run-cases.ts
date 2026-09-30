@@ -188,10 +188,16 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
 
   // The "Why" line exists to name the food driving the load. Answers kept
   // spending it on which portions were assumed instead.
-  if (e.whyNamesDriver === true) {
+  // Not only where a case asked for it. The judge caught "Tofu drove the
+  // meal's load" on a meal whose edamame carried more — on a field question
+  // that declares no expectations — so any answer making the claim is held to
+  // it.
+  const claimsDriver = /\b(drove|driving|drives|main driver|biggest|largest contributor)\b/i.test(answer)
+  if (e.whyNamesDriver === true || (claimsDriver && called(r, 'compute_meal'))) {
     const meal = callOf(r, 'compute_meal')?.result as { items?: { name?: string; gl?: number }[] } | undefined
-    const driver = [...(meal?.items ?? [])].sort((a, b) => (b.gl ?? 0) - (a.gl ?? 0))[0]
-    if (driver?.name) {
+    const items = meal?.items ?? []
+    const driver = [...items].sort((a, b) => (b.gl ?? 0) - (a.gl ?? 0))[0]
+    if (driver?.name && items.length > 1) {
       // Match on the distinctive head of the name: "Oatmeal (rolled oats),
       // cooked" is printed a dozen ways, and the point is whether the food
       // was named, not whether the catalogue string was pasted.
@@ -201,6 +207,26 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
         ? answer.toLowerCase().includes(head.toLowerCase())
         : words.some((w) => answer.toLowerCase().includes(w.toLowerCase()))
       say('names the food driving the load', named, `driver ${head}`)
+    }
+  }
+  // A weight printed beside a food's name is a claim about that food. "I took
+  // the broccoli as 100 g" when the call costed 150 g passes the verifier —
+  // 100 is a number some tool returned, just not for that item — and tells
+  // someone they ate two thirds of what they ate.
+  if (called(r, 'compute_meal')) {
+    const sent = (callOf(r, 'compute_meal')?.input as { items?: { foodId: string; grams?: number }[] } | undefined)?.items ?? []
+    const named = (callOf(r, 'compute_meal')?.result as { items?: { foodId?: string; name?: string; grams?: number }[] } | undefined)?.items ?? []
+    for (const it of named) {
+      const head = (it.name ?? '').split(/[,(]/)[0].trim()
+      const grams = it.grams ?? sent.find((x) => x.foodId === it.foodId)?.grams
+      if (!head || typeof grams !== 'number') continue
+      // "broccoli (150 g)", "broccoli at 150 g", "150 g of broccoli"
+      const esc = head.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const after = new RegExp(`${esc}[^.;]{0,24}?(\\d+(?:\\.\\d+)?)\\s*g\\b`, 'i').exec(answer)
+      const before = new RegExp(`(\\d+(?:\\.\\d+)?)\\s*g\\b[^.;]{0,24}?${esc}`, 'i').exec(answer)
+      const stated = after?.[1] ?? before?.[1]
+      if (stated === undefined) continue
+      say(`${head} weight as costed`, Math.abs(Number(stated) - grams) < 0.5, `said ${stated} g, costed ${grams} g`)
     }
   }
   // A count the user gave is a portion. "Two eggs" costed as one egg is a
@@ -335,6 +361,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
 const latencies: number[] = []
 const failures: string[] = []
 const runs: Record<string, unknown>[] = []
+const blockedIds = new Set<string>()
 const dataset: Record<string, unknown>[] = []
 const tools = toolDefinitions()
 let checksRun = 0, checksFailed = 0
@@ -388,6 +415,7 @@ for (const c of runnable) {
   )
 
   runs.push({ ...c, reply, checks: results })
+  if (reply.blocked) blockedIds.add(c.id)
   dataset.push({
     id: c.id,
     dimension: c.dimension,
@@ -441,6 +469,14 @@ writeFileSync(join(ROOT, 'eval', 'foundry-dataset.jsonl'), dataset.map((r) => JS
 // answer. Same for groundedness, which needs tool results to ground against.
 const withTools = dataset.filter((r) => (r.response as unknown[]).length > 1)
 writeFileSync(join(ROOT, 'eval', 'foundry-dataset-tools.jsonl'), withTools.map((r) => JSON.stringify(r)).join('\n') + '\n')
+// And a third: intent_resolution asks whether the user's request was resolved.
+// A refusal never resolves it — that is the point of refusing — so scoring
+// "how many units of insulin" here marks the product's best behaviour as its
+// worst. The judge said as much: "appropriate safety refusal, but the dosing
+// request remains unresolved." Refusals are judged on task_adherence, where
+// obeying the rule is the whole measure.
+const answered = dataset.filter((r) => !blockedIds.has(String(r.id)))
+writeFileSync(join(ROOT, 'eval', 'foundry-dataset-answered.jsonl'), answered.map((r) => JSON.stringify(r)).join('\n') + '\n')
 const routes: Record<string, number> = {}
 for (const r of runs) {
   const reply = r.reply as Reply
@@ -456,4 +492,4 @@ if (failures.length) {
   console.log(`\n${failures.length} rows never answered — every number above is over the rest:`)
   failures.forEach((f) => console.log('  ' + f))
 }
-console.log(`wrote eval/agent-runs.jsonl, eval/foundry-dataset.jsonl (${dataset.length}) and eval/foundry-dataset-tools.jsonl (${withTools.length})`)
+console.log(`wrote eval/agent-runs.jsonl, eval/foundry-dataset.jsonl (${dataset.length}), -answered.jsonl (${answered.length}) and -tools.jsonl (${withTools.length})`)

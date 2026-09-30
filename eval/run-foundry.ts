@@ -86,13 +86,20 @@ async function score(dataset: string, label: string, criteria: unknown[]) {
 }
 
 await upload('foundry-dataset.jsonl')
+await upload('foundry-dataset-answered.jsonl')
 await upload('foundry-dataset-tools.jsonl')
 
-// Every row can be judged on whether the agent understood the ask and obeyed
-// its instructions — including the refusals, where obeying is the whole point.
-await score('foundry-dataset.jsonl', 'all', [
-  criterion('intent_resolution', 'builtin.intent_resolution', { query: '{{item.query}}', response: '{{item.response}}' }),
+// Every row, refusals included, can be judged on whether the agent obeyed its
+// instructions: refusing is obeying.
+await score('foundry-dataset.jsonl', 'adherence', [
   criterion('task_adherence', 'builtin.task_adherence', { query: '{{item.query}}', response: '{{item.response}}' }),
+])
+
+// Intent resolution is a different question — was the user's request
+// resolved — and a refusal never resolves one. Scoring the refusals here
+// marks the product's best behaviour as its worst, so they are left out.
+await score('foundry-dataset-answered.jsonl', 'intent', [
+  criterion('intent_resolution', 'builtin.intent_resolution', { query: '{{item.query}}', response: '{{item.response}}' }),
 ])
 
 // Only rows that used tools can be judged on how they used them.
