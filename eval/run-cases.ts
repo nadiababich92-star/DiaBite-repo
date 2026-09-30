@@ -264,7 +264,10 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
     }
   }
   // A swap the engine did not return is a number nobody computed.
-  if (e.noInventedSwap === true) {
+  // On every meal, not only where a case asks: the browser showed "swap the
+  // rye bread for the avocado" on a meal containing both, after a compute_meal
+  // that returned no alternatives at all.
+  if (e.noInventedSwap === true || called(r, 'compute_meal')) {
     const alts = (callOf(r, 'compute_meal')?.result as { alternatives?: unknown[] } | undefined)?.alternatives ?? []
     if (alts.length === 0) {
       const text = answer.replace(/\bno\b[^.]*\b(swap|alternatives?|change)\b[^.]*\./gi, ' ')

@@ -44,6 +44,8 @@ export interface AgentResponse {
   verifierError?: string | null
   toolCalls?: number
   trace?: TraceStep[]
+  /** Which specialist answered: the meal agent, or the advisor with no tools. */
+  route?: 'meal' | 'advisor' | 'triage'
 }
 
 /** Engine ids for diary entries: locally known foods are `seed:<id>`; agent-logged ones already carry theirs. */

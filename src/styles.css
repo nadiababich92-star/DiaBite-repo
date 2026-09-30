@@ -207,11 +207,13 @@ tr:last-child td { border-bottom: none; }
 .answer.tone-change { border-left-color: var(--medium); }
 .answer.tone-bad, .answer.tone-blocked, .card.tone-blocked { border-left: 3px solid var(--high); }
 .answer.tone-ask { border-left-color: var(--accent); }
+.answer.tone-advice { border-left-color: var(--ink-soft, #8a8f87); }
 .eyebrow-line { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; margin-bottom: 10px; color: var(--text-faint); }
 .tone-good .eyebrow-line { color: var(--low); }
 .tone-change .eyebrow-line { color: var(--medium); }
 .tone-bad .eyebrow-line, .tone-blocked .eyebrow-line { color: var(--high); }
 .tone-ask .eyebrow-line { color: var(--accent); }
+.tone-advice .eyebrow-line { color: var(--ink-soft, #8a8f87); }
 .answer-text p { margin: 0 0 10px; font-size: 15.5px; line-height: 1.55; max-width: 60ch; }
 .answer-text p:first-child { font-family: var(--serif); font-size: 21px; line-height: 1.25; font-weight: 600; letter-spacing: -0.015em; margin-bottom: 12px; text-wrap: balance; }
 .answer-text strong { font-weight: 600; }

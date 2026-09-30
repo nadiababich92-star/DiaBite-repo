@@ -54,7 +54,14 @@ function Answer({ text }: { text: string }) {
   )
 }
 
-function verdictTone(answer: string): 'good' | 'change' | 'bad' | 'ask' {
+/**
+ * An advisory answer has no verdict line to read, so reading one gave it the
+ * clarifying-question badge: "One question first" over a plain explanation of
+ * the glycemic index. Who answered decides the label; only a meal has a
+ * verdict.
+ */
+function verdictTone(answer: string, route?: string): 'good' | 'change' | 'bad' | 'ask' | 'advice' {
+  if (route === 'advisor') return 'advice'
   const first = answer.split('\n')[0].toLowerCase()
   if (first.includes('does not fit') || first.includes("doesn't fit") || first.includes('not today')) return 'bad'
   if (first.includes('with a change') || first.includes('with one change') || first.includes('swap')) return 'change'
@@ -184,7 +191,7 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
     setLogged(true)
   }
 
-  const tone = reply ? (reply.blocked ? 'blocked' : verdictTone(reply.answer)) : null
+  const tone = reply ? (reply.blocked ? 'blocked' : verdictTone(reply.answer, reply.route)) : null
 
   return (
     <>
@@ -239,13 +246,20 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
           <section className={`card answer tone-${tone}`}>
             <div className="eyebrow-line">
               {reply.blocked ? 'Not something I\'ll answer' :
-               tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Not today' : 'One question first'}
+               tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Not today' :
+               tone === 'advice' ? 'Advice' : 'One question first'}
             </div>
             <Answer text={reply.answer} />
             {!reply.blocked && (
               <div className="verify-row">
                 {reply.verified ? (
-                  <span className="pill low">Verified · {reply.matchedNumbers?.length ?? 0} numbers traced to tools</span>
+                  <span className="pill low">
+                    {(reply.matchedNumbers?.length ?? 0) === 0
+                      // "Verified · 0 numbers traced to tools" reads like a
+                      // warning under an answer whose whole rule is to state none.
+                      ? 'No numbers stated — nothing to trace'
+                      : `Verified · ${reply.matchedNumbers?.length} numbers traced to tools`}
+                  </span>
                 ) : reply.verifierError ? (
                   <span className="pill medium">Verifier unavailable</span>
                 ) : (
