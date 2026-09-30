@@ -822,13 +822,52 @@ back in one response. The same run writes the Foundry rows — `query`,
 on) — so the dataset uploaded to Foundry is a build artefact, reproducible from
 the deployed agent, rather than a hand-collected transcript. Foundry's
 model-graded evaluators need a judge model deployed in Azure, and the judge
-must not be the model under test: the agent runs on `gpt-5-mini`, so the judge
-is a different deployment. Running the same dataset past two judges is itself
-informative — the course lab shows a weaker judge scoring identical answers
-far lower, which is a reason to report the judge alongside the score. The engine harness stays
-outside Foundry on purpose: it has to run in seconds after every data change,
-and its checks are exact matches that need no judge. Exact evaluator names and
-SDK shapes follow the course material; the mapping above is by capability.
+must not be the model under test: the agent answers on `gpt-5.4-mini`, so the
+judge is `gpt-5-mini` — the deployment the meal agent left when it moved.
+Running the same dataset past two judges is itself informative — the course lab
+shows a weaker judge scoring identical answers far lower, which is a reason to
+report the judge alongside the score. The engine harness stays outside Foundry
+on purpose: it has to run in seconds after every data change, and its checks
+are exact matches that need no judge. Exact evaluator names and SDK shapes
+follow the course material; the mapping above is by capability.
+
+**What the judges scored, and what that is worth** *(four runs, 30 September,
+judge `gpt-5-mini`)*. Two of these are stable and two move between runs of the
+same agent, so both are reported that way.
+
+| Evaluator | Rows | Result | Reading |
+|---|---|---|---|
+| Intent resolution | 71 answered | **70/71**, mean 4.56/5 | Stable |
+| Tool call accuracy | 59 with tools | **56/59**, mean 4.85/5 | Rose from 47/55 (4.56) as the fixes below landed, and held |
+| Groundedness | 59 with tools | **55/59**, mean 4.71/5 | Stable; two of the four failures are the judge's own error, below |
+| Task adherence | all 87 | **60–64/87**, mean 0.67 → 0.79 → 0.72 → 0.71 | Moves by four or five rows between identical configurations. Report the range |
+
+Refusals are scored on task adherence and **left out of intent resolution**: a
+refusal never resolves the user's request — that is what refusing is — and the
+judge said so while marking one down ("appropriate safety refusal, but the
+dosing request remains unresolved"). Scoring them there marks the product's
+best behaviour as its worst.
+
+**Task adherence measures our own spec's strictness, not answer quality.** Its
+27 failures in the last run break down as: a default weight named for one item
+but not another (8), the wording of the next action (6), the shape of the "why"
+line (5), a missing closing question (2), an unglossed term (1), and five
+others. **None** is a wrong number, a substituted food, a missed refusal or an
+unsupported verdict — those are the mechanical checks, and they pass 182 of
+182. We prescribe a four-part answer under 120 words with named weights, a
+named driver and a named swap; a judge reading that spec can always find one
+element short. The score could be lifted by loosening the format, which is the
+one thing we will not do, so the honest report is the number with its cause
+beside it.
+
+**Two failures are the judge's, and they are worth publishing too.** Asked
+about "fried rice", the engine answers `unknown: true` — deliberately, because
+frying changes a food enough that it is not the white rice it resembles — and
+the agent says it does not have the dish. The judge sees "White rice, cooked"
+in the candidate list at a 0.97 lexical score, ignores the flag beside it, and
+scores the answer as contradicting its own context. It made the same call
+twice, on two different dishes. A model-graded evaluator reads the payload;
+only the contract knows which field is the verdict.
 
 ### Model Requirements
 
@@ -911,10 +950,11 @@ conversation resumed an hour later looks like — and the answer says the budget
 is unknown instead of claiming a fit.
 
 **Latency, the number that stayed broken longest, is now inside target.** On 30
-September the set — 83 cases, the original 71 plus twelve that measure the
-advisor and the router — ran at a **median of 4.4 s and a p90 of 6.3 s**, against
-11.7 s and 26.4 s a week earlier and a target of under 10 s. All 83 answered,
-all verified on the first attempt, 91 of 91 mechanical checks passed.
+September the set — 87 cases, the original 71 plus sixteen that measure the
+advisor, the router and the failures the judges found — ran at a **median of
+4.9 s and a p90 of 7.8 s**, against 11.7 s and 26.4 s a week earlier and a
+target of under 10 s. All 87 answered, all verified on the first attempt, 182
+of 182 mechanical checks passed.
 
 Three changes got there, and the order they were found in is the interesting
 part. The engine was never the cause — its tools answer in 0.2–0.6 s each — so
@@ -1233,13 +1273,17 @@ matched, the weight used, the GI applied, and the arithmetic; the trace shows
 every tool call and the verifier's verdict.
 
 **Benchmarks we publish rather than round.** Verified rate (every number
-traceable — 83 of 83 answers in the run of 30 September, none needing the
+traceable — 87 of 87 answers in the run of 30 September, none needing the
 regenerate); safety probes (6 of 6, including two the rules miss and the model
-catches); mechanical checks 91 of 91, now including which specialist answered;
-resolution accuracy *reported with its method*, on a narrow set, never as a
-headline; latency p90 6.3 s against a 10 s target, **with the régime it was
-measured in stated next to it** — one user with pauses, not a back-to-back run,
-which queues against the per-minute token quota and answers slower.
+catches); mechanical checks 182 of 182, now including which specialist
+answered, whether a food the database lacks stayed out of the meal, and whether
+a weight printed beside a food is the weight it was costed at; the Foundry
+judges reported with their spread, since task adherence moves four or five rows
+between runs of the same agent; resolution accuracy *reported with its method*,
+on a narrow set, never as a headline; latency p90 7.8 s against a 10 s target,
+**with the régime it was measured in stated next to it** — one user with
+pauses, not a back-to-back run, which queues against the per-minute token quota
+and answers slower.
 
 **Disclosure.** The disclaimer precedes any number. Unverified food records are
 flagged in-app (E3). Where the agent refuses, it says why.
