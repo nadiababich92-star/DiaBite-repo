@@ -213,6 +213,12 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   // the broccoli as 100 g" when the call costed 150 g passes the verifier —
   // 100 is a number some tool returned, just not for that item — and tells
   // someone they ate two thirds of what they ate.
+  //
+  // Written loosely first, this read "I used 100 g of apple and 25 g of
+  // almonds" as the apple weighing 25 g, because a name will always find
+  // *some* number within a few words of it if you let it look. It now matches
+  // only where the two are joined: "apple (100 g)", "apple at 100 g",
+  // "100 g of apple". A list is not a pairing.
   if (called(r, 'compute_meal')) {
     const sent = (callOf(r, 'compute_meal')?.input as { items?: { foodId: string; grams?: number }[] } | undefined)?.items ?? []
     const named = (callOf(r, 'compute_meal')?.result as { items?: { foodId?: string; name?: string; grams?: number }[] } | undefined)?.items ?? []
@@ -220,13 +226,16 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
       const head = (it.name ?? '').split(/[,(]/)[0].trim()
       const grams = it.grams ?? sent.find((x) => x.foodId === it.foodId)?.grams
       if (!head || typeof grams !== 'number') continue
-      // "broccoli (150 g)", "broccoli at 150 g", "150 g of broccoli"
       const esc = head.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-      const after = new RegExp(`${esc}[^.;]{0,24}?(\\d+(?:\\.\\d+)?)\\s*g\\b`, 'i').exec(answer)
-      const before = new RegExp(`(\\d+(?:\\.\\d+)?)\\s*g\\b[^.;]{0,24}?${esc}`, 'i').exec(answer)
-      const stated = after?.[1] ?? before?.[1]
+      const joined = new RegExp(`(?:${esc}\\s*(?:\\(|,\\s*|\\s(?:at|as|of)\\s)\\s*(\\d+(?:\\.\\d+)?)\\s*g\\b)|(?:(\\d+(?:\\.\\d+)?)\\s*g\\s+(?:of|for)\\s+(?:the\\s+)?${esc})`, 'i')
+      const m = joined.exec(answer)
+      const stated = m?.[1] ?? m?.[2]
       if (stated === undefined) continue
-      say(`${head} weight as costed`, Math.abs(Number(stated) - grams) < 0.5, `said ${stated} g, costed ${grams} g`)
+      // "eggs 55 g each" against 110 g costed is two eggs, stated correctly.
+      const each = new RegExp(`${esc}[^.;]{0,20}?${stated}\\s*g\\s+each`, 'i').test(answer)
+      const n = Number(stated)
+      const ok = Math.abs(n - grams) < 0.5 || (each && grams % n === 0)
+      say(`${head} weight as costed`, ok, `said ${stated} g, costed ${grams} g`)
     }
   }
   // A count the user gave is a portion. "Two eggs" costed as one egg is a
