@@ -162,12 +162,34 @@ async function main() {
     catch (e) { res.status(404).json({ error: (e as Error).message }) }
   })
 
+  /**
+   * The day's entries, minus anything this build cannot cost.
+   *
+   * One stale id in the diary — a food renamed or dropped between releases —
+   * threw out of `dayState`, which made every tool call 500, which Foundry
+   * turns into a fatal error: the user asked about their lunch and got a
+   * validation error, because of a breakfast they logged last week. The day's
+   * budget is worth more than its completeness, so an id we cannot cost is
+   * dropped and named in the log rather than taking the answer with it.
+   */
+  const skippedIds = new Set<string>()
+  const costable = (entries: { foodId: string }[]) => entries.filter((e) => {
+    try { getRecord(e.foodId); return true }
+    catch {
+      if (!skippedIds.has(e.foodId)) {
+        skippedIds.add(e.foodId)
+        console.warn(`day state: skipping an entry this build cannot cost: ${e.foodId}`)
+      }
+      return false
+    }
+  })
+
   /** Today's budget for a session, or the marker that says we do not hold it. */
   const dayStateFor = (sessionId: string | undefined) => {
     if (sessionId === undefined) return undefined
     const held = sessionId ? getSession(sessionId) : undefined
     if (!held) return { unknown: true as const, sessionId: sessionId ?? '' }
-    return dayState(held.budget, held.entries)
+    return dayState(held.budget, costable(held.entries))
   }
 
   app.post('/tools/resolve_foods', async (req, res) => {
@@ -261,7 +283,7 @@ async function main() {
       entries = s.entries
     }
     if (!budget || !Array.isArray(entries)) return res.status(400).json({ error: 'sessionId, or budget and entries, required' })
-    try { res.json(dayState(budget, entries)) }
+    try { res.json(dayState(budget, costable(entries))) }
     catch (e) { res.json({ unknown: true, error: (e as Error).message }) }
   })
 
