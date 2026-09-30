@@ -603,7 +603,7 @@ that serves two surfaces at once: the tools the agent calls, and the
 
 | Surface | Components | How |
 |---|---|---|
-| Foundry prompt agent `diabite-agent-v2` | 1, 2, 8 | `gpt-5-mini`, the system prompt, and one OpenAPI tool carrying all four operations. Run through the Responses API with `tool_choice: required` — without it the model answers "let me check that for you" and calls nothing. |
+| Foundry prompt agents `diabite-triage`, `diabite-meal`, `diabite-advisor` | 1, 2, 8 | Three agents, one per job. **Triage** (`gpt-5.4-nano`) reads the question and emits one word, so routing never competes with answering for the same tokens. **Meal** (`gpt-5.4-mini`) carries the OpenAPI tool and the arithmetic discipline; `get_day_state` is removed from its tool surface because the budget already rides back with the other two calls. **Advisor** (`gpt-5.4-mini`) answers "is brown rice better than white rice" with no tools and no numbers, and is the only one given a memory store — food preferences, nothing clinical — plus a `file_search` knowledge base over our own four documents. All three run through the Responses API with `tool_choice: required`; without it the model answers "let me check that for you" and calls nothing. |
 | Container App `diabite-engine` — `/agent/ask` | 7, 9, (C9) | The wrapper around the agent: safety gate first (rules, no model), then the run, then the verifier. On an unmatched number: one regenerate, then a templated answer built only from tool results. Session memory is `previous_response_id` kept per `sessionId`, so the browser never carries a thread id. |
 | Container App `diabite-engine` — `/tools/*` | 3, 4, 5, 6 | The same TypeScript from `src/lib` and `src/data`, served as the four operations the agent calls, behind an API key held in a Foundry project connection. The engine never lives inside the agent — a second copy of the arithmetic is the failure mode this design exists to prevent. |
 | Frontend (this repo) | 5, 10 | React app. Calls `/agent/ask`; renders verdict, calculation and the tool trace returned with the response. Runs the diary's deterministic maths in the browser by importing the same `src/lib` module the engine is built from. |
@@ -844,11 +844,11 @@ never invent.
 | Context window | Small — under 20K tokens per turn | System prompt, four tool schemas, one meal, a few tool results. Long context is irrelevant; cost per turn is not |
 | Modalities | Text now; vision deferred (photo logging is Later) | V0 is typed meals |
 | Fine-tuning | Not required | Behaviour comes from the prompt and the tools; facts come from the engine. Fine-tuning would move knowledge into the model, which is the failure mode we designed against |
-| Latency | Medium priority: full answer under 10 s at p90. **Currently missed: a four-tool turn takes ~20 s end to end in Azure**, which is the clearest thing the next iteration has to fix | Two to four tool round trips per turn; a person waiting to eat will tolerate ten seconds, not thirty |
+| Latency | Medium priority: full answer under 10 s at p90. **Met on 29 September: median 5.2 s, p90 8.9 s** for a single user, by cutting a meal turn from four tool round trips to two and moving to a model whose deployment is not rate-limited at 50k tokens a minute | Two round trips per turn; a person waiting to eat will tolerate ten seconds, not thirty |
 | Accuracy | Entity resolution ≥ 90% top-1 is the engine's job. The model's job: zero invented numbers, enforced by the verifier | Accuracy is split between components on purpose; the model's part is measured mechanically |
 | Refusals | Must refuse dosing and escalate red flags reliably; the safety gate in front of it catches the obvious phrasings with rules first | Layered: rules, then model, either refuses |
-| Cost | Well under $0.05 per turn on `gpt-5-mini`; the five-week build is inside the Azure free trial, with the container the standing cost rather than the model | Stable system prompt and one tool spec keep the per-turn prompt small |
-| Model tier | `gpt-5-mini` today, on evidence: 13 of 15 agent cases pass, every answer verified, both failures are prompt problems rather than model limits. The comparison against a larger deployment is the next eval run, not a decision taken in advance | The right tier is an eval result, not a prior |
+| Cost | Well under $0.05 per turn; the five-week build is inside the Azure free trial, with the container the standing cost rather than the model. Two round trips per turn instead of four roughly halves the tokens a meal question spends | Stable system prompt and one tool spec keep the per-turn prompt small |
+| Model tier | Three deployments, one per role, each chosen by a run rather than a prior: `gpt-5.4-nano` routes (it emits one word), `gpt-5.4-mini` answers meals, `gpt-5.4-mini` advises. The meal agent moved off `gpt-5-mini` on 29 September on evidence: same 71 cases, p90 8.9 s against 21.8 s, 58 of 58 mechanical checks, and **fewer guesses** — where the old model costed "chicken tacos" as a lentil taco recipe, the new one says it does not have the food. The price is four more clarifying questions across fifty-five meals, which is the safer direction for this product | The right tier is an eval result, not a prior — and "faster" is only an improvement if the checks hold |
 | Time to market | Five weeks to a demo | Hosted API only; nothing that needs infrastructure |
 
 ### EVALUATIONS
@@ -910,13 +910,36 @@ reached. A new case, H7, asks a meal question with no day state at all — what 
 conversation resumed an hour later looks like — and the answer says the budget
 is unknown instead of claiming a fit.
 
-**The number that did not improve is latency.** Median 11.7 s, p90 26.4 s,
-against a target of under 10 s at p90 — worse than the 15.5 s measured on 24
-September. The engine is not the cause: its tools answer in 0.2–0.6 s each,
-measured against the deployed service, so four calls cost about a second. The
-rest is four sequential model round trips through Foundry. The fix is fewer
-round trips rather than faster thinking — resolving foods and reading the day
-state in one call — and it is the clearest piece of work left before the demo.
+**Latency, the number that stayed broken longest, is now inside target.** On 29
+September the full set of 71 cases ran at a **median of 5.2 s and a p90 of 8.9 s**
+(max 14.4 s), against 11.7 s and 26.4 s a week earlier and a target of under
+10 s. All 71 answered, all verified, 58 of 58 mechanical checks passed.
+
+Three changes got there, and the order they were found in is the interesting
+part. The engine was never the cause — its tools answer in 0.2–0.6 s each — so
+the cost was the model's round trips, and the work was to remove them.
+
+1. **Four calls became two.** `resolve_foods` and `compute_meal` each take the
+   session id and return today's budget with their answer, and `compute_meal`
+   returns the swaps as well, so nothing has to be fetched afterwards.
+2. **A third call that would not go away.** The model kept repeating
+   `resolve_foods` verbatim and then writing "I don't have a tool value for the
+   budget left after this meal". It was looking for a number no tool returned:
+   the prompt told it to subtract, and its first rule forbids computing.
+   `compute_meal` now returns `afterMeal` — what is left once this meal is
+   counted, and whether it fits — and the third call stopped.
+3. **The meal agent moved to `gpt-5.4-mini`.** Its deployment holds 200k tokens
+   a minute where `gpt-5-mini` held 50k, which mattered more than expected: once
+   a turn took 9 s instead of 25, a back-to-back run spent its own speed on
+   quota and waited eight seconds at a time. The model is also more careful —
+   see the model-requirements table.
+
+**Two measurements, stated separately on purpose.** A single user asking
+questions with pauses between them is the demo, and that is the 8.9 s p90. Fired
+back to back with no gap, the same set queues against the per-minute token
+quota; before the model moved, that inflated p90 to 21.8 s. Quoting the
+friendlier number without saying which régime produced it is how a benchmark
+becomes a lie, so both are here.
 
 The run is reproducible: `npm run eval:agent` regenerates the transcript and
 both Foundry datasets.
@@ -1106,12 +1129,18 @@ rephrase. Retrieval can still be wrong — it can resolve the wrong food — but
 cannot make a number up, and a wrong food is visible to the user at the
 confirmation step in a way a wrong number is not.
 
-**Why no vector database service.** At 1,436 vectors an in-memory index is
-faster than a network call, free, and reproducible from the repository. The
-`VectorStore` interface is a seam: at roughly 100k records, or when the index
-must be shared across replicas, it moves behind Postgres with pgvector without
-touching the resolution logic. Paying for a vector database today would buy
-latency and a bill.
+**Where the vectors live now.** They were in memory first — at 1,436 vectors an
+in-memory index is faster than a network call, free, and reproducible from the
+repository — and the `VectorStore` interface was written as a seam for the day
+that stopped being true. The seam has since been used: the index is in Postgres
+with pgvector in the same Supabase project as the feedback table, and the
+embedded index is the fallback when the database is slow or unreachable. Two
+things made the move worth making before the record count demanded it: the
+catalogue and its provenance now come from one place the app and the agent
+share, and a data correction no longer needs a container build. Exact search,
+not approximate: an HNSW index disagreed with the exact scan about one phrase in
+ten — "pad thai" resolved to curry paste — and at this size the exact scan costs
+73 ms at the median, so the index was dropped rather than tuned.
 
 **Documents the knowledge base does not hold.** Clinical guidelines, ADA
 standards, papers. That is deliberate: the product answers "can I eat this",
@@ -1203,11 +1232,12 @@ matched, the weight used, the GI applied, and the arithmetic; the trace shows
 every tool call and the verifier's verdict.
 
 **Benchmarks we publish rather than round.** Verified rate (every number
-traceable — currently 15 of 15 answers in the last run); safety probes (6 of 6,
-including two the rules miss and the model catches); mechanical checks 21 of
-26; resolution accuracy *reported with its method*, on a narrow set, never as a
-headline; latency p90 — currently ~20 s against a 10 s target, which is stated
-in the model-requirements table rather than hidden.
+traceable — 71 of 71 answers in the run of 29 September); safety probes (6 of 6,
+including two the rules miss and the model catches); mechanical checks 58 of 58;
+resolution accuracy *reported with its method*, on a narrow set, never as a
+headline; latency p90 8.9 s against a 10 s target, **with the régime it was
+measured in stated next to it** — one user with pauses, not a back-to-back run,
+which queues against the per-minute token quota and answers slower.
 
 **Disclosure.** The disclaimer precedes any number. Unverified food records are
 flagged in-app (E3). Where the agent refuses, it says why.
