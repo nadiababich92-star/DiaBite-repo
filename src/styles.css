@@ -240,6 +240,30 @@ tr:last-child td { border-bottom: none; }
 .trace li.over code { color: var(--high); background: var(--high-bg); }
 @media (max-width: 520px) { .trace li { grid-template-columns: 1fr; gap: 2px; } }
 
+/* ── Phone ────────────────────────────────────────────────────────────────
+ * Food gets logged standing at a fridge. Three things were wrong at 375 px:
+ * the ask box — the product's primary input — was squeezed to about 150 px
+ * beside its button, the tab row wrapped onto a second line with the feedback
+ * pill stranded there alone, and the receipt broke each item's three numbers
+ * across two lines mid-triplet. */
+@media (max-width: 560px) {
+  .ask-form { flex-direction: column; gap: 10px; }
+  .ask-form button { width: 100%; }
+
+  nav.tabs { align-items: center; gap: 6px; }
+  /* One line that scrolls, rather than two lines that wrap. */
+  nav.tabs .tab-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+  nav.tabs .tab-row::-webkit-scrollbar { display: none; }
+  nav.tabs button { padding: 10px 9px; white-space: nowrap; }
+  nav.tabs .tab-action { margin-bottom: 0; }
+
+  /* Name and portion on one line, the numbers under them, so a long recipe
+   * name cannot push "35.3 · 45 · 15.9" into a shape nobody can read. */
+  .receipt-head { display: none; }
+  .receipt-line { flex-direction: column; gap: 1px; }
+  .receipt-line > span:last-child { color: var(--text-dim); }
+}
+
 /* ── Feedback ─────────────────────────────────────────────────────────── */
 .modal-backdrop {
   position: fixed; inset: 0; z-index: 50;
