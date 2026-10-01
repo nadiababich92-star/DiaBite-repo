@@ -271,7 +271,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
     const alts = (callOf(r, 'compute_meal')?.result as { alternatives?: unknown[] } | undefined)?.alternatives ?? []
     if (alts.length === 0) {
       const text = answer.replace(/\bno\b[^.]*\b(swap|alternatives?|change)\b[^.]*\./gi, ' ')
-      say('offers no swap of its own', !/\b(swap|instead of|replace|smaller portion|cut back on|reduce the)\b/i.test(text))
+      say('offers no swap of its own', !/\b(swap|replace|smaller portion|cut back on|reduce the)\b/i.test(text))
     }
   }
   // Costing three known foods and leaving the fourth out is fine; saying so
