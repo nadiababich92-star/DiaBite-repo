@@ -39,16 +39,77 @@ function mealForNow(): MealType {
 }
 
 /** The agent answers in light markdown: **bold** and line breaks. Nothing else is rendered. */
+/** The verdict, as a mark you can read before you read anything. */
+function StatusDot({ tone }: { tone: string | null }) {
+  const path =
+    tone === 'good' ? 'M20 6L9 17l-5-5' :
+    tone === 'change' ? 'M12 5v14M5 12h14' :
+    tone === 'bad' || tone === 'blocked' ? 'M18 6L6 18M6 6l12 12' :
+    tone === 'advice' ? 'M12 8h.01M11 12h1v5h1' :
+    'M12 17h.01M12 7v6'
+  return (
+    <span className={`status-dot dot-${tone ?? 'ask'}`} aria-hidden="true">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>
+    </span>
+  )
+}
+
+const bold = (line: string, key: string) =>
+  line.split(/(\*\*[^*]+\*\*)/g).map((seg, j) =>
+    seg.startsWith('**') ? <strong key={key + j}>{seg.slice(2, -2)}</strong> : <span key={key + j}>{seg}</span>,
+  )
+
+/**
+ * The four parts of a meal answer, read off the labels the prompt guarantees.
+ *
+ * Returns null for anything else — an advisory answer, a clarifying question,
+ * a refusal — which then renders as plain paragraphs. A parser that guessed
+ * would eventually dress a refusal up as a verdict.
+ */
+function meal(text: string): { verdict: string; numbers?: string; why?: string; next?: string } | null {
+  const part = (label: string) =>
+    text.match(new RegExp(`\\*{0,2}${label}\\*{0,2}\\s*[—–-]\\s*([^\\n]+)`, 'i'))?.[1]?.trim()
+  let verdict = part('Verdict')
+  if (!verdict) return null
+  // Printed large and alone, a lowercase first letter looks like a mistake.
+  verdict = verdict.charAt(0).toUpperCase() + verdict.slice(1)
+  return { verdict, numbers: part('Numbers'), why: part('Why'), next: part('Next action') }
+}
+
 function Answer({ text }: { text: string }) {
+  const parts = meal(text)
+  if (parts) {
+    // The hierarchy the design canvas asked for and the app never had: the
+    // verdict is the sentence someone reads, the number is the thing they
+    // check, and the reason is support. Four identical paragraphs is what
+    // made the screen read as flat.
+    const tail = text
+      .split(/\n+/)
+      .map((l) => l.trim())
+      .filter((l) => l && !/^\*{0,2}(Verdict|Numbers|Why|Next action)\*{0,2}\s*[—–-]/i.test(l))
+    return (
+      <div className="answer-text">
+        <p className="a-verdict">{bold(parts.verdict, 'v')}</p>
+        {parts.numbers && <p className="a-numbers">{bold(parts.numbers, 'n')}</p>}
+        {parts.why && <p className="a-why">{bold(parts.why, 'w')}</p>}
+        {parts.next && (
+          <p className="a-next">
+            <span className="a-next-label">Next</span>
+            {bold(parts.next, 'x')}
+          </p>
+        )}
+        {tail.map((l, i) => (
+          <p key={`t${i}`} className="a-tail">{bold(l, `t${i}`)}</p>
+        ))}
+      </div>
+    )
+  }
   const lines = text.split(/\n+/).filter((l) => l.trim())
   return (
     <div className="answer-text">
       {lines.map((line, i) => (
-        <p key={i}>
-          {line.split(/(\*\*[^*]+\*\*)/g).map((seg, j) =>
-            seg.startsWith('**') ? <strong key={j}>{seg.slice(2, -2)}</strong> : <span key={j}>{seg}</span>,
-          )}
-        </p>
+        <p key={i}>{bold(line, `p${i}`)}</p>
       ))}
     </div>
   )
@@ -60,8 +121,19 @@ function Answer({ text }: { text: string }) {
  * the glycemic index. Who answered decides the label; only a meal has a
  * verdict.
  */
-function verdictTone(answer: string, route?: string): 'good' | 'change' | 'bad' | 'ask' | 'advice' {
+function verdictTone(answer: string, route?: string, reply?: AgentResponse): 'good' | 'change' | 'bad' | 'ask' | 'advice' {
   if (route === 'advisor') return 'advice'
+  // The engine already decided this. Reading it out of the prose worked only
+  // while the prose was a label: the moment the verdict became a sentence a
+  // person would say — "This one goes over today." — the badge over it read
+  // "One question first". `afterMeal.fits` is the same comparison the answer
+  // is built on, and it cannot be paraphrased.
+  const meal = reply?.trace?.find((t) => t.tool.endsWith('compute_meal'))?.result as
+    { afterMeal?: { fits?: boolean }; alternatives?: unknown[] } | undefined
+  if (meal?.afterMeal && typeof meal.afterMeal.fits === 'boolean') {
+    if (!meal.afterMeal.fits) return 'bad'
+    return (meal.alternatives?.length ?? 0) > 0 ? 'change' : 'good'
+  }
   const first = answer.split('\n')[0].toLowerCase()
   if (first.includes('does not fit') || first.includes("doesn't fit") || first.includes('not today')) return 'bad'
   if (first.includes('with a change') || first.includes('with one change') || first.includes('swap')) return 'change'
@@ -191,7 +263,7 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
     setLogged(true)
   }
 
-  const tone = reply ? (reply.blocked ? 'blocked' : verdictTone(reply.answer, reply.route)) : null
+  const tone = reply ? (reply.blocked ? 'blocked' : verdictTone(reply.answer, reply.route, reply)) : null
 
   return (
     <>
@@ -245,6 +317,7 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
           <p className="muted asked">{asked}</p>
           <section className={`card answer tone-${tone}`}>
             <div className="eyebrow-line">
+              <StatusDot tone={tone} />
               {reply.blocked ? 'Not something I\'ll answer' :
                tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Not today' :
                tone === 'advice' ? 'Advice' : 'One question first'}

@@ -208,15 +208,54 @@ tr:last-child td { border-bottom: none; }
 .answer.tone-bad, .answer.tone-blocked, .card.tone-blocked { border-left: 3px solid var(--high); }
 .answer.tone-ask { border-left-color: var(--accent); }
 .answer.tone-advice { border-left-color: var(--ink-soft, #8a8f87); }
-.eyebrow-line { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; margin-bottom: 10px; color: var(--text-faint); }
+.eyebrow-line { display: flex; align-items: center; gap: 7px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; margin-bottom: 10px; color: var(--text-faint); }
 .tone-good .eyebrow-line { color: var(--low); }
 .tone-change .eyebrow-line { color: var(--medium); }
 .tone-bad .eyebrow-line, .tone-blocked .eyebrow-line { color: var(--high); }
 .tone-ask .eyebrow-line { color: var(--accent); }
 .tone-advice .eyebrow-line { color: var(--ink-soft, #8a8f87); }
+
+/* The status mark: a filled disc carrying the same colour as its label, so the
+ * verdict is legible before a word of it is read. */
+.status-dot {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%; color: #fff;
+}
+.dot-good { background: var(--low); }
+.dot-change { background: var(--medium); }
+.dot-bad, .dot-blocked { background: var(--high); }
+.dot-ask { background: var(--accent); }
+.dot-advice { background: var(--text-faint); }
 .answer-text p { margin: 0 0 10px; font-size: 15.5px; line-height: 1.55; max-width: 60ch; }
-.answer-text p:first-child { font-family: var(--serif); font-size: 21px; line-height: 1.25; font-weight: 600; letter-spacing: -0.015em; margin-bottom: 12px; text-wrap: balance; }
 .answer-text strong { font-weight: 600; }
+
+/* A meal answer has four jobs and they are not the same size.
+ *
+ * The design canvas settled this in September — verdict in a human voice,
+ * then the number, then the reason — and the app shipped four identical
+ * paragraphs with bold labels instead, which is what made the screen read as
+ * flat. Anything that is not a meal answer still renders as prose: an
+ * advisory answer has no verdict to enlarge. */
+.answer-text .a-verdict {
+  font-family: var(--serif); font-size: 25px; line-height: 1.18; font-weight: 600;
+  letter-spacing: -0.02em; margin-bottom: 12px; text-wrap: balance; max-width: 22ch;
+}
+.answer-text .a-numbers {
+  font-family: var(--mono); font-size: 13.5px; line-height: 1.6; color: var(--accent);
+  font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+  background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; max-width: none;
+}
+.answer-text .a-why { color: var(--text-dim); }
+.answer-text .a-next {
+  margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border);
+  display: flex; gap: 9px; align-items: baseline;
+}
+.answer-text .a-next-label {
+  flex: none; font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  font-weight: 600; color: var(--text-faint); transform: translateY(-1px);
+}
+.answer-text .a-tail { color: var(--text-dim); font-size: 14.5px; }
+.answer-text p:last-child { margin-bottom: 0; }
 .verify-row { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
 
 .receipt { font-family: var(--mono); font-size: 12.5px; font-variant-numeric: tabular-nums; display: flex; flex-direction: column; gap: 9px; }
@@ -247,6 +286,7 @@ tr:last-child td { border-bottom: none; }
  * pill stranded there alone, and the receipt broke each item's three numbers
  * across two lines mid-triplet. */
 @media (max-width: 560px) {
+  .answer-text .a-verdict { font-size: 22px; max-width: none; }
   .ask-form { flex-direction: column; gap: 10px; }
   .ask-form button { width: 100%; }
 
