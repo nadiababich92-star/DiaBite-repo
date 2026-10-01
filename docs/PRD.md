@@ -420,7 +420,7 @@ would matter more at a real launch.
 - Personal targets with their derivation on screen
 - Safety envelope: no dosing, red-flag escalation, honest "no verified data for that"
 - A measured evaluation set, however small
-- The weekly menu generator — already built, carried into the demo at no extra cost
+- ~~The weekly menu generator~~ — withdrawn from the demo on 1 October; see Narrowing the scope
 
 **Deferred**
 
@@ -606,7 +606,7 @@ that serves two surfaces at once: the tools the agent calls, and the
 | Foundry prompt agents `diabite-triage`, `diabite-meal`, `diabite-advisor` | 1, 2, 8 | Three agents, one per job. **Triage** (`gpt-5.4-nano`) reads the question and emits one word, so routing never competes with answering for the same tokens. **Meal** (`gpt-5.4-mini`) carries the OpenAPI tool and the arithmetic discipline; `get_day_state` is removed from its tool surface because the budget already rides back with the other two calls. **Advisor** (`gpt-5.4-mini`) answers "is brown rice better than white rice" with no tools and no numbers, and is the only one given a memory store — food preferences, nothing clinical — plus a `file_search` knowledge base over our own four documents. All three run through the Responses API with `tool_choice: required`; without it the model answers "let me check that for you" and calls nothing. |
 | Container App `diabite-engine` — `/agent/ask` | 7, 9, (C9) | The wrapper around the agent: safety gate first (rules, no model), then the run, then the verifier. On an unmatched number: one regenerate, then a templated answer built only from tool results. Session memory is `previous_response_id` kept per `sessionId`, so the browser never carries a thread id. |
 | Container App `diabite-engine` — `/tools/*` | 3, 4, 5, 6 | The same TypeScript from `src/lib` and `src/data`, served as the four operations the agent calls, behind an API key held in a Foundry project connection. The engine never lives inside the agent — a second copy of the arithmetic is the failure mode this design exists to prevent. |
-| Frontend (this repo) | 5, 10 | React app. Calls `/agent/ask`; renders verdict, calculation and the tool trace returned with the response. Runs the diary's deterministic maths in the browser by importing the same `src/lib` module the engine is built from. |
+| Frontend (this repo) | 5, 10 | React app, **served by the same container that answers it** since 1 October: one image, one address, no CORS, no second service, and nothing to start before a demo. Calls `/agent/ask`; renders verdict, calculation and the tool trace returned with the response. Runs the diary's deterministic maths in the browser by importing the same `src/lib` module the engine is built from. Laid out for a phone first — food gets logged standing at a fridge. |
 
 **Why the day state does not go through the model.** The browser writes the
 day's budget and entries to `PUT /session/:id`; the agent is given only the
@@ -651,7 +651,7 @@ design* — and are assessed in the summary table.
 | Do you have data to train? | **N/A for V0** | No fine-tuning. What we need is ~100 labelled meals for evaluation, built in Week 3. User corrections at the confirmation step then become labelled data for free. |
 | Can it be solved by ML/AI? | **PASS** | Entity extraction from short text is well within current model capability. Portion estimation from words like "a bowl" is the weak spot. |
 | Can it meet accuracy requirements? | **RISK** | 90% top-1 entity match on a narrow food set is plausible. Portion estimation is inherently ±30% from language alone. Mitigation: ask when ambiguous, and the user confirms resolved foods before anything is saved. |
-| Can it scale? | **PASS** | One model call per meal, ~$0.05–0.10 with prompt caching. |
+| Can it scale? | **PASS** | Two model round trips per meal since 30 September, down from four; well under $0.05 a turn. The binding limit is not price but the deployment's tokens-per-minute quota, which one user never reaches and a back-to-back evaluation run does. |
 | How fast can you get feedback? | **PASS** | The confirmation step yields an immediate correction signal on every meal. |
 | What are the laws? | **WATCH** | Parsing is unregulated. What we do with the output — the verdict — is where the FDA question lives (component 8). |
 | What about bias? | **RISK** | The model resolves foods common in its training data better. Mexican, Chinese-American and Southern dishes may resolve worse than a "chicken salad". Mitigation: the evaluation set deliberately over-samples them. |
@@ -715,10 +715,17 @@ Cost is a tie-breaker only.
 functional requirements; both are pending instructor review before they are
 applied there.
 
-1. **Weekly menu (Epic D) moves from V0 to V1.** It is a second core job —
-   planning next to tracking — and a second agentic loop. Carrying it into the
-   demo dilutes the one claim V0 exists to make. The code stays; it leaves the
-   narrative.
+1. **Weekly menu (Epic D) moves from V0 to V1** — decided on 1 October, after
+   looking at it properly for the first time. It is a second core job —
+   planning next to tracking — and a second agentic loop, and it is also the
+   least finished surface in the product: it draws on **30 hand-written dishes**
+   rather than the 1,000-recipe database, so Monday, Thursday and Sunday come
+   out identical; "Generate again" returns the same dishes with the portions
+   rescaled; and it plans a day at GL 24 against the 54 the product has just
+   told the user is their ceiling. Rebuilding it on the recipe database is
+   three to four days, and it is held until the clinical review returns,
+   because the meal shares and that GL gap are among the numbers under review.
+   The code stays; it leaves the narrative, and the tab leaves the demo.
 2. **Minimal memory enters V0.** Remembering rejected suggestions for the
    session is cheap and is the difference between "context" and "memory" on
    the agentic checklist.
@@ -949,12 +956,14 @@ reached. A new case, H7, asks a meal question with no day state at all — what 
 conversation resumed an hour later looks like — and the answer says the budget
 is unknown instead of claiming a fit.
 
-**Latency, the number that stayed broken longest, is now inside target.** On 30
-September the set — 87 cases, the original 71 plus sixteen that measure the
-advisor, the router and the failures the judges found — ran at a **median of
-4.9 s and a p90 of 7.8 s**, against 11.7 s and 26.4 s a week earlier and a
-target of under 10 s. All 87 answered, all verified on the first attempt, 182
-of 182 mechanical checks passed.
+**Latency, the number that stayed broken longest, is now inside target.** The
+set — 87 cases, the original 71 plus sixteen that measure the advisor, the
+router and the failures the judges found — runs at a **median of 4.0 s and a
+p90 of 6.2 s**, against 11.7 s and 26.4 s a week earlier and a target of under
+10 s. All 87 answered, all verified on the first attempt, 191 of 193 mechanical
+checks passed. The catalogue grew from 1,436 records to 6,054 between those
+measurements and the latency fell, because the search is a scan over vectors
+rather than anything that cares about the count.
 
 Three changes got there, and the order they were found in is the interesting
 part. The engine was never the cause — its tools answer in 0.2–0.6 s each — so
@@ -1000,6 +1009,18 @@ next opens.
 What moves a stage back: any Harmless failure; a verified rate below the line
 for more than a day; a class of `unknown` phrases that is systematic rather
 than incidental (a whole cuisine, a whole food category).
+
+**Two things stand before the measurement launch, and both are written down
+rather than intended.** `docs/CLINICAL_REVIEW.md` puts every decision the
+product makes about a person in front of a diabetologist or dietitian —
+seventeen questions, forty minutes, with the glycemic-load ceiling, the
+0.8 g/kg protein cap applied without knowing a stage, and the silence at a
+stated glucose under 70 named as the ones we most want challenged.
+`docs/USER_SESSIONS.md` is the protocol for five moderated sessions on the
+hosted app: the tasks, what the moderator may not say, and the rule that every
+phrase a real person types and we cannot resolve becomes an evaluation case
+that week. The eval set is ours today; those sessions are how it stops being
+ours.
 
 ---
 
@@ -1091,7 +1112,7 @@ which exists only to judge the system.
 
 | Set | What it is | How it is built |
 |---|---|---|
-| Food data (1,436 records) | The engine's source of truth | `data/recipes-db/build.py` composes recipes from ingredients; `validate.py` checks nutrient sums and GI bounds; the index is exported once and loaded at boot |
+| Food data (6,054 records) | The engine's source of truth | Three layers: 351 ingredients and ~85 everyday foods curated by hand, 1,000 recipes composed from them by `data/recipes-db/build.py`, and 4,618 USDA Survey (FNDDS) foods — "foods as eaten" — carrying nutrients, household portions and a glycemic index assigned by the five-level scheme of Aston et al. The curated records win a tie; coverage fills the gaps |
 | GI cross-check (88 ingredients) | A second opinion on our GI values | Compared against published tables: 51 agree, 24 read lower in our table, 5 higher, 8 have no published match. Reviewed by hand before external use |
 | Engine cases (108) | Resolution, clarify bands, verifier probes | Hand-labelled phrases → the correct record id or `unknown`; deliberately over-samples foods we lack and cuisines where embeddings are weaker |
 | Agent cases (19, HHH) | Helpful / Honest / Harmless behaviour | Written as query + expected behaviour + mechanical checks, in `eval/cases.json` |
@@ -1112,7 +1133,7 @@ stated in the PRD so the number is never quoted without it.
 
 | Purpose | Now | What V1 needs |
 |---|---|---|
-| Food coverage | 1,436 records; enough for the demo's scenarios, not for a real week of a real person | Packaged and restaurant foods — a different source (brand databases), because the ingredient-first method cannot derive them |
+| Food coverage | 6,054 records. 13% of the food phrases in the test set still resolve to nothing, down from 18% before the coverage layer was loaded | Branded and restaurant items — Oreos, a KIND bar, a Starbucks frappuccino — which have no published glycemic index at all. See the open decision below |
 | Resolution ground truth | ~100 labelled phrases | 300–500, drawn from what users actually type rather than what we imagined |
 | Agent behaviour | 19 HHH cases | 40–60, with every safety phrasing the gate has ever missed |
 | GI verification | 88 ingredients cross-checked | All 350, each against its cited source, before anything is shown outside the demo |
@@ -1155,7 +1176,7 @@ is the point.
 
 **Mechanism.** Every food record's name is embedded once with
 `all-MiniLM-L6-v2` (384 dimensions) and kept in an in-memory cosine index
-(~1,436 vectors, persisted as `embeddings.bin` so a boot costs no model time).
+(6,054 vectors, persisted as `embeddings.bin` so a boot costs no model time).
 A user phrase is embedded at query time; the top candidates are re-scored with
 a lexical boost, a kind prior (short phrases favour ingredients, long ones
 recipes) and an alias layer that pins everyday names at 0.97. The result is
@@ -1170,7 +1191,7 @@ rephrase. Retrieval can still be wrong — it can resolve the wrong food — but
 cannot make a number up, and a wrong food is visible to the user at the
 confirmation step in a way a wrong number is not.
 
-**Where the vectors live now.** They were in memory first — at 1,436 vectors an
+**Where the vectors live now.** They were in memory first — at a few thousand vectors an
 in-memory index is faster than a network call, free, and reproducible from the
 repository — and the `VectorStore` interface was written as a seam for the day
 that stopped being true. The seam has since been used: the index is in Postgres
@@ -1182,6 +1203,23 @@ share, and a data correction no longer needs a container build. Exact search,
 not approximate: an HNSW index disagreed with the exact scan about one phrase in
 ten — "pad thai" resolved to curry paste — and at this size the exact scan costs
 73 ms at the median, so the index was dropped rather than tuned.
+
+**The coverage layer, and the number it cannot give.** The curated records
+describe foods as they are cooked; USDA's Survey tables describe them as they
+are eaten, which is what someone types into a diary. Loading them took the
+share of phrases that resolve to nothing from 18% to 13%, and the 13% that
+remains is almost entirely branded: Oreos, a KIND bar, a Starbucks
+frappuccino, someone's family kugel.
+
+A rule keeps the layer honest. A record with no glycemic index and real
+carbohydrate in it does **not** enter the catalogue, because the engine's load
+helper answers zero for a missing GI — true of cheese, false of pizza. The
+layer was live for an hour before that rule existed, and in that hour it told
+someone two slices of pepperoni pizza carried a glycemic load of zero. Pizza
+and General Tso's chicken are now absent rather than wrong, which costs 813
+foods and is the right trade until the product can say *"carbohydrate yes,
+glycemic load not computable"* — a contract change, and question 17 in the
+clinical review pack.
 
 **Documents the knowledge base does not hold.** Clinical guidelines, ADA
 standards, papers. That is deliberate: the product answers "can I eat this",
@@ -1275,12 +1313,14 @@ every tool call and the verifier's verdict.
 **Benchmarks we publish rather than round.** Verified rate (every number
 traceable — 87 of 87 answers in the run of 30 September, none needing the
 regenerate); safety probes (6 of 6, including two the rules miss and the model
-catches); mechanical checks 182 of 182, now including which specialist
+catches); mechanical checks 191 of 193, now including which specialist
 answered, whether a food the database lacks stayed out of the meal, and whether
 a weight printed beside a food is the weight it was costed at; the Foundry
 judges reported with their spread, since task adherence moves four or five rows
-between runs of the same agent; resolution accuracy *reported with its method*,
-on a narrow set, never as a headline; latency p90 7.8 s against a 10 s target,
+between runs of the same agent; resolution 83 of 83 on the engine's own set,
+*reported with its method*, on a narrow set, never as a headline; the share of
+phrases that resolve to nothing — 13%, and what they are; latency p90 6.2 s
+against a 10 s target,
 **with the régime it was measured in stated next to it** — one user with
 pauses, not a back-to-back run, which queues against the per-minute token quota
 and answers slower.
@@ -1371,7 +1411,7 @@ produce. Four things carry the defensibility, and none of them is weights:
 | What | Why it is hard to copy |
 |---|---|
 | The deterministic engine | Same meal, same number, every time, with the arithmetic on screen. A tuned model cannot promise that; it can only be usually right |
-| The glycemic data layer | 1,436 records with provenance, built from USDA plus the International Tables and a carbohydrate-weighted method. No public database carries GI, so this is slow work rather than a download |
+| The glycemic data layer | 6,054 records with provenance, built from USDA plus the International Tables and a carbohydrate-weighted method, each number carrying the level of evidence behind it. No public database carries GI, so this is slow work rather than a download |
 | The verifier | Every number must trace to a tool result. It is the product's only unconditional promise, and it is code |
 | The safety envelope | Dosing refused, red flags escalated, phrasings collected from real failures. A rule set that grows from evidence, in front of a model that also refuses |
 

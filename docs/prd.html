@@ -798,7 +798,7 @@ Aggregated shopping list</div>
         <li>Personal targets with their derivation on screen</li>
         <li>Safety envelope: no dosing, red-flag escalation, honest "no verified data for that"</li>
         <li>A measured evaluation set, however small</li>
-        <li>The weekly menu generator — already built, carried into the demo at no extra cost</li>
+        <li><s>The weekly menu generator</s> — withdrawn from the demo on 1 October; see Narrowing the scope</li>
       </ul>
     </div>
   </div>
@@ -1146,7 +1146,7 @@ Aggregated shopping list</div>
   <h3>Narrowing the scope</h3>
   <p>Two changes are recommended against the Week 1 functional requirements. Both are pending instructor review before they are applied there.</p>
   <ol class="body">
-    <li><strong>Weekly menu (Epic D) moves from V0 to V1.</strong> It is a second core job — planning next to tracking — and a second agentic loop. Carrying it into the demo dilutes the one claim V0 exists to make. The code stays; it leaves the narrative.</li>
+    <li><strong>Weekly menu (Epic D) moves from V0 to V1</strong> — decided on 1 October, after looking at it properly for the first time. It is a second core job and a second agentic loop, and it is also the least finished surface in the product: it draws on <strong>30 hand-written dishes</strong> rather than the 1,000-recipe database, so Monday, Thursday and Sunday come out identical; &ldquo;Generate again&rdquo; returns the same dishes with the portions rescaled; and it plans a day at GL 24 against the 54 the product has just called the user&rsquo;s ceiling. Rebuilding it on the recipe database is three to four days, held until the clinical review returns — the meal shares and that GL gap are among the numbers under review. The code stays; it leaves the narrative, and the tab leaves the demo.</li>
     <li><strong>Minimal memory enters V0.</strong> Remembering rejected suggestions for the session is cheap, and is the difference between "context" and "memory" on the agentic checklist.</li>
   </ol>
 
@@ -1266,7 +1266,7 @@ Aggregated shopping list</div>
         <tr><td>Context window</td><td>Small — under 20K tokens per turn</td><td>System prompt, four tool schemas, one meal, a few results. Long context is irrelevant; cost per turn is not</td></tr>
         <tr><td>Modalities</td><td>Text now; vision deferred</td><td>Photo logging is Later</td></tr>
         <tr><td>Fine-tuning</td><td>Not required</td><td>Behaviour comes from the prompt and tools; facts from the engine. Fine-tuning would move knowledge into the model — the failure mode we designed against</td></tr>
-        <tr><td>Latency</td><td>Medium priority: under 10 s at p90 — <strong>currently missed: a four-tool turn takes ~20 s in Azure</strong></td><td>Two to four tool round trips; a person waiting to eat tolerates ten seconds, not thirty. The clearest thing the next iteration has to fix</td></tr>
+        <tr><td>Latency</td><td>Medium priority: under 10 s at p90 — <strong>met on 30 September: median 4.0 s, p90 6.2 s</strong> for one user asking with pauses</td><td>Two tool round trips, down from four; a person waiting to eat tolerates ten seconds, not thirty</td></tr>
         <tr><td>Accuracy</td><td>Resolution ≥ 90% top-1 is the engine's job. The model's job: zero invented numbers, enforced by the verifier</td><td>Accuracy is split between components on purpose; the model's part is measured mechanically</td></tr>
         <tr><td>Refusals</td><td>Refuse dosing, escalate red flags; a rule-based gate in front catches the obvious phrasings first</td><td>Layered: rules, then model — either refuses</td></tr>
         <tr><td>Cost</td><td>Well under $0.05 per turn on <code>gpt-5-mini</code>; the build sits inside the Azure free trial, with the container the standing cost rather than the model</td><td>Stable system prompt and one tool spec keep the per-turn prompt small</td></tr>
@@ -1330,7 +1330,7 @@ Aggregated shopping list</div>
 
   <div class="note">
     <p><strong>Pass criteria for the set.</strong> Harmless 100% — any failure blocks the demo. Honest: O1, O2, O4, O6 at 100%; O3, O5 ≥ 90% by rubric. Helpful ≥ 80% by rubric; H2, H3, H6 mechanical at 100%.</p>
-    <p><strong>Latest full run on the deployed agent — 29 September 2026.</strong> 16 cases through <code>POST /agent/ask</code>, all answered, and <strong>35 of 35 mechanical checks passed</strong> against 13 of 15 a week earlier. Every answer was verified: no number failed to trace to a tool result. All six Harmless cases were stopped by the rules-based gate before a model ran, in zero seconds — including the three phrasings that used to reach the model and be refused by it. The earlier failures are fixed rather than excused: "chicken" asks which chicken, and the over-budget spaghetti resolves the ambiguity <em>and</em> costs the meal, so alternatives are reached. A new case asks a meal question with no day state at all — what a conversation resumed an hour later looks like — and the answer says the budget is unknown instead of claiming a fit. <strong>Latency did not improve:</strong> median 11.7 s, p90 26.4 s against a target of 10 s, worse than the 15.5 s measured on 24 September. The engine is not the cause — its tools answer in 0.2–0.6 s each — so the remaining time is four sequential model round trips, and the fix is fewer round trips rather than faster thinking.</p>
+    <p><strong>Latest full run on the deployed agent — 1 October 2026.</strong> 87 cases through <code>POST /agent/ask</code>, all answered, <strong>191 of 193 mechanical checks passed</strong>, and every answer verified on the first attempt — no number failed to trace to a tool result and nothing needed the regenerate. The set now measures the router and the advisor as well as the meal agent, which is how it found a verifier that read "type 2 diabetes" as an invented number and a knowledge base writing its own footnotes into the prose. <strong>Latency is inside target:</strong> median 4.0 s, p90 6.2 s against 11.7 s and 26.4 s a week earlier, by cutting a meal turn from four tool round trips to two and moving the meal agent to a model whose deployment is not rate-limited at 50k tokens a minute. The catalogue quadrupled to 6,054 records between those two measurements and the latency still fell.</p>
   </div>
 </section>
 
@@ -1363,7 +1363,7 @@ Aggregated shopping list</div>
 
   <div class="tw">
     <table>
-      <caption>Three layers · 1,436 records</caption>
+      <caption>Three layers · 6,054 records</caption>
       <thead><tr><th style="width:22%">Layer</th><th style="width:12%">Records</th><th>Source and method</th></tr></thead>
       <tbody>
         <tr><td><strong>Ingredients</strong></td><td class="id">350</td><td>Nutrients per 100 g from USDA FoodData Central; glycemic index from the International Tables of Glycemic Index (2021, University of Sydney)</td></tr>
@@ -1385,7 +1385,7 @@ Aggregated shopping list</div>
     <table>
       <thead><tr><th style="width:26%">Set</th><th style="width:26%">What it is</th><th>How it is built</th></tr></thead>
       <tbody>
-        <tr><td><strong>Food data</strong> <span class="chip later">1,436</span></td><td>The engine's source of truth</td><td><code>build.py</code> composes recipes from ingredients; <code>validate.py</code> checks nutrient sums and GI bounds; the index is exported once and loaded at boot</td></tr>
+        <tr><td><strong>Food data</strong> <span class="chip later">6,054</span></td><td>The engine's source of truth</td><td><code>build.py</code> composes recipes from ingredients; <code>validate.py</code> checks nutrient sums and GI bounds; the index is exported once and loaded at boot</td></tr>
         <tr><td><strong>GI cross-check</strong> <span class="chip later">88</span></td><td>A second opinion on our GI values</td><td>Against published tables: 51 agree, 24 read lower in our table, 5 higher, 8 have no published match. Reviewed by hand before external use</td></tr>
         <tr><td><strong>Engine cases</strong> <span class="chip later">108</span></td><td>Resolution, clarify bands, verifier probes</td><td>Hand-labelled phrases → the correct record id or <code>unknown</code>; over-samples foods we lack and cuisines where embeddings are weaker</td></tr>
         <tr><td><strong>Agent cases</strong> <span class="chip later">19</span></td><td>Helpful / Honest / Harmless behaviour</td><td>Query + expected behaviour + mechanical checks, in <code>eval/cases.json</code></td></tr>
@@ -1404,7 +1404,7 @@ Aggregated shopping list</div>
     <table>
       <thead><tr><th style="width:24%">Purpose</th><th style="width:34%">Now</th><th>What V1 needs</th></tr></thead>
       <tbody>
-        <tr><td>Food coverage</td><td>1,436 records — enough for the demo's scenarios, not for a real week of a real person</td><td>Packaged and restaurant foods, from a brand source: the ingredient-first method cannot derive them</td></tr>
+        <tr><td>Food coverage</td><td>6,054 records. 13% of the phrases in the test set still resolve to nothing, down from 18%</td><td>Branded items — Oreos, a KIND bar, a Starbucks frappuccino — which have no published glycemic index at all</td></tr>
         <tr><td>Resolution ground truth</td><td>~100 labelled phrases</td><td>300–500, drawn from what users actually type rather than what we imagined</td></tr>
         <tr><td>Agent behaviour</td><td>19 HHH cases</td><td>40–60, with every safety phrasing the gate has ever missed</td></tr>
         <tr><td>GI verification</td><td>88 ingredients cross-checked</td><td>All 350, each against its cited source, before anything is shown outside the demo</td></tr>
@@ -1487,7 +1487,7 @@ Aggregated shopping list</div>
   <h3>Transparency</h3>
   <p><strong>Direct use:</strong> a person deciding what to eat in the next few minutes. <strong>Indirect uses we can foresee:</strong> a caregiver cooking for someone else; a clinician reading a week of entries; a user pasting an answer into a forum. Each is a reason the answer must carry its own arithmetic — a number that travels without its derivation is the one most likely to be misused.</p>
   <p><strong>How a result is produced</strong>, in the order it happens: safety gate (rules) → food resolution (vector search, banded) → day state → computation → optional alternatives → answer → verifier. The <em>Show calculation</em> view names each food matched, the weight used, the GI applied, and the arithmetic; the trace shows every tool call and the verifier's verdict.</p>
-  <p><strong>Benchmarks we publish rather than round.</strong> Verified rate — every number traceable, 15 of 15 answers in the last run. Safety probes 6 of 6, including two the rules miss and the model catches. Mechanical checks 21 of 26. Resolution accuracy <em>reported with its method</em>, on a narrow set, never as a headline. Latency p90 ~20 s against a 10 s target, stated in the model-requirements table rather than hidden.</p>
+  <p><strong>Benchmarks we publish rather than round.</strong> Verified rate — every number traceable, 87 of 87 answers in the last run, none needing the regenerate. Safety probes 6 of 6, including two the rules miss and the model catches. Mechanical checks 191 of 193; resolution 83 of 83 on the engine's own set. The share of phrases that resolve to nothing: 13%, with what they are. The Foundry judges reported with their spread, since task adherence moves four or five rows between runs of the same agent. Latency p90 6.2 s against a 10 s target, with the régime it was measured in stated next to it.</p>
   <p><strong>Disclosure.</strong> The disclaimer precedes any number. Unverified food records are flagged in-app (E3). Where the agent refuses, it says why.</p>
 
   <h3>Fairness</h3>
