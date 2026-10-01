@@ -654,10 +654,13 @@
       {
         "phrase": "pepperoni pizza",
         "expect": [
-          "unknown"
+          "usda:2708642",
+          "usda:2708635",
+          "usda:2708636",
+          "usda:2708638"
         ],
         "tags": [
-          "unknown"
+          "coverage"
         ]
       },
       {
@@ -681,82 +684,83 @@
       {
         "phrase": "grits",
         "expect": [
-          "unknown"
+          "usda:2708363"
         ],
         "tags": [
-          "unknown"
+          "coverage"
         ]
       },
       {
         "phrase": "cornbread",
         "expect": [
-          "unknown"
+          "usda:2707811",
+          "usda:2707810"
         ],
         "tags": [
-          "unknown"
+          "coverage"
         ]
       },
       {
         "phrase": "tortilla chips",
         "expect": [
-          "unknown"
+          "usda:2708202"
         ],
         "tags": [
-          "unknown"
+          "coverage"
         ]
       },
       {
         "phrase": "pad thai",
         "expect": [
-          "unknown"
+          "usda:2708804"
         ],
         "tags": [
-          "unknown"
+          "coverage"
         ]
       },
       {
         "phrase": "general tso's chicken",
         "expect": [
-          "unknown"
+          "usda:2706794"
         ],
         "tags": [
-          "unknown"
+          "coverage"
         ]
       },
       {
         "phrase": "biscuits and gravy",
         "expect": [
-          "unknown"
+          "usda:2708744"
         ],
         "tags": [
-          "unknown"
+          "coverage"
         ]
       },
       {
         "phrase": "mac and cheese",
         "expect": [
-          "unknown"
+          "usda:2708811"
         ],
         "tags": [
-          "unknown"
+          "coverage"
         ]
       },
       {
         "phrase": "frozen yogurt",
         "expect": [
-          "unknown"
+          "usda:2705451"
         ],
         "tags": [
-          "unknown"
+          "coverage"
         ]
       },
       {
         "phrase": "energy drink",
         "expect": [
-          "unknown"
+          "usda:2710756"
         ],
         "tags": [
-          "unknown"
+          "coverage"
         ]
       }
     ],

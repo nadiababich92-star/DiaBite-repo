@@ -18,6 +18,29 @@ const LEXICAL_BOOST = 0.12 // every phrase token appears in the record name
 // Short phrases ("rice", "greek yogurt") are almost always an ingredient; long
 // ones ("chicken burrito bowl with guac") are usually a dish.
 const KIND_PRIOR = 0.04
+/**
+ * The curated records win a tie against the coverage layer.
+ *
+ * USDA's survey table holds a food for nearly everything someone types, which
+ * is why it is there — but where we have curated a record it is the better
+ * answer, and the two tie at the top because both match the phrase exactly.
+ * Measured: "oatmeal" went to a USDA row with **no glycemic index at all**
+ * over our own with a measured 55, "tomato sauce" went to tomato chili sauce
+ * at a 17 g portion, and peanut butter to a category estimate of 47 over a
+ * measured 14. Coverage is for the gaps, not for the foods we know.
+ */
+const COVERAGE_PENALTY = 0.08
+/**
+ * And a coverage record we cannot compute a load from is weaker still.
+ *
+ * A record without a glycemic index can give carbohydrate and calories but no
+ * glycemic load, which is the number this product exists to produce. Where two
+ * rows name the same food and only one can be costed, the one that can be
+ * costed is the better answer: it is why "cornbread" went to *chicken*
+ * cornbread (no GI) over cornbread from a mix (GI 60), and why "miso" left our
+ * own measured paste for a USDA row with no GI at all.
+ */
+const NO_GI_PENALTY = 0.16
 // A word the record's name never mentions is a difference the score should
 // feel. "frozen yogurt" is not yogurt and "mac and cheese" is not cheddar,
 // however close the embeddings sit.
@@ -215,9 +238,11 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
       .map((h) => {
         const rec = byId.get(h.id)!
         const exact = rec.aliases?.includes(norm(phrase)) || norm(plainName(rec.name)) === norm(phrase)
-        const score = exact
+        const base = exact
           ? Math.max(ALIAS_SCORE, h.score)
           : Math.min(1, h.score + lexicalScore(phrase, rec.name) + kindPrior(phrase, rec.kind))
+        const penalty = h.id.startsWith('usda:') ? (rec.gi === null ? NO_GI_PENALTY : COVERAGE_PENALTY) : 0
+        const score = base - penalty
         return { ...summary(rec), score }
       })
       .sort((a, b) => b.score - a.score)

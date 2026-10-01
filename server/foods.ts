@@ -7,7 +7,7 @@
  *   - 1,000 recipes (per serving).
  * Ingredients and seed foods are priced per gram, recipes per serving.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import type { Food, FoodCategory, Nutrients } from '../src/types'
@@ -162,6 +162,62 @@ const GROUP_TO_CATEGORY: Record<string, FoodCategory> = {
   supplement: 'nuts',
 }
 
+/**
+ * The USDA coverage layer: foods as people eat them, rather than as they cook.
+ *
+ * `data/foods-usda/foods_usda.json` was built in September and never loaded.
+ * It is why "grits", "fried rice" and "pepperoni pizza" came back as foods we
+ * do not have while the file holding all three sat in the repository. We take
+ * the FNDDS half — 5,431 "foods as eaten" from NHANES, which is what someone
+ * types into a diary — and leave SR Legacy's base ingredients out, because the
+ * 351-ingredient table already covers that ground and duplicates cost
+ * resolution more than they add.
+ *
+ * Nothing here is computed by us: nutrients are USDA's, and the glycemic index
+ * carries the level and the plain-English basis the build assigned it, so a
+ * category-median estimate reaches the user labelled as one.
+ */
+interface UsdaRow {
+  fdc_id: string; name: string; dataset: string; category: string
+  per100: Nutrients & { sugar?: number }
+  portions?: { label: string; grams: number }[]
+  gi: number | null; gi_level: number | string | null; gi_basis?: string
+}
+
+/** The portion a person would say, not the one a lab would weigh. */
+function householdPortion(rows: { label: string; grams: number }[] | undefined): number {
+  const usable = (rows ?? []).filter((p) => p.grams > 10 && p.grams <= 600 && !/\bdry\b|yields|not specified/i.test(p.label))
+  const cup = usable.find((p) => /\bcup\b/i.test(p.label))
+  return Math.round(cup?.grams ?? usable[0]?.grams ?? 100)
+}
+
+/** "Grits, NFS" is how a nutritionist codes it, not how anyone says it. */
+const readableName = (name: string) =>
+  name.replace(/,\s*(NFS|NS as to [^,]+)/gi, '').replace(/\s{2,}/g, ' ').replace(/,\s*$/, '').trim()
+
+function usdaRecords(): FoodRecord[] {
+  const path = join(here, '..', 'data', 'foods-usda', 'foods_usda.json')
+  if (!existsSync(path)) return []
+  const rows = (JSON.parse(readFileSync(path, 'utf8')) as { foods: UsdaRow[] }).foods
+  const out: FoodRecord[] = []
+  for (const r of rows) {
+    if (r.dataset !== 'survey_fndds') continue
+    // GI 0 means no available carbohydrate, the same convention the ingredient
+    // table uses; level 5 means the build refused to guess, and both reach the
+    // user as "I do not have a glycemic index for this".
+    const gi = typeof r.gi === 'number' && r.gi > 0 ? r.gi : null
+    const name = readableName(r.name)
+    out.push({
+      id: `usda:${r.fdc_id}`, kind: 'ingredient', name, gi, giLevel: giLevel(gi),
+      category: 'grains', unit: 'g', defaultPortion: householdPortion(r.portions),
+      searchText: `${name}. ${r.name}. ${r.category}.`,
+      per100: { kcal: r.per100.kcal, protein: r.per100.protein, fat: r.per100.fat, carbs: r.per100.carbs, fiber: r.per100.fiber },
+      source: `USDA FoodData Central, Survey (FNDDS)${r.gi_basis ? `; glycemic index ${r.gi_basis}` : ''}.`,
+    })
+  }
+  return out
+}
+
 let cache: { records: FoodRecord[]; byId: Map<string, FoodRecord> } | null = null
 
 export function loadFoods() {
@@ -179,6 +235,12 @@ export function loadFoods() {
       id: `ing:${r.id}`, kind: 'ingredient', name: r.name, gi, giLevel: giLevel(gi),
       category: r.group, unit: 'g', defaultPortion: 100,
       searchText: `${r.name}. ${r.group}. ${r.id.replace(/_/g, ' ')}`,
+      // The id is the everyday word for the food and the name is the precise
+      // one — "miso" for White miso paste, "black beans" for Black beans,
+      // cooked. Treating it as an exact name is what keeps a curated record
+      // from losing its own word to a coverage row that happens to be titled
+      // with it.
+      aliases: [r.id.replace(/_/g, ' ')],
       per100: r.per100,
     })
   }
@@ -208,6 +270,13 @@ export function loadFoods() {
       ingredientNames: names,
     })
   }
+
+  // On, because the measurement says the curated categories are untouched by
+  // it — everyday 32/32, ingredients 28/28, cuisines 9/9 with the layer loaded,
+  // exactly as without — while ten of the twelve foods the suite had recorded
+  // as "we do not have this" are now found, with the right dish. Set
+  // USDA_FOODS=off to measure without it.
+  if (process.env.USDA_FOODS !== 'off') records.push(...usdaRecords())
 
   cache = { records, byId: new Map(records.map((x) => [x.id, x])) }
   return cache

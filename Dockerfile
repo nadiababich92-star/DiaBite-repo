@@ -49,6 +49,9 @@ COPY src/lib/profile.ts ./src/lib/profile.ts
 COPY src/lib/dietary.ts ./src/lib/dietary.ts
 COPY src/data/foods.ts ./src/data/foods.ts
 COPY data/recipes-db/ingredients.json data/recipes-db/recipes_db.json ./data/recipes-db/
+# The coverage layer: USDA's "foods as eaten", which is what someone types
+# into a diary. 7 MB next to an 87 MB model.
+COPY data/foods-usda/foods_usda.json ./data/foods-usda/
 COPY data/recipes-db/embeddings.bin data/recipes-db/embeddings.ids.json ./data/recipes-db/
 # Warm the model cache in the image. The local .cache is gitignored, so the
 # build fetches the model rather than copying it — same result, no 87 MB in git.

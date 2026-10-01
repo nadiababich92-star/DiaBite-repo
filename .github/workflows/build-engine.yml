@@ -23,6 +23,7 @@ on:
       - 'index.html'
       - 'vite.config.ts'
       - 'tsconfig.json'
+      - 'data/foods-usda/foods_usda.json'
       - 'data/recipes-db/ingredients.json'
       - 'data/recipes-db/recipes_db.json'
       - 'data/recipes-db/embeddings.bin'
