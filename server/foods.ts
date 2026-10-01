@@ -206,6 +206,15 @@ function usdaRecords(): FoodRecord[] {
     // table uses; level 5 means the build refused to guess, and both reach the
     // user as "I do not have a glycemic index for this".
     const gi = typeof r.gi === 'number' && r.gi > 0 ? r.gi : null
+    // A carbohydrate food with no glycemic index cannot be costed, and the
+    // engine's load helper answers 0 for a missing GI — which is true of
+    // cheese and false of pizza. Deployed for an hour, the layer told someone
+    // that two slices of pepperoni pizza carried a glycemic load of zero.
+    // Until "carbs known, load unknown" is an answer this product can give,
+    // a row we cannot cost does not enter the catalogue: not having the food
+    // is the honest failure, and the one the agent already handles.
+    const available = Math.max(0, (r.per100.carbs ?? 0) - (r.per100.fiber ?? 0))
+    if (gi === null && available >= 5) continue
     const name = readableName(r.name)
     out.push({
       id: `usda:${r.fdc_id}`, kind: 'ingredient', name, gi, giLevel: giLevel(gi),

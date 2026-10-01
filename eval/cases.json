@@ -654,22 +654,19 @@
       {
         "phrase": "pepperoni pizza",
         "expect": [
-          "usda:2708642",
-          "usda:2708635",
-          "usda:2708636",
-          "usda:2708638"
+          "unknown"
         ],
         "tags": [
-          "coverage"
+          "unknown"
         ]
       },
       {
         "phrase": "chick-fil-a sandwich",
         "expect": [
-          "unknown"
+          "usda:2707003"
         ],
         "tags": [
-          "unknown"
+          "coverage"
         ]
       },
       {
@@ -721,19 +718,19 @@
       {
         "phrase": "general tso's chicken",
         "expect": [
-          "usda:2706794"
+          "unknown"
         ],
         "tags": [
-          "coverage"
+          "unknown"
         ]
       },
       {
         "phrase": "biscuits and gravy",
         "expect": [
-          "usda:2708744"
+          "unknown"
         ],
         "tags": [
-          "coverage"
+          "unknown"
         ]
       },
       {
@@ -758,6 +755,27 @@
         "phrase": "energy drink",
         "expect": [
           "usda:2710756"
+        ],
+        "tags": [
+          "coverage"
+        ]
+      },
+      {
+        "phrase": "biscuits",
+        "expect": [
+          "usda:2707801",
+          "usda:2707802"
+        ],
+        "tags": [
+          "coverage"
+        ]
+      },
+      {
+        "phrase": "gravy",
+        "expect": [
+          "usda:2706406",
+          "usda:2707144",
+          "usda:2707145"
         ],
         "tags": [
           "coverage"
