@@ -77,8 +77,41 @@ function meal(text: string): { verdict: string; numbers?: string; why?: string; 
   return { verdict, numbers: part('Numbers'), why: part('Why'), next: part('Next action') }
 }
 
-function Answer({ text }: { text: string }) {
+/**
+ * The three figures a verdict rests on, taken from the tool result rather than
+ * from the sentence about it.
+ *
+ * "meal glycemic load 53.7; day before this meal 48; after this meal -5.7"
+ * is a log line. These are the same three numbers — the verifier guarantees
+ * the prose agrees with them — laid out so the one that matters is the one
+ * you see.
+ */
+function Figures({ reply }: { reply: AgentResponse }) {
+  const meal = reply.trace?.find((t) => t.tool.endsWith('compute_meal'))?.result as
+    | { totals?: { gl?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean } }
+    | undefined
+  const mealGl = meal?.totals?.gl
+  const before = meal?.dayState?.remaining?.gl
+  const after = meal?.afterMeal?.remaining?.gl
+  if (typeof mealGl !== 'number' || typeof before !== 'number' || typeof after !== 'number') return null
+  const fits = meal?.afterMeal?.fits !== false
+  return (
+    <div className="figures">
+      <div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{mealGl}</span></div>
+      <div className="fig"><span className="fig-k">before</span><span className="fig-v">{before}</span></div>
+      <div className={`fig fig-lead ${fits ? 'ok' : 'over'}`}>
+        <span className="fig-k">{fits ? 'left after' : 'over by'}</span>
+        <span className="fig-v">{fits ? after : Math.abs(after)}</span>
+      </div>
+    </div>
+  )
+}
+
+function Answer({ text, reply }: { text: string; reply?: AgentResponse }) {
   const parts = meal(text)
+  const m = reply?.trace?.find((t) => t.tool.endsWith('compute_meal'))?.result as
+    { totals?: { gl?: number }; afterMeal?: { remaining?: { gl?: number } } } | undefined
+  const figuresShown = typeof m?.totals?.gl === 'number' && typeof m?.afterMeal?.remaining?.gl === 'number'
   if (parts) {
     // The hierarchy the design canvas asked for and the app never had: the
     // verdict is the sentence someone reads, the number is the thing they
@@ -91,7 +124,8 @@ function Answer({ text }: { text: string }) {
     return (
       <div className="answer-text">
         <p className="a-verdict">{bold(parts.verdict, 'v')}</p>
-        {parts.numbers && <p className="a-numbers">{bold(parts.numbers, 'n')}</p>}
+        {reply && <Figures reply={reply} />}
+        {parts.numbers && !figuresShown && <p className="a-numbers">{bold(parts.numbers, 'n')}</p>}
         {parts.why && <p className="a-why">{bold(parts.why, 'w')}</p>}
         {parts.next && (
           <p className="a-next">
@@ -272,6 +306,12 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
           <span className="label">glycemic load left today</span>
           <span className="value">{left} <small>of {targets.glBudget}</small></span>
         </div>
+        {/* The day, at a glance. A bar rather than a ring: a ring is a score
+            to close, and the design canvas ruled those out. */}
+        <div className="budget-bar" role="img"
+             aria-label={`${Math.max(0, targets.glBudget - left)} of ${targets.glBudget} glycemic load used today`}>
+          <span style={{ width: `${Math.min(100, Math.max(0, ((targets.glBudget - left) / Math.max(1, targets.glBudget)) * 100))}%` }} />
+        </div>
         <h2 className="ask-title">What are you about to eat?</h2>
         <div className="row lab-row">
           {saved > 0 && <button className="ghost" onClick={downloadResponses}>Download Responses</button>}
@@ -300,8 +340,14 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
       </section>
 
       {busy && (
-        <section className="card">
-          <p className="muted" style={{ margin: 0 }}>Looking up foods, computing the load, checking every number…</p>
+        <section className="card thinking">
+          {/* What happens, in order, with nothing claiming to know where we
+              are: the trace only arrives when the answer does. */}
+          <ol>
+            <li>Looking the foods up in the database</li>
+            <li>Computing the load from their carbohydrate</li>
+            <li>Checking every number against the result</li>
+          </ol>
         </section>
       )}
 
@@ -322,7 +368,7 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
                tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Not today' :
                tone === 'advice' ? 'Advice' : 'One question first'}
             </div>
-            <Answer text={reply.answer} />
+            <Answer text={reply.answer} reply={reply} />
             {!reply.blocked && (
               <div className="verify-row">
                 {reply.verified ? (

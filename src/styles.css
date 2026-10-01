@@ -193,6 +193,39 @@ tr:last-child td { border-bottom: none; }
 .ask-budget .label, .chips-col .label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
 .ask-budget .value { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; }
 .ask-budget .value small { font-size: 13px; color: var(--text-faint); font-weight: 400; }
+.budget-bar {
+  display: block; height: 3px; border-radius: 99px; background: var(--border);
+  margin: 0 0 18px; overflow: hidden;
+}
+.budget-bar span { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width .5s ease; }
+
+/* The three figures a verdict rests on. */
+.figures { display: flex; gap: 8px; margin: 0 0 14px; }
+.fig {
+  flex: 1; display: flex; flex-direction: column; gap: 3px;
+  background: var(--surface-2); border-radius: 10px; padding: 9px 11px;
+}
+.fig-k { font-size: 10.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+.fig-v { font-family: var(--mono); font-size: 19px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.fig-lead { background: var(--accent-soft); }
+.fig-lead.ok .fig-v { color: var(--accent); }
+.fig-lead.over { background: color-mix(in srgb, var(--high) 12%, transparent); }
+.fig-lead.over .fig-v { color: var(--high); }
+
+/* The wait. Three steps, no pretend progress. */
+.thinking ol { margin: 0; padding: 0 0 0 2px; list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.thinking li {
+  display: flex; align-items: center; gap: 10px; font-size: 14.5px; color: var(--text-dim);
+  animation: thinking-pulse 1.9s ease-in-out infinite;
+}
+.thinking li::before {
+  content: ''; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+}
+.thinking li:nth-child(2) { animation-delay: .25s; }
+.thinking li:nth-child(3) { animation-delay: .5s; }
+@keyframes thinking-pulse { 0%, 100% { opacity: .45 } 50% { opacity: 1 } }
+@media (prefers-reduced-motion: reduce) { .thinking li { animation: none; opacity: .8 } }
+
 .ask-title { font-family: var(--serif); font-size: 30px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; margin: 0 0 6px; text-wrap: balance; max-width: 18ch; }
 .ask-form { display: flex; gap: 8px; margin: 16px 0 6px; }
 .ask-form input { flex: 1; padding: 12px 14px; border-radius: 12px; font-size: 15px; min-height: 46px; }
@@ -287,6 +320,9 @@ tr:last-child td { border-bottom: none; }
  * across two lines mid-triplet. */
 @media (max-width: 560px) {
   .answer-text .a-verdict { font-size: 22px; max-width: none; }
+  .figures { gap: 6px; }
+  .fig { padding: 8px 9px; }
+  .fig-v { font-size: 17px; }
   .ask-form { flex-direction: column; gap: 10px; }
   .ask-form button { width: 100%; }
 
