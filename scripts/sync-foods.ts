@@ -103,10 +103,21 @@ async function pushOverRest(rows: Row[]): Promise<void> {
   process.stdout.write('\n')
 
   // Stale rows, deleted by the ids that should no longer be there. PostgREST
-  // has no "delete where not in this list", so the list is computed here.
-  const have = await fetch(`${restUrl}/rest/v1/foods?select=id`, {
-    headers: { apikey: serviceKey!, authorization: `Bearer ${serviceKey}` },
-  }).then((r) => r.json() as Promise<{ id: string }[]>)
+  // has no "delete where not in this list", so the list is computed here —
+  // and it has to be read a page at a time, because an unpaginated select
+  // stops at a thousand rows without saying so. Unpaginated, this read saw
+  // the first thousand ids, found almost all of them still wanted, deleted
+  // nothing, and printed success: 813 withdrawn foods stayed in the table and
+  // the engine went on serving them, which is how a pizza the catalogue no
+  // longer held came back costed at a glycemic load of zero.
+  const have: { id: string }[] = []
+  for (let from = 0; ; from += 1000) {
+    const page = await fetch(`${restUrl}/rest/v1/foods?select=id&order=id&offset=${from}&limit=1000`, {
+      headers: { apikey: serviceKey!, authorization: `Bearer ${serviceKey}` },
+    }).then((r) => r.json() as Promise<{ id: string }[]>)
+    have.push(...page)
+    if (page.length < 1000) break
+  }
   const wanted = new Set(rows.map((r) => r.id as string))
   const stale = have.map((r) => r.id).filter((id) => !wanted.has(id))
   for (let i = 0; i < stale.length; i += BATCH) {
@@ -117,7 +128,7 @@ async function pushOverRest(rows: Row[]): Promise<void> {
     })
     if (!res.ok) throw new Error(`delete failed: ${res.status} ${(await res.text()).slice(0, 200)}`)
   }
-  console.log(`synced ${rows.length} records${stale.length ? `, removed ${stale.length} stale` : ''} over PostgREST`)
+  console.log(`synced ${rows.length} records${stale.length ? `, removed ${stale.length} stale` : ''} over PostgREST; the table held ${have.length} before`)
 }
 
 /**
