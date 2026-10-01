@@ -5,7 +5,7 @@
  * bands are what let the agent ask one question (medium) or admit it has no
  * verified data (low) instead of guessing.
  */
-import { loadFoods, summary } from './foods'
+import { loadFoods, summary, type FoodRecord } from './foods'
 import { embed, type VectorStore } from './embeddings'
 import type { Confidence, ResolveCandidate, ResolvedPhrase } from './contract'
 
@@ -214,6 +214,73 @@ function aliasesOf(): Map<string, string> {
   return aliasIndex
 }
 
+/**
+ * A spelling pass, for when the meaning pass has nothing to work with.
+ *
+ * Vector search reads meaning, which is why "yoghurt", "soda" and "porridge"
+ * all land correctly. It does not read letters: a typo is simply a different
+ * set of subword tokens, so "avacado" scored 0.43 against Avocado, "brocolli"
+ * 0.40 against Broccoli, and "bannana" came back first as Cotija cheese. Each
+ * of those reached the user as "I do not have that food", which is a true
+ * sentence about a word nobody meant to type.
+ *
+ * So when nothing is close enough in meaning, we look at the characters:
+ * trigram overlap against every name and alias. The bar is deliberately high —
+ * a loose one turns an honest "I do not have that" into a confident wrong
+ * answer, and the foods we genuinely lack must stay lacking.
+ */
+/**
+ * How many single-character edits apart two words are, giving up past a cap.
+ *
+ * Typos are edits, so edit distance is the measure; trigram overlap was tried
+ * first and was both too loose at the bottom and too tight at the top — one
+ * substitution in "avacado" scores 0.45, which is also roughly what two
+ * unrelated short words score.
+ */
+function editsWithin(a: string, b: string, cap: number): boolean {
+  if (Math.abs(a.length - b.length) > cap) return false
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i)
+  for (let i = 1; i <= a.length; i++) {
+    const row = [i]
+    let best = i
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1
+      row[j] = Math.min(prev[j] + 1, row[j - 1] + 1, prev[j - 1] + cost)
+      best = Math.min(best, row[j])
+    }
+    if (best > cap) return false
+    prev = row
+  }
+  return prev[b.length] <= cap
+}
+
+/**
+ * The closest record by spelling, or nothing.
+ *
+ * One edit for a short word, two for a long one, and a long word must agree on
+ * its first two letters — without that, "doritos" finds "burritos" and a food
+ * we honestly do not have becomes a confident wrong answer. The foods we lack
+ * have to stay lacking: that is the behaviour this product is built around.
+ */
+function closestBySpelling(phrase: string, records: FoodRecord[]): FoodRecord | null {
+  const q = norm(phrase)
+  // One word to one word. A phrase is a different problem, and a misspelt
+  // phrase usually still has a correctly spelt word in it for the vectors.
+  if (!q || q.includes(' ') || q.length < 4) return null
+  const cap = q.length >= 7 ? 2 : 1
+  for (const rec of records) {
+    for (const name of [norm(plainName(rec.name)), ...(rec.aliases ?? [])]) {
+      for (const word of name.split(' ')) {
+        if (word.length < 4 || Math.abs(word.length - q.length) > cap) continue
+        if (cap === 2 && word.slice(0, 2) !== q.slice(0, 2)) continue
+        if (word === q) return rec
+        if (editsWithin(q, word, cap)) return rec
+      }
+    }
+  }
+  return null
+}
+
 export async function resolvePhrases(store: VectorStore, phrases: string[], topK = 5): Promise<ResolvedPhrase[]> {
   const { byId } = loadFoods()
   const given = phrases.map((p) => p.trim()).filter(Boolean)
@@ -249,13 +316,25 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
       .slice(0, topK)
       .map((c) => ({ ...c, score: Math.round(c.score * 1000) / 1000 }))
 
-    const confidence = band(phrase, candidates)
-    const unknown = confidence === 'low'
+    let confidence = band(phrase, candidates)
+    let cands = candidates
     let clarify: string | undefined
-    if (confidence === 'medium') {
-      const rival = candidates.slice(1).find((c) => !sameFood(c.name, candidates[0].name))
-      clarify = rival ? `Did you mean ${candidates[0].name} or ${rival.name}?` : undefined
+
+    // Nothing close in meaning: try the spelling before giving up.
+    if (confidence === 'low') {
+      const spelled = closestBySpelling(phrase, loadFoods().records)
+      if (spelled) {
+        confidence = 'medium'
+        cands = [{ ...summary(spelled), score: 0.62 },
+                 ...candidates.filter((c) => c.id !== spelled.id)].slice(0, topK)
+        clarify = `Did you mean ${spelled.name}?`
+      }
     }
-    return { phrase: given[i], confidence, candidates, clarify, unknown }
+    const unknown = confidence === 'low'
+    if (confidence === 'medium' && !clarify) {
+      const rival = cands.slice(1).find((c) => !sameFood(c.name, cands[0].name))
+      clarify = rival ? `Did you mean ${cands[0].name} or ${rival.name}?` : undefined
+    }
+    return { phrase: given[i], confidence, candidates: cands, clarify, unknown }
   }))
 }

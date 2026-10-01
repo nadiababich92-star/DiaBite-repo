@@ -780,6 +780,84 @@
         "tags": [
           "coverage"
         ]
+      },
+      {
+        "phrase": "avacado",
+        "expect": [
+          "ing:avocado",
+          "seed:avocado"
+        ],
+        "tags": [
+          "typo"
+        ]
+      },
+      {
+        "phrase": "brocolli",
+        "expect": [
+          "ing:broccoli",
+          "seed:broccoli"
+        ],
+        "tags": [
+          "typo"
+        ]
+      },
+      {
+        "phrase": "chiken",
+        "expect": [
+          "ing:chicken_breast",
+          "seed:chicken"
+        ],
+        "tags": [
+          "typo"
+        ]
+      },
+      {
+        "phrase": "bannana",
+        "expect": [
+          "seed:banana",
+          "ing:banana"
+        ],
+        "tags": [
+          "typo"
+        ]
+      },
+      {
+        "phrase": "quinoia",
+        "expect": [
+          "ing:quinoa",
+          "seed:quinoa"
+        ],
+        "tags": [
+          "typo"
+        ]
+      },
+      {
+        "phrase": "oatmeel",
+        "expect": [
+          "seed:oats",
+          "ing:oats"
+        ],
+        "tags": [
+          "typo"
+        ]
+      },
+      {
+        "phrase": "kugel",
+        "expect": [
+          "unknown"
+        ],
+        "tags": [
+          "unknown"
+        ]
+      },
+      {
+        "phrase": "oreos",
+        "expect": [
+          "unknown"
+        ],
+        "tags": [
+          "unknown"
+        ]
       }
     ],
     "clarify": [
