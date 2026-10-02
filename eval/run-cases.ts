@@ -277,7 +277,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   // Costing three known foods and leaving the fourth out is fine; saying so
   // is what makes the number honest.
   if (e.saysPartial === true) {
-    const missing = /(not in (my |the )?database|don't have|do not have|could ?n'?t find|could not find|(is|was|were|are) ?n'?t in|is not in)/i.test(answer)
+    const missing = /(not in (my |the )?database|don't have|do not have|could ?n'?t find|could not find|(is|was|were|are) ?n'?t in|is not in|i'?m missing|missing the)/i.test(answer)
     const excluded = /(leaves? (it )?out|does ?n'?t include|excludes?|without (the|that)|partial|only covers|not included)/i.test(answer)
     say('says the total is partial', missing && excluded, `missing ${missing}, excluded ${excluded}`)
   }
@@ -327,7 +327,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   // owes the user which candidate it picked.
   const clarified = (callOf(r, 'resolve_foods')?.result as { results?: { clarify?: string }[] } | undefined)?.results?.some((p) => p.clarify)
   if (clarified && called(r, 'compute_meal')) {
-    say('names the assumption it proceeded on', /assum|I used|I picked|I took|I counted|using |treated (it|this) as|default/i.test(answer))
+    say('names the assumption it proceeded on', /assum|I used|I picked|I took|I counted|using |I treated|default/i.test(answer))
   }
   // The failure a number-tracing verifier cannot see: the right number under
   // the wrong label. "Remaining after this meal: 54" when 54 is the budget
@@ -348,10 +348,13 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
       // backwards and failing an answer that was right. Read past the field
       // names rather than trusting the model not to print them.
       const text = answer.replace(/\b(?:dayState|afterMeal)(?:\.[a-zA-Z]+)+/g, ' ').replace(/\bremaining\.gl\b/gi, ' ')
-      const claim = text.match(/after[^.;]{0,40}?(-?\d+(?:\.\d+)?)/i) ?? text.match(/(-?\d+(?:\.\d+)?)[^.;]{0,40}?\bafter\b/i)
-      if (claim) {
-        const n = Number(claim[1])
-        say('"after" figure matches the engine', Math.abs(n - after) < 0.15, `said ${n}, should be ${after}`)
+      const near = [
+        text.match(/after[^.;]{0,40}?(-?\d+(?:\.\d+)?)/i)?.[1],
+        text.match(/(-?\d+(?:\.\d+)?)[^.;]{0,40}?\bafter\b/i)?.[1],
+      ].filter((x): x is string => x !== undefined).map(Number)
+      if (near.length) {
+        const ok = near.some((n) => Math.abs(n - after) < 0.15)
+        say('"after" figure matches the engine', ok, `saw ${near.join(' / ')}, should be ${after}`)
       }
     }
   }
