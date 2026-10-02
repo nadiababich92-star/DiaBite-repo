@@ -348,10 +348,16 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
       // backwards and failing an answer that was right. Read past the field
       // names rather than trusting the model not to print them.
       const text = answer.replace(/\b(?:dayState|afterMeal)(?:\.[a-zA-Z]+)+/g, ' ').replace(/\bremaining\.gl\b/gi, ' ')
-      const near = [
-        text.match(/after[^.;]{0,40}?(-?\d+(?:\.\d+)?)/i)?.[1],
-        text.match(/(-?\d+(?:\.\d+)?)[^.;]{0,40}?\bafter\b/i)?.[1],
-      ].filter((x): x is string => x !== undefined).map(Number)
+      // Every number within a short reach of the word "after", on either side.
+      // Matching one regex at a time kept finding the wrong one: in "your day
+      // was at 53.4 before this meal and is at 47 after it" the first number
+      // that can reach "after" is 53.4, and the one that means it is 47.
+      const near: number[] = []
+      for (const m of text.matchAll(/\bafter\b/gi)) {
+        const at = m.index ?? 0
+        const window = text.slice(Math.max(0, at - 45), at + 45)
+        for (const num of window.matchAll(/-?\d+(?:\.\d+)?/g)) near.push(Number(num[0]))
+      }
       if (near.length) {
         const ok = near.some((n) => Math.abs(n - after) < 0.15)
         say('"after" figure matches the engine', ok, `saw ${near.join(' / ')}, should be ${after}`)
