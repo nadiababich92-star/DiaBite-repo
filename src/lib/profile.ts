@@ -65,6 +65,7 @@ export const COMORBIDITY_LABELS: Record<Comorbidity, string> = {
   celiac: 'Celiac disease',
   pcos: 'PCOS',
   eatingDisorder: 'A history of disordered eating',
+  brittle: 'Blood sugar that swings hard and unpredictably',
 }
 
 export const ALLERGEN_LABELS: Record<Allergen, string> = {
@@ -157,6 +158,7 @@ export function carbApproachBlocked(p: Profile, a: CarbApproach): string | null 
   if (p.meds.includes('sulfonylurea') || p.insulin === 'basal') return 'Needs your clinician first: with insulin or a sulfonylurea, cutting carbs this far risks a hypo.'
   if (p.comorbidities.includes('gout')) return 'Not recommended with gout — ketosis raises uric acid.'
   if (p.comorbidities.includes('eatingDisorder')) return 'We do not offer this given what you told us about disordered eating.'
+  if (p.comorbidities.includes('brittle')) return 'Not with blood sugar that already swings hard — cutting carbohydrate this far makes the swings harder to predict, not easier.'
   if (p.age >= 65) return 'Not recommended over 65 — protein and micronutrient intake usually suffer.'
   return null
 }
@@ -214,9 +216,26 @@ export function calculateTargets(p: Profile): Targets {
 
   // A GLP-1 cuts appetite by a fifth or more; the risk stops being too much
   // food and becomes too little protein.
+  //
+  // But a floor applied after a cap silently removes it. Until 2 October this
+  // raised a CKD patient on a GLP-1 from 0.8 g/kg back to 1.2 — and printed
+  // both sentences, so the app told them their protein was capped for their
+  // kidneys and then handed them half again as much. Dr James LaSalle named
+  // the collision on his first read: "protein needs are greater but many
+  // diabetics have eGFR levels that could be contradictory."
+  //
+  // The kidney number wins, and the conflict is stated rather than resolved
+  // silently, because which way it should go is a question for the person's
+  // own clinician and not for an app.
+  const kidneyLimited = p.kidney === 'ckd' || p.kidney === 'mentioned' || p.kidney === 'dialysis'
   if (p.meds.includes('glp1')) {
-    proteinG = Math.max(proteinG, p.weightKg * 1.2)
-    add('glp1-protein', 'proteinG', 'Protein floor raised: on a GLP-1 the usual problem is eating too little of it, not too much.')
+    if (kidneyLimited) {
+      add('glp1-vs-kidney', 'proteinG',
+        'On a GLP-1 the usual advice is to aim higher on protein, but what you told us about your kidneys caps it lower. We kept the lower number. This is worth asking your clinician about — it is a real tension, not a rounding choice.')
+    } else {
+      proteinG = Math.max(proteinG, p.weightKg * 1.2)
+      add('glp1-protein', 'proteinG', 'Protein floor raised: on a GLP-1 the usual problem is eating too little of it, not too much.')
+    }
   }
   if (p.age >= 65) {
     proteinG = Math.max(proteinG, p.weightKg * 1.0)
@@ -245,6 +264,12 @@ export function calculateTargets(p: Profile): Targets {
   if (p.comorbidities.includes('ascvd')) add('ascvd-fat', 'none', 'Keep saturated fat under 10% of calories, and watch LDL if you cut carbs hard.')
   if (p.comorbidities.includes('masld')) add('masld-fructose', 'none', 'Added sugar and sweet drinks matter more than usual with fatty liver.')
   if (p.comorbidities.includes('celiac')) add('celiac-gf', 'none', 'Every suggestion is filtered gluten-free.')
+  // Added 2 October on Dr James LaSalle's review: "your avoid statements are
+  // good — add brittle diabetics." Someone whose glucose swings hard is the
+  // person a daily average helps least and a fixed ceiling can mislead most.
+  if (p.comorbidities.includes('brittle')) {
+    add('brittle-swings', 'none', 'You told us your blood sugar swings hard. A daily ceiling is an average, and averages are the least useful thing for swings — treat these numbers as background, and let your care team and your meter lead.')
+  }
   if (p.comorbidities.includes('eatingDisorder')) {
     gl = Math.round(gl)
     add('ed-framing', 'none', 'Daily ceilings are shown as guidance, never as a score to beat.')

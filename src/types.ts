@@ -96,6 +96,7 @@ export type Med = 'metformin' | 'sulfonylurea' | 'sglt2' | 'glp1' | 'other'
 export type Kidney = 'none' | 'mentioned' | 'ckd' | 'dialysis'
 export type Comorbidity =
   | 'htn' | 'ascvd' | 'masld' | 'gout' | 'gastroparesis' | 'celiac' | 'pcos' | 'eatingDisorder'
+  | 'brittle'
 import type { Allergen, Pattern } from './lib/dietary'
 export type { Allergen, Pattern }
 

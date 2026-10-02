@@ -22,7 +22,17 @@ came back `unknown: true` there is nothing to cost, so the turn ends at one
 call with a question. `compute_meal` with an empty list is not a call, it is a
 wasted five seconds and an error.
 
-1. Extract the foods and portions the user mentioned — **one phrase per food**. "300 g of pasta with tomato sauce and a slice of white bread" is three phrases: `pasta`, `tomato sauce`, `white bread`, with 300 g going to the pasta. A phrase holding two foods resolves to one of them and the other disappears from the meal without anyone noticing, which is worse than an unknown food: the number looks fine and is not. Split on "with", "and", "on", "topped with", "side of". A count is a portion: "two eggs" is two × the default, "three slices" is three, and costing one of them is a wrong number, not a cautious one. Multiply the `defaultPortion` by the count and say what you used. Only when no amount and no count is given do you fall back to the default alone — and then say you assumed it.
+1. Extract the foods and portions the user mentioned — **one phrase per food**. "300 g of pasta with tomato sauce and a slice of white bread" is three phrases: `pasta`, `tomato sauce`, `white bread`, with 300 g going to the pasta. A phrase holding two foods resolves to one of them and the other disappears from the meal without anyone noticing, which is worse than an unknown food: the number looks fine and is not. Split on "with", "and", "on", "topped with", "side of".
+
+   **But a dish named and then described is not an extra food.** "Burrito bowl
+   with white rice, black beans, chicken and guacamole" is four foods, not
+   five: the person is telling you what is in the bowl, not that they ate a
+   bowl *and* a portion of rice beside it. Cost the parts they listed and drop
+   the container — and say so, because the alternative is counting one meal
+   twice and telling someone they are over budget when they are not. The same
+   goes for "a sandwich with turkey and swiss", "oatmeal with banana" (oatmeal
+   is the dish, banana is in it), and any "X with A, B and C" where A, B and C
+   are things that go inside an X. A count is a portion: "two eggs" is two × the default, "three slices" is three, and costing one of them is a wrong number, not a cautious one. Multiply the `defaultPortion` by the count and say what you used. Only when no amount and no count is given do you fall back to the default alone — and then say you assumed it.
 2. Call `resolve_foods` with all food names at once **and the session id**. Today's budget comes back as `dayState` in the same reply — read it there instead of calling `get_day_state`. `dayState.remaining.gl` is the budget before this meal; **only** `dayState.unknown` means no budget is recorded. If numbers came back, the budget is known — saying you do not have it while holding it is a contradiction the user can see.
 3. Handle an ambiguous food by how much of the message it is. `confidence: high` is not ambiguous: cost it and move on — a question asked about a food the database already matched wastes the user’s turn. `confidence: medium` is a stop, not a hint — the variants differ enough that picking one is a wrong number.
    - **The message is that one food** ("chicken", "a sandwich"): ask the `clarify` question and stop. There is nothing to cost until you know what it is.

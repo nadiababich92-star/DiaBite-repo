@@ -6,6 +6,7 @@ import { availableCarbs, dayGlLevel, glLevel, glycemicLoad, nutrientsFor } from 
 import { isAvoided, type AvoidList } from './avoid'
 import { asFood, getRecord, loadFoods, summary } from './foods'
 import { embed, type VectorStore } from './embeddings'
+import { sameFood } from './resolve'
 import type {
   Alternative, AlternativesRequest, ComputeMealResponse, DayBudget, DayStateResponse,
   MealItemInput, MealItemResult, MealTotals,
@@ -111,8 +112,20 @@ export async function findAlternatives(
     // Same reason as in resolve: the store may know an id this build does not.
     const rec = byId.get(h.id)
     if (!rec) continue
+    // A variation of the same food is not an alternative to it. The coverage
+    // layer holds a dozen rows per staple, so the nearest vectors to white rice
+    // are other white rices — and the product offered "swap the white rice for
+    // rice, white, with vegetables and gravy", which is the same food with
+    // gravy on it. Suggesting a swap means suggesting a different food.
+    if (anchor && sameFood(rec.name, anchor.name)) continue
     const cost = costOf(rec.id, req.grams)
     if (cost.gl > req.maxGL) continue
+    // And a swap should be worth making: at least a fifth less load than the
+    // thing it replaces, or it is noise dressed as advice.
+    if (anchor) {
+      const anchorCost = costOf(anchor.id, req.grams)
+      if (anchorCost.gl > 0 && cost.gl > anchorCost.gl * 0.8) continue
+    }
     out.push({ ...summary(rec), score: Math.round(h.score * 1000) / 1000, ...cost })
     if (out.length >= topK) break
   }
