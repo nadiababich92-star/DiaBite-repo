@@ -1,12 +1,46 @@
-# DiaBite — clinical review pack
+# DiaBite — clinical review
 
-**For a diabetologist, endocrinologist or registered dietitian.** Everything
-this product decides about a person is written below, with the reasoning behind
-it and the question we would like answered. It should take 30–45 minutes.
+**For: Dr James LaSalle** · Prepared by Nadia Babich · 2 October 2026
 
-We would rather hear "that number is wrong" now than after people are using it.
+Thank you for saying yes.
+
+DiaBite answers one question — *can I eat this?* — for adults with type 2
+diabetes, prediabetes or insulin resistance in the US. Someone describes a meal
+in their own words; the app matches the foods against a database of 6,054
+records, computes carbohydrate, fibre, glycemic index and glycemic load with a
+deterministic engine, and says whether the meal fits what is left of their day.
+It never gives a dose, never diagnoses, and never lets a language model produce
+a number.
+
+**What I am asking for is not an endorsement.** It is for someone qualified to
+tell me what is wrong. Everything the product decides about a person is written
+out below — the energy and protein targets, what we do about kidney disease and
+GLP-1s, which options we block, and the rules that stop the conversation — with
+the reasoning behind each and the question I would like answered. Seventeen
+questions, marked **Q1** to **Q17**, about forty minutes.
+
+**If you only have ten minutes**, these three are the ones I would most like
+challenged:
+
+- **Q7** — we give each person a daily *glycemic-load ceiling*, derived from
+  their carbohydrate target and a target mean diet GI. That is my own
+  construction, not a guideline, and I do not know whether it is defensible.
+- **Q4** — we cap protein at 0.8 g/kg for anyone who reports chronic kidney
+  disease, **without knowing their eGFR or stage**.
+- **Q12** — at a stated glucose under 70 mg/dL we stop the conversation and say
+  to seek help; we deliberately do not tell them to take fast-acting
+  carbohydrate. I am not sure that is right.
+
+**How to leave comments:** select any text and use the comment button, or just
+reply to me with the question numbers — whichever is less work. Partial answers
+are welcome; there is no deadline, and nothing here is waiting on a release.
+
+Appendix A holds four answers the product gave, captured from the running
+system rather than written for this document, so you can see the voice a
+patient would actually read.
 
 ---
+
 
 ## What the product does, and what it never does
 
@@ -213,3 +247,47 @@ them is minutes of work, and every change is re-tested automatically against
 
 If there is one thing on this list you would fix first, that is the thing we
 would most like to know.
+
+
+---
+
+# Appendix A — four answers, as the product gave them
+
+
+Produced by the running product. Nothing is edited. The advice side of DiaBite states no numbers at all — not even a glycemic index — because a number there would be one nobody checked.
+
+## Is brown rice better than white rice?
+
+Usually, yes: brown rice is a better choice than white rice for blood sugar because it keeps the bran and fibre, so it tends to raise glucose more slowly. White rice is more refined and usually lands faster.
+
+That said, the best choice depends on the whole meal and your own response. Rice eaten with protein, vegetables, and healthy fat often affects blood sugar less than rice eaten alone.
+
+If you want, tell me the rice dish and portion and I can help you compare it with other options.
+
+## Why is my blood sugar highest in the morning?
+
+Blood sugar is often highest in the morning because your body releases hormones overnight that tell the liver to put extra glucose into the blood. This is called the dawn phenomenon.
+
+It can also happen if:
+- you ate late or had a high-carb evening snack
+- you had poor sleep or stress
+- your body is becoming more insulin resistant, which means your cells respond less well to insulin
+
+If morning highs are frequent, your care team can help look for the pattern and what is driving it. If you have confusion, fainting, chest pain, vomiting, or a very high or very low reading, seek help now.
+
+## Should I stop eating fruit?
+
+Usually, no. Fruit can fit well with type 2 diabetes, prediabetes, and insulin resistance. Whole fruit is usually a better choice than juice or dried fruit because the fibre helps slow the rise in blood glucose. Pair fruit with protein or fat, like yogurt, nuts, or cheese, if you notice it hits you hard on its own.
+
+It’s a good idea to limit fruit juice, smoothies, and fruit canned in syrup.
+
+If you have kidney disease, are pregnant or breastfeeding, or have a history of disordered eating, please check with a clinician who knows your situation.
+
+## Is keto sensible for type 2 diabetes?
+
+Keto can be sensible for some people with type 2 diabetes, but it is not the best fit for everyone.
+
+It may help some people reduce blood sugar swings because it cuts carbs sharply, but it can also be hard to follow, and it can be risky if you use diabetes medicines that can cause low blood sugar. If you have kidney disease, are pregnant or breastfeeding, or have a history of disordered eating, it is not a good DIY choice.
+
+A safer way to decide is to review your medicines and goals with your diabetes care team. If you want, I can help compare keto with a less strict lower-carb approach.
+
