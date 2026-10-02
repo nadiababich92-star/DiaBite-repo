@@ -173,6 +173,25 @@ function unknownId(id: string): false {
 }
 
 /** Two records that are really the same food (e.g. seed and ingredient copies) are not competitors. */
+/**
+ * Is one food just a dressed-up version of the other?
+ *
+ * `sameFood` compares whole token sets and lets "Rice, white, with gravy, fat
+ * added" past "White rice, cooked" — they share two tokens of three, which is
+ * under its threshold. But the leading words of a food's name are what name
+ * it: everything after them is preparation. So if the anchor's first two words
+ * both appear in the candidate, it is the same food with something on it, and
+ * offering it as a swap is advice that changes nothing.
+ *
+ * "Brown rice" and "Cauliflower rice" survive this, which is the point.
+ */
+export function sameFamily(anchor: string, candidate: string): boolean {
+  const head = tokens(plainName(anchor)).slice(0, 2)
+  if (head.length < 2) return false
+  const other = new Set(tokens(plainName(candidate)))
+  return head.every((t) => other.has(t))
+}
+
 export function sameFood(a: string, b: string): boolean {
   const ta = new Set(tokens(a)), tb = new Set(tokens(b))
   const inter = [...ta].filter((t) => tb.has(t)).length

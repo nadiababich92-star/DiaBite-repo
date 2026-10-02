@@ -6,7 +6,7 @@ import { availableCarbs, dayGlLevel, glLevel, glycemicLoad, nutrientsFor } from 
 import { isAvoided, type AvoidList } from './avoid'
 import { asFood, getRecord, loadFoods, summary } from './foods'
 import { embed, type VectorStore } from './embeddings'
-import { sameFood } from './resolve'
+import { sameFamily, sameFood } from './resolve'
 import type {
   Alternative, AlternativesRequest, ComputeMealResponse, DayBudget, DayStateResponse,
   MealItemInput, MealItemResult, MealTotals,
@@ -106,7 +106,20 @@ export async function findAlternatives(
     return true
   }
   // Over-fetch, then keep only what fits the budget.
-  const hits = await store.search(query, topK * 8, filter)
+  // Fetch wide. The coverage layer holds a dozen rows per staple, so the first
+  // two dozen neighbours of white rice are all white rice with something on
+  // it — filter those out of a small basket and nothing is left to suggest.
+  const raw = await store.search(query, Math.max(topK * 8, 80), filter)
+  // Curated first, coverage second — not a bonus on the score but a partition,
+  // because a bonus was not enough: brown rice sits 48 neighbours away from
+  // white rice while yellow rice sits 10, so the swap we offered for white
+  // rice was yellow rice. The curated table is a few hundred staples chosen
+  // for exactly this job; the coverage layer exists to recognise foods we
+  // lack, not to recommend them. Within each half the vector order stands, so
+  // a suggestion still resembles the thing it replaces.
+  const curated = raw.filter((h) => !h.id.startsWith('usda:'))
+  const coverage = raw.filter((h) => h.id.startsWith('usda:'))
+  const hits = [...curated, ...coverage]
   const out: Alternative[] = []
   for (const h of hits) {
     // Same reason as in resolve: the store may know an id this build does not.
@@ -117,7 +130,7 @@ export async function findAlternatives(
     // are other white rices — and the product offered "swap the white rice for
     // rice, white, with vegetables and gravy", which is the same food with
     // gravy on it. Suggesting a swap means suggesting a different food.
-    if (anchor && sameFood(rec.name, anchor.name)) continue
+    if (anchor && (sameFood(rec.name, anchor.name) || sameFamily(anchor.name, rec.name))) continue
     const cost = costOf(rec.id, req.grams)
     if (cost.gl > req.maxGL) continue
     // And a swap should be worth making: at least a fifth less load than the
@@ -126,6 +139,9 @@ export async function findAlternatives(
       const anchorCost = costOf(anchor.id, req.grams)
       if (anchorCost.gl > 0 && cost.gl > anchorCost.gl * 0.8) continue
     }
+    // The curated table and the ingredient table both hold an Apple, so a list
+    // of three swaps could be Apple, Apple, Watermelon.
+    if (out.some((o) => sameFood(o.name, rec.name))) continue
     out.push({ ...summary(rec), score: Math.round(h.score * 1000) / 1000, ...cost })
     if (out.length >= topK) break
   }

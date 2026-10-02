@@ -242,7 +242,13 @@ export function loadFoods() {
     const gi = r.gi > 0 ? r.gi : null
     records.push({
       id: `ing:${r.id}`, kind: 'ingredient', name: r.name, gi, giLevel: giLevel(gi),
-      category: r.group, unit: 'g', defaultPortion: 100,
+      // Mapped here, not only in asFood. The ingredient table says "grain" and
+      // "veg" where everything else in the app says "grains" and "vegetables",
+      // and `find_alternatives` filters by equal category — so a swap for
+      // white rice could never be a curated ingredient, because 'grains' never
+      // equalled 'grain'. The pool was smaller than it looked for every food.
+      category: GROUP_TO_CATEGORY[r.group] ?? (r.group as FoodCategory),
+      unit: 'g', defaultPortion: 100,
       searchText: `${r.name}. ${r.group}. ${r.id.replace(/_/g, ' ')}`,
       // The id is the everyday word for the food and the name is the precise
       // one — "miso" for White miso paste, "black beans" for Black beans,
