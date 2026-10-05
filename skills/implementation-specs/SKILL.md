@@ -8,10 +8,23 @@ description: >
   "what do I need to start building", or asks for a migration or env list.
 ---
 
-## Input
-`docs/engineering/engineering-doc.md`, approved by the user.
+## Purpose
 
-## Steps
+Turn an approved engineering plan into specs a developer can build from without
+asking a question. Second skill in the pipeline: it reads what
+`/engineering-planner` wrote, and nothing is guessed.
+
+## Inputs
+
+- `docs/engineering/engineering-doc.md` — approved by the user
+- `CLAUDE.md` — the project rules
+- `docs/design.md` — for any screen the plan describes
+- `supabase/migrations/` — the conventions already in use
+
+**Precondition:** if `docs/engineering/engineering-doc.md` does not exist or has
+not been approved, stop and tell the user to run `/engineering-planner` first.
+
+## Instructions
 1. **Read** the engineering doc in full, then `CLAUDE.md`.
 2. **Identify** each distinct concern: an endpoint, a tool change, a prompt
    change, a screen, a table, an eval.
@@ -20,13 +33,15 @@ description: >
 4. **Do not ask clarifying questions.** Everything was decided in the plan; if
    something was not, stop and say the plan is incomplete.
 
-## Every spec file is
+### Every spec file is
 - **Self-contained** — a developer can read it alone and know what to build.
 - **Concrete** — types, paths, error shapes, exact copy for user-facing text.
 - **Verifiable** — it ends with the checks that prove it works: the eval cases
   to add, the tool-result fields a check should read, the screen to look at.
 
-## Always include, when the plan touches them
+## Output
+
+Files under `docs/specs/`, named for what they specify, and — when the plan touches them:
 
 **`supabase/migrations/<timestamp>_<name>.sql`** — follow the existing
 `supabase/migrations/` convention. Must run on the live project without
@@ -43,6 +58,6 @@ the bundle, so nothing secret may carry that prefix.
 **Evaluation cases** — additions to `eval/cases.json` (engine and agent), with
 the expectation each one asserts. A feature without cases is not finished.
 
-## After generating
+### After generating
 Print each file created with its path and one sentence on what it specifies.
 Then stop and wait for approval before Stage 3.

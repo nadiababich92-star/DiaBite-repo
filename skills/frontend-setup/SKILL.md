@@ -8,13 +8,30 @@ description: >
   project, never switches framework, and never overwrites existing files.
 ---
 
-# Frontend conventions
+## Purpose
+
+Add a screen or component to DiaBite's existing frontend, in the structure it
+already has. Used for every piece of UI once a plan is approved. It never creates
+the project, because the project exists.
+
+## Inputs
+
+- `docs/engineering/engineering-doc.md` and `docs/specs/*.md` — what to build, once a feature has been planned
+- `docs/design.md` — read before writing any UI
+- `src/styles.css` — the tokens as they run
+- `src/App.tsx`, `src/components/`, `src/lib/` — what is already there
+- `CLAUDE.md`
+
+**Precondition:** if the request is a new feature and no approved spec exists for
+it, say so and offer to run `/engineering-planner` first.
+
+## Instructions
 
 **Stack: React 18 + Vite 5 + TypeScript. Plain CSS in one stylesheet. No router,
 no UI library, no state library.** Do not add one without asking. If a feature
 seems to need one, say why and let the user decide.
 
-## Step 1 — Read what is there
+### Step 1 — Read what is there
 
 Before writing anything, look at the real structure:
 
@@ -41,7 +58,7 @@ src/
 the engine's Docker image. **Changing one is changing the engine.** Run
 `npm run eval` afterwards, and check the Dockerfile still copies what it needs.
 
-## Step 2 — Decide where the feature goes
+### Step 2 — Decide where the feature goes
 
 - A new **screen** → a new file in `src/components/`, one tab in `App.tsx`.
 - A new **widget** → a component in the file that uses it, until a second place
@@ -51,13 +68,13 @@ the engine's Docker image. **Changing one is changing the engine.** Run
 - **Numbers shown to the user come from a tool result.** Never compute a
   nutrition figure in a component.
 
-## Step 3 — Build with the design system
+### Step 3 — Build with the design system
 
 Apply `/design-system` and read `docs/design.md` first. Every colour, size and
 spacing value is a token. The phone is the first screen: check **375px** before
 anything else.
 
-## Step 4 — Check it in the browser
+### Step 4 — Check it in the browser
 
 1. Start the dev server (`npm run dev`, or the `diabite` entry in
    `.claude/launch.json`) and open it.
@@ -66,10 +83,16 @@ anything else.
    and the phone width.
 4. Read the console. Report what you saw, with a screenshot.
 
-## Rules
+### Rules
 - Never overwrite an existing file without saying so.
 - Every `localStorage` access is wrapped in `try/catch` — the app must render
   with no stored value.
 - Anything inlined by Vite (`VITE_*`) is public. Never put a secret there.
 - The feedback form talks to Supabase with the publishable key and insert-only
   rights. Do not widen that.
+
+## Output
+
+The new screen or component, using only tokens from `docs/design.md`; any new
+logic in `src/lib/`; a tab added in `src/App.tsx` if it is a screen. Plus what you
+saw when you opened it at 375px and at desktop width, with a screenshot.

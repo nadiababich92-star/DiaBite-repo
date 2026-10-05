@@ -150,6 +150,23 @@ cases the feature needs *in the same change*.
 | Design System | `/design-system` | Enforces `docs/design.md` on all UI code |
 | Security Foundation | `/security-foundation` | Audits DiaBite's real surfaces → `docs/security/security-plan.md` |
 
+## Writing a skill
+
+Every `skills/<name>/SKILL.md` has the same four sections, so each one is a
+contract:
+
+- **Purpose** — what it does and when to run it
+- **Inputs** — the files it reads, **by path** ("read `docs/design.md`", never
+  "read the design document"), and a **Precondition** that stops it if the
+  previous stage's output is missing
+- **Instructions** — the steps, specific enough that two runs agree
+- **Output** — the files that exist when it has finished, which is the proof
+
+The folder name is the slash command. The skills form a pipeline — each reads
+what the one before it wrote — so a skill whose input is missing stops and says
+which skill to run first. Treat a SKILL.md like code: edit it, commit it, and
+tighten any instruction that produced something unexpected.
+
 ## Docs
 
 | File | Purpose |

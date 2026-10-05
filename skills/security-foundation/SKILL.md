@@ -15,7 +15,17 @@ Find every surface where someone could spend money, read what is not theirs,
 mislead a patient, or learn something about a person they should not — then
 close what is open and write down what is left.
 
-## Steps
+## Inputs
+
+- `CLAUDE.md`, and the engineering docs and specs if they exist
+- `server/engine.ts`, `server/agent.ts`, `server/sessions.ts` — routes and middleware
+- `src/lib/supabase.ts` and `supabase/migrations/` — the browser's reach into the database
+- `Dockerfile`, `.github/workflows/`, `agent/provision.ts` — build, deploy, agent identity
+- the running service itself: every route is called, not assumed
+
+**Precondition:** none beyond a reachable service. This skill audits what is live.
+
+## Instructions
 
 1. **Read** `CLAUDE.md`, the engineering docs if they exist, and the code:
    `server/engine.ts` (routes and middleware), `server/agent.ts`, `server/sessions.ts`,
@@ -28,7 +38,7 @@ close what is open and write down what is left.
 4. **Implement** the fixes the user approves. Stop after the plan first and ask.
 5. **Verify** each control against the running service and report what you saw.
 
-## The surfaces DiaBite has
+### The surfaces DiaBite has
 
 **1. The public agent route — `POST /agent/ask`.** Unauthenticated by design (the
 browser calls it) and every call spends model tokens. This is the largest
@@ -87,14 +97,14 @@ the image tag; dependencies pinned by lockfile; the build running on pushes to
 roles it holds, the content filter policy attached, the knowledge base containing
 only documents we wrote, and the memory store scoped to the advisor.
 
+### Rules
+- Never weaken a control to make a test pass.
+- Report findings as findings: severity, evidence, fix. Do not soften a high.
+- Never print a secret to show it is set; show its length or that it matched.
+- A control that was not tested against the running service is not done.
+
 ## Output
 
 `docs/security/security-plan.md`, then the code for whatever is approved — middleware
 in `server/`, migrations in `supabase/migrations/`, tests in `eval/` — and a
 paragraph per control saying how it was checked against the live service.
-
-## Rules
-- Never weaken a control to make a test pass.
-- Report findings as findings: severity, evidence, fix. Do not soften a high.
-- Never print a secret to show it is set; show its length or that it matched.
-- A control that was not tested against the running service is not done.
