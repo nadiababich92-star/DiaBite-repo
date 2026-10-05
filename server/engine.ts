@@ -118,6 +118,11 @@ async function main() {
    * possible culprits: DNS and TLS to the endpoint, a cheap authenticated read,
    * and one real agent turn.
    */
+  /** What the limits see as the caller's address. Behind the ingress this must be the client, not the proxy. */
+  app.get('/diag/ip', (req, res) => res.json({
+    ip: req.ip, ips: req.ips, xForwardedFor: req.get('x-forwarded-for') ?? null,
+  }))
+
   app.get('/diag/foundry', async (_req, res) => {
     const endpoint = process.env.PROJECT_ENDPOINT ?? ''
     const key = process.env.PROJECT_API_KEY ?? ''
