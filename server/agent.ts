@@ -566,7 +566,8 @@ function rememberPreferences(sessionId: string, message: string, answer: string)
   }
 }
 
-const MAX_TOOL_CALLS = 6
+/** 0 leaves the cap off; it exists so the cap can be removed without a code change. */
+const MAX_TOOL_CALLS = Number(process.env.MAX_TOOL_CALLS ?? 6)
 
 /** One request to one agent, waiting out the per-minute token limit. */
 async function runAgent(role: Role, input: string, previous?: string, forceTools = false, sessionId?: string): Promise<Turn> {
@@ -581,7 +582,7 @@ async function runAgent(role: Role, input: string, previous?: string, forceTools
     ...(forceTools ? { tool_choice: 'required' } : {}),
     // A normal meal turn makes two calls and a clarification one. Six is a
     // looping agent stopped, not a working one.
-    max_tool_calls: MAX_TOOL_CALLS,
+    ...(MAX_TOOL_CALLS > 0 ? { max_tool_calls: MAX_TOOL_CALLS } : {}),
   }
   return (await withRateLimitRetry(() =>
     agentClient().responses.create(payload as never),

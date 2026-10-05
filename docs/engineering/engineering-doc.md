@@ -1,6 +1,6 @@
 # Engineering document — abuse protection for the public agent route
 
-*Produced by `/engineering-planner` from `docs/PRD.md`, 5 October 2026. Approved by the owner; the next stage is `/implementation-specs`. Nothing in this document has been built.*
+*Produced by `/engineering-planner` from `docs/PRD.md`, 5 October 2026. Approved by the owner. Built and deployed the same day; see Status at the end.*
 
 ## 1. Summary
 
@@ -120,3 +120,24 @@ Plus: `npm run eval` and `npm run eval:agent` must be unchanged (191+/195, p90 �
 | CORS and proxy | `server/engine.ts` |
 | App state | `src/lib/agent.ts`, `src/components/AskPage.tsx` |
 | Proof | `eval/run-abuse.ts`, `package.json` |
+
+## Status — built and deployed, 5 October 2026
+
+Live as revision 54 (commit c664449). What was checked, and how:
+
+| Plan | Result |
+|---|---|
+| `npm run eval:abuse` (A0–A12, no model, no money) | all pass |
+| `npm run eval` | 91 resolve, 15 clarify, 12 verify, unchanged |
+| Live: foreign Origin, own origin | no header / header present |
+| Live: 501-character message, 65-character or `a/b` session id, 40 KB body | 400 `message`, 400 `sessionId`, 413 |
+| Live: a normal turn, and a dosing question | answered; rule `dosing` |
+| `req.ip` behind the ingress (`/diag/ip`) | the caller's address; a spoofed `X-Forwarded-For: 1.2.3.4` is ignored, the last hop wins |
+| `eval:agent` against live, with the key | 87/87 answered, 191/191 checks, no 429 |
+
+Not proved, and said plainly:
+
+- **The limiter was proved locally, not on production**, as planned: hammering the live service would spend money to learn what a local run already shows. The first real 429 will be the first time it happens on Azure.
+- **`max_tool_calls` is accepted by Foundry** (no error, turns normal) but nothing here forces a turn to exceed it, so *enforced* is unproved. `MAX_TOOL_CALLS=0` removes it.
+- **Latency on the live run was median 6.3 s, p90 13.2 s**, against a recorded p90 of 6–8 s. An A/B run of the 55 field cases, with the cap and without, ran at the same speed (p90 15.2 s and 14.4 s, concurrently), so the cap is not the cause. The owner's connection was unstable that day; re-measure before quoting a number.
+- **Q1 (real price), Q2 (IPs) and Q3 (shared networks) are still open.**
