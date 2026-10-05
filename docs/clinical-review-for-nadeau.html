@@ -1,0 +1,137 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>body{font-family:Georgia,serif;line-height:1.5;max-width:46em}h1,h2,h3,h4{font-family:Helvetica,Arial,sans-serif}
+td{vertical-align:top;font-family:Helvetica,Arial,sans-serif;font-size:10pt}code{font-family:Menlo,monospace;font-size:10pt}
+li{margin-bottom:6px}</style></head><body>
+<h1>DiaBite — clinical review</h1>
+<p><strong>For: Dr Dan Nadeau</strong> · Prepared by Nadia Babich · 5 October 2026</p>
+<p>Thank you, I appreciate it. It is long, so here is how to read it in the time you actually have.</p>
+<p>DiaBite answers one question — <em>can I eat this?</em> — for adults with type 2 diabetes, prediabetes or insulin resistance in the US. Someone describes a meal in their own words; the app matches the foods against a database of 6,054 records, computes carbohydrate, fibre, glycemic index and glycemic load with a deterministic engine, and says whether the meal fits what is left of their day. It never gives a dose, never diagnoses, and never lets a language model produce a number.</p>
+<p><strong>In my first message I named three things I cannot check myself.</strong> They are the ones I would most like you to go at, and they are Q3, Q4 and Q7:</p>
+<ul><li><strong>Q3 and Q4 — protein.</strong> 1.6 g/kg while someone is losing weight (above the range usually quoted for type 2 diabetes), a cap of 0.8 g/kg for anyone who reports chronic kidney disease <strong>without my knowing their eGFR or stage</strong>, and a floor of 1.2 g/kg on a GLP-1. Another reviewer found that these last two collided, which I have fixed; section &quot;What one review has already changed&quot; says how.</li><li><strong>Q7 — the glycemic-load ceiling.</strong> The daily limit is something I constructed: carbohydrate target times a target mean diet GI, divided by 100. It is not from a guideline, and I do not know whether it is defensible or only looks precise.</li></ul>
+<p><strong>If you have a little longer</strong>, add <strong>Q12</strong>, because you will have an opinion on it that I do not: when someone states a glucose under 70, the app stops the conversation and says to seek help. It deliberately does not tell them to take fast-acting carbohydrate. I am not sure that is right.</p>
+<p>Your specialty line puts nutrition next to endocrinology, so if a question does not apply to how you practise, skip it; if one seems to be missing, tell me which.</p>
+<p><strong>How to comment:</strong> select any text and use the comment button, or reply to me with question numbers. Partial answers are welcome, and one line is worth more to me than silence.</p>
+<hr>
+<h2>What one review has already changed</h2>
+<p>Dr James LaSalle read this on 2 October. Two things changed the same day, so they are recorded here rather than left for you to find again:</p>
+<ul><li><strong>A protein bug.</strong> He wrote: <em>&quot;protein needs are greater but many diabetics have eGFR levels that could be contradictory.&quot;</em> He was right, and it was a bug rather than a tension: the GLP-1 protein floor ran <strong>after</strong> the kidney cap and took a maximum, so a patient with chronic kidney disease on a GLP-1 was pushed from 0.8 g/kg back up to 1.2 — while the app displayed both sentences at once. The kidney number now wins, and the app says the two pull against each other and to ask their own clinician. See Q4.</li><li><strong>Brittle diabetes</strong> joined the conditions, at his suggestion. It blocks the very-low-carbohydrate option and says plainly that a daily ceiling is an average, and an average is the least useful thing for glucose that swings.</li></ul>
+<p>He also asked three questions this document does not yet answer; they are Q18 to Q20 at the end.</p>
+<h2>What the product does, and what it never does</h2>
+<p>DiaBite answers one question — <em>can I eat this?</em> — for adults with type 2 diabetes, prediabetes or insulin resistance in the US. A person describes a meal in their own words; the app resolves the foods against a database of 6,054 records, computes carbohydrate, fibre, glycemic index and glycemic load with a deterministic engine, and says whether the meal fits what is left of their day.</p>
+<p><strong>It never:</strong> gives an insulin or medication dose, changes a prescription, diagnoses, promises an outcome, or computes a number with a language model. Every number shown is produced by the engine and machine-checked against that engine&#x27;s output before display; a disclaimer precedes any number.</p>
+<p><strong>Where a language model is used:</strong> reading what the person wrote, choosing which database records they meant, and writing the sentence around the numbers.</p>
+<hr>
+<h2>A. Who we turn away</h2>
+<p>Three profiles get a plain &quot;this is not for you&quot; and no targets at all.</p>
+<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%">
+<tr><td style="background:#eef3f0"><strong>Profile</strong></td><td style="background:#eef3f0"><strong>What we say</strong></td></tr>
+<tr><td>Under 18</td><td>Paediatric diabetes is managed differently, with growth and puberty in the picture — use the plan the paediatric team gave</td></tr>
+<tr><td>Pregnant or breastfeeding, or gestational diabetes</td><td>Carbohydrate needs rise rather than fall; targets belong with an OB or diabetes educator</td></tr>
+<tr><td>Mealtime insulin or an insulin pump</td><td>The numbers that matter are ratios and correction factors, and this app must never touch those</td></tr>
+</table>
+<p>Kidney disease, disordered eating and a history of it do <strong>not</strong> exit; they change the numbers instead (section B) and trigger a referral message.</p>
+<div style="border-left:3px solid #1c6b49;padding:4px 0 4px 14px;margin:14px 0"><p style="margin:6px 0"><strong>Q1.</strong> Are these the right three exits, and is anyone missing? We have gone back and forth on type 1 without a pump — currently allowed, with the more cautious settings.</p><p style="margin:6px 0"><strong>Q2.</strong> Should a history of disordered eating be an exit rather than an adjustment?</p></div>
+<hr>
+<h2>B. The daily targets</h2>
+<p>Computed in the browser, shown with every constraint that changed them and why.</p>
+<h3>Energy</h3>
+<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%">
+<tr><td style="background:#eef3f0"><strong>Step</strong></td><td style="background:#eef3f0"><strong>What we do</strong></td></tr>
+<tr><td>Resting energy</td><td>Mifflin-St Jeor. &quot;Prefer not to say&quot; takes the midpoint of the two sex constants</td></tr>
+<tr><td>Activity</td><td>×1.2 sedentary, ×1.375 light, ×1.55 moderate, ×1.725 high</td></tr>
+<tr><td>Goal</td><td>−15% to lose, +10% to gain, maintenance otherwise</td></tr>
+<tr><td>No deficit when</td><td>BMI under 18.5, or a history of disordered eating (maintenance instead, and no &quot;budget left&quot; framing)</td></tr>
+<tr><td>Floor</td><td>1,200 kcal for women, 1,500 for men, whatever the arithmetic says</td></tr>
+</table>
+<h3>Macronutrients</h3>
+<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%">
+<tr><td style="background:#eef3f0"><strong>Target</strong></td><td style="background:#eef3f0"><strong>Rule</strong></td></tr>
+<tr><td>Carbohydrate</td><td>40% of calories on &quot;moderate&quot;, 26% on &quot;low&quot;, 15% on &quot;very low&quot;</td></tr>
+<tr><td>Protein</td><td>1.6 g/kg when losing weight, 1.4 g/kg otherwise</td></tr>
+<tr><td>— kidney disease</td><td>capped at 0.8 g/kg; 1.0 g/kg if they mention kidney trouble without a diagnosis; <strong>raised</strong> to 1.1 g/kg on dialysis</td></tr>
+<tr><td>— on a GLP-1</td><td>floor of 1.2 g/kg, because the risk becomes too little protein rather than too much food — <strong>unless a kidney answer caps it lower, in which case the cap wins and the tension is stated</strong></td></tr>
+<tr><td>— age 65+</td><td>floor of 1.0 g/kg</td></tr>
+<tr><td>Fat</td><td>whatever calories remain, never below 30 g</td></tr>
+<tr><td>Fibre</td><td>14 g per 1,000 kcal; capped at 15 g with gastroparesis</td></tr>
+</table>
+<div style="border-left:3px solid #1c6b49;padding:4px 0 4px 14px;margin:14px 0"><p style="margin:6px 0"><strong>Q3.</strong> Is 1.6 g/kg while losing weight defensible for this population, or too high? It is above the range usually quoted for type 2 diabetes.</p><p style="margin:6px 0"><strong>Q4.</strong> We cap protein at 0.8 g/kg for anyone who reports chronic kidney disease, <strong>without knowing their eGFR or stage</strong>. Is a single cap acceptable, or does an unstaged cap do more harm than good? And now that the kidney cap beats the GLP-1 floor rather than the other way round, is <em>keeping the lower number and naming the conflict</em> the right resolution — or should the app decline to set a protein target at all when both are true?</p><p style="margin:6px 0"><strong>Q5.</strong> Are 1,200 and 1,500 kcal the right floors, and should they scale with body size rather than sex?</p><p style="margin:6px 0"><strong>Q6.</strong> Fibre at 14 g/1,000 kcal — right target, right units?</p></div>
+<hr>
+<h2>C. The glycemic-load budget (the least standard thing we do)</h2>
+<p>This is our own construction and the part we would most like challenged.</p>
+<p>The app gives each person a <strong>daily glycemic-load ceiling</strong>, and every meal is judged against what is left of it. It is derived, not measured:</p>
+<p>``<code> GL budget = carbohydrate target (g) × target mean diet GI ÷ 100,   capped at 120 target mean diet GI = 45 for diabetes (and when the type is unconfirmed) 50 for prediabetes and insulin resistance </code>``</p>
+<p>So a 1,653 kcal low-carb day gives 107 g of carbohydrate, and at a mean GI of 45 that becomes a ceiling of <strong>48 GL for the day</strong>.</p>
+<p>Per meal we band the load as low / medium / high, and the day&#x27;s consumed load is banded against the daily ceiling.</p>
+<div style="border-left:3px solid #1c6b49;padding:4px 0 4px 14px;margin:14px 0"><p style="margin:6px 0"><strong>Q7.</strong> Is a daily glycemic-load ceiling a defensible way to steer eating in type 2 diabetes, or does it invite precision nobody should claim?</p><p style="margin:6px 0"><strong>Q8.</strong> Are 45 and 50 sensible targets for a mean diet GI, and is 120 the right absolute cap?</p><p style="margin:6px 0"><strong>Q9.</strong> If you would not use GL this way, what would you put in its place that is still computable from a food database — available carbohydrate alone?</p></div>
+<hr>
+<h2>D. What we refuse to let someone choose</h2>
+<p>&quot;Very low carb&quot; (15% of calories) is blocked, with the reason shown, when the person reports:</p>
+<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%">
+<tr><td style="background:#eef3f0"><strong>Condition</strong></td><td style="background:#eef3f0"><strong>Our reasoning</strong></td></tr>
+<tr><td>An SGLT2 inhibitor</td><td>Ketosis can trigger euglycaemic DKA; the FDA label warns of it</td></tr>
+<tr><td>A sulfonylurea or basal insulin</td><td>Cutting carbohydrate this far risks hypoglycaemia unless the dose changes, which only their clinician can do</td></tr>
+<tr><td>Gout</td><td>Ketosis raises urate</td></tr>
+<tr><td>A history of disordered eating</td><td>We do not offer the most restrictive option</td></tr>
+<tr><td>Age 65+</td><td>Protein and micronutrient intake usually suffer</td></tr>
+</table>
+<p>We also show standing advice without changing numbers: keep carbohydrate steady meal to meal on insulin or a sulfonylurea; do not fast or go ketogenic on an SGLT2 inhibitor; sodium under 2,300 mg with hypertension; saturated fat under 10% of calories with established cardiovascular disease.</p>
+<div style="border-left:3px solid #1c6b49;padding:4px 0 4px 14px;margin:14px 0"><p style="margin:6px 0"><strong>Q10.</strong> Is blocking, rather than warning, the right call for each of these?</p><p style="margin:6px 0"><strong>Q11.</strong> Is there a medication or condition we let through that should be blocked — metformin with a very low carbohydrate intake, for instance?</p></div>
+<hr>
+<h2>E. The safety rules</h2>
+<p>These run <strong>before</strong> the language model, as plain pattern matching, so no prompt can talk the product out of them.</p>
+<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%">
+<tr><td style="background:#eef3f0"><strong>Rule</strong></td><td style="background:#eef3f0"><strong>Fires on</strong></td><td style="background:#eef3f0"><strong>What the user gets</strong></td></tr>
+<tr><td>Dosing</td><td>Any question about insulin units, doses, carb ratios, correction factors</td><td>Refusal and a referral to their care team</td></tr>
+<tr><td>Red flag</td><td>Confusion, fainting, chest pain, vomiting; a stated glucose ≥ 300 or &lt; 70 mg/dL</td><td>&quot;Seek help now&quot;, and the conversation about food stops</td></tr>
+<tr><td>Prolonged fast</td><td>Statements about not eating for a long period</td><td>A referral, no meal talk</td></tr>
+<tr><td>Referral</td><td>Pregnancy, kidney disease, disordered eating raised in conversation</td><td>Says our targets were never derived for this, and to ask a clinician who knows them</td></tr>
+</table>
+<div style="border-left:3px solid #1c6b49;padding:4px 0 4px 14px;margin:14px 0"><p style="margin:6px 0"><strong>Q12.</strong> Are ≥ 300 and &lt; 70 mg/dL the right thresholds to stop the conversation, and is stopping the right response at 70 rather than telling the person to take fast-acting carbohydrate? We deliberately do not give hypoglycaemia instructions — please tell us if that is the wrong call.</p><p style="margin:6px 0"><strong>Q13.</strong> Is there a symptom or phrase that must stop the conversation and currently does not?</p></div>
+<hr>
+<h2>F. What the advice side may say</h2>
+<p>A second agent answers general questions (&quot;is brown rice better than white rice?&quot;). Its rules: <strong>no numbers at all</strong> — no GI, no grams, no calories, because a number there would be one nobody checked; no dosing; no diagnosis; no promised outcomes; and pregnancy, kidney disease and disordered eating are declared out of scope with a referral.</p>
+<p>It may compare foods <strong>in direction without quantity</strong> — that white rice raises glucose faster than pearl barley, that fibre and fat slow a rise, that a food eaten after protein lands differently.</p>
+<p>Four sample answers are attached separately for your read: brown vs white rice, why morning glucose runs high, whether to stop eating fruit, and whether keto is sensible in type 2 diabetes.</p>
+<div style="border-left:3px solid #1c6b49;padding:4px 0 4px 14px;margin:14px 0"><p style="margin:6px 0"><strong>Q14.</strong> Is &quot;direction without quantity&quot; a safe line to draw?</p><p style="margin:6px 0"><strong>Q15.</strong> In the four sample answers, is anything said that a clinician would not say?</p></div>
+<hr>
+<h2>G. Where the food numbers come from</h2>
+<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%">
+<tr><td style="background:#eef3f0"><strong></strong></td><td style="background:#eef3f0"><strong></strong></td></tr>
+<tr><td>Nutrients</td><td>USDA FoodData Central; a seed table of published averages for everyday US foods</td></tr>
+<tr><td>Glycemic index</td><td>International Tables of Glycemic Index and Glycemic Load Values (2021)</td></tr>
+<tr><td>Available carbohydrate</td><td>total carbohydrate − fibre</td></tr>
+<tr><td>Glycemic load</td><td>GI × available carbohydrate ÷ 100</td></tr>
+<tr><td>A recipe&#x27;s GI</td><td>carbohydrate-weighted mean of its ingredients (Wolever &amp; Jenkins)</td></tr>
+<tr><td>Coverage</td><td>6,054 records, in three layers: 351 ingredients and ~85 everyday foods curated by hand, 1,000 recipes composed from them, and 4,618 USDA Survey (FNDDS) foods — &quot;foods as eaten&quot; — added on 1 October. <strong>13% of the food phrases in our test set still resolve to nothing</strong>, almost all of them branded: Oreos, a KIND bar, a Starbucks frappuccino</td></tr>
+<tr><td>A food we cannot cost</td><td>A record with no published GI and real carbohydrate in it is <strong>kept out of the database entirely</strong>, because our arithmetic would otherwise report its glycemic load as zero. That is why a pepperoni pizza comes back as &quot;I do not have that food&quot; rather than as a number — see Q17</td></tr>
+</table>
+<p>Records a human has checked are labelled <strong>checked</strong> with a date in the app; the rest are labelled <strong>unverified</strong>, visibly, on every answer.</p>
+<div style="border-left:3px solid #1c6b49;padding:4px 0 4px 14px;margin:14px 0"><p style="margin:6px 0"><strong>Q16.</strong> Is the carbohydrate-weighted mean an acceptable way to give a mixed dish a GI, given that fat, protein and cooking all move it?</p><p style="margin:6px 0"><strong>Q17.</strong> For branded foods with no published GI, is it better to give carbohydrate alone and say the glycemic load cannot be computed, or to say nothing at all? This decision is open and your answer would settle it.</p></div>
+<hr>
+<h2>H. Three questions the first review opened</h2>
+<p>Dr LaSalle raised these and they are not settled. They are last because they are the largest.</p>
+<div style="border-left:3px solid #1c6b49;padding:4px 0 4px 14px;margin:14px 0"><p style="margin:6px 0"><strong>Q18.</strong> He wrote: <em>&quot;calories and counting them have a long history of failure.&quot;</em> Our daily ceiling is <strong>derived from the calorie target</strong> — carbohydrate is a share of energy, and the load ceiling is a share of carbohydrate. So the objection is not beside our design, it is inside it. Does a daily load ceiling change what someone eats, or is it the same failure in a different unit?</p><p style="margin:6px 0"><strong>Q19.</strong> On a GLP-1: we raise protein and say nothing about lean mass or bone. What should a nutrition tool say, if anything, to someone losing weight quickly on these drugs?</p><p style="margin:6px 0"><strong>Q20.</strong> He suggested splitting the targets three ways — overweight, prediabetes, established type 2 — rather than treating them as one population with a switch. Would that change the numbers, or only the wording?</p></div>
+<h2>What we will do with your answers</h2>
+<p>Anything you flag becomes a change in the code, a test case in the evaluation suite, or a documented decision with your objection recorded next to it. The targets, the blocks and the safety rules are constants in one file; changing them is minutes of work, and every change is re-tested automatically against 203 behavioural checks.</p>
+<p>If there is one thing on this list you would fix first, that is the thing we would most like to know.</p>
+<hr>
+<h1>Appendix A — four answers, as the product gave them</h1>
+<p>Produced by the running product. Nothing is edited. The advice side of DiaBite states no numbers at all — not even a glycemic index — because a number there would be one nobody checked.</p>
+<h2>Is brown rice better than white rice?</h2>
+<p>Usually, yes: brown rice is a better choice than white rice for blood sugar because it keeps the bran and fibre, so it tends to raise glucose more slowly. White rice is more refined and usually lands faster.</p>
+<p>That said, the best choice depends on the whole meal and your own response. Rice eaten with protein, vegetables, and healthy fat often affects blood sugar less than rice eaten alone.</p>
+<p>If you want, tell me the rice dish and portion and I can help you compare it with other options.</p>
+<h2>Why is my blood sugar highest in the morning?</h2>
+<p>Blood sugar is often highest in the morning because your body releases hormones overnight that tell the liver to put extra glucose into the blood. This is called the dawn phenomenon.</p>
+<p>It can also happen if:</p>
+<ul><li>you ate late or had a high-carb evening snack</li><li>you had poor sleep or stress</li><li>your body is becoming more insulin resistant, which means your cells respond less well to insulin</li></ul>
+<p>If morning highs are frequent, your care team can help look for the pattern and what is driving it. If you have confusion, fainting, chest pain, vomiting, or a very high or very low reading, seek help now.</p>
+<h2>Should I stop eating fruit?</h2>
+<p>Usually, no. Fruit can fit well with type 2 diabetes, prediabetes, and insulin resistance. Whole fruit is usually a better choice than juice or dried fruit because the fibre helps slow the rise in blood glucose. Pair fruit with protein or fat, like yogurt, nuts, or cheese, if you notice it hits you hard on its own.</p>
+<p>It’s a good idea to limit fruit juice, smoothies, and fruit canned in syrup.</p>
+<p>If you have kidney disease, are pregnant or breastfeeding, or have a history of disordered eating, please check with a clinician who knows your situation.</p>
+<h2>Is keto sensible for type 2 diabetes?</h2>
+<p>Keto can be sensible for some people with type 2 diabetes, but it is not the best fit for everyone.</p>
+<p>It may help some people reduce blood sugar swings because it cuts carbs sharply, but it can also be hard to follow, and it can be risky if you use diabetes medicines that can cause low blood sugar. If you have kidney disease, are pregnant or breastfeeding, or have a history of disordered eating, it is not a good DIY choice.</p>
+<p>A safer way to decide is to review your medicines and goals with your diabetes care team. If you want, I can help compare keto with a less strict lower-carb approach.</p>
+</body></html>
