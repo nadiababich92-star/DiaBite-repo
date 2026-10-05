@@ -34,6 +34,7 @@ import { verify } from './verify'
 import { getSession, putSession, sessionCount } from './sessions'
 import { openApiSpec } from './openapi'
 import { ask, type AskRequest } from './agent'
+import { RateLimited, originAllowed, sourceTag, validateAsk } from './guard'
 import type {
   AlternativesRequest, ComputeMealRequest, DayStateRequest, ResolveRequest, VerifyRequest,
 } from './contract'
@@ -48,7 +49,17 @@ async function main() {
   console.log(`ready in ${Date.now() - t0} ms`)
 
   const app = express()
-  app.use(cors())
+  // Container Apps ingress is one hop, so the client address is the last entry
+  // of X-Forwarded-For. Wrong here and every visitor shares one rate-limit bucket.
+  app.set('trust proxy', 1)
+  // Only our own origin and localhost may read a browser response. This does not
+  // stop a script, which sends no Origin — the rate limits do that.
+  app.use(cors((req, cb) => {
+    const ok = originAllowed(req.header('origin'), req.header('host'))
+    cb(null, { origin: ok })
+  }))
+  // The agent route takes a message, never a document: 32 KB is generous.
+  app.use('/agent', express.json({ limit: '32kb' }))
   app.use(express.json({ limit: '1mb' }))
 
   // Two surfaces, two audiences. The tool surface is called by Foundry's
@@ -73,12 +84,19 @@ async function main() {
    * This is what the frontend talks to — the replacement for the n8n webhook.
    */
   app.post('/agent/ask', async (req, res) => {
+    const bad = validateAsk(req.body)
+    if (bad) return res.status(400).json({ error: 'invalid_request', field: bad.field })
     const body = req.body as AskRequest
-    if (!body?.sessionId || typeof body.message !== 'string') {
-      return res.status(400).json({ error: 'sessionId and message required' })
-    }
-    try { res.json(await ask(body)) }
+    // A caller holding the key (the agent evals, 87 cases from one address) is
+    // exempt from the rate limits, never from the size caps above.
+    const trusted = !!API_KEY && req.get('x-api-key') === API_KEY
+    try { res.json(await ask(body, { clientKey: trusted ? undefined : req.ip, trusted })) }
     catch (e) {
+      if (e instanceof RateLimited) {
+        console.warn(JSON.stringify({ evt: 'rate_limited', scope: e.scope, source: sourceTag(req.ip), retryAfterSec: e.retryAfterSec }))
+        res.set('Retry-After', String(e.retryAfterSec))
+        return res.status(429).json({ error: 'rate_limited', scope: e.scope, retryAfterSec: e.retryAfterSec })
+      }
       console.error('agent/ask failed:', e)
       res.status(502).json({ error: (e as Error).message })
     }

@@ -66,6 +66,16 @@ export function avoidOf(p: Profile): AgentRequest['avoid'] {
   return allergens.length || foodIds.length || pattern ? { allergens, foodIds, pattern } : undefined
 }
 
+/** The engine said "not now": over a limit, with how long to wait. Not an agent answer. */
+export class RateLimitedError extends Error {
+  constructor(public scope: 'ip' | 'session' | 'daily', public retryAfterSec: number) {
+    super('rate_limited')
+  }
+}
+
+/** Longest question the engine accepts; the input stops there rather than failing late. */
+export const MAX_QUESTION = 500
+
 export async function askAgent(req: AgentRequest, signal?: AbortSignal): Promise<AgentResponse> {
   const res = await fetch(AGENT_URL, {
     method: 'POST',
@@ -74,6 +84,11 @@ export async function askAgent(req: AgentRequest, signal?: AbortSignal): Promise
     signal,
   })
   if (res.status === 404) throw new Error('The agent is not reachable — is the engine deployed?')
+  if (res.status === 429) {
+    const body = await res.json().catch(() => ({})) as { scope?: 'ip' | 'session' | 'daily'; retryAfterSec?: number }
+    const wait = Number(body.retryAfterSec ?? res.headers.get('retry-after')) || 60
+    throw new RateLimitedError(body.scope ?? 'ip', wait)
+  }
   if (!res.ok) throw new Error(`Agent error ${res.status}`)
   const data = (await res.json()) as AgentResponse
   if (typeof data.answer !== 'string') throw new Error('Unexpected reply from the agent')

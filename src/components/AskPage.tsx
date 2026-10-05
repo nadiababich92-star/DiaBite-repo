@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { askAgent, avoidOf, budgetOf, engineId, receiptFrom, type AgentResponse, type Receipt, type TraceStep } from '../lib/agent'
+import { askAgent, avoidOf, budgetOf, engineId, MAX_QUESTION, RateLimitedError, receiptFrom, type AgentResponse, type Receipt, type TraceStep } from '../lib/agent'
 import { viewEntry } from '../lib/diary'
 import { todayISO } from '../lib/storage'
 import { downloadResponses, saveResponse, savedCount } from '../lib/responses'
@@ -237,6 +237,9 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Set when the engine says "not now". Never locks the button: the safety rules
+  // still answer while a limit is on, so only the server may decide who waits.
+  const [limited, setLimited] = useState<{ scope: 'ip' | 'session' | 'daily'; minutes: number } | null>(null)
   const [reply, setReply] = useState<AgentResponse | null>(null)
   const [asked, setAsked] = useState('')
   const [showReceipt, setShowReceipt] = useState(false)
@@ -262,7 +265,7 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
     if (!q || busy) return
     abort.current?.abort()
     abort.current = new AbortController()
-    setBusy(true); setError(null); setReply(null); setShowReceipt(false); setLogged(false); setAsked(q)
+    setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(false); setLogged(false); setAsked(q)
     try {
       const res = await askAgent({
         sessionId: fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId(),
@@ -277,7 +280,9 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
       // Lab 3.2: keep every successful exchange as evaluation data.
       setSaved(saveResponse(q, res))
     } catch (e) {
-      if ((e as Error).name !== 'AbortError') setError((e as Error).message)
+      if (e instanceof RateLimitedError) {
+        setLimited({ scope: e.scope, minutes: Math.max(1, Math.ceil(e.retryAfterSec / 60)) })
+      } else if ((e as Error).name !== 'AbortError') setError((e as Error).message)
     } finally {
       setBusy(false)
     }
@@ -325,7 +330,7 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
         <form className="ask-form" onSubmit={(e) => { e.preventDefault(); ask(text) }}>
           <input
             type="text" value={text} onChange={(e) => setText(e.target.value)}
-            placeholder="e.g. two slices of pepperoni pizza" disabled={busy} aria-label="What are you about to eat?"
+            placeholder="e.g. two slices of pepperoni pizza" disabled={busy} maxLength={MAX_QUESTION} aria-label="What are you about to eat?"
           />
           <button className="primary" type="submit" disabled={busy || !text.trim()}>{busy ? 'Thinking…' : 'Ask'}</button>
         </form>
@@ -348,6 +353,17 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
             <li>Computing the load from their carbohydrate</li>
             <li>Checking every number against the result</li>
           </ol>
+        </section>
+      )}
+
+      {limited && (
+        <section className="card tone-blocked" role="status">
+          <div className="eyebrow-line">A short pause</div>
+          <p style={{ margin: 0 }}>
+            {limited.scope === 'daily'
+              ? 'DiaBite has reached its limit for today and will be back tomorrow. Dosing and safety questions still work.'
+              : `You've asked a lot of questions in a short time. Please try again in about ${limited.minutes} ${limited.minutes === 1 ? 'minute' : 'minutes'}.`}
+          </p>
         </section>
       )}
 

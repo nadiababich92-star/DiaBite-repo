@@ -37,6 +37,7 @@ import { DefaultAzureCredential } from '@azure/identity'
 import OpenAI from 'openai'
 import { openApiSpec } from './openapi'
 import { safetyGate } from './safety'
+import { chargeTurn } from './guard'
 import { verify } from './verify'
 import type { AvoidList } from './avoid'
 import { previousResponseFor, putSession, rememberResponse } from './sessions'
@@ -565,6 +566,8 @@ function rememberPreferences(sessionId: string, message: string, answer: string)
   }
 }
 
+const MAX_TOOL_CALLS = 6
+
 /** One request to one agent, waiting out the per-minute token limit. */
 async function runAgent(role: Role, input: string, previous?: string, forceTools = false, sessionId?: string): Promise<Turn> {
   void sessionId
@@ -576,6 +579,9 @@ async function runAgent(role: Role, input: string, previous?: string, forceTools
     // is grounded in the engine, so a turn that calls nothing there is a turn
     // that guessed; the advisor has nothing to call at all.
     ...(forceTools ? { tool_choice: 'required' } : {}),
+    // A normal meal turn makes two calls and a clarification one. Six is a
+    // looping agent stopped, not a working one.
+    max_tool_calls: MAX_TOOL_CALLS,
   }
   return (await withRateLimitRetry(() =>
     agentClient().responses.create(payload as never),
@@ -604,9 +610,16 @@ async function route(message: string): Promise<{ role: Role; by: 'triage' | 'fal
   return { role: 'meal', by: 'fallback' }
 }
 
-export async function ask(req: AskRequest): Promise<AskResponse> {
+/** Who is asking, as far as the limits are concerned. */
+export interface AskContext {
+  /** The caller's address; absent for trusted callers, who are not rate limited. */
+  clientKey?: string
+  trusted?: boolean
+}
+
+export async function ask(req: AskRequest, ctx: AskContext = {}): Promise<AskResponse> {
   const started = Date.now()
-  const res = await answer(req)
+  const res = await answer(req, ctx)
   logTurn(req, res, Date.now() - started)
   return res
 }
@@ -631,7 +644,7 @@ export function stripCitations(text: string): string {
     .trimEnd()
 }
 
-async function answer(req: AskRequest): Promise<AskResponse> {
+async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   const gate = safetyGate(req.message)
   if (gate.blocked) {
     // No model call at all: the refusal is the product's answer, not a draft.
@@ -641,6 +654,10 @@ async function answer(req: AskRequest): Promise<AskResponse> {
       routedBy: 'gate',
     }
   }
+
+  // After the gate, before the router: a refusal costs nothing and is never
+  // withheld, and the router is itself a model call. Throws RateLimited.
+  if (!ctx.trusted) chargeTurn(ctx.clientKey, req.sessionId)
 
   const { role, by } = await route(req.message)
   // Only a meal turn needs the day's budget parked for the engine to read.

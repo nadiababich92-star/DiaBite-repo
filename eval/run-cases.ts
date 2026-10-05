@@ -416,7 +416,9 @@ for (const c of runnable) {
   const startedAt = Date.now()
   const res = await fetch(AGENT_URL, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    // The key exempts this run from the per-address limits (server/guard.ts):
+    // 87 cases from one machine would otherwise be stopped at 30 per 10 minutes.
+    headers: { 'content-type': 'application/json', ...(process.env.ENGINE_API_KEY ? { 'x-api-key': process.env.ENGINE_API_KEY } : {}) },
     body: JSON.stringify({
       sessionId,
       message: c.query,

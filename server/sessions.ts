@@ -31,10 +31,26 @@ export interface SessionState {
 }
 
 const TTL_MS = 60 * 60 * 1000 // an hour: longer than any single conversation
+/**
+ * Each map holds at most this many entries, oldest first out. A session id is
+ * client-chosen, so without a bound every new one grows memory for an hour.
+ */
+export const MAX_SESSIONS = 5_000
 const store = new Map<string, SessionState>()
 
+/** Insert as newest, then drop from the front (the oldest) while over the cap. */
+function setBounded<V>(map: Map<string, V>, key: string, value: V): void {
+  map.delete(key)
+  map.set(key, value)
+  while (map.size > MAX_SESSIONS) map.delete(map.keys().next().value as string)
+}
+
 function sweep(now = Date.now()) {
-  for (const [id, s] of store) if (now - s.storedAt > TTL_MS) store.delete(id)
+  // Insertion order is age order, so the first live entry ends the walk.
+  for (const [id, s] of store) {
+    if (now - s.storedAt <= TTL_MS) break
+    store.delete(id)
+  }
 }
 
 export function putSession(
@@ -42,7 +58,7 @@ export function putSession(
 ): SessionState {
   sweep()
   const state: SessionState = { budget, entries, avoid, storedAt: Date.now() }
-  store.set(id, state)
+  setBounded(store, id, state)
   return state
 }
 
@@ -50,6 +66,9 @@ export function getSession(id: string): SessionState | undefined {
   sweep()
   return store.get(id)
 }
+
+/** Sizes of the three maps, for the abuse suite. */
+export const _sizes = () => ({ store: store.size, lastResponse: lastResponse.size, conversations: conversations.size })
 
 export function sessionCount(): number {
   sweep()
@@ -75,7 +94,7 @@ export function previousResponseFor(sessionId: string): string | undefined {
 }
 
 export function rememberResponse(sessionId: string, responseId: string): void {
-  lastResponse.set(sessionId, { responseId, storedAt: Date.now() })
+  setBounded(lastResponse, sessionId, { responseId, storedAt: Date.now() })
 }
 
 /**
@@ -96,5 +115,5 @@ export function conversationFor(sessionId: string): string | undefined {
 }
 
 export function rememberConversation(sessionId: string, id: string): void {
-  conversations.set(sessionId, { id, storedAt: Date.now() })
+  setBounded(conversations, sessionId, { id, storedAt: Date.now() })
 }

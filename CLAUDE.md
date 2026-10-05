@@ -41,7 +41,8 @@ Permanent address: `https://diabite-engine.greenglacier-ab5551c6.swedencentral.a
 ```bash
 npm run dev                      # frontend on :5173, proxied to the deployed engine
 npm run eval                     # engine evals — run after ANY change to data, aliases, thresholds, targets
-AGENT_URL=<url>/agent/ask npm run eval:agent   # agent evals — run after ANY change to a prompt, tool spec, model or food data
+npm run eval:abuse               # rate limits, size caps, CORS, bounded memory — no model, no money
+ENGINE_API_KEY=<key> AGENT_URL=<url>/agent/ask npm run eval:agent   # agent evals — after ANY change to a prompt, tool spec, model or food data (the key exempts the run from rate limits)
 npm run deploy                   # waits for that commit's image build, updates the app, retires old revisions
 npx tsx agent/provision.ts       # republish the three agents after editing agent/prompts/*.md (needs the env in agent/SETUP.md)
 npx tsx scripts/sync-foods.ts    # push the catalogue and vectors to Supabase (needs .env.local)
@@ -70,6 +71,8 @@ The shell does not have Node on its PATH by default: prefix with
    and in swaps.
 6. **Dosing, red flags, fasting and referral are caught by rules before any
    model runs.** A refusal that depends on a model behaving is not a refusal.
+   The same order holds for the limits on `/agent/ask`: **the safety gate runs
+   before the rate limits**, so nobody describing a red flag is told to wait.
 7. **Do not write checks that read the product's prose with a regex when the
    tool result already says it.** Every prose-reading check failed the day the
    agent started sounding human. Read `afterMeal`, `items`, `alternatives`.
