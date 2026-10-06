@@ -858,6 +858,46 @@
         "tags": [
           "unknown"
         ]
+      },
+      {
+        "phrase": "Potato, boiled",
+        "expect": [
+          "seed:potato-boil"
+        ],
+        "tags": [
+          "named",
+          "loop"
+        ]
+      },
+      {
+        "phrase": "boiled potato",
+        "expect": [
+          "seed:potato-boil"
+        ],
+        "tags": [
+          "named",
+          "loop"
+        ]
+      },
+      {
+        "phrase": "boiled potatoes",
+        "expect": [
+          "seed:potato-boil"
+        ],
+        "tags": [
+          "named",
+          "loop"
+        ]
+      },
+      {
+        "phrase": "New potatoes, boiled & cooled",
+        "expect": [
+          "ing:new_potato"
+        ],
+        "tags": [
+          "named",
+          "loop"
+        ]
       }
     ],
     "clarify": [
@@ -935,6 +975,26 @@
         "phrase": "spaghetti",
         "band": "high",
         "why": "alias must beat spaghetti squash"
+      },
+      {
+        "phrase": "Potato, boiled",
+        "band": "high",
+        "why": "the person typed the record's name, so asking again is a loop"
+      },
+      {
+        "phrase": "boiled potato",
+        "band": "high",
+        "why": "the person typed the record's name, so asking again is a loop"
+      },
+      {
+        "phrase": "boiled potatoes",
+        "band": "high",
+        "why": "the person typed the record's name, so asking again is a loop"
+      },
+      {
+        "phrase": "New potatoes, boiled & cooled",
+        "band": "high",
+        "why": "the person typed the record's name, so asking again is a loop"
       }
     ],
     "verify": [

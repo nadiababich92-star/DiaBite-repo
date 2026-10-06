@@ -198,6 +198,21 @@ export function sameFood(a: string, b: string): boolean {
   return inter / Math.max(1, Math.min(ta.size, tb.size)) >= 0.75
 }
 
+/**
+ * The phrase IS the record's name, in any word order and either plural.
+ *
+ * "Potato, boiled" and "boiled potato" are one food. Without this the first
+ * was only "medium" and the second ranked *New potatoes, boiled & cooled*
+ * above it, because the rival also contains every word of the phrase. The
+ * agent then asked "did you mean…", and the person's answer — the name it had
+ * just offered — asked the same question again. Someone who has typed a
+ * record's name has answered; a sibling that merely shares the words has not.
+ */
+function isNamed(phrase: string, name: string): boolean {
+  const a = new Set(tokens(phrase).map(stem)), b = new Set(tokens(plainName(name)).map(stem))
+  return a.size > 0 && a.size === b.size && [...a].every((t) => b.has(t))
+}
+
 function band(phrase: string, cands: ResolveCandidate[]): Confidence {
   const top = cands[0]
   if (!top || top.score < LOW_MAX) return 'low'
@@ -209,6 +224,7 @@ function band(phrase: string, cands: ResolveCandidate[]): Confidence {
   }
   // A category word is never certain, however well it matched.
   if (tokens(phrase).every((t) => CATEGORY_WORDS.has(t))) return 'medium'
+  if (isNamed(phrase, top.name)) return 'high'
   const rival = cands.slice(1).find((c) => !sameFood(c.name, top.name))
   if (top.score >= HIGH_MIN && (!rival || top.score - rival.score >= HIGH_GAP)) return 'high'
   return 'medium'
@@ -323,7 +339,7 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
       .filter((h) => byId.has(h.id) || unknownId(h.id))
       .map((h) => {
         const rec = byId.get(h.id)!
-        const exact = rec.aliases?.includes(norm(phrase)) || norm(plainName(rec.name)) === norm(phrase)
+        const exact = rec.aliases?.includes(norm(phrase)) || norm(plainName(rec.name)) === norm(phrase) || isNamed(phrase, rec.name)
         const base = exact
           ? Math.max(ALIAS_SCORE, h.score)
           : Math.min(1, h.score + lexicalScore(phrase, rec.name) + kindPrior(phrase, rec.kind))
