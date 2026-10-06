@@ -9,10 +9,11 @@
  * resolve_foods was tuned by hand on a dozen phrases, and the food database
  * keeps growing.
  *
- * Three sections, from eval/cases.json:
+ * Four sections, from eval/cases.json:
  *   resolve  — did the phrase reach the right record, or correctly reach none
  *   clarify  — did the confidence band ask when it should have
  *   verify   — does the verifier accept true answers and reject altered ones
+ *   gate     — does the safety gate stop what it must and leave ordinary meals alone
  *
  * Exits non-zero when resolve falls under its target, so this can gate a
  * build. The target is the PRD's: parsing at or above 90%.
@@ -24,6 +25,7 @@ import { loadFoods } from '../server/foods'
 import { openStore } from '../server/embeddings'
 import { resolvePhrases } from '../server/resolve'
 import { verify } from '../server/verify'
+import { safetyGate } from '../server/safety'
 import type { VerifyRequest } from '../server/contract'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -31,10 +33,11 @@ const TARGET = Number(process.env.RESOLVE_TARGET ?? 90)
 
 interface ResolveCase { phrase: string; expect: string[]; tags: string[] }
 interface ClarifyCase { phrase: string; band: string; why: string }
+interface GateCase { phrase: string; rule: string | null }
 interface VerifyCase { id: string; answer: string; toolResults: unknown[]; ok: boolean }
 
 const cases = JSON.parse(readFileSync(join(ROOT, 'eval', 'cases.json'), 'utf8')) as {
-  engine: { resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[] }
+  engine: { resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[] }
 }
 
 const t0 = Date.now()
@@ -91,6 +94,19 @@ cases.engine.clarify.forEach((c, i) => {
 console.log(`\nclarify   ${cases.engine.clarify.length - bandMisses.length}/${cases.engine.clarify.length}`)
 if (bandMisses.length) { console.log('  wrong band:'); bandMisses.forEach((m) => console.log(m)) }
 
+// ── gate ──────────────────────────────────────────────────────────────────
+// The rules that run before any model. A phrasing that once got past them is
+// a case here forever; so is every ordinary sentence that must not be stopped.
+
+const gateMisses: string[] = []
+for (const c of cases.engine.gate) {
+  const got = safetyGate(c.phrase)
+  const rule = got.blocked ? got.rule ?? '?' : null
+  if (rule !== c.rule) gateMisses.push(`    want ${String(c.rule).padEnd(14)} got ${String(rule).padEnd(14)} ${c.phrase.slice(0, 70)}`)
+}
+console.log(`\ngate      ${cases.engine.gate.length - gateMisses.length}/${cases.engine.gate.length}`)
+if (gateMisses.length) { console.log('  wrong rule:'); gateMisses.forEach((m) => console.log(m)) }
+
 // ── verify ────────────────────────────────────────────────────────────────
 
 const verifyMisses: string[] = []
@@ -108,3 +124,4 @@ if (resolvePct < TARGET) {
   process.exit(1)
 }
 if (verifyMisses.length) { console.log('the verifier disagreed with a probe'); process.exit(1) }
+if (gateMisses.length) { console.log('the safety gate disagreed with a probe'); process.exit(1) }

@@ -54,8 +54,8 @@ except one insert-only table, and nothing secret is in the repository.
 
 ## Open questions — the owner's
 
-- **Q-S1.** Does the product need to understand Russian or Spanish dosing and red-flag phrases? The market is the US; the owner's own testing is in Russian.
-- **Q-S2.** What should the advisor do when someone says their sugar is low: stop and refer, or give the standard "fast carbohydrate" advice? This is the same question as Q12 in the clinical pack.
+- **Q-S1 — answered 6 October: not now.** Russian and Spanish dosing and red-flag phrases are not covered, on purpose: the market is the US. Revisit if the product leaves it.
+- **Q-S2 — answered 6 October: ask the clinicians.** What should the advisor do when someone says their sugar is low: stop and refer, or give the standard "fast carbohydrate" advice? It is the same question as Q12 in the clinical pack, and it is theirs to answer, not ours. Until they do, the behaviour is as described under S1 below.
 - **Q-S3.** Log meal sentences by default, or only during user sessions? What retention?
 - **Q-S4.** Is feedback spam a risk worth a control before the five sessions?
 
@@ -68,3 +68,26 @@ except one insert-only table, and nothing secret is in the repository.
 
 Each control is verified against the live service after deploy, and `npm run
 eval`, `eval:abuse` and `eval:agent` stay green.
+
+## Status — 6 October 2026
+
+### S1, the rules gate: done
+
+`server/safety.ts` now catches, in English:
+
+- insulin by name (Novolog, Humalog, Lantus, Fiasp and about twenty more, plus GLP-1 and sulfonylurea brands), misspellings (`inzulin`, `insuline`), and the word spelled with spaces, dots or full-width letters;
+- glucose spelled out in words ("three hundred and fifty"), and in mmol/L in both directions (under 3.9 and over 16.6, which is the same 70 and 300 mg/dL);
+- symptoms without a keyword (dizzy, lightheaded, clammy, passing or blacking out, slurred speech, short of breath, ketoacidosis, DKA), and "shaky" or "sweating" only when the speaker is the one shaking, so "sweating onions" stays a recipe;
+- "my sugar is low" and "glucose is crashing".
+
+It also stopped two false alarms that were already there: `a 500 mg calcium chew and a banana` was an emergency, and so was `sugar free yogurt with 20 almonds`.
+
+**How it was checked.** 63 phrasings are now a `gate` section in `eval/cases.json`, run by `npm run eval` with no model. Against the old gate, 28 of them fail; against the new one, all pass. Then the gate was run over 14,169 recipe and food names (nothing blocked) and over the 55 real field questions (the same 8 blocked as before).
+
+### Known limits, stated
+
+- **Any mention of an insulin or a named drug is refused**, exactly as the bare word "insulin" already was. A person on basal insulin who writes "I take Lantus, can I eat fruit" is told the app cannot help with doses. That follows the product's exit for insulin users; the clinicians asked about Q1 may change it.
+- **`unit` and `units` on their own still refuse**: "a unit of bread" is read as dosing. Older than this change.
+- **A reading of exactly 3.9 mmol/L (70 mg/dL) passes**, as the rule says "under 70". The advisor answered such a sentence with fast-sugar advice. That is the live Q-S2 question, now narrowed to the boundary, and it goes to the clinicians with the exact sentence.
+- Russian, Spanish and other languages: not covered (Q-S1).
+- A model is still behind the gate, and the gate is still a list. A new phrasing that gets past it becomes a case in `eval/cases.json`.
