@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { isLabelled, parseMeal } from '../lib/answer'
 import { askAgent, avoidOf, budgetOf, engineId, MAX_QUESTION, RateLimitedError, receiptFrom, type AgentResponse, type Receipt, type TraceStep } from '../lib/agent'
 import { viewEntry } from '../lib/diary'
 import { todayISO } from '../lib/storage'
@@ -61,23 +62,6 @@ const bold = (line: string, key: string) =>
   )
 
 /**
- * The four parts of a meal answer, read off the labels the prompt guarantees.
- *
- * Returns null for anything else — an advisory answer, a clarifying question,
- * a refusal — which then renders as plain paragraphs. A parser that guessed
- * would eventually dress a refusal up as a verdict.
- */
-function meal(text: string): { verdict: string; numbers?: string; why?: string; next?: string } | null {
-  const part = (label: string) =>
-    text.match(new RegExp(`\\*{0,2}${label}\\*{0,2}\\s*[—–-]\\s*([^\\n]+)`, 'i'))?.[1]?.trim()
-  let verdict = part('Verdict')
-  if (!verdict) return null
-  // Printed large and alone, a lowercase first letter looks like a mistake.
-  verdict = verdict.charAt(0).toUpperCase() + verdict.slice(1)
-  return { verdict, numbers: part('Numbers'), why: part('Why'), next: part('Next action') }
-}
-
-/**
  * The three figures a verdict rests on, taken from the tool result rather than
  * from the sentence about it.
  *
@@ -108,7 +92,7 @@ function Figures({ reply }: { reply: AgentResponse }) {
 }
 
 function Answer({ text, reply }: { text: string; reply?: AgentResponse }) {
-  const parts = meal(text)
+  const parts = parseMeal(text)
   const m = reply?.trace?.find((t) => t.tool.endsWith('compute_meal'))?.result as
     { totals?: { gl?: number }; afterMeal?: { remaining?: { gl?: number } } } | undefined
   const figuresShown = typeof m?.totals?.gl === 'number' && typeof m?.afterMeal?.remaining?.gl === 'number'
@@ -120,7 +104,7 @@ function Answer({ text, reply }: { text: string; reply?: AgentResponse }) {
     const tail = text
       .split(/\n+/)
       .map((l) => l.trim())
-      .filter((l) => l && !/^\*{0,2}(Verdict|Numbers|Why|Next action)\*{0,2}\s*[—–-]/i.test(l))
+      .filter((l) => l && !isLabelled(l) && l !== parts.verdictLine)
     return (
       <div className="answer-text">
         <p className="a-verdict">{bold(parts.verdict, 'v')}</p>

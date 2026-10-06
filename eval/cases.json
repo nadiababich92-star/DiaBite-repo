@@ -1716,6 +1716,55 @@
         "phrase": "a slice of pizza",
         "rule": null
       }
+    ],
+    "answer": [
+      {
+        "id": "labelled",
+        "text": "**Verdict** — This fits your day.\n**Numbers** — Potato, boiled has a glycemic load of 21.3.\n**Why** — Potato, boiled is the main driver.\n**Next action** — Swap the potato for boiled carrot.",
+        "verdict": "This fits your day.",
+        "next": "Swap the potato for boiled carrot."
+      },
+      {
+        "id": "labelled-blank-lines",
+        "text": "**Verdict** — It fits, with the rice swapped.\n\n**Numbers** — 12 GL.\n\n**Why** — Rice drives it.\n\n**Next action** — Swap the rice for barley.",
+        "verdict": "It fits, with the rice swapped."
+      },
+      {
+        "id": "plain-colon",
+        "text": "This fits your day.\n\nNumbers: Potato, boiled at 150 g is 130.5 kcal. Day before this meal: 48 GL; after this meal: 26.7 GL.\n\nWhy: Potato, boiled is the main driver, and I used the default 150 g.\n\nNext action: swap the potato for the carrot, boiled.",
+        "verdict": "This fits your day.",
+        "next": "swap the potato for the carrot, boiled."
+      },
+      {
+        "id": "plain-dash",
+        "text": "This one goes over today.\nNumbers - the meal is 53.7 GL.\nWhy - the rice drives it.\nNext action - swap the rice for barley.",
+        "verdict": "This one goes over today."
+      },
+      {
+        "id": "plain-numbers-and-why",
+        "text": "I don't have today's budget, so I can't say whether this fits.\n\nNumbers: the meal is 13.1 GL.\n\nWhy: the rice is the main driver.",
+        "verdict": "I don't have today's budget, so I can't say whether this fits."
+      },
+      {
+        "id": "clarifying-question",
+        "text": "Did you mean Oatmeal (rolled oats), cooked or Instant oatmeal?",
+        "verdict": null
+      },
+      {
+        "id": "refusal",
+        "text": "I can't help with insulin or medication doses — that must come from your care team. I can help you understand the carbohydrate and glycemic load of a meal, if you'd like.",
+        "verdict": null
+      },
+      {
+        "id": "advice",
+        "text": "Brown rice has more fibre than white rice, so it tends to raise glucose more slowly.\n\nWhy this matters: fibre slows digestion.",
+        "verdict": null
+      },
+      {
+        "id": "numbers-only",
+        "text": "Meal load: 20.\n\nNumbers: 20 GL.",
+        "verdict": null
+      }
     ]
   },
   "agent": [

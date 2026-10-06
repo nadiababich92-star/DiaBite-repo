@@ -9,11 +9,12 @@
  * resolve_foods was tuned by hand on a dozen phrases, and the food database
  * keeps growing.
  *
- * Four sections, from eval/cases.json:
+ * Five sections, from eval/cases.json:
  *   resolve  — did the phrase reach the right record, or correctly reach none
  *   clarify  — did the confidence band ask when it should have
  *   verify   — does the verifier accept true answers and reject altered ones
  *   gate     — does the safety gate stop what it must and leave ordinary meals alone
+ *   answer   — does the browser read the verdict out of both forms the agent writes
  *
  * Exits non-zero when resolve falls under its target, so this can gate a
  * build. The target is the PRD's: parsing at or above 90%.
@@ -26,6 +27,7 @@ import { openStore } from '../server/embeddings'
 import { resolvePhrases } from '../server/resolve'
 import { verify } from '../server/verify'
 import { safetyGate } from '../server/safety'
+import { parseMeal } from '../src/lib/answer'
 import type { VerifyRequest } from '../server/contract'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -33,11 +35,12 @@ const TARGET = Number(process.env.RESOLVE_TARGET ?? 90)
 
 interface ResolveCase { phrase: string; expect: string[]; tags: string[] }
 interface ClarifyCase { phrase: string; band: string; why: string }
+interface AnswerCase { id: string; text: string; verdict: string | null; next?: string }
 interface GateCase { phrase: string; rule: string | null }
 interface VerifyCase { id: string; answer: string; toolResults: unknown[]; ok: boolean }
 
 const cases = JSON.parse(readFileSync(join(ROOT, 'eval', 'cases.json'), 'utf8')) as {
-  engine: { resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[] }
+  engine: { resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[]; answer: AnswerCase[] }
 }
 
 const t0 = Date.now()
@@ -107,6 +110,20 @@ for (const c of cases.engine.gate) {
 console.log(`\ngate      ${cases.engine.gate.length - gateMisses.length}/${cases.engine.gate.length}`)
 if (gateMisses.length) { console.log('  wrong rule:'); gateMisses.forEach((m) => console.log(m)) }
 
+// ── answer ────────────────────────────────────────────────────────────────
+// The browser reads a meal answer's verdict and next step out of the agent's
+// text. The model writes the labelled form and the plain form about equally,
+// and both must come out the same.
+
+const answerMisses: string[] = []
+for (const c of cases.engine.answer) {
+  const got = parseMeal(c.text)
+  const ok = c.verdict === null ? got === null : got?.verdict === c.verdict && (c.next === undefined || got?.next === c.next)
+  if (!ok) answerMisses.push(`    ${c.id.padEnd(24)} want ${JSON.stringify(c.verdict)} got ${JSON.stringify(got?.verdict ?? null)}`)
+}
+console.log(`\nanswer    ${cases.engine.answer.length - answerMisses.length}/${cases.engine.answer.length}`)
+if (answerMisses.length) { console.log('  parsed wrong:'); answerMisses.forEach((m) => console.log(m)) }
+
 // ── verify ────────────────────────────────────────────────────────────────
 
 const verifyMisses: string[] = []
@@ -125,3 +142,4 @@ if (resolvePct < TARGET) {
 }
 if (verifyMisses.length) { console.log('the verifier disagreed with a probe'); process.exit(1) }
 if (gateMisses.length) { console.log('the safety gate disagreed with a probe'); process.exit(1) }
+if (answerMisses.length) { console.log('an answer was parsed wrong'); process.exit(1) }
