@@ -101,7 +101,7 @@ Plus: `npm run eval` and `npm run eval:agent` must be unchanged (191+/195, p90 �
 
 ## 12. Open questions — the owner's or a clinician's
 
-- **Q1 — real price.** The ~$16 / day figure uses Claude list prices from `docs/FINANCIAL_PLAN.md`; production runs `gpt-5.4-mini` and `-nano`. Check Azure cost analysis before treating 1,000 as the right number. (Also relevant to Saturday's lecture: the plan's per-turn cost is built on a model we no longer run.)
+- **Q1 — real price. Answered 8 October:** measured from Azure Cost Management and the Foundry traces, a question costs about €0.0026 in model charges (`docs/monitoring.md`), so the 1,000-turn daily ceiling bounds the model bill at roughly €2.6 a day, not the ~$16 estimated below. The ceiling can stay as it is as an abuse stop; it no longer needs to be low to protect the budget. Original text: The ~$16 / day figure uses Claude list prices from `docs/FINANCIAL_PLAN.md`; production runs `gpt-5.4-mini` and `-nano`. Check Azure cost analysis before treating 1,000 as the right number. (Also relevant to Saturday's lecture: the plan's per-turn cost is built on a model we no longer run.)
 - **Q2 — IPs.** Are in-memory IPs, never logged raw, acceptable without a privacy-policy line? A statement of what is kept belongs in `docs/PLAN.md` when accounts arrive.
 - **Q3 — shared networks.** A clinic or an office behind one IP shares 200 asks a day. Fine today; revisit when real users cluster.
 

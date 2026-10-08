@@ -134,6 +134,17 @@ This is the number most AI-product financial plans get wrong, so it is built
 from the architecture in the PRD rather than from a rule of thumb. Model prices
 are Anthropic list rates; cached input reads at 0.1x and cache writes at 1.25x.
 
+> **Measured, 8 October 2026 — read before using this section.** The table below
+> is built on Anthropic list prices and a Haiku / Sonnet / Opus split, with a
+> model-based verifier. Production runs `gpt-5.4-nano` (router) and
+> `gpt-5.4-mini` (meal or advice), and the verifier is code. Measured from the
+> Foundry traces and Azure Cost Management over 1,941 real questions: about
+> **4,900 tokens in (74% cached) and 140 out** per question, billed at about
+> **€0.0026**, against **$0.0156** below. The structure of the argument (the engine
+> computes, routing, caching) holds; the dollar figure is roughly six times too
+> high for this stack and should be rebuilt from the measurement, not adjusted.
+> Details in `docs/monitoring.md`. The plan has not been recalculated.
+
 **One "can I eat this?" interaction:**
 
 | Step | Model | Tokens (fresh in / cached in / out) | Cost |
