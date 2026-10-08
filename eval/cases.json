@@ -1806,6 +1806,13 @@
         "costed": true,
         "text": "Which did you mean?\n\nOne of two.\n\nTell me.",
         "verdict": null
+      },
+      {
+        "id": "reason-unlabelled-next-labelled",
+        "text": "This fits your day.\n\nMeal GL 20.6. Day before this meal 54, after this meal 33.4.\n\nRye bread drives the load; I used 110 g for the two eggs.\n\nNext action: swap the rye bread for sprouted grain bread.",
+        "verdict": "This fits your day.",
+        "next": "swap the rye bread for sprouted grain bread.",
+        "why": "110 g"
       }
     ]
   },

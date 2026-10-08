@@ -35,7 +35,8 @@ export const isLabelled = (line: string): boolean =>
  */
 export function parseMeal(text: string, opts: { costed?: boolean } = {}): (MealParts & { used: string[] }) | null {
   const lines = text.split(/\n+/).map((l) => l.trim()).filter(Boolean)
-  const why = part(text, 'Why'), next = part(text, 'Next action')
+  let why = part(text, 'Why')
+  const next = part(text, 'Next action')
   let numbers = part(text, 'Numbers')
   let verdict = part(text, 'Verdict')
   const used: string[] = []
@@ -56,9 +57,15 @@ export function parseMeal(text: string, opts: { costed?: boolean } = {}): (MealP
     verdict = lines[first]; used.push(lines[first])
     if (!numbers) {
       // Everything between the verdict and the first labelled line, whatever it is called.
+      // The first of those lines is the numbers; with no "Why" label, the rest is the reason
+      // (the three figures replace the numbers on screen, so a reason folded into them is lost).
       const stop = lines.findIndex((l, i) => i > first && isLabelled(l))
       const between = lines.slice(first + 1, stop < 0 ? undefined : stop)
-      if (between.length) { numbers = between.join(' '); used.push(...between) }
+      if (between.length) {
+        numbers = between[0]
+        if (!why && between.length > 1) why = between.slice(1).join(' ')
+        used.push(...between)
+      }
     }
     if (!numbers && !(why && next)) return null
   }
