@@ -82,7 +82,7 @@ Point at the provenance line under the receipt. One of the sources says
 
 > Two eggs, avocado and a slice of rye bread
 
-Answer: **fits** (meal load 7.8, 39.6 left), and — this is the line to point at —
+Answer: **fits** (a meal load of about 7.4), and — this is the line to point at —
 the *why* says **110 g of egg**. Two eggs, not one.
 
 > "It read 'two' as a quantity. Until last week it didn't: 'two eggs' resolved
@@ -90,10 +90,10 @@ the *why* says **110 g of egg**. Two eggs, not one.
 > came back confidently wrong. That defect was found by a model-judge, not by a
 > human reading answers."
 
-And the next action says **no change needed** — worth a half-sentence:
-
-> "When there's nothing to suggest, it says so. It used to invent a swap to
-> fill the slot."
+The next action varies between runs: sometimes "no change needed", sometimes a
+swap such as the rye bread for sprouted grain bread. Either is fine to say aloud;
+do not promise the first. (Until 8 October a slice of rye bread was costed at
+100 g and the load came out near 20; a slice is now 35 g.)
 
 ### 3. "A slice of grandma's kugel" — the honesty beat  ·  ~7 s
 
