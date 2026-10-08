@@ -177,5 +177,6 @@ tighten any instruction that produced something unexpected.
 | `docs/PRD.md` | What we build and why — the source of truth |
 | `docs/design.md` | The visual contract |
 | `docs/PLAN.md` | What comes after the demo, and the decisions that are the owner's |
+| `docs/PRD-post-course.md` | All the work after the course: workstreams, sizes, decisions, and what needs a price |
 | `docs/CLINICAL_REVIEW.md` | Every decision the product makes about a person, with questions for clinicians |
 | `docs/DEMO_SCRIPT.md`, `docs/USER_SESSIONS.md` | The demo and the five moderated sessions |
