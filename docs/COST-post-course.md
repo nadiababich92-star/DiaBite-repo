@@ -139,6 +139,29 @@ A paying user costs about **€0.35 a month** in model charges, a tenth of the
 $2.11 the draft financial plan assumed. Photo logging is not included: a vision
 call per photo is not measured yet.
 
+### The same month in the Azure Pricing Calculator
+
+Built on 8 October in the calculator itself (Sweden Central, euros, pay as you go) for one launch-scale month: **1,000 active users, 135 questions each, 135,000 questions**. The token counts are the measured ones per question (meal and advice agent: 4,913 in with 74% cached, 137 out; router: 259 in with 36% cached, 13 out).
+
+| Line in the calculator | Per month |
+|---|---|
+| Azure Container Apps, 1 vCPU, 2 GiB, 0.5 million requests | **€0.00** |
+| Container Registry, Basic, 5 GB | €4.84 |
+| Azure Cache for Redis, Basic C0 | €14.13 |
+| Azure OpenAI, GPT-5.4 mini: 171.1M input, 492.1M cached input, 18.5M output tokens | €218.66 |
+| Azure OpenAI, GPT-5.4 nano: 22.4M input, 12.6M cached input, 1.8M output tokens | €6.09 |
+| Azure Monitor, logs at this volume | €0.00 |
+| **Calculator total** | **€243.72 a month, €2,924.67 a year** |
+
+The calculator's model lines rebuild the list-price figure to the cent (€0.00166 a question), which confirms the meters. It also **gets two things wrong for this product**, and both matter for pricing:
+
+1. **It does not charge for the replica being on.** The Consumption plan is modelled as billed only while requests are being served, so the always-on replica shows €0.00. The real bill is idle usage: about €21.70 a month per replica at list price (confirmed by the daily bills, about €0.70 a day). Two replicas at launch add about **€43**.
+2. **It models the tokens on the traces, not the bill.** Billed model charges came to €0.0026 a question against €0.00166 here, 57% higher: retries, a second attempt when the verifier rejects, and agent overhead not visible in the trace. On €224.75 of model lines that is about **€127** more.
+
+**What to budget for that month: about €415** (€243.72 + €43 + €127), plus the non-Azure lines (Supabase about €23, domain and email €5–15) and payment fees, which are a share of revenue. That agrees with the earlier table (1,000 users: €351 model charges plus €90–125 fixed, about €440–475) from the other direction.
+
+The estimate is not saved: saving and sharing in the calculator needs a Microsoft sign-in. To reproduce it, enter the table above, or use *Export* for a spreadsheet.
+
 ## 6. What a subscription would have to earn
 
 Not a price recommendation: the price is the owner's decision and the finance
