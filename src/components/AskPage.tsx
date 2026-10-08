@@ -84,7 +84,8 @@ function Figures({ reply }: { reply: AgentResponse }) {
 }
 
 function Answer({ text, reply }: { text: string; reply?: AgentResponse }) {
-  const parts = parseMeal(text)
+  const costed = !!reply?.trace?.some((x) => x.tool.endsWith('compute_meal') && typeof (x.result as { totals?: unknown } | undefined)?.totals === 'object')
+  const parts = parseMeal(text, { costed })
   const m = reply?.trace?.find((t) => t.tool.endsWith('compute_meal'))?.result as
     { totals?: { gl?: number }; afterMeal?: { remaining?: { gl?: number } } } | undefined
   const figuresShown = typeof m?.totals?.gl === 'number' && typeof m?.afterMeal?.remaining?.gl === 'number'
@@ -96,7 +97,7 @@ function Answer({ text, reply }: { text: string; reply?: AgentResponse }) {
     const tail = text
       .split(/\n+/)
       .map((l) => l.trim())
-      .filter((l) => l && !isLabelled(l) && l !== parts.verdictLine)
+      .filter((l) => l && !isLabelled(l) && !parts.used.includes(l))
     return (
       <div className="answer-text">
         <p className="a-verdict">{bold(parts.verdict, 'v')}</p>

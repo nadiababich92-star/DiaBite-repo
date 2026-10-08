@@ -26,19 +26,43 @@ function part(text: string, label: string): string | undefined {
 export const isLabelled = (line: string): boolean =>
   new RegExp(`^\\*{0,2}(${LABELS.join('|')})\\*{0,2}\\s*${SEP}`, 'i').test(line.trim())
 
-export function parseMeal(text: string): (MealParts & { verdictLine?: string }) | null {
-  const numbers = part(text, 'Numbers'), why = part(text, 'Why'), next = part(text, 'Next action')
+/**
+ * The reason and the next step are the labels the model keeps; the line that
+ * carries the numbers is called "Numbers", "Meal", "Meal load" or nothing, and
+ * a parser that waited for "Numbers" showed the flagship answer as plain text.
+ * So an answer is a meal when it has a reason or a next step, and whatever
+ * sits between the first line and the first label is its numbers.
+ */
+export function parseMeal(text: string, opts: { costed?: boolean } = {}): (MealParts & { used: string[] }) | null {
+  const lines = text.split(/\n+/).map((l) => l.trim()).filter(Boolean)
+  const why = part(text, 'Why'), next = part(text, 'Next action')
+  let numbers = part(text, 'Numbers')
   let verdict = part(text, 'Verdict')
-  let verdictLine: string | undefined
-  if (!verdict) {
-    // No label: the first line is the verdict, but only when the rest of the
-    // answer is the labelled body of a meal, so a question is never mistaken for one.
-    if (!numbers || !(why || next)) return null
-    verdictLine = text.split(/\n+/).map((l) => l.trim()).find((l) => l && !isLabelled(l))
-    if (!verdictLine) return null
-    verdict = verdictLine
+  const used: string[] = []
+  if (verdict) {
+    const l = lines.find((x) => /^\*{0,2}Verdict\*{0,2}\s*[:—–-]/i.test(x)); if (l) used.push(l)
+  } else {
+    // No label: a question or a refusal never has a reason or a next step.
+    if (!why && !next) {
+      // Four plain paragraphs, no labels at all: verdict, numbers, reason, next step.
+      // Read by position, and only when the engine really costed a meal (the caller
+      // knows from the trace), so a question is never dressed as a verdict.
+      if (!opts.costed || lines.length < 3 || /\?$/.test(lines[0])) return null
+      const [v, n, w, x] = lines
+      return { verdict: v.charAt(0).toUpperCase() + v.slice(1), numbers: n, why: w, next: x, used: lines.slice(0, x ? 4 : 3) }
+    }
+    const first = lines.findIndex((l) => !isLabelled(l))
+    if (first < 0) return null
+    verdict = lines[first]; used.push(lines[first])
+    if (!numbers) {
+      // Everything between the verdict and the first labelled line, whatever it is called.
+      const stop = lines.findIndex((l, i) => i > first && isLabelled(l))
+      const between = lines.slice(first + 1, stop < 0 ? undefined : stop)
+      if (between.length) { numbers = between.join(' '); used.push(...between) }
+    }
+    if (!numbers && !(why && next)) return null
   }
   // Printed large and alone, a lowercase first letter looks like a mistake.
   verdict = verdict.charAt(0).toUpperCase() + verdict.slice(1)
-  return { verdict, numbers, why, next, verdictLine }
+  return { verdict, numbers, why, next, used }
 }

@@ -1764,6 +1764,48 @@
         "id": "numbers-only",
         "text": "Meal load: 20.\n\nNumbers: 20 GL.",
         "verdict": null
+      },
+      {
+        "id": "meal-label-no-numbers-label",
+        "text": "This fits your day.\n\nMeal: gl 45.5; day before this meal gl 54; after this meal gl 8.5.\n\nWhy: white rice drove most of the load, and I assumed chicken breast for chicken.\n\nNext action: swap the white rice for brown rice.\n\nDid you mean chicken breast or ground chicken?",
+        "verdict": "This fits your day.",
+        "next": "swap the white rice for brown rice."
+      },
+      {
+        "id": "meal-load-line",
+        "text": "This fits your day.\nMeal load: 20.\nDay before: 48 GL; after: 28 GL.\nWhy: the rice drives it.\nNext action: no change needed.",
+        "verdict": "This fits your day.",
+        "next": "no change needed."
+      },
+      {
+        "id": "question-with-numbers-line",
+        "text": "Did you mean Oatmeal (rolled oats), cooked or Instant oatmeal?\nMeal: ask first.",
+        "verdict": null
+      },
+      {
+        "id": "four-plain-paragraphs-costed",
+        "costed": true,
+        "text": "This fits your day.\n\nMeal GL: 20.8. Day before this meal: 54. After this meal: 33.2.\n\nWhite bread is driving the number, and I assumed 30 g per slice.\n\nSwap the white bread for rye bread.",
+        "verdict": "This fits your day.",
+        "next": "Swap the white bread for rye bread."
+      },
+      {
+        "id": "four-plain-paragraphs-no-next",
+        "costed": true,
+        "text": "This fits your day.\n\nMeal GL 8.2. Day before this meal 54, after this meal 45.8.\n\nThe blueberries drive the GL. I used the default portion.",
+        "verdict": "This fits your day."
+      },
+      {
+        "id": "same-shape-not-costed",
+        "costed": false,
+        "text": "Did you mean oatmeal or instant oatmeal?\n\nPick one.\n\nThen I can count it.",
+        "verdict": null
+      },
+      {
+        "id": "costed-but-a-question",
+        "costed": true,
+        "text": "Which did you mean?\n\nOne of two.\n\nTell me.",
+        "verdict": null
       }
     ]
   },

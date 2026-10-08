@@ -35,7 +35,7 @@ const TARGET = Number(process.env.RESOLVE_TARGET ?? 90)
 
 interface ResolveCase { phrase: string; expect: string[]; tags: string[] }
 interface ClarifyCase { phrase: string; band: string; why: string }
-interface AnswerCase { id: string; text: string; verdict: string | null; next?: string }
+interface AnswerCase { id: string; text: string; verdict: string | null; next?: string; costed?: boolean }
 interface GateCase { phrase: string; rule: string | null }
 interface VerifyCase { id: string; answer: string; toolResults: unknown[]; ok: boolean }
 
@@ -117,7 +117,7 @@ if (gateMisses.length) { console.log('  wrong rule:'); gateMisses.forEach((m) =>
 
 const answerMisses: string[] = []
 for (const c of cases.engine.answer) {
-  const got = parseMeal(c.text)
+  const got = parseMeal(c.text, { costed: c.costed })
   const ok = c.verdict === null ? got === null : got?.verdict === c.verdict && (c.next === undefined || got?.next === c.next)
   if (!ok) answerMisses.push(`    ${c.id.padEnd(24)} want ${JSON.stringify(c.verdict)} got ${JSON.stringify(got?.verdict ?? null)}`)
 }
