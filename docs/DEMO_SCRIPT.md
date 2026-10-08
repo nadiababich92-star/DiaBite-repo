@@ -4,7 +4,7 @@ Five questions, about four minutes, one arc: **a person asks about lunch in
 their own words, and every number they get back can be traced to something
 that is not the model.**
 
-Every line below was run against the deployed agent on 30 September and timed.
+Every line below was run against the deployed agent on 8 October and timed.
 Nothing here is aspirational; if a beat stops working, this file is wrong and
 should be re-run rather than trusted.
 
@@ -19,7 +19,7 @@ should be re-run rather than trusted.
    this is not a wake-up call; it is proof that the whole chain — browser,
    engine, Foundry, the tools — is answering today, taken while there is still
    time to do something about it.
-2. Check the health line: `/health` should say `records: 1436`. A smaller
+2. Check the health line: `/health` should say `records: 6054`. A smaller
    number means the database did not load and the answers will be wrong in a
    way that looks right.
 3. Open **the hosted address**, not a dev server on your laptop:
@@ -29,7 +29,7 @@ should be re-run rather than trusted.
 4. Set the profile up **as the person you are about to describe**. The script
    below assumes: type 2 diabetes, metformin, no insulin, peanut allergy, lose
    weight, low carb → a budget of **48 GL**. Log one breakfast (Greek yogurt)
-   so the day has something in it; a day at zero looks like a fresh install.
+   so the day has something in it — the beats below were timed with 47.4 left; a day at zero looks like a fresh install.
 5. Have the backup recording open in another tab, minimised. You will not need
    it, and that is exactly why it should be open.
 
@@ -52,8 +52,18 @@ While it thinks, say the sentence that frames everything after it:
 > "This is how people actually talk about food. Not 180 grams of cooked
 > long-grain white rice — 'a burrito bowl'."
 
-What comes back: **does not fit today**, meal glycemic load about 59 against 47
-left, white rice named as the driver, and one swap.
+What comes back: **fits, barely** — a meal load of 41.2 against 47.4 left, so
+6.2 remain; white rice named as the driver, and one swap (brown rice). Since
+8 October the bowl is costed by what is in it (180 g of white rice, 100 g of
+black beans, 150 g of chicken, 100 g of guacamole) rather than as one database
+record, which is why it no longer goes over. Say so: it is a better story than
+a clean "no".
+
+> "It fits — but look how little is left. Almost all of that is the rice, and it
+> offers the swap."
+
+The answer may also ask whether it was right to assume chicken *breast*. Let it:
+that is the product saying what it assumed.
 
 Then click **Show calculation** and stop talking for two seconds. The receipt is
 the pitch:
@@ -72,8 +82,8 @@ Point at the provenance line under the receipt. One of the sources says
 
 > Two eggs, avocado and a slice of rye bread
 
-Answer: **fits**, and — this is the line to point at — the *why* says **110 g of
-egg**. Two eggs, not one.
+Answer: **fits** (meal load 7.8, 39.6 left), and — this is the line to point at —
+the *why* says **110 g of egg**. Two eggs, not one.
 
 > "It read 'two' as a quantity. Until last week it didn't: 'two eggs' resolved
 > to nothing at all, the eggs dropped silently out of the meal, and the total
@@ -138,6 +148,8 @@ Tested, and they are the weak spots as of 30 September:
 |---|---|---|
 | "spaghetti" | one run in several resolves it to a spaghetti-squash recipe | "pasta" |
 | "fried rice", "pepperoni pizza", "grits", "diet coke", "Oreos" | genuinely not in the database — fine as a *deliberate* unknown, bad as a surprise | use beat 3's kugel, which you control |
+| "baked potato" | still costed as *boiled* potato (an alias nobody has removed yet) — a different glycemic index | "boiled potato" |
+| "french fries", "pizza", "avocado toast" | fries pick a school-lunch record on a 60 g portion; pizza and avocado toast ask odd "did you mean" questions | stay on the five beats |
 | Anything with a brand name | Chick-fil-A, KIND, Kraft: all unknown | a plain description of the food |
 | A follow-up that depends on the last answer ("and if I add a banana?") | works, but the session must be the same one — do not reload between | ask it as a whole meal |
 
@@ -161,6 +173,12 @@ nothing:
 
 Nobody minds. What they mind is watching a spinner.
 
+**One episode to know about.** On the morning of 8 October nine of eighteen turns
+failed inside ten minutes (the model service could not reach the engine and the
+engine could not reach the model: `503`, `connection timeout`). It did not
+repeat under eight concurrent turns later the same day, and nothing had
+restarted. Treat it as the reason the recording is open in the other tab.
+
 **If the app will not answer at all**, the most likely cause is the container
 having been scaled to zero and failing its first request. `/health` tells you
 in a second. The recording covers everything else.
@@ -172,16 +190,21 @@ in a second. The recording covers everything else.
 **"How do you know it isn't making the numbers up?"**
 Every number in an answer is checked against the tool results before the answer
 is shown. If one cannot be traced, the answer is regenerated once and then
-replaced with a templated one built only from tool output. In the last run, 87
-of 87 answers passed on the first attempt.
+replaced with a templated one built only from tool output. In the run on
+8 October, every answer that came back was verified; one of 87 came back as a
+transient server error and is counted as a miss, not hidden.
 
 **"What's your accuracy?"**
 Two layers, and I'd rather give you both than average them. The mechanical
-layer — food resolution, clarification bands, the verifier — is 80 of 81 on a
-fixed set, and 203 of 203 behavioural checks on the deployed agent. The
-model-graded layer in Azure AI Foundry: intent resolution 70 of 71, tool-call
-accuracy 56 of 59, groundedness 55 of 59. Task adherence sits at 69–74% across
-four runs, and I can tell you exactly why it isn't higher.
+layer needs no model: food resolution 95 of 95, clarification bands 19 of 19,
+the safety gate 63 of 63 phrasings, answer parsing 9 of 9, the verifier 12 of
+12. On the deployed agent, 180 of 183 behavioural checks passed on 8 October
+(191 of 191 on 5 October); the three misses named the dish rather than its
+heaviest food as the driver — a wording miss, not a wrong number. The
+model-graded layer in Azure AI Foundry was last run in September: intent
+resolution 70 of 71, tool-call accuracy 56 of 59, groundedness 55 of 59, task
+adherence 69–74% across four runs. **Not re-run since the changes of
+October** — say "September" if you quote it.
 
 **"Why isn't task adherence higher?"**
 Because it measures compliance with our own answer format, which is strict on
@@ -191,12 +214,13 @@ substituted food or a missed refusal. I could raise the score by loosening the
 format. The format is the product.
 
 **"How fast is it?"**
-Median 5 seconds, p90 7.8 — for one person asking with pauses, which is what a
-user does. Fired back to back it queues against a per-minute token quota and
+Median 4.7 seconds, p90 8.2 (8 October, 86 questions) — for one person asking with
+pauses, which is what a user does. Four people asking at once also worked, eight
+turns in a row, between 4 and 12 seconds. Fired back to back it queues against a per-minute token quota and
 slows down; I measure both and quote which is which.
 
 **"What happens when it doesn't know a food?"**
-You saw it. It says so. 18% of the food phrases in our test set are not in the
+You saw it. It says so. about 13% of the food phrases in our test set are not in the
 database — mostly American brand foods — and that number is in the PRD rather
 than hidden, because the honest failure is the feature.
 

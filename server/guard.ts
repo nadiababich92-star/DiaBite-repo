@@ -12,6 +12,7 @@
  * consulted before the gate has had its say.
  */
 import { createHash } from 'node:crypto'
+import { ALLERGEN_PATTERNS, PATTERN_PATTERNS } from '../src/lib/dietary'
 
 const num = (name: string, fallback: number): number => {
   const v = Number(process.env[name])
@@ -57,7 +58,26 @@ export function validateAsk(body: unknown): Invalid | null {
       if (bud[k] !== undefined && !finite(bud[k])) return { field: 'budget' }
     }
   }
+  if (b.avoid !== undefined && !validAvoid(b.avoid)) return { field: 'avoid' }
   return null
+}
+
+/**
+ * The person's allergens and exclusions, as the browser sends them.
+ *
+ * An id the engine has no rule for is not ignored downstream, it throws: the
+ * filter fails loudly rather than letting an allergen through. Reached from
+ * a public route that turns one bad value into a turn of failing tool calls
+ * (five in a row in one test) before the answer is lost, so it is refused here.
+ */
+function validAvoid(v: unknown): boolean {
+  const a = v as Record<string, unknown> | null
+  if (!a || typeof a !== 'object' || Array.isArray(a)) return false
+  const known = (x: unknown, ok: (s: string) => boolean, max: number) =>
+    x === undefined || (Array.isArray(x) && x.length <= max && x.every((s) => typeof s === 'string' && s.length <= 64 && ok(s)))
+  return known(a.allergens, (s) => Object.hasOwn(ALLERGEN_PATTERNS, s), 20)
+    && known(a.foodIds, () => true, MAX_ENTRIES)
+    && (a.pattern === undefined || a.pattern === 'none' || (typeof a.pattern === 'string' && Object.hasOwn(PATTERN_PATTERNS, a.pattern)))
 }
 
 // ── Sliding windows ───────────────────────────────────────────────────────

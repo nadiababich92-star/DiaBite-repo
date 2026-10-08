@@ -104,6 +104,14 @@ async function httpSuite() {
       longId.status === 400 && slashId.status === 400 && slashId.json.field === 'sessionId',
       JSON.stringify([longId.status, slashId.status, slashId.json]))
 
+    const badAllergen = await ask({ ...meal('a5d'), avoid: { allergens: ['peanut'] } })
+    const badAvoid = await ask({ ...meal('a5e'), avoid: 'peanuts' })
+    const goodAvoid = await ask({ ...meal('a5f'), avoid: { allergens: ['peanuts', 'gluten'], pattern: 'vegan', foodIds: ['seed:egg'] } }, { 'x-api-key': KEY })
+    check('A5d', 'an allergen id the engine has no rule for: 400, field avoid',
+      badAllergen.status === 400 && badAllergen.json.field === 'avoid', JSON.stringify([badAllergen.status, badAllergen.json]))
+    check('A5e', 'avoid that is not an object: 400', badAvoid.status === 400, String(badAvoid.status))
+    check('A5f', 'a valid avoid list passes validation (keyed, so the limit above does not hide it)', ADMITTED.has(goodAvoid.status), String(goodAvoid.status))
+
     const big = await ask({ ...meal('a5b'), entries: Array.from({ length: 101 }, () => ({})) })
     check('A5b', '101 diary entries: 400, field entries', big.status === 400 && big.json.field === 'entries', JSON.stringify([big.status, big.json]))
 
