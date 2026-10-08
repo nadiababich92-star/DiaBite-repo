@@ -49,6 +49,22 @@ interface RecipeRow {
  * embedding text and an exact-phrase match in resolve.ts. Without them
  * "spaghetti" lands on spaghetti squash and "toast" finds nothing.
  */
+/**
+ * What one serving of an ingredient weighs, where 100 g is plainly wrong.
+ *
+ * Every ingredient defaulted to 100 g, so "a slice of rye bread" was costed as
+ * three slices (a glycemic load of 20.6 where one slice is about 7.8) and the
+ * answer said, honestly, that it had used the database default. A default that
+ * is disclosed and three times too big is still a wrong number. Only the
+ * breads, so far, because a slice is the unit people say; the rest are to be
+ * set as the sessions show which ones are asked about.
+ */
+const INGREDIENT_PORTION_G: Record<string, number> = {
+  rye_bread: 35,
+  whole_grain_bread: 35,
+  ezekiel_bread: 34,
+}
+
 const ALIASES: Record<string, string[]> = {
   'rice-white': ['rice', 'white rice', 'steamed rice', 'jasmine rice', 'sushi rice', 'fried rice'],
   'rice-brown': ['brown rice'],
@@ -248,7 +264,7 @@ export function loadFoods() {
       // white rice could never be a curated ingredient, because 'grains' never
       // equalled 'grain'. The pool was smaller than it looked for every food.
       category: GROUP_TO_CATEGORY[r.group] ?? (r.group as FoodCategory),
-      unit: 'g', defaultPortion: 100,
+      unit: 'g', defaultPortion: INGREDIENT_PORTION_G[r.id] ?? 100,
       searchText: `${r.name}. ${r.group}. ${r.id.replace(/_/g, ' ')}`,
       // The id is the everyday word for the food and the name is the precise
       // one — "miso" for White miso paste, "black beans" for Black beans,

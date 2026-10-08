@@ -40,7 +40,7 @@ interface GateCase { phrase: string; rule: string | null }
 interface VerifyCase { id: string; answer: string; toolResults: unknown[]; ok: boolean }
 
 const cases = JSON.parse(readFileSync(join(ROOT, 'eval', 'cases.json'), 'utf8')) as {
-  engine: { resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[]; answer: AnswerCase[] }
+  engine: { resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[]; answer: AnswerCase[]; portion: { id: string; grams: number }[] }
 }
 
 const t0 = Date.now()
@@ -110,6 +110,15 @@ for (const c of cases.engine.gate) {
 console.log(`\ngate      ${cases.engine.gate.length - gateMisses.length}/${cases.engine.gate.length}`)
 if (gateMisses.length) { console.log('  wrong rule:'); gateMisses.forEach((m) => console.log(m)) }
 
+// ── portion ───────────────────────────────────────────────────────────────
+// A default serving that is plainly wrong becomes a wrong number, disclosed or not.
+
+const { byId } = loadFoods()
+const portionMisses = cases.engine.portion.filter((c) => byId.get(c.id)?.defaultPortion !== c.grams)
+  .map((c) => `    ${c.id.padEnd(24)} want ${c.grams} g got ${byId.get(c.id)?.defaultPortion}`)
+console.log(`\nportion   ${cases.engine.portion.length - portionMisses.length}/${cases.engine.portion.length}`)
+if (portionMisses.length) { console.log('  wrong default serving:'); portionMisses.forEach((m) => console.log(m)) }
+
 // ── answer ────────────────────────────────────────────────────────────────
 // The browser reads a meal answer's verdict and next step out of the agent's
 // text. The model writes the labelled form and the plain form about equally,
@@ -143,3 +152,4 @@ if (resolvePct < TARGET) {
 if (verifyMisses.length) { console.log('the verifier disagreed with a probe'); process.exit(1) }
 if (gateMisses.length) { console.log('the safety gate disagreed with a probe'); process.exit(1) }
 if (answerMisses.length) { console.log('an answer was parsed wrong'); process.exit(1) }
+if (portionMisses.length) { console.log('a default serving is wrong'); process.exit(1) }

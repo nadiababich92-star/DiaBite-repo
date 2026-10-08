@@ -1814,6 +1814,20 @@
         "next": "swap the rye bread for sprouted grain bread.",
         "why": "110 g"
       }
+    ],
+    "portion": [
+      {
+        "id": "ing:rye_bread",
+        "grams": 35
+      },
+      {
+        "id": "ing:whole_grain_bread",
+        "grams": 35
+      },
+      {
+        "id": "ing:ezekiel_bread",
+        "grams": 34
+      }
     ]
   },
   "agent": [
