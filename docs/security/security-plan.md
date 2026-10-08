@@ -91,3 +91,27 @@ It also stopped two false alarms that were already there: `a 500 mg calcium chew
 - **A reading of exactly 3.9 mmol/L (70 mg/dL) passes**, as the rule says "under 70". The advisor answered such a sentence with fast-sugar advice. That is the live Q-S2 question, now narrowed to the boundary, and it goes to the clinicians with the exact sentence.
 - Russian, Spanish and other languages: not covered (Q-S1).
 - A model is still behind the gate, and the gate is still a list. A new phrasing that gets past it becomes a case in `eval/cases.json`.
+
+## Status — 8 October 2026
+
+Done, deployed as revision 60, and checked against the running service:
+
+| # | What changed | How it was checked |
+|---|---|---|
+| S3 | The session id is a random UUID (`src/lib/session.ts`); with no storage it is one per page load, never `'anon'` | `eval:abuse` A19: 200 ids unique and well-formed, stable per page. Ids already stored in browsers keep working |
+| S4 | `ENGINE_API_KEY` is a Container App secret referenced by the app; no plain value remains in the active revision. The key is compared as SHA-256 digests with `timingSafeEqual` | The revision's env entry holds only `name` and `secretRef`; a real agent turn still passes the key to the tools; `eval:abuse` A16 (wrong key and no key are both 401) |
+| S5 | An upstream failure is `{"error":"agent_unavailable"}`; Azure's content filter becomes a calm refusal (`blockedRule: content_filter`) | A17 locally; live: the system-prompt probe now returns the refusal rather than a 502 carrying Azure's text |
+| S7 | CSP, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS; no `x-powered-by` | A13, A13b; in a real browser with the built app: fonts load, no violations, Supabase reachable, a foreign origin blocked; headers read from the live page |
+| S8 | `anon` and `authenticated` keep `INSERT` on `feedback` and `SELECT` on `foods`, nothing else (`supabase/migrations/20261008120000_revoke_excess_anon_grants.sql`) | Privileges read from the database after applying; as the public role: foods read 200, foods update and feedback read refused, an invalid feedback insert still reaches the RLS policy |
+| S12 | IPv6 addresses are limited per /64; `/health` no longer reports live sessions; `PUT /session` validates its id and entry count | A14, A15, A18 |
+
+`X-XSS-Protection`, which the course lesson lists, is left out on purpose:
+modern browsers ignore it and old ones had bugs with it. The CSP does that job.
+
+### Still open
+
+- **S2 (what the advisor says about low sugar):** the clinicians' question, as decided on 6 October.
+- **S6 (log meal sentences by default):** the owner's decision. Recommended: off, on only during user sessions.
+- **S9 (feedback spam):** the owner's decision.
+- **S10 and S11 are portal actions, not code:** delete the two federated credentials for the old branches once those branches are deleted; remove the `probe`, `v0` and `agent-v2` agent identities; trim the engine identity's four overlapping Foundry roles one at a time with `eval:agent` between each; enable Dependabot; pin the Actions and the base image.
+- **Deploy is a human step on purpose.** The workflow builds the image on every push; `npm run deploy` puts it live. Making a push deploy by itself would mean giving the CI identity rights over the running app, today it can only push images, and that trade is the owner's to make.
