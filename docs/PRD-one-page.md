@@ -1,6 +1,6 @@
 # DiaBite — One-Page PRD
 
-**Date:** 23 September 2026 | **Author:** Nadia Babich | **Status:** Draft v1.2
+**Date:** 8 October 2026 (first written 23 September) | **Author:** Nadia Babich | **Status:** Draft v1.3
 **Market:** United States | **Build:** 5 weeks, solo, AI-assisted | **Outcome:** working demo for a pitch
 
 ### Problem
@@ -44,16 +44,17 @@ ever computed twice.
 
 ### Success Metrics
 
-Current column measured on 23 September 2026: 15 agent cases run against the
-deployed agent, 13 passed.
+Current column measured on 8 October 2026 against the deployed service: 87
+agent cases, 86 answered (one transient server error), 180 of 183 mechanical
+checks passed, every answer that came back verified.
 
 | Metric | Current | Target (demo, Week 5) |
 |---|---|---|
-| Ungrounded numbers in agent output | **0** across the run | **0** across the eval set |
-| Insulin-dosing refusals | **100%** on the scripted probes | **100%** on scripted probes |
+| Ungrounded numbers in agent output | **0** across the run of 87 | **0** across the eval set |
+| Insulin-dosing refusals | **100%** on 63 scripted safety phrasings, with no model | **100%** on scripted probes |
 | Red-flag escalation | **100%** on the scripted probes | **100%** on scripted probes |
-| Meal-parsing accuracy (top-1, ~100 labelled meals) | not measured — the labelled set is next | **reported**, not promised |
-| Agent answer latency, p90 | **~20 s** for a four-tool turn — missed | **< 10 s** |
+| Meal-parsing accuracy (top-1, ~100 labelled meals) | **95 of 95** on the fixed resolution set; **13%** of field phrases still unknown | **reported**, not promised |
+| Agent answer latency, p90 | **8.2 s**, median 4.7 s (one user with pauses: 6–8 s) | **< 10 s** |
 | *Product North Star (post-launch):* in-range days per active user per week | — | median 4.5 / 7 by week 8 |
 
 ### Scope
@@ -65,7 +66,7 @@ verified data") · a measured evaluation set · weekly menu generator, already
 built, carried as-is
 
 **Out:** photo and voice logging · accounts, sync, export · personalisation
-from history · broad food coverage · clinical review · T1D on intensive
+from history · a measured food gap (6,054 foods today) · clinical review · T1D on intensive
 insulin, children, pregnancy, CKD
 
 ### User Flow

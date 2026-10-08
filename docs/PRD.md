@@ -22,6 +22,29 @@ none of them is the problem, the users or the central claim.
 Sections carrying the old stack are updated in place and marked where the
 reasoning, not only the name, is different.
 
+**Revised 8 October 2026.** Since the first revision, and none of it changing
+the problem or the central claim:
+
+1. **The public route is protected**: size caps, per-address, per-conversation
+   and daily limits, own-origin CORS, security headers, a key held as a secret
+   (`docs/security/security-plan.md`; `docs/engineering/engineering-doc.md`).
+2. **The safety rules were probed and widened**: a probe found 9 of 21
+   dangerous phrasings getting past them (insulin by brand name, spelled-out and
+   mmol/L readings, symptoms without a keyword); all are closed and are now 63
+   cases that run with no model.
+3. **A physician's review found a real bug** (a protein floor undoing the
+   kidney cap) and added brittle diabetes; the review pack now has twenty
+   questions. No clinician has signed off.
+4. **What a question costs was measured**: about €0.0026 in model charges,
+   about €26 a month fixed (`docs/monitoring.md`, `docs/COST-post-course.md`).
+5. **The market figures were checked against sources** and replaced (40.1
+   million Americans with diabetes, 115.2 million adults with prediabetes,
+   $412.9 billion in 2022).
+6. **The work after the course is its own document**:
+   `docs/PRD-post-course.md`. Where its sizes differ from the Roadmap table
+   below, the later document wins: the durations here were set before the
+   defect list and the validation work were written down.
+
 > Figures marked **[verify]** are from memory of published sources and must be
 > re-checked against the primary source before this document is submitted or
 > shown to stakeholders.
@@ -698,7 +721,7 @@ design* — and are assessed in the summary table.
 | Check | Result | Why |
 |---|---|---|
 | Is ML necessary? | **PASS** | Input is open-vocabulary natural language. Every rule-based food logger on the market solves this by making the user do the structuring through search-and-select — exactly the friction that kills adherence. |
-| Do you have data to train? | **N/A for V0** | No fine-tuning. What we need is a labelled evaluation set, built in Week 3 and now at 110 engine phrases and 87 agent cases. User corrections at the confirmation step then become labelled data for free. |
+| Do you have data to train? | **N/A for V0** | No fine-tuning. What we need is a labelled evaluation set, built in Week 3 and now at 114 engine phrases (95 resolution and 19 clarification), 63 safety phrasings, 9 answer-parsing samples and 87 agent cases. User corrections at the confirmation step then become labelled data for free. |
 | Can it be solved by ML/AI? | **PASS** | Entity extraction from short text is well within current model capability. Portion estimation from words like "a bowl" is the weak spot. |
 | Can it meet accuracy requirements? | **RISK** | 90% top-1 entity match on a narrow food set is plausible. Portion estimation is inherently ±30% from language alone. Mitigation: ask when ambiguous, and the user confirms resolved foods before anything is saved. |
 | Can it scale? | **PASS** | Two model round trips per meal since 30 September, down from four; well under $0.05 a turn. The binding limit is not price but the deployment's tokens-per-minute quota, which one user never reaches and a back-to-back evaluation run does. |
@@ -796,7 +819,7 @@ applied there.
 
 | Release | Features | Duration |
 |---|---|---|
-| **MVP — V0, the demo** | Core loop (free text → verified numbers → verdict); verifier and visible tool trace; personal targets with derivation; safety gate; an evaluation set of 87 agent cases and 110 engine cases with reported accuracy; a memory store for food preferences on the advisor; a knowledge base over our own documents; in-app feedback form (rating and comment, no account) so the first users can answer back | Weeks 1–5 |
+| **MVP — V0, the demo** | Core loop (free text → verified numbers → verdict); verifier and visible tool trace; personal targets with derivation; safety gate; an evaluation set of 87 agent cases and 198 engine cases (resolution, clarification, safety phrasings, answer parsing, verifier) with reported accuracy; a memory store for food preferences on the advisor; a knowledge base over our own documents; in-app feedback form (rating and comment, no account) so the first users can answer back | Weeks 1–5 |
 | **MVP 1** | Persistent memory of preferences; single-slot menu regeneration and the menu returned to the product; frequent meals one tap; export and delete; ingredient GI values verified against their sources; packaged and restaurant foods added | +6 weeks |
 | **Launch** | Accounts and sync; photo logging; broad US food coverage including restaurant chains and packaged goods; clinical review of all copy; FDA general-wellness positioning confirmed with counsel | +3 months |
 | **Iteration** | CGM import; personalisation from measured glucose response; caregiver view; clinician summary | ongoing |
@@ -832,7 +855,7 @@ model or the food data. A run is a script — `npm run eval:agent` sends every
 case in `eval/cases.json` to the deployed agent, checks the mechanical
 expectations, and writes the transcript (`eval/agent-runs.jsonl`) and three
 Foundry uploads (all rows, the rows that used tools, and the rows that are not
-refusals). 87 cases, 191 of 193 checks at the last run. Before the move to
+refusals). 87 cases, 191 of 193 checks at the run of 30 September (191 of 191 on 5 October, 180 of 183 on 8 October). Before the move to
 Foundry this was hand work: ask each question in the app, download the answers,
 reconcile them.
 
@@ -1075,7 +1098,7 @@ than incidental (a whole cuisine, a whole food category).
 **Two things stand before the measurement launch, and both are written down
 rather than intended.** `docs/CLINICAL_REVIEW.md` puts every decision the
 product makes about a person in front of a diabetologist or dietitian —
-seventeen questions, forty minutes, with the glycemic-load ceiling, the
+twenty questions, forty minutes, with the glycemic-load ceiling, the
 0.8 g/kg protein cap applied without knowing a stage, and the silence at a
 stated glucose under 70 named as the ones we most want challenged.
 `docs/USER_SESSIONS.md` is the protocol for five moderated sessions on the
@@ -1207,7 +1230,7 @@ stated in the PRD so the number is never quoted without it.
 | Purpose | Now | What V1 needs |
 |---|---|---|
 | Food coverage | 6,054 records. 13% of the food phrases in the test set still resolve to nothing, down from 18% before the coverage layer was loaded | Branded and restaurant items — Oreos, a KIND bar, a Starbucks frappuccino — which have no published glycemic index at all. See the open decision below |
-| Resolution ground truth | 110 labelled phrases, of which 10 were added the day the coverage layer arrived and 4 record foods we still do not have | 300–500, drawn from what users actually type rather than what we imagined. The five moderated sessions are the mechanism: every phrase a participant types that we cannot resolve becomes a case that week |
+| Resolution ground truth | 114 labelled phrases (95 resolution, 19 clarification), of which 10 were added the day the coverage layer arrived and 4 record foods we still do not have | 300–500, drawn from what users actually type rather than what we imagined. The five moderated sessions are the mechanism: every phrase a participant types that we cannot resolve becomes a case that week |
 | Agent behaviour | 19 HHH cases | 40–60, with every safety phrasing the gate has ever missed |
 | GI verification | 88 ingredients cross-checked | All 350, each against its cited source, before anything is shown outside the demo |
 
@@ -1238,7 +1261,7 @@ loop that tunes them:
 | Surface | What gets tuned | Re-measured by |
 |---|---|---|
 | System prompt | Answer format, clarify policy, safety wording | The agent cases — every prompt change re-runs them |
-| Resolution thresholds | `HIGH_MIN` 0.66, `HIGH_GAP` 0.05, `LOW_MAX` 0.60 | The 108 engine cases, in seconds |
+| Resolution thresholds | `HIGH_MIN` 0.66, `HIGH_GAP` 0.05, `LOW_MAX` 0.60 | The 198 engine cases, in seconds |
 | Alias layer | Everyday names that embeddings miss ("spaghetti" → pasta, not spaghetti squash) | The same cases, plus every new `unknown` |
 | Food data | New records, corrected values | `validate.py` plus the GI cross-check |
 
@@ -1418,7 +1441,7 @@ a weight printed beside a food is the weight it was costed at; the Foundry
 judges reported with their spread, since task adherence moves four or five rows
 between runs of the same agent; resolution 83 of 83 on the engine's own set,
 *reported with its method*, on a narrow set, never as a headline; the share of
-phrases that resolve to nothing — 13%, and what they are; latency p90 6.2 s
+phrases that resolve to nothing — 13%, and what they are; latency p90 6.2 s on 30 September and 8.2 s on 8 October
 against a 10 s target,
 **with the régime it was measured in stated next to it** — one user with
 pauses, not a back-to-back run, which queues against the per-minute token quota
@@ -1527,7 +1550,7 @@ them describe us:
 | Condition | Us |
 |---|---|
 | **Factual knowledge acquisition** | Exactly what we must not do. Glycemic values belong in a table with a source and a date, not in weights |
-| **Limited training data** | 108 labelled engine cases and 19 agent cases. Enough to *evaluate*, nowhere near enough to *train* |
+| **Limited training data** | 114 labelled engine phrases and 87 agent cases. Enough to *evaluate*, nowhere near enough to *train* |
 | **Short-term task retention** | The day's budget and a person's preferences change hourly; that is state, not a weight |
 | **Computational constraints** | One person, five weeks, a free Azure trial. Even LoRA's modest cost is real when nothing else in the stack needs a GPU |
 | Task domain mismatch | The one that does *not* apply: food language is a genuine domain, which is why the next section exists |
