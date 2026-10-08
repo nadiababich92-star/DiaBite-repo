@@ -379,6 +379,26 @@ operating at N active users, using the per-question and fixed figures).
 
 ---
 
+## 9b. A dietitian's read of the market, 8 October
+
+A registered dietitian and certified diabetes educator who runs a diabetes
+wellness business in the US replied to the outreach. Recorded here because it
+bears on four assumptions in this document and in the financial plans.
+
+| What he said | What it changes |
+| --- | --- |
+| Strong apps (MacroFactor, Cronometer, MyFitnessPal, Lose It) cost about **$60 to $80 a year**; some insurers give patients free meal-scanning apps; pumps and CGMs ship their own apps | The price anchor is about $5 to $7 a month. The plan's $14.99 a month (about $180 a year) is two to three times it. At $6.99 a month, a net of €10,000 a month needs about 2,750 paying users (55,000 registered at 5% conversion), against 1,095 at $14.99 |
+| In the US anyone diagnosed with diabetes or obesity is referred to a registered dietitian, covered by insurance and Medicare, and dietitians recommend tracking apps | The dietitian is the channel (the plan already named clinicians and dietitians as the only affordable one) and also the gatekeeper. The product has to be something a dietitian would recommend, which makes a clinician-facing summary (WS10, not underwritten) a candidate to move up |
+| "Most people who start scanning their meals stop after a few months" | Retention is the risk to test, not assume. DiaBite asks at the moment of a decision rather than logging every meal, which may help, but week-4 retention is unmeasured |
+| GLP-1 drugs are the biggest trend; people with type 2 diabetes on them use any nutrition app | The GLP-1 segment is where attention is; the product already raises the protein floor for it and the lean-mass question (Q19) is open. A hypothesis to test in the sessions, not a pivot |
+| Someone with kidney failure, heart disease and diabetes needs safe advice for all three at once | Agrees with the risk already recorded. Today the product is cautious rather than comprehensive: a protein cap for kidney disease and a referral when asked |
+| He read the outreach as "an app that scans carbohydrates" | The pitch message did not say what makes DiaBite different: no scanning and no tracking, a verdict at the moment of choice, with the arithmetic shown |
+
+**What to do with it:** ask dietitians directly what would make them recommend an
+app and what would make them stop; test a price near the market anchor in the
+sessions and the beta; keep the product claim to "a verdict and the arithmetic
+at the moment of choice", not "a nutrition app".
+
 ## 10. Costing
 
 The first calculation is in `docs/COST-post-course.md`: the work to launch in
