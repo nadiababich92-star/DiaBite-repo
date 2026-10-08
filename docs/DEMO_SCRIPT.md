@@ -229,3 +229,46 @@ No, and it says so before any number, in the banner that never leaves the
 screen. It refuses dosing, escalates red-flag symptoms, and declines to set
 targets for pregnancy, kidney disease or a history of disordered eating —
 that last one deterministically, before the model sees the question.
+
+---
+
+## The three-minute recording
+
+The pitch template asks for a recording of **under three minutes** in place of
+the live demo. This is the cut of the five beats that fits, about **2 min 50 s**,
+with the dead time between a question and its answer edited out (an answer takes
+5 to 15 seconds; a recording does not have to wait for it).
+
+**Before you press record**
+
+1. Open the hosted address, not a dev server. Ask any question and discard it, so
+   the whole chain has answered once today.
+2. The profile is the one in "Before you start" above: type 2 diabetes, peanut
+   allergy, a budget of 48 GL, one breakfast logged. A day at zero looks like a
+   fresh install.
+3. Set the browser to a normal window, zoom 100%, dark and light as you prefer but
+   not changing mid-recording. Close other tabs and notifications.
+4. **Do one full silent rehearsal** with the screen recorder running. The model
+   writes a slightly different answer each time: the burrito bowl came back at 41.2
+   and at 45.5 glycemic load on two runs the same day. Do not read a figure aloud;
+   say what it means ("it fits, with very little left").
+5. Record at 1080p with the microphone check first. Keep a second take.
+
+**The cut**
+
+| Time | On screen | Say |
+|---|---|---|
+| 0:00 – 0:20 | The app, the budget line, the three sample questions | "People with type 2 diabetes ask one question five to seven times a day: can I eat this? DiaBite answers it from a sentence, and every number in the answer is computed, not generated." |
+| 0:20 – 1:10 | Type **Burrito bowl with white rice, black beans, chicken and guacamole**. The answer card. Click **Show calculation** and hold still for two seconds | While it thinks: "This is how people really talk about food. Not 180 grams of cooked rice." On the card: "It fits, with very little left, and it names the white rice as the driver and offers one swap." On the receipt: "Every line came from a database and a formula. The model chose none of these numbers." Point at the source line: "checked" or "unverified", and say so |
+| 1:10 – 1:35 | **Two eggs, avocado and a slice of rye bread** | "'Two' counts as two: the reason says 110 grams of egg. Two weeks ago two eggs resolved to nothing and the total was confidently wrong. A model judge found that, not a person." |
+| 1:35 – 2:05 | **A slice of grandma's kugel** | "This is the one to remember. It does not have kugel. It could have picked a noodle casserole and given you a number that looks reasonable. For someone deciding what to eat with diabetes, a confident wrong number is worse than none, so it says it does not know and asks." |
+| 2:05 – 2:25 | **How many units of insulin should I take before pasta?** The refusal arrives at once | "That never reached a model. Dosing questions are caught by rules before anything generative sees them, because a refusal that depends on a model behaving is not a refusal." |
+| 2:25 – 2:50 | The address on screen | "Three agents on Azure AI Foundry, a deterministic engine, a verifier on every answer. Next: five people with diabetes using it, and clinicians taking the logic apart. The address is on screen." |
+
+**Leave out of the recording:** the brown against white rice beat (it needs time to
+explain the second agent), "baked potato", "french fries", "pizza" and
+"avocado toast", and any brand name.
+
+**If a take goes wrong** (an answer takes over twenty seconds, or a question comes
+back with a different shape): stop, wait a minute, and take it again. Azure had one
+bad ten minutes on 8 October; it did not repeat.
