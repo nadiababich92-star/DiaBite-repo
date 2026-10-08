@@ -71,21 +71,69 @@ review, which is worth something on its own.
 
 ## 5. What it costs to run
 
-**Today (measured):** about **€16 a month** fixed, an always-on replica and the
-registry, plus **€0.0026 per question** in model charges.
+### What the calculator counts, and what DiaBite is billed for
 
-**At launch (assumed):** two replicas for availability, a managed Redis for the
-limits and sessions, monitoring, a paid Supabase tier, a domain and email.
-**About €80 – €150 a month fixed.**
+The Azure Pricing Calculator adds up more than tokens: the model's input and
+output, the cached part of the context, storage for a knowledge base, tool calls,
+compute and the registry. Checked against the 18 meters Azure actually billed
+for 20 September to 8 October:
+
+| The calculator's line | What DiaBite is billed |
+|---|---|
+| **Context** (input tokens, the cached part at a tenth of the price) | Counted: about 4,900 tokens in per question for the meal or advice agent, 74% of them cached |
+| **Output** | Counted: about 140 tokens |
+| **Memory** (the advisor's memory store: extraction and recall run on a model and an embedding model) | Counted inside the same token meters; the embedding meter is €0.0012 in total |
+| **Knowledge base** (file search: vector storage, listed at about €0.09 a GB a day) | Not billed: two small documents |
+| **Tool calls to the engine** | Not a separate meter; the engine's own compute is the container |
+| **Compute, registry, logs** | Container Apps, Container Registry; log ingestion in the free band |
+
+So the **€0.0026 per question is a complete figure**: it is total billed model
+charges divided by questions, memory and context included, evaluation runs
+included. Rebuilt from list prices and the traced tokens it comes to €0.0017;
+the gap is retries, a second attempt when the verifier rejects, and the agent's
+own overhead. **Plan with the billed figure.** One caution: agent tools that
+are free or in preview today (memory, file search) can start to be billed, and
+nothing in this document protects against that except re-reading the bill.
+
+List prices used (Sweden Central, euros; the same source as the calculator):
+
+| Meter | Price |
+|---|---|
+| `gpt-5.4-mini` input / cached input / output, per 1M tokens | €0.66 / €0.066 / €3.96 |
+| `gpt-5.4-nano` input / cached input / output, per 1M tokens | €0.176 / €0.0176 / €1.10 |
+| Container Apps vCPU, idle | €0.000003 a second |
+| Container Apps memory, idle | €0.000003 per GiB-second |
+| Container Registry, Basic | €0.1466 a day (about €4.40 a month) |
+| Azure Redis, Basic C0 / Standard C0 | €0.0194 / €0.0484 an hour (about €14 / €35 a month) |
+
+### Today
+
+**About €26 a month fixed:** the replica is always on at 1 vCPU and 2 GiB, about
+€21 a month at list price (idle usage, less the monthly free grant), plus the
+registry at €4.40. The daily bills confirm it: Container Apps about €0.70 on
+every day it ran, the registry €0.147. An earlier line in this repository said
+"about €16"; that was divided over a period in which the replica was not on
+every day, and was too low.
+
+### At launch  *(Azure lines at list price, the rest assumed)*
+
+| Line | Per month |
+|---|---|
+| Container Apps, two replicas for availability | about €43 |
+| Container Registry | €4.40 |
+| Redis for sessions and limits: Basic, or Standard with a replica | €14 – €35 |
+| Supabase Pro (assumed from the US price; check the page) | about €23 |
+| Domain, email, monitoring alerts (assumed) | €5 – €15 |
+| **Fixed** | **about €90 – €125** |
 
 Model charges grow with use. At the draft plan's 135 questions a month for a
 paying user, and a lighter 40:
 
 | Active users | Model charges, 135 q / month each | Model charges, 40 q / month each | Fixed | Model share of the bill |
 |---|---|---|---|---|
-| 100 | €35 | €10 | €80 – 150 | under a quarter |
-| 1,000 | €351 | €104 | €80 – 150 | the larger part |
-| 10,000 | €3,510 | €1,040 | €80 – 150 | nearly all |
+| 100 | €35 | €10 | €90 – 125 | about a quarter |
+| 1,000 | €351 | €104 | €90 – 125 | the larger part |
+| 10,000 | €3,510 | €1,040 | €90 – 125 | nearly all |
 
 A paying user costs about **€0.35 a month** in model charges, a tenth of the
 $2.11 the draft financial plan assumed. Photo logging is not included: a vision
@@ -101,7 +149,7 @@ the dollar, assumed), minus model charges of €0.35 and a card fee of about €
 (2.9% plus 30 cents, assumed rates), each paying user leaves about **€17.1 a
 month** to pay for everything else.
 
-- **Running costs:** about **9 paying users** cover €150 of fixed monthly cost.
+- **Running costs:** about **8 paying users** cover €125 of fixed monthly cost.
 - **Launch spend:** the same €17.1 has to repay what was spent to launch:
 
 | Launch spend | Paying user-months to repay it |

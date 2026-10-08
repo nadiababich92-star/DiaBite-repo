@@ -118,7 +118,7 @@ Billed cost for the same period, from Cost Management: about **€5.03** for
 `gpt-5.4-mini` (input €2.66, output €2.07, cached input €0.30), so roughly
 **€0.0026 per question**, evaluation runs included. The router is too small to
 appear among the larger meters. Next to it, in the same weeks: Container Apps
-idle compute €7.6 (the single replica is always on), the registry €2.26, and
+idle compute €7.6 over the period (the replica was not on every day; on a day it runs it is about €0.70, so about €21 a month at list price), the registry €2.26, and
 €5.3 of the Foundry evaluation judge (`gpt-5-mini`), plus €7.3 of `gpt-4o` from
 the earlier agent versions and their evaluations.
 

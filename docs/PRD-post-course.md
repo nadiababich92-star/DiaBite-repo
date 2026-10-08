@@ -32,7 +32,7 @@ Measured on 8 October 2026 against the running service.
 | Quality | Food resolution 95/95, clarification 19/19, safety phrasings 63/63, answer parsing 9/9, verifier 12/12; live agent 180/183 checks on 8 October (191/191 on 5 October); answer time median 4.7 s, p90 8.2 s |
 | Safety | Rules before any model (dosing, red flags, fasting, referral); public route limited per address, per conversation and per day; browser headers; secrets held as secrets |
 | Hosting | One container on Azure Container Apps serving app and engine at a permanent address; image built by GitHub Actions; deploy is a human step on purpose |
-| Cost, measured | About €0.0026 per question in model charges; about €16 a month fixed (always-on replica and registry) |
+| Cost, measured | About €0.0026 per question in model charges; about €26 a month fixed (always-on replica and registry, at list price) |
 | Validation | Three physicians hold the review pack; the first review changed the product within a day; no clinician has signed off |
 | Users | None yet beyond the owner. Five moderated sessions are written and not scheduled |
 
@@ -343,7 +343,7 @@ known.
 | Line | Known |
 |---|---|
 | Model charges per question | **€0.0026**, measured from traces and Cost Management (`docs/monitoring.md`); photo calls unmeasured |
-| Azure fixed cost | **About €16 a month** now (always-on replica, registry); a second replica and Redis add to it |
+| Azure fixed cost | **About €26 a month** now (always-on replica, registry); a second replica and Redis take it to roughly €90–125 |
 | Azure Pricing Calculator | to be filled from the table in the previous step |
 | Supabase | Free today; the paid tier's price to be taken from the Supabase pricing page |
 | Dietitian | draft plan: $3.0k a month on contract; hours here to be quoted |
