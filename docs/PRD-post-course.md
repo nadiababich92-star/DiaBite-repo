@@ -313,7 +313,7 @@ WS10 is not in the total.
    off, on for sessions).
 6. **Feedback spam:** worth a control before the sessions?
 7. **Whether a push deploys by itself.**
-8. **Whether clinicians are paid,** and whether sessions have an incentive.
+8. ~~Whether clinicians are paid.~~ **Answered 8 October:** the owner pays no one today and will need consultants and developers later. The cost calculation therefore prices three ways of splitting the work between the owner and bought help (`docs/COST-post-course.md`); whether session participants get an incentive is still open.
 9. **Which price to test,** after the finance work (the draft plan proposes
    $19.99 a month or $149 a year; it was built on costs about six times too
    high).
@@ -352,7 +352,7 @@ known.
 | Commercial food or GI data | none chosen; USDA sources are free |
 | Payments, email, domain, analytics | standard rates to be looked up once the price is chosen |
 | The builder's time | **~95–122 working days**; its price is the owner's to set, as an hourly cost or as an opportunity cost |
-| Clinician advisors | unpaid today |
+| Clinician advisors | unpaid today; the owner pays no one now and expects to need outside help later (see section 11) |
 
 Two ways to total it, both worth doing: **to launch** (WS0–WS4, WS6–WS9, the
 effort above plus the lines that need quotes) and **to run** (the monthly cost of
@@ -379,7 +379,30 @@ operating at N active users, using the per-question and fixed figures).
 
 ---
 
-## 10. Traceability
+## 10. Costing
+
+The first calculation is in `docs/COST-post-course.md`: the work to launch in
+days, what has to be bought either way, three ways to split the build, and what
+it costs to run. Its price ranges for outside specialists are **assumptions to be
+replaced by quotes**.
+
+## 11. People and outside help
+
+None of this is hired today. What is needed, when, and what it unblocks:
+
+| Who | For | Needed from | Form |
+|---|---|---|---|
+| Clinical advisors (physicians, dietitians) | WS1, WS4, WS6: answers, copy review | now | unpaid today; a paid advisory arrangement may be needed at launch |
+| Registered dietitian | WS2 ingredient GI verification; sign-off on safety copy | phase 2 | part-time contract |
+| Counsel (US health products, privacy, EU data protection) | WS3, WS6: FDA general-wellness position, privacy policy, terms | **ask now**: the slowest and gates three workstreams | one engagement, then on call |
+| Developer(s) | WS3, WS7, WS9 can be handed over; WS2 data ingestion | phase 3 | contractor, hybrid or outsourced (cost document, section 4) |
+| Designer | polish, empty states, accessibility fixes | phase 3 | short contract |
+| Accessibility auditor | WS6 | before launch | one audit |
+| Security tester | WS8 | before launch | one test |
+| Support and community | WS9 | at launch | part-time, later |
+| Nutrition-data operations; clinical and regulatory lead | keeping the data layer current; ongoing claims | after launch | the draft financial plan places these in months 16 and 19 |
+
+## 12. Traceability
 
 | This document | Source |
 |---|---|
