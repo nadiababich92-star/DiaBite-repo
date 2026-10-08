@@ -26,10 +26,11 @@ ever computed twice.
 
 ### Why Now?
 
-- **The population is huge and under-served.** 97.6M US adults have prediabetes
-  and over 80% don't know it; diet is first-line treatment, yet only a low
-  single-digit share of eligible Medicare beneficiaries ever use the nutrition
-  therapy they are entitled to. **[verify — CDC, ADA]**
+- **The population is huge and under-served.** 115.2M US adults have
+  prediabetes and 40.1M Americans have diabetes (CDC, September 2026); diabetes
+  cost the country $412.9B in 2022 (ADA). Diet is first-line treatment, yet only
+  a low single-digit share of eligible Medicare beneficiaries ever use the
+  nutrition therapy they are entitled to **[verify]**.
 - **The market has been educated.** ZOE, Levels and Nutrisense taught consumers
   what a glycemic response is — then gated it behind $100+/month sensors.
 - **The technology just became trustworthy.** Tool-calling models make

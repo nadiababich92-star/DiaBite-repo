@@ -118,13 +118,19 @@ prioritisation one:
 
 **The US population alone is enormous.**
 
-- 38.4 million Americans have diabetes — 11.6% of the population — and roughly
-  90% of it is type 2 **[verify — CDC National Diabetes Statistics Report]**.
-- 97.6 million US adults, more than one in three, have prediabetes. Over 80% of
-  them do not know it **[verify — CDC]**.
-- Diagnosed diabetes cost the United States $413 billion in 2022, of which
-  $307 billion was direct medical spend **[verify — ADA, Economic Costs of
-  Diabetes in the U.S.]**.
+- 40.1 million Americans have diabetes, diagnosed or not — 12.0% of the
+  population — and 29.1 million of them are diagnosed. 11.0 million (27.6% of
+  adults with diabetes) do not know they have it. *CDC, National Diabetes
+  Statistics Report, updated 16 September 2026, 2023 data. Checked 8 October
+  2026.* The report page does not state the share that is type 2; the earlier
+  "roughly 90%" is still **[verify]**.
+- 115.2 million US adults have prediabetes. *Same CDC report.* An earlier draft
+  said "over 80% of them do not know it"; the current report page does not
+  give that share, so it is removed until a primary source is found.
+- Diagnosed diabetes cost the United States $412.9 billion in 2022, of which
+  $306.6 billion was direct medical spend and $106.3 billion indirect. *ADA,
+  Economic Costs of Diabetes in the U.S. in 2022, Diabetes Care 2023. Checked
+  8 October 2026.*
 
 **Diet is not adjunctive here — it is the treatment.**
 
