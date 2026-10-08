@@ -162,6 +162,46 @@ The calculator's model lines rebuild the list-price figure to the cent (€0.001
 
 The estimate is not saved: saving and sharing in the calculator needs a Microsoft sign-in. To reproduce it, enter the table above, or use *Export* for a spreadsheet.
 
+## 5b. 1,000 people using it every day
+
+The question that matters for planning: what does a month cost when a thousand
+people use the app daily? Three intensities, using the billed **€0.0026 a
+question**. 4.5 a day is the draft plan's figure (five to seven eating decisions
+a day, not all asked of the app).
+
+| | 2 questions a day | **4.5 a day** | 7 a day |
+|---|---|---|---|
+| Questions a month | 60,000 | **135,000** | 210,000 |
+| Model charges | €156 | **€351** | €546 |
+| Azure fixed: two replicas, registry, Redis, alerts | €70 – 100 | **€70 – 100** | €80 – 110 |
+| Supabase Pro, domain, email (assumed) | €33 | **€33** | €33 |
+| **Total a month** | **about €275** | **about €470** | **about €675** |
+| Per user a month | €0.28 | **€0.47** | €0.68 |
+
+Payment fees are not in it: they are a share of whatever is charged, about €0.80
+on a $19.99 subscription. At $19.99 each paying user leaves about €17.5 after
+model charges and the card fee, so **about 27 paying users out of 1,000 (2.7%)
+cover the whole running bill at 4.5 questions a day**, if every one of the
+thousand used it that much. It leaves out people, which at this size is the larger
+cost: support, a dietitian keeping the data layer current, clinical review, legal
+upkeep.
+
+**What has to change before real traffic of this size** (none of it is done):
+
+1. **The daily ceiling.** `ASK_DAILY_CEILING` is 1,000 model turns a day, set to
+   protect the budget when a question was thought to cost far more. At 4,500
+   questions a day it would stop the app after about a fifth of the day's
+   users. Raise it to about 10,000 (a worst-day bill of roughly €26).
+2. **Two replicas need Redis first** (workstream 7). Sessions, the parked day
+   state and the limits are in memory on the one replica; a second replica
+   would answer a tool call for a day state parked on the first.
+3. **The model quota.** The `gpt-5.4-mini` deployment allows 200,000 tokens a
+   minute, about 40 questions a minute. At 1,000 daily users the peak is around
+   10 a minute, a quarter of it. About 4,000 daily users would need a larger
+   quota.
+4. **Per-user limits** for any free tier need accounts; today the limits are
+   per address and per conversation.
+
 ## 6. What a subscription would have to earn
 
 Not a price recommendation: the price is the owner's decision and the finance
