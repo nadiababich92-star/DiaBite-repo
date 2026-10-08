@@ -239,194 +239,226 @@ a { color: var(--accent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
+<style>
+/* ── v3 additions ─────────────────────────────── */
+.chip.meas { background: var(--low-bg); color: var(--low); }
+.chip.scoped { background: var(--accent-soft); color: var(--accent); }
+.chip.ver { background: var(--mid-bg); color: var(--mid); }
+.thesis {
+  border: 2px solid var(--ink); background: var(--surface);
+  padding: 26px 28px; margin: 30px 0; max-width: var(--measure);
+}
+.thesis p { font-family: var(--serif); font-size: 21px; line-height: 1.42; margin: 0; letter-spacing: -0.012em; }
+.thesis p + p { margin-top: 14px; font-size: 16px; font-family: var(--sans); color: var(--ink-2); }
+.ask {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  border: 2px solid var(--ink); background: var(--surface); margin: 30px 0 34px;
+}
+.ask > div { padding: 24px 26px; border-right: 1px solid var(--rule); }
+.ask > div:last-child { border-right: none; }
+.ask h5 { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; margin: 0 0 10px; font-weight: 500; color: var(--ink-3); }
+.ask .amt { font-family: var(--serif); font-size: 34px; font-weight: 700; letter-spacing: -0.025em; margin: 0; line-height: 1; font-variant-numeric: tabular-nums; }
+.ask .sub { font-family: var(--mono); font-size: 12px; color: var(--ink-3); margin: 10px 0 0; }
+.ask .note2 { font-size: 14px; color: var(--ink-2); margin: 12px 0 0; line-height: 1.5; }
+@media (max-width: 720px) { .ask > div { border-right: none; border-bottom: 1px solid var(--rule); } .ask > div:last-child { border-bottom: none; } }
+.ln-up { stroke: var(--mid); stroke-width: 1.6; fill: none; stroke-dasharray: 5 3; }
+.ln-dn { stroke: var(--high); stroke-width: 1.6; fill: none; stroke-dasharray: 2 3; }
+tr.flag td { background: var(--high-bg); }
+tr.flag td.neg { color: var(--high); font-weight: 600; }
+tr.hi td { background: var(--accent-soft); }
+.channels { counter-reset: ch; list-style: none; padding: 0; margin: 26px 0 30px; max-width: var(--measure); }
+.channels li { counter-increment: ch; position: relative; padding-left: 46px; margin-bottom: 22px; }
+.channels li::before {
+  content: counter(ch); position: absolute; left: 0; top: 1px;
+  font-family: var(--mono); font-size: 12px; color: var(--accent);
+  border: 1px solid var(--accent); width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+}
+.channels h4 { margin: 0 0 6px; font-size: 15.5px; }
+.channels p { margin: 0; }
+.risk-h { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 46px 0 10px; }
+.risk-h h3 { margin: 0; }
+</style>
 
 <div class="page">
 
 <header class="masthead">
-  <p class="kicker">Financial Plan · 36-month operating model</p>
+  <p class="kicker">Financial Plan · Seed round · Confidential</p>
   <h1>DiaBite</h1>
-  <p class="standfirst">What it costs to run an agent that is forbidden from doing arithmetic — and what that buys.</p>
+  <p class="standfirst">An agentic nutrition copilot for type&nbsp;2 diabetes. The architecture is built, deployed and measured — the seed buys distribution.</p>
   <div class="byline">
     <span><b>Author</b> Nadia Babich</span>
-    <span><b>Date</b> 1 September 2026</span>
-    <span><b>Status</b> Draft for review</span>
+    <span><b>Date</b> 8 October 2026</span>
     <span><b>Currency</b> USD</span>
     <span><b>Market</b> United States</span>
-    <span><b>Companion to</b> PRD, Week 1</span>
+    <span><b>Cost base</b> European Union</span>
+    <span><b>Horizon</b> 36 months</span>
   </div>
 </header>
 
 <div class="note">
-  <p>Every number here is either <span class="chip dec">decided</span> — a choice already made — <span class="chip mod">modelled</span> — computed from the assumptions in §2 and reproducible from them — or <span class="chip est">estimate</span>, a benchmark carried in from outside and <strong>not yet verified against a primary source</strong>.</p>
-  <p>Estimates are the weak joints of this plan. They are listed together in §12, and nothing here should be shown to an investor until that section is closed. Price is a <span class="chip est">proposed</span> recommendation, not yet a decision — §3 gives the reasoning and what changes at $14.99 and $9.99.</p>
+  <p><strong>Provenance.</strong> Every figure is marked. <span class="chip meas">measured</span> comes from Azure Cost Management and production traces over 1,941 live agent questions. <span class="chip scoped">scoped</span> is a size in working days from the engineering plan. <span class="chip est">assumed</span> has no measurement behind it yet.</p>
+  <p><strong>There are no users, so every growth figure is assumed</strong> — §13 lists them with the evidence that will replace each one. Market figures carry <span class="chip ver">to verify</span> until re-checked against the primary source.</p>
 </div>
 
 <nav class="toc">
   <h2>Contents</h2>
   <ol>
-    <li><a href="#summary">1 · Summary</a></li>
-    <li><a href="#assumptions">2 · Assumption register</a></li>
-    <li><a href="#pricing">3 · Pricing</a></li>
-    <li><a href="#agentcost">4 · What the agent costs to run</a></li>
+    <li><a href="#summary">1 · Executive summary</a></li>
+    <li><a href="#state">2 · What the seed is not paying for</a></li>
+    <li><a href="#market">3 · Market</a></li>
+    <li><a href="#model">4 · Business model</a></li>
     <li><a href="#unit">5 · Unit economics</a></li>
-    <li><a href="#pnl">6 · Three-year P&amp;L</a></li>
-    <li><a href="#costs">7 · Cost structure</a></li>
-    <li><a href="#funding">8 · Funding and runway</a></li>
-    <li><a href="#gates">9 · Spend gates</a></li>
-    <li><a href="#scenarios">10 · Scenarios</a></li>
-    <li><a href="#risks">11 · Risks with a price</a></li>
-    <li><a href="#verify">12 · Before this goes to anyone</a></li>
+    <li><a href="#growth">6 · Growth model</a></li>
+    <li><a href="#pnl">7 · Projections</a></li>
+    <li><a href="#team">8 · Team and the EU cost base</a></li>
+    <li><a href="#scenarios">9 · Scenarios</a></li>
+    <li><a href="#raise">10 · The raise</a></li>
+    <li><a href="#beyond">11 · Beyond year three</a></li>
+    <li><a href="#risks">12 · Risks</a></li>
+    <li><a href="#assumptions">13 · Assumptions</a></li>
   </ol>
 </nav>
 
 <section id="summary">
   <p class="eyebrow">Section one</p>
-  <h2 class="sec">Summary</h2>
+  <h2 class="sec">Executive summary</h2>
 
-  <p>DiaBite is a subscription consumer-health product with an agentic AI core. Its financial shape follows directly from two decisions already made in the PRD: the deterministic engine does the arithmetic — so the model is called for <em>understanding</em>, not for computation, which keeps inference cost at 13% of revenue — and the market is the United States, so pricing is direct-pay and compared against a medication copay rather than against a fitness app.</p>
+  <p>DiaBite answers one question for people with type 2 diabetes, prediabetes or insulin resistance — <em>can I eat this, how much, and with what?</em> — in seconds, from a sentence of plain English. A language model reads the meal and plans the work; a deterministic engine computes every number; a verifier rejects any answer containing a figure no tool returned. The user gets a verdict, the number behind it, a reason, and the arithmetic one tap away.</p>
 
   <div class="kpis">
-    <div class="kpi"><p class="k">Blended ARPU</p><p class="v">$16.58</p><p class="s">per month</p></div>
-    <div class="kpi"><p class="k">Gross margin</p><p class="v">79.4%</p><p class="s">at scale</p></div>
-    <div class="kpi"><p class="k">LLM per paid user</p><p class="v">$2.11</p><p class="s">13% of ARPU</p></div>
-    <div class="kpi"><p class="k">LTV</p><p class="v">$252</p><p class="s">19.1-month blended life</p></div>
-    <div class="kpi"><p class="k">LTV / CAC</p><p class="v">3.5<span style="font-size:20px">x</span></p><p class="s">paid channel, Y2</p></div>
-    <div class="kpi"><p class="k">Year 3 ARR</p><p class="v">$7.25M</p><p class="s">37,400 subscribers</p></div>
-    <div class="kpi"><p class="k">EBITDA-positive</p><p class="v up">M35</p><p class="s">base case</p></div>
-    <div class="kpi"><p class="k">Peak cash need</p><p class="v down">$3.01M</p><p class="s">cumulative</p></div>
+    <div class="kpi"><p class="k">Gross margin</p><p class="v up">91.5%</p><p class="s">COGS $1.41 of $16.58</p></div>
+    <div class="kpi"><p class="k">Inference / subscriber</p><p class="v">$0.38</p><p class="s">measured · 2.3% of revenue</p></div>
+    <div class="kpi"><p class="k">LTV</p><p class="v">$290</p><p class="s">19-month blended life</p></div>
+    <div class="kpi"><p class="k">LTV / CAC</p><p class="v">3.4<span style="font-size:20px">×</span></p><p class="s">paid channel, Y2</p></div>
+    <div class="kpi"><p class="k">Year 3 exit ARR</p><p class="v">$11.5M</p><p class="s">58,900 subscribers</p></div>
+    <div class="kpi"><p class="k">EBITDA-positive</p><p class="v up">M30</p><p class="s">base case</p></div>
+    <div class="kpi"><p class="k">Peak cash</p><p class="v">$2.65M</p><p class="s">cumulative</p></div>
+    <div class="kpi"><p class="k">Year 5 ARR</p><p class="v">$40.6M</p><p class="s">0.36% of market</p></div>
   </div>
 
-  <p>The funding plan is a <strong>$2.5M seed at Month 1</strong> and a <strong>$6M Series A at Month 20</strong>, sized with a ~35% buffer over the base case because the conservative case consumes $4.85M.</p>
+  <h3>Three things make the economics unusual for consumer health</h3>
+  <ol class="body">
+    <li><strong>91.5% gross margin, measured not modelled.</strong> The model never produces a nutrition number, so it is never asked to reason its way to one. Inference costs <strong>$0.0028 a question in production</strong>. At 2.3% of revenue, inference pricing is not a line item that can threaten this business.</li>
+    <li><strong>US revenue on an EU cost base.</strong> Engineering, clinical and operations sit in the EU at roughly 60% of US loaded cost, against US consumer pricing. The plan reaches $11.5M ARR with 26 people and $2.65M of cumulative cash.</li>
+    <li><strong>The product exists.</strong> 6,054 foods, three agents in production, 285 evaluation cases, a verified rate of 100% across the most recent live run, p90 latency of 8.2 seconds. The seed buys distribution and clinical validation, not a first version.</li>
+  </ol>
 
-  <blockquote><p>The plan is product-led before it is spend-led. Months 1–6 buy a product and a defensible data layer, not users.</p></blockquote>
+  <div class="thesis">
+    <p>What the seed is actually for: finding out whether the people who need this will pay for it, at a cost of acquisition that works.</p>
+    <p>Everything else is either done or scoped in days.</p>
+  </div>
 
-  <p>Marketing scales in four steps — $8k, $25k, $55k, $110k a month — and every step is released by a metric, not by a date (§9). That is the structural answer to the one way products in this category reliably fail: weak retention, scaled.</p>
+  <div class="ask">
+    <div>
+      <h5>Seed — now</h5>
+      <p class="amt">$3.0M</p>
+      <p class="sub">19 months to the Series A</p>
+      <p class="note2">54% team, 28% marketing gated in four steps, 15% counsel and clinical validation.</p>
+    </div>
+    <div>
+      <h5>Series A — month 20</h5>
+      <p class="amt">$12M</p>
+      <p class="sub">at $2.18M ARR, growing ~3× yearly</p>
+      <p class="note2">Raised on proven CAC, a flattened cohort curve and a written FDA position — §10.</p>
+    </div>
+  </div>
 </section>
 
-<section id="assumptions">
+<section id="state">
   <p class="eyebrow">Section two</p>
-  <h2 class="sec">Assumption register</h2>
-  <p>Everything downstream is computed from this table. Change a row and the model moves.</p>
+  <h2 class="sec">What the seed is not paying for</h2>
+  <p>Measured 8 October 2026 against the running service.</p>
 
   <div class="tw">
     <table>
-      <caption>Revenue</caption>
-      <thead><tr><th>Assumption</th><th class="num">Value</th><th>Basis</th></tr></thead>
       <tbody>
-        <tr><td>Monthly price</td><td class="num">$19.99</td><td><span class="chip est">proposed</span> awaiting sign-off — see §3</td></tr>
-        <tr><td>Annual price</td><td class="num">$149</td><td><span class="chip est">proposed</span> 38% discount</td></tr>
-        <tr><td>Annual plan mix of new paid</td><td class="num">45%</td><td><span class="chip est">estimate</span></td></tr>
-        <tr><td>Free → paid conversion</td><td class="num">6.0 → 7.5%</td><td><span class="chip est">estimate</span> category runs 3–8%</td></tr>
-        <tr><td>Monthly-plan churn</td><td class="num">10 → 7% / mo</td><td><span class="chip est">estimate</span></td></tr>
-        <tr><td>Annual-plan renewal</td><td class="num">50 → 60%</td><td><span class="chip est">estimate</span></td></tr>
-        <tr><td>Free-tier churn</td><td class="num">12% / mo</td><td><span class="chip est">estimate</span></td></tr>
-        <tr><td>Upgrade from existing free base</td><td class="num">0.8% / mo</td><td><span class="chip est">estimate</span></td></tr>
+        <tr><td><strong>The promise</strong></td><td>Every number computed by a deterministic engine and checked by a verifier before display. No model produces a nutrition number</td></tr>
+        <tr><td><strong>Product</strong></td><td>Onboarding with derived targets, ask screen, diary, weekly menu generator, feedback, phone layout</td></tr>
+        <tr><td><strong>Agents</strong></td><td>Router, meal specialist with tools, advisor with memory and knowledge base — all in production on Azure AI Foundry</td></tr>
+        <tr><td><strong>Food catalogue</strong></td><td>6,054 foods: 351 verified ingredients, 1,000 recipes computing dish glycemic index deterministically from ingredients, 4,618 USDA survey foods</td></tr>
+        <tr><td><strong>Quality <span class="chip meas">measured</span></strong></td><td>Food resolution 95/95 · clarification 19/19 · safety phrasings 63/63 · verifier 12/12 · live agent 180/183 checks · p90 8.2 s, median 4.7 s</td></tr>
+        <tr><td><strong>Safety</strong></td><td>Deterministic rules run before any model: insulin dosing refused, red flags escalated, rate limits per address, conversation and day</td></tr>
+        <tr><td><strong>Clinical</strong></td><td>Three physicians hold a 20-question review pack; the first review changed the product within a day. <strong>No clinician has signed off yet</strong></td></tr>
+        <tr><td><strong>Cost <span class="chip meas">measured</span></strong></td><td>$0.0028 a question · $28 a month of fixed infrastructure</td></tr>
+        <tr class="flag"><td><strong>Users</strong></td><td><strong>None yet.</strong> Five moderated sessions written, not scheduled</td></tr>
       </tbody>
     </table>
   </div>
 
+  <p><strong>What is honestly not done:</strong> no accounts — the diary lives in the browser — no photo logging, 13% of typed foods resolve to nothing, mostly branded products with no published glycemic index, and the FDA general-wellness position is unconfirmed. Each is scoped in days in the engineering plan and funded below. Together they are <strong>83–106 working days <span class="chip scoped">scoped</span></strong> to a public launch.</p>
+</section>
+
+<section id="market">
+  <p class="eyebrow">Section three</p>
+  <h2 class="sec">Market</h2>
+
   <div class="tw">
     <table>
-      <caption>Acquisition</caption>
-      <thead><tr><th>Assumption</th><th class="num">Value</th><th>Basis</th></tr></thead>
       <tbody>
-        <tr><td>Blended cost per free signup</td><td class="num">$6.00 → $5.50</td><td><span class="chip est">estimate</span></td></tr>
-        <tr><td>Organic signups at launch</td><td class="num">500 / mo, +10%</td><td><span class="chip est">estimate</span></td></tr>
-        <tr><td>Channel mix</td><td class="num">—</td><td><span class="chip dec">decided</span> content &amp; SEO, condition communities, clinician and dietitian referral, contained paid-social test</td></tr>
+        <tr><td>US adults with diagnosed diabetes, ~90% type 2</td><td class="num">40.1M</td><td><span class="chip ver">to verify</span> CDC, Sept 2026</td></tr>
+        <tr><td>US adults with prediabetes</td><td class="num">115.2M</td><td><span class="chip ver">to verify</span> CDC</td></tr>
+        <tr><td>Annual US cost of diagnosed diabetes</td><td class="num">$412.9B</td><td><span class="chip ver">to verify</span> ADA</td></tr>
+        <tr class="total"><td><strong>Serviceable market</strong> — diagnosed T2D ~36M plus prediabetes that knows it ~23M</td><td class="num"><strong>59M</strong></td><td>people</td></tr>
+        <tr><td>Revenue per subscriber per year</td><td class="num"><strong>$199</strong></td><td>blended ARPU × 12</td></tr>
       </tbody>
     </table>
   </div>
 
-  <p>Channel mix is a financial decision, not a marketing one. Paid social at a $100 CAC against a $252 LTV is a 2.5x business that pays back in seven months — survivable, but not fundable at scale. Content and referral are what move the blended number, which is why the first growth hire is a <strong>growth and content lead</strong> rather than a performance marketer.</p>
+  <p>Diet is first-line treatment for type 2 diabetes, and medical nutrition therapy moves HbA1c by about as much as adding a drug <span class="chip ver">to verify</span>. The gap is delivery: structured programmes need human coaches and do not scale, and the software that does scale was built for calorie counting.</p>
+
+  <h3>The penetration this plan assumes is small enough to check by eye</h3>
 
   <div class="tw">
     <table>
-      <caption>Cost of revenue</caption>
-      <thead><tr><th>Assumption</th><th class="num">Value</th><th>Basis</th></tr></thead>
+      <thead><tr><th>&nbsp;</th><th class="num">Year 3 subscribers</th><th class="num">Share of the 59M</th></tr></thead>
       <tbody>
-        <tr><td>Agent interactions — paying user</td><td class="num">4.5 / day</td><td><span class="chip est">estimate</span> PRD: 5–7 eating decisions a day</td></tr>
-        <tr><td>Agent interactions — free user</td><td class="num">12 / mo</td><td><span class="chip dec">decided</span> hard cap 15 — the free tier's cost ceiling</td></tr>
-        <tr><td>Photo logging share of logs</td><td class="num">15%</td><td><span class="chip est">estimate</span> P1 feature, from M10</td></tr>
-        <tr><td>Infrastructure</td><td class="num">$0.35 / $0.08</td><td><span class="chip est">estimate</span> per paid / free MAU</td></tr>
-        <tr><td>Support</td><td class="num">$0.30</td><td><span class="chip est">estimate</span> per paid MAU</td></tr>
-        <tr><td>Payment processing</td><td class="num">4.0%</td><td>Stripe 2.9% + $0.30 on a ~$16 ticket</td></tr>
-        <tr><td>Food-data licensing</td><td class="num">$1.5k → $7k / mo</td><td><span class="chip est">estimate</span> source still open — §11</td></tr>
+        <tr><td>Conservative</td><td class="num">33,700</td><td class="num">0.057%</td></tr>
+        <tr class="hi"><td><strong>Base</strong></td><td class="num"><strong>58,900</strong></td><td class="num"><strong>0.100%</strong></td></tr>
+        <tr><td>Upside</td><td class="num">120,700</td><td class="num">0.205%</td></tr>
+        <tr class="total"><td>One percent of the serviceable market</td><td class="num">590,000</td><td class="num">$117M ARR</td></tr>
       </tbody>
     </table>
   </div>
 
-  <div class="note">
-    <p><strong>Web-first is worth 11–26 points of margin.</strong> The product is React + Vite on the web, so subscriptions run through Stripe at ~4% rather than an app store at 15–30%. Native apps are a Year 2+ decision and must be priced knowing they cost roughly <strong>$2.50 per subscriber per month</strong> in store fees.</p>
+  <h3>Competitive position</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>&nbsp;</th><th>What it does well</th><th>Where it fails this job</th></tr></thead>
+      <tbody>
+        <tr><td><strong>ZOE · Levels · Nutrisense</strong></td><td>Genuinely personalised through real glucose response; strong science brands</td><td>Gated behind a $100+/month sensor; answers what happened, not what to do next</td></tr>
+        <tr><td><strong>MyFitnessPal · Cronometer</strong></td><td>Enormous food databases, barcode scanning, micronutrient rigour</td><td>Calorie-first. No glycemic load, no verdict, and 3–5 minutes of work per meal</td></tr>
+        <tr><td><strong>A general-purpose chatbot</strong></td><td>Understands any meal described in any words, free</td><td>Generates nutrition numbers from memory — two different glycemic loads for the same meal, no daily budget, no safety envelope</td></tr>
+        <tr class="hi"><td><strong>DiaBite</strong></td><td>A verdict with the number behind it, computed and verifiable, in under 10 seconds</td><td>A tenth of the price of a CGM subscription, and the only one whose arithmetic a clinician can inspect</td></tr>
+      </tbody>
+    </table>
   </div>
 </section>
 
-<section id="pricing">
-  <p class="eyebrow">Section three</p>
-  <h2 class="sec">Pricing</h2>
+<section id="model">
+  <p class="eyebrow">Section four</p>
+  <h2 class="sec">Business model</h2>
 
   <div class="tw">
     <table>
       <thead><tr><th>Plan</th><th class="num">Price</th><th class="num">Per month</th><th class="num">Mix of new paid</th></tr></thead>
       <tbody>
         <tr><td>Monthly</td><td class="num">$19.99</td><td class="num">$19.99</td><td class="num">55%</td></tr>
-        <tr><td>Annual</td><td class="num">$149</td><td class="num">$12.42</td><td class="num">45%</td></tr>
+        <tr><td>Annual</td><td class="num">$149</td><td class="num">$12.42</td><td class="num">45% <span class="chip est">assumed</span></td></tr>
         <tr class="total"><td>Blended ARPU</td><td class="num">—</td><td class="num">$16.58</td><td class="num">100%</td></tr>
       </tbody>
     </table>
   </div>
 
-  <h3>The free tier is the proof, not the funnel</h3>
-  <p>Free gets the whole deterministic engine: logging with glycemic load and available carbohydrate, personal targets shown with their derivation, the weekly menu generator, the shopping list — plus 15 agent interactions a month. It costs <strong>$0.27 per user per month</strong> to run, $0.19 of that inference.</p>
-  <p>It exists because the deterministic half of the product is genuinely useful alone, and because it is the demonstration that the numbers can be trusted. Pro adds unlimited agent interactions under fair use, photo logging, adaptive re-planning, longitudinal memory of what was accepted and rejected, and export.</p>
+  <p><strong>Free tier.</strong> The entire deterministic engine — targets with their derivation, the diary, the safety envelope, the weekly menu — plus 15 agent answers a month. It costs <strong>$0.043 per user per month <span class="chip meas">measured</span></strong>, which makes it the cheapest acquisition channel in the plan and, more importantly, the proof: a user can confirm the numbers are trustworthy before paying for anything.</p>
 
-  <h3>Why $19.99 and not $9.99 — a recommendation, not a decision</h3>
-  <p>The persona compares this against a medication copay, and the competitive set anchors far higher — ZOE and Nutrisense start in the hundreds because a CGM is in the box. At $19.99 DiaBite is a quarter of a CGM-first subscription and the cheapest credible thing in the category that answers <em>can I eat this</em>.</p>
-  <p>At $14.99 the model still works but Year 3 EBITDA turns negative and the Series A gets harder. At $9.99 paid acquisition stops paying back at all, and the plan reduces to a purely organic business.</p>
-  <p><strong>Deliberately not in the model:</strong> employer and payer channels, the clinician-facing view for dietitians, and any CGM hardware attach. Each is plausible Year 3 revenue; none is underwritten here.</p>
-</section>
+  <p><strong>Paid tier.</strong> Unlimited agent answers under fair use, photo logging, longitudinal memory of what was accepted and rejected, history and trends, export.</p>
 
-<section id="agentcost">
-  <p class="eyebrow">Section four</p>
-  <h2 class="sec">What the agent costs to run</h2>
-  <p>This is the number most AI-product financial plans get wrong, so it is built from the architecture in the PRD rather than from a rule of thumb. Prices are Anthropic list rates; cached input reads at 0.1&times; and cache writes at 1.25&times;.</p>
-
-  <div class="tw">
-    <table>
-      <caption>One "can I eat this?" interaction</caption>
-      <thead><tr><th>Step</th><th>Model</th><th class="num">Fresh in</th><th class="num">Cached in</th><th class="num">Out</th><th class="num">Cost</th></tr></thead>
-      <tbody>
-        <tr><td><code>resolve_foods</code> — text → entities + portions</td><td>Haiku 4.5</td><td class="num">350</td><td class="num">1,200</td><td class="num">180</td><td class="num">$0.00137</td></tr>
-        <tr><td>Agent loop — plan, call tools, narrate (2 calls)</td><td>Sonnet 5</td><td class="num">1,400</td><td class="num">5,000</td><td class="num">450</td><td class="num">$0.01055</td></tr>
-        <tr><td>Verifier — every number traced to a tool result</td><td>Haiku 4.5</td><td class="num">900</td><td class="num">600</td><td class="num">90</td><td class="num">$0.00141</td></tr>
-        <tr><td>Hard re-planning escalation (5% of turns)</td><td>Opus 5</td><td class="num">1,800</td><td class="num">5,000</td><td class="num">600</td><td class="num">$0.00133</td></tr>
-        <tr><td>Photo logging (15% of logs)</td><td>Sonnet 5, vision</td><td class="num">1,800</td><td class="num">1,200</td><td class="num">250</td><td class="num">$0.00095</td></tr>
-        <tr class="total"><td colspan="5">Total per interaction</td><td class="num">$0.0156</td></tr>
-      </tbody>
-    </table>
+  <div class="note">
+    <p><strong>On the price.</strong> $19.99 is one quarter of a CGM-first subscription and is the figure this plan is built on, because a paid-acquisition path needs the ARPU to support it. <strong>It has not been tested on a user.</strong> A $14.99 variant costs roughly four months of calendar; the price will be set from the five moderated sessions and the beta, before the first dollar of paid acquisition is spent.</p>
   </div>
 
-  <div class="tw">
-    <table>
-      <thead><tr><th>User</th><th class="num">Interactions / month</th><th class="num">LLM cost / month</th></tr></thead>
-      <tbody>
-        <tr><td>Paying</td><td class="num">135</td><td class="num"><strong>$2.11</strong></td></tr>
-        <tr><td>Free</td><td class="num">12</td><td class="num"><strong>$0.19</strong></td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h3>Three architectural decisions carry this number</h3>
-  <ol class="body">
-    <li><strong>The engine computes; the model narrates.</strong> Every gram and glycemic load comes from deterministic TypeScript. The model never reasons its way to a number, so it never needs a large thinking budget to do so. The safety argument in the PRD and the cost argument are the same argument.</li>
-    <li><strong>Model routing.</strong> Entity resolution and verification are classification work and run on Haiku 4.5. Only planning and narration need Sonnet 5; only genuinely hard re-planning escalates to Opus 5. Running the whole loop on Opus 5 would cost about $0.05 per interaction — <strong>$6.75 per paying user per month</strong>, tripling COGS and cutting gross margin from 79% to roughly 62%.</li>
-    <li><strong>Prompt caching.</strong> The system prompt, tool definitions, and user profile are a stable prefix read at 0.1&times;. Without caching, per-interaction cost rises about 40%. That makes prefix stability a <em>financial</em> requirement: no timestamps in the system prompt, deterministic tool ordering.</li>
-  </ol>
-
-  <div class="note warn">
-    <p><strong>Cost controls that have to be built, not hoped for:</strong> a hard monthly interaction ceiling on the free tier; a fair-use ceiling on Pro; a tool-call cap per turn, because a looping agent is an unbounded bill; and per-user cost telemetry in the same log line as the tool calls and verifier result that requirement E3 already demands.</p>
-  </div>
-
-  <p><strong>Price risk runs both ways.</strong> A doubling of inference prices costs five points of gross margin — survivable. The historical direction has been downward, and this model assumes no decline.</p>
+  <p><strong>Deliberately not in these projections:</strong> employer and payer channels, a clinician-facing view for dietitians and endocrinologists, CGM data import, and any market outside the US. Each is a credible second act. None is underwritten here.</p>
 </section>
 
 <section id="unit">
@@ -434,377 +466,502 @@ a { color: var(--accent); }
   <h2 class="sec">Unit economics</h2>
 
   <div class="decomp">
-    <p class="cap">Where $16.58 of monthly revenue goes</p>
-    <div class="bar" role="img" aria-label="Of $16.58 blended monthly ARPU: $2.11 LLM inference, $0.66 payment processing, $0.35 infrastructure, $0.30 support, leaving $13.16 gross profit.">
-      <span class="s-llm" style="width:12.7%"></span>
+    <p class="cap">Cost of goods per paying subscriber, per month</p>
+    <div class="bar" role="img" aria-label="Of $16.58 blended monthly ARPU: $0.66 payment processing, $0.38 inference, $0.25 support, $0.12 hosting, leaving $15.17 gross profit, or 91.5 percent.">
       <span class="s-pay" style="width:4.0%"></span>
-      <span class="s-inf" style="width:2.1%"></span>
-      <span class="s-sup" style="width:1.8%"></span>
-      <span class="s-gp"  style="width:79.4%"></span>
+      <span class="s-llm" style="width:2.3%"></span>
+      <span class="s-sup" style="width:1.5%"></span>
+      <span class="s-inf" style="width:0.7%"></span>
+      <span class="s-gp"  style="width:91.5%"></span>
     </div>
     <div class="key">
-      <span><i class="s-llm"></i>LLM $2.11</span>
       <span><i class="s-pay"></i>Payments $0.66</span>
-      <span><i class="s-inf"></i>Infra $0.35</span>
-      <span><i class="s-sup"></i>Support $0.30</span>
-      <span><i class="s-gp" style="border:1px solid var(--rule)"></i>Gross profit $13.16 — 79.4%</span>
+      <span><i class="s-llm"></i>Inference $0.38</span>
+      <span><i class="s-sup"></i>Support $0.25</span>
+      <span><i class="s-inf"></i>Hosting $0.12</span>
+      <span><i class="s-gp" style="border:1px solid var(--rule)"></i>Gross profit $15.17 — 91.5%</span>
     </div>
   </div>
 
+  <h3>Why inference is 2.3% of revenue and not 13%</h3>
+  <p>Three decisions, all made for safety and all paying a commercial dividend.</p>
+  <ul>
+    <li><strong>The engine computes; the model narrates.</strong> Every gram and glycemic load comes from deterministic code. The model is never asked to derive a number, so it never needs a long reasoning budget to do so.</li>
+    <li><strong>Three models, by role.</strong> A small, fast model routes. A mid-tier model reads meals and answers. Only the hardest re-planning escalates. Routing was chosen on evaluation results, not on price — and the evidence favoured the model that guessed less, which was also the cheaper one.</li>
+    <li><strong>74% of input tokens are served from cache <span class="chip meas">measured</span>.</strong> The system prompt, tool definitions and user profile are a stable prefix. Prefix stability is therefore an engineering rule, not an optimisation.</li>
+  </ul>
+  <p>A doubling of inference prices would cost <strong>1.1 points of gross margin</strong>. This is the line most AI-product plans get wrong in the other direction, and it is the one line here that is measured rather than forecast.</p>
+
   <div class="tw">
     <table>
-      <caption>Subscription life and LTV</caption>
-      <thead><tr><th>&nbsp;</th><th class="num">Monthly plan</th><th class="num">Annual plan</th><th class="num">Blended</th></tr></thead>
+      <caption>Retention and lifetime value <span class="chip est">assumed</span></caption>
+      <thead><tr><th>&nbsp;</th><th class="num">Year 1</th><th class="num">Year 2</th><th class="num">Year 3</th></tr></thead>
       <tbody>
-        <tr><td>Average subscription life</td><td class="num">12.5 mo</td><td class="num">27.3 mo</td><td class="num">19.1 mo</td></tr>
-        <tr class="total"><td>LTV — ARPU × margin × life</td><td class="num">$165</td><td class="num">$360</td><td class="num">$252</td></tr>
+        <tr><td>Monthly-plan churn</td><td class="num">8.0%</td><td class="num">6.8%</td><td class="num">5.8%</td></tr>
+        <tr><td>Annual-plan renewal</td><td class="num">55%</td><td class="num">60%</td><td class="num">65%</td></tr>
+        <tr><td>Blended subscription life</td><td class="num">16.4 mo</td><td class="num">19.1 mo</td><td class="num">22.2 mo</td></tr>
+        <tr class="total"><td>LTV</td><td class="num">$249</td><td class="num">$290</td><td class="num">$337</td></tr>
       </tbody>
     </table>
   </div>
+
+  <p><strong>The annual plan is the retention strategy.</strong> It is 45% of new subscriptions and carries roughly twice the lifetime of a monthly one. An annual-first onboarding offer, timed to the 90-day window after diagnosis when motivation is highest, is the single highest-leverage retention lever in the plan — ahead of any product feature.</p>
 
   <div class="tw">
     <table>
       <caption>Acquisition efficiency</caption>
       <thead><tr><th>&nbsp;</th><th class="num">Year 1</th><th class="num">Year 2</th><th class="num">Year 3</th></tr></thead>
       <tbody>
-        <tr><td><strong>CAC — paid channel only</strong></td><td class="num">$100</td><td class="num">$71</td><td class="num">$73</td></tr>
-        <tr><td class="lbl-sub">LTV / CAC</td><td class="num">2.5×</td><td class="num">3.5×</td><td class="num">3.4×</td></tr>
-        <tr><td class="lbl-sub">Payback</td><td class="num">7.6 mo</td><td class="num">5.4 mo</td><td class="num">5.6 mo</td></tr>
-        <tr><td>CAC — blended with organic</td><td class="num">$50</td><td class="num">$41</td><td class="num">$41</td></tr>
-        <tr><td class="lbl-sub">LTV / CAC</td><td class="num">5.0×</td><td class="num">6.1×</td><td class="num">6.1×</td></tr>
+        <tr class="hi"><td><strong>CAC — paid channel only</strong></td><td class="num"><strong>$117</strong></td><td class="num"><strong>$86</strong></td><td class="num"><strong>$100</strong></td></tr>
+        <tr><td class="lbl-sub">LTV / CAC</td><td class="num">2.5×</td><td class="num">3.4×</td><td class="num">2.9×</td></tr>
+        <tr><td class="lbl-sub">Payback</td><td class="num">7.7 mo</td><td class="num">5.6 mo</td><td class="num">6.6 mo</td></tr>
+        <tr><td>CAC — blended with organic</td><td class="num">$79</td><td class="num">$57</td><td class="num">$65</td></tr>
+        <tr><td class="lbl-sub">LTV / CAC</td><td class="num">3.7×</td><td class="num">5.1×</td><td class="num">4.5×</td></tr>
       </tbody>
     </table>
   </div>
 
-  <p><strong>Read the paid-channel row, not the blended one.</strong> Blended CAC flatters the business by treating organic signups as free. It is the right number for reporting and the wrong number for deciding whether to spend — so the gates in §9 are set on the paid-channel figure.</p>
-
-  <p><strong>The annual plan is the retention strategy.</strong> A monthly subscriber is worth $165; an annual subscriber is worth $360. Anything that pushes annual mix past 45% — an annual-first onboarding offer, a 90-day price break tied to the diagnosis window the PRD identifies as peak motivation — moves LTV further than any change to the price itself.</p>
+  <p><strong>The paid-channel row is the one that governs decisions.</strong> Blended CAC flatters the business by treating organic signups as free; it is the right number for reporting and the wrong number for deciding whether to spend. Year 3's CAC rises as paid channels saturate — that is modelled, not an oversight, and it is the reason the organic channel is built first.</p>
 </section>
 
-<section id="pnl">
+<section id="growth">
   <p class="eyebrow">Section six</p>
-  <h2 class="sec">Three-year P&amp;L</h2>
+  <h2 class="sec">Growth model</h2>
+  <p>Three channels, in the order they are built.</p>
+
+  <ol class="channels">
+    <li>
+      <h4>Clinicians and dietitians</h4>
+      <p>Endocrinologists, primary-care physicians and RDs already see these patients and are already asked <em>what can I eat</em>. They have no good answer to hand out. Three physicians are engaged in clinical review today, and the review relationship is the beginning of the referral relationship. This is the channel the product's differentiator — showing the arithmetic — was built for, because it is the only one a clinician can inspect.</p>
+    </li>
+    <li>
+      <h4>Search and content</h4>
+      <p>The question has enormous, specific, low-competition long-tail volume: <em>glycemic load of X</em>, <em>can diabetics eat Y</em>. The food catalogue and the deterministic engine generate pages that are correct by construction, and every unresolved food a user types is logged and becomes both an evaluation case and a content target.</p>
+    </li>
+    <li>
+      <h4>Paid social and search</h4>
+      <p>Opened only once the first two establish a baseline and the gates in §10 are met. Modelled at a cost per registered signup of $7.00 improving to $6.00 <span class="chip est">assumed</span>.</p>
+    </li>
+  </ol>
 
   <div class="tw">
     <table>
-      <caption>Base case</caption>
       <thead><tr><th>&nbsp;</th><th class="num">Year 1</th><th class="num">Year 2</th><th class="num">Year 3</th></tr></thead>
       <tbody>
-        <tr><td>Paying subscribers, exit</td><td class="num">817</td><td class="num">9,535</td><td class="num">37,410</td></tr>
-        <tr><td>Free users, exit</td><td class="num">8,185</td><td class="num">65,682</td><td class="num">206,015</td></tr>
-        <tr><td>Exit ARR</td><td class="num">$160k</td><td class="num">$1.86M</td><td class="num">$7.25M</td></tr>
-        <tr><td><strong>Revenue</strong></td><td class="num"><strong>$45.7k</strong></td><td class="num"><strong>$936.6k</strong></td><td class="num"><strong>$4.52M</strong></td></tr>
-        <tr><td class="lbl-sub">Cost of revenue</td><td class="num">$26.7k</td><td class="num">$361.5k</td><td class="num">$1.48M</td></tr>
-        <tr><td><strong>Gross profit</strong></td><td class="num"><strong>$19.0k</strong></td><td class="num"><strong>$575.1k</strong></td><td class="num"><strong>$3.04M</strong></td></tr>
-        <tr><td class="lbl-sub">Gross margin</td><td class="num">41%</td><td class="num">61%</td><td class="num">67%</td></tr>
-        <tr><td>Personnel</td><td class="num">$651k</td><td class="num">$1,113k</td><td class="num">$1,809k</td></tr>
-        <tr><td>Sales &amp; marketing</td><td class="num">$51k</td><td class="num">$480k</td><td class="num">$1,680k</td></tr>
-        <tr><td>G&amp;A, legal, compliance, tooling</td><td class="num">$193k</td><td class="num">$283k</td><td class="num">$304k</td></tr>
-        <tr><td><strong>Operating expense</strong></td><td class="num"><strong>$895k</strong></td><td class="num"><strong>$1.88M</strong></td><td class="num"><strong>$3.79M</strong></td></tr>
-        <tr class="total"><td>EBITDA</td><td class="num neg">($876k)</td><td class="num neg">($1.30M)</td><td class="num neg">($753k)</td></tr>
-        <tr><td>Average monthly burn</td><td class="num">$73k</td><td class="num">$108k</td><td class="num">$63k</td></tr>
+        <tr><td>Marketing spend</td><td class="num">$746k</td><td class="num">$1.32M</td><td class="num">$3.90M</td></tr>
+        <tr><td>Registered signups</td><td class="num">23,300</td><td class="num">216,000</td><td class="num">553,000</td></tr>
+        <tr><td>Free → paid conversion <span class="chip est">assumed</span></td><td class="num">6.0%</td><td class="num">7.0%</td><td class="num">7.5%</td></tr>
+        <tr class="total"><td>Paying subscribers, exit</td><td class="num">2,007</td><td class="num">16,748</td><td class="num">58,909</td></tr>
       </tbody>
     </table>
   </div>
 
-  <p>Gross margin opens at 41% and climbs to 67% because free-tier inference and the data licence are close to fixed and are carried against a small paid base. At the Year 3 exit run-rate the marginal margin is the 79% in §5; the reported annual figure converges on it as the paid base grows.</p>
+  <p>Marketing scales in five steps — $15k, $40k, $110k, $250k, then $400k a month — and each step is released by a metric, not a date (§10).</p>
+</section>
+
+<section id="pnl">
+  <p class="eyebrow">Section seven</p>
+  <h2 class="sec">Projections</h2>
 
   <figure>
     <div class="fw">
-      <svg viewBox="0 0 990 268" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Left: monthly EBITDA by month, negative through month 34 and turning positive at month 35. Right: cumulative cash consumed, reaching a trough of $3.01 million at month 34 before recovering.">
-        <text x="62" y="14" class="ch-t">Monthly EBITDA</text>
-        <text x="572" y="14" class="ch-t">Cumulative cash consumed</text>
-        <line x1="62" y1="236.0" x2="448" y2="236.0" class="grid"/><text x="54" y="239.5" class="ax" text-anchor="end">-200k</text>
-        <line x1="62" y1="198.1" x2="448" y2="198.1" class="grid"/><text x="54" y="201.6" class="ax" text-anchor="end">-150k</text>
-        <line x1="62" y1="160.3" x2="448" y2="160.3" class="grid"/><text x="54" y="163.8" class="ax" text-anchor="end">-100k</text>
-        <line x1="62" y1="122.4" x2="448" y2="122.4" class="grid"/><text x="54" y="125.9" class="ax" text-anchor="end">-50k</text>
-        <line x1="62" y1="46.7" x2="448" y2="46.7" class="grid"/><text x="54" y="50.2" class="ax" text-anchor="end">50k</text>
-        <rect x="62.8" y="84.6" width="9.1" height="36.6" class="bar-neg"/>
-        <rect x="73.5" y="84.6" width="9.1" height="38.9" class="bar-neg"/>
-        <rect x="84.2" y="84.6" width="9.1" height="54.1" class="bar-neg"/>
-        <rect x="95.0" y="84.6" width="9.1" height="40.4" class="bar-neg"/>
-        <rect x="105.7" y="84.6" width="9.1" height="63.5" class="bar-neg"/>
-        <rect x="116.4" y="84.6" width="9.1" height="65.4" class="bar-neg"/>
-        <rect x="127.1" y="84.6" width="9.1" height="58.9" class="bar-neg"/>
-        <rect x="137.9" y="84.6" width="9.1" height="66.1" class="bar-neg"/>
-        <rect x="148.6" y="84.6" width="9.1" height="65.0" class="bar-neg"/>
-        <rect x="159.3" y="84.6" width="9.1" height="59.4" class="bar-neg"/>
-        <rect x="170.0" y="84.6" width="9.1" height="58.2" class="bar-neg"/>
-        <rect x="180.7" y="84.6" width="9.1" height="57.0" class="bar-neg"/>
-        <rect x="191.5" y="84.6" width="9.1" height="75.9" class="bar-neg"/>
-        <rect x="202.2" y="84.6" width="9.1" height="72.0" class="bar-neg"/>
-        <rect x="212.9" y="84.6" width="9.1" height="78.5" class="bar-neg"/>
-        <rect x="223.6" y="84.6" width="9.1" height="107.1" class="bar-neg"/>
-        <rect x="234.4" y="84.6" width="9.1" height="80.3" class="bar-neg"/>
-        <rect x="245.1" y="84.6" width="9.1" height="76.1" class="bar-neg"/>
-        <rect x="255.8" y="84.6" width="9.1" height="96.3" class="bar-neg"/>
-        <rect x="266.5" y="84.6" width="9.1" height="93.3" class="bar-neg"/>
-        <rect x="277.2" y="84.6" width="9.1" height="85.1" class="bar-neg"/>
-        <rect x="288.0" y="84.6" width="9.1" height="92.0" class="bar-neg"/>
-        <rect x="298.7" y="84.6" width="9.1" height="68.5" class="bar-neg"/>
-        <rect x="309.4" y="84.6" width="9.1" height="60.1" class="bar-neg"/>
-        <rect x="320.1" y="84.6" width="9.1" height="105.3" class="bar-neg"/>
-        <rect x="330.9" y="84.6" width="9.1" height="100.1" class="bar-neg"/>
-        <rect x="341.6" y="84.6" width="9.1" height="84.0" class="bar-neg"/>
-        <rect x="352.3" y="84.6" width="9.1" height="76.5" class="bar-neg"/>
-        <rect x="363.0" y="84.6" width="9.1" height="60.2" class="bar-neg"/>
-        <rect x="373.7" y="84.6" width="9.1" height="43.8" class="bar-neg"/>
-        <rect x="384.5" y="84.6" width="9.1" height="76.7" class="bar-neg"/>
-        <rect x="395.2" y="84.6" width="9.1" height="53.0" class="bar-neg"/>
-        <rect x="405.9" y="84.6" width="9.1" height="29.0" class="bar-neg"/>
-        <rect x="416.6" y="84.6" width="9.1" height="4.8" class="bar-neg"/>
-        <rect x="427.4" y="65.1" width="9.1" height="19.5" class="bar-pos"/>
-        <rect x="438.1" y="40.6" width="9.1" height="43.9" class="bar-pos"/>
-        <line x1="62" y1="84.6" x2="448" y2="84.6" class="grid zero"/><text x="54" y="88.1" class="ax" text-anchor="end">0</text>
-        <line x1="425.0" y1="30" x2="425.0" y2="84.6" class="marker"/>
-        <text x="421.0" y="27" class="anno" text-anchor="end">M35 · first positive</text>
-        <text x="67.4" y="252" class="ax" text-anchor="middle">M1</text>
-        <text x="121.0" y="252" class="ax" text-anchor="middle">M6</text>
-        <text x="185.3" y="252" class="ax" text-anchor="middle">M12</text>
-        <text x="249.6" y="252" class="ax" text-anchor="middle">M18</text>
-        <text x="314.0" y="252" class="ax" text-anchor="middle">M24</text>
-        <text x="378.3" y="252" class="ax" text-anchor="middle">M30</text>
-        <text x="442.6" y="252" class="ax" text-anchor="middle">M36</text>
-        <line x1="572" y1="24.0" x2="958" y2="24.0" class="grid"/><text x="564" y="27.5" class="ax" text-anchor="end">0</text>
-        <line x1="572" y1="90.2" x2="958" y2="90.2" class="grid"/><text x="564" y="93.8" class="ax" text-anchor="end">$1M</text>
-        <line x1="572" y1="156.5" x2="958" y2="156.5" class="grid"/><text x="564" y="160.0" class="ax" text-anchor="end">$2M</text>
-        <line x1="572" y1="222.8" x2="958" y2="222.8" class="grid"/><text x="564" y="226.2" class="ax" text-anchor="end">$3M</text>
-        <path d="M 572.0 27.2 L 583.0 30.6 L 594.1 35.3 L 605.1 38.9 L 616.1 44.4 L 627.1 50.2 L 638.2 55.3 L 649.2 61.1 L 660.2 66.8 L 671.3 72.0 L 682.3 77.1 L 693.3 82.1 L 704.3 88.7 L 715.4 95.0 L 726.4 101.9 L 737.4 111.2 L 748.5 118.3 L 759.5 124.9 L 770.5 133.3 L 781.5 141.5 L 792.6 149.0 L 803.6 157.0 L 814.6 163.0 L 825.7 168.3 L 836.7 177.5 L 847.7 186.2 L 858.7 193.6 L 869.8 200.3 L 880.8 205.5 L 891.8 209.4 L 902.9 216.1 L 913.9 220.7 L 924.9 223.3 L 935.9 223.7 L 947.0 222.0 L 958.0 218.1 L 958.0 24.0 L 572.0 24.0 Z" class="area"/>
-        <path d="M 572.0 27.2 L 583.0 30.6 L 594.1 35.3 L 605.1 38.9 L 616.1 44.4 L 627.1 50.2 L 638.2 55.3 L 649.2 61.1 L 660.2 66.8 L 671.3 72.0 L 682.3 77.1 L 693.3 82.1 L 704.3 88.7 L 715.4 95.0 L 726.4 101.9 L 737.4 111.2 L 748.5 118.3 L 759.5 124.9 L 770.5 133.3 L 781.5 141.5 L 792.6 149.0 L 803.6 157.0 L 814.6 163.0 L 825.7 168.3 L 836.7 177.5 L 847.7 186.2 L 858.7 193.6 L 869.8 200.3 L 880.8 205.5 L 891.8 209.4 L 902.9 216.1 L 913.9 220.7 L 924.9 223.3 L 935.9 223.7 L 947.0 222.0 L 958.0 218.1" class="line"/>
-        <circle cx="935.9" cy="223.7" r="3.4" class="dot"/>
-        <text x="927.9" y="241" class="anno" text-anchor="end">trough M34 · $3.01M</text>
-        <text x="572.0" y="252" class="ax" text-anchor="middle">M1</text>
-        <text x="627.1" y="252" class="ax" text-anchor="middle">M6</text>
-        <text x="693.3" y="252" class="ax" text-anchor="middle">M12</text>
-        <text x="759.5" y="252" class="ax" text-anchor="middle">M18</text>
-        <text x="825.7" y="252" class="ax" text-anchor="middle">M24</text>
-        <text x="891.8" y="252" class="ax" text-anchor="middle">M30</text>
-        <text x="958.0" y="252" class="ax" text-anchor="middle">M36</text>
+      <svg viewBox="0 0 990 284" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Left: exit ARR by quarter reaching 11.5 million dollars in the base case by quarter 12, with a conservative case at 6.5 million and an upside case at 23.7 million. Right: cash on hand, starting from a 3 million dollar seed, falling to 1.07 million at month 19, then a 12 million dollar Series A at month 20.">
+        <text x="72" y="14" class="ch-t">Exit ARR</text>
+        <text x="580" y="14" class="ch-t">Cash on hand</text>
+        <line x1="72" y1="236.0" x2="448" y2="236.0" class="grid zero"/><text x="64" y="239.5" class="ax" text-anchor="end">0</text>
+<line x1="72" y1="194.0" x2="448" y2="194.0" class="grid"/><text x="64" y="197.5" class="ax" text-anchor="end">$5M</text>
+<line x1="72" y1="152.0" x2="448" y2="152.0" class="grid"/><text x="64" y="155.5" class="ax" text-anchor="end">$10M</text>
+<line x1="72" y1="110.0" x2="448" y2="110.0" class="grid"/><text x="64" y="113.5" class="ax" text-anchor="end">$15M</text>
+<line x1="72" y1="68.0" x2="448" y2="68.0" class="grid"/><text x="64" y="71.5" class="ax" text-anchor="end">$20M</text>
+<line x1="72" y1="26.0" x2="448" y2="26.0" class="grid"/><text x="64" y="29.5" class="ax" text-anchor="end">$25M</text>
+        <rect x="78.9" y="236.0" width="17.5" height="0.0" class="bar-pos"/>
+<rect x="110.2" y="235.7" width="17.5" height="0.3" class="bar-pos"/>
+<rect x="141.6" y="234.8" width="17.5" height="1.2" class="bar-pos"/>
+<rect x="172.9" y="232.7" width="17.5" height="3.3" class="bar-pos"/>
+<rect x="204.2" y="229.8" width="17.5" height="6.2" class="bar-pos"/>
+<rect x="235.6" y="222.5" width="17.5" height="13.5" class="bar-pos"/>
+<rect x="266.9" y="215.4" width="17.5" height="20.6" class="bar-pos"/>
+<rect x="298.2" y="208.5" width="17.5" height="27.5" class="bar-pos"/>
+<rect x="329.6" y="194.8" width="17.5" height="41.2" class="bar-pos"/>
+<rect x="360.9" y="181.4" width="17.5" height="54.6" class="bar-pos"/>
+<rect x="392.2" y="160.3" width="17.5" height="75.7" class="bar-pos"/>
+<rect x="423.6" y="139.7" width="17.5" height="96.3" class="bar-pos"/>
+        <path d="M 87.7 236.0 L 119.0 235.4 L 150.3 233.6 L 181.7 229.2 L 213.0 223.3 L 244.3 208.3 L 275.7 193.6 L 307.0 179.5 L 338.3 151.1 L 369.7 123.5 L 401.0 79.8 L 432.3 37.3" class="ln-up"/>
+
+<path d="M 87.7 236.0 L 119.0 235.8 L 150.3 235.3 L 181.7 234.2 L 213.0 232.5 L 244.3 228.4 L 275.7 224.3 L 307.0 220.5 L 338.3 212.7 L 369.7 205.0 L 401.0 193.1 L 432.3 181.5" class="ln-dn"/>
+
+<rect x="78" y="30" width="11" height="9" class="bar-pos"/><text x="95" y="38.5" class="anno">Base — $11.5M</text><line x1="78" y1="52" x2="89" y2="52" class="ln-up"/><text x="95" y="55.5" class="anno">Upside — $23.7M</text><line x1="78" y1="69" x2="89" y2="69" class="ln-dn"/><text x="95" y="72.5" class="anno">Conservative — $6.5M</text>
+        <text x="87.7" y="252" class="ax" text-anchor="middle">Q1</text>
+<text x="181.7" y="252" class="ax" text-anchor="middle">Q4</text>
+<text x="307.0" y="252" class="ax" text-anchor="middle">Q8</text>
+<text x="432.3" y="252" class="ax" text-anchor="middle">Q12</text>
+<text x="260" y="268" class="ax" text-anchor="middle">quarter · exit ARR</text>
+        <line x1="580" y1="236.0" x2="958" y2="236.0" class="grid zero"/><text x="572" y="239.5" class="ax" text-anchor="end">0</text>
+<line x1="580" y1="183.5" x2="958" y2="183.5" class="grid"/><text x="572" y="187.0" class="ax" text-anchor="end">$4M</text>
+<line x1="580" y1="131.0" x2="958" y2="131.0" class="grid"/><text x="572" y="134.5" class="ax" text-anchor="end">$8M</text>
+<line x1="580" y1="78.5" x2="958" y2="78.5" class="grid"/><text x="572" y="82.0" class="ax" text-anchor="end">$12M</text>
+<line x1="580" y1="26.0" x2="958" y2="26.0" class="grid"/><text x="572" y="29.5" class="ax" text-anchor="end">$16M</text>
+        <path d="M 580.0 197.1 L 590.8 198.1 L 601.6 198.8 L 612.4 199.9 L 623.2 200.8 L 634.0 202.1 L 644.8 203.4 L 655.6 204.6 L 666.4 205.9 L 677.2 207.4 L 688.0 208.9 L 698.8 210.4 L 709.6 211.9 L 720.4 213.3 L 731.2 214.7 L 742.0 217.2 L 752.8 219.0 L 763.6 220.6 L 774.4 222.0 L 785.2 65.6 L 796.0 66.5 L 806.8 67.1 L 817.6 67.7 L 828.4 68.0 L 839.2 69.8 L 850.0 71.2 L 860.8 72.2 L 871.6 73.2 L 882.4 73.2 L 893.2 72.8 L 904.0 73.7 L 914.8 73.9 L 925.6 73.3 L 936.4 72.0 L 947.2 69.9 L 958.0 66.9 L 958.0 236.0 L 580.0 236.0 Z" class="area"/>
+<path d="M 580.0 197.1 L 590.8 198.1 L 601.6 198.8 L 612.4 199.9 L 623.2 200.8 L 634.0 202.1 L 644.8 203.4 L 655.6 204.6 L 666.4 205.9 L 677.2 207.4 L 688.0 208.9 L 698.8 210.4 L 709.6 211.9 L 720.4 213.3 L 731.2 214.7 L 742.0 217.2 L 752.8 219.0 L 763.6 220.6 L 774.4 222.0 L 785.2 65.6 L 796.0 66.5 L 806.8 67.1 L 817.6 67.7 L 828.4 68.0 L 839.2 69.8 L 850.0 71.2 L 860.8 72.2 L 871.6 73.2 L 882.4 73.2 L 893.2 72.8 L 904.0 73.7 L 914.8 73.9 L 925.6 73.3 L 936.4 72.0 L 947.2 69.9 L 958.0 66.9" class="line"/>
+<line x1="580.0" y1="28" x2="580.0" y2="236" class="marker"/>
+<text x="586.0" y="42" class="anno">Seed $3.0M</text>
+<circle cx="774.4" cy="222.0" r="3.4" class="dot"/>
+<text x="766.4" y="207.0" class="anno" text-anchor="end">M19 · $1.07M left</text>
+<line x1="785.2" y1="28" x2="785.2" y2="65.6" class="marker"/>
+<text x="791.2" y="42" class="anno" text-anchor="end">Series A $12M</text>
+        <text x="580.0" y="252" class="ax" text-anchor="middle">1</text>
+<text x="634.0" y="252" class="ax" text-anchor="middle">6</text>
+<text x="698.8" y="252" class="ax" text-anchor="middle">12</text>
+<text x="785.2" y="252" class="ax" text-anchor="middle">20</text>
+<text x="828.4" y="252" class="ax" text-anchor="middle">24</text>
+<text x="893.2" y="252" class="ax" text-anchor="middle">30</text>
+<text x="958.0" y="252" class="ax" text-anchor="middle">36</text>
+<text x="769" y="268" class="ax" text-anchor="middle">month · cash on hand</text>
       </svg>
     </div>
-    <figcaption>Base case, 36 months. The <b>step changes in burn</b> on the left are the four marketing gates in §9 opening — M13, M19, M25, M31 — each briefly deepening the loss before the cohort it buys pays back. The <b>flat bottom</b> on the right, months 32 to 36, is the whole plan: cash stops leaving before it starts returning.</figcaption>
+    <figcaption>Left: the <b>spread between the three cases is almost entirely conversion and churn</b> — the two things no amount of engineering can settle before launch, which is why §10 gates spend on them rather than forecasting them. Right: the seed is sized so that <b>even the conservative case reaches month 19 with cash in hand</b> ($0.77M) rather than raising the Series A from a position of weakness.</figcaption>
   </figure>
 
   <div class="tw">
     <table>
-      <caption>Year 1, month by month</caption>
-      <thead><tr><th>Month</th><th class="num">Signups</th><th class="num">Free</th><th class="num">Paid</th><th class="num">MRR</th><th class="num">Gross profit</th><th class="num">Opex</th><th class="num">EBITDA</th><th class="num">Cumulative</th></tr></thead>
-      <tbody>
-        <tr><td>1</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$48.4k</td><td class="num neg">($48.4k)</td><td class="num neg">($48k)</td></tr>
-        <tr><td>2</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$51.4k</td><td class="num neg">($51.4k)</td><td class="num neg">($100k)</td></tr>
-        <tr><td>3</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$71.4k</td><td class="num neg">($71.4k)</td><td class="num neg">($171k)</td></tr>
-        <tr><td>4</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$53.4k</td><td class="num neg">($53.4k)</td><td class="num neg">($225k)</td></tr>
-        <tr><td>5</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$83.9k</td><td class="num neg">($83.9k)</td><td class="num neg">($309k)</td></tr>
-        <tr><td>6</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$86.4k</td><td class="num neg">($86.4k)</td><td class="num neg">($395k)</td></tr>
-        <tr><td><strong>7 · launch</strong></td><td class="num">1,833</td><td class="num">1,710</td><td class="num">124</td><td class="num">$2.1k</td><td class="num neg">($0.3k)</td><td class="num">$77.4k</td><td class="num neg">($77.7k)</td><td class="num neg">($473k)</td></tr>
-        <tr><td>8</td><td class="num">1,883</td><td class="num">3,249</td><td class="num">254</td><td class="num">$4.2k</td><td class="num">$1.0k</td><td class="num">$88.2k</td><td class="num neg">($87.2k)</td><td class="num neg">($560k)</td></tr>
-        <tr><td>9</td><td class="num">1,938</td><td class="num">4,643</td><td class="num">389</td><td class="num">$6.4k</td><td class="num">$2.3k</td><td class="num">$88.2k</td><td class="num neg">($85.9k)</td><td class="num neg">($646k)</td></tr>
-        <tr><td>10</td><td class="num">1,999</td><td class="num">5,917</td><td class="num">528</td><td class="num">$8.7k</td><td class="num">$3.8k</td><td class="num">$82.2k</td><td class="num neg">($78.4k)</td><td class="num neg">($724k)</td></tr>
-        <tr><td>11</td><td class="num">2,065</td><td class="num">7,091</td><td class="num">671</td><td class="num">$11.0k</td><td class="num">$5.3k</td><td class="num">$82.2k</td><td class="num neg">($76.9k)</td><td class="num neg">($801k)</td></tr>
-        <tr class="total"><td>12</td><td class="num">2,139</td><td class="num">8,185</td><td class="num">817</td><td class="num">$13.3k</td><td class="num">$6.9k</td><td class="num">$82.2k</td><td class="num neg">($75.3k)</td><td class="num neg">($876k)</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <p>Later exits, base case: <strong>M18</strong> — 3,706 paid, $60k MRR · <strong>M24</strong> — 9,535 paid, $155k MRR · <strong>M30</strong> — 20,713 paid, $336k MRR · <strong>M36</strong> — 37,410 paid, $604k MRR, EBITDA <strong>+$58k</strong>.</p>
-</section>
-
-<section id="costs">
-  <p class="eyebrow">Section seven</p>
-  <h2 class="sec">Cost structure</h2>
-  <p>Year 1 spend is <strong>73% people, 22% G&amp;A and compliance, 6% marketing</strong>. That ratio is the plan.</p>
-
-  <div class="tw">
-    <table>
-      <caption>Headcount — fully loaded monthly cost</caption>
-      <thead><tr><th>Role</th><th class="num">Starts</th><th class="num">Cost / month</th></tr></thead>
-      <tbody>
-        <tr><td>Founder / PM</td><td class="num">M1</td><td class="num">$5.0k → $10k (M13) → $13k (M25)</td></tr>
-        <tr><td>Senior full-stack engineer</td><td class="num">M1</td><td class="num">$13.8k</td></tr>
-        <tr><td>AI / agent engineer</td><td class="num">M1</td><td class="num">$15.4k</td></tr>
-        <tr><td>Product designer — contract, to M9</td><td class="num">M1</td><td class="num">$6.0k</td></tr>
-        <tr><td>Registered Dietitian — contract → full-time</td><td class="num">M2</td><td class="num">$3.0k → $8.0k (M17)</td></tr>
-        <tr><td>Full-stack engineer #2</td><td class="num">M5</td><td class="num">$12.5k</td></tr>
-        <tr><td>Growth &amp; content lead</td><td class="num">M8</td><td class="num">$10.8k</td></tr>
-        <tr><td>Engineer #3</td><td class="num">M15</td><td class="num">$13.8k</td></tr>
-        <tr><td>Nutrition-data operations</td><td class="num">M16</td><td class="num">$8.3k</td></tr>
-        <tr><td>Clinical &amp; regulatory lead — part-time</td><td class="num">M19</td><td class="num">$7.0k</td></tr>
-        <tr><td>Support &amp; community</td><td class="num">M20</td><td class="num">$6.5k</td></tr>
-        <tr><td>Engineer #4 · Data scientist, evals · Growth #2 · Engineer #5</td><td class="num">M25–M31</td><td class="num">$14.2k · $14.0k · $11.5k · $14.2k</td></tr>
-        <tr class="total"><td>Headcount</td><td class="num">—</td><td class="num">6 at M12 → 10 at M24 → 14 at M36</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="note">
-    <p><strong>Two roles that look optional and are not.</strong> The Registered Dietitian from Month 2 is what makes requirement E4 — every food record carries a source and a last-verified date — real rather than aspirational, and is the person who signs off that a recommendation is safe. The nutrition-data operations hire in Month 16 exists because the glycemic data layer is named in the PRD as one of four moats, and a moat nobody maintains stops being one.</p>
-  </div>
-
-  <div class="tw">
-    <table>
-      <caption>Non-personnel operating expense</caption>
+      <caption>Three-year P&amp;L — base case</caption>
       <thead><tr><th>&nbsp;</th><th class="num">Year 1</th><th class="num">Year 2</th><th class="num">Year 3</th></tr></thead>
       <tbody>
-        <tr><td>Legal, corporate, regulatory counsel</td><td class="num">$30k + $20k</td><td class="num">$30k + $20k</td><td class="num">$30k</td></tr>
-        <tr><td>Privacy, ToS, medical-disclaimer review</td><td class="num">$14k</td><td class="num">—</td><td class="num">—</td></tr>
-        <tr><td>Professional liability &amp; cyber insurance</td><td class="num">$18k</td><td class="num">$36k</td><td class="num">$48k</td></tr>
-        <tr><td>Evaluation dataset annotation — B1's 90% target</td><td class="num">$18k</td><td class="num">—</td><td class="num">—</td></tr>
-        <tr><td>Ongoing food-data verification</td><td class="num">$25k</td><td class="num">$42k</td><td class="num">$42k</td></tr>
-        <tr><td>Clinical advisory board — 2 advisors</td><td class="num">$18k</td><td class="num">$24k</td><td class="num">$24k</td></tr>
-        <tr><td>SOC 2 Type I</td><td class="num">—</td><td class="num">$35k</td><td class="num">—</td></tr>
-        <tr><td>Tooling, accounting, admin, misc</td><td class="num">$70k</td><td class="num">$108k</td><td class="num">$160k</td></tr>
+        <tr><td>Paying subscribers, exit</td><td class="num">2,007</td><td class="num">16,748</td><td class="num">58,909</td></tr>
+        <tr><td>Free users, exit</td><td class="num">22,093</td><td class="num">119,331</td><td class="num">344,824</td></tr>
+        <tr class="hi"><td><strong>Exit ARR</strong></td><td class="num"><strong>$395k</strong></td><td class="num"><strong>$3.27M</strong></td><td class="num"><strong>$11.46M</strong></td></tr>
+        <tr><td>Revenue</td><td class="num">$107k</td><td class="num">$1.78M</td><td class="num">$7.29M</td></tr>
+        <tr><td class="lbl-sub">Cost of goods</td><td class="num">$12k</td><td class="num">$190k</td><td class="num">$748k</td></tr>
+        <tr><td><strong>Gross profit</strong></td><td class="num"><strong>$95k</strong></td><td class="num"><strong>$1.59M</strong></td><td class="num"><strong>$6.54M</strong></td></tr>
+        <tr><td class="lbl-sub">Gross margin</td><td class="num pos">88.4%</td><td class="num pos">89.3%</td><td class="num pos">89.7%</td></tr>
+        <tr><td>Personnel</td><td class="num">$608k</td><td class="num">$1.33M</td><td class="num">$2.15M</td></tr>
+        <tr><td>Sales and marketing</td><td class="num">$746k</td><td class="num">$1.32M</td><td class="num">$3.90M</td></tr>
+        <tr><td>G&amp;A, legal, compliance, data</td><td class="num">$130k</td><td class="num">$90k</td><td class="num">$406k</td></tr>
+        <tr><td><strong>Operating expense</strong></td><td class="num"><strong>$1.15M</strong></td><td class="num"><strong>$2.74M</strong></td><td class="num"><strong>$6.46M</strong></td></tr>
+        <tr class="total"><td>EBITDA</td><td class="num neg">($1.05M)</td><td class="num neg">($1.15M)</td><td class="num pos">$86k</td></tr>
+        <tr><td>Headcount, exit</td><td class="num">12</td><td class="num">17</td><td class="num">26</td></tr>
       </tbody>
     </table>
   </div>
-</section>
 
-<section id="funding">
-  <p class="eyebrow">Section eight</p>
-  <h2 class="sec">Funding and runway</h2>
+  <p>Reported gross margin runs 88–90% rather than the 91.5% marginal figure because free-tier inference and fixed hosting are carried against a smaller paid base; it converges upward as the base grows.</p>
 
   <div class="tw">
     <table>
-      <thead><tr><th>Round</th><th class="num">Timing</th><th class="num">Amount</th><th>What it buys</th></tr></thead>
+      <caption>Quarterly</caption>
+      <thead><tr><th>Quarter</th><th class="num">Revenue</th><th class="num">EBITDA</th><th class="num">Exit subscribers</th><th class="num">Exit ARR</th><th class="num">Headcount</th></tr></thead>
       <tbody>
-        <tr><td>Seed</td><td class="num">M1</td><td class="num"><strong>$2.5M</strong></td><td>20 months of runway, through launch and the first real retention cohort</td></tr>
-        <tr><td>Series A</td><td class="num">M20</td><td class="num"><strong>$6.0M</strong></td><td>Scale-up of acquisition, once the paid-channel gate clears</td></tr>
+        <tr><td>Q1 · M1–3</td><td class="num">—</td><td class="num neg">($168k)</td><td class="num">—</td><td class="num">—</td><td class="num">6</td></tr>
+        <tr><td><strong>Q2 · M4–6 launch</strong></td><td class="num">$3k</td><td class="num neg">($253k)</td><td class="num">173</td><td class="num">$35k</td><td class="num">8</td></tr>
+        <tr><td>Q3 · M7–9</td><td class="num">$27k</td><td class="num neg">($287k)</td><td class="num">722</td><td class="num">$143k</td><td class="num">10</td></tr>
+        <tr><td>Q4 · M10–12</td><td class="num">$78k</td><td class="num neg">($343k)</td><td class="num">2,007</td><td class="num">$395k</td><td class="num">12</td></tr>
+        <tr><td>Q5 · M13–15</td><td class="num">$156k</td><td class="num neg">($323k)</td><td class="num">3,766</td><td class="num">$740k</td><td class="num">13</td></tr>
+        <tr><td>Q6 · M16–18</td><td class="num">$330k</td><td class="num neg">($454k)</td><td class="num">8,174</td><td class="num">$1.61M</td><td class="num">14</td></tr>
+        <tr><td>Q7 · M19–21</td><td class="num">$544k</td><td class="num neg">($254k)</td><td class="num">12,535</td><td class="num">$2.46M</td><td class="num">15</td></tr>
+        <tr><td>Q8 · M22–24</td><td class="num">$750k</td><td class="num neg">($121k)</td><td class="num">16,748</td><td class="num">$3.27M</td><td class="num">17</td></tr>
+        <tr><td>Q9 · M25–27</td><td class="num">$1.09M</td><td class="num neg">($319k)</td><td class="num">25,121</td><td class="num">$4.91M</td><td class="num">20</td></tr>
+        <tr><td>Q10 · M28–30</td><td class="num">$1.49M</td><td class="num neg">($41k)</td><td class="num">33,351</td><td class="num">$6.50M</td><td class="num">22</td></tr>
+        <tr><td>Q11 · M31–33</td><td class="num">$2.04M</td><td class="num neg">($44k)</td><td class="num">46,235</td><td class="num">$9.01M</td><td class="num">26</td></tr>
+        <tr class="total"><td>Q12 · M34–36</td><td class="num">$2.66M</td><td class="num pos">$490k</td><td class="num">58,909</td><td class="num">$11.46M</td><td class="num">26</td></tr>
       </tbody>
     </table>
   </div>
 
-  <p>Cash on hand: $2.45M at M1 → $1.62M at M12 → $977k at M18 → <strong>$726k at M20</strong>, the trough before the A → $6.6M at M21 → $5.6M at M36. Peak cumulative cash consumed in the base case is <strong>$3.01M</strong>; the raise carries a deliberate ~35% buffer over it, because the conservative case consumes $4.85M and would need a larger or earlier Series A.</p>
+  <p>The EBITDA dips in Q6, Q9 and Q11 are the marketing steps opening. Each is a deliberate purchase of a cohort that pays back in five to eight months.</p>
 
-  <h3>What Month 20 has to show</h3>
-  <p>The Series A is raisable on these, and not otherwise.</p>
-  <ul>
-    <li>Twelve weeks of live cohort data with <strong>week-4 retention ≥ 30%</strong>, and a Month-3 cohort curve that has flattened rather than gone to zero.</li>
-    <li><strong>Paid-channel CAC ≤ $75 with payback under six months</strong> in at least one repeatable channel.</li>
-    <li><strong>Zero</strong> ungrounded numeric claims and <strong>zero</strong> insulin-dosing responses in production — the PRD's P0 guardrails, with the eval logs to prove it.</li>
-    <li>A resolved regulatory position, and a food-data source that survives due diligence.</li>
-    <li>Meal-parsing accuracy ≥ 90% on a held-out labelled set.</li>
-  </ul>
+  <div class="tw">
+    <table>
+      <caption>Year 1, month by month</caption>
+      <thead><tr><th class="num">Month</th><th class="num">Signups</th><th class="num">Free</th><th class="num">Paying</th><th class="num">MRR</th><th class="num">Gross profit</th><th class="num">Opex</th><th class="num">EBITDA</th><th class="num">Cumulative</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$39k</td><td class="num neg">($39k)</td><td class="num neg">($39k)</td></tr>
+        <tr><td class="num">2</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$73k</td><td class="num neg">($73k)</td><td class="num neg">($112k)</td></tr>
+        <tr><td class="num">3</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$55k</td><td class="num neg">($55k)</td><td class="num neg">($168k)</td></tr>
+        <tr><td class="num">4</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$81k</td><td class="num neg">($81k)</td><td class="num neg">($249k)</td></tr>
+        <tr><td class="num">5</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$73k</td><td class="num neg">($73k)</td><td class="num neg">($321k)</td></tr>
+        <tr class="hi"><td class="num"><strong>6 · launch</strong></td><td class="num">2,643</td><td class="num">2,469</td><td class="num">173</td><td class="num">$2.9k</td><td class="num">$2.5k</td><td class="num">$102k</td><td class="num neg">($99k)</td><td class="num neg">($421k)</td></tr>
+        <tr><td class="num">7</td><td class="num">2,688</td><td class="num">4,696</td><td class="num">353</td><td class="num">$5.8k</td><td class="num">$5.1k</td><td class="num">$98k</td><td class="num neg">($93k)</td><td class="num neg">($514k)</td></tr>
+        <tr><td class="num">8</td><td class="num">2,737</td><td class="num">6,712</td><td class="num">536</td><td class="num">$8.8k</td><td class="num">$7.8k</td><td class="num">$102k</td><td class="num neg">($94k)</td><td class="num neg">($608k)</td></tr>
+        <tr><td class="num">9</td><td class="num">2,790</td><td class="num">8,545</td><td class="num">722</td><td class="num">$11.9k</td><td class="num">$10.5k</td><td class="num">$111k</td><td class="num neg">($100k)</td><td class="num neg">($708k)</td></tr>
+        <tr><td class="num">10</td><td class="num">6,420</td><td class="num">13,558</td><td class="num">1,146</td><td class="num">$18.9k</td><td class="num">$16.7k</td><td class="num">$130k</td><td class="num neg">($113k)</td><td class="num neg">($821k)</td></tr>
+        <tr><td class="num">11</td><td class="num">6,484</td><td class="num">18,052</td><td class="num">1,575</td><td class="num">$25.9k</td><td class="num">$22.9k</td><td class="num">$138k</td><td class="num neg">($115k)</td><td class="num neg">($936k)</td></tr>
+        <tr class="total"><td class="num">12</td><td class="num">6,553</td><td class="num">22,093</td><td class="num">2,007</td><td class="num">$32.9k</td><td class="num">$29.2k</td><td class="num">$144k</td><td class="num neg">($115k)</td><td class="num neg">($1.05M)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Peak cumulative cash consumption is <strong>$2.65M at month 32</strong>; the first EBITDA-positive month is <strong>30</strong>.</p>
 </section>
 
-<section id="gates">
-  <p class="eyebrow">Section nine</p>
-  <h2 class="sec">Spend gates</h2>
-  <p>Acquisition spend steps up on evidence, not on the calendar. Each gate must hold for two consecutive months before the next step is released.</p>
+<section id="team">
+  <p class="eyebrow">Section eight</p>
+  <h2 class="sec">Team and the EU cost base</h2>
+  <p>Fully loaded cost — salary, employer contributions, equipment, tooling. The team is EU-based, which is the structural reason this plan reaches $11.5M ARR on $2.65M of cash.</p>
 
-  <ul class="gates">
-    <li><span class="mo">M1 – M6</span><span class="sp">$0</span><span class="gt">Build only. No acquisition spend of any kind.</span></li>
-    <li><span class="mo">M6</span><span class="sp">$3k</span><span class="gt">Waitlist only.</span></li>
-    <li><span class="mo">M7 – M12</span><span class="sp">$8k / mo</span><span class="gt">Launch. <b>Activation ≥ 50%</b> — three meals logged in the first three days.</span></li>
-    <li><span class="mo">M13 – M18</span><span class="sp">$25k / mo</span><span class="gt"><b>Week-4 retention ≥ 30%</b>; paid CAC ≤ $110.</span></li>
-    <li><span class="mo">M19 – M24</span><span class="sp">$55k / mo</span><span class="gt"><b>Paid CAC ≤ $85</b>; payback ≤ 7 months; monthly churn ≤ 9%.</span></li>
-    <li><span class="mo">M25 – M30</span><span class="sp">$110k / mo</span><span class="gt"><b>Paid LTV/CAC ≥ 3.0×</b> on realised cohort revenue, not projected.</span></li>
-    <li><span class="mo">M31 – M36</span><span class="sp">$170k / mo</span><span class="gt">The same, sustained; gross margin ≥ 75%.</span></li>
-  </ul>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Role</th><th class="num">Starts</th><th class="num">Loaded / month</th></tr></thead>
+      <tbody>
+        <tr><td>Founder / CEO</td><td class="num">M1</td><td class="num">$7.5k → $9.5k → $11.5k</td></tr>
+        <tr><td>AI / agent engineer</td><td class="num">M1</td><td class="num">$10.0k</td></tr>
+        <tr><td>Senior full-stack engineer</td><td class="num">M1</td><td class="num">$9.2k</td></tr>
+        <tr><td>Registered Dietitian — part-time to full-time</td><td class="num">M1</td><td class="num">$3.8k → $6.7k</td></tr>
+        <tr><td>Product designer — contract to full-time</td><td class="num">M2</td><td class="num">$5.5k → $6.3k</td></tr>
+        <tr><td>Full-stack engineer #2</td><td class="num">M3</td><td class="num">$8.0k</td></tr>
+        <tr><td>Growth and content lead</td><td class="num">M5</td><td class="num">$7.9k</td></tr>
+        <tr><td>Clinical and regulatory lead — part-time</td><td class="num">M6</td><td class="num">$5.8k</td></tr>
+        <tr class="hi"><td><strong>US medical director</strong> — part-time, US rate</td><td class="num">M7</td><td class="num">$10.0k</td></tr>
+        <tr><td>Support and community</td><td class="num">M8</td><td class="num">$3.8k</td></tr>
+        <tr><td>Engineer #3 · Nutrition-data operations</td><td class="num">M11, M12</td><td class="num">$8.6k · $5.0k</td></tr>
+        <tr><td>Engineer #4 · Data scientist, evaluations</td><td class="num">M15, M17</td><td class="num">$8.6k · $9.2k</td></tr>
+        <tr><td>Lifecycle and retention marketer</td><td class="num">M19</td><td class="num">$7.5k</td></tr>
+        <tr><td>Engineer #5 · Head of growth</td><td class="num">M22, M23</td><td class="num">$8.8k · $12.5k</td></tr>
+        <tr><td>Engineers #6–7 · Clinical ops · Support #2–3</td><td class="num">M26–28</td><td class="num">$17.6k · $7.0k · $8.0k</td></tr>
+        <tr><td>Engineers #8–9 · Finance and ops · Growth analyst</td><td class="num">M31–33</td><td class="num">$18.0k · $8.5k · $7.0k</td></tr>
+        <tr class="total"><td>Headcount</td><td class="num">—</td><td class="num">12 at M12 · 17 at M24 · 26 at M36</td></tr>
+      </tbody>
+    </table>
+  </div>
 
   <div class="note">
-    <p><strong>The gate runs the other way too.</strong> If Year 1 lands at the top of the range — blended LTV/CAC at 5× is this model's own output — the plan is <em>underspending</em>, and the right response is to pull the Series A forward and raise more, not to hold the schedule.</p>
+    <p><strong>Three roles that look discretionary and are not.</strong> The <strong>Registered Dietitian from month 1</strong> is what makes the food data defensible — every record carrying a source and a verification date — and signs off that a recommendation is safe. The <strong>US medical director</strong> is a US-market requirement, not a nicety: clinical credibility in the US is held by US-licensed clinicians, and this is the one role deliberately paid at a US rate. <strong>Nutrition-data operations</strong> exists because the glycemic data layer is a moat, and a moat nobody maintains stops being one.</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <caption>Non-personnel</caption>
+      <thead><tr><th>&nbsp;</th><th class="num">Year 1</th><th class="num">Year 2</th><th class="num">Year 3</th></tr></thead>
+      <tbody>
+        <tr><td>Counsel — FDA position, privacy, terms, claims</td><td class="num">$82k</td><td class="num">$60k</td><td class="num">$66k</td></tr>
+        <tr><td>Clinical advisory board</td><td class="num">$25k</td><td class="num">$30k</td><td class="num">$30k</td></tr>
+        <tr><td>Ongoing food-data verification</td><td class="num">$32k</td><td class="num">$42k</td><td class="num">$42k</td></tr>
+        <tr><td>Evaluation dataset annotation</td><td class="num">$22k</td><td class="num">—</td><td class="num">—</td></tr>
+        <tr><td>Accessibility audit and penetration test</td><td class="num">$9k</td><td class="num">—</td><td class="num">$30k</td></tr>
+        <tr><td>SOC 2 Type I</td><td class="num">—</td><td class="num">$40k</td><td class="num">—</td></tr>
+        <tr><td>Insurance, tooling, accounting, admin</td><td class="num">$50k</td><td class="num">$90k</td><td class="num">$144k</td></tr>
+        <tr><td>Infrastructure</td><td class="num">$6k</td><td class="num">$22k</td><td class="num">$54k</td></tr>
+      </tbody>
+    </table>
   </div>
 </section>
 
 <section id="scenarios">
-  <p class="eyebrow">Section ten</p>
+  <p class="eyebrow">Section nine</p>
   <h2 class="sec">Scenarios</h2>
 
   <div class="scen">
     <div>
       <h5>Conservative</h5>
       <dl>
-        <dt>Conversion</dt><dd>4.0 → 5.2%</dd>
-        <dt>Monthly churn</dt><dd>12 → 9.5%</dd>
-        <dt>Year 3 revenue</dt><dd>$2.36M</dd>
-        <dt>Year 3 exit ARR</dt><dd>$3.77M</dd>
-        <dt>Year 3 EBITDA</dt><dd>($2.34M)</dd>
+        <dt>Conversion</dt><dd>4.2 → 5.3%</dd>
+        <dt>Monthly churn</dt><dd>10.0 → 7.3%</dd>
+        <dt>Y3 revenue</dt><dd>$4.13M</dd>
+        <dt>Y3 exit ARR</dt><dd>$6.49M</dd>
+        <dt>Y3 subscribers</dt><dd>33,697</dd>
+        <dt>Y3 EBITDA</dt><dd>($2.78M)</dd>
         <dt>EBITDA-positive</dt><dd>beyond M36</dd>
-        <dt>Peak cash need</dt><dd>$4.85M</dd>
+        <dt>Peak cash</dt><dd>$5.73M</dd>
       </dl>
     </div>
     <div class="base">
       <h5>Base</h5>
       <dl>
         <dt>Conversion</dt><dd>6.0 → 7.5%</dd>
-        <dt>Monthly churn</dt><dd>10 → 7%</dd>
-        <dt>Year 3 revenue</dt><dd>$4.52M</dd>
-        <dt>Year 3 exit ARR</dt><dd>$7.25M</dd>
-        <dt>Year 3 EBITDA</dt><dd>($753k)</dd>
-        <dt>EBITDA-positive</dt><dd>M35</dd>
-        <dt>Peak cash need</dt><dd>$3.01M</dd>
+        <dt>Monthly churn</dt><dd>8.0 → 5.8%</dd>
+        <dt>Y3 revenue</dt><dd>$7.29M</dd>
+        <dt>Y3 exit ARR</dt><dd>$11.46M</dd>
+        <dt>Y3 subscribers</dt><dd>58,909</dd>
+        <dt>Y3 EBITDA</dt><dd>$86k</dd>
+        <dt>EBITDA-positive</dt><dd>M30</dd>
+        <dt>Peak cash</dt><dd>$2.65M</dd>
       </dl>
     </div>
     <div>
-      <h5>Optimistic</h5>
+      <h5>Upside</h5>
       <dl>
-        <dt>Conversion</dt><dd>8.5 → 10.5%</dd>
-        <dt>Monthly churn</dt><dd>8.5 → 5.5%</dd>
-        <dt>Year 3 revenue</dt><dd>$7.70M</dd>
-        <dt>Year 3 exit ARR</dt><dd>$12.48M</dd>
-        <dt>Year 3 EBITDA</dt><dd>+$1.66M</dd>
-        <dt>EBITDA-positive</dt><dd>M27</dd>
-        <dt>Peak cash need</dt><dd>$1.75M</dd>
+        <dt>Conversion</dt><dd>7.5 → 9.4%</dd>
+        <dt>Monthly churn</dt><dd>6.6 → 4.8%</dd>
+        <dt>Y3 revenue</dt><dd>$15.04M</dd>
+        <dt>Y3 exit ARR</dt><dd>$23.66M</dd>
+        <dt>Y3 subscribers</dt><dd>120,655</dd>
+        <dt>Y3 EBITDA</dt><dd>$5.34M</dd>
+        <dt>EBITDA-positive</dt><dd>M20</dd>
+        <dt>Peak cash</dt><dd>$1.56M</dd>
       </dl>
     </div>
   </div>
 
-  <p>The conservative case is not a failure case — it is a $3.8M ARR business that needs a larger Series A and reaches profitability in Year 4. The failure case is different in kind: <strong>retention that never flattens</strong>. A product whose Month-3 cohort curve goes to zero cannot be fixed with more marketing, and the honest response is to stop spending, not to raise.</p>
+  <p><strong>The conservative case is still a venture outcome</strong> — $6.5M of ARR growing, at 89% margin — but it needs a larger Series A and reaches profitability in year four. It is the case the round is sized against.</p>
+
+  <blockquote><p>The case this plan is not built to survive is different in kind: retention that never flattens. A product whose month-three cohort curve goes to zero cannot be fixed with marketing.</p></blockquote>
+
+  <p>The correct response to that would be to stop spending, not to raise more. §10's gates exist to detect it within two months of launch rather than two years.</p>
 
   <div class="tw">
     <table>
-      <caption>Sensitivity — Year 3 exit subscribers, one lever moved</caption>
-      <thead><tr><th>Lever</th><th class="num">Year 3 exit paid</th><th class="num">vs. base</th></tr></thead>
+      <caption>What moves the outcome</caption>
+      <thead><tr><th>Lever</th><th class="num">Effect on Year 3 ARR</th></tr></thead>
       <tbody>
-        <tr class="total"><td>Base</td><td class="num">37,410</td><td class="num">—</td></tr>
-        <tr><td>Conversion 6% → 4.5%</td><td class="num">~28,100</td><td class="num neg">−25%</td></tr>
-        <tr><td>Conversion 6% → 8%</td><td class="num">~49,800</td><td class="num pos">+33%</td></tr>
-        <tr><td>Monthly churn 10% → 13%</td><td class="num">~29,200</td><td class="num neg">−22%</td></tr>
-        <tr><td>Monthly churn 10% → 8%</td><td class="num">~44,100</td><td class="num pos">+18%</td></tr>
-        <tr><td>Cost per signup $5 → $8</td><td class="num">~24,700</td><td class="num neg">−34%</td></tr>
+        <tr><td>Conversion 6.0% → 4.2%</td><td class="num neg">−43%</td></tr>
+        <tr><td>Conversion 6.0% → 7.5%</td><td class="num pos">+33%</td></tr>
+        <tr><td>Monthly churn 8% → 10%</td><td class="num neg">−28%</td></tr>
+        <tr><td>Cost per signup $7.00 → $9.10</td><td class="num neg">−31%</td></tr>
+        <tr class="hi"><td><strong>Inference price doubling</strong></td><td class="num"><strong>−1.1 points of gross margin; no change to ARR</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="raise">
+  <p class="eyebrow">Section ten</p>
+  <h2 class="sec">The raise</h2>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Round</th><th class="num">Timing</th><th class="num">Amount</th><th>Runway</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Seed</strong></td><td class="num">now</td><td class="num"><strong>$3.0M</strong></td><td>19 months to the Series A, with $1.07M of cushion at the trough in the base case and <strong>$0.77M in the conservative case</strong></td></tr>
+        <tr><td>Series A</td><td class="num">month 20</td><td class="num">$12.0M</td><td>At $2.18M ARR growing ~3× year on year</td></tr>
       </tbody>
     </table>
   </div>
 
-  <p>Retention and acquisition cost dominate. <strong>Inference price does not appear in this table</strong> because it cannot move the outcome — at 13% of ARPU it would have to quadruple to matter. That is the point of the architecture.</p>
+  <div class="tw">
+    <table>
+      <caption>Use of the seed — $3.0M over 19 months</caption>
+      <thead><tr><th>&nbsp;</th><th class="num">Amount</th><th class="num">Share</th></tr></thead>
+      <tbody>
+        <tr><td>Team — 4 people at month 1 to 15 at month 19</td><td class="num">$1.43M</td><td class="num">54%</td></tr>
+        <tr><td>Sales and marketing — gated in four steps</td><td class="num">$746k</td><td class="num">28%</td></tr>
+        <tr><td>Counsel, clinical validation, compliance, food data</td><td class="num">$403k</td><td class="num">15%</td></tr>
+        <tr><td>Cost of goods</td><td class="num">$83k</td><td class="num">3%</td></tr>
+        <tr class="total"><td>Total spend</td><td class="num">$2.67M</td><td class="num">—</td></tr>
+        <tr><td>Revenue earned over the period</td><td class="num">$751k</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>What the Series A is raised on</h3>
+  <p>The round is raisable on these and not otherwise. Each is already instrumented in production or scoped.</p>
+
+  <div class="tw">
+    <table>
+      <tbody>
+        <tr><td><strong>Paid-channel CAC</strong></td><td>≤ $90 with payback under 7 months, in at least one repeatable channel</td></tr>
+        <tr><td><strong>Retention</strong></td><td>Week-4 retention ≥ 30% and a <strong>flattened month-three cohort curve</strong> across twelve weeks of live data</td></tr>
+        <tr><td><strong>ARR</strong></td><td>≥ $2M run-rate, growing</td></tr>
+        <tr><td><strong>Safety</strong></td><td><strong>Zero</strong> ungrounded numeric claims and <strong>zero</strong> insulin-dosing responses in production, with the evaluation logs to prove it</td></tr>
+        <tr><td><strong>Regulatory</strong></td><td>FDA general-wellness position confirmed in writing by counsel</td></tr>
+        <tr><td><strong>Clinical</strong></td><td>Safety copy signed off by a named clinician; food data carrying source and verification dates</td></tr>
+        <tr><td><strong>Accuracy</strong></td><td>Meal parsing ≥ 90% on users' own phrases, not ours</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Spend gates</h3>
+  <p>Marketing is released on evidence, not on the calendar. Each gate holds for two consecutive months before the next step opens.</p>
+
+  <ul class="gates">
+    <li><span class="mo">M1–5</span><span class="sp">$0</span><span class="gt">Build. Counsel engaged in month 2 — the first material spend in the plan.</span></li>
+    <li><span class="mo">M6–9</span><span class="sp">$15k / mo</span><span class="gt"><b>Launch.</b> Activation ≥ 50% — three meals logged in the first three days.</span></li>
+    <li><span class="mo">M10–15</span><span class="sp">$40k / mo</span><span class="gt">Week-4 retention ≥ 30%; paid CAC ≤ $130.</span></li>
+    <li><span class="mo">M16–24</span><span class="sp">$110k / mo</span><span class="gt">Paid CAC ≤ $110; payback ≤ 8 months; monthly churn ≤ 9%.</span></li>
+    <li><span class="mo">M25–30</span><span class="sp">$250k / mo</span><span class="gt">Paid LTV/CAC ≥ 3.0× on <b>realised</b> cohort revenue.</span></li>
+    <li><span class="mo">M31–36</span><span class="sp">$400k / mo</span><span class="gt">Sustained, with gross margin ≥ 85%.</span></li>
+  </ul>
+
+  <div class="note">
+    <p><strong>The gate runs both ways.</strong> If the launch cohorts land at the upside end, this plan is underspending, and the right response is to pull the Series A forward and raise more — not to hold the schedule.</p>
+  </div>
+
+  <div class="note">
+    <p><strong>One note on capital efficiency.</strong> A variant of this plan reaching launch without institutional capital has been modelled: the product needs roughly <strong>$20k of outside services</strong> to reach a public launch, because it is already built. That is not the plan being proposed — it caps the business at a few hundred subscribers and cedes a market that is being actively educated by better-funded competitors — but it means <strong>the seed buys growth, not survival</strong>, and the company is not forced into a bad Series A.</p>
+  </div>
+</section>
+
+<section id="beyond">
+  <p class="eyebrow">Section eleven</p>
+  <h2 class="sec">Beyond year three</h2>
+  <p>Growth saturating, marketing rising to $900k a month, no new market or channel assumed.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>&nbsp;</th><th class="num">Revenue</th><th class="num">Exit subscribers</th><th class="num">Exit ARR</th></tr></thead>
+      <tbody>
+        <tr><td>Year 3</td><td class="num">$7.29M</td><td class="num">58,909</td><td class="num">$11.46M</td></tr>
+        <tr><td>Year 4</td><td class="num">$19.13M</td><td class="num">131,350</td><td class="num">$25.42M</td></tr>
+        <tr class="total"><td>Year 5</td><td class="num">$33.84M</td><td class="num">210,987</td><td class="num">$40.58M</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>$40M of ARR is <strong>0.36% of the serviceable market</strong> — still a rounding error against 59M people. The expansions deliberately absent from every number above are what carry the business past it: CGM import and personalisation from measured glucose response, a clinician-facing view sold into practices, employer and payer channels, the caregiver persona, and markets outside the US.</p>
 </section>
 
 <section id="risks">
-  <p class="eyebrow">Section eleven</p>
-  <h2 class="sec">Risks with a price</h2>
+  <p class="eyebrow">Section twelve</p>
+  <h2 class="sec">Risks</h2>
 
-  <h3><span class="chip risk">can invalidate the plan</span> Regulatory posture</h3>
-  <p>The PRD flags it and it is unresolved. If a "can I eat this" verdict for people with diagnosed diabetes falls outside FDA general-wellness guidance, DiaBite becomes a regulated device. A 510(k) route adds roughly <strong>$400k–$900k and 12–18 months</strong> before revenue, none of which this model carries. Mitigation: resolve it with counsel before Month 6 — the $20k in Month 3 is that engagement — and hold the claim surface inside general wellness until it is answered. This is the one risk that ends the plan rather than dents it.</p>
-
-  <h3>Food data licensing</h3>
-  <p>The source decision is open. USDA FoodData Central is free but carries no glycemic index; a commercial branded and restaurant database is the realistic path to US coverage, modelled at $1.5k–$7k a month. Enterprise licensing nearer $10k/month costs about two points of Year 3 gross margin — material, not structural. The bigger exposure is time: the glycemic layer has to be built regardless, which is what the dietitian and the data-ops hire are for.</p>
+  <div class="risk-h"><h3>Regulatory</h3><span class="chip risk">changes the plan, not the date</span></div>
+  <p>FDA general-wellness guidance covers products that promote a healthy lifestyle. A <em>can I eat this</em> verdict aimed at people with a diagnosis sits close to the line. If it falls outside, DiaBite becomes a regulated device: a 510(k) route would add an estimated $400k–900k and 12–18 months before revenue, which this plan does not carry.</p>
+  <p><em>Mitigation:</em> counsel engaged in month 2 — the first material spend in the plan — claims held inside general wellness until answered, a part-time regulatory lead from month 6, and a US medical director from month 7. This is the one risk that changes the plan rather than delays it, and it is deliberately the first money spent.</p>
 
   <h3>Retention</h3>
-  <p>The PRD's own week-4 target of 30% is modest, and manual food logging is a category with a well-documented adherence collapse. Every dollar here rests on the "under 20 seconds to log" requirement being met. If it is not, churn goes to the conservative case or worse — and the gates in §9 stop the spend.</p>
+  <p>Manual food logging has a well-documented adherence collapse, and every figure in §7 rests on logging taking under 20 seconds. <em>Mitigation:</em> the gates in §10 detect it in the first two cohorts; the annual plan at 45% of mix absorbs monthly churn; the north-star metric is in-range days per week, which only moves if behaviour actually changes.</p>
 
-  <h3>Free-tier abuse</h3>
-  <p>200,000 free users at Year 3 cost about $54k a month in inference and infrastructure. Uncapped, a small share of heavy users can double that. The 15-interaction cap is a P0 cost control, not a growth lever.</p>
+  <h3>Acquisition cost</h3>
+  <p>$117 against a $290 LTV is a 2.5× business in year one — workable, not comfortable, and the number most likely to disappoint. <em>Mitigation:</em> the clinician and search channels are built before paid is opened, which is why marketing is only 28% of the seed.</p>
 
-  <h3>Single model provider</h3>
-  <p>Sole-sourcing inference is a supplier risk in a plan where inference is a cost line. The mitigation is structural: the deterministic core is provider-independent by construction, and only the understanding and narration layer is coupled — so a provider change is a prompt-and-eval migration, not a rewrite.</p>
+  <h3>The 13% unknown-food rate</h3>
+  <p>The most visible product weakness and the first thing a user meets. It is a conversion risk, not a cost risk. <em>Mitigation:</em> 16–24 days scoped, a dietitian from month 1, and an explicit "glycemic load not available" answer rather than a guessed number — the promise holds even where the data does not.</p>
+
+  <h3>Holding health data from the EU</h3>
+  <p>A US-facing service storing identifiable health data, operated from the EU, is subject to GDPR alongside US rules. <em>Mitigation:</em> a device-scoped anonymous identity first, with deletion and export from the first migration; counsel's scope covers it; SOC 2 Type I in year two.</p>
+
+  <h3>Clinical liability</h3>
+  <p>No clinician has signed off yet. <em>Mitigation:</em> the advisory board and the review pack are live; professional liability and cyber insurance are funded from year one; the product refuses dosing questions deterministically, before any model runs.</p>
 
   <h3>Key person</h3>
-  <p>Through Month 12 the team is six people and the founder is both PM and domain owner. Standard at this stage, and worth stating rather than hiding.</p>
+  <p>The founder is currently the whole team. <em>Mitigation:</em> the first three hires close in months 1–3 and the architecture is documented to the level of this plan's own sources.</p>
 </section>
 
-<section id="verify">
-  <p class="eyebrow">Section twelve</p>
-  <h2 class="sec">Before this goes to anyone</h2>
-  <p>Every <span class="chip est">estimate</span> in §2 must be replaced with a sourced figure or an explicit range. In the order they actually move the outcome:</p>
-  <ol class="body">
-    <li><strong>Free → paid conversion</strong> and <strong>monthly churn</strong> — the two levers that dominate the sensitivity table. Both are unknowable pre-launch, so the plan's credibility rests on the gates in §9, not on the point estimates.</li>
-    <li><strong>Cost per free signup</strong>, by channel, from a real test — not a category benchmark.</li>
-    <li><strong>Interactions per user per day.</strong> The 4.5 is inferred from the PRD's "five to seven eating decisions a day." Instrument it in the first cohort; it scales COGS linearly.</li>
-    <li><strong>Annual plan mix.</strong> 45% is assumed and is worth $95 of LTV per subscriber.</li>
-    <li><strong>Food-data licensing quotes</strong> — actual quotes, once the source is chosen.</li>
-    <li><strong>US salary benchmarks</strong> for the loaded costs in §7.</li>
-    <li><strong>Regulatory cost</strong> of the 510(k) contingency, from counsel.</li>
-  </ol>
-  <p>The PRD's own <span class="chip est">verify</span> market figures — CDC prevalence, ADA cost of diabetes — are not inputs to this model; no line here is derived from market size. But they appear in the same investor conversation and carry the same obligation.</p>
+<section id="assumptions">
+  <p class="eyebrow">Section thirteen</p>
+  <h2 class="sec">Assumptions</h2>
+
+  <div class="tw">
+    <table>
+      <caption>Measured — from production</caption>
+      <tbody>
+        <tr><td>Inference cost per agent question</td><td class="num">$0.0028</td><td>1,941 questions, 27 Sep – 8 Oct, including retries, verifier second attempts and evaluation runs</td></tr>
+        <tr><td>Tokens per question</td><td class="num">4,913 / 137</td><td>in / out, with 74% of input served from cache</td></tr>
+        <tr><td>Fixed infrastructure</td><td class="num">$28 / mo</td><td>today; $98–137 at launch</td></tr>
+        <tr><td>Latency</td><td class="num">p90 8.2 s</td><td>median 4.7 s</td></tr>
+        <tr><td>Evaluation results</td><td class="num">285 cases</td><td>most recent live run 180/183; verified rate 100% of answers returned</td></tr>
+        <tr><td>Unresolved-food rate</td><td class="num">13%</td><td>of field phrases</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tw">
+    <table>
+      <caption>Assumed — and what will replace each</caption>
+      <thead><tr><th>&nbsp;</th><th class="num">Value</th><th>Evidence that replaces it</th></tr></thead>
+      <tbody>
+        <tr><td>Questions per paying subscriber</td><td class="num">135 / mo</td><td>Instrumented from launch; scales COGS linearly, and at 2.3% of revenue it cannot move the outcome</td></tr>
+        <tr class="flag"><td><strong>Free → paid conversion</strong></td><td class="num"><strong>6.0 → 7.5%</strong></td><td>The first two cohorts. <strong>Worth 43% of Year 3 ARR</strong></td></tr>
+        <tr class="flag"><td><strong>Monthly churn / annual renewal</strong></td><td class="num"><strong>8.0% / 55%</strong></td><td>Month-three cohort curve, twelve weeks after launch</td></tr>
+        <tr><td>Annual plan mix</td><td class="num">45%</td><td>Checkout data from week one</td></tr>
+        <tr><td>Cost per registered signup</td><td class="num">$7.00 → $6.00</td><td>A live channel test before the month-10 step</td></tr>
+        <tr><td>Price</td><td class="num">$19.99 / $149</td><td>Five moderated sessions and the beta, before paid acquisition opens</td></tr>
+        <tr><td>Build calendar to launch</td><td class="num">5 months</td><td>83–106 scoped days against the hiring plan</td></tr>
+        <tr><td>Loaded personnel cost</td><td class="num">60% of US</td><td>Offers accepted</td></tr>
+        <tr><td>Outside services</td><td class="num">$403k / 3 yr</td><td><strong>Quotes outstanding</strong> for counsel, accessibility audit and penetration test</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><strong>Not in any number above.</strong> Photo and voice logging. Branded-food licensing if USDA data proves insufficient. App-store fees — the product is web-first at 2.9%, against 15–30% on a mobile store, and leaving the web is a decision with a known price. Corporate taxes. Any revenue from the expansions listed in §4 and §11.</p>
 </section>
 
 <hr class="rule">

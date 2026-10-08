@@ -1,473 +1,575 @@
 # DiaBite — Financial Plan
 
-**36-month operating model, funding requirement, and unit economics**
-Author: Nadia Babich · Date: 1 September 2026 · Status: Draft for review
-Companion to `docs/PRD.md` (Week 1). Currency: USD. Market: United States only.
+**Three-year operating model · seed round**
+Nadia Babich · 8 October 2026 · Confidential
 
-> **How to read this.** Every number here is either **[decided]** (a choice already
-> made — price, market, scope), **[modelled]** (computed from the assumptions in
-> §2 and reproducible from them), or **[estimate]** (a benchmark carried in from
-> outside and *not yet verified against a primary source*). Estimates are the
-> weak joints of this plan and are listed together in §12. Nothing below should
-> be shown to an investor until §12 is closed.
+**Currency:** US dollars. Revenue is earned in the US; the cost base is in euros
+(the team and infrastructure are EU-based), converted at $1.093 to the euro.
+**Companion documents:** `docs/PRD.md` (product), `docs/PRD-post-course.md`
+(scope of work), `docs/COST-post-course.md` and `docs/monitoring.md` (measured
+costs), `docs/CLINICAL_REVIEW.md` (clinical validation).
+
+> **Provenance.** Every figure is marked. **[measured]** comes from Azure Cost
+> Management and production traces over 1,941 live agent questions.
+> **[scoped]** is a size in working days from the engineering plan.
+> **[assumed]** has no measurement behind it yet. There are no users, so every
+> growth figure is assumed; §13 lists them with the evidence that will replace
+> each one. Market figures carry **[to verify]** until re-checked against the
+> primary source.
 
 ---
 
-## 1. Summary
+## 1. Executive summary
 
-DiaBite is a subscription consumer-health product with an agentic AI core. Its
-financial shape follows directly from two facts established in the PRD: the
-deterministic engine does the arithmetic (so the LLM is called for
-*understanding*, not for computation, which keeps inference cost low), and the
-market is the United States (so pricing is direct-pay and compared against
-medication, not against a fitness app).
+DiaBite answers one question for people with type 2 diabetes, prediabetes or
+insulin resistance — *can I eat this, how much, and with what?* — in seconds,
+from a sentence of plain English. A language model reads the meal and plans the
+work; a deterministic engine computes every number; a verifier rejects any
+answer containing a figure no tool returned. The user gets a verdict, the number
+behind it, a reason, and the arithmetic one tap away.
+
+**The architecture is built, deployed and measured.** That is what distinguishes
+this plan from a forecast: the cost of goods below is not an estimate.
 
 | | Base case |
 |---|---|
-| Pricing | $19.99 / month · $149 / year **[proposed]** |
-| Gross margin at scale | **79%** — variable cost $3.42 against $16.58 blended ARPU |
-| LLM cost per paying user per month | **$2.11** — 13% of ARPU |
-| LTV (blended plans) | **$252** |
-| CAC — paid channel only | $100 (Y1) → $71 (Y2) → $73 (Y3) |
-| LTV/CAC — paid channel | 2.5x → 3.5x |
-| Payback — paid channel | 7.6 mo (Y1) → 5.4 mo (Y2) |
-| Year 3 exit ARR | **$7.25M** · 37,400 paying subscribers |
-| First EBITDA-positive month | **Month 35** |
-| Peak cumulative cash requirement | **$3.01M** |
-| Funding plan | Seed **$2.5M** at M1 · Series A **$6M** at M20 |
+| Pricing | $19.99 / month · $149 / year |
+| **Gross margin** | **91.5%** — COGS of $1.41 against $16.58 blended ARPU |
+| Inference cost per paying subscriber | **$0.38 / month [measured]** — 2.3% of revenue |
+| LTV | $290 | 
+| CAC, paid channel | $117 (Y1) → $86 (Y2) |
+| LTV / CAC, paid channel | 2.5× → 3.4× · payback 7.7 → 5.6 months |
+| Year 1 exit ARR | $395k |
+| Year 2 exit ARR | $3.27M |
+| **Year 3 exit ARR** | **$11.46M** · 58,900 paying subscribers |
+| First EBITDA-positive month | **Month 30** |
+| Peak cumulative cash | **$2.65M** |
+| **The raise** | **$3.0M seed now · $12M Series A at month 20** |
 
-The plan is deliberately **product-led before it is spend-led**. Months 1–6 are
-build-only with zero acquisition spend. Marketing scales in three steps
-($8k → $25k → $55k → $110k/mo) and each step is gated on a metric, not on a
-date (§9). This is the structural answer to the biggest risk in the category:
-consumer health products with weak retention scale their way into a hole.
+**Three things make the economics unusual for consumer health.**
 
----
+1. **91.5% gross margin, measured not modelled.** The model never produces a
+   nutrition number, so it is never asked to reason its way to one. Inference
+   costs $0.0028 a question in production. At 2.3% of revenue, inference pricing
+   is not a line item that can threaten this business.
+2. **US revenue on an EU cost base.** Engineering, clinical and operations sit
+   in the EU at roughly 60% of US loaded cost, against US consumer pricing. The
+   plan reaches $11.5M ARR with 26 people and $2.65M of cumulative cash.
+3. **The product exists.** 6,054 foods, three agents in production, 285
+   evaluation cases, a verified rate of 100% across the most recent live run, p90
+   latency of 8.2 seconds. The seed buys distribution and clinical validation,
+   not a first version.
 
-## 2. Assumption register
-
-Everything downstream is computed from this table. Change a row and the model moves.
-
-### Revenue
-
-| Assumption | Value | Basis |
-|---|---|---|
-| Monthly price | $19.99 | **[proposed]** — awaiting sign-off, see §3 |
-| Annual price | $149 (38% discount) | **[proposed]** |
-| Annual plan mix | 45% of new paid | **[estimate]** |
-| Free → paid conversion | 6% (Y1) → 7% (Y2) → 7.5% (Y3) | **[estimate]** — consumer health freemium runs 3–8% |
-| Monthly-plan churn | 10% → 8% → 7% per month | **[estimate]** |
-| Annual-plan renewal | 50% → 56% → 60% | **[estimate]** |
-| Free-tier churn | 12% / month | **[estimate]** |
-| Free → paid upgrade from base | 0.8% / month | **[estimate]** |
-
-### Acquisition
-
-| Assumption | Value | Basis |
-|---|---|---|
-| Blended cost per free signup | $6.00 (Y1) → $5.00 (Y2) → $5.50 (Y3) | **[estimate]** |
-| Organic signups at launch | 500 / month, +10% / month | **[estimate]** |
-| Channel mix | Content/SEO + condition communities + clinician & dietitian referral, with a contained paid-social test | **[decided]** |
-
-Channel mix is a financial decision, not a marketing one. Paid social at a
-$100 CAC against a $252 LTV is a 2.5x business that pays back in seven months —
-survivable but not fundable at scale. Content and referral are what move the
-blended number, which is why the first growth hire is a **growth/content lead**
-and not a performance marketer.
-
-### Cost of revenue
-
-| Assumption | Value | Basis |
-|---|---|---|
-| Agent interactions — paying user | 4.5 / day (135 / month) | **[estimate]** — the PRD's job is 5–7 eating decisions a day |
-| Agent interactions — free user | 12 / month (hard cap 15) | **[decided]** — the free tier's cost ceiling |
-| Photo logging share of logs | 15% (P1 feature, from M10) | **[estimate]** |
-| Infrastructure | $0.35 / paid MAU · $0.08 / free MAU | **[estimate]** |
-| Support | $0.30 / paid MAU | **[estimate]** |
-| Payment processing | 4.0% of gross revenue | Stripe 2.9% + $0.30 on a ~$16 average ticket |
-| Food-data licensing | $1.5k/mo (Y1) → $4k (Y2) → $7k (Y3) | **[estimate]** — see §11, open PRD question |
-
-**Web-first is worth ~11–26 points of margin.** The product is React + Vite on
-the web, so subscriptions run through Stripe at ~4% rather than through an app
-store at 15–30%. Native apps are a Year 2+ decision and must be priced knowing
-they cost roughly $2.50 per subscriber per month in store fees.
+> **What the seed is actually for:** finding out whether people who need this
+> will pay for it, at a cost of acquisition that works. Everything else is done
+> or scoped.
 
 ---
 
-## 3. Pricing
+## 2. Where we are — what the seed is not paying for
 
-| | Monthly | Annual |
-|---|---|---|
-| Price | $19.99 | $149 ($12.42 / mo) |
-| Assumed mix of new paid | 55% | 45% |
-| Blended ARPU | **$16.58 / month** | |
+Measured 8 October 2026 against the running service.
 
-**Free tier.** The whole deterministic engine: logging with glycemic load and
-available carbohydrate, personal targets with their derivation, the weekly menu
-generator, the shopping list. Plus 15 agent interactions per month. The free
-tier costs $0.27 per user per month to run ($0.19 of it inference) and exists
-because the deterministic half of the product is genuinely useful on its own —
-it is the demonstration that the numbers are trustworthy.
+| | State |
+|---|---|
+| **The promise** | Every number computed by a deterministic engine and checked by a verifier before display. No model produces a nutrition number |
+| **Product** | Onboarding with derived targets, ask screen, diary, weekly menu generator, feedback, phone layout |
+| **Agents** | Router, meal specialist with tools, advisor with memory and knowledge base — all in production on Azure AI Foundry |
+| **Food catalogue** | 6,054 foods: 351 verified ingredients, 1,000 recipes computing dish GI deterministically from ingredients, 4,618 USDA survey foods |
+| **Quality [measured]** | Food resolution 95/95 · clarification 19/19 · safety phrasings 63/63 · verifier 12/12 · live agent 180/183 checks · p90 8.2 s, median 4.7 s |
+| **Safety** | Deterministic rules run before any model: insulin dosing refused, red flags escalated, rate limits per address, conversation and day |
+| **Clinical** | Three physicians hold a 20-question review pack; the first review changed the product within a day. **No clinician has signed off yet** |
+| **Cost [measured]** | $0.0028 a question · $28 a month of fixed infrastructure |
+| **Users** | **None yet.** Five moderated sessions written, not scheduled |
 
-**Pro tier.** Unlimited agent interactions under fair use, photo logging,
-adaptive re-planning, longitudinal memory of accepted and rejected suggestions,
-export.
-
-**Why $19.99 and not $9.99 — a recommendation, not a decision.** The persona compares this against a medication
-copay, not against a fitness app, and the competitive set anchors far higher:
-ZOE and Nutrisense start in the hundreds of dollars because a CGM is in the box.
-At $19.99 DiaBite is a quarter of a CGM-first subscription and the cheapest
-credible thing in the category that answers *"can I eat this."* At $14.99 the
-model still works but Year 3 EBITDA turns negative and the Series A gets harder;
-at $9.99, paid acquisition stops paying back at all and the plan reduces to a
-purely organic business.
-
-**Not in the model, deliberately:** B2B2C (employer and payer channels), the
-clinician-facing view for dietitians, and any CGM hardware attach. Each is
-plausible Year 3 revenue and none is underwritten here.
+**What is honestly not done:** no accounts (the diary lives in the browser), no
+photo logging, 13% of typed foods resolve to nothing — mostly branded products
+with no published glycemic index — and the FDA general-wellness position is
+unconfirmed. Each is scoped in days in `docs/PRD-post-course.md` and funded
+below. Together they are **83–106 working days [scoped]** to a public launch.
 
 ---
 
-## 4. What the agent actually costs to run
-
-This is the number most AI-product financial plans get wrong, so it is built
-from the architecture in the PRD rather than from a rule of thumb. Model prices
-are Anthropic list rates; cached input reads at 0.1x and cache writes at 1.25x.
-
-> **Measured, 8 October 2026 — read before using this section.** The table below
-> is built on Anthropic list prices and a Haiku / Sonnet / Opus split, with a
-> model-based verifier. Production runs `gpt-5.4-nano` (router) and
-> `gpt-5.4-mini` (meal or advice), and the verifier is code. Measured from the
-> Foundry traces and Azure Cost Management over 1,941 real questions: about
-> **4,900 tokens in (74% cached) and 140 out** per question, billed at about
-> **€0.0026**, against **$0.0156** below. The structure of the argument (the engine
-> computes, routing, caching) holds; the dollar figure is roughly six times too
-> high for this stack and should be rebuilt from the measurement, not adjusted.
-> Details in `docs/monitoring.md`. The plan has not been recalculated.
-
-**One "can I eat this?" interaction:**
-
-| Step | Model | Tokens (fresh in / cached in / out) | Cost |
-|---|---|---|---|
-| `resolve_foods` — text → food entities + portions | Claude Haiku 4.5 | 350 / 1,200 / 180 | $0.00137 |
-| Agent loop — plan, call tools, narrate (2 calls) | Claude Sonnet 5 | 1,400 / 5,000 / 450 | $0.01055 |
-| Verifier — every number traced to a tool result | Claude Haiku 4.5 | 900 / 600 / 90 | $0.00141 |
-| Hard re-planning escalation (5% of turns) | Claude Opus 5 | 1,800 / 5,000 / 600 | $0.00133 |
-| Photo logging (15% of logs) | Claude Sonnet 5, vision | 1,800 / 1,200 / 250 | $0.00095 |
-| **Total per interaction** | | | **$0.0156** |
-
-| | Interactions / month | LLM cost / month |
-|---|---|---|
-| Paying user | 135 | **$2.11** |
-| Free user | 12 | **$0.19** |
-
-**Three architectural decisions carry this number.**
-
-1. **The engine computes; the model narrates.** Every gram and glycemic load
-   comes from deterministic TypeScript. The model never reasons its way to a
-   number, so it never needs a large thinking budget to do so. The safety
-   argument in the PRD and the cost argument are the same argument.
-2. **Model routing.** Entity resolution and verification are classification
-   work and run on Haiku 4.5. Only planning and narration need Sonnet 5, and
-   only genuinely hard re-planning escalates to Opus 5. Running the whole loop
-   on Opus 5 would cost roughly $0.05 per interaction — **$6.75 per paying user
-   per month**, tripling COGS and cutting gross margin from 79% to about 62%.
-3. **Prompt caching.** The system prompt, tool definitions, and the user's
-   profile are a stable prefix read at 0.1x. Without caching, per-interaction
-   cost rises about 40%. This makes prefix stability a *financial* requirement:
-   no timestamps in the system prompt, deterministic tool ordering.
-
-**Cost control that must be built, not hoped for:** a hard per-user monthly
-interaction ceiling on the free tier, a fair-use ceiling on Pro, a
-tool-call-count cap per turn (a looping agent is an unbounded bill), and per-user
-cost telemetry in the same log line as the tool calls and verifier result that
-E3 already requires.
-
-**Price risk runs both ways.** A 2x rise in inference prices costs 5 points of
-gross margin — survivable. The historical direction has been downward, and the
-model does not assume any decline.
-
----
-
-## 5. Unit economics (base case, steady state)
+## 3. Market
 
 | | |
 |---|---|
-| Blended ARPU | $16.58 / month |
-| LLM | $2.11 |
-| Infrastructure | $0.35 |
-| Support | $0.30 |
-| Payment processing | $0.66 |
-| **Variable COGS** | **$3.42** |
-| **Gross margin** | **79.4%** |
+| US adults with diagnosed diabetes | 40.1M, ~90% type 2 **[to verify — CDC, Sept 2026]** |
+| US adults with prediabetes | 115.2M **[to verify — CDC]** |
+| Annual US cost of diagnosed diabetes | $412.9B **[to verify — ADA]** |
+| **Serviceable market** — diagnosed T2D (~36M) plus prediabetes that knows it (~23M) | **59M people** |
+| Revenue per subscriber per year | **$199** |
 
-| | Monthly plan | Annual plan | Blended |
-|---|---|---|---|
-| Average subscription life | 12.5 mo | 27.3 mo | **19.1 mo** |
-| **LTV** (ARPU × GM × life) | | | **$252** |
+Diet is first-line treatment for type 2 diabetes, and medical nutrition therapy
+moves HbA1c by about as much as adding a drug **[to verify — ADA Standards of
+Care]**. The gap is delivery: structured programmes need human coaches and do
+not scale, and the software that does scale was built for calorie counting.
 
-| | Y1 | Y2 | Y3 |
-|---|---|---|---|
-| CAC — paid channel only | $100 | $71 | $73 |
-| LTV/CAC | 2.5x | 3.5x | 3.4x |
-| Payback | 7.6 mo | 5.4 mo | 5.6 mo |
-| CAC — blended with organic | $50 | $41 | $41 |
-| LTV/CAC — blended | 5.0x | 6.1x | 6.1x |
+**The penetration this plan assumes is small enough to check by eye.**
 
-**Read the paid-channel row, not the blended one.** Blended CAC flatters the
-business by treating organic signups as free; it is the right number for
-reporting and the wrong number for deciding whether to spend. The decision rule
-is the paid-channel figure, and the gate in §9 is set on it.
+| | Y3 subscribers | Share of the 59M |
+|---|---|---|
+| Conservative | 33,700 | 0.057% |
+| **Base** | **58,900** | **0.100%** |
+| Upside | 120,700 | 0.205% |
 
-**The annual plan is the retention strategy.** A monthly subscriber is worth
-$165; an annual subscriber is worth $360. Everything that pushes annual mix
-above 45% — an annual-only onboarding offer, a 90-day price break tied to the
-diagnosis window the PRD identifies as peak motivation — moves LTV more than
-any pricing change.
+One percent of the serviceable market is 590,000 subscribers and $117M of ARR.
+The base case needs one tenth of one percent.
+
+**Competitive position.** ZOE, Levels and Nutrisense taught US consumers what a
+glycemic response is, then priced it behind a $100-plus monthly sensor.
+MyFitnessPal and Cronometer give a database and three to five minutes of work
+per meal, with no glycemic index at all. A general-purpose chatbot answers the
+question fluently and gives two different glycemic loads for the same meal.
+DiaBite is the only one that answers *can I eat this* with a number it can show
+you the derivation of — at a tenth of the price of a CGM subscription.
 
 ---
 
-## 6. Three-year P&L (base case)
+## 4. Business model
+
+| Plan | Price | Per month | Mix of new paid **[assumed]** |
+|---|---|---|---|
+| Monthly | $19.99 | $19.99 | 55% |
+| Annual | $149 | $12.42 | 45% |
+| **Blended ARPU** | | **$16.58** | |
+
+**Free tier.** The entire deterministic engine — targets with their derivation,
+the diary, the safety envelope, the weekly menu — plus 15 agent answers a month.
+It costs **$0.043 per user per month [measured]**, which makes it the cheapest
+acquisition channel in the plan and, more importantly, the proof: a user can
+confirm the numbers are trustworthy before paying for anything.
+
+**Paid tier.** Unlimited agent answers under fair use, photo logging,
+longitudinal memory of what was accepted and rejected, history and trends,
+export.
+
+**On the price.** $19.99 is one quarter of a CGM-first subscription and is the
+figure this plan is built on, because a paid-acquisition path needs the ARPU to
+support it. It has not been tested on a user. A $14.99 variant is modelled in
+§13 and costs roughly four months of calendar; the price will be set from the
+five moderated sessions and the beta, before the first dollar of paid
+acquisition is spent.
+
+**Deliberately not in these projections:** employer and payer channels, a
+clinician-facing view for dietitians and endocrinologists, CGM data import, and
+any market outside the US. Each is a credible second act. None is underwritten
+here.
+
+---
+
+## 5. Unit economics
+
+### Cost of goods, per paying subscriber per month
+
+| | | Share of ARPU |
+|---|---|---|
+| Blended ARPU | **$16.58** | |
+| Inference **[measured]** | $0.38 | 2.3% |
+| Hosting and infrastructure | $0.12 | 0.7% |
+| Support | $0.25 | 1.5% |
+| Payment processing | $0.66 | 4.0% |
+| **Cost of goods** | **$1.41** | 8.5% |
+| **Gross profit** | **$15.17** | **91.5%** |
+
+**Why inference is 2.3% of revenue and not 13%.** Three decisions, all made for
+safety and all paying a commercial dividend:
+
+- **The engine computes; the model narrates.** Every gram and glycemic load
+  comes from deterministic code. The model is never asked to derive a number, so
+  it never needs a long reasoning budget to do so.
+- **Three models, by role.** A small, fast model routes. A mid-tier model reads
+  meals and answers. Only the hardest re-planning escalates. Routing was chosen
+  on evaluation results, not on price — and the evidence favoured the model that
+  guessed less, which was also the cheaper one.
+- **74% of input tokens are served from cache [measured].** The system prompt,
+  tool definitions and user profile are a stable prefix. Prefix stability is
+  therefore an engineering rule, not an optimisation.
+
+A doubling of inference prices would cost **1.1 points of gross margin**. This
+is the line most AI-product plans get wrong in the other direction, and it is
+the one line here that is measured rather than forecast.
+
+### Retention and lifetime value **[assumed]**
 
 | | Year 1 | Year 2 | Year 3 |
 |---|---|---|---|
-| Paying subscribers (exit) | 817 | 9,535 | 37,410 |
-| Free users (exit) | 8,185 | 65,682 | 206,015 |
-| Exit ARR | $160k | $1.86M | $7.25M |
-| **Revenue** | **$45.7k** | **$936.6k** | **$4.52M** |
-| Cost of revenue | $26.7k | $361.5k | $1.48M |
-| **Gross profit** | **$19.0k** | **$575.1k** | **$3.04M** |
-| Gross margin | 41% | 61% | 67% |
-| Personnel | $651k | $1,113k | $1,809k |
-| Sales & marketing | $51k | $480k | $1,680k |
-| G&A, legal, compliance, tooling | $193k | $283k | $304k |
-| **Total operating expense** | **$895k** | **$1.88M** | **$3.79M** |
-| **EBITDA** | **($876k)** | **($1.30M)** | **($753k)** |
-| Average monthly burn | $73k | $108k | $63k |
-| Cumulative cash consumed | $876k | $2.18M | $2.93M |
+| Monthly-plan churn | 8.0% | 6.8% | 5.8% |
+| Annual-plan renewal | 55% | 60% | 65% |
+| Blended subscription life | 16.4 mo | 19.1 mo | 22.2 mo |
+| **LTV** | $249 | **$290** | $337 |
 
-Gross margin starts at 41% and climbs to 67% because free-tier inference and the
-data licence are fixed-ish costs carried against a small paid base. At the Year 3
-exit run-rate the marginal margin is the 79% in §5; the reported annual figure
-converges on it as the paid base grows.
+**The annual plan is the retention strategy.** It is 45% of new subscriptions
+and carries roughly twice the lifetime of a monthly one. An annual-first
+onboarding offer, timed to the 90-day window after diagnosis when motivation is
+highest, is the single highest-leverage retention lever in the plan — ahead of
+any product feature.
 
-**Monthly path, Year 1:**
+### Acquisition efficiency
 
-| Month | Signups | Free | Paid | MRR | Gross profit | Opex | EBITDA | Cumulative |
-|---|---|---|---|---|---|---|---|---|
-| 1 | — | — | — | — | — | $48.4k | ($48.4k) | ($48k) |
-| 2 | — | — | — | — | — | $51.4k | ($51.4k) | ($100k) |
-| 3 | — | — | — | — | — | $71.4k | ($71.4k) | ($171k) |
-| 4 | — | — | — | — | — | $53.4k | ($53.4k) | ($225k) |
-| 5 | — | — | — | — | — | $83.9k | ($83.9k) | ($309k) |
-| 6 | — | — | — | — | — | $86.4k | ($86.4k) | ($395k) |
-| 7 · **launch** | 1,833 | 1,710 | 124 | $2.1k | ($0.3k) | $77.4k | ($77.7k) | ($473k) |
-| 8 | 1,883 | 3,249 | 254 | $4.2k | $1.0k | $88.2k | ($87.2k) | ($560k) |
-| 9 | 1,938 | 4,643 | 389 | $6.4k | $2.3k | $88.2k | ($85.9k) | ($646k) |
-| 10 | 1,999 | 5,917 | 528 | $8.7k | $3.8k | $82.2k | ($78.4k) | ($724k) |
-| 11 | 2,065 | 7,091 | 671 | $11.0k | $5.3k | $82.2k | ($76.9k) | ($801k) |
-| 12 | 2,139 | 8,185 | 817 | $13.3k | $6.9k | $82.2k | ($75.3k) | ($876k) |
+| | Year 1 | Year 2 | Year 3 |
+|---|---|---|---|
+| **CAC — paid channel only** | **$117** | **$86** | **$100** |
+| LTV / CAC | 2.5× | 3.4× | 2.9× |
+| Payback | 7.7 mo | 5.6 mo | 6.6 mo |
+| CAC — blended with organic | $79 | $57 | $65 |
+| LTV / CAC — blended | 3.7× | 5.1× | 4.5× |
 
-**Year 2–3 quarterly exits:** M18 — 3,706 paid, $60k MRR · M24 — 9,535 paid,
-$155k MRR · M30 — 20,713 paid, $336k MRR · M36 — 37,410 paid, $604k MRR,
-EBITDA **+$58k**.
+**The paid-channel row is the one that governs decisions.** Blended CAC flatters
+the business by treating organic signups as free; it is the right number for
+reporting and the wrong number for deciding whether to spend. Year 3's CAC rises
+as paid channels saturate — that is modelled, not an oversight, and it is the
+reason the organic channel is built first.
 
 ---
 
-## 7. Cost structure
+## 6. Growth model
 
-Year 1 spend is 73% people, 22% G&A and compliance, 6% marketing. That ratio is
-the plan: Year 1 buys a product and a defensible data layer, not users.
+Three channels, in the order they are built.
 
-### Headcount
+**1. Clinicians and dietitians.** Endocrinologists, primary-care physicians and
+RDs already see these patients and are already asked *what can I eat*. They have
+no good answer to hand out. Three physicians are engaged in clinical review
+today; the review relationship is the beginning of the referral relationship.
+This is the channel the product's differentiator — showing the arithmetic — was
+built for, because it is the only one a clinician can inspect.
 
-| Role | Starts | Loaded cost / mo |
+**2. Search and content.** The question has enormous, specific, low-competition
+long-tail search volume: *glycemic load of X*, *can diabetics eat Y*. The food
+catalogue and the deterministic engine generate pages that are correct by
+construction, and every unresolved food a user types is logged and becomes both
+an evaluation case and a content target.
+
+**3. Paid social and search.** Opened only once the first two establish a
+baseline and the gates in §10 are met. Modelled at a cost per registered signup
+of $7.00 improving to $6.00 **[assumed]**.
+
+| | Year 1 | Year 2 | Year 3 |
+|---|---|---|---|
+| Marketing spend | $746k | $1.32M | $3.90M |
+| Registered signups | 23,300 | 216,000 | 553,000 |
+| Free → paid conversion **[assumed]** | 6.0% | 7.0% | 7.5% |
+| Paying subscribers, exit | 2,007 | 16,748 | 58,909 |
+
+Marketing scales in four steps — $15k, $40k, $110k, $250k, then $400k a month —
+and each step is released by a metric, not a date (§10).
+
+---
+
+## 7. Financial projections
+
+### Three-year P&L — base case
+
+| | Year 1 | Year 2 | Year 3 |
+|---|---|---|---|
+| Paying subscribers, exit | 2,007 | 16,748 | 58,909 |
+| Free users, exit | 22,093 | 119,331 | 344,824 |
+| **Exit ARR** | **$395k** | **$3.27M** | **$11.46M** |
+| Revenue | $107k | $1.78M | $7.29M |
+| Cost of goods | $12k | $190k | $748k |
+| **Gross profit** | **$95k** | **$1.59M** | **$6.54M** |
+| Gross margin | 88.4% | 89.3% | 89.7% |
+| Personnel | $608k | $1.33M | $2.15M |
+| Sales and marketing | $746k | $1.32M | $3.90M |
+| G&A, legal, compliance, data | $130k | $90k | $406k |
+| **Operating expense** | **$1.15M** | **$2.74M** | **$6.46M** |
+| **EBITDA** | **($1.05M)** | **($1.15M)** | **$86k** |
+| Headcount, exit | 12 | 17 | 26 |
+
+Reported gross margin runs 88–90% rather than the 91.5% marginal figure because
+free-tier inference and fixed hosting are carried against a smaller paid base;
+it converges upward as the base grows.
+
+### Quarterly
+
+| Quarter | Revenue | EBITDA | Exit subscribers | Exit ARR | Headcount |
+|---|---|---|---|---|---|
+| Q1 · M1–3 | — | ($168k) | — | — | 6 |
+| Q2 · M4–6 **launch** | $3k | ($253k) | 173 | $35k | 8 |
+| Q3 · M7–9 | $27k | ($287k) | 722 | $143k | 10 |
+| Q4 · M10–12 | $78k | ($343k) | 2,007 | $395k | 12 |
+| Q5 · M13–15 | $156k | ($323k) | 3,766 | $740k | 13 |
+| Q6 · M16–18 | $330k | ($454k) | 8,174 | $1.61M | 14 |
+| Q7 · M19–21 | $544k | ($254k) | 12,535 | $2.46M | 15 |
+| Q8 · M22–24 | $750k | ($121k) | 16,748 | $3.27M | 17 |
+| Q9 · M25–27 | $1.09M | ($319k) | 25,121 | $4.91M | 20 |
+| Q10 · M28–30 | $1.49M | ($41k) | 33,351 | $6.50M | 22 |
+| Q11 · M31–33 | $2.04M | ($44k) | 46,235 | $9.01M | 26 |
+| **Q12 · M34–36** | **$2.66M** | **$490k** | **58,909** | **$11.46M** | 26 |
+
+The EBITDA dips in Q6, Q9 and Q11 are the marketing steps opening. Each is a
+deliberate purchase of a cohort that pays back in five to eight months.
+
+### Year 1, month by month
+
+| Month | Signups | Free | Paying | MRR | Gross profit | Opex | EBITDA | Cumulative |
+|---|---|---|---|---|---|---|---|---|
+| 1 | — | — | — | — | — | $39k | ($39k) | ($39k) |
+| 2 | — | — | — | — | — | $73k | ($73k) | ($112k) |
+| 3 | — | — | — | — | — | $55k | ($55k) | ($168k) |
+| 4 | — | — | — | — | — | $81k | ($81k) | ($249k) |
+| 5 | — | — | — | — | — | $73k | ($73k) | ($321k) |
+| **6 · launch** | 2,643 | 2,469 | 173 | $2.9k | $2.5k | $102k | ($99k) | ($421k) |
+| 7 | 2,688 | 4,696 | 353 | $5.8k | $5.1k | $98k | ($93k) | ($514k) |
+| 8 | 2,737 | 6,712 | 536 | $8.8k | $7.8k | $102k | ($94k) | ($608k) |
+| 9 | 2,790 | 8,545 | 722 | $11.9k | $10.5k | $111k | ($100k) | ($708k) |
+| 10 | 6,420 | 13,558 | 1,146 | $18.9k | $16.7k | $130k | ($113k) | ($821k) |
+| 11 | 6,484 | 18,052 | 1,575 | $25.9k | $22.9k | $138k | ($115k) | ($936k) |
+| 12 | 6,553 | 22,093 | 2,007 | $32.9k | $29.2k | $144k | ($115k) | ($1.05M) |
+
+Peak cumulative cash consumption is **$2.65M at month 32**; the first
+EBITDA-positive month is **30**.
+
+---
+
+## 8. Team and the EU cost base
+
+Fully loaded cost — salary, employer contributions, equipment, tooling. The team
+is EU-based, which is the structural reason this plan reaches $11.5M ARR on
+$2.65M of cash.
+
+| Role | Starts | Loaded / month |
 |---|---|---|
-| Founder / PM | M1 | $5.0k → $10k (M13) → $13k (M25) |
-| Senior full-stack engineer | M1 | $13.8k |
-| AI / agent engineer | M1 | $15.4k |
-| Product designer (contract, to M9) | M1 | $6.0k |
-| Registered Dietitian (contract → FT) | M2 | $3.0k → $8.0k (M17) |
-| Full-stack engineer #2 | M5 | $12.5k |
-| Growth / content lead | M8 | $10.8k |
-| Engineer #3 | M15 | $13.8k |
-| Nutrition-data operations | M16 | $8.3k |
-| Clinical & regulatory lead (part-time) | M19 | $7.0k |
-| Support / community | M20 | $6.5k |
-| Engineer #4 · Data scientist (evals) · Growth #2 · Engineer #5 | M25–M31 | $14.2k · $14.0k · $11.5k · $14.2k |
+| Founder / CEO | M1 | $7.5k → $9.5k (M13) → $11.5k (M25) |
+| AI / agent engineer | M1 | $10.0k |
+| Senior full-stack engineer | M1 | $9.2k |
+| Registered Dietitian — part-time to full-time | M1 | $3.8k → $6.7k (M10) |
+| Product designer — contract to full-time | M2 | $5.5k → $6.3k (M12) |
+| Full-stack engineer #2 | M3 | $8.0k |
+| Growth and content lead | M5 | $7.9k |
+| Clinical and regulatory lead — part-time | M6 | $5.8k |
+| **US medical director — part-time, US rate** | M7 | $10.0k |
+| Support and community | M8 | $3.8k |
+| Engineer #3 · Nutrition-data operations | M11, M12 | $8.6k · $5.0k |
+| Engineer #4 · Data scientist, evaluations | M15, M17 | $8.6k · $9.2k |
+| Lifecycle and retention marketer | M19 | $7.5k |
+| Engineer #5 · Head of growth | M22, M23 | $8.8k · $12.5k |
+| Engineers #6–7 · Clinical ops · Support #2–3 | M26–M28 | $17.6k · $7.0k · $8.0k |
+| Engineers #8–9 · Finance and ops · Growth analyst | M31–M33 | $18.0k · $8.5k · $7.0k |
 
-Headcount: 6 at M12 → 10 at M24 → 14 at M36. Costs are fully loaded (salary +
-payroll tax + benefits + equipment), founder below market through Month 12.
+Headcount: **12 at month 12 · 17 at month 24 · 26 at month 36.**
 
-**Two roles that look optional and are not.** The **Registered Dietitian** from
-Month 2 is what makes E4 ("every food record carries a source and a
-last-verified date") real rather than aspirational, and is the person who signs
-off that a recommendation is safe. The **nutrition-data operations** hire in
-Month 16 exists because the glycemic data layer is named in the PRD as one of
-four moats — a moat that nobody maintains stops being one.
+**Three roles that look discretionary and are not.** The **Registered Dietitian
+from month 1** is what makes the food data defensible — every record carrying a
+source and a verification date — and signs off that a recommendation is safe.
+The **US medical director** is a US-market requirement, not a nicety: clinical
+credibility in the US is held by US-licensed clinicians, and this is the one
+role deliberately paid at a US rate. **Nutrition-data operations** exists
+because the glycemic data layer is a moat, and a moat nobody maintains stops
+being one.
 
 ### Non-personnel
 
-| | Y1 | Y2 | Y3 |
+| | Year 1 | Year 2 | Year 3 |
 |---|---|---|---|
-| Legal, corporate, regulatory counsel | $30k + $20k one-off (M3) | $30k + $20k (M22) | $30k |
-| Privacy, ToS, medical-disclaimer review | $14k (M6) | — | — |
-| Professional liability & cyber insurance | $18k | $36k | $48k |
-| Evaluation dataset annotation (B1's 90% target) | $18k (M5) | — | — |
-| Ongoing food-data verification | $25k | $42k | $42k |
-| Clinical advisory board (2 advisors) | $18k | $24k | $24k |
-| SOC 2 Type I | — | $35k (M16) | — |
-| Tooling, accounting, admin, misc | $70k | $108k | $160k |
+| Counsel — FDA position, privacy, terms, claims | $82k | $60k | $66k |
+| Clinical advisory board | $25k | $30k | $30k |
+| Ongoing food-data verification | $32k | $42k | $42k |
+| Evaluation dataset annotation | $22k | — | — |
+| Accessibility audit and penetration test | $9k | — | $30k |
+| SOC 2 Type I | — | $40k | — |
+| Insurance, tooling, accounting, admin | $50k | $90k | $144k |
+| Infrastructure | $6k | $22k | $54k |
 
 ---
 
-## 8. Funding and runway
+## 9. Scenarios
 
-| Round | Timing | Amount | Buys |
+| | Conservative | **Base** | Upside |
 |---|---|---|---|
-| Seed | M1 | **$2.5M** | 20 months of runway through the launch and the first retention cohort |
-| Series A | M20 | **$6.0M** | Scale-up of acquisition once the paid-channel gate clears |
+| Free → paid conversion | 4.2% → 5.3% | 6.0% → 7.5% | 7.5% → 9.4% |
+| Monthly churn | 10.0% → 7.3% | 8.0% → 5.8% | 6.6% → 4.8% |
+| Cost per signup vs. base | 1.30× | 1.00× | 0.85× |
+| Organic reach vs. base | 0.60× | 1.00× | 1.50× |
+| Year 1 revenue | $59k | $107k | $218k |
+| Year 2 revenue | $1.00M | $1.78M | $3.66M |
+| Year 3 revenue | $4.13M | $7.29M | $15.04M |
+| **Year 3 exit ARR** | **$6.49M** | **$11.46M** | **$23.66M** |
+| Year 3 exit subscribers | 33,697 | 58,909 | 120,655 |
+| Year 3 EBITDA | ($2.78M) | $86k | $5.34M |
+| First EBITDA-positive month | beyond M36 | M30 | M20 |
+| **Peak cumulative cash** | **$5.73M** | **$2.65M** | **$1.56M** |
+| Gross margin, Year 3 | 89.1% | 89.7% | 90.1% |
 
-Cash on hand: $2.45M (M1) → $1.62M (M12) → $977k (M18) → **$726k (M20, trough
-before the A)** → $6.6M (M21) → $5.6M (M36). Peak cumulative cash consumed in the
-base case is **$3.01M**; the raise carries a deliberate ~35% buffer over it,
-because the conservative case consumes $4.85M and needs a bigger or earlier A.
+**The conservative case is still a venture outcome** — $6.5M of ARR growing, at
+89% margin — but it needs a larger Series A and reaches profitability in year
+four. It is the case the round is sized against.
 
-**Seed milestones — what M20 has to show.** The A is raisable on these, and not
-otherwise:
+The case this plan is not built to survive is different in kind: **retention
+that never flattens.** A product whose month-three cohort curve goes to zero
+cannot be fixed with marketing, and the correct response is to stop spending,
+not to raise more. §10's gates exist to detect that within two months of launch
+rather than two years.
 
-- 12 weeks of live cohort data with **week-4 retention ≥ 30%** and a Month-3
-  cohort curve that has flattened rather than gone to zero.
-- **Paid-channel CAC ≤ $75 with payback under 6 months** in at least one
-  repeatable channel.
-- **Zero** ungrounded numeric claims and **zero** insulin-dosing responses in
-  production — the PRD's P0 guardrails, with the eval logs to prove it.
-- A resolved regulatory position (§11) and a food-data source that survives due
-  diligence.
-- Meal-parsing accuracy ≥ 90% on a held-out labelled set.
+### What moves the outcome
 
----
-
-## 9. Spend gates
-
-Acquisition spend steps up on evidence, not on the calendar. Each gate must hold
-for two consecutive months before the next step is released.
-
-| Step | Spend | Gate |
-|---|---|---|
-| M1–M6 | $0 | — |
-| M6 | $3k | Waitlist only |
-| M7–M12 | $8k / mo | Launch: activation ≥ 50% (≥3 meals in first 3 days) |
-| M13–M18 | $25k / mo | Week-4 retention ≥ 30%; paid CAC ≤ $110 |
-| M19–M24 | $55k / mo | Paid CAC ≤ $85; payback ≤ 7 mo; monthly churn ≤ 9% |
-| M25–M30 | $110k / mo | Paid LTV/CAC ≥ 3.0x on realised (not projected) cohort revenue |
-| M31–M36 | $170k / mo | Same, sustained; gross margin ≥ 75% |
-
-**And the gate runs the other way too.** If the Year 1 numbers land at the top of
-the range — blended LTV/CAC at 5x is the base case's own output — this plan is
-*underspending*, and the correct response is to accelerate the Series A and
-raise more, not to hold the schedule.
-
----
-
-## 10. Scenarios
-
-| | Conservative | **Base** | Optimistic |
-|---|---|---|---|
-| Free → paid conversion | 4.0% → 5.2% | 6.0% → 7.5% | 8.5% → 10.5% |
-| Monthly churn | 12% → 9.5% | 10% → 7% | 8.5% → 5.5% |
-| Annual renewal | 42% → 50% | 50% → 60% | 58% → 70% |
-| Organic reach vs. base | 0.6x | 1.0x | 1.55x |
-| Cost per signup vs. base | 1.35x | 1.0x | 0.82x |
-| **Y1 revenue** | $23.3k | $45.7k | $81.0k |
-| **Y2 revenue** | $491k | $937k | $1.57M |
-| **Y3 revenue** | $2.36M | $4.52M | $7.70M |
-| Y3 exit ARR | $3.77M | $7.25M | $12.48M |
-| Y3 exit paying subs | 19,645 | 37,410 | 64,145 |
-| **Y3 EBITDA** | ($2.34M) | ($753k) | **+$1.66M** |
-| First EBITDA-positive month | beyond M36 | M35 | M27 |
-| **Peak cash requirement** | **$4.85M** | **$3.01M** | **$1.75M** |
-
-The conservative case is not a failure case — it is a $3.8M ARR business that
-needs a larger Series A and reaches profitability in Year 4. The failure case is
-different in kind: retention that never flattens. A product whose Month-3 cohort
-curve goes to zero cannot be fixed with more marketing, and the honest response
-to it is to stop spending, not to raise.
-
-**Sensitivity — Year 3 exit subscribers, one lever moved:**
-
-| Lever | Y3 exit paid |
+| Lever | Effect on Year 3 ARR |
 |---|---|
-| Base | 37,410 |
-| Conversion 6% → 4.5% | ~28,100 |
-| Conversion 6% → 8% | ~49,800 |
-| Monthly churn 10% → 13% | ~29,200 |
-| Monthly churn 10% → 8% | ~44,100 |
-| Cost per signup $5 → $8 | ~24,700 |
-
-Retention and acquisition cost dominate. Inference price does not appear in this
-table because it cannot move the outcome — at 13% of ARPU it would have to
-quadruple to matter, which is the point of the architecture.
+| Conversion 6.0% → 4.2% | −43% |
+| Conversion 6.0% → 7.5% | +33% |
+| Monthly churn 8% → 10% | −28% |
+| Cost per signup $7.00 → $9.10 | −31% |
+| **Inference price doubling** | **−1.1 points of gross margin; no change to ARR** |
 
 ---
 
-## 11. Risks with a financial consequence
+## 10. The raise
 
-**Regulatory posture — the largest single unknown.** The PRD flags it and it is
-unresolved. If a "can I eat this" verdict for people with diagnosed diabetes
-falls outside FDA general-wellness guidance, DiaBite becomes a regulated device.
-Financial consequence: a 510(k) route adds roughly **$400k–$900k and 12–18
-months** before revenue, which this model does not carry. Mitigation is to
-resolve it with counsel before Month 6 — the $20k in Month 3 is that engagement —
-and to hold the claim surface inside general wellness until it is answered. This
-is the one risk that can invalidate the plan rather than dent it.
+| Round | Timing | Amount | Post-round runway |
+|---|---|---|---|
+| **Seed** | now | **$3.0M** | 19 months to the Series A, with $1.07M of cushion at the trough in the base case and $0.77M in the conservative case |
+| Series A | month 20 | $12.0M | At $2.18M ARR growing ~3× year on year |
 
-**Food data licensing.** The source decision is open (PRD, Open Question 1).
-USDA FoodData Central is free but carries no glycemic index; a commercial
-branded/restaurant database is the realistic path to US coverage and is modelled
-at $1.5k–$7k per month. If enterprise licensing lands nearer $10k/month, Year 3
-gross margin drops about 2 points — material but not structural. The bigger
-exposure is time: the glycemic layer has to be built regardless, which is what
-the RD and the data-ops hire are for.
+### Use of the seed — $3.0M over 19 months
 
-**Retention.** The PRD's own week-4 target of 30% is modest, and manual food
-logging is a category with a well-documented adherence collapse. Every dollar in
-this plan rests on the "< 20 seconds to log" requirement being met. If it is not,
-churn goes to the conservative case or worse and the gates in §9 stop the spend.
+| | | Share |
+|---|---|---|
+| Team — 4 people at month 1 to 15 at month 19 | $1.43M | 54% |
+| Sales and marketing — gated in four steps | $746k | 28% |
+| Counsel, clinical validation, compliance, food data | $403k | 15% |
+| Cost of goods | $83k | 3% |
+| **Total spend** | **$2.67M** | |
+| Revenue earned over the period | $751k | |
 
-**Free-tier abuse.** 200,000 free users at Year 3 cost about $54k/month in
-inference and infrastructure. Uncapped, a small share of heavy users can double
-that. The 15-interaction cap is a P0 cost control, not a growth lever.
+### What the Series A is raised on
 
-**Concentration on a single model provider.** Sole-sourcing inference is a
-supplier risk in a plan where inference is a cost line. The mitigation is that
-the deterministic core is provider-independent by construction — only the
-understanding and narration layer is coupled — so a provider change is a
-prompt-and-eval migration, not a rewrite.
+The round is raisable on these and not otherwise. Each is already instrumented
+in production or scoped.
 
-**Key person.** Through Month 12 the team is six people and the founder is both
-PM and domain owner. Standard, and worth stating rather than hiding.
+| | Target |
+|---|---|
+| **Paid-channel CAC** | ≤ $90 with payback under 7 months, in at least one repeatable channel |
+| **Retention** | Week-4 retention ≥ 30% and a **flattened month-three cohort curve** across twelve weeks of live data |
+| **ARR** | ≥ $2M run-rate, growing |
+| **Safety** | **Zero** ungrounded numeric claims and **zero** insulin-dosing responses in production, with the evaluation logs to prove it |
+| **Regulatory** | FDA general-wellness position confirmed in writing by counsel |
+| **Clinical** | Safety copy signed off by a named clinician; food data carrying source and verification dates |
+| **Accuracy** | Meal parsing ≥ 90% on users' own phrases, not ours |
+
+### Spend gates
+
+Marketing is released on evidence, not on the calendar. Each gate holds for two
+consecutive months before the next step opens.
+
+| Step | Monthly spend | Gate |
+|---|---|---|
+| M1–5 | $0 | Build; counsel engaged in month 2 |
+| M6–9 | $15k | Launch: activation ≥ 50% — three meals logged in the first three days |
+| M10–15 | $40k | Week-4 retention ≥ 30%; paid CAC ≤ $130 |
+| M16–24 | $110k | Paid CAC ≤ $110; payback ≤ 8 months; monthly churn ≤ 9% |
+| M25–30 | $250k | Paid LTV/CAC ≥ 3.0× on **realised** cohort revenue |
+| M31–36 | $400k | Sustained, with gross margin ≥ 85% |
+
+**The gate runs both ways.** If the launch cohorts land at the upside end, this
+plan is underspending, and the right response is to pull the Series A forward
+and raise more — not to hold the schedule.
+
+**One note on capital efficiency.** A variant of this plan reaching launch
+without institutional capital is modelled in
+`docs/FINANCIAL_PLAN-bootstrap.md`: the product needs roughly $20k of outside
+services to reach a public launch, because it is already built. That is not the
+plan being proposed — it caps the business at a few hundred subscribers and
+cedes a market that is being actively educated by better-funded competitors —
+but it means **the seed buys growth, not survival**, and the company is not
+forced into a bad Series A.
 
 ---
 
-## 12. Before this goes to anyone
+## 11. Beyond year three
 
-Every **[estimate]** in §2 must be replaced with a sourced figure or an explicit
-range. The ones that actually move the outcome, in order:
+Growth saturating, marketing rising to $900k a month, no new market or channel
+assumed.
 
-1. **Free → paid conversion** and **monthly churn** — the two levers in the
-   sensitivity table. These are unknowable pre-launch, so the plan's credibility
-   rests on the gates in §9, not on the point estimates.
-2. **Cost per free signup**, by channel, from a real test — not a category
-   benchmark.
-3. **Interactions per user per day.** 4.5 is inferred from the PRD's "five to
-   seven eating decisions a day." Instrument it in the first cohort; it scales
-   COGS linearly.
-4. **Annual plan mix.** 45% is assumed and is worth $95 of LTV per subscriber.
-5. **Food-data licensing quotes** — actual quotes, once the source is chosen.
-6. **US salary benchmarks** for the loaded costs in §7.
-7. **Regulatory cost** of the 510(k) contingency, from counsel.
+| | Revenue | Exit subscribers | Exit ARR |
+|---|---|---|---|
+| Year 3 | $7.29M | 58,909 | $11.46M |
+| Year 4 | $19.13M | 131,350 | $25.42M |
+| Year 5 | $33.84M | 210,987 | **$40.58M** |
 
-The PRD's `[verify]` market figures (CDC prevalence, ADA cost of diabetes) are
-not inputs to this model — no line here is derived from market size — but they
-appear in the same investor conversation and carry the same obligation.
+$40M of ARR is **0.36% of the serviceable market** — still a rounding error
+against 59M people. The expansions that are deliberately absent from every
+number above are what carry the business past it: CGM import and personalisation
+from measured glucose response, a clinician-facing view sold into practices,
+employer and payer channels, the caregiver persona, and markets outside the US.
+
+---
+
+## 12. Risks
+
+**Regulatory — the sharpest open risk.** FDA general-wellness guidance covers
+products that promote a healthy lifestyle. A *can I eat this* verdict aimed at
+people with a diagnosis sits close to the line. If it falls outside, DiaBite
+becomes a regulated device: a 510(k) route would add an estimated $400k–900k and
+12–18 months before revenue, which this plan does not carry.
+*Mitigation:* counsel engaged in month 2 — the first material spend in the plan
+— claims held inside general wellness until answered, a part-time regulatory
+lead from month 6, and a US medical director from month 7. This is the one risk
+that changes the plan rather than delays it, and it is deliberately the first
+money spent.
+
+**Retention.** Manual food logging has a well-documented adherence collapse, and
+every figure in §7 rests on logging taking under 20 seconds. *Mitigation:* the
+gates in §10 detect it in the first two cohorts; the annual plan at 45% of mix
+absorbs monthly churn; the north-star metric is in-range days per week, which
+only moves if behaviour actually changes.
+
+**Acquisition cost.** $117 against a $290 LTV is a 2.5× business in year one —
+workable, not comfortable, and the number most likely to disappoint.
+*Mitigation:* the clinician and search channels are built before paid is opened,
+which is why marketing is only 28% of the seed.
+
+**The 13% unknown-food rate.** The most visible product weakness and the first
+thing a user meets. It is a conversion risk, not a cost risk. *Mitigation:*
+16–24 days scoped, a dietitian from month 1, and an explicit "glycemic load not
+available" answer rather than a guessed number — the promise holds even where
+the data does not.
+
+**Holding health data from the EU.** A US-facing service storing identifiable
+health data, operated from the EU, is subject to GDPR alongside US rules.
+*Mitigation:* a device-scoped anonymous identity first, with deletion and export
+from the first migration; counsel's scope covers it; SOC 2 Type I in year two.
+
+**Clinical liability.** No clinician has signed off yet. *Mitigation:* the
+advisory board and the review pack are live; professional liability and cyber
+insurance are funded from year one; the product refuses dosing questions
+deterministically, before any model runs.
+
+**Key person.** The founder is currently the whole team. *Mitigation:* the first
+three hires close in month 1–3 and the architecture is documented to the level
+of this plan's own sources.
+
+---
+
+## 13. Assumptions
+
+### Measured — from production
+
+| | Value |
+|---|---|
+| Inference cost per agent question | $0.0028 · 1,941 questions, 27 Sep – 8 Oct, including retries, verifier second attempts and evaluation runs |
+| Tokens per question | 4,913 in — 74% cached — 137 out |
+| Fixed infrastructure | $28/month today; $98–137 at launch |
+| Latency | p90 8.2 s, median 4.7 s |
+| Evaluation results | 285 cases; most recent live run 180/183, verified rate 100% of answers returned |
+| Unresolved-food rate | 13% of field phrases |
+
+### Assumed — and what will replace each
+
+| | Value | Evidence that replaces it |
+|---|---|---|
+| Questions per paying subscriber | 135 / month | Instrumented from launch; scales COGS linearly, and at 2.3% of revenue it cannot move the outcome |
+| Free → paid conversion | 6.0% → 7.5% | The first two cohorts. **Worth 43% of Year 3 ARR** |
+| Monthly churn / annual renewal | 8.0% / 55% | Month-three cohort curve, twelve weeks after launch |
+| Annual plan mix | 45% | Checkout data from week one |
+| Cost per registered signup | $7.00 → $6.00 | A live channel test before the month-10 step |
+| Price | $19.99 / $149 | Five moderated sessions and the beta, before paid acquisition opens |
+| Build calendar to launch | 5 months | 83–106 scoped days against the hiring plan |
+| Loaded personnel cost | EU rates, 60% of US | Offers accepted |
+| Outside services | $403k over 3 years | **Quotes outstanding** for counsel, accessibility audit and penetration test |
+
+### Not in any number above
+
+Photo and voice logging. Branded-food licensing if USDA data proves
+insufficient. App-store fees — the product is web-first at 2.9%, against 15–30%
+on a mobile store, and leaving the web is a decision with a known price.
+Corporate taxes. Any revenue from the expansions listed in §4 and §11.
