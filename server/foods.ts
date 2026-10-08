@@ -135,7 +135,10 @@ function fromRow(r: FoodRow): FoodRecord {
   return {
     id: r.id, kind: r.kind, name: r.name, gi, giLevel: giLevel(gi),
     category: (r.category ?? '') as FoodRecord['category'], cuisine: r.cuisine ?? undefined,
-    unit: (r.unit ?? 'g') as FoodRecord['unit'], defaultPortion: num(r.default_portion) ?? 100,
+    unit: (r.unit ?? 'g') as FoodRecord['unit'],
+    // The table holds 100 for every ingredient; a slice of bread is not 100 g, and a row
+    // read from it must say so as well as the file the table was built from does.
+    defaultPortion: (r.id.startsWith('ing:') ? INGREDIENT_PORTION_G[r.id.slice(4)] : undefined) ?? num(r.default_portion) ?? 100,
     searchText: r.search_text,
     aliases: r.aliases ?? undefined,
     ingredientNames: r.ingredient_names ?? undefined,
