@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { isLabelled, parseMeal } from '../lib/answer'
+import { sessionId } from '../lib/session'
 import { askAgent, avoidOf, budgetOf, engineId, MAX_QUESTION, RateLimitedError, receiptFrom, type AgentResponse, type Receipt, type TraceStep } from '../lib/agent'
 import { viewEntry } from '../lib/diary'
 import { todayISO } from '../lib/storage'
@@ -18,15 +19,6 @@ const SAMPLES = [
   'How many units of insulin should I take before pasta?',
   "A slice of grandma's kugel",
 ]
-
-function sessionId(): string {
-  try {
-    const k = 'diabite.session'
-    let v = localStorage.getItem(k)
-    if (!v) { v = Math.random().toString(36).slice(2, 10); localStorage.setItem(k, v) }
-    return v
-  } catch { return 'anon' }
-}
 
 /** Lab 3.2: with fresh context every question gets its own session and an empty diary, so saved responses don't depend on each other. */
 const FRESH_KEY = 'diabite.freshContext'

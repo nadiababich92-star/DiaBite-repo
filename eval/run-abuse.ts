@@ -14,7 +14,8 @@
 import { spawn } from 'node:child_process'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { chargeTurn, _reset, _state, RateLimited, MAX_KEYS } from '../server/guard'
+import { chargeTurn, addressKey, _reset, _state, RateLimited, MAX_KEYS } from '../server/guard'
+import { newSessionId, sessionId } from '../src/lib/session'
 import { putSession, rememberResponse, _sizes, MAX_SESSIONS } from '../server/sessions'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -137,6 +138,33 @@ async function httpSuite() {
       keyed.every((r) => ADMITTED.has(r.status)), keyed.map((r) => r.status).join(','))
     const keyedLong = await ask(meal('a10b', 'x'.repeat(501)), { 'x-api-key': KEY })
     check('A10b', '…and not from the size caps', keyedLong.status === 400, String(keyedLong.status))
+
+    // ── what the browser is told, and what an error says ──────────────────
+    const page = await fetch(`${BASE}/`)
+    const h = (n: string) => page.headers.get(n)
+    check('A13', 'every response carries the security headers and no x-powered-by',
+      h('x-powered-by') === null && h('x-content-type-options') === 'nosniff' && h('x-frame-options') === 'DENY'
+        && !!h('referrer-policy') && !!h('permissions-policy') && !!h('strict-transport-security'),
+      JSON.stringify([...page.headers.entries()].map(([k]) => k)))
+    const csp = h('content-security-policy') ?? ''
+    check('A13b', "the CSP allows scripts only from 'self', no framing and no objects",
+      /script-src 'self'(;|$)/.test(csp) && csp.includes("frame-ancestors 'none'") && csp.includes("object-src 'none'") && !/script-src[^;]*unsafe/.test(csp), csp)
+    const health = await (await fetch(`${BASE}/health`)).json() as Record<string, unknown>
+    check('A14', '/health says it is up and how many foods, and nothing about live sessions',
+      health.ok === true && typeof health.records === 'number' && !('sessions' in health), JSON.stringify(health))
+    const badPut = await fetch(`${BASE}/session/${'x'.repeat(65)}`, {
+      method: 'PUT', headers: { 'content-type': 'application/json', 'x-api-key': KEY }, body: JSON.stringify({ budget: { glBudget: 1 }, entries: [] }),
+    })
+    const okPut = await fetch(`${BASE}/session/abc-123`, {
+      method: 'PUT', headers: { 'content-type': 'application/json', 'x-api-key': KEY }, body: JSON.stringify({ budget: { glBudget: 1 }, entries: [] }),
+    })
+    check('A15', 'PUT /session refuses an id over 64 characters and accepts a normal one', badPut.status === 400 && okPut.status === 200, `${badPut.status} ${okPut.status}`)
+    const wrongKey = await fetch(`${BASE}/tools/resolve_foods`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': KEY + 'x' }, body: '{}' })
+    const noKey = await fetch(`${BASE}/tools/resolve_foods`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })
+    check('A16', 'a wrong key and no key are both 401', wrongKey.status === 401 && noKey.status === 401, `${wrongKey.status} ${noKey.status}`)
+    const failed = await ask(meal('a17'), { 'x-api-key': KEY })
+    check('A17', 'an upstream failure reaches the browser as fixed text, never the upstream message',
+      failed.status === 502 && failed.json.error === 'agent_unavailable', JSON.stringify([failed.status, failed.json]))
   } finally { child.kill() }
 
   // ── daily ceiling: 2 model turns a day, whoever asks ───────────────────
@@ -184,6 +212,19 @@ function memorySuite() {
   const sz = _sizes()
   check('A9b', `session maps stay at or under ${MAX_SESSIONS} entries`,
     sz.store <= MAX_SESSIONS && sz.lastResponse <= MAX_SESSIONS, JSON.stringify(sz))
+
+  // One person, one /64: rotating through your own IPv6 block must not dodge a limit.
+  const same = addressKey('2001:db8:1:2:aaaa:bbbb:cccc:dddd') === addressKey('2001:db8:1:2::1')
+  const other = addressKey('2001:db8:1:3::1') !== addressKey('2001:db8:1:2::1')
+  const v4 = addressKey('203.0.113.9') === '203.0.113.9' && addressKey('::ffff:203.0.113.9') === '203.0.113.9'
+  check('A18', 'an IPv6 address is keyed on its /64; IPv4 and mapped IPv4 are themselves', same && other && v4, `${same} ${other} ${v4}`)
+
+  // A session id is random, 8-plus word characters, and never a constant, even with no storage.
+  const ids = new Set(Array.from({ length: 200 }, () => newSessionId()))
+  const shaped = [...ids].every((i) => /^[\w-]{16,64}$/.test(i))
+  const a = sessionId(), b = sessionId()
+  check('A19', 'session ids are unique and well-formed, and stay stable per page with no storage',
+    ids.size === 200 && shaped && a === b && a !== 'anon', `${ids.size} ${shaped} ${a}`)
 
   // The retry time must be a real wait, and a refused turn must not be charged to the person.
   _reset()

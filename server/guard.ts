@@ -169,3 +169,27 @@ export function originAllowed(origin: string | undefined, selfHost?: string): bo
   } catch { return false }
   return (process.env.ALLOWED_ORIGINS ?? '').split(',').map((s) => s.trim()).filter(Boolean).includes(origin)
 }
+
+// ── Who is asking ─────────────────────────────────────────────────────────
+
+/**
+ * The address a limit is keyed on. An IPv4 address is itself. An IPv6 home or
+ * office is handed a whole /64 (2^64 addresses), so keyed on the full address
+ * one person could dodge a per-address limit by rotating through their own
+ * block; the first four groups are the person.
+ */
+export function addressKey(ip?: string): string | undefined {
+  if (!ip) return undefined
+  const mapped = ip.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i)
+  if (mapped) return mapped[1]
+  if (!ip.includes(':')) return ip
+  const [head, tail = ''] = ip.split('::')
+  const h = head ? head.split(':') : []
+  const t = tail ? tail.split(':') : []
+  const groups = ip.includes('::') ? [...h, ...Array(Math.max(0, 8 - h.length - t.length)).fill('0'), ...t] : h
+  return `${groups.slice(0, 4).map((g) => g.toLowerCase().padStart(4, '0')).join(':')}::/64`
+}
+
+/** An id the client chose: word characters and hyphens, 64 at most. */
+export const validSessionId = (id: unknown): id is string =>
+  typeof id === 'string' && id.length >= 1 && id.length <= MAX_SESSION_ID && /^[\w-]+$/.test(id)

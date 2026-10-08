@@ -31,10 +31,11 @@ import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
 import { computeMeal, dayState, findAlternatives } from './compute'
 import { verify } from './verify'
-import { getSession, putSession, sessionCount } from './sessions'
+import { getSession, putSession } from './sessions'
 import { openApiSpec } from './openapi'
 import { ask, type AskRequest } from './agent'
-import { RateLimited, originAllowed, sourceTag, validateAsk } from './guard'
+import { createHash, timingSafeEqual } from 'node:crypto'
+import { RateLimited, addressKey, originAllowed, sourceTag, validSessionId, validateAsk } from './guard'
 import type {
   AlternativesRequest, ComputeMealRequest, DayStateRequest, ResolveRequest, VerifyRequest,
 } from './contract'
@@ -49,6 +50,39 @@ async function main() {
   console.log(`ready in ${Date.now() - t0} ms`)
 
   const app = express()
+  // Nobody needs to be told which framework answered.
+  app.disable('x-powered-by')
+
+  // What the browser is told to refuse. The app is one page from one origin: its
+  // scripts and API are ours, its fonts come from Google, and the feedback form
+  // talks to the Supabase project. Anything else it is asked to load is blocked,
+  // which is what turns an injected script into a harmless string. X-XSS-Protection
+  // is left out on purpose: modern browsers ignore it and old ones had bugs with it.
+  const supabaseOrigin = (() => { try { return new URL(process.env.SUPABASE_URL ?? '').origin } catch { return '' } })()
+  const CSP = [
+    "default-src 'self'",
+    "script-src 'self'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src https://fonts.gstatic.com",
+    "img-src 'self' data:",
+    `connect-src 'self' ${supabaseOrigin}`.trim(),
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "object-src 'none'",
+  ].join('; ')
+  app.use((_req, res, next) => {
+    res.set({
+      'Content-Security-Policy': CSP,
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+      // No includeSubDomains: this host is a subdomain of a domain we do not own.
+      'Strict-Transport-Security': 'max-age=31536000',
+    })
+    next()
+  })
   // Container Apps ingress is one hop, so the client address is the last entry
   // of X-Forwarded-For. Wrong here and every visitor shares one rate-limit bucket.
   app.set('trust proxy', 1)
@@ -66,16 +100,21 @@ async function main() {
   // OpenAPI tool and by nothing else, so it carries a shared key. The product
   // surface (/agent/ask) is called by the browser, which cannot hold a secret.
   const API_KEY = process.env.ENGINE_API_KEY
+  // Compared as digests, in constant time, so neither the length of the key nor
+  // how many leading characters were right can be read from how long a refusal took.
+  const keyDigest = API_KEY ? createHash('sha256').update(API_KEY).digest() : null
+  const keyMatches = (given: string | undefined): boolean =>
+    !!keyDigest && !!given && timingSafeEqual(createHash('sha256').update(given).digest(), keyDigest)
   const GUARDED = /^\/(tools|session|verify|diag)\b/
   if (API_KEY) {
     app.use((req, res, next) => {
       if (!GUARDED.test(req.path)) return next()
-      if (req.get('x-api-key') === API_KEY) return next()
+      if (keyMatches(req.get('x-api-key'))) return next()
       res.status(401).json({ error: 'x-api-key required' })
     })
   }
 
-  app.get('/health', (_req, res) => res.json({ ok: true, records: records.length, sessions: sessionCount() }))
+  app.get('/health', (_req, res) => res.json({ ok: true, records: records.length }))
 
   app.get('/openapi.json', (_req, res) => res.json(openApiSpec()))
 
@@ -89,23 +128,34 @@ async function main() {
     const body = req.body as AskRequest
     // A caller holding the key (the agent evals, 87 cases from one address) is
     // exempt from the rate limits, never from the size caps above.
-    const trusted = !!API_KEY && req.get('x-api-key') === API_KEY
-    try { res.json(await ask(body, { clientKey: trusted ? undefined : req.ip, trusted })) }
+    const trusted = keyMatches(req.get('x-api-key'))
+    try { res.json(await ask(body, { clientKey: trusted ? undefined : addressKey(req.ip), trusted })) }
     catch (e) {
       if (e instanceof RateLimited) {
-        console.warn(JSON.stringify({ evt: 'rate_limited', scope: e.scope, source: sourceTag(req.ip), retryAfterSec: e.retryAfterSec }))
+        console.warn(JSON.stringify({ evt: 'rate_limited', scope: e.scope, source: sourceTag(addressKey(req.ip)), retryAfterSec: e.retryAfterSec }))
         res.set('Retry-After', String(e.retryAfterSec))
         return res.status(429).json({ error: 'rate_limited', scope: e.scope, retryAfterSec: e.retryAfterSec })
       }
+      // The full error stays in the log. What the browser gets is fixed text:
+      // an upstream message can carry endpoint names, deployment ids and links.
       console.error('agent/ask failed:', e)
-      res.status(502).json({ error: (e as Error).message })
+      // Azure's content filter refusing a prompt is an answer, not an outage.
+      if (/content management policy|content[_ ]filter|ResponsibleAI/i.test((e as Error).message ?? '')) {
+        return res.json({
+          answer: "I can't help with that request. I can tell you what a meal does to your day, or answer a general question about food and blood sugar.",
+          blocked: true, blockedRule: 'content_filter', verified: true,
+          unmatchedNumbers: [], matchedNumbers: [], toolCalls: 0, trace: [], routedBy: 'gate',
+        })
+      }
+      res.status(502).json({ error: 'agent_unavailable' })
     }
   })
 
   /** The client parks the day's budget and log here, then hands the agent only the id. */
   app.put('/session/:id', (req, res) => {
     const { budget, entries, avoid } = req.body ?? {}
-    if (!budget || !Array.isArray(entries)) return res.status(400).json({ error: 'budget and entries required' })
+    if (!validSessionId(req.params.id)) return res.status(400).json({ error: 'invalid session id' })
+    if (!budget || !Array.isArray(entries) || entries.length > 100) return res.status(400).json({ error: 'budget and at most 100 entries required' })
     putSession(req.params.id, budget, entries, avoid)
     res.json({ ok: true, sessionId: req.params.id, entries: entries.length })
   })
