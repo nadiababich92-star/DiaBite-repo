@@ -242,3 +242,70 @@ of running DiaBite is small; the cost of launching it is the thing to plan.**
 **Next step:** replace the assumed lines with quotes, starting with counsel
 (the slowest and the one that gates three workstreams), then re-run with the
 finance lecture's method.
+
+## 8. Reaching a net of €10,000
+
+"Net" here means what is left of subscription income after running costs and
+the other monthly overhead below, **before your own income tax and before VAT or
+US sales tax**. Both readings of the target are shown: €10,000 a *month*, and
+€10,000 a *year* (€833 a month).
+
+**The plans this is built on** (the draft financial plan's structure, with the
+price as the variable):
+
+| Plan | What it includes | Price |
+|---|---|---|
+| **Free** | the whole deterministic engine: targets and their derivation, diary, safety rules; **15 agent answers a month** (about €0.04 a user) | €0 |
+| **Pro, monthly** | unlimited agent answers under fair use, and the paid features as they ship | $9.99, **$14.99** or $19.99 |
+| **Pro, annual** | the same; the plan assumed 7.45 times the monthly price (a third off) | $74 / **$112** / $149 |
+
+The mix is 55% monthly and 45% annual (the draft plan's assumption), so the
+average revenue per paying user is 83% of the monthly price. Costs per paying
+user: model charges about €0.35 a month (135 questions), the card fee (2.9% plus
+30 cents, assumed; a Poland-based account charging US cards may pay more), and a
+share of the free users' cost.
+
+**Paying users needed**, at a free-to-paid conversion of 3%, 5% and 10%
+(assumed; nothing measured yet), with €125 of fixed infrastructure and other
+monthly overhead of **€600** (you alone, an accountant, tools) or **€3,000**
+(adding part-time support, a dietitian retainer, legal upkeep): both assumed.
+
+**€10,000 a month**
+
+| Price | Overhead €600: paying users | registered users at 5% | Overhead €3,000: paying users | registered users at 5% |
+|---|---|---|---|---|
+| $9.99 | 1,756 | 35,100 | 2,148 | 43,000 |
+| **$14.99** | **1,095** | **21,900** | **1,340** | **26,800** |
+| $19.99 | 796 | 15,900 | 974 | 19,500 |
+
+At 3% conversion the registered users needed are about 1.5 times these; at 10%,
+about half.
+
+**€10,000 a year**
+
+| Price | Overhead €600: paying users | registered users at 5% | Overhead €3,000: paying users | registered users at 5% |
+|---|---|---|---|---|
+| $9.99 | 255 | 5,100 | 648 | 13,000 |
+| **$14.99** | **159** | **3,200** | **404** | **8,100** |
+| $19.99 | 116 | 2,300 | 294 | 5,900 |
+
+**What these numbers leave out, and it is the main thing:**
+
+1. **Getting the users.** The draft plan puts a paid-channel acquisition cost at
+   $100 a paying user (its own estimate). At that price 1,100 paying users cost
+   about €100,000 to find; 160 cost about €15,000. A monthly target of €10,000 is
+   not reachable by buying users; it needs an organic channel (clinicians,
+   dietitians, communities, search). That channel is the real plan.
+2. **Churn.** The tables count paying users *at a time*. Subscribers leave; at 5%
+   a month, 1,100 payers means winning about 55 new ones every month just to stand still.
+3. **Prices were not tested.** A lower price needs more payers but may convert
+   better; a higher one the reverse. Nothing here measures it.
+4. **Infrastructure at 20,000 or more registered users** needs more than €125;
+   the per-question costs scale, the replicas and Redis do not stay at the floor.
+5. **Taxes, refunds and any app-store fee** (30% or 15% on a mobile store
+   subscription; a web-first product avoids it).
+
+**What this suggests:** €10,000 a year is a first-year goal with real
+plausibility (120–400 paying users); €10,000 a month is a multi-year goal that
+depends on an organic channel and on the price test. Take the price from the
+sessions and the beta, not from this table.
