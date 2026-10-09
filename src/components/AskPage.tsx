@@ -395,7 +395,7 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
 
           {receipt && (
             <div className="row" style={{ marginBottom: 12 }}>
-              <button className="primary" onClick={logIt} disabled={logged}>{logged ? 'Logged' : 'Log it'}</button>
+              <button className="primary" onClick={logIt} disabled={logged}>{logged ? 'Logged' : receipt.partial ? 'Log what was counted' : 'Log it'}</button>
               <button className="ghost" onClick={() => setShowReceipt((v) => !v)}>{showReceipt ? 'Hide calculation' : 'Show calculation'}</button>
             </div>
           )}
