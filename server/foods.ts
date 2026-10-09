@@ -63,6 +63,8 @@ const INGREDIENT_PORTION_G: Record<string, number> = {
   rye_bread: 35,
   whole_grain_bread: 35,
   ezekiel_bread: 34,
+  // The record is "Egg, large (50 g each)": the default is one egg, so "two eggs" is two of it.
+  egg: 50,
 }
 
 const ALIASES: Record<string, string[]> = {

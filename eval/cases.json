@@ -2015,6 +2015,10 @@
       {
         "id": "ing:ezekiel_bread",
         "grams": 34
+      },
+      {
+        "id": "ing:egg",
+        "grams": 50
       }
     ],
     "partial": [
@@ -2843,7 +2847,7 @@
         ],
         "verified": true,
         "itemsAtLeast": {
-          "seed:egg": 110
+          "seed:egg|ing:egg": 100
         },
         "whyNamesDriver": true
       },

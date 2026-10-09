@@ -258,7 +258,8 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   if (e.itemsAtLeast && typeof e.itemsAtLeast === 'object') {
     const items = (callOf(r, 'compute_meal')?.input as { items?: { foodId: string; grams?: number; servings?: number }[] } | undefined)?.items ?? []
     for (const [foodId, min] of Object.entries(e.itemsAtLeast as Record<string, number>)) {
-      const it = items.find((x) => x.foodId === foodId)
+      // "a|b": either record is a right answer for the food (two curated eggs exist).
+      const it = items.find((x) => foodId.split('|').includes(x.foodId))
       const amount = it?.grams ?? it?.servings
       say(`${foodId} costed at ${min}+`, typeof amount === 'number' && amount >= min, `got ${amount ?? 'nothing'}`)
     }
