@@ -305,7 +305,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
     say('engine marks a branded item unscored, fits is not true', !!res?.afterMeal?.partial?.unscored?.length && res.afterMeal.fits !== true && !scoredWrongly, JSON.stringify(res?.afterMeal))
   }
   if (e.noFitsClaim === true) {
-    say('claims no fit', !/\b(it )?fits\b|within (your )?budget/i.test(answer.replace(/can'?t say[^.]*\./gi, ' ')))
+    say('claims no fit', !/\b(it )?fits\b|within (your )?budget/i.test(answer.replace(/can'?t (?:say|tell|judge)[^.]*\./gi, ' ')))
   }
   if (e.noDigits === true) say('no digits in answer', !digits(r.answer))
   // "Tell me what's in it" is a question asked politely. A check that only
