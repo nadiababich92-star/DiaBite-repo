@@ -31,6 +31,7 @@ import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
 import { afterMealFor } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
+import { withHangRetry } from '../server/agent'
 import { getSession, noteResolution, putSession } from '../server/sessions'
 import type { VerifyRequest } from '../server/contract'
 
@@ -153,6 +154,25 @@ const expectOk = (name: string, ok: boolean) => { if (!ok) storedMisses.push(`  
 console.log(`\nstored    ${storedMisses.length === 0 ? 'ok' : 'WRONG'}`)
 storedMisses.forEach((m) => console.log(m))
 
+// ── hang ──────────────────────────────────────────────────────────────────
+// A call to Foundry that hangs gets one more try; an error that is the caller's
+// own is not retried; a second hang is an error, not a loop.
+
+const hangMisses: string[] = []
+{
+  const hang = Object.assign(new Error('Request timed out.'), { name: 'APIConnectionTimeoutError' })
+  let calls = 0
+  const recovered = await withHangRetry(async () => { if (++calls === 1) throw hang; return 'ok' })
+  if (recovered !== 'ok' || calls !== 2) hangMisses.push(`    a hang was not retried once (calls ${calls})`)
+  calls = 0
+  try { await withHangRetry(async () => { calls++; throw hang }); hangMisses.push('    two hangs did not fail') } catch { if (calls !== 2) hangMisses.push(`    two hangs made ${calls} calls`) }
+  calls = 0
+  try { await withHangRetry(async () => { calls++; throw Object.assign(new Error('bad request'), { status: 400 }) }) } catch { /* expected */ }
+  if (calls !== 1) hangMisses.push(`    a 400 was retried (${calls} calls)`)
+}
+console.log(`\nhang      ${hangMisses.length === 0 ? 'ok' : 'WRONG'}`)
+hangMisses.forEach((m) => console.log(m))
+
 // ── partial ───────────────────────────────────────────────────────────────
 // CLAUDE.md rule 3: a meal costed without a food the database lacks is
 // understated, and may never be called "fits". The engine decides that, not the
@@ -216,5 +236,6 @@ if (gateMisses.length) { console.log('the safety gate disagreed with a probe'); 
 if (answerMisses.length) { console.log('an answer was parsed wrong'); process.exit(1) }
 if (portionMisses.length) { console.log('a default serving is wrong'); process.exit(1) }
 if (partialMisses.length) { console.log('a partial meal was called a fit'); process.exit(1) }
+if (hangMisses.length) { console.log('the hang retry misbehaved'); process.exit(1) }
 if (storedMisses.length) { console.log('stored data was trusted'); process.exit(1) }
 if (catalogueMisses.length) { console.log('a food with carbohydrate and no glycemic index is in the catalogue'); process.exit(1) }

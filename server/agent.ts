@@ -601,9 +601,32 @@ async function runAgent(role: Role, input: string, previous?: string, forceTools
     // looping agent stopped, not a working one.
     ...(MAX_TOOL_CALLS > 0 ? { max_tool_calls: MAX_TOOL_CALLS } : {}),
   }
-  return (await withRateLimitRetry(() =>
-    agentClient().responses.create(payload as never),
-  )) as unknown as Turn
+  const responses = agentClient().responses as unknown as {
+    create(body: never, opts: { timeout: number; maxRetries: number }): Promise<unknown>
+  }
+  return (await withRateLimitRetry(() => withHangRetry(() =>
+    responses.create(payload as never, { timeout: CALL_TIMEOUT_MS, maxRetries: 0 }),
+  ))) as unknown as Turn
+}
+
+/**
+ * A turn takes 6 to 20 seconds. From inside the container the same call has
+ * hung for minutes (`/diag/foundry` exists because of it), and the ingress
+ * answered the browser with a 504 after four. Each attempt is bounded, and a
+ * hang or a dropped connection gets one more try; anything else is the
+ * caller's error and is not retried.
+ */
+const CALL_TIMEOUT_MS = Number(process.env.CALL_TIMEOUT_MS ?? 45_000)
+export async function withHangRetry<T>(run: () => Promise<T>): Promise<T> {
+  try {
+    return await run()
+  } catch (e) {
+    const err = e as { name?: string; code?: string; status?: number; message?: string }
+    const hung = /timeout|timed out|abort/i.test(`${err.name} ${err.message}`) || err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT'
+    if (!hung || err.status) throw e
+    console.warn(`agent call hung (${err.name}); trying once more`)
+    return await run()
+  }
 }
 
 /**

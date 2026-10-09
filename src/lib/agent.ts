@@ -84,7 +84,7 @@ export const MAX_QUESTION = 500
  * been seen hanging for minutes from inside the container, and the question box
  * is disabled while it waits, so without a limit a hang strands the person.
  */
-export const ASK_TIMEOUT_MS = 75_000
+export const ASK_TIMEOUT_MS = 100_000
 
 export async function askAgent(req: AgentRequest, signal?: AbortSignal): Promise<AgentResponse> {
   const ctl = new AbortController()
