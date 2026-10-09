@@ -133,6 +133,17 @@ interface FoodRow {
 
 const num = (v: number | string | null): number | null => (v === null ? null : Number(v))
 
+/**
+ * Rule 4 of CLAUDE.md, for every path a record can enter by: a record with real
+ * carbohydrate and no glycemic index stays out. The load helper answers 0 for a
+ * missing GI — true of cheese, false of baking powder — and the table path
+ * ("food can be added without a deploy") is the one that must not skip it.
+ */
+export function carbsWithoutLoad(r: { gi: number | null; per100?: Nutrients }): boolean {
+  if (r.gi !== null && r.gi > 0) return false
+  return !!r.per100 && Math.max(0, r.per100.carbs - (r.per100.fiber ?? 0)) >= 5
+}
+
 function fromRow(r: FoodRow): FoodRecord {
   const gi = num(r.gi)
   return {
@@ -163,7 +174,7 @@ function fromRow(r: FoodRow): FoodRecord {
  */
 export async function adoptCatalogue(rows: unknown[], log = console.log): Promise<boolean> {
   const inImage = loadFoods().records.length
-  const built = (rows as FoodRow[]).filter((r) => r && r.id && r.search_text).map(fromRow)
+  const built = (rows as FoodRow[]).filter((r) => r && r.id && r.search_text).map(fromRow).filter((r) => !carbsWithoutLoad(r))
   // Fewer records than the image holds means a truncated read, not a smaller
   // database — the file version is the safer of the two.
   if (built.length < inImage) {
@@ -272,6 +283,7 @@ export function loadFoods() {
   for (const r of ingredients) {
     // GI 0 in the table means "no available carbohydrate" — the app models that as null.
     const gi = r.gi > 0 ? r.gi : null
+    if (carbsWithoutLoad({ gi, per100: r.per100 })) continue // vanilla extract, baking powder: see carbsWithoutLoad
     records.push({
       id: `ing:${r.id}`, kind: 'ingredient', name: r.name, gi, giLevel: giLevel(gi),
       // Mapped here, not only in asFood. The ingredient table says "grain" and

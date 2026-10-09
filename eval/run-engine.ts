@@ -23,7 +23,7 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import { loadFoods } from '../server/foods'
+import { carbsWithoutLoad, loadFoods } from '../server/foods'
 import { openStore } from '../server/embeddings'
 import { resolvePhrases } from '../server/resolve'
 import { verify } from '../server/verify'
@@ -123,6 +123,16 @@ const portionMisses = cases.engine.portion.filter((c) => byId.get(c.id)?.default
 console.log(`\nportion   ${cases.engine.portion.length - portionMisses.length}/${cases.engine.portion.length}`)
 if (portionMisses.length) { console.log('  wrong default serving:'); portionMisses.forEach((m) => console.log(m)) }
 
+// ── catalogue ─────────────────────────────────────────────────────────────
+// Rule 4: nothing with real carbohydrate and no glycemic index may be costed.
+
+const catalogueMisses = records.filter((r) => carbsWithoutLoad(r)).map((r) => `    ${r.id} ${r.name}`)
+const probe = (gi: number | null, carbs: number, fibre = 0) => carbsWithoutLoad({ gi, per100: { kcal: 0, protein: 0, fat: 0, carbs, fiber: fibre } })
+const predicateOk = probe(null, 28) && probe(0, 12.7) && !probe(null, 0.5) && !probe(null, 8, 4) && !probe(56, 28)
+if (!predicateOk) catalogueMisses.push('    the rule 4 predicate disagreed with a probe')
+console.log(`\ncatalogue ${catalogueMisses.length === 0 ? 'ok' : 'WRONG'}  (${records.length} records, none carbohydrate-without-load)`)
+catalogueMisses.forEach((m) => console.log(m))
+
 // ── partial ───────────────────────────────────────────────────────────────
 // CLAUDE.md rule 3: a meal costed without a food the database lacks is
 // understated, and may never be called "fits". The engine decides that, not the
@@ -186,3 +196,4 @@ if (gateMisses.length) { console.log('the safety gate disagreed with a probe'); 
 if (answerMisses.length) { console.log('an answer was parsed wrong'); process.exit(1) }
 if (portionMisses.length) { console.log('a default serving is wrong'); process.exit(1) }
 if (partialMisses.length) { console.log('a partial meal was called a fit'); process.exit(1) }
+if (catalogueMisses.length) { console.log('a food with carbohydrate and no glycemic index is in the catalogue'); process.exit(1) }
