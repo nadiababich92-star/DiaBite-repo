@@ -1,143 +1,212 @@
-# Engineering document — abuse protection for the public agent route
+# Engineering document: sign-in, branded foods, weekly menu V1
 
-*Produced by `/engineering-planner` from `docs/PRD.md`, 5 October 2026. Approved by the owner. Built and deployed the same day; see Status at the end.*
+*Produced by `/engineering-planner` on 9 October 2026 from `docs/PRD.md`, `docs/PLAN.md`,
+`docs/PRD-post-course.md` (WS2, WS3, WS4) and the code. The previous document in this
+place, the abuse protection of `/agent/ask`, is shipped and now lives in
+`docs/engineering/abuse-protection.md`.*
+
+**Decisions already made by the owner, 9 October 2026** (recorded, not reopened here):
+
+| Question | Answer |
+|---|---|
+| How people sign in | An emailed link (no password) |
+| Is sign-in required | **Yes, before the first question** |
+| What is stored about a person | The diary **and the whole profile** (diagnosis, medicines, kidney status, allergies) |
+| The diary already in a browser | Offer to move it, once, on first sign-in |
+| Email delivery | Azure Communication Services |
+| Branded foods | Show carbohydrate; "glycemic load not available"; one to two thousand common items |
+| Weekly menu | Back now, with V1 features; **hidden** for a history of disordered eating, chronic kidney disease and dialysis until a clinician answers |
+
+---
 
 ## 1. Summary
 
-**The feature.** Put limits in front of `POST /agent/ask`, the one route that is public and spends model tokens.
+**Three changes, one document, because they meet at the same screens.**
 
-**Why now.** Checked against the live service on 5 October: the route needs no key, `cors()` allows every origin (`access-control-allow-origin: *`), there is no rate limit, no message-length cap beyond a 1 MB JSON body, and no cap on tool calls per turn. Anyone can run up the Azure bill, and the owner is about to hand the link to five strangers for user sessions. `docs/FINANCIAL_PLAN.md` already names this: *"cost control that must be built, not hoped for … a tool-call-count cap per turn (a looping agent is an unbounded bill)."*
+| | The user problem (PRD / PLAN reference) | Done when |
+|---|---|---|
+| **A. Sign-in** | Close the tab and DiaBite has never met you; no history, no trends, no way for the owner to know whom to ask for feedback (PLAN "Then: accounts"; WS3) | A person signs in on a phone, logs a meal, opens the app on a laptop and sees yesterday's day. Export and deletion work |
+| **B. Branded foods** | 13% of what people type resolves to nothing, mostly Doritos, Oreos, KIND bars; a user who meets "I don't have that" twice stops asking (PLAN "Next: the food gap"; WS2) | "A KIND bar" returns grams of carbohydrate, fibre and calories, computed by the engine, with the load stated as not available; the unknown rate is re-measured next to 13% |
+| **C. Weekly menu V1** | The menu works and has never been in front of a user; it ignores kidneys, eating-disorder history, gout and gastroparesis (code: `src/lib/menu.ts` filters only allergens and eating pattern) (WS4 D3/D4) | One meal can be replaced without regenerating the week; no dish repeats within three days; the shopping list works; the hidden profiles see a calm explanation instead |
 
-**Success.** (1) A script firing requests at the live route is stopped by a counted limit, not by luck. (2) The worst-case day is bounded at **1,000 model turns** (~$16 by the financial plan's per-turn figure; to be re-checked against Azure's real price, see Q1). (3) A person asking real questions, the demo, and the five sessions never meet a limit. (4) A person in distress is **never** told "rate limited" — dosing and red-flag replies still arrive.
+**Measures.** A: share of first visits that reach the first answer (the wall costs some; this is the number to watch), returning users in week 2. B: unknown rate on `eval/questions-field.jsonl` (13% now), branded answers that the verifier passes. C: menu opened by users who did not hide it; zero menus shown to a hidden profile (a test, not a metric).
+
+**Build order I recommend: B, then C, then A.** B and C need no outside parties and no personal data; A starts its outside work (email domain, counsel) now and builds when those are ready. If you prefer A first, nothing in B or C depends on it.
 
 ## 2. Scope
 
-**In:** per-IP and per-session limits; a daily ceiling on model turns; message, payload and `sessionId` caps; a cap on tool calls per turn; CORS restricted to our own origin; bounded in-memory maps; `trust proxy`; a calm "slow down" state in the app; an abuse suite that proves each control.
+**In scope.**
+- A: Supabase Auth email link; `profiles` and `diary_entries` tables with row-level security; a sign-in screen and a gate; the server checks the sign-in token on `/agent/ask`; one-time import of the browser's diary; export; "delete my account and everything"; limits per person as well as per address; a consent line in onboarding.
+- B: a `branded` kind of record, a visibly different kind of answer, 1,000 to 2,000 products, rule 4 amended in `CLAUDE.md`.
+- C: `regenerateSlot`, a no-repeat window, the hidden-profile guard, a labelled "not yet reviewed by a clinician" line.
 
-**Out:** accounts or sign-in (`docs/PLAN.md` — the owner's decision, not this change), CAPTCHA, a WAF, Redis.
+**Out of scope.** Google or password sign-in; social features; a clinician-facing view; photo logging (needs the diary first, which A delivers); trends and the in-range-days screen (the *next* document; A only makes the data exist); a second region or a queue.
 
-**Later:** move counters to Redis when the app scales past one replica (the same limit `server/sessions.ts` already documents); limits per account instead of per IP once accounts exist; Cloudflare Turnstile if abuse actually appears.
+**Later, named so they are not forgotten.** History and trends screens. Redis for the limits when there is more than one replica. A paid tier. Making the advisor's memory per person (see section 12).
 
 ## 3. User flows
 
 ```
-Normal:    browser → POST /agent/ask → size/shape check → safety gate → limits → router → meal|advisor → verifier → answer
-Over limit: browser → POST /agent/ask → … → safety gate → limits FAIL → 429 {error:'rate_limited', scope, retryAfterSec} + Retry-After → calm message in the app
-Distress:  "glucose 320, vomiting" → size/shape check → safety gate BLOCKS → red-flag reply (200) — limits never consulted
-Ceiling:   1,001st model turn of the UTC day → 429 {scope:'daily'} until 00:00 UTC; gate refusals keep working
-```
+A  First visit
+   open app → sign-in screen (emergency line + email box)
+   → POST Supabase Auth /otp {email}  → email arrives from Azure Communication Services
+   → person taps the link → app opens with a session → consent line (once) → onboarding
+   → profile saved to profiles (RLS: own row only) → ask screen
 
-The order is the design. **The safety gate runs before the limits**, because a refusal or an escalation costs nothing and must never be withheld.
+A  Returning visit, new device
+   open app → link → session → profiles + diary_entries read (RLS) → yesterday's day is there
+
+A  Ask
+   type → POST /agent/ask  Authorization: Bearer <access token>
+     → size/shape check → safety gate (no token needed to refuse or to escalate)
+     → token verified → limits per user and per address → router → specialist → verifier → answer
+   no token, ordinary meal question → 401 sign_in_required (the app never sends this; a script would)
+
+A  First sign-in with a diary already in the browser
+   → "We found a diary on this device. Move it to your account?"  [Move] [Not now]
+   → rows upserted by their own ids (a second tap changes nothing) → local copy kept until confirmed
+
+B  "A KIND bar"
+   resolve_foods → record kind:'branded', gi:null  → compute_meal
+   → item: availableCarbs, fibre, kcal; loadAvailable:false
+   → afterMeal.fits = null, partial.unscored = ["KIND bar…"]       (same mechanism as an unknown food)
+   → card: "One question first" is wrong here, so a new label: "Carbs only"
+   → "Carbohydrate 16 g (fibre 7 g). I can't give a glycemic load for a branded product, so I can't judge your day."
+
+C  Weekly menu
+   Profile flags (eatingDisorder | kidney ckd | dialysis) → menu tab shows the message, no plan
+   otherwise → plan → "replace" on one meal → same day, same share of the day, a dish not used in the last 3 days
+```
 
 ## 4. The promise check
 
-No nutrition number is touched. The 429 body contains a retry time, which is **not an agent answer**: it travels in an error envelope, never through the verifier, and the app renders it in the error state, not the answer card. Nothing here lets a model produce a number.
+| Number shown | Where it is computed | How it is covered |
+|---|---|---|
+| Branded carbohydrate, fibre, calories | The engine: USDA per-100 g values × grams, in `server/compute.ts`, from a record in the table | Verifier sees them as tool-result numbers, like every other item |
+| Branded glycemic load | **Not produced.** `loadAvailable:false`, `gl` absent for that item | No number to quote; the model cannot state one, and if it does the verifier rejects it. **Estimating a GI by category stays refused** (PLAN, option three) |
+| The verdict on a meal with a branded item | The engine: `afterMeal.fits` is `null` (or `false` if the scored part is already over) with `partial.unscored` | Same function (`afterMealFor`) and the same eval that already protects unknown foods |
+| Menu figures (kcal, carbohydrate, GL per meal and day) | The browser, `src/lib/menu.ts` and `glycemic.ts`, from the dish table; no model involved | Not an agent answer; unchanged |
+| Account screens | No nutrition numbers | n/a |
+
+No path lets a model produce a nutrition number. The only new way a number could be *missing* is a branded item, and that is shown as missing.
 
 ## 5. Frontend
 
-- `src/lib/agent.ts` — recognise status 429 and return a typed `{ limited: true, scope, retryAfterSec }` instead of throwing the generic "Couldn't reach the agent".
-- `src/components/AskPage.tsx` — a new **limited** state, in the existing error-card style, in the product's own voice: *"You've asked a lot of questions in a short time. Please try again in about 8 minutes."* For `daily`: *"DiaBite has reached its limit for today and will be back tomorrow. Dosing and safety questions still work."* No emoji, no exclamation marks (`docs/design.md`). Input gets `maxLength={500}`, silently.
-- Checked at 375 px, light and dark. The "Ask" button re-enables after `retryAfterSec`.
+**New or changed files:** `src/components/SignIn.tsx` (new), `src/lib/auth.ts` (new), `src/lib/sync.ts` (new: read and write the two tables, merge by id), `src/components/ImportPrompt.tsx` (new), `src/App.tsx` (gate), `src/lib/supabase.ts` (persist the session), `src/lib/storage.ts` (local copy becomes a cache), `src/components/ProfilePage.tsx` (account block), `src/components/AskPage.tsx` (send the token; branded display), `src/components/MenuPage.tsx` and `src/lib/menu.ts` (guard, regenerate slot, no-repeat), `src/styles.css`, `docs/design.md` if a token is missing.
+
+**States.** Sign-in: empty, sending, "check your mail" (with the address and a resend after 60 s), link expired, error. App: signed out, loading the account, offline (reads the local copy and says changes will sync), sync failed (never silent). Ask: signed out cannot reach it. Branded answer: "Carbs only", never the green "Fits". Menu: plan, hidden profile, too few dishes for this person.
+
+**Sign-in screen copy (needs a clinician's eye, section 9):** one line above the box: "If you have symptoms such as chest pain, confusion, vomiting or fainting, call emergency services. DiaBite does not give insulin or medication doses." Nothing here is behind the wall.
+
+**Phone layout.** One column, the email box and button full width, 44 px targets, 16 px text so iOS does not zoom (already in the stylesheet). Checked at 375 px, light and dark, and with the keyboard open.
+
+**Accessibility.** The status of "check your mail" is a `role="status"` region; focus moves to it. The email box has a visible label. The import prompt is a dialog with the same focus trap as the feedback dialog.
 
 ## 6. Engine and API
 
-**New `server/guard.ts`** (the only new engine file):
-- `validateAsk(body)` — `message` ≤ 500 chars; `sessionId` ≤ 64 chars matching `/^[\w-]+$/`; `entries` ≤ 100; `budget` finite numbers. Failure → `400 {error:'invalid_request', field}`.
-- `limiter` — sliding window over timestamps, in memory, **bounded to 10,000 keys** with oldest-first eviction. Defaults (owner chose *generous*): **30 asks / 10 min and 200 / day per IP; 60 / hour per session**.
-- `reserveModelTurn()` — a UTC-day counter, default **1,000**; returns `{ok}` or the seconds to midnight.
-- All limits read from env (`ASK_IP_10MIN`, `ASK_IP_DAY`, `ASK_SESSION_HOUR`, `ASK_DAILY_CEILING`, `ABUSE_GUARD=off` kill switch), so the abuse suite can run them tiny.
+| Method, path | Auth | Request | Response | Errors |
+|---|---|---|---|---|
+| `POST /agent/ask` (changed) | `Authorization: Bearer <Supabase access token>`; the gate runs first and needs none | as today | as today, plus `partial.unscored` inside the meal tool result | `401 {error:'sign_in_required'}` for a model turn without a valid token; 429 as today, now also per user |
+| `DELETE /account` (new) | Bearer token | none | `{ok:true}` after the auth user and every row are gone | 401; 502 if the admin call fails (nothing is half-deleted: rows go first through `on delete cascade` from the auth user) |
+| `GET /health` | none | | unchanged | |
+| `/tools/*`, `/session`, `/verify`, `/diag` | `x-api-key`, unchanged | | | fail closed in production, as of today |
 
-**`server/engine.ts`:** `app.set('trust proxy', 1)` (Container Apps ingress is one hop — **verify on the live service by logging `req.ip` against `X-Forwarded-For`**; wrong, and every user shares one bucket); `cors({ origin })` allowing only our own origin plus `localhost` dev, via `ALLOWED_ORIGINS`; a stricter `express.json({ limit: '32kb' })` mounted on `/agent`; pass `clientKey` (the IP) into `ask()`.
+**Token check.** `server/auth.ts` (new) verifies the access token against the project's published signing keys (`https://<project>.supabase.co/auth/v1/.well-known/jwks.json`) with the `jose` library, cached, and takes `sub` as the person. It adds one dependency, `jose`, which goes in the lockfile and in the supply-chain row of `docs/security/security-plan.md`. The Supabase project URL is public by design; **no new secret reaches the browser**.
 
-**`server/agent.ts`:** inside `answer()`, **after the safety gate and before `route()`**, call the limits and throw a typed `RateLimited` that the handler turns into 429 + `Retry-After`. `route()` is itself a model call, so it sits behind the ceiling too.
+**`DELETE /account`** needs the service-role key to remove the auth user. It lives only as a Container App secret (`supabase-service-key`), never in the image, never in `VITE_*`. The browser cannot delete an auth user, so this is the one place the key is used by the engine; the route verifies the Bearer token first and deletes only that `sub`.
 
-Model-facing tools are unchanged — they answer 200 with an `error` field on purpose.
+**Limits.** `server/guard.ts` gains a per-user key beside the per-address key: 200 model turns a day and 60 an hour per person (the numbers from the first design, now owned by a person rather than a network). The per-address limits stay as a second wall. **The gate still runs before every limit**, and the token check sits after the gate, so no one is turned away from a refusal or an escalation for lack of a token.
 
-An authenticated caller (valid `x-api-key`) is exempt from the **rate limits**, never from the size caps. That is how `npm run eval:agent` — 87 cases from one IP in under ten minutes, which would otherwise trip 30 / 10 min — keeps working.
+**Branded in the tools.** `ResolvedPhrase.candidates[].kind` already exists; it gains `'branded'`. `ComputeMealResponse.items[]` gains `loadAvailable: boolean`; `totals.gl` is the sum of the *scored* items only; `afterMeal.partial` gains `unscored: string[]` next to `unknownFoods`. `server/contract.ts` documents both. Tools still answer 200 with an `error` field.
 
 ## 7. Agents
 
-`runAgent` sends `max_tool_calls: 6` on the Responses request (a normal turn is two calls; a clarification, one). **Verify Foundry prompt agents honour the parameter**; if not, count `function_call` items in the output and abort the turn past six, returning the templated answer. Prompts and the router are unchanged.
+- **Meal prompt** (`agent/prompts/meal.md`): one added paragraph, in the "and also" form: a branded item carries carbohydrate, fibre and calories but no glycemic load; give those figures, say plainly the load is not available for a branded product, follow the partial-total rule for the verdict, and never name a similar unbranded food as a stand-in. Re-provision with `npx tsx agent/provision.ts`.
+- **Tool spec** (`server/openapi.ts`): the compute_meal response description gains `loadAvailable` and `partial.unscored`.
+- **Triage** and **advisor**: unchanged. The router prompt already treats a named food as a meal.
+- **Re-run `npm run eval:agent`** against the deployed agent after the prompt change (CLAUDE.md rule 8), with the same key, and keep the "and also" discipline.
 
 ## 8. Data
 
-No tables, no migration. Counters live in memory and **reset on every deploy or restart** — acceptable and stated: a restart can double a day's worst case to ~2,000 turns, never more than one restart a deploy. `server/sessions.ts`: bound `store`, `lastResponse` and `conversations` to 5,000 entries each with oldest-first eviction (today any new `sessionId` grows them for an hour, and `sweep()` walks the whole map on every call).
+**Migration 1: accounts** (`supabase/migrations/<timestamp>_accounts.sql`, additive):
 
-Nothing is stored about a person. **IPs are held in memory only, never written to a log in full**; a block is logged as `scope` plus a short salted hash so one source can be recognised without being identified.
+```
+profiles       user_id uuid primary key references auth.users on delete cascade
+               data jsonb not null            -- the Profile object the app already validates
+               consent_at timestamptz, consent_version text
+               updated_at timestamptz not null default now()
+diary_entries  id uuid primary key             -- the client's own id, so an import is idempotent
+               user_id uuid not null references auth.users on delete cascade
+               day date not null, meal text, food_id text, grams numeric, snapshot jsonb
+               created_at, updated_at timestamptz
+index          diary_entries (user_id, day)
+RLS            enabled on both; policies select / insert / update / delete  using (auth.uid() = user_id)
+grants         none for anon; select, insert, update, delete for authenticated
+```
+
+Policies are written first and tested before any app code reads the tables (section 10). `feedback` stays insert-only; it gains a nullable `user_id` set from the session when there is one, so the owner can answer someone. Nothing else about the feedback table changes.
+
+**Migration 2: branded foods.** `public.foods.kind` accepts `'branded'`; rows carry `per100`, a household serving, a `brand` and `fdc_id`; `gi` is null. Rows enter by `scripts/sync-foods.ts` from a new `data/foods-usda/branded_common.json` built by `scripts/build-branded.ts`. **The build needs the USDA FoodData Central "Branded Foods" download (a few hundred MB zipped, public domain). Downloading a file is something I ask you about at that step, with the file name, source and size.**
+
+**What is stored about a person, in full:** the email address (Supabase Auth); the profile (age, sex as chosen, height, weight, activity, diagnosis, medicine classes, kidney status, other conditions, allergens, eating pattern, units, consent); the diary (date, meal, food, grams, the engine's numbers at the time); the feedback they chose to send. **Not stored:** the meal sentences (still only logged when `LOG_QUESTIONS` is on, and that stays off by default for accounts: open decision 4 of PRD-post-course §6); medicine doses (never asked); a name.
+
+**Where it lives:** Supabase project `DiaBite-feedback`, region `eu-west-1` (Ireland). The owner is in the EU, so GDPR applies to the whole service whatever the users' country, and these are health data (special category). See section 9 and 12.
+
+**Deletion and export.** Delete: the app calls `DELETE /account`; the foreign keys cascade. Export: the browser reads its own rows (RLS) and downloads one JSON file; no server code.
 
 ## 9. Safety and responsible AI
 
-- The gate-before-limits order (§3) is the safeguard. A rate limit that silenced a red-flag reply would be a harm the limiter caused.
-- The "daily" message names that safety questions still work.
-- No clinician review needed: no number, threshold or advice changes.
-- Residual risk, stated: the gate and the size check run on every request, so a flood of *cheap* requests costs CPU, not money, and is bounded only by the 32 KB body and the container. Azure's own request limits are the backstop.
+- **The wall and the red flag.** Rule 6 of `CLAUDE.md` says nobody describing a red flag is told to wait. A sign-in wall in front of the app is a wait. Two mitigations are in the design and both need a clinician's reading of the words: the emergency line on the sign-in screen itself, and the engine answering gate-caught messages without a token. If you ever wanted the wall to be absolute, that sentence is what you would be giving up.
+- **Consent.** Health data, identifiable person, EU controller: explicit consent for special-category data, a plain statement of what is kept, and deletion on request. The onboarding gets one screen; its wording is a draft for counsel (WS6), not final.
+- **Menu guard.** Hidden for `eatingDisorder` in the comorbidities, `kidney: 'ckd'` and `'dialysis'`. **Not hidden, and a question for the clinicians:** `kidney: 'mentioned'`, gout, gastroparesis, brittle diabetes, a GLP-1 user's protein. Meanwhile the menu says "not yet reviewed by a clinician". A calorie-counted daily *target* is still shown to someone with a history of disordered eating in onboarding today; that is not changed here and is a clinician question (new, item Q-ED below).
+- **Branded.** The risk is a person reading a carbohydrate figure as permission. The card never uses the green "Fits", says the load is not available, and asks nothing it cannot use.
+- **What a clinician should review:** the sign-in emergency line; the consent wording; the hidden-profile list and the sentence shown instead; the branded wording; the menu's "not reviewed" line.
 
-## 10. Evaluation plan — written in the same change
+## 10. Evaluation plan: written in the same changes
 
-**New `eval/run-abuse.ts`, `npm run eval:abuse`.** Starts a local engine with tiny limits and asserts on **status codes and JSON fields, never on prose**:
+**Engine (`npm run eval`, no model, no money):**
+- `partial` section: a branded item makes `fits` null; an over-budget scored part with a branded item is still `false`; a branded item alone never says fits.
+- `catalogue` section: rule 4 amended precisely: every record with carbohydrate and no GI is `kind: 'branded'` and has `loadAvailable` false, **and nothing else is**. The check fails if a non-branded record is in that state.
+- `resolve`: 30 branded phrases from the field set (KIND bar, Oreos, Doritos, Red Bull) reach a branded record; 10 unrelated phrases still do not (no spaghetti-to-squash accident).
+- `menu` section: no dish repeats within three days over 200 seeds; regenerating one slot changes only that slot; the same seed gives the same plan; every hidden profile gets no plan.
+- `stored` section: the profile sanitiser keeps working on a profile read from the table.
 
-| # | Case | Expect |
-|---|---|---|
-| A1 | 4th request inside the window with `ASK_IP_10MIN=3` | 429, `Retry-After` present, `scope:'ip'` |
-| A2 | Dosing question after the limit is hit | 200, blocked by rule `dosing` |
-| A3 | Red-flag message after the limit is hit | 200, rule `red_flag` |
-| A4 | 501-character message | 400 `invalid_request`, `field:'message'` |
-| A5 | `sessionId` of 65 chars or containing `/` | 400 |
-| A6 | Foreign `Origin` | no `access-control-allow-origin` |
-| A7 | Same origin / localhost | header present |
-| A8 | Daily ceiling of 5, sixth model turn | 429 `scope:'daily'`; a gate turn still 200 |
-| A9 | 10,000 distinct `sessionId`s | map size stays ≤ cap |
-| A10 | Valid `x-api-key` | exempt from rate limits, not from size caps |
+**Abuse (`npm run eval:abuse`):** a model turn without a token is 401; a dosing question without a token is 200 and refused; a red-flag message without a token is 200; a forged and an expired token are 401; the per-user limit; the gate before the limits is unchanged; `DELETE /account` without a token is 401.
 
-Plus: `npm run eval` and `npm run eval:agent` must be unchanged (191+/195, p90 ≈ 6 s), proving a normal user never meets a limit. **Live check:** one real request for the CORS header and the `Retry-After` shape; the limiter itself is proved locally, so no money is spent hammering production.
+**Row-level security (a SQL test, run against a branch database before the migration is applied to the project):** user A cannot select, update or delete user B's rows; anon cannot select anything; deleting an auth user removes both tables' rows; importing the same entry twice leaves one row.
+
+**Agent (`npm run eval:agent`, live):** "A KIND bar" and "a pack of Oreos" answer with carbohydrate and the load stated as not available, `afterMeal.fits` is not true (read from the tool result, not the prose, by a new `engineUnscored` expectation), and the answer is verified; the existing 90 cases stay as they were.
+
+**By hand, once:** the sign-in on a real phone from a real email, the import prompt with a real browser diary, and deletion of a test account, each against the live service.
 
 ## 11. Rollout
 
-1. Implement on `main` (one change: guard, wiring, app state, abuse suite, `.env.example` entries).
-2. `npm run eval:abuse`, `npm run eval`, tsc, build.
-3. `npm run deploy`; then **ask the running service**: CORS from a foreign origin, an oversize body, one normal turn, and log `req.ip` vs `X-Forwarded-For`.
-4. `npm run eval:agent` against the live service with the key.
-5. **Rollback:** set `ABUSE_GUARD=off` (new revision, ~1 minute) or reactivate the previous revision. The owner can also add an Azure budget alert in the portal — their action, not ours.
+1. **Before any code, you (outside this repository):** create the Azure Communication Services Email resource and a sender domain (an Azure-managed one works to start; your own domain looks more trustworthy and avoids spam folders); in Supabase set the Site URL and the redirect allow-list to the app's address, and the SMTP settings from that resource. I will list the exact fields; I cannot set them for you.
+2. **B first:** build the branded file, migration 2, engine, prompt, evals. Deploy; `sync-foods`; **restart the revision** (rule 10 of `CLAUDE.md`); ask the live service about a KIND bar.
+3. **C:** menu changes are in the browser only. Deploy; check on the live app with a profile that has each hidden flag.
+4. **A:** migration 1 on a Supabase branch first, the RLS tests, then the project; engine auth behind `REQUIRE_SIGN_IN` (default **off** until the sign-in screen is deployed, then on); deploy; sign in with a real address; run the abuse suite against the live service.
+5. **Check the thing, not the report:** after each deploy, ask the running service for what it is serving (CLAUDE.md rule 1).
+6. **Rollback.** A: set `REQUIRE_SIGN_IN=off` (new revision, a minute) and the app is anonymous again; the tables stay and nothing is lost. B: `BRANDED_FOODS=off` removes the kind from resolution; the rows stay inert. C: the guard and the regenerate button are code in the browser; revert the commit. Migrations are additive, so none needs undoing.
 
-## 12. Open questions — the owner's or a clinician's
+## 12. Open questions: the owner's, a clinician's, counsel's
 
-- **Q1 — real price. Answered 8 October:** measured from Azure Cost Management and the Foundry traces, a question costs about €0.0026 in model charges (`docs/monitoring.md`), so the 1,000-turn daily ceiling bounds the model bill at roughly €2.6 a day, not the ~$16 estimated below. The ceiling can stay as it is as an abuse stop; it no longer needs to be low to protect the budget. Original text: The ~$16 / day figure uses Claude list prices from `docs/FINANCIAL_PLAN.md`; production runs `gpt-5.4-mini` and `-nano`. Check Azure cost analysis before treating 1,000 as the right number. (Also relevant to Saturday's lecture: the plan's per-turn cost is built on a model we no longer run.)
-- **Q2 — IPs.** Are in-memory IPs, never logged raw, acceptable without a privacy-policy line? A statement of what is kept belongs in `docs/PLAN.md` when accounts arrive.
-- **Q3 — shared networks.** A clinic or an office behind one IP shares 200 asks a day. Fine today; revisit when real users cluster.
+**Owner**
+1. **Demo Day and the five strangers.** With a wall, a person at the demo cannot try the app without giving an email. Do you want a demo account that is already signed in on one device, or a short "try it" path? (My recommendation is the first: a device you hold.)
+2. **Advisor memory.** The advisor's memory store keeps food preferences under the session id. With accounts it can be per person, which is the "memory worth having" of PLAN, and it means preferences about an identifiable person live in Foundry. Per person, or still per session for now?
+3. **Which emails may sign in.** Anyone, or an allow-list during the beta? An allow-list is the owner knowing who by construction.
+4. **Sender domain** for the emails: Azure's own, or yours.
+5. **The branded list.** I will build it from the phrases people typed in the field set plus the common US brands I know; you may have a list from your reading of the market that is better. Say if you do.
+6. **Signing out on a shared device:** clear the local copy, or keep it?
+
+**Clinician (new questions for the pack)**
+- **Q-W1** Which profiles should not be shown a plan: is "eating disorder, CKD, dialysis" right, and what about "kidney problems mentioned", gout, gastroparesis, brittle diabetes?
+- **Q-ED** Should a history of disordered eating see a calorie target at all, in onboarding or anywhere?
+- **Q-S1** The sign-in screen's emergency sentence, and whether a gate-only answer without sign-in is acceptable.
+- **Q-B1** Is "carbohydrate, load not available" an answer a person with diabetes can use safely, and what should the card say beside it?
+
+**Counsel** (WS6, started early because it is the slowest)
+- GDPR for health data of US users under an EU controller: the lawful basis and the consent text, a data processing agreement with Supabase and Microsoft, retention, the right to export and erasure, and whether a US state law (Washington's My Health My Data Act, for one) also applies. **This document does not answer them.** A private beta with explicit consent and deletion is where this plan stops until counsel has answered.
 
 ## Files that change
 
-`server/guard.ts` (new) · `server/engine.ts` · `server/agent.ts` · `server/sessions.ts` · `src/lib/agent.ts` · `src/components/AskPage.tsx` · `eval/run-abuse.ts` (new) · `package.json` (script) · `.env.example` · `CLAUDE.md` (one rule: *the gate runs before the limits*).
-
-## Specs → implementation
-
-| Spec | Files |
-|---|---|
-| Validation and caps | `server/guard.ts`, `server/engine.ts` |
-| Limits and ceiling | `server/guard.ts`, `server/agent.ts` |
-| Bounded maps | `server/sessions.ts` |
-| Tool-call cap | `server/agent.ts` |
-| CORS and proxy | `server/engine.ts` |
-| App state | `src/lib/agent.ts`, `src/components/AskPage.tsx` |
-| Proof | `eval/run-abuse.ts`, `package.json` |
-
-## Status — built and deployed, 5 October 2026
-
-Live as revision 54 (commit c664449). What was checked, and how:
-
-| Plan | Result |
-|---|---|
-| `npm run eval:abuse` (A0–A12, no model, no money) | all pass |
-| `npm run eval` | 91 resolve, 15 clarify, 12 verify, unchanged |
-| Live: foreign Origin, own origin | no header / header present |
-| Live: 501-character message, 65-character or `a/b` session id, 40 KB body | 400 `message`, 400 `sessionId`, 413 |
-| Live: a normal turn, and a dosing question | answered; rule `dosing` |
-| `req.ip` behind the ingress (`/diag/ip`) | the caller's address; a spoofed `X-Forwarded-For: 1.2.3.4` is ignored, the last hop wins |
-| `eval:agent` against live, with the key | 87/87 answered, 191/191 checks, no 429 |
-
-Not proved, and said plainly:
-
-- **The limiter was proved locally, not on production**, as planned: hammering the live service would spend money to learn what a local run already shows. The first real 429 will be the first time it happens on Azure.
-- **`max_tool_calls` is accepted by Foundry** (no error, turns normal) but nothing here forces a turn to exceed it, so *enforced* is unproved. `MAX_TOOL_CALLS=0` removes it.
-- **Latency on the live run was median 6.3 s, p90 13.2 s**, against a recorded p90 of 6–8 s. An A/B run of the 55 field cases, with the cap and without, ran at the same speed (p90 15.2 s and 14.4 s, concurrently), so the cap is not the cause. The owner's connection was unstable that day; re-measure before quoting a number.
-- **Q1 (real price), Q2 (IPs) and Q3 (shared networks) are still open.**
+`server/auth.ts` (new) · `server/engine.ts` · `server/guard.ts` · `server/agent.ts` · `server/contract.ts` · `server/compute.ts` · `server/foods.ts` · `server/resolve.ts` · `server/openapi.ts` · `server/sessions.ts` · `agent/prompts/meal.md` · `scripts/build-branded.ts` (new) · `scripts/sync-foods.ts` · `supabase/migrations/*accounts.sql`, `*branded_foods.sql` (new) · `src/components/SignIn.tsx`, `ImportPrompt.tsx` (new) · `AskPage.tsx` · `MenuPage.tsx` · `ProfilePage.tsx` · `src/lib/auth.ts`, `sync.ts` (new) · `src/lib/supabase.ts` · `src/lib/storage.ts` · `src/lib/menu.ts` · `src/styles.css` · `eval/cases.json`, `run-engine.ts`, `run-abuse.ts`, `run-cases.ts` · `package.json` (`jose`) · `.env.example` · `CLAUDE.md` (rule 4 amended; a rule on the account tables) · `docs/security/security-plan.md` · `docs/design.md` if a token is missing.
