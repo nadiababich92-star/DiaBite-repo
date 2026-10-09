@@ -332,7 +332,7 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
       </section>
 
       {busy && (
-        <section className="card thinking">
+        <section className="card thinking" role="status" aria-live="polite">
           {/* What happens, in order, with nothing claiming to know where we
               are: the trace only arrives when the answer does. */}
           <ol>
@@ -364,7 +364,7 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
       {reply && (
         <>
           <p className="muted asked">{asked}</p>
-          <section className={`card answer tone-${tone}`}>
+          <section className={`card answer tone-${tone}`} role="status" aria-live="polite">
             <div className="eyebrow-line">
               <StatusDot tone={tone} />
               {reply.blocked ? 'Not something I\'ll answer' :

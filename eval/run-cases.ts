@@ -361,7 +361,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
       const near: number[] = []
       for (const m of text.matchAll(/\bafter\b/gi)) {
         const at = m.index ?? 0
-        const window = text.slice(Math.max(0, at - 45), at + 45)
+        const window = text.slice(Math.max(0, at - 45), at + 45).replace(/\u2212/g, '-') // the model writes a true minus sign
         for (const num of window.matchAll(/-?\d+(?:\.\d+)?/g)) near.push(Number(num[0]))
       }
       if (near.length) {
