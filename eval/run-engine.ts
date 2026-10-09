@@ -163,6 +163,23 @@ const brandedMisses: string[] = []
 console.log(`\nbranded   ${brandedMisses.length === 0 ? 'ok' : 'WRONG'}`)
 brandedMisses.forEach((m) => console.log(m))
 
+// ── image ─────────────────────────────────────────────────────────────────
+// A data file the engine reads that the Dockerfile does not copy is a service
+// that starts, finds the vectors do not match its records, tries to rebuild the
+// index in a read-only folder and dies. It happened on 9 October with the branded
+// list. Every file server/foods.ts and server/embeddings.ts open must be copied.
+
+const imageMisses: string[] = []
+{
+  const dockerfile = readFileSync(join(ROOT, 'Dockerfile'), 'utf8')
+  const read = readFileSync(join(ROOT, 'server', 'foods.ts'), 'utf8') + readFileSync(join(ROOT, 'server', 'embeddings.ts'), 'utf8')
+  for (const f of ['foods_usda.json', 'branded_common.json', 'ingredients.json', 'recipes_db.json', 'embeddings.bin', 'embeddings.ids.json']) {
+    if (read.includes(f) && !dockerfile.includes(f)) imageMisses.push(`    ${f} is read by the engine and not copied into the image`)
+  }
+}
+console.log(`\nimage     ${imageMisses.length === 0 ? 'ok' : 'WRONG'}`)
+imageMisses.forEach((m) => console.log(m))
+
 // ── stored ────────────────────────────────────────────────────────────────
 // What the browser hands back from localStorage is not trusted: one wrong type
 // must not take the app down.
@@ -311,6 +328,7 @@ if (portionMisses.length) { console.log('a default serving is wrong'); process.e
 if (partialMisses.length) { console.log('a partial meal was called a fit'); process.exit(1) }
 if (menuMisses.length) { console.log('the weekly menu broke a rule'); process.exit(1) }
 if (hangMisses.length) { console.log('the hang retry misbehaved'); process.exit(1) }
+if (imageMisses.length) { console.log('the image is missing a data file the engine reads'); process.exit(1) }
 if (brandedMisses.length) { console.log('a branded product was given a load, or the layer is the wrong size'); process.exit(1) }
 if (storedMisses.length) { console.log('stored data was trusted'); process.exit(1) }
 if (catalogueMisses.length) { console.log('a food with carbohydrate and no glycemic index is in the catalogue'); process.exit(1) }
