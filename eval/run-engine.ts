@@ -30,6 +30,7 @@ import { verify } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
 import { afterMealFor } from '../server/compute'
+import { sanitizeProfile } from '../src/lib/storage'
 import { getSession, noteResolution, putSession } from '../server/sessions'
 import type { VerifyRequest } from '../server/contract'
 
@@ -133,6 +134,25 @@ if (!predicateOk) catalogueMisses.push('    the rule 4 predicate disagreed with 
 console.log(`\ncatalogue ${catalogueMisses.length === 0 ? 'ok' : 'WRONG'}  (${records.length} records, none carbohydrate-without-load)`)
 catalogueMisses.forEach((m) => console.log(m))
 
+// ── stored ────────────────────────────────────────────────────────────────
+// What the browser hands back from localStorage is not trusted: one wrong type
+// must not take the app down.
+
+const storedMisses: string[] = []
+const expectOk = (name: string, ok: boolean) => { if (!ok) storedMisses.push(`    ${name}`) }
+{
+  const p = sanitizeProfile({ age: 'forty', allergens: 'milk', meds: [1, 2], weightKg: -3, onboarded: 'yes', sex: 'male', comorbidities: ['gout'] })
+  expectOk('a string age falls back to the default', typeof p.age === 'number' && p.age > 0)
+  expectOk('allergens that is not a list becomes the default list', Array.isArray(p.allergens))
+  expectOk('a list of numbers is refused', p.meds.every((m) => typeof m === 'string'))
+  expectOk('a negative weight is refused', p.weightKg > 0)
+  expectOk('a string where a boolean belongs is refused', typeof p.onboarded === 'boolean')
+  expectOk('a valid value survives', p.sex === 'male' && p.comorbidities.includes('gout'))
+  expectOk('null and arrays give the default profile', sanitizeProfile(null).age === sanitizeProfile([]).age)
+}
+console.log(`\nstored    ${storedMisses.length === 0 ? 'ok' : 'WRONG'}`)
+storedMisses.forEach((m) => console.log(m))
+
 // ── partial ───────────────────────────────────────────────────────────────
 // CLAUDE.md rule 3: a meal costed without a food the database lacks is
 // understated, and may never be called "fits". The engine decides that, not the
@@ -196,4 +216,5 @@ if (gateMisses.length) { console.log('the safety gate disagreed with a probe'); 
 if (answerMisses.length) { console.log('an answer was parsed wrong'); process.exit(1) }
 if (portionMisses.length) { console.log('a default serving is wrong'); process.exit(1) }
 if (partialMisses.length) { console.log('a partial meal was called a fit'); process.exit(1) }
+if (storedMisses.length) { console.log('stored data was trusted'); process.exit(1) }
 if (catalogueMisses.length) { console.log('a food with carbohydrate and no glycemic index is in the catalogue'); process.exit(1) }

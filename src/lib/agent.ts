@@ -79,7 +79,30 @@ export class RateLimitedError extends Error {
 /** Longest question the engine accepts; the input stops there rather than failing late. */
 export const MAX_QUESTION = 500
 
+/**
+ * How long to wait for an answer. A turn takes 6 to 20 seconds; the call has
+ * been seen hanging for minutes from inside the container, and the question box
+ * is disabled while it waits, so without a limit a hang strands the person.
+ */
+export const ASK_TIMEOUT_MS = 75_000
+
 export async function askAgent(req: AgentRequest, signal?: AbortSignal): Promise<AgentResponse> {
+  const ctl = new AbortController()
+  const timer = setTimeout(() => ctl.abort(new Error('timeout')), ASK_TIMEOUT_MS)
+  const onAbort = () => ctl.abort(signal?.reason)
+  if (signal?.aborted) onAbort(); else signal?.addEventListener('abort', onAbort, { once: true })
+  try {
+    return await askOnce(req, ctl.signal)
+  } catch (e) {
+    if (ctl.signal.aborted && !signal?.aborted) throw new Error('That is taking too long. Please try again in a moment.')
+    throw e
+  } finally {
+    clearTimeout(timer)
+    signal?.removeEventListener('abort', onAbort)
+  }
+}
+
+async function askOnce(req: AgentRequest, signal: AbortSignal): Promise<AgentResponse> {
   const res = await fetch(AGENT_URL, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
