@@ -115,3 +115,20 @@ modern browsers ignore it and old ones had bugs with it. The CSP does that job.
 - **S9 (feedback spam):** the owner's decision.
 - **S10 and S11 are portal actions, not code:** delete the two federated credentials for the old branches once those branches are deleted; remove the `probe`, `v0` and `agent-v2` agent identities; trim the engine identity's four overlapping Foundry roles one at a time with `eval:agent` between each; enable Dependabot; pin the Actions and the base image.
 - **Deploy is a human step on purpose.** The workflow builds the image on every push; `npm run deploy` puts it live. Making a push deploy by itself would mean giving the CI identity rights over the running app, today it can only push images, and that trade is the owner's to make.
+
+---
+
+## Update, 9 October 2026 — found by a code review, fixed and checked
+
+| What | Before | Now | How it was checked |
+|---|---|---|---|
+| **Tool routes fail open** (S4) | With `ENGINE_API_KEY` unset the guard was never installed: `/tools/*`, `PUT /session`, `/verify` and `/diag/*` were open, and `/diag/foundry` spends model tokens | In production, no key means **503** on those routes, with a line in the log; `/health` stays up | A local engine with `NODE_ENV=production` and no key: tools 503, diag 503, health 200. The live service with the key set still answers 401 without it |
+| **Key length in `/diag`** | The response said how many characters the key had | It says `set` or `none` | Read from the code; the live route is behind the key |
+| **A second, unguarded engine** | `server/index.ts`: no key, no limits, no safety gate, open CORS, a request body spread into `calculateTargets`, one `npm run engine` away | Deleted; `npm run engine` starts `server/engine.ts` | Nothing imported it; typecheck and build pass |
+| **An unverified answer was shown** | After two failed checks and with nothing to rebuild from, the model's text appeared under a warning pill | The text is withheld and replaced by a fixed sentence with no figure in it | Code review; not provoked on the live service (it needs a failing verifier) |
+| **The verifier's source set** | Every numeric leaf of every tool result, including a candidate's search score and the digits of a record id | Scores, ids and session ids are not quotable | Four verifier cases, two each way round |
+| **Rule 4 on the table path** | The path that adds food without a deploy skipped the no-GI-with-carbohydrate check; vanilla extract and baking powder entered as a load of 0 | One predicate guards the file build and the table; both rows are out | `npm run eval` fails if any record has carbohydrate and no GI; the live catalogue reports 6,052 records |
+| **A catalogue change needs a sync and a restart** | `npm run deploy` alone left the old catalogue serving | Written down as rule 10 in `CLAUDE.md` | A baked potato kept answering as boiled until the table was synced and the revision restarted |
+
+Still open from the review and not changed here: the daily ceiling counts UTC days (a cost counter, correct as one; only the "back tomorrow" wording is off for the US), the unauthenticated feedback and session routes keep their existing limits, and the Profile tab lets a person choose a carbohydrate approach the onboarding blocks, which is a clinical decision.
+

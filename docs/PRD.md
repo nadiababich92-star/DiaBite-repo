@@ -1062,7 +1062,11 @@ the cost was the model's round trips, and the work was to remove them.
    budget left after this meal". It was looking for a number no tool returned:
    the prompt told it to subtract, and its first rule forbids computing.
    `compute_meal` now returns `afterMeal` — what is left once this meal is
-   counted, and whether it fits — and the third call stopped.
+   counted, and whether it fits — and the third call stopped. (9 October: when a
+   food the database lacks was left out of the meal, `fits` is `null` — "cannot
+   say" — or `false` if the partial total is already over; it is never `true`.
+   The engine decides this from what `resolve_foods` could not find, not the
+   model from its prose.)
 3. **The meal agent moved to `gpt-5.4-mini`.** Its deployment holds 200k tokens
    a minute where `gpt-5-mini` held 50k, which mattered more than expected: once
    a turn took 9 s instead of 25, a back-to-back run spent its own speed on
