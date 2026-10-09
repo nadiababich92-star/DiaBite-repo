@@ -110,8 +110,20 @@ function score(
 /** How many days a dish must not repeat within. */
 const REPEAT_GAP = 3
 
-export function generateWeek(profile: Profile, targets: Targets, seed = Date.now()): WeekPlan {
-  const rnd = mulberry32(seed)
+/**
+ * Profiles a fixed plan of meals and calories is not DiaBite's to write: a
+ * history of disordered eating, and kidney disease or dialysis (where protein
+ * and potassium decide the plate). Until a clinician says otherwise the menu is
+ * not shown to them, and no plan is computed. Deliberately narrow: gout,
+ * gastroparesis, "my doctor mentioned my kidneys" and brittle diabetes are
+ * questions for the clinicians (Q-W1 in the engineering plan), not decided here.
+ */
+export function menuHidden(profile: Profile): boolean {
+  return profile.comorbidities.includes('eatingDisorder') || profile.kidney === 'ckd' || profile.kidney === 'dialysis'
+}
+
+/** The dishes this person may be offered: the same answers the agent respects. */
+function availableDishes(profile: Profile) {
   const excluded = new Set(profile.excludedFoodIds)
 
   // A week of meals has to respect the same answers the agent respects. It did
@@ -124,8 +136,12 @@ export function generateWeek(profile: Profile, targets: Targets, seed = Date.now
     const text = [d.name, ...d.items.map((it) => getFood(it.foodId)?.name ?? '')].join(' ')
     return dietaryReason(text, avoid) !== null
   }
+  return DISHES.filter((d) => !forbidden(d))
+}
 
-  const available = DISHES.filter((d) => !forbidden(d))
+export function generateWeek(profile: Profile, targets: Targets, seed = Date.now()): WeekPlan {
+  const rnd = mulberry32(seed)
+  const available = availableDishes(profile)
   const pool = { available: available.length, total: DISHES.length }
 
   /** dishId -> index of the day the dish was last used. */
@@ -205,7 +221,68 @@ export function shoppingList(plan: WeekPlan): { name: string; grams: number; cat
   return [...totals.entries()]
     .map(([id, grams]) => {
       const food = getFood(id)
-      return { name: food.name, grams: Math.round(grams), category: food.category }
+      // To the nearest 5 g: a list of "412 g" claims a precision the plan never had.
+      return { name: food.name, grams: Math.max(5, Math.round(grams / 5) * 5), category: food.category }
     })
     .sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name))
+}
+
+/** The list as plain text, grouped by category, for pasting into a notes app. */
+export function shoppingText(list: { name: string; grams: number; category: FoodCategory }[], labels: Record<FoodCategory, string>): string {
+  const out: string[] = []
+  let last = ''
+  for (const item of list) {
+    if (item.category !== last) { if (out.length) out.push(''); out.push(labels[item.category]); last = item.category }
+    const amount = item.grams >= 1000 ? `${(item.grams / 1000).toFixed(2)} kg` : `${item.grams} g`
+    out.push(`${item.name}, ${amount}`)
+  }
+  return out.join('\n')
+}
+
+export interface Replaced { plan: WeekPlan; relaxed: boolean; changed: boolean }
+
+/**
+ * Replace one meal and nothing else.
+ *
+ * Deterministic for a seed. The new dish is not the one being replaced, not
+ * already in that day, and not used within REPEAT_GAP days either side in the
+ * rest of the week; when exclusions leave nothing, the repeat rule is relaxed
+ * (as the generator does) and `relaxed` says so, so the page can tell the
+ * person rather than silently repeating.
+ */
+export function regenerateSlot(
+  plan: WeekPlan, dayIndex: number, meal: MealType, profile: Profile, targets: Targets, seed: number,
+): Replaced {
+  const day = plan.days[dayIndex]
+  const slot = day?.meals.findIndex((m) => m.meal === meal) ?? -1
+  if (!day || slot < 0) return { plan, relaxed: false, changed: false }
+
+  const rnd = mulberry32(seed)
+  const current = day.meals[slot].dish.id
+  const available = availableDishes(profile).filter((d) => d.meals.includes(meal) && d.id !== current)
+  const inDay = new Set(day.meals.map((m) => m.dish.id))
+  const nearby = (id: string) => plan.days.some((d, i) => i !== dayIndex && Math.abs(i - dayIndex) < REPEAT_GAP && d.meals.some((m) => m.dish.id === id))
+
+  let candidates = available.filter((d) => !inDay.has(d.id) && !nearby(d.id))
+  let relaxed = false
+  if (candidates.length === 0) { candidates = available.filter((d) => !inDay.has(d.id)); relaxed = true }
+  if (candidates.length === 0) return { plan, relaxed: false, changed: false }
+
+  const share = MEAL_SHARE[meal]
+  const targetKcal = targets.kcal * share, targetCarbs = targets.carbsG * share, targetGL = targets.glBudget * share
+  const best = candidates
+    .map((dish) => {
+      const scale = fitScale(dish, targetKcal)
+      const ev = evaluate(dish, scale)
+      return { dish, scale, ev, s: score(ev, targetKcal, targetCarbs, targetGL) + rnd() * 0.15 }
+    })
+    .sort((a, b) => a.s - b.s)[0]
+
+  const meals = day.meals.map((m, i) => i === slot
+    ? { meal, dish: best.dish, scale: best.scale, nutrients: best.ev.nutrients, gl: best.ev.gl, gi: best.ev.gi }
+    : m)
+  const days = plan.days.map((d, i) => i === dayIndex
+    ? { ...d, meals, totals: sumNutrients(meals.map((m) => m.nutrients)), gl: meals.reduce((t, m) => t + m.gl, 0) }
+    : d)
+  return { plan: { ...plan, days }, relaxed, changed: true }
 }

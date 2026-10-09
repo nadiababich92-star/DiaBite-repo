@@ -87,7 +87,7 @@ export default function App() {
       {tab === 'diary' && (
         <DiaryPage targets={targets} diary={diary} onChange={setDiary} />
       )}
-      {tab === 'menu' && <MenuPage profile={profile} targets={targets} />}
+      {tab === 'menu' && <MenuPage profile={profile} targets={targets} onAsk={() => setTab('ask')} />}
       {tab === 'profile' && (
         <ProfilePage
           profile={profile}

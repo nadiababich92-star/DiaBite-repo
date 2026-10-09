@@ -32,6 +32,9 @@ import { parseMeal } from '../src/lib/answer'
 import { afterMealFor } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
 import { withHangRetry } from '../server/agent'
+import { generateWeek, menuHidden, regenerateSlot, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
+import { calculateTargets, DEFAULT_PROFILE } from '../src/lib/profile'
+import { CATEGORY_LABELS } from '../src/data/foods'
 import { getSession, noteResolution, putSession } from '../server/sessions'
 import type { VerifyRequest } from '../server/contract'
 
@@ -154,6 +157,51 @@ const expectOk = (name: string, ok: boolean) => { if (!ok) storedMisses.push(`  
 console.log(`\nstored    ${storedMisses.length === 0 ? 'ok' : 'WRONG'}`)
 storedMisses.forEach((m) => console.log(m))
 
+// ── menu ──────────────────────────────────────────────────────────────────
+// The weekly menu runs in the browser; its rules are tested here, without one.
+
+const menuMisses: string[] = []
+{
+  const profile = { ...DEFAULT_PROFILE, onboarded: true }
+  const targets = calculateTargets(profile)
+  // (a) no dish twice inside the repeat gap, wherever the pool allows it
+  let repeats = 0
+  for (let seed = 1; seed <= 200; seed++) {
+    const plan = generateWeek(profile, targets, seed)
+    plan.days.forEach((d, i) => d.meals.forEach((m) => {
+      for (let j = Math.max(0, i - 2); j < i; j++) if (plan.days[j].meals.some((x) => x.dish.id === m.dish.id)) repeats++
+    }))
+  }
+  if (repeats > 0) menuMisses.push(`    ${repeats} dishes repeated inside 3 days over 200 seeds`)
+  // (b) one slot changes, nothing else, and the day still adds up
+  const plan = generateWeek(profile, targets, 7)
+  const r = regenerateSlot(plan, 2, 'lunch', profile, targets, 99)
+  const sameElsewhere = r.plan.days.every((d, i) => i === 2 || d === plan.days[i])
+  const sameMeals = r.plan.days[2].meals.every((m, i) => m.meal === 'lunch' || m === plan.days[2].meals[i])
+  const newLunch = r.plan.days[2].meals.find((m) => m.meal === 'lunch')!.dish.id
+  const oldLunch = plan.days[2].meals.find((m) => m.meal === 'lunch')!.dish.id
+  const kcal = r.plan.days[2].meals.reduce((t, m) => t + m.nutrients.kcal, 0)
+  if (!r.changed || !sameElsewhere || !sameMeals || newLunch === oldLunch) menuMisses.push('    replacing one meal changed more than that meal, or nothing')
+  if (Math.abs(kcal - r.plan.days[2].totals.kcal) > 0.01) menuMisses.push('    the day total does not equal the sum of its meals after a replacement')
+  // (c) the same seed, the same answer
+  const again = regenerateSlot(plan, 2, 'lunch', profile, targets, 99)
+  if (again.plan.days[2].meals.find((m) => m.meal === 'lunch')!.dish.id !== newLunch) menuMisses.push('    a replacement is not deterministic for a seed')
+  // (d) who is not shown a plan
+  const hide = (patch: object) => menuHidden({ ...profile, ...patch } as typeof profile)
+  const hiddenOk = hide({ comorbidities: ['eatingDisorder'] }) && hide({ kidney: 'ckd' }) && hide({ kidney: 'dialysis' })
+  const shownOk = !hide({}) && !hide({ kidney: 'mentioned' }) && !hide({ comorbidities: ['gout'] }) && !hide({ comorbidities: ['gastroparesis'] }) && !hide({ comorbidities: ['brittle'] }) && !hide({ kidney: 'none', comorbidities: ['htn', 'celiac'] })
+  if (!hiddenOk) menuMisses.push('    a profile that must not see a plan does')
+  if (!shownOk) menuMisses.push('    a profile that may see a plan does not')
+  // the list: rounded to 5 g and ready to paste
+  const list = shoppingList(plan)
+  if (list.some((l) => l.grams % 5 !== 0)) menuMisses.push('    the shopping list is not rounded to 5 g')
+  const text = shoppingText(list, CATEGORY_LABELS)
+  if (!text.includes('\n') || !/ g$|kg$/m.test(text)) menuMisses.push('    the shopping list text has no amounts')
+  if (MEAL_ORDER.length !== 4) menuMisses.push('    meal order changed')
+}
+console.log(`\nmenu      ${menuMisses.length === 0 ? 'ok' : 'WRONG'}`)
+menuMisses.forEach((m) => console.log(m))
+
 // ── hang ──────────────────────────────────────────────────────────────────
 // A call to Foundry that hangs gets one more try; an error that is the caller's
 // own is not retried; a second hang is an error, not a loop.
@@ -236,6 +284,7 @@ if (gateMisses.length) { console.log('the safety gate disagreed with a probe'); 
 if (answerMisses.length) { console.log('an answer was parsed wrong'); process.exit(1) }
 if (portionMisses.length) { console.log('a default serving is wrong'); process.exit(1) }
 if (partialMisses.length) { console.log('a partial meal was called a fit'); process.exit(1) }
+if (menuMisses.length) { console.log('the weekly menu broke a rule'); process.exit(1) }
 if (hangMisses.length) { console.log('the hang retry misbehaved'); process.exit(1) }
 if (storedMisses.length) { console.log('stored data was trusted'); process.exit(1) }
 if (catalogueMisses.length) { console.log('a food with carbohydrate and no glycemic index is in the catalogue'); process.exit(1) }
