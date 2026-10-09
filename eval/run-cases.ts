@@ -297,6 +297,13 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
     const after = (callOf(r, 'compute_meal')?.result as { afterMeal?: { fits?: boolean | null; partial?: { unknownFoods: string[] } } } | undefined)?.afterMeal
     say('engine marks the meal partial, not fits', !!after?.partial?.unknownFoods?.length && after.fits !== true, JSON.stringify(after))
   }
+  // A branded item is never given a load: the engine's own result says which
+  // items it could not score, and the verdict is not "fits".
+  if (e.engineUnscored === true) {
+    const res = callOf(r, 'compute_meal')?.result as { items?: { loadAvailable?: boolean; gl?: number | null }[]; afterMeal?: { fits?: boolean | null; partial?: { unscored?: string[] } } } | undefined
+    const scoredWrongly = (res?.items ?? []).some((it) => it.loadAvailable === false && it.gl !== null)
+    say('engine marks a branded item unscored, fits is not true', !!res?.afterMeal?.partial?.unscored?.length && res.afterMeal.fits !== true && !scoredWrongly, JSON.stringify(res?.afterMeal))
+  }
   if (e.noFitsClaim === true) {
     say('claims no fit', !/\b(it )?fits\b|within (your )?budget/i.test(answer.replace(/can'?t say[^.]*\./gi, ' ')))
   }

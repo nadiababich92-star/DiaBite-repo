@@ -129,7 +129,8 @@ export interface ReceiptLine {
   portion: string
   availableCarbs: number
   gi: number | null
-  gl: number
+  /** Null for a branded product: no glycemic index is published, so no load exists. */
+  gl: number | null
   kcal: number
   carbs: number
   fiber: number
@@ -146,6 +147,10 @@ export interface Receipt {
   leftAfter: number | null
   /** Foods the database lacks, left out of the sum: the total is understated. */
   partial?: string[]
+  /** Branded items: carbohydrate counted, load not available. */
+  unscored?: string[]
+  /** Every item is branded: the card shows carbohydrate, not a load. */
+  carbsOnly?: boolean
   /** Where the numbers in this receipt came from, and whether anyone checked them (PRD E3). */
   sources: { text: string; verified: boolean }[]
 }
@@ -154,12 +159,12 @@ interface MealResult {
   items: {
     foodId: string; name: string; grams: number; servings?: number
     kcal: number; carbs: number; fiber: number; protein: number; fat: number
-    availableCarbs: number; gi: number | null; gl: number
+    availableCarbs: number; gi: number | null; gl: number | null
   }[]
   totals: { gl: number }
   /** The budget before this meal; compute_meal returns it when it was given a session. */
   dayState?: { remaining?: { gl: number } }
-  afterMeal?: { partial?: { unknownFoods: string[] } }
+  afterMeal?: { partial?: { unknownFoods: string[]; unscored?: string[] } }
 }
 
 interface DayStateResult { remaining: { gl: number } }
@@ -217,5 +222,7 @@ export function receiptFrom(trace: TraceStep[] | undefined): Receipt | null {
     leftAfter: leftBefore === null ? null : Math.round((leftBefore - m.totals.gl) * 10) / 10,
     sources: [...sources].map(([text, verified]) => ({ text, verified })),
     ...(m.afterMeal?.partial?.unknownFoods.length ? { partial: m.afterMeal.partial.unknownFoods } : {}),
+    ...(m.afterMeal?.partial?.unscored?.length ? { unscored: m.afterMeal.partial.unscored } : {}),
+    ...(m.items.length > 0 && m.items.every((it) => it.gl === null) ? { carbsOnly: true } : {}),
   }
 }

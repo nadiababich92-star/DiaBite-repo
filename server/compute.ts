@@ -20,6 +20,18 @@ const r1 = (x: number) => Math.round(x * 10) / 10
 
 export function computeItem(input: MealItemInput): MealItemResult {
   const rec = getRecord(input.foodId)
+  if (rec.kind === 'branded') {
+    // Label data: carbohydrate, fibre and energy are real, the glycemic load is
+    // not available and is not estimated (the promise, and PLAN's option three).
+    const grams = input.grams ?? rec.defaultPortion
+    const p = rec.per100!
+    const k = grams / 100
+    return {
+      foodId: rec.id, name: rec.name, kind: 'branded', grams,
+      kcal: r1(p.kcal * k), carbs: r1(p.carbs * k), fiber: r1(p.fiber * k), protein: r1(p.protein * k), fat: r1(p.fat * k),
+      availableCarbs: r1(Math.max(0, p.carbs - p.fiber) * k), gi: null, gl: null, glLevel: null, loadAvailable: false,
+    }
+  }
   if (rec.kind === 'ingredient') {
     const food = asFood(rec)
     const grams = input.grams ?? rec.defaultPortion
@@ -29,7 +41,7 @@ export function computeItem(input: MealItemInput): MealItemResult {
     return {
       foodId: rec.id, name: rec.name, kind: 'ingredient', grams,
       kcal: r1(n.kcal), carbs: r1(n.carbs), fiber: r1(n.fiber), protein: r1(n.protein), fat: r1(n.fat),
-      availableCarbs: r1(avail), gi: rec.gi, gl: r1(gl), glLevel: glLevel(gl),
+      availableCarbs: r1(avail), gi: rec.gi, gl: r1(gl), glLevel: glLevel(gl), loadAvailable: true,
     }
   }
   const ps = rec.perServing!
@@ -40,12 +52,14 @@ export function computeItem(input: MealItemInput): MealItemResult {
     kcal: r1(ps.kcal * servings), carbs: r1(ps.carbs * servings), fiber: r1(ps.fiber * servings),
     protein: r1(ps.protein * servings), fat: r1(ps.fat * servings),
     availableCarbs: r1(ps.availableCarbs * servings), gi: rec.gi,
-    gl: r1(ps.gl * servings), glLevel: glLevel(ps.gl * servings),
+    gl: r1(ps.gl * servings), glLevel: glLevel(ps.gl * servings), loadAvailable: true,
   }
 }
 
 export function totalsOf(items: MealItemResult[]): MealTotals {
-  const sum = (k: keyof MealItemResult) => r1(items.reduce((s, it) => s + (it[k] as number), 0))
+  // A null load (a branded item) adds nothing: the total is the scored part, and
+  // afterMeal.partial.unscored says that it is only that.
+  const sum = (k: keyof MealItemResult) => r1(items.reduce((s, it) => s + ((it[k] as number | null) ?? 0), 0))
   const gl = sum('gl')
   // Carb-weighted mean GI across items, using the shared helper for ingredients
   // and the recipe's own GI for recipes.
@@ -83,7 +97,7 @@ function costOf(id: string, grams?: number): { gl: number; kcal: number; availab
   const rec = getRecord(id)
   const input = rec.kind === 'ingredient' && grams ? { foodId: id, grams } : { foodId: id }
   const it = computeItem(input)
-  return { gl: it.gl, kcal: it.kcal, availableCarbs: it.availableCarbs, portion: rec.kind === 'ingredient' ? it.grams : (it.servings ?? 1) }
+  return { gl: it.gl ?? 0, kcal: it.kcal, availableCarbs: it.availableCarbs, portion: rec.kind === 'ingredient' ? it.grams : (it.servings ?? 1) }
 }
 
 export async function findAlternatives(
@@ -102,6 +116,8 @@ export async function findAlternatives(
     const rec = byId.get(id)
     // Dropped before ranking, not after: an allergen is not a tie-breaker.
     if (rec && isAvoided(rec, avoid)) return false
+    // A branded item has no load to compare, so it is never a swap.
+    if (rec?.kind === 'branded') return false
     if (req.sameCategory && anchor) return rec?.category === anchor.category
     return true
   }
@@ -161,16 +177,17 @@ export function afterMealFor(
   remaining: { gl: number; carbsG: number; kcal: number },
   meal: { gl: number; carbs: number; kcal: number },
   unknownFoods: string[] = [],
+  unscored: string[] = [],
 ) {
   const after = {
     gl: Math.round((remaining.gl - meal.gl) * 10) / 10,
     carbsG: Math.round((remaining.carbsG - meal.carbs) * 10) / 10,
     kcal: Math.round(remaining.kcal - meal.kcal),
   }
-  const partial = unknownFoods.length > 0
+  const partial = unknownFoods.length + unscored.length > 0
   return {
     remaining: after,
     fits: partial ? (after.gl >= 0 ? null : false) : after.gl >= 0,
-    ...(partial ? { partial: { unknownFoods } } : {}),
+    ...(partial ? { partial: { unknownFoods, ...(unscored.length ? { unscored } : {}) } } : {}),
   }
 }

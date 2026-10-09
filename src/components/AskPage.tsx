@@ -38,7 +38,7 @@ function StatusDot({ tone }: { tone: string | null }) {
     tone === 'good' ? 'M20 6L9 17l-5-5' :
     tone === 'change' ? 'M12 5v14M5 12h14' :
     tone === 'bad' || tone === 'blocked' ? 'M18 6L6 18M6 6l12 12' :
-    tone === 'advice' ? 'M12 8h.01M11 12h1v5h1' :
+    tone === 'advice' || tone === 'carbs' ? 'M12 8h.01M11 12h1v5h1' :
     'M12 17h.01M12 7v6'
   return (
     <span className={`status-dot dot-${tone ?? 'ask'}`} aria-hidden="true">
@@ -67,6 +67,20 @@ function Figures({ reply }: { reply: AgentResponse }) {
     | { totals?: { gl?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean | null } }
     | undefined
   const mealGl = meal?.totals?.gl
+  // A meal of branded products only: the three tiles are what the label gives —
+  // carbohydrate, fibre, calories — and none of them is a load or a verdict.
+  const items = (meal as { items?: { loadAvailable?: boolean }[] } | undefined)?.items ?? []
+  if (items.length > 0 && items.every((it) => it.loadAvailable === false)) {
+    const t = (meal as { totals?: { carbs?: number; fiber?: number; kcal?: number } }).totals
+    if (typeof t?.carbs !== 'number') return null
+    return (
+      <div className="figures">
+        <div className="fig"><span className="fig-k">carbohydrate</span><span className="fig-v">{t.carbs} g</span></div>
+        <div className="fig"><span className="fig-k">fibre</span><span className="fig-v">{t.fiber ?? 0} g</span></div>
+        <div className="fig"><span className="fig-k">calories</span><span className="fig-v">{t.kcal}</span></div>
+      </div>
+    )
+  }
   const before = meal?.dayState?.remaining?.gl
   const after = meal?.afterMeal?.remaining?.gl
   if (typeof mealGl !== 'number' || typeof before !== 'number' || typeof after !== 'number') return null
@@ -135,7 +149,7 @@ function Answer({ text, reply }: { text: string; reply?: AgentResponse }) {
  * the glycemic index. Who answered decides the label; only a meal has a
  * verdict.
  */
-function verdictTone(answer: string, route?: string, reply?: AgentResponse): 'good' | 'change' | 'bad' | 'ask' | 'advice' {
+function verdictTone(answer: string, route?: string, reply?: AgentResponse): 'good' | 'change' | 'bad' | 'ask' | 'advice' | 'carbs' | 'partial' {
   if (route === 'advisor') return 'advice'
   // The engine already decided this. Reading it out of the prose worked only
   // while the prose was a label: the moment the verdict became a sentence a
@@ -143,9 +157,13 @@ function verdictTone(answer: string, route?: string, reply?: AgentResponse): 'go
   // "One question first". `afterMeal.fits` is the same comparison the answer
   // is built on, and it cannot be paraphrased.
   const meal = reply?.trace?.find((t) => t.tool.endsWith('compute_meal'))?.result as
-    { afterMeal?: { fits?: boolean | null }; alternatives?: unknown[] } | undefined
+    { afterMeal?: { fits?: boolean | null; partial?: { unscored?: string[] } }; items?: { loadAvailable?: boolean }[]; alternatives?: unknown[] } | undefined
   // A partial meal has no verdict to badge: a food is missing and the answer is
   // asking what is in it, which is what "One question first" says.
+  // Every item branded: carbohydrate and no load. Some branded, some scored: the
+  // part of a meal that could be judged. Neither is a verdict, and neither is green.
+  if (meal?.afterMeal?.partial?.unscored?.length && (meal.items ?? []).length > 0 && (meal.items ?? []).every((it) => it.loadAvailable === false)) return 'carbs'
+  if (meal?.afterMeal?.partial?.unscored?.length && meal.afterMeal.fits !== false) return 'partial'
   if (meal?.afterMeal?.fits === null) return 'ask'
   if (meal?.afterMeal && typeof meal.afterMeal.fits === 'boolean') {
     if (!meal.afterMeal.fits) return 'bad'
@@ -165,19 +183,21 @@ function ReceiptView({ r }: { r: Receipt }) {
       {r.lines.map((l) => (
         <div className="receipt-line" key={l.foodId + l.portion}>
           <span>{l.name} <em>{l.portion}</em></span>
-          <span>{l.availableCarbs.toFixed(1)} · {l.gi ?? '—'} · <b>{l.gl.toFixed(1)}</b></span>
+          <span>{l.availableCarbs.toFixed(1)} · {l.gi ?? '—'} · <b>{l.gl === null ? '—' : l.gl.toFixed(1)}</b></span>
         </div>
       ))}
-      <div className="receipt-total"><span>{r.partial ? 'Glycemic load so far' : 'Meal glycemic load'}</span><span>{r.total.toFixed(1)}</span></div>
+      <div className="receipt-total"><span>{r.carbsOnly ? 'Glycemic load' : r.partial || r.unscored ? 'Glycemic load so far' : 'Meal glycemic load'}</span><span>{r.carbsOnly ? 'not available' : r.total.toFixed(1)}</span></div>
+      {r.unscored && !r.carbsOnly && <div className="receipt-line muted"><span>Not scored: {r.unscored.join(', ')}</span><span>no glycemic index</span></div>}
       {r.partial && <div className="receipt-line muted"><span>Not counted: {r.partial.join(', ')}</span><span>not in the database</span></div>}
       {r.leftBefore !== null && (
         <>
           <div className="receipt-line muted"><span>Left before this meal</span><span>{r.leftBefore.toFixed(1)}</span></div>
-          <div className={`receipt-line ${r.partial ? '' : (r.leftAfter ?? 0) < 0 ? 'over' : 'ok'}`}><span>{r.partial ? 'Left so far' : 'Left after'}</span><span>{r.leftAfter?.toFixed(1)}</span></div>
+          <div className={`receipt-line ${r.partial || r.unscored ? '' : (r.leftAfter ?? 0) < 0 ? 'over' : 'ok'}`}><span>{r.partial || r.unscored ? 'Left so far' : 'Left after'}</span><span>{r.leftAfter?.toFixed(1)}</span></div>
         </>
       )}
       <div className="receipt-foot">
         GL = GI × available carbs ÷ 100. Available carbs = total − fibre.
+        {r.unscored && ' No glycemic index is published for packaged products, so none is estimated.'}
         {r.sources.length > 0 && (
           <ul className="receipt-sources">
             {r.sources.map((s) => (
@@ -283,7 +303,7 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
       id: `${stamp}-${i}`, date: today, meal, foodId: l.foodId, grams: l.grams,
       snapshot: {
         name: l.name, kcal: l.kcal, carbs: l.carbs, fiber: l.fiber, protein: l.protein, fat: l.fat,
-        availableCarbs: l.availableCarbs, gi: l.gi, gl: l.gl, servings: l.servings,
+        availableCarbs: l.availableCarbs, gi: l.gi, gl: l.gl ?? 0, loadAvailable: l.gl !== null, servings: l.servings,
       },
     })))
     setLogged(true)
@@ -369,7 +389,7 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
               <StatusDot tone={tone} />
               {reply.blocked ? 'Not something I\'ll answer' :
                tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Not today' :
-               tone === 'advice' ? 'Advice' : 'One question first'}
+               tone === 'advice' ? 'Advice' : tone === 'carbs' ? 'Carbs only' : tone === 'partial' ? 'Part of the meal' : 'One question first'}
             </div>
             <Answer text={reply.answer} reply={reply} />
             {!reply.blocked && (
@@ -395,7 +415,7 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
 
           {receipt && (
             <div className="row" style={{ marginBottom: 12 }}>
-              <button className="primary" onClick={logIt} disabled={logged}>{logged ? 'Logged' : receipt.partial ? 'Log what was counted' : 'Log it'}</button>
+              <button className="primary" onClick={logIt} disabled={logged}>{logged ? 'Logged' : receipt.partial || receipt.unscored ? 'Log what was counted' : 'Log it'}</button>
               <button className="ghost" onClick={() => setShowReceipt((v) => !v)}>{showReceipt ? 'Hide calculation' : 'Show calculation'}</button>
             </div>
           )}

@@ -1,0 +1,384 @@
+# One product per line: every word on the line must appear in the USDA brand and
+# description for a row to match. Blank lines and lines starting with # are ignored.
+# The owner may add lines at any time; rerun scripts/build-branded.py.
+
+# bars and snacks
+kind bar dark chocolate nuts sea salt
+kind bar almond coconut
+kind bar peanut butter dark chocolate
+clif bar chocolate chip
+larabar apple pie
+larabar peanut butter chocolate chip
+quest protein bar chocolate chip cookie dough
+quest protein bar cookies cream
+rxbar chocolate sea salt
+nature valley crunchy oats honey
+nature valley sweet salty almond
+special k protein bar
+granola bar chewy chocolate chip
+fiber one chewy bar oats chocolate
+kellogg pop-tarts frosted strawberry
+rice krispies treats
+planters mixed nuts
+planters peanuts dry roasted
+blue diamond almonds
+wonderful pistachios
+emerald cashews
+pringles original
+pringles sour cream onion
+lays classic potato chips
+lays barbecue
+ruffles cheddar sour cream
+doritos nacho cheese
+doritos cool ranch
+cheetos crunchy
+cheetos puffs
+fritos original corn chips
+tostitos scoops
+tostitos restaurant style
+sun chips harvest cheddar
+popcorners sea salt
+skinnypop popcorn
+smartfood white cheddar popcorn
+orville redenbacher microwave popcorn butter
+pretzels rold gold tiny twists
+snyders pretzel
+goldfish cheddar
+cheez-it original
+ritz crackers original
+triscuit original
+wheat thins original
+club crackers
+saltines nabisco premium
+animal crackers
+graham crackers honey maid
+oreo chocolate sandwich cookies
+oreo double stuf
+chips ahoy chocolate chip cookies
+nutter butter
+fig newtons
+nilla wafers
+pepperidge farm milano
+lorna doone
+girl scout thin mints
+famous amos chocolate chip
+little debbie oatmeal creme pie
+little debbie swiss cake rolls
+hostess donettes
+entenmanns chocolate chip cookies
+twinkies
+snickers bar
+m&ms milk chocolate
+reese peanut butter cups
+kit kat
+twix
+hersheys milk chocolate bar
+skittles
+starburst
+haribo gold bears
+swedish fish
+nerds
+jolly rancher
+peanut m&ms
+butterfinger
+milky way
+3 musketeers
+tootsie roll
+werthers original
+lindt lindor milk chocolate truffles
+ghirardelli dark chocolate squares
+ben jerry chocolate chip cookie dough
+haagen-dazs vanilla ice cream
+breyers natural vanilla
+blue bell homemade vanilla
+klondike bar
+drumstick sundae cone
+eskimo pie
+popsicle
+fudgsicle
+magnum ice cream bar
+
+# cereal and breakfast
+cheerios
+honey nut cheerios
+frosted flakes
+froot loops
+lucky charms
+cinnamon toast crunch
+cocoa puffs
+corn flakes kellogg
+rice krispies
+special k original
+raisin bran
+frosted mini-wheats
+shredded wheat
+fiber one original
+grape-nuts
+life cereal original
+honey bunches of oats
+quaker oats old fashioned
+quaker instant oatmeal maple brown sugar
+quaker instant oatmeal original
+quaker chewy granola bars
+quaker rice cakes
+cream of wheat
+eggo waffles homestyle
+kellogg nutri-grain bar strawberry
+pop-tarts
+pillsbury cinnamon rolls
+aunt jemima pancake mix
+krusteaz pancake mix
+log cabin syrup
+mrs butterworths syrup
+nutella
+jif creamy peanut butter
+skippy creamy peanut butter
+smuckers strawberry jam
+welchs grape jelly
+justins almond butter
+smart balance
+i cant believe its not butter
+land o lakes butter
+philadelphia cream cheese original
+kraft singles american
+babybel
+string cheese
+sargento shredded mozzarella
+tillamook medium cheddar
+cottage cheese daisy
+cottage cheese breakstones
+
+# bread
+wonder bread classic white
+nature's own whole wheat
+nature's own honey wheat
+dave's killer bread 21 whole grains
+sara lee whole wheat
+arnold whole wheat
+ezekiel 4:9 sprouted bread
+thomas english muffins original
+thomas bagels plain
+sara lee plain bagels
+pepperidge farm farmhouse white
+mission flour tortillas
+mission corn tortillas
+old el paso taco shells
+la tortilla factory low carb
+joseph's lavash
+pita bread
+hawaiian rolls king's
+croissant
+
+# drinks
+coca-cola classic
+coke zero sugar
+diet coke
+pepsi cola
+diet pepsi
+pepsi zero sugar
+sprite
+sprite zero
+dr pepper
+diet dr pepper
+mountain dew
+fanta orange
+7up
+root beer a&w
+canada dry ginger ale
+red bull energy drink
+red bull sugarfree
+monster energy
+monster zero ultra
+rockstar energy
+celsius
+bang energy
+gatorade thirst quencher
+gatorade zero
+powerade
+vitaminwater
+body armor
+propel
+smartwater
+dasani
+lacroix
+bubly
+perrier
+snapple
+arizona green tea
+arizona iced tea
+lipton iced tea
+pure leaf iced tea
+gold peak tea
+honest tea
+starbucks frappuccino
+starbucks doubleshot
+starbucks cold brew
+dunkin iced coffee
+international delight
+coffee mate
+nestle coffee-mate french vanilla
+silk almond milk unsweetened
+silk soy milk
+almond breeze unsweetened
+oatly oat drink
+fairlife milk
+horizon organic milk
+ocean spray cranberry juice
+ocean spray cran-grape
+tropicana orange juice
+simply orange juice
+minute maid
+welchs grape juice
+v8 vegetable juice
+capri sun
+kool-aid
+hawaiian punch
+sunny d
+ensure original
+ensure max protein
+boost glucose control
+premier protein shake
+muscle milk
+fairlife core power
+slimfast
+orgain protein
+sunkist soda
+
+# dairy and yogurt
+chobani greek yogurt plain
+chobani greek yogurt vanilla
+chobani strawberry
+fage total 0%
+fage total 2%
+oikos greek yogurt
+yoplait original strawberry
+yoplait light
+dannon light fit
+activia
+siggis skyr
+noosa
+silk almond yogurt
+kefir lifeway
+cottage cheese
+sour cream daisy
+reddi-wip
+cool whip
+ranch dressing hidden valley
+kraft ranch
+newman's own italian
+wish-bone italian
+caesar dressing
+heinz ketchup
+hellmann's mayonnaise
+miracle whip
+french's yellow mustard
+gulden's mustard
+bbq sauce sweet baby ray's
+kraft barbecue sauce
+heinz 57
+soy sauce kikkoman
+sriracha huy fong
+tabasco
+frank's redhot
+heinz chili sauce
+
+# pasta, soups, frozen, meals
+kraft macaroni cheese original
+annie's mac and cheese
+velveeta shells cheese
+barilla spaghetti
+barilla whole grain
+ronzoni
+banza chickpea pasta
+ragu old world traditional
+prego traditional
+classico
+rao's marinara
+campbells tomato soup
+campbells chicken noodle soup
+progresso chicken noodle
+progresso minestrone
+knorr rice sides
+uncle ben's ready rice
+minute rice
+rice-a-roni
+near east couscous
+stove top stuffing
+instant mashed potatoes betty crocker
+idahoan
+hamburger helper cheeseburger macaroni
+stouffer's lasagna
+stouffer's mac cheese
+marie callender's
+banquet fried chicken
+hungry-man
+amy's burrito
+hot pockets pepperoni pizza
+totino's pizza rolls
+digiorno pepperoni pizza
+red baron
+tombstone pizza
+newman's own pizza
+california pizza kitchen
+bagel bites
+tyson chicken nuggets
+tyson chicken strips
+perdue chicken breast
+foster farms corn dogs
+state fair corn dogs
+ball park hot dogs
+oscar mayer hot dogs
+oscar mayer bologna
+hormel pepperoni
+spam classic
+hillshire farm smoked sausage
+jimmy dean sausage
+johnsonville bratwurst
+beyond burger
+beyond meat
+impossible burger
+ore-ida french fries
+ore-ida tater tots
+ore-ida hash browns
+bush's baked beans
+bush's black beans
+goya black beans
+goya chickpeas
+rosarita refried beans
+old el paso refried beans
+heinz beans
+van camp's pork and beans
+chef boyardee ravioli
+dinty moore beef stew
+starkist tuna
+bumble bee tuna
+chicken of the sea
+sardines king oscar
+hormel chili
+wolf brand chili
+ortega taco seasoning
+old el paso taco seasoning
+sugar in the raw
+splenda
+stevia truvia
+equal
+domino sugar
+c&h sugar
+honey nature nate's
+agave
+maple syrup grade a
+
+# restaurant-style packaged and fast food items that carry a nutrition label
+chick-fil-a nuggets
+chick-fil-a sandwich
+mcdonald's big mac
+mcdonald's chicken mcnuggets
+mcdonald's french fries
+wendy's baconator
+burger king whopper
+taco bell crunchwrap
+subway turkey sandwich
+chipotle burrito bowl
+krispy kreme original glazed
+kraft macaroni cheese
+starbucks caramel frappuccino

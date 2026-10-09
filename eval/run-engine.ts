@@ -29,7 +29,7 @@ import { resolvePhrases } from '../server/resolve'
 import { verify } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
-import { afterMealFor } from '../server/compute'
+import { afterMealFor, computeItem, computeMeal } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
 import { withHangRetry } from '../server/agent'
 import { generateWeek, menuHidden, regenerateSlot, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
@@ -44,12 +44,12 @@ const TARGET = Number(process.env.RESOLVE_TARGET ?? 90)
 interface ResolveCase { phrase: string; expect: string[]; tags: string[] }
 interface ClarifyCase { phrase: string; band: string; why: string }
 interface AnswerCase { id: string; text: string; verdict: string | null; next?: string; why?: string; costed?: boolean }
-interface PartialCase { id: string; remainingGl?: number; mealGl?: number; unknown?: string[]; fits?: boolean | null; flow?: boolean; fitsAfterRetry?: boolean }
+interface PartialCase { id: string; remainingGl?: number; mealGl?: number; unknown?: string[]; unscored?: string[]; fits?: boolean | null; flow?: boolean; fitsAfterRetry?: boolean }
 interface GateCase { phrase: string; rule: string | null }
 interface VerifyCase { id: string; answer: string; toolResults: unknown[]; ok: boolean }
 
 const cases = JSON.parse(readFileSync(join(ROOT, 'eval', 'cases.json'), 'utf8')) as {
-  engine: { resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[]; answer: AnswerCase[]; portion: { id: string; grams: number }[]; partial: PartialCase[] }
+  engine: { resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[]; answer: AnswerCase[]; portion: { id: string; grams: number }[]; partial: PartialCase[]; branded: { id: string; foodId: string; grams: number }[] }
 }
 
 const t0 = Date.now()
@@ -137,6 +137,31 @@ const predicateOk = probe(null, 28) && probe(0, 12.7) && !probe(null, 0.5) && !p
 if (!predicateOk) catalogueMisses.push('    the rule 4 predicate disagreed with a probe')
 console.log(`\ncatalogue ${catalogueMisses.length === 0 ? 'ok' : 'WRONG'}  (${records.length} records, none carbohydrate-without-load)`)
 catalogueMisses.forEach((m) => console.log(m))
+
+// ── branded ───────────────────────────────────────────────────────────────
+// A branded item is costed for carbohydrate from its label and never for a load.
+
+const brandedMisses: string[] = []
+{
+  const all = records.filter((r) => r.kind === 'branded')
+  if (all.length < 300 || all.length > 2000) brandedMisses.push(`    ${all.length} branded records, expected 300 to 2,000`)
+  if (all.some((r) => r.gi !== null)) brandedMisses.push('    a branded record has a glycemic index')
+  if (records.some((r) => r.kind !== 'branded' && carbsWithoutLoad(r))) brandedMisses.push('    a non-branded record has carbohydrate and no GI')
+  for (const c of cases.engine.branded) {
+    const rec = records.find((r) => r.id === c.foodId)
+    if (!rec) { brandedMisses.push(`    ${c.id}: ${c.foodId} is not in the catalogue`); continue }
+    const it = computeItem({ foodId: c.foodId, grams: c.grams })
+    const k = c.grams / 100, p = rec.per100!
+    const ok = it.loadAvailable === false && it.gl === null && it.glLevel === null && it.gi === null
+      && Math.abs(it.carbs - Math.round(p.carbs * k * 10) / 10) < 0.11 && Math.abs(it.kcal - Math.round(p.kcal * k * 10) / 10) < 0.11
+    if (!ok) brandedMisses.push(`    ${c.id}: ${JSON.stringify(it)}`)
+    // ...and a meal made of it has no load of its own to total
+    const meal = computeMeal([{ foodId: c.foodId, grams: c.grams }])
+    if (meal.totals.gl !== 0) brandedMisses.push(`    ${c.id}: the meal total carries a load`)
+  }
+}
+console.log(`\nbranded   ${brandedMisses.length === 0 ? 'ok' : 'WRONG'}`)
+brandedMisses.forEach((m) => console.log(m))
 
 // ── stored ────────────────────────────────────────────────────────────────
 // What the browser hands back from localStorage is not trusted: one wrong type
@@ -243,7 +268,7 @@ for (const c of cases.engine.partial) {
     if (held !== null || retried !== c.fitsAfterRetry || !fresh) partialMisses.push(`    ${c.id} held=${held} retried=${retried} fresh=${fresh}`)
     continue
   }
-  const got = afterMealFor(room(c.remainingGl!), { gl: c.mealGl!, carbs: 10, kcal: 100 }, c.unknown).fits
+  const got = afterMealFor(room(c.remainingGl!), { gl: c.mealGl!, carbs: 10, kcal: 100 }, c.unknown, c.unscored).fits
   if (got !== c.fits) partialMisses.push(`    ${c.id.padEnd(40)} want ${c.fits} got ${got}`)
 }
 console.log(`\npartial   ${cases.engine.partial.length - partialMisses.length}/${cases.engine.partial.length}`)
@@ -286,5 +311,6 @@ if (portionMisses.length) { console.log('a default serving is wrong'); process.e
 if (partialMisses.length) { console.log('a partial meal was called a fit'); process.exit(1) }
 if (menuMisses.length) { console.log('the weekly menu broke a rule'); process.exit(1) }
 if (hangMisses.length) { console.log('the hang retry misbehaved'); process.exit(1) }
+if (brandedMisses.length) { console.log('a branded product was given a load, or the layer is the wrong size'); process.exit(1) }
 if (storedMisses.length) { console.log('stored data was trusted'); process.exit(1) }
 if (catalogueMisses.length) { console.log('a food with carbohydrate and no glycemic index is in the catalogue'); process.exit(1) }

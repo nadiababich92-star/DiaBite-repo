@@ -10,6 +10,8 @@ export interface EntryView {
   availableCarbs: number
   gi: number | null
   gl: number
+  /** False when no glycemic load exists for this entry (a branded product); `gl` is then 0 and must be shown as unavailable. */
+  loadAvailable: boolean
   breadUnits: number
 }
 
@@ -20,7 +22,7 @@ export function viewEntry(e: DiaryEntry): EntryView {
       name: s.name,
       portion: s.servings ? `${s.servings} serving${s.servings === 1 ? '' : 's'}` : `${e.grams} g`,
       nutrients: { kcal: s.kcal, carbs: s.carbs, fiber: s.fiber, protein: s.protein, fat: s.fat },
-      availableCarbs: s.availableCarbs, gi: s.gi, gl: s.gl,
+      availableCarbs: s.availableCarbs, gi: s.gi, gl: s.gl, loadAvailable: s.loadAvailable !== false,
       breadUnits: s.availableCarbs / CARBS_PER_BREAD_UNIT,
     }
   }
@@ -30,6 +32,6 @@ export function viewEntry(e: DiaryEntry): EntryView {
     portion: `${e.grams} g`,
     nutrients: nutrientsFor(food, e.grams),
     availableCarbs: availableCarbs(food, e.grams), gi: food.gi,
-    gl: glycemicLoad(food, e.grams), breadUnits: breadUnits(food, e.grams),
+    gl: glycemicLoad(food, e.grams), loadAvailable: true, breadUnits: breadUnits(food, e.grams),
   }
 }

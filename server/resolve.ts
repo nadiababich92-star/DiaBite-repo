@@ -39,6 +39,14 @@ const COVERAGE_PENALTY = 0.08
  */
 const SCHOOL_PENALTY = 0.10
 /**
+ * A branded product is for a phrase that names one. "chips" must still ask and
+ * "potato chips" must still reach USDA's survey record; "Doritos" and "KIND bar"
+ * reach the branded ones because their first word, the brand, is in the phrase.
+ */
+const BRANDED_PENALTY = 0.05
+/** First words of a branded name that are a kind of food, not a brand: "Chips Ahoy" is not "chips". */
+const GENERIC_FIRST_WORD = new Set(['chip', 'cheese', 'cereal', 'bar', 'cookie', 'candy', 'soda', 'juice', 'water', 'milk', 'tea', 'coffee', 'sauce', 'bread', 'rice', 'pasta', 'soup', 'pizza', 'pie', 'cake', 'yogurt', 'butter'])
+/**
  * And a coverage record we cannot compute a load from is weaker still.
  *
  * A record without a glycemic index can give carbohydrate and calories but no
@@ -126,7 +134,7 @@ export function withoutQuantity(phrase: string): string {
 }
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim()
-const STOP = new Set(['a', 'an', 'the', 'of', 'with', 'and', 'some', 'my', 'plate', 'bowl', 'cup', 'slice', 'slices', 'piece', 'pieces'])
+const STOP = new Set(['a', 'an', 'the', 'of', 'with', 'and', 'some', 'my', 'plate', 'bowl', 'cup', 'slice', 'slices', 'piece', 'pieces', 'pack', 'packet', 'bag', 'box', 'bottle', 'jar', 'can'])
 const tokens = (s: string) => norm(s).split(' ').filter((t) => t && !STOP.has(t))
 
 /**
@@ -234,6 +242,12 @@ export function sameFood(a: string, b: string): boolean {
 function isNamed(phrase: string, name: string): boolean {
   const a = new Set(tokens(phrase).map(stem)), b = new Set(tokens(plainName(name)).map(stem))
   return a.size > 0 && a.size === b.size && [...a].every((t) => b.has(t))
+}
+
+/** The brand word of a branded name (its first word), or '' when that word is a food, not a brand. */
+function brandWord(name: string): string {
+  const w = stem(tokens(name)[0] ?? '')
+  return GENERIC_FIRST_WORD.has(w) ? '' : w
 }
 
 function band(phrase: string, cands: ResolveCandidate[]): Confidence {
@@ -367,8 +381,9 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
           ? Math.max(ALIAS_SCORE, h.score)
           : Math.min(1, h.score + lexicalScore(phrase, rec.name) + kindPrior(phrase, rec.kind))
         const penalty = h.id.startsWith('usda:') ? (rec.gi === null ? NO_GI_PENALTY : COVERAGE_PENALTY) : 0
+        const branded = h.id.startsWith('branded:') ? ((brandWord(rec.name) && tokens(phrase).map(stem).includes(brandWord(rec.name))) ? 0 : BRANDED_PENALTY + COVERAGE_PENALTY) : 0
         const school = /\bschool\b/i.test(rec.name) && !/\bschool\b/i.test(phrase) ? SCHOOL_PENALTY : 0
-        const score = base - penalty - school
+        const score = base - penalty - school - branded
         return { ...summary(rec), score }
       })
       .sort((a, b) => b.score - a.score)

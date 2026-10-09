@@ -65,8 +65,13 @@ The shell does not have Node on its PATH by default: prefix with
    name.** It comes back `unknown` and the agent says so. Partial meals are
    costed without it and labelled partial, and may never be called "fits".
 4. **A record with no glycemic index and real carbohydrate stays out of the
-   catalogue.** The load helper answers 0 for a missing GI — true of cheese,
-   false of pizza.
+   catalogue**, with one exception that is its own kind: `kind: 'branded'`
+   (USDA Branded Foods, chosen by `scripts/build-branded.py`). Those are costed
+   for carbohydrate, fibre and calories from the label and **never for a
+   glycemic load** (`gl: null`, `loadAvailable: false`), and a meal containing
+   one is partial, so it is never "fits". The load helper answers 0 for a
+   missing GI — true of cheese, false of pizza — which is why nothing else may
+   hold carbohydrate without a GI. `npm run eval` fails if anything else does.
 5. **Curated records win a tie against the coverage layer**, in resolution
    and in swaps.
 6. **Dosing, red flags, fasting and referral are caught by rules before any

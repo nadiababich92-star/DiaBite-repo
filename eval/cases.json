@@ -654,10 +654,10 @@
       {
         "phrase": "pepperoni pizza",
         "expect": [
-          "unknown"
+          "branded:2679824"
         ],
         "tags": [
-          "unknown"
+          "branded"
         ]
       },
       {
@@ -853,10 +853,10 @@
       {
         "phrase": "oreos",
         "expect": [
-          "unknown"
+          "branded:2529927"
         ],
         "tags": [
-          "unknown"
+          "branded"
         ]
       },
       {
@@ -951,6 +951,90 @@
         ],
         "tags": [
           "everyday"
+        ]
+      },
+      {
+        "phrase": "Doritos",
+        "expect": [
+          "branded:2527791",
+          "branded:2527941"
+        ],
+        "tags": [
+          "branded"
+        ]
+      },
+      {
+        "phrase": "bag of Doritos",
+        "expect": [
+          "branded:2527791",
+          "branded:2527941"
+        ],
+        "tags": [
+          "branded"
+        ]
+      },
+      {
+        "phrase": "pack of Oreos",
+        "expect": [
+          "branded:2529927"
+        ],
+        "tags": [
+          "branded"
+        ]
+      },
+      {
+        "phrase": "Red Bull",
+        "expect": [
+          "branded:2188593"
+        ],
+        "tags": [
+          "branded"
+        ]
+      },
+      {
+        "phrase": "diet coke",
+        "expect": [
+          "branded:540654",
+          "branded:651170"
+        ],
+        "tags": [
+          "branded"
+        ]
+      },
+      {
+        "phrase": "Kraft mac and cheese",
+        "expect": [
+          "branded:1300677"
+        ],
+        "tags": [
+          "branded"
+        ]
+      },
+      {
+        "phrase": "potato chips",
+        "expect": [
+          "usda:2709421"
+        ],
+        "tags": [
+          "branded-not"
+        ]
+      },
+      {
+        "phrase": "oatmeal",
+        "expect": [
+          "seed:oats"
+        ],
+        "tags": [
+          "branded-not"
+        ]
+      },
+      {
+        "phrase": "spaghetti",
+        "expect": [
+          "seed:pasta-durum"
+        ],
+        "tags": [
+          "branded-not"
         ]
       }
     ],
@@ -1074,6 +1158,21 @@
         "phrase": "fries",
         "band": "high",
         "why": "means potato fries; yuca and sweet-potato fries name themselves"
+      },
+      {
+        "phrase": "KIND bar",
+        "band": "medium",
+        "why": "several KIND bars with different carbohydrate; asks which"
+      },
+      {
+        "phrase": "chips",
+        "band": "medium",
+        "why": "a branded cookie must not make the question about Chips Ahoy"
+      },
+      {
+        "phrase": "Red Bull",
+        "band": "high",
+        "why": "a named product"
       }
     ],
     "verify": [
@@ -1613,6 +1712,58 @@
           }
         ],
         "ok": true
+      },
+      {
+        "id": "branded_carbs_quotable",
+        "answer": "That is 25 g of carbohydrate and 163 calories.",
+        "toolResults": [
+          {
+            "items": [
+              {
+                "foodId": "branded:2529927",
+                "name": "Oreo Chocolate Sandwich Cookies",
+                "grams": 34,
+                "carbs": 25,
+                "fiber": 1.2,
+                "kcal": 163,
+                "gl": null,
+                "loadAvailable": false
+              }
+            ],
+            "totals": {
+              "gl": 0,
+              "carbs": 25,
+              "kcal": 163
+            }
+          }
+        ],
+        "ok": true
+      },
+      {
+        "id": "branded_load_invented",
+        "answer": "Its glycemic load is about 14.",
+        "toolResults": [
+          {
+            "items": [
+              {
+                "foodId": "branded:2529927",
+                "name": "Oreo Chocolate Sandwich Cookies",
+                "grams": 34,
+                "carbs": 25,
+                "fiber": 1.2,
+                "kcal": 163,
+                "gl": null,
+                "loadAvailable": false
+              }
+            ],
+            "totals": {
+              "gl": 0,
+              "carbs": 25,
+              "kcal": 163
+            }
+          }
+        ],
+        "ok": false
       }
     ],
     "gate": [
@@ -2067,6 +2218,38 @@
         "id": "session_flow_unknown_then_retry_known",
         "flow": true,
         "fitsAfterRetry": true
+      },
+      {
+        "id": "branded_alone_is_not_fits",
+        "remainingGl": 20,
+        "mealGl": 0,
+        "unknown": [],
+        "unscored": [
+          "Oreo"
+        ],
+        "fits": null
+      },
+      {
+        "id": "branded_with_scored_part_over_is_false",
+        "remainingGl": 10,
+        "mealGl": 12,
+        "unknown": [],
+        "unscored": [
+          "Oreo"
+        ],
+        "fits": false
+      }
+    ],
+    "branded": [
+      {
+        "id": "oreo_34g",
+        "foodId": "branded:2529927",
+        "grams": 34
+      },
+      {
+        "id": "cola_zero",
+        "foodId": "branded:540654",
+        "grams": 355
       }
     ]
   },
@@ -3014,6 +3197,114 @@
       },
       "judge": "mechanical",
       "tags": []
+    },
+    {
+      "id": "H15",
+      "dimension": "helpful",
+      "query": "A Red Bull",
+      "ground_truth": "Costs the label's carbohydrate and calories; says no glycemic load is available for a packaged product; does not say it fits.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "engineUnscored": true,
+        "noFitsClaim": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "branded"
+      ]
+    },
+    {
+      "id": "H16",
+      "dimension": "helpful",
+      "query": "A pack of Oreos",
+      "ground_truth": "Carbohydrate from the label, load not available, no 'fits'.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "engineUnscored": true,
+        "noFitsClaim": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "branded"
+      ]
+    },
+    {
+      "id": "H17",
+      "dimension": "helpful",
+      "query": "A bag of Doritos and a green salad",
+      "ground_truth": "Costs the salad for a load and the chips for carbohydrate only; the day cannot be judged.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "engineUnscored": true,
+        "noFitsClaim": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "branded"
+      ]
+    },
+    {
+      "id": "H18",
+      "dimension": "helpful",
+      "query": "A Kraft mac and cheese for dinner",
+      "ground_truth": "Carbohydrate from the label, load not available.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "engineUnscored": true,
+        "noFitsClaim": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "branded"
+      ]
     }
   ]
 }

@@ -12,7 +12,7 @@ USDA FoodData Central, **Branded Foods** CSV release (public domain). **Ask the 
 
 ## The list: 1,000 to 2,000 products
 
-`scripts/build-branded.ts` (new) reads the CSV and writes `data/foods-usda/branded_common.json`. The list is not "the first N rows": it is chosen.
+`scripts/build-branded.py` (new; Python, because the three tables are 0.4, 1.0 and 1.5 GB of CSV with quoted multi-line fields) reads the CSV and writes `data/foods-usda/branded_common.json`. The list is not "the first N rows": it is chosen.
 
 1. **Seeds**, in this order: (a) every phrase in `eval/questions-field.jsonl` and the `unknown` resolve cases that currently resolve to nothing; (b) `data/foods-usda/branded_wanted.txt` (new, one product or brand per line, written by the owner or by me from the common US brands; the owner may add lines at any time and rerun); (c) the two or three most-sold products of about 60 categories (cereal, chips, crackers, cookies, bars, soda, energy drinks, juice, yogurt, frozen meals, sauces, bread, fast-food chains' standard items).
 2. **Match** each seed to USDA rows by brand and name tokens; take the single best row per seed and, for brand lines, the best row per product type up to 20 per brand. Rows with a missing `serving_size`, a missing carbohydrate or a carbohydrate above 100 g per 100 g are dropped and listed in `data/foods-usda/branded_dropped.txt` with the reason.
@@ -56,3 +56,11 @@ USDA FoodData Central, **Branded Foods** CSV release (public domain). **Ask the 
 - `npm run eval` `catalogue`: every record with carbohydrate and no GI has `kind: 'branded'`; there are at least 800 and at most 2,000 branded records; no branded record has a `gi`.
 - `resolve` cases (added in the same change): "KIND bar" → a `branded:` record; "Oreos" → a branded Oreo; "Doritos" → branded; "Red Bull" → branded; "Chick-fil-A nuggets" (if in the list) → branded. Negative cases that must **not** reach a branded record: "oatmeal", "chips" (asks), "potato chips", "bread", "chicken", "spaghetti", "pizza".
 - The unknown rate on the field set is measured again and reported next to 13%.
+
+## As built, 9 October 2026
+
+- Source: `FoodData_Central_branded_food_csv_2026-04-30.zip` (449 MB), downloaded with the owner's approval into the scratchpad, never into the repository.
+- `data/foods-usda/branded_wanted.txt`: 367 product lines. Up to three rows per line, each under its own name; 321 name duplicates, 105 rows without carbohydrate or energy and 16 implausible label values were dropped (`branded_dropped.txt`).
+- **737 records**, not 1,000 to 2,000: the list is what was named, and it grows by adding lines. The engine eval asserts 300 to 2,000.
+- A serving in ml is taken as grams **for a drink only** (the record's `source` says so); the first spec said such rows would be dropped.
+- Ranking: a branded record loses 0.13 (the coverage penalty plus 0.05) unless the phrase contains its brand word, and a brand word that is really a kind of food ("chips", "cereal", "bar") does not count as one.

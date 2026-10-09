@@ -141,8 +141,11 @@ const num = (v: number | string | null): number | null => (v === null ? null : N
  * missing GI — true of cheese, false of baking powder — and the table path
  * ("food can be added without a deploy") is the one that must not skip it.
  */
-export function carbsWithoutLoad(r: { gi: number | null; per100?: Nutrients }): boolean {
+export function carbsWithoutLoad(r: { gi: number | null; per100?: Nutrients; kind?: string }): boolean {
   if (r.gi !== null && r.gi > 0) return false
+  // The one exception, by design: a branded product is *labelled* as carbohydrate
+  // without a load, costed for carbohydrate only, and never for a glycemic load.
+  if (r.kind === 'branded') return false
   return !!r.per100 && Math.max(0, r.per100.carbs - (r.per100.fiber ?? 0)) >= 5
 }
 
@@ -272,6 +275,33 @@ function usdaRecords(): FoodRecord[] {
   return out
 }
 
+/**
+ * Packaged products from USDA's Branded Foods, chosen by scripts/build-branded.py.
+ *
+ * Label data only: carbohydrate, fibre, energy, protein and fat per 100 g and one
+ * serving. No glycemic index exists for them and none is invented, which is why
+ * they are their own kind: the only records allowed to hold carbohydrate without
+ * a GI, and costed for carbohydrate but never for a load.
+ */
+interface BrandedRow {
+  id: string; name: string; brand: string; category: string
+  per100: Nutrients; serving: { grams: number; label: string }
+  source: string; published?: string
+}
+
+function brandedRecords(): FoodRecord[] {
+  if (process.env.BRANDED_FOODS === 'off') return []
+  const path = join(here, '..', 'data', 'foods-usda', 'branded_common.json')
+  if (!existsSync(path)) return []
+  const rows = JSON.parse(readFileSync(path, 'utf8')) as BrandedRow[]
+  return rows.map((r) => ({
+    id: r.id, kind: 'branded' as const, name: r.name, gi: null, giLevel: giLevel(null),
+    category: r.category as FoodRecord['category'], unit: 'g' as const, defaultPortion: r.serving.grams,
+    searchText: `${r.name}. ${r.brand}. ${r.category}.`,
+    per100: r.per100, source: r.source,
+  }))
+}
+
 let cache: { records: FoodRecord[]; byId: Map<string, FoodRecord> } | null = null
 
 export function loadFoods() {
@@ -338,6 +368,7 @@ export function loadFoods() {
   // as "we do not have this" are now found, with the right dish. Set
   // USDA_FOODS=off to measure without it.
   if (process.env.USDA_FOODS !== 'off') records.push(...usdaRecords())
+  records.push(...brandedRecords())
 
   cache = { records, byId: new Map(records.map((x) => [x.id, x])) }
   return cache
@@ -369,5 +400,5 @@ export function asFood(rec: FoodRecord): Food {
 }
 
 export function kindOf(id: string): FoodKind {
-  return id.startsWith('rec:') ? 'recipe' : 'ingredient'
+  return id.startsWith('rec:') ? 'recipe' : id.startsWith('branded:') ? 'branded' : 'ingredient'
 }

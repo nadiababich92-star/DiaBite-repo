@@ -8,7 +8,7 @@
 import type { Nutrients } from '../src/types'
 import type { Level } from '../src/lib/glycemic'
 
-export type FoodKind = 'ingredient' | 'recipe'
+export type FoodKind = 'ingredient' | 'recipe' | 'branded'
 
 export interface FoodSummary {
   id: string
@@ -84,8 +84,14 @@ export interface MealItemResult extends Nutrients {
   servings?: number
   availableCarbs: number
   gi: number | null
-  gl: number
-  glLevel: Level
+  /**
+   * Null for a branded product: no glycemic index is published for packaged food,
+   * so no load is computed and none is estimated. `loadAvailable` says so in words
+   * a program can read; a 0 here would be a claim.
+   */
+  gl: number | null
+  glLevel: Level | null
+  loadAvailable: boolean
 }
 
 export interface MealTotals extends Nutrients {
@@ -130,7 +136,7 @@ export interface ComputeMealResponse {
      */
     fits: boolean | null
     /** Foods the user named that the database does not have; absent on a whole meal. */
-    partial?: { unknownFoods: string[] }
+    partial?: { unknownFoods: string[]; /** Branded items: carbohydrate counted, load not available. */ unscored?: string[] }
   }
   /** Swaps for the heaviest item, when the meal needed them. */
   alternatives?: Alternative[]

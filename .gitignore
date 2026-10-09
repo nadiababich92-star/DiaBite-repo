@@ -20,3 +20,6 @@ tsconfig.tsbuildinfo
 eval/agent-runs.jsonl
 eval/foundry-dataset.jsonl
 eval/foundry-dataset-tools.jsonl
+
+# Recordings stay on the owner's machine; the repository holds the script (docs/PITCH_3MIN.md), not the video.
+docs/*.mp4

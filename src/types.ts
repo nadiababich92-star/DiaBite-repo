@@ -81,6 +81,8 @@ export interface DiaryEntry {
     availableCarbs: number
     gi: number | null
     gl: number
+    /** False for a branded product: `gl` is 0 only because no load exists, and the diary says so. */
+    loadAvailable?: boolean
     servings?: number
   }
 }

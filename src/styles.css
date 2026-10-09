@@ -239,13 +239,13 @@ tr:last-child td { border-bottom: none; }
 .answer.tone-good { border-left-color: var(--low); }
 .answer.tone-change { border-left-color: var(--medium); }
 .answer.tone-bad, .answer.tone-blocked, .card.tone-blocked { border-left: 3px solid var(--high); }
-.answer.tone-ask { border-left-color: var(--accent); }
+.answer.tone-ask, .answer.tone-carbs, .answer.tone-partial { border-left-color: var(--accent); }
 .answer.tone-advice { border-left-color: var(--text-faint); }
 .eyebrow-line { display: flex; align-items: center; gap: 7px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; margin-bottom: 10px; color: var(--text-faint); }
 .tone-good .eyebrow-line { color: var(--low); }
 .tone-change .eyebrow-line { color: var(--medium); }
 .tone-bad .eyebrow-line, .tone-blocked .eyebrow-line { color: var(--high); }
-.tone-ask .eyebrow-line { color: var(--accent); }
+.tone-ask .eyebrow-line, .tone-carbs .eyebrow-line, .tone-partial .eyebrow-line { color: var(--accent); }
 .tone-advice .eyebrow-line { color: var(--text-faint); }
 
 /* The status mark: a filled disc carrying the same colour as its label, so the
@@ -257,7 +257,7 @@ tr:last-child td { border-bottom: none; }
 .dot-good { background: var(--low); }
 .dot-change { background: var(--medium); }
 .dot-bad, .dot-blocked { background: var(--high); }
-.dot-ask { background: var(--accent); }
+.dot-ask, .dot-carbs, .dot-partial { background: var(--accent); }
 .dot-advice { background: var(--text-faint); }
 .answer-text p { margin: 0 0 10px; font-size: 15.5px; line-height: 1.55; max-width: 60ch; }
 .answer-text strong { font-weight: 600; }

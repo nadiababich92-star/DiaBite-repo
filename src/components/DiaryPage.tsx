@@ -186,7 +186,7 @@ export default function DiaryPage({ targets, diary, onChange }: Props) {
                         </td>
                         <td className="num">{v.portion}</td>
                         <td className="num">{v.availableCarbs.toFixed(1)} g</td>
-                        <td className="num">{v.gl.toFixed(1)}</td>
+                        <td className="num">{v.loadAvailable ? v.gl.toFixed(1) : '—'}</td>
                         <td className="num">{v.breadUnits.toFixed(1)}</td>
                         <td className="num">
                           <button
