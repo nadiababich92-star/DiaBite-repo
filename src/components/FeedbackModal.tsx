@@ -31,6 +31,32 @@ export default function FeedbackModal({ onClose }: Props) {
 
   useEffect(() => { firstField.current?.focus() }, [])
 
+  // A dialog is the only thing on the page while it is open: the rest is inert
+  // (no Tab, no screen-reader virtual cursor), the page behind does not scroll,
+  // Tab wraps inside, and focus goes back to what opened it.
+  useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null
+    const behind = [...document.querySelectorAll<HTMLElement>('.app > :not(.modal-backdrop)')]
+    behind.forEach((el) => el.setAttribute('inert', ''))
+    document.body.classList.add('modal-open')
+    const trap = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab' || !dialog.current) return
+      const items = [...dialog.current.querySelectorAll<HTMLElement>('button, input, textarea, select, a[href], [tabindex]:not([tabindex="-1"])')]
+        .filter((el) => !(el as HTMLButtonElement).disabled)
+      if (items.length === 0) return
+      const first = items[0], last = items[items.length - 1]
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+    }
+    document.addEventListener('keydown', trap)
+    return () => {
+      document.removeEventListener('keydown', trap)
+      behind.forEach((el) => el.removeAttribute('inert'))
+      document.body.classList.remove('modal-open')
+      opener?.focus?.()
+    }
+  }, [])
+
   // Esc closes, except mid-submit so an in-flight send is never orphaned.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !sending) onClose() }

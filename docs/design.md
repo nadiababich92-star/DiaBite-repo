@@ -58,7 +58,7 @@ There is a full dark set; both are defined together and must stay in step.
 | Token | Light | Dark | Meaning |
 |---|---|---|---|
 | `--low` / `--low-bg` | `#2f7d57` / `#e3f0e8` | `#63b98c` / `#15291f` | Low load, fits |
-| `--medium` / `--medium-bg` | `#91650f` / `#f6edda` | `#c99a3c` / `#2b2313` | Medium, fits with a change |
+| `--medium` / `--medium-bg` | `#8a5f0d` / `#f6edda` | `#c99a3c` / `#2b2313` | Medium, fits with a change |
 | `--high` / `--high-bg` | `#a9443b` / `#f7e5e2` | `#d97b70` / `#2c1c1a` | High, over budget, refused |
 
 ### Colour rules

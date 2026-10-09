@@ -68,6 +68,8 @@ export default function App() {
             <button
               key={t.id}
               role="tab"
+              id={`tab-${t.id}`}
+              aria-controls={`panel-${t.id}`}
               aria-selected={tab === t.id}
               onClick={() => setTab(t.id)}
             >
@@ -78,6 +80,7 @@ export default function App() {
         <button className="tab-action" onClick={() => setFeedbackOpen(true)}>Feedback</button>
       </nav>
 
+      <main role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
       {tab === 'ask' && (
         <AskPage profile={profile} targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} />
       )}
@@ -93,6 +96,7 @@ export default function App() {
           onRedoOnboarding={() => setOnboarding(true)}
         />
       )}
+      </main>
 
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
     </div>

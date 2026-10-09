@@ -9,7 +9,7 @@
   --accent: #1c6b49;
   --accent-soft: #e2efe8;
   --low: #2f7d57;
-  --medium: #91650f;
+  --medium: #8a5f0d;
   --high: #a9443b;
   --low-bg: #e3f0e8;
   --medium-bg: #f6edda;
@@ -240,19 +240,19 @@ tr:last-child td { border-bottom: none; }
 .answer.tone-change { border-left-color: var(--medium); }
 .answer.tone-bad, .answer.tone-blocked, .card.tone-blocked { border-left: 3px solid var(--high); }
 .answer.tone-ask { border-left-color: var(--accent); }
-.answer.tone-advice { border-left-color: var(--ink-soft, #8a8f87); }
+.answer.tone-advice { border-left-color: var(--text-faint); }
 .eyebrow-line { display: flex; align-items: center; gap: 7px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; margin-bottom: 10px; color: var(--text-faint); }
 .tone-good .eyebrow-line { color: var(--low); }
 .tone-change .eyebrow-line { color: var(--medium); }
 .tone-bad .eyebrow-line, .tone-blocked .eyebrow-line { color: var(--high); }
 .tone-ask .eyebrow-line { color: var(--accent); }
-.tone-advice .eyebrow-line { color: var(--ink-soft, #8a8f87); }
+.tone-advice .eyebrow-line { color: var(--text-faint); }
 
 /* The status mark: a filled disc carrying the same colour as its label, so the
  * verdict is legible before a word of it is read. */
 .status-dot {
   flex: none; display: inline-flex; align-items: center; justify-content: center;
-  width: 20px; height: 20px; border-radius: 50%; color: #fff;
+  width: 20px; height: 20px; border-radius: 50%; color: var(--bg); /* the page colour: light on the dark discs of light mode, dark on the light discs of dark mode */
 }
 .dot-good { background: var(--low); }
 .dot-change { background: var(--medium); }
@@ -463,3 +463,15 @@ tr:last-child td { border-bottom: none; }
   input, select, textarea,
   .ask-form input, .feedback-form textarea { font-size: 16px; }
 }
+
+/* A visible focus ring on every control, as docs/design.md promises; inputs and
+   the rating dots already have theirs. */
+button:focus-visible, a:focus-visible, [role="tab"]:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Touch targets of at least 44px where a finger is the pointer. */
+@media (hover: none) and (pointer: coarse) {
+  button.primary, button.ghost, button.link, nav.tabs .tab-action, nav.tabs .tab-row button { min-height: 44px; }
+  button.link { min-width: 44px; }
+}
+
+body.modal-open { overflow: hidden; }
