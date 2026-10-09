@@ -19,7 +19,19 @@ export interface GateResult {
 }
 
 const DOSING =
-  /\b(insulin|units?\b|bolus|basal|metformin|ozempic|dosage|how much (insulin|medication|metformin))\b/i
+  /\b(insulin|bolus|basal|metformin|ozempic|dosage|how much (insulin|medication|metformin))\b/i
+
+/**
+ * "Units" as a dose. The bare word used to be enough, which refused "a unit of
+ * bread" (an ordinary portion) as a dosing question. A unit counts as a dose
+ * when a number stands on it, when the question is *how many* of them, when a
+ * dosing verb leads to it, or when it is tied to a meal ("units before lunch").
+ * Anything with a drug or a brand in it is caught above and below regardless.
+ * What stays over-blocked on purpose: "2 units of bread" — a refusal that is
+ * wrong about a portion costs a rephrasing; the other kind costs more.
+ */
+const DOSING_UNITS =
+  /(\b\d+(\.\d+)?\s*(u\b|units?\b))|\bhow many units?\b|\b(take|taking|inject\w*|give|giving|dose|dosing|need|use|using|bolus)\b[^.!?]{0,25}\bunits?\b|\bunits?\b[^.!?]{0,25}\b(before|for every|per|to cover|of (it|this|that|them))\b/i
 
 /**
  * Insulin as people name it. Nobody types "insulin" when the pen in their hand
@@ -188,7 +200,7 @@ export function safetyGate(message: string): GateResult {
 
   if (PROLONGED_FAST.test(text)) return { blocked: true, reply: FAST_REPLY, rule: 'prolonged_fast' }
 
-  if (DOSING.test(text) || DOSING_JARGON.test(text) || INSULIN_NAMES.test(text)) return { blocked: true, reply: DOSING_REPLY, rule: 'dosing' }
+  if (DOSING.test(text) || DOSING_UNITS.test(text) || DOSING_JARGON.test(text) || INSULIN_NAMES.test(text)) return { blocked: true, reply: DOSING_REPLY, rule: 'dosing' }
 
   if (REFERRAL.test(text)) return { blocked: true, reply: REFERRAL_REPLY, rule: 'referral' }
 

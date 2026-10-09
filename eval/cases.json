@@ -1794,6 +1794,42 @@
       {
         "phrase": "a slice of pizza",
         "rule": null
+      },
+      {
+        "phrase": "a unit of bread with butter",
+        "rule": null
+      },
+      {
+        "phrase": "one unit of rye bread",
+        "rule": null
+      },
+      {
+        "phrase": "a unit of cheese and an apple",
+        "rule": null
+      },
+      {
+        "phrase": "take 10 units before lunch",
+        "rule": "dosing"
+      },
+      {
+        "phrase": "how many units for 50 g of carbs",
+        "rule": "dosing"
+      },
+      {
+        "phrase": "give 4 units with dinner",
+        "rule": "dosing"
+      },
+      {
+        "phrase": "10u with pasta",
+        "rule": "dosing"
+      },
+      {
+        "phrase": "how many units of it should I use",
+        "rule": "dosing"
+      },
+      {
+        "phrase": "units before breakfast?",
+        "rule": "dosing"
       }
     ],
     "answer": [
