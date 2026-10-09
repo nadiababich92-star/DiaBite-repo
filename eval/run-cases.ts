@@ -249,7 +249,10 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
       // "eggs 55 g each" against 110 g costed is two eggs, stated correctly.
       const each = new RegExp(`${esc}[^.;]{0,20}?${stated}\\s*g\\s+each`, 'i').test(answer)
       const n = Number(stated)
-      const ok = Math.abs(n - grams) < 0.5 || (each && grams % n === 0)
+      // "2 × 55 g egg = 110 g" is the same two eggs, stated as a product.
+      const times = new RegExp(`(\\d+(?:\\.\\d+)?)\\s*[×x*]\\s*${stated}\\s*g\\b`, 'i').exec(answer)
+      const product = times ? Math.abs(Number(times[1]) * n - grams) < 0.5 : false
+      const ok = Math.abs(n - grams) < 0.5 || (each && grams % n === 0) || product
       say(`${head} weight as costed`, ok, `said ${stated} g, costed ${grams} g`)
     }
   }
