@@ -40,26 +40,27 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
             <select value={profile.sex} onChange={(e) => set('sex', e.target.value as Sex)}>
               <option value="female">Female</option>
               <option value="male">Male</option>
+              <option value="unspecified">Prefer not to say</option>
             </select>
           </label>
           <label className="field">
             <span>Age, years</span>
             <input
-              type="number" min={14} max={100} value={profile.age}
+              type="number" inputMode="numeric" min={14} max={100} value={profile.age}
               onChange={(e) => set('age', Number(e.target.value))}
             />
           </label>
           <label className="field">
             <span>Height, cm</span>
             <input
-              type="number" min={120} max={220} value={profile.heightCm}
+              type="number" inputMode="decimal" min={120} max={220} value={profile.heightCm}
               onChange={(e) => set('heightCm', Number(e.target.value))}
             />
           </label>
           <label className="field">
             <span>Weight, kg</span>
             <input
-              type="number" min={35} max={250} step={0.5} value={profile.weightKg}
+              type="number" inputMode="decimal" min={35} max={250} step={0.5} value={profile.weightKg}
               onChange={(e) => set('weightKg', Number(e.target.value))}
             />
           </label>

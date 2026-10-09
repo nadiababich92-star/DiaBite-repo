@@ -165,7 +165,21 @@ export function carbApproachBlocked(p: Profile, a: CarbApproach): string | null 
 
 const BMI = (p: Profile) => p.weightKg / (p.heightCm / 100) ** 2
 
-export function calculateTargets(p: Profile): Targets {
+/**
+ * A number field cleared mid-edit reads as 0, and 0 kg is a BMI of 0 and a
+ * protein target of "NaN g/kg". The formula always sees a plausible body: values
+ * outside these bounds are held at the bound, and the screen keeps whatever the
+ * person is typing.
+ */
+const clampTo = (v: number, lo: number, hi: number, fallback: number) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : fallback)
+
+export function calculateTargets(raw: Profile): Targets {
+  const p: Profile = {
+    ...raw,
+    age: clampTo(raw.age, 14, 110, DEFAULT_PROFILE.age),
+    heightCm: clampTo(raw.heightCm, 100, 230, DEFAULT_PROFILE.heightCm),
+    weightKg: clampTo(raw.weightKg, 30, 300, DEFAULT_PROFILE.weightKg),
+  }
   const constraints: Constraint[] = []
   const add = (id: string, field: Constraint['field'], reason: string) =>
     constraints.push({ id, field, reason })

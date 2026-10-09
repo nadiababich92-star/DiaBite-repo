@@ -225,7 +225,7 @@ export default function Onboarding({ initial, onDone, onCancel }: Props) {
                   ))}
                 </div>
 
-                {p.sex === 'female' && p.age <= 50 && (
+                {p.sex !== 'male' && p.age <= 50 && (
                   <label className="check-row onb-flag">
                     <input type="checkbox" checked={p.pregnantOrBreastfeeding}
                       aria-label="Pregnant, planning a pregnancy, or breastfeeding"
