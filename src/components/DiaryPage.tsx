@@ -191,7 +191,7 @@ export default function DiaryPage({ targets, diary, onChange }: Props) {
                         <td className="num">
                           <button
                             className="link"
-                            aria-label="Delete entry"
+                            aria-label={`Delete ${v.name ?? "entry"}, ${v.portion}`}
                             onClick={() => onChange(diary.filter((x) => x.id !== e.id))}
                           >
                             ✕

@@ -115,7 +115,8 @@ export interface ComputeMealResponse {
   dayState?: DayStateResponse | DayStateUnknown
   /**
    * What would be left of the day if this meal were eaten, and whether it
-   * fits. The verdict is the first thing the answer has to state, so the
+   * fits. "Fits" is the glycemic-load comparison alone: the carbohydrate and
+   * calorie figures beside it are reported, and do not change the verdict. The verdict is the first thing the answer has to state, so the
    * engine states it rather than letting the model subtract — and rather than
    * letting it spend a round trip looking for a number nobody returned.
    */

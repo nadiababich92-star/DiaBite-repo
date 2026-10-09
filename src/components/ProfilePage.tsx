@@ -209,7 +209,7 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
                 {getFood(id).name}
                 <button
                   className="link"
-                  aria-label="Remove from exclusions"
+                  aria-label={`Remove ${getFood(id).name} from exclusions`}
                   onClick={() =>
                     set('excludedFoodIds', profile.excludedFoodIds.filter((x) => x !== id))
                   }

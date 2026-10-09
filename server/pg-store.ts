@@ -111,7 +111,10 @@ export class PgVectorStore implements VectorStore {
     // comes back short.
     const PAGE = 1000
     const all: unknown[] = []
+    // A proxy that ignores Range would hand back the same full page forever; the cap
+    // (100,000 rows) is far beyond any catalogue and turns that into an error.
     for (let from = 0; ; from += PAGE) {
+      if (from >= 100 * PAGE) throw new Error('catalogue: more than 100 pages, is Range being ignored?')
       const res = await fetch(`${this.cfg.url}/rest/v1/foods?select=${cols}&order=id`, {
         headers: {
           apikey: this.cfg.key,

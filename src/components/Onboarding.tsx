@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ACTIVITY_LABELS, ALLERGEN_LABELS, CARB_APPROACH_LABELS, COMORBIDITY_LABELS, CONDITION_LABELS,
   EXIT_COPY, GOAL_LABELS, INSULIN_LABELS, KIDNEY_LABELS, MED_LABELS,
@@ -44,8 +44,12 @@ export default function Onboarding({ initial, onDone, onCancel }: Props) {
   const targets = useMemo(() => calculateTargets(p), [p])
   const blocked = carbApproachBlocked(p, p.carbApproach)
 
-  // A blocked approach must not silently survive to the targets screen.
-  if (blocked && step >= 4) set('carbApproach', 'moderate')
+  // A blocked approach must not silently survive to the targets screen. An
+  // effect, not a set-state in the render body: that only stopped looping
+  // because exactly one approach was ever blocked.
+  useEffect(() => {
+    if (blocked && step >= 4) setP((prev) => ({ ...prev, carbApproach: 'moderate' }))
+  }, [blocked, step])
 
   /**
    * Leaving an exit screen has to clear the answer that caused it — otherwise
