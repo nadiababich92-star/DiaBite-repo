@@ -24,6 +24,9 @@ export default function FeedbackModal({ onClose }: Props) {
   const [errors, setErrors] = useState<FeedbackErrors>({})
   const [status, setStatus] = useState<Status>('editing')
   const [failure, setFailure] = useState('')
+  // What had focus when the dialog opened, read during the first render: by the time
+  // effects run, the dialog has already taken focus for itself.
+  const [opener] = useState(() => document.activeElement as HTMLElement | null)
   const dialog = useRef<HTMLDivElement>(null)
   const firstField = useRef<HTMLButtonElement>(null)
 
@@ -35,7 +38,6 @@ export default function FeedbackModal({ onClose }: Props) {
   // (no Tab, no screen-reader virtual cursor), the page behind does not scroll,
   // Tab wraps inside, and focus goes back to what opened it.
   useEffect(() => {
-    const opener = document.activeElement as HTMLElement | null
     const behind = [...document.querySelectorAll<HTMLElement>('.app > :not(.modal-backdrop)')]
     behind.forEach((el) => el.setAttribute('inert', ''))
     document.body.classList.add('modal-open')
@@ -55,7 +57,7 @@ export default function FeedbackModal({ onClose }: Props) {
       document.body.classList.remove('modal-open')
       opener?.focus?.()
     }
-  }, [])
+  }, [opener])
 
   // Esc closes, except mid-submit so an in-flight send is never orphaned.
   useEffect(() => {
