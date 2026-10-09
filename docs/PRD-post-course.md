@@ -29,7 +29,7 @@ Measured on 8 October 2026 against the running service.
 | Product | Onboarding with targets and their derivation, ask screen, diary, weekly menu (built, never shown to a user), feedback form, phone layout |
 | Agents | Router (`gpt-5.4-nano`), meal specialist (`gpt-5.4-mini`, with tools), advisor (`gpt-5.4-mini`, no tools, no numbers, memory and knowledge base), all in Azure AI Foundry |
 | Catalogue | 6,054 foods: 351 ingredients, ~85 everyday foods, 1,000 recipes, 4,618 USDA survey foods |
-| Quality | Food resolution 95/95, clarification 19/19, safety phrasings 63/63, answer parsing 9/9, verifier 12/12; live agent 180/183 checks on 8 October (191/191 on 5 October); answer time median 4.7 s, p90 8.2 s |
+| Quality | Measured 9 October 2026. Engine: food resolution 101/101, clarification 24/24, safety phrasings 72/72, portions 4/4, partial meals 6/6, answer parsing 17/17, verifier 16/16, plus checks that no costable record has carbohydrate without a GI, that stored data is not trusted blindly and that a hung call is retried once. Live agent: 90 of 90 answered, 198 of 199 mechanical checks (the one miss was a check reading prose, since fixed). Foundry model-graded: task adherence 79/90 (mean 0.91), intent resolution 74/74 (4.93), tool-call accuracy 62/63 (4.95), groundedness 61/63 (4.84). Answer time median 9.6 s and p90 32.7 s on this run, from a laptop on a poor connection; the 8 October figure of 4.7 s / 8.2 s came from a good one, so the target (p90 under 10 s) is **not** shown to be met or missed by this run |
 | Safety | Rules before any model (dosing, red flags, fasting, referral); public route limited per address, per conversation and per day; browser headers; secrets held as secrets |
 | Hosting | One container on Azure Container Apps serving app and engine at a permanent address; image built by GitHub Actions; deploy is a human step on purpose |
 | Cost, measured | About €0.0026 per question in model charges; about €26 a month fixed (always-on replica and registry, at list price) |
@@ -89,16 +89,18 @@ when, depends on, size, and what it costs to run or buy.
 
 | Item | Detail | Size |
 |---|---|---|
-| Potato family | The curated "Potato, boiled" record carries the alias "baked potato", so a baked potato is costed as boiled. Bare "potato" silently means boiled although preparations differ from GI 56 to 94. Add "potato" to the category words so the agent asks; remove the alias; add cases | 1 d |
-| Chips and school records | "french fries" resolves to a school-lunch record on a 60 g portion; USDA fries all share one estimated GI. Down-rank school variants; prefer the generic record | 0.5 d |
+| Potato family | The curated "Potato, boiled" record carries the alias "baked potato", so a baked potato is costed as boiled. Bare "potato" silently means boiled although preparations differ from GI 56 to 94. Add "potato" to the category words so the agent asks; remove the alias; add cases | 1 d · **Status: done 9 Oct** |
+| Chips and school records | "french fries" resolves to a school-lunch record on a 60 g portion; USDA fries all share one estimated GI. Down-rank school variants; prefer the generic record | 0.5 d · **Status: done 9 Oct** |
 | Odd clarifying questions | "pizza" and "avocado toast" ask about dessert pizza or a topping. Follows from the rule that keeps no-GI records out (rule 4 in `CLAUDE.md`); resolved properly by workstream 2 | in WS2 |
-| `unit` / `units` over-block | "a unit of bread" is refused as a dosing question. Narrow the pattern with the cases kept | 0.5 d |
-| Driver naming | The prompt says to name the item with the largest load, not the dish; the model sometimes names the dish. Three live checks failed on this on 8 October. Tighten the prompt, rerun the agent evals | 0.5 d |
-| Re-measure | Rerun the Foundry model-graded evaluation (last run: September, before three agents' worth of changes) and refresh every quoted figure | 0.5 d |
+| `unit` / `units` over-block | "a unit of bread" is refused as a dosing question. Narrow the pattern with the cases kept | 0.5 d · **Status: done 9 Oct** |
+| Driver naming | The prompt says to name the item with the largest load, not the dish; the model sometimes names the dish. Three live checks failed on this on 8 October. Tighten the prompt, rerun the agent evals | 0.5 d · **Status: no failure in the 9 Oct run (90 cases); prompt left as is** |
+| Re-measure | Rerun the Foundry model-graded evaluation (last run: September, before three agents' worth of changes) and refresh every quoted figure | 0.5 d · **Status: done 9 Oct; figures above** |
 | Document consistency | The PRD text still describes earlier states in places; one pass | 0.5 d |
 
 *Done when:* the potato, fries and unit cases are tests, the live agent run is
-clean, and the quoted numbers carry a date.
+clean, and the quoted numbers carry a date. **9 October: met**, except "Odd clarifying
+questions" (workstream 2) and "Document consistency" (a pass over the PRD text, not
+yet done). Also fixed the same day, from a code review: see `docs/security/security-plan.md`.
 
 ### WS1 — Validation with real people and clinicians  ·  10–14 days of work, 6–10 weeks elapsed
 
@@ -139,7 +141,7 @@ the first thing a user will hit.
 | USDA Branded Foods ingestion | The dataset is large; it changes index size, search latency and what the vector store costs | 4–6 d |
 | Verify ingredient GI against sources | 351 ingredients, each against its cited table. Needs a registered dietitian or a researcher; the PRD calls this out as required before external use | 5–8 d, plus the person |
 | Restaurant chains | Common US chains; needs a source (menu nutrition pages or a dataset) and a licence check | 3–5 d |
-| Re-measure | Unknown rate on the same field set, reported beside the old one | 0.5 d |
+| Re-measure | Unknown rate on the same field set, reported beside the old one | 0.5 d · **Status: done 9 Oct; figures above** |
 
 *Done when:* the unknown rate is measured again and reported next to 13%,
 every curated GI carries a verified source and date, and a branded product
