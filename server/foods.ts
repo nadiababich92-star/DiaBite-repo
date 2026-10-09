@@ -217,6 +217,15 @@ function householdPortion(rows: { label: string; grams: number }[] | undefined):
 const readableName = (name: string) =>
   name.replace(/,\s*(NFS|NS as to [^,]+)/gi, '').replace(/\s{2,}/g, ' ').replace(/,\s*$/, '').trim()
 
+/**
+ * Everyday names for USDA records, where the survey table is the only record we
+ * hold and the name people use is not the one it carries. Without these,
+ * "fries" asked whether someone meant yuca or sweet-potato fries.
+ */
+const USDA_ALIASES: Record<string, string[]> = {
+  'usda:2709458': ['french fries', 'french fry', 'fries'], // Potato, french fries, from fresh, fried
+}
+
 function usdaRecords(): FoodRecord[] {
   const path = join(here, '..', 'data', 'foods-usda', 'foods_usda.json')
   if (!existsSync(path)) return []
@@ -240,6 +249,7 @@ function usdaRecords(): FoodRecord[] {
     const name = readableName(r.name)
     out.push({
       id: `usda:${r.fdc_id}`, kind: 'ingredient', name, gi, giLevel: giLevel(gi),
+      aliases: USDA_ALIASES[`usda:${r.fdc_id}`],
       category: 'grains', unit: 'g', defaultPortion: householdPortion(r.portions),
       searchText: `${name}. ${r.name}. ${r.category}.`,
       per100: { kcal: r.per100.kcal, protein: r.per100.protein, fat: r.per100.fat, carbs: r.per100.carbs, fiber: r.per100.fiber },

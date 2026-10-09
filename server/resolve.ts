@@ -31,6 +31,14 @@ const KIND_PRIOR = 0.04
  */
 const COVERAGE_PENALTY = 0.08
 /**
+ * A school-lunch record is a school-lunch portion of a school-lunch recipe.
+ *
+ * "french fries" went to *Potato, french fries, school* on a 60 g portion,
+ * because the vectors cannot tell a school serving from the food. Unless the
+ * phrase says school, the generic record is the better answer.
+ */
+const SCHOOL_PENALTY = 0.10
+/**
  * And a coverage record we cannot compute a load from is weaker still.
  *
  * A record without a glycemic index can give carbohydrate and calories but no
@@ -359,7 +367,8 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
           ? Math.max(ALIAS_SCORE, h.score)
           : Math.min(1, h.score + lexicalScore(phrase, rec.name) + kindPrior(phrase, rec.kind))
         const penalty = h.id.startsWith('usda:') ? (rec.gi === null ? NO_GI_PENALTY : COVERAGE_PENALTY) : 0
-        const score = base - penalty
+        const school = /\bschool\b/i.test(rec.name) && !/\bschool\b/i.test(phrase) ? SCHOOL_PENALTY : 0
+        const score = base - penalty - school
         return { ...summary(rec), score }
       })
       .sort((a, b) => b.score - a.score)

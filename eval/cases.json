@@ -916,6 +916,42 @@
         "tags": [
           "everyday"
         ]
+      },
+      {
+        "phrase": "french fries",
+        "expect": [
+          "usda:2709458"
+        ],
+        "tags": [
+          "everyday"
+        ]
+      },
+      {
+        "phrase": "fries",
+        "expect": [
+          "usda:2709458"
+        ],
+        "tags": [
+          "everyday"
+        ]
+      },
+      {
+        "phrase": "french fry",
+        "expect": [
+          "usda:2709458"
+        ],
+        "tags": [
+          "everyday"
+        ]
+      },
+      {
+        "phrase": "sweet potato fries",
+        "expect": [
+          "usda:2709709"
+        ],
+        "tags": [
+          "everyday"
+        ]
       }
     ],
     "clarify": [
@@ -1033,6 +1069,11 @@
         "phrase": "boiled potato",
         "band": "high",
         "why": "a preparation was named"
+      },
+      {
+        "phrase": "fries",
+        "band": "high",
+        "why": "means potato fries; yuca and sweet-potato fries name themselves"
       }
     ],
     "verify": [
@@ -2830,6 +2871,32 @@
         "verified": true,
         "itemsExclude": [
           "seed:potato-boil"
+        ]
+      },
+      "judge": "mechanical",
+      "tags": []
+    },
+    {
+      "id": "H14",
+      "dimension": "helpful",
+      "query": "A side of french fries",
+      "ground_truth": "Costs the generic fried record, not the school-lunch serving.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "itemsExclude": [
+          "usda:2709464"
         ]
       },
       "judge": "mechanical",
