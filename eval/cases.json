@@ -1540,6 +1540,79 @@
           }
         ],
         "ok": false
+      },
+      {
+        "id": "search_score_is_not_a_load",
+        "answer": "The meal's glycemic load is 0.77.",
+        "toolResults": [
+          {
+            "candidates": [
+              {
+                "id": "usda:2709464",
+                "name": "Potato, french fries, school",
+                "score": 0.77,
+                "gi": 78
+              }
+            ],
+            "sessionId": "s-1234567"
+          }
+        ],
+        "ok": false
+      },
+      {
+        "id": "record_id_digits_are_not_a_figure",
+        "answer": "That comes to 2709464.",
+        "toolResults": [
+          {
+            "candidates": [
+              {
+                "id": "usda:2709464",
+                "name": "Potato, french fries, school",
+                "score": 0.77,
+                "gi": 78
+              }
+            ],
+            "sessionId": "s-1234567"
+          }
+        ],
+        "ok": false
+      },
+      {
+        "id": "real_gi_still_quotable",
+        "answer": "The glycemic index is 78.",
+        "toolResults": [
+          {
+            "candidates": [
+              {
+                "id": "usda:2709464",
+                "name": "Potato, french fries, school",
+                "score": 0.77,
+                "gi": 78
+              }
+            ],
+            "sessionId": "s-1234567"
+          }
+        ],
+        "ok": true
+      },
+      {
+        "id": "load_still_quotable",
+        "answer": "Potato, boiled at 150 g has a load of 21.3.",
+        "toolResults": [
+          {
+            "totals": {
+              "gl": 21.3
+            },
+            "items": [
+              {
+                "foodId": "seed:potato-boil",
+                "gl": 21.3,
+                "grams": 150
+              }
+            ]
+          }
+        ],
+        "ok": true
       }
     ],
     "gate": [

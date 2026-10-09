@@ -23,12 +23,24 @@ function numbersIn(text: string): number[] {
   return (text.replace(NAMED, ' ').match(NUM) ?? []).map((t) => parseFloat(t.replace(',', '.'))).filter((n) => Number.isFinite(n))
 }
 
+/**
+ * Fields whose numbers are the engine's bookkeeping, not facts a person is told:
+ * a candidate's search score, a record id, the session id. Counted as sources,
+ * "the load is 0.77" would verify against a similarity score, and the digits in
+ * "usda:2709464" would license a seven-digit figure. They stay in the trace;
+ * they are not quotable.
+ */
+const BOOKKEEPING_KEYS = new Set(['score', 'id', 'foodId', 'sessionId', 'responseId', 'call_id'])
+const LOOKS_LIKE_ID = /^[a-z]+:[\w.-]+$/i
+
 /** Every numeric leaf in a tool result, plus numbers embedded in its strings. */
 function collect(value: unknown, out: Set<number>): void {
   if (typeof value === 'number' && Number.isFinite(value)) { out.add(value); return }
-  if (typeof value === 'string') { for (const n of numbersIn(value)) out.add(n); return }
+  if (typeof value === 'string') { if (!LOOKS_LIKE_ID.test(value)) for (const n of numbersIn(value)) out.add(n); return }
   if (Array.isArray(value)) { for (const v of value) collect(v, out); return }
-  if (value && typeof value === 'object') { for (const v of Object.values(value as object)) collect(v, out) }
+  if (value && typeof value === 'object') {
+    for (const [k, v] of Object.entries(value as object)) if (!BOOKKEEPING_KEYS.has(k)) collect(v, out)
+  }
 }
 
 /**
