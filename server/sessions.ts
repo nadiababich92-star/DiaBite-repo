@@ -27,6 +27,12 @@ export interface SessionState {
   entries: MealItemInput[]
   /** Allergens and exclusions, parked with the day state for the same reason. */
   avoid?: AvoidList
+  /**
+   * Phrases of this turn's meal that resolve_foods could not find. A meal
+   * costed without them is understated, and the engine, not the model, is what
+   * keeps that from being called "fits". Reset whenever a turn parks its day.
+   */
+  unknownFoods: string[]
   storedAt: number
 }
 
@@ -57,9 +63,21 @@ export function putSession(
   id: string, budget: DayBudget, entries: MealItemInput[], avoid?: AvoidList,
 ): SessionState {
   sweep()
-  const state: SessionState = { budget, entries, avoid, storedAt: Date.now() }
+  const state: SessionState = { budget, entries, avoid, unknownFoods: [], storedAt: Date.now() }
   setBounded(store, id, state)
   return state
+}
+
+/**
+ * Record what resolve_foods found and did not find. A phrase that was unknown
+ * and later resolves (the model retried with another name) stops counting.
+ */
+export function noteResolution(id: string, results: { phrase: string; unknown: boolean }[]): void {
+  const s = store.get(id)
+  if (!s) return
+  const unknown = new Set(s.unknownFoods)
+  for (const r of results) { if (r.unknown) unknown.add(r.phrase); else unknown.delete(r.phrase) }
+  s.unknownFoods = [...unknown]
 }
 
 export function getSession(id: string): SessionState | undefined {

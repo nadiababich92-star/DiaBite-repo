@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit && tsc -p server/tsconfig.json",
     "typecheck:server": "tsc -p server/tsconfig.json",
     "server": "tsx server/engine.ts",
-    "engine": "tsx server/index.ts",
+    "engine": "tsx server/engine.ts",
     "tunnel": "ngrok http 8787 --url https://tinkling-grievance-brink.ngrok-free.dev",
     "eval": "tsx eval/run-engine.ts",
     "eval:agent": "tsx eval/run-cases.ts",

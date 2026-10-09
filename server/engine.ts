@@ -29,9 +29,9 @@ import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
-import { computeMeal, dayState, findAlternatives } from './compute'
+import { afterMealFor, computeMeal, dayState, findAlternatives } from './compute'
 import { verify } from './verify'
-import { getSession, putSession } from './sessions'
+import { getSession, noteResolution, putSession } from './sessions'
 import { openApiSpec } from './openapi'
 import { ask, type AskRequest } from './agent'
 import { createHash, timingSafeEqual } from 'node:crypto'
@@ -106,6 +106,13 @@ async function main() {
   const keyMatches = (given: string | undefined): boolean =>
     !!keyDigest && !!given && timingSafeEqual(createHash('sha256').update(given).digest(), keyDigest)
   const GUARDED = /^\/(tools|session|verify|diag)\b/
+  // Fail closed. A deploy that loses the secret must not quietly open the tool
+  // routes (and /diag/foundry, which spends model tokens): in production, no
+  // key means no access, and the service says why in its log.
+  if (!API_KEY && process.env.NODE_ENV === 'production') {
+    console.error('ENGINE_API_KEY is not set: tool, session, verify and diag routes are closed')
+    app.use((req, res, next) => (GUARDED.test(req.path) ? res.status(503).json({ error: 'engine key not configured' }) : next()))
+  }
   if (API_KEY) {
     app.use((req, res, next) => {
       if (!GUARDED.test(req.path)) return next()
@@ -176,7 +183,7 @@ async function main() {
   app.get('/diag/foundry', async (_req, res) => {
     const endpoint = process.env.PROJECT_ENDPOINT ?? ''
     const key = process.env.PROJECT_API_KEY ?? ''
-    const out: Record<string, unknown> = { endpoint: endpoint.replace(/https:\/\/([^.]+).*/, '$1…'), key: key ? `${key.length} chars` : 'none' }
+    const out: Record<string, unknown> = { endpoint: endpoint.replace(/https:\/\/([^.]+).*/, '$1…'), key: key ? 'set' : 'none' }
 
     const timed = async (name: string, run: () => Promise<string>) => {
       const t0 = Date.now()
@@ -280,8 +287,10 @@ async function main() {
     }
     // The day state rides along when asked for: one model round trip fewer,
     // and the budget is the thing the next step needs anyway.
+    const results = await resolvePhrases(store, body.phrases, body.topK)
+    if (body.sessionId) noteResolution(body.sessionId, results)
     res.json({
-      results: await resolvePhrases(store, body.phrases, body.topK),
+      results,
       ...(body.sessionId !== undefined ? { dayState: dayStateFor(body.sessionId) } : {}),
     })
   })
@@ -307,12 +316,8 @@ async function main() {
       // is left once this meal is counted. Negative means over budget, and is
       // returned as such — "fits" is the engine's verdict, not the model's.
       if (day && !('unknown' in day)) {
-        const after = {
-          gl: Math.round((day.remaining.gl - meal.totals.gl) * 10) / 10,
-          carbsG: Math.round((day.remaining.carbsG - meal.totals.carbs) * 10) / 10,
-          kcal: Math.round(day.remaining.kcal - meal.totals.kcal),
-        }
-        out.afterMeal = { remaining: after, fits: after.gl >= 0 }
+        const unknownFoods = (body.sessionId ? getSession(body.sessionId)?.unknownFoods : undefined) ?? []
+        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods)
       }
 
       const remaining = day && !('unknown' in day) ? day.remaining.gl : undefined

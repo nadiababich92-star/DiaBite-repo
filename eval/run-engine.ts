@@ -9,11 +9,12 @@
  * resolve_foods was tuned by hand on a dozen phrases, and the food database
  * keeps growing.
  *
- * Five sections, from eval/cases.json:
+ * Sections, from eval/cases.json:
  *   resolve  — did the phrase reach the right record, or correctly reach none
  *   clarify  — did the confidence band ask when it should have
  *   verify   — does the verifier accept true answers and reject altered ones
  *   gate     — does the safety gate stop what it must and leave ordinary meals alone
+ *   partial  — is a meal with a missing food never called a fit
  *   answer   — does the browser read the verdict out of both forms the agent writes
  *
  * Exits non-zero when resolve falls under its target, so this can gate a
@@ -28,6 +29,8 @@ import { resolvePhrases } from '../server/resolve'
 import { verify } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
+import { afterMealFor } from '../server/compute'
+import { getSession, noteResolution, putSession } from '../server/sessions'
 import type { VerifyRequest } from '../server/contract'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -36,11 +39,12 @@ const TARGET = Number(process.env.RESOLVE_TARGET ?? 90)
 interface ResolveCase { phrase: string; expect: string[]; tags: string[] }
 interface ClarifyCase { phrase: string; band: string; why: string }
 interface AnswerCase { id: string; text: string; verdict: string | null; next?: string; why?: string; costed?: boolean }
+interface PartialCase { id: string; remainingGl?: number; mealGl?: number; unknown?: string[]; fits?: boolean | null; flow?: boolean; fitsAfterRetry?: boolean }
 interface GateCase { phrase: string; rule: string | null }
 interface VerifyCase { id: string; answer: string; toolResults: unknown[]; ok: boolean }
 
 const cases = JSON.parse(readFileSync(join(ROOT, 'eval', 'cases.json'), 'utf8')) as {
-  engine: { resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[]; answer: AnswerCase[]; portion: { id: string; grams: number }[] }
+  engine: { resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[]; answer: AnswerCase[]; portion: { id: string; grams: number }[]; partial: PartialCase[] }
 }
 
 const t0 = Date.now()
@@ -119,7 +123,35 @@ const portionMisses = cases.engine.portion.filter((c) => byId.get(c.id)?.default
 console.log(`\nportion   ${cases.engine.portion.length - portionMisses.length}/${cases.engine.portion.length}`)
 if (portionMisses.length) { console.log('  wrong default serving:'); portionMisses.forEach((m) => console.log(m)) }
 
-// ── answer ────────────────────────────────────────────────────────────────
+// ── partial ───────────────────────────────────────────────────────────────
+// CLAUDE.md rule 3: a meal costed without a food the database lacks is
+// understated, and may never be called "fits". The engine decides that, not the
+// model, so it is tested here without one.
+
+const partialMisses: string[] = []
+const room = (gl: number) => ({ gl, carbsG: 100, kcal: 1500 })
+for (const c of cases.engine.partial) {
+  if (c.flow) {
+    // The session carries what resolve_foods could not find, and a retry under
+    // another name clears it; a new turn starts clean.
+    putSession('eval-partial', { glBudget: 40, carbsG: 150, kcal: 1700 }, [])
+    noteResolution('eval-partial', [{ phrase: 'kugel', unknown: true }, { phrase: 'eggs', unknown: false }])
+    const held = afterMealFor(room(20), { gl: 5, carbs: 10, kcal: 100 }, getSession('eval-partial')?.unknownFoods).fits
+    noteResolution('eval-partial', [{ phrase: 'kugel', unknown: false }])
+    const retried = afterMealFor(room(20), { gl: 5, carbs: 10, kcal: 100 }, getSession('eval-partial')?.unknownFoods).fits
+    noteResolution('eval-partial', [{ phrase: 'kugel', unknown: true }])
+    putSession('eval-partial', { glBudget: 40, carbsG: 150, kcal: 1700 }, [])
+    const fresh = getSession('eval-partial')?.unknownFoods.length === 0
+    if (held !== null || retried !== c.fitsAfterRetry || !fresh) partialMisses.push(`    ${c.id} held=${held} retried=${retried} fresh=${fresh}`)
+    continue
+  }
+  const got = afterMealFor(room(c.remainingGl!), { gl: c.mealGl!, carbs: 10, kcal: 100 }, c.unknown).fits
+  if (got !== c.fits) partialMisses.push(`    ${c.id.padEnd(40)} want ${c.fits} got ${got}`)
+}
+console.log(`\npartial   ${cases.engine.partial.length - partialMisses.length}/${cases.engine.partial.length}`)
+if (partialMisses.length) { console.log('  a partial meal got the wrong verdict:'); partialMisses.forEach((m) => console.log(m)) }
+
+// ── answer ────────────────────────────────────────────────────────────────────
 // The browser reads a meal answer's verdict and next step out of the agent's
 // text. The model writes the labelled form and the plain form about equally,
 // and both must come out the same.
@@ -153,3 +185,4 @@ if (verifyMisses.length) { console.log('the verifier disagreed with a probe'); p
 if (gateMisses.length) { console.log('the safety gate disagreed with a probe'); process.exit(1) }
 if (answerMisses.length) { console.log('an answer was parsed wrong'); process.exit(1) }
 if (portionMisses.length) { console.log('a default serving is wrong'); process.exit(1) }
+if (partialMisses.length) { console.log('a partial meal was called a fit'); process.exit(1) }

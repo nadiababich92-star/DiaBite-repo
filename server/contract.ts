@@ -119,7 +119,18 @@ export interface ComputeMealResponse {
    * engine states it rather than letting the model subtract — and rather than
    * letting it spend a round trip looking for a number nobody returned.
    */
-  afterMeal?: { remaining: { gl: number; carbsG: number; kcal: number }; fits: boolean }
+  afterMeal?: {
+    remaining: { gl: number; carbsG: number; kcal: number }
+    /**
+     * `true` fits, `false` does not. `null` when the meal is partial and what
+     * was costed still leaves room: an understated total cannot say the day is
+     * safe, so the engine declines to. A partial meal that is already over is
+     * still `false` — leaving a food out only makes the real total larger.
+     */
+    fits: boolean | null
+    /** Foods the user named that the database does not have; absent on a whole meal. */
+    partial?: { unknownFoods: string[] }
+  }
   /** Swaps for the heaviest item, when the meal needed them. */
   alternatives?: Alternative[]
   /** Which item the alternatives replace. */

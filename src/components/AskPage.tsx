@@ -64,19 +64,22 @@ const bold = (line: string, key: string) =>
  */
 function Figures({ reply }: { reply: AgentResponse }) {
   const meal = reply.trace?.find((t) => t.tool.endsWith('compute_meal'))?.result as
-    | { totals?: { gl?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean } }
+    | { totals?: { gl?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean | null } }
     | undefined
   const mealGl = meal?.totals?.gl
   const before = meal?.dayState?.remaining?.gl
   const after = meal?.afterMeal?.remaining?.gl
   if (typeof mealGl !== 'number' || typeof before !== 'number' || typeof after !== 'number') return null
+  // `null` is a partial meal: what was costed still leaves room, but a food is
+  // missing from the sum, so the figure is shown as "so far", not as a verdict.
+  const partial = meal?.afterMeal?.fits === null
   const fits = meal?.afterMeal?.fits !== false
   return (
     <div className="figures">
       <div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{mealGl}</span></div>
       <div className="fig"><span className="fig-k">before</span><span className="fig-v">{before}</span></div>
-      <div className={`fig fig-lead ${fits ? 'ok' : 'over'}`}>
-        <span className="fig-k">{fits ? 'left after' : 'over by'}</span>
+      <div className={`fig fig-lead ${partial ? '' : fits ? 'ok' : 'over'}`}>
+        <span className="fig-k">{partial ? 'left so far' : fits ? 'left after' : 'over by'}</span>
         <span className="fig-v">{fits ? after : Math.abs(after)}</span>
       </div>
     </div>
@@ -140,7 +143,10 @@ function verdictTone(answer: string, route?: string, reply?: AgentResponse): 'go
   // "One question first". `afterMeal.fits` is the same comparison the answer
   // is built on, and it cannot be paraphrased.
   const meal = reply?.trace?.find((t) => t.tool.endsWith('compute_meal'))?.result as
-    { afterMeal?: { fits?: boolean }; alternatives?: unknown[] } | undefined
+    { afterMeal?: { fits?: boolean | null }; alternatives?: unknown[] } | undefined
+  // A partial meal has no verdict to badge: a food is missing and the answer is
+  // asking what is in it, which is what "One question first" says.
+  if (meal?.afterMeal?.fits === null) return 'ask'
   if (meal?.afterMeal && typeof meal.afterMeal.fits === 'boolean') {
     if (!meal.afterMeal.fits) return 'bad'
     return (meal.alternatives?.length ?? 0) > 0 ? 'change' : 'good'
@@ -162,11 +168,12 @@ function ReceiptView({ r }: { r: Receipt }) {
           <span>{l.availableCarbs.toFixed(1)} · {l.gi ?? '—'} · <b>{l.gl.toFixed(1)}</b></span>
         </div>
       ))}
-      <div className="receipt-total"><span>Meal glycemic load</span><span>{r.total.toFixed(1)}</span></div>
+      <div className="receipt-total"><span>{r.partial ? 'Glycemic load so far' : 'Meal glycemic load'}</span><span>{r.total.toFixed(1)}</span></div>
+      {r.partial && <div className="receipt-line muted"><span>Not counted: {r.partial.join(', ')}</span><span>not in the database</span></div>}
       {r.leftBefore !== null && (
         <>
           <div className="receipt-line muted"><span>Left before this meal</span><span>{r.leftBefore.toFixed(1)}</span></div>
-          <div className={`receipt-line ${(r.leftAfter ?? 0) < 0 ? 'over' : 'ok'}`}><span>Left after</span><span>{r.leftAfter?.toFixed(1)}</span></div>
+          <div className={`receipt-line ${r.partial ? '' : (r.leftAfter ?? 0) < 0 ? 'over' : 'ok'}`}><span>{r.partial ? 'Left so far' : 'Left after'}</span><span>{r.leftAfter?.toFixed(1)}</span></div>
         </>
       )}
       <div className="receipt-foot">
@@ -188,7 +195,10 @@ function ReceiptView({ r }: { r: Receipt }) {
 function summarize(step: TraceStep): string {
   const res = Array.isArray(step.result) && step.result.length === 1 ? step.result[0] : step.result
   const r = res as Record<string, unknown> | null
-  switch (step.tool) {
+  // Foundry names a call after the tool and the operation (diabite_engine_compute_meal).
+  // Matching the bare name left every line of this panel blank in production.
+  const op = ['resolve_foods', 'compute_meal', 'get_day_state', 'find_alternatives'].find((o) => step.tool === o || step.tool.endsWith(`_${o}`))
+  switch (op) {
     case 'resolve_foods': {
       const results = (r?.results as { confidence: string; unknown: boolean }[]) ?? []
       const n = results.length, unk = results.filter((x) => x.unknown).length, ask = results.filter((x) => x.confidence === 'medium').length
@@ -372,6 +382,8 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
                       ? 'No numbers stated — nothing to trace'
                       : `Verified · ${reply.matchedNumbers?.length} numbers traced to tools`}
                   </span>
+                ) : reply.withheld ? (
+                  <span className="pill high">Answer withheld: its numbers did not check</span>
                 ) : reply.verifierError ? (
                   <span className="pill medium">Verifier unavailable</span>
                 ) : (

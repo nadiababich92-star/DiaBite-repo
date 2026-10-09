@@ -42,6 +42,8 @@ export interface AgentResponse {
   matchedNumbers?: number[]
   unmatchedNumbers?: number[]
   verifierError?: string | null
+  /** The model's text failed the check and was not shown. */
+  withheld?: boolean
   toolCalls?: number
   trace?: TraceStep[]
   /** Which specialist answered: the meal agent, or the advisor with no tools. */
@@ -59,7 +61,8 @@ export function budgetOf(t: Targets): AgentRequest['budget'] {
 
 /** Onboarding answers the engine needs when it ranks alternatives. */
 export function avoidOf(p: Profile): AgentRequest['avoid'] {
-  const allergens = p.allergens ?? []
+  // A copy: pushing onto the profile's own array would persist 'gluten' into it.
+  const allergens = [...(p.allergens ?? [])]
   const foodIds = (p.excludedFoodIds ?? []).map((id) => `seed:${id}`)
   if (p.comorbidities?.includes('celiac') && !allergens.includes('gluten')) allergens.push('gluten')
   const pattern = p.pattern && p.pattern !== 'none' ? p.pattern : undefined
@@ -118,6 +121,8 @@ export interface Receipt {
   total: number
   leftBefore: number | null
   leftAfter: number | null
+  /** Foods the database lacks, left out of the sum: the total is understated. */
+  partial?: string[]
   /** Where the numbers in this receipt came from, and whether anyone checked them (PRD E3). */
   sources: { text: string; verified: boolean }[]
 }
@@ -129,6 +134,9 @@ interface MealResult {
     availableCarbs: number; gi: number | null; gl: number
   }[]
   totals: { gl: number }
+  /** The budget before this meal; compute_meal returns it when it was given a session. */
+  dayState?: { remaining?: { gl: number } }
+  afterMeal?: { partial?: { unknownFoods: string[] } }
 }
 
 interface DayStateResult { remaining: { gl: number } }
@@ -153,9 +161,12 @@ export function receiptFrom(trace: TraceStep[] | undefined): Receipt | null {
   if (!meal) return null
   const m = unwrap(meal.result) as MealResult
   if (!m?.items) return null
+  // The agent no longer calls get_day_state: the budget rides in the meal's own
+  // reply. An older trace that still has the call is read as a fallback.
   const day = trace.find((t) => isCall(t, 'get_day_state'))
   const d = day ? (unwrap(day.result) as DayStateResult) : null
-  const leftBefore = typeof d?.remaining?.gl === 'number' ? d.remaining.gl : null
+  const before = m.dayState?.remaining?.gl ?? d?.remaining?.gl
+  const leftBefore = typeof before === 'number' ? before : null
   // Provenance for exactly the foods in this receipt: resolve_foods carries it
   // on each candidate, and the meal names the ids that were actually used.
   const used = new Set(m.items.map((it) => it.foodId))
@@ -182,5 +193,6 @@ export function receiptFrom(trace: TraceStep[] | undefined): Receipt | null {
     lines, total: m.totals.gl, leftBefore,
     leftAfter: leftBefore === null ? null : Math.round((leftBefore - m.totals.gl) * 10) / 10,
     sources: [...sources].map(([text, verified]) => ({ text, verified })),
+    ...(m.afterMeal?.partial?.unknownFoods.length ? { partial: m.afterMeal.partial.unknownFoods } : {}),
   }
 }

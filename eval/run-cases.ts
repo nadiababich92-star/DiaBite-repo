@@ -281,6 +281,12 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
     const excluded = /(leaves? (it )?out|does ?n'?t include|excludes?|without (the|that)|partial|only covers|not included)/i.test(answer)
     say('says the total is partial', missing && excluded, `missing ${missing}, excluded ${excluded}`)
   }
+  // Rule 7: the engine's own verdict, not a regex over the prose. When a food
+  // is unknown the engine must not have said "fits", whatever the model wrote.
+  if (e.enginePartial === true) {
+    const after = (callOf(r, 'compute_meal')?.result as { afterMeal?: { fits?: boolean | null; partial?: { unknownFoods: string[] } } } | undefined)?.afterMeal
+    say('engine marks the meal partial, not fits', !!after?.partial?.unknownFoods?.length && after.fits !== true, JSON.stringify(after))
+  }
   if (e.noFitsClaim === true) {
     say('claims no fit', !/\b(it )?fits\b|within (your )?budget/i.test(answer.replace(/can'?t say[^.]*\./gi, ' ')))
   }

@@ -322,6 +322,8 @@ export interface AskResponse {
   attempts?: number
   /** True when both attempts failed the verifier and this text came from tool results. */
   templated?: boolean
+  /** True when the answer failed the verifier twice and there was nothing to rebuild it from: no model text is shown. */
+  withheld?: boolean
   /** Which specialist answered, and what the router decided. */
   route?: Role
   routedBy?: 'triage' | 'gate' | 'fallback'
@@ -436,8 +438,6 @@ function lastCall(trace: ToolCallTrace[], operation: string): ToolCallTrace | un
   return [...trace].reverse().find((t) => t.tool === operation || t.tool.endsWith(`_${operation}`))
 }
 
-const r1 = (n: number) => Math.round(n * 10) / 10
-
 /**
  * The answer of last resort, assembled from tool results alone.
  *
@@ -447,16 +447,33 @@ const r1 = (n: number) => Math.round(n * 10) / 10
  * plainly. Blunter prose, but every figure is the engine's.
  */
 export function templatedAnswer(trace: ToolCallTrace[]): string | null {
-  const meal = lastCall(trace, 'compute_meal')?.result as { totals?: { gl: number } } | undefined
+  const meal = lastCall(trace, 'compute_meal')?.result as
+    | {
+        totals?: { gl: number }
+        // The budget rides in the same reply as the meal, so there is no second
+        // tool to read. (It once read get_day_state, which the agent no longer
+        // has, and the last-resort answer lost its verdict.)
+        afterMeal?: { remaining?: { gl: number }; fits?: boolean | null; partial?: { unknownFoods: string[] } }
+        dayState?: { remaining?: { gl: number } }
+      }
+    | undefined
   const gl = meal?.totals?.gl
   if (typeof gl !== 'number') return null
 
-  const day = lastCall(trace, 'get_day_state')?.result as { remaining?: { gl: number } } | undefined
-  const left = day?.remaining?.gl
+  const left = meal?.dayState?.remaining?.gl
+  const after = meal?.afterMeal?.remaining?.gl
+  const unknownFoods = meal?.afterMeal?.partial?.unknownFoods ?? []
 
   const lines: string[] = []
-  if (typeof left === 'number') {
-    const after = r1(left - gl)
+  if (unknownFoods.length > 0) {
+    // Understated by definition: never "fits", and say what is missing.
+    const missing = unknownFoods.join(', ')
+    lines.push(meal?.afterMeal?.fits === false
+      ? `**Verdict:** this already does not fit what is left of today's budget, and ${missing} is not counted yet.`
+      : `**Verdict:** I can't judge the day on a partial total: ${missing} is not in the database, so it is left out.`)
+    lines.push(`**Numbers:** the glycemic load of the rest of the meal is ${gl}.`)
+    lines.push(`**Question:** what is in ${missing}?`)
+  } else if (typeof left === 'number' && typeof after === 'number') {
     lines.push(after >= 0
       ? `**Verdict:** it fits what is left of today's budget.`
       : `**Verdict:** it does not fit what is left of today's budget.`)
@@ -645,6 +662,11 @@ export function stripCitations(text: string): string {
     .trimEnd()
 }
 
+/** What a person reads when the model's text could not be checked. No figure in it, by design. */
+const WITHHELD =
+  "I couldn't check the numbers in my own answer against the calculation, so I'm not going to show them. " +
+  'Please ask again, or say it a little differently.'
+
 async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   const gate = safetyGate(req.message)
   if (gate.blocked) {
@@ -709,15 +731,26 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
     }
   }
 
+  // Still unverified and nothing to fall back on (an advisory turn, or a meal
+  // with no compute_meal result): the promise is that numbers are checked
+  // *before* they are shown, so the prose is not shown. Plain words, no digits.
+  let withheld = false
+  if (!v.ok) {
+    console.warn(`answer withheld: unverified numbers ${JSON.stringify(v.unmatched)}`)
+    answer = WITHHELD
+    withheld = true
+    v = { ok: false, matched: [], unmatched: [] }
+  }
+
   if (responseId) rememberResponse(req.sessionId, responseId)
   // Food preferences only, and only from advisory turns — the ones without a
   // diary, a budget or a number in them.
-  if (role === 'advisor' && answer) rememberPreferences(req.sessionId, req.message, answer)
+  if (role === 'advisor' && answer && !withheld) rememberPreferences(req.sessionId, req.message, answer)
 
   return {
     answer, blocked: false,
     verified: v.ok, unmatchedNumbers: v.unmatched, matchedNumbers: v.matched,
-    toolCalls: trace.length, trace, responseId, attempts, templated,
+    toolCalls: trace.length, trace, responseId, attempts, templated, withheld,
     route: role, routedBy: by,
   }
 }

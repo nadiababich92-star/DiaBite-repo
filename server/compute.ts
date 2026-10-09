@@ -148,3 +148,29 @@ export async function findAlternatives(
   return out
 }
 
+
+
+/**
+ * What is left of the day after a meal, and whether it fits.
+ *
+ * A food the database lacks was left out of the sum, so the total is
+ * understated: "fits" is off the table (`null`), while "does not fit" is still
+ * true, because leaving a food out can only make the real total larger.
+ */
+export function afterMealFor(
+  remaining: { gl: number; carbsG: number; kcal: number },
+  meal: { gl: number; carbs: number; kcal: number },
+  unknownFoods: string[] = [],
+) {
+  const after = {
+    gl: Math.round((remaining.gl - meal.gl) * 10) / 10,
+    carbsG: Math.round((remaining.carbsG - meal.carbs) * 10) / 10,
+    kcal: Math.round(remaining.kcal - meal.kcal),
+  }
+  const partial = unknownFoods.length > 0
+  return {
+    remaining: after,
+    fits: partial ? (after.gl >= 0 ? null : false) : after.gl >= 0,
+    ...(partial ? { partial: { unknownFoods } } : {}),
+  }
+}

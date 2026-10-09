@@ -31,4 +31,13 @@ export const saveProfile = (p: Profile): void => write(PROFILE_KEY, p)
 export const loadDiary = (): DiaryEntry[] => read<DiaryEntry[]>(DIARY_KEY, [])
 export const saveDiary = (entries: DiaryEntry[]): void => write(DIARY_KEY, entries)
 
-export const todayISO = (): string => new Date().toISOString().slice(0, 10)
+/**
+ * The person's own calendar day. `toISOString()` is UTC, which for a user in
+ * Los Angeles turns to tomorrow at 17:00 — the day's budget would silently
+ * reset in the middle of dinner.
+ */
+export const todayISO = (): string => {
+  const d = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}

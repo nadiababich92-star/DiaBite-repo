@@ -1828,6 +1828,54 @@
         "id": "ing:ezekiel_bread",
         "grams": 34
       }
+    ],
+    "partial": [
+      {
+        "id": "whole_meal_fits",
+        "remainingGl": 20,
+        "mealGl": 12,
+        "unknown": [],
+        "fits": true
+      },
+      {
+        "id": "whole_meal_over",
+        "remainingGl": 10,
+        "mealGl": 12,
+        "unknown": [],
+        "fits": false
+      },
+      {
+        "id": "partial_room_left_is_not_fits",
+        "remainingGl": 20,
+        "mealGl": 12,
+        "unknown": [
+          "grandma's kugel"
+        ],
+        "fits": null
+      },
+      {
+        "id": "partial_already_over_still_over",
+        "remainingGl": 10,
+        "mealGl": 12,
+        "unknown": [
+          "grandma's kugel"
+        ],
+        "fits": false
+      },
+      {
+        "id": "partial_exact_zero_is_not_fits",
+        "remainingGl": 12,
+        "mealGl": 12,
+        "unknown": [
+          "kugel"
+        ],
+        "fits": null
+      },
+      {
+        "id": "session_flow_unknown_then_retry_known",
+        "flow": true,
+        "fitsAfterRetry": true
+      }
     ]
   },
   "agent": [
@@ -2639,6 +2687,7 @@
         ],
         "verified": true,
         "saysPartial": true,
+        "enginePartial": true,
         "noFitsClaim": true,
         "answerHasQuestion": true
       },
