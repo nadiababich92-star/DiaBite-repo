@@ -263,6 +263,12 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
       say(`${foodId} costed at ${min}+`, typeof amount === 'number' && amount >= min, `got ${amount ?? 'nothing'}`)
     }
   }
+  // A food costed under a neighbour's name: "baked potato" must not arrive as
+  // the boiled record.
+  if (Array.isArray(e.itemsExclude)) {
+    const items = (callOf(r, 'compute_meal')?.input as { items?: { foodId: string }[] } | undefined)?.items ?? []
+    for (const foodId of e.itemsExclude as string[]) say(`${foodId} not costed`, !items.some((x) => x.foodId === foodId))
+  }
   // A swap the engine did not return is a number nobody computed.
   // On every meal, not only where a case asks: the browser showed "swap the
   // rye bread for the avocado" on a meal containing both, after a compute_meal

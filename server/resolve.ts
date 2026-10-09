@@ -59,7 +59,22 @@ const MISSING_TOKEN_PENALTY = Number(process.env.MISSING_TOKEN_PENALTY ?? 0.20)
 const CATEGORY_WORDS = new Set([
   'chicken', 'fish', 'beans', 'nuts', 'oatmeal', 'oats', 'tortilla',
   'cheese', 'yogurt', 'greens', 'berries', 'squash', 'seeds',
+  // Preparation moves a potato's glycemic index from 56 (new, boiled and cooled)
+  // to 94 (roasted), so "potato" with no word about how it was cooked is a
+  // question, not a record. Sweet potatoes are a different food and not caught.
+  'potato', 'potatoes',
 ])
+
+/**
+ * What to ask for a category word, when "did you mean A or B?" would put the
+ * wrong choice in front of someone. The two nearest records of "potato" are
+ * boiled and an unspecified USDA row; the question that decides the number is
+ * how it was cooked.
+ */
+const CATEGORY_QUESTION: Record<string, string> = {
+  potato: 'How was the potato cooked: boiled, baked, mashed, roasted or fried?',
+  potatoes: 'How were the potatoes cooked: boiled, baked, mashed, roasted or fried?',
+}
 
 /**
  * A record's name with its negations removed.
@@ -366,6 +381,8 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
       }
     }
     const unknown = confidence === 'low'
+    const asked = tokens(phrase).length === 1 ? CATEGORY_QUESTION[tokens(phrase)[0]] : undefined
+    if (confidence === 'medium' && !clarify && asked) clarify = asked
     if (confidence === 'medium' && !clarify) {
       const rival = cands.slice(1).find((c) => !sameFood(c.name, cands[0].name))
       clarify = rival ? `Did you mean ${cands[0].name} or ${rival.name}?` : undefined

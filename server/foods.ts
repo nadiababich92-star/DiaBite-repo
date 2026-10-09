@@ -74,7 +74,10 @@ const ALIASES: Record<string, string[]> = {
   'bread-white': ['bread', 'toast', 'white toast', 'sandwich bread', 'bun', 'roll', 'bagel'],
   'bread-rye': ['rye bread', 'rye toast', 'pumpernickel'],
   'bread-sprout': ['ezekiel bread', 'sprouted bread'],
-  'potato-boil': ['potato', 'potatoes', 'boiled potatoes', 'baked potato'],
+  // 'potato' stays as the default to name when a meal has one among several foods;
+  // resolve.ts keeps it from being certain (CATEGORY_WORDS). 'baked potato' is gone: a
+  // baked potato is not a boiled one, and the records we hold say GI 83 against 78.
+  'potato-boil': ['potato', 'potatoes', 'boiled potatoes'],
   'potato-mash': ['mashed potatoes', 'mash'],
   'sweetpotato': ['sweet potato', 'yam'],
   'oats': ['oatmeal', 'porridge', 'oats'],
