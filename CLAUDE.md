@@ -81,6 +81,12 @@ The shell does not have Node on its PATH by default: prefix with
    "and also", not "instead of".
 9. **A federated credential is scoped to a branch.** Renaming the trunk broke
    the deploy until one for `main` was added.
+10. **The live catalogue is the Supabase table, not the files in the image.**
+    A change to aliases, GI, portions or any food record reaches production only
+    after `npx tsx scripts/sync-foods.ts` *and* a restart of the active revision
+    (`az containerapp revision restart`), because the engine reads the table once
+    at start. `npm run deploy` alone leaves the old behaviour in place, and the
+    local `npm run eval` will say it is fixed. Ask the running service.
 
 ---
 
