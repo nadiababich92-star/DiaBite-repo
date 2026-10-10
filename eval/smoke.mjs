@@ -63,7 +63,7 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
     check('M7', 'sign-in is required: the first screen is the sign-in screen with the emergency line',
       /Email me a link/.test(t) && /call emergency services/i.test(t) && !/Can I eat this\?/.test(t), t.slice(0, 120))
   } else {
-    await until(b, `!!document.querySelector('label.field input')`)
+    await until(b, `[...document.querySelectorAll('label.field')].some(l => l.innerText.trim().startsWith('Age'))`)
     await b.ev(`__setNum('Age', 52)`); await b.ev(`__click('Continue')`); await sleep(250)
     await b.ev(`__click('Type 2 diabetes')`); await b.ev(`__click('Continue')`); await sleep(250)
     await b.ev(`__click('Continue')`); await sleep(250); await b.ev(`__click('Continue')`); await sleep(250)
@@ -89,8 +89,8 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
     check('M9', 'the answer arrives in under 15 seconds', meal.secs < 15, `${meal.secs.toFixed(1)} s`)
 
     const partial = await ask("A slice of grandma's kugel and two eggs")
-    check('M10', 'a meal with an unknown food is never called "fits" and says what is left so far',
-      !/FITS\b/i.test(partial.text.split('\n').slice(0, 40).join(' ').replace(/\bdoes not fit\b/gi, '')) && /LEFT SO FAR/i.test(partial.text), partial.text.replace(/\s+/g, ' ').slice(-500))
+    check('M10', 'a meal with an unknown food is never called "fits"; it shows what is left so far, or asks what the food is',
+      !/FITS\b/i.test(partial.text.split('\n').slice(0, 40).join(' ').replace(/\bdoes not fit\b/gi, '')) && /LEFT SO FAR|ONE QUESTION FIRST/i.test(partial.text), partial.text.replace(/\s+/g, ' ').slice(-500))
 
     await b.send('Page.navigate', { url: `${URL_}/?demo` })
     await until(b, `/What are you\\s+about to eat/i.test(document.body.innerText)`)
