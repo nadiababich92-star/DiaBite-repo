@@ -328,8 +328,8 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
   const tone = reply ? (reply.blocked ? 'blocked' : verdictTone(reply.answer, reply.route, reply)) : null
 
   return (
-    <div className="ask-layout">
-      <section className="card ask-hero">
+    <div>
+      <section className={`card ask-hero${reply || busy ? ' compact' : ''}`}>
         <div className="ask-budget">
           <span className="label">glycemic load left today</span>
           <span className="value">{left} <small>of {targets.glBudget}</small></span>
@@ -367,7 +367,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
         )}
       </section>
 
-      <div className="ask-result" ref={resultRef}>
+      <div ref={resultRef}>
       {busy && (
         <section className="card thinking" role="status" aria-live="polite">
           {/* What happens, in order, with nothing claiming to know where we

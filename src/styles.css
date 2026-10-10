@@ -163,9 +163,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.app { max-width: 880px; margin: 0 auto; padding: 0 16px 120px; }
+.app { max-width: 880px; margin: 0 auto; padding: 12px 16px 120px; }
 
-header.masthead { padding: 16px 0 14px; display: flex; align-items: center; gap: 8px; }
+header.masthead { padding: 8px 0 14px; display: flex; align-items: center; gap: 8px; }
 header.masthead .logo { width: 28px; height: 28px; flex: none; }
 header.masthead h1 { margin: 0; font-size: 21px; letter-spacing: -0.02em; font-family: var(--serif); font-weight: 600; display: flex; align-items: baseline; }
 .wordmark b {
@@ -669,12 +669,13 @@ button.danger:disabled { opacity: 0.45; cursor: not-allowed; }
 .theme-note { margin: 8px 0 0; }
 
 /* ── Wide screens ─────────────────────────────────────────────────────────
- * A laptop is a pointer and a wide window, not a thumb and a tall one. The
- * navigation moves to the top, beside the logo, and the ask box stays on the
- * left while its answer opens on the right, so the verdict is on the first
- * screen instead of below the fold. */
+ * One centred column at every width, so nothing hangs to one side. On a laptop
+ * the navigation moves to the top, beside the logo, because the pointer is up
+ * there and a bar at the bottom of a wide window is far from it and covers the
+ * answer. After a question the big ask card folds into one short row, so the
+ * verdict is under it on the first screen. */
 @media (min-width: 760px) {
-  .app { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; align-content: start; padding-bottom: 64px; }
+  .app { max-width: 760px; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; align-content: start; padding-bottom: 64px; }
   .app > * { grid-column: 1 / -1; }
   .app > header.masthead { grid-column: 1; grid-row: 1; }
   .app > nav.tabs {
@@ -685,13 +686,15 @@ button.danger:disabled { opacity: 0.45; cursor: not-allowed; }
   nav.tabs .tab-ico, nav.tabs button[aria-selected='true'] .tab-ico { width: 24px; height: 24px; background: none; box-shadow: none; border-radius: 0; }
   nav.tabs button[aria-selected='true'] { background: var(--marker); color: var(--marker-ink); box-shadow: var(--marker-glow); }
 }
-@media (min-width: 980px) {
-  .app { max-width: 1120px; }
-  main > .card, main > .day, main > details { max-width: 840px; }
-  .ask-layout { display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 0 24px; align-items: start; }
-  .ask-layout .ask-hero { position: sticky; top: 16px; }
-  .ask-layout .ask-result > :first-child { margin-top: 0; }
-  .ask-layout .ask-hero .ask-form { flex-direction: column; }
-  .ask-layout .ask-hero .ask-form button { width: 100%; }
-  .ask-layout .ask-result:empty::before { content: 'Your answer will open here.'; display: block; color: var(--text-faint); padding: 28px 4px; }
-}
+
+/* After a question: the budget and the box, nothing else, so the answer is close. */
+.ask-hero.compact { padding: 14px 18px 16px; }
+.ask-hero.compact .ask-title, .ask-hero.compact > p.muted, .ask-hero.compact .lab-row, .ask-hero.compact .chips-col { display: none; }
+.ask-hero.compact .ask-budget { margin-bottom: 10px; }
+.ask-hero.compact .budget-bar { margin-bottom: 12px; }
+.ask-hero.compact .ask-form { margin: 0; }
+
+/* The question is the product's one headline: the card rule for h2 must not shrink it. */
+.ask-hero .ask-title { font-size: 30px; line-height: 1.15; margin: 0 0 8px; max-width: 20ch; }
+.ask-hero.compact .ask-title { display: none; }
+@media (max-width: 560px) { .ask-hero .ask-title { font-size: 28px; } }
