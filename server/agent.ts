@@ -351,8 +351,13 @@ async function withRateLimitRetry<T>(run: () => Promise<T>): Promise<T> {
       const err = e as { status?: number; code?: string; headers?: Record<string, string> }
       const limited = err.status === 429 || err.code === 'rate_limit_exceeded'
       if (!limited || attempt >= 2) throw e
-      const reset = Number(err.headers?.['x-ratelimit-reset-tokens'])
-      const wait = Number.isFinite(reset) && reset > 0 ? Math.min(reset, 65) * 1000 : (attempt + 1) * 8000
+      // What the service says first: Retry-After (seconds) or the reset of the token window; else a
+      // short wait that grows (3 s, then 6 s). The first wait used to be 8 s, which is most of a turn.
+      const hdr = err.headers ?? {}
+      const retryAfter = Number(hdr['retry-after-ms']) / 1000 || Number(hdr['retry-after'])
+      const reset = Number(hdr['x-ratelimit-reset-tokens'])
+      const asked = [retryAfter, reset].find((n) => Number.isFinite(n) && n > 0)
+      const wait = (asked !== undefined ? Math.min(asked, 20) : (attempt + 1) * 3) * 1000
       const h = err.headers ?? {}
       const seen = Object.entries(h).filter(([k]) => /ratelimit|retry-after/i.test(k)).map(([k, v]) => `${k}=${v}`).join(' ')
       console.warn(`rate limited, waiting ${Math.round(wait / 1000)}s | ${String((e as Error).message ?? '').slice(0, 200)} | ${seen}`)
@@ -704,6 +709,17 @@ const WITHHELD =
   "I couldn't check the numbers in my own answer against the calculation, so I'm not going to show them. " +
   'Please ask again, or say it a little differently.'
 
+/**
+ * Is this message plainly food? No question mark and none of the words that ask for an opinion or an
+ * explanation. Deliberately strict: a false "no" only costs the second and a half it would have saved,
+ * a false "yes" would run the meal agent on a question about food in general (and the router's
+ * answer would then discard it).
+ */
+export function looksLikeMeal(message: string): boolean {
+  if (message.includes('?')) return false
+  return !/\b(is|are|was|were|should|shouldn'?t|can|could|may|will|would|why|how|does|do|did|what|which|when|better|worse|best|worst|compare|compared|versus|vs|difference|explain|help|tell|safe|good|bad|healthy|okay|ok|allowed|avoid|stop|start|lower|raise|spike|diet|keto|fasting|a1c|medication|metformin)\b/i.test(message)
+}
+
 async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   const gate = safetyGate(req.message)
   if (gate.blocked) {
@@ -722,19 +738,30 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   if (!ctx.trusted) chargeTurn(ctx.clientKey, req.sessionId, undefined, ctx.person?.sub)
 
   const clock = { t0: Date.now(), route: 0, park: 0, agent: [] as number[] }
+  let previous = previousResponseFor(req.sessionId)
+  const mealInput = `[session_id: ${req.sessionId}]\n\n${req.message}`
+
+  // A message that is plainly a list of foods (no question, no word that asks for an opinion) is a
+  // meal, and the router only has to agree. So the meal run starts at the same moment as the router
+  // and is used when it does, a second and a half saved. A message that might be advice waits for
+  // the router, because a meal run that is thrown away still calls the tools, and its late
+  // resolve_foods result could land in the next turn's session.
+  const plainMeal = looksLikeMeal(req.message)
+  const parked = parkDayState(req)
+  const speculative = plainMeal ? parked.then(() => runAgent('meal', mealInput, previous, true, req.sessionId)) : null
+  speculative?.catch(() => { /* its error is read where it is used */ })
   const { role, by } = await route(req.message)
   clock.route = Date.now() - clock.t0
-  // Only a meal turn needs the day's budget parked for the engine to read.
   const parkAt = Date.now()
-  if (role === 'meal') await parkDayState(req)
+  if (role === 'meal') await parked
+  else parked.catch(() => { /* nobody reads a day that was parked for nothing */ })
   clock.park = Date.now() - parkAt
 
-  let previous = previousResponseFor(req.sessionId)
   // Advisory turns carry what this person has said they like; meal turns do
   // not, because their answer is arithmetic and a preference cannot change a
   // number.
   const recalled = role === 'advisor' ? await recallPreferences(req.sessionId, req.message) : ''
-  let input = `[session_id: ${req.sessionId}]\n\n${req.message}${recalled}`
+  let input = role === 'meal' ? mealInput : `${mealInput}${recalled}`
 
   const trace: ToolCallTrace[] = []
   let answer = ''
@@ -747,7 +774,8 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   while (attempts < 2) {
     attempts++
     const agentAt = Date.now()
-    const res = await runAgent(role, input, previous, role === 'meal', req.sessionId)
+    // The first meal attempt is the run already under way; a retry, or any other role, starts its own.
+    const res = attempts === 1 && role === 'meal' && speculative ? await speculative : await runAgent(role, input, previous, role === 'meal', req.sessionId)
     clock.agent.push(Date.now() - agentAt)
 
     responseId = res.id

@@ -31,7 +31,7 @@ import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
 import { afterMealFor, computeItem, computeMeal } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
-import { withHangRetry } from '../server/agent'
+import { looksLikeMeal, withHangRetry } from '../server/agent'
 import { diffEntries, exportShape, fromRow, mergeById, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { generateWeek, menuHidden, regenerateSlot, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
@@ -246,6 +246,19 @@ const menuMisses: string[] = []
 console.log(`\nmenu      ${menuMisses.length === 0 ? 'ok' : 'WRONG'}`)
 menuMisses.forEach((m) => console.log(m))
 
+// ── routing ───────────────────────────────────────────────────────────────
+// Which messages may start the meal agent before the router has answered.
+
+const routeMisses: string[] = []
+for (const m of ['two eggs and rye toast', 'A burrito bowl with white rice, black beans and chicken', 'oatmeal with a banana and a spoon of peanut butter', 'a pack of Oreos', 'grilled salmon with quinoa and broccoli', 'a slice of grandma\'s kugel']) {
+  if (!looksLikeMeal(m)) routeMisses.push(`    should start at once: ${m}`)
+}
+for (const m of ['Is brown rice better than white rice?', 'Can I have an apple with almonds?', 'why is my blood sugar highest in the morning', 'Should I stop eating fruit', 'how does the glycemic index work', 'What should I eat for breakfast', 'is keto sensible for type 2', 'will low carb lower my A1c', 'tell me about oatmeal', 'a banana, is that ok']) {
+  if (looksLikeMeal(m)) routeMisses.push(`    should wait for the router: ${m}`)
+}
+console.log(`\nrouting   ${routeMisses.length === 0 ? 'ok' : 'WRONG'}`)
+routeMisses.forEach((m) => console.log(m))
+
 // ── account ───────────────────────────────────────────────────────────────
 // Sign-in and sync: the parts that need no network. The rows themselves are proved in
 // the database (docs/security/security-plan.md); the engine's checks are in eval:abuse.
@@ -365,6 +378,7 @@ if (answerMisses.length) { console.log('an answer was parsed wrong'); process.ex
 if (portionMisses.length) { console.log('a default serving is wrong'); process.exit(1) }
 if (partialMisses.length) { console.log('a partial meal was called a fit'); process.exit(1) }
 if (menuMisses.length) { console.log('the weekly menu broke a rule'); process.exit(1) }
+if (routeMisses.length) { console.log('a message started the meal agent that should have waited'); process.exit(1) }
 if (accountMisses.length) { console.log('the account sync or the sign-in messages misbehaved'); process.exit(1) }
 if (hangMisses.length) { console.log('the hang retry misbehaved'); process.exit(1) }
 if (imageMisses.length) { console.log('the image is missing a data file the engine reads'); process.exit(1) }
