@@ -92,6 +92,13 @@ The shell does not have Node on its PATH by default: prefix with
     (`az containerapp revision restart`), because the engine reads the table once
     at start. `npm run deploy` alone leaves the old behaviour in place, and the
     local `npm run eval` will say it is fixed. Ask the running service.
+11. **Publish the agents with `MODEL_MEAL` unset and `MODEL_DEPLOYMENT_NAME`
+    unset.** The Container App still carries `MODEL_DEPLOYMENT_NAME=gpt-5-mini`;
+    exporting the app's environment before `npx tsx agent/provision.ts` once
+    put the meal agent back on it (50k tokens a minute, a 429 wait of 8 to 16 s,
+    median 20 s instead of 3). After any provision, read the model of each agent
+    from the project (`GET <project>/agents/<name>?api-version=v1`), not from the
+    script's report.
 
 ---
 
