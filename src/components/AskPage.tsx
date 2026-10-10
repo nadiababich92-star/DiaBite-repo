@@ -5,6 +5,7 @@ import { accessToken } from '../lib/auth'
 import { askAgent, avoidOf, budgetOf, engineId, MAX_QUESTION, RateLimitedError, receiptFrom, SignInRequiredError, type AgentResponse, type Receipt, type TraceStep } from '../lib/agent'
 import { viewEntry } from '../lib/diary'
 import { todayISO } from '../lib/storage'
+import { isDemo } from '../lib/demo'
 import { downloadResponses, saveResponse, savedCount } from '../lib/responses'
 import type { DiaryEntry, MealType, Profile, Targets } from '../types'
 
@@ -26,6 +27,8 @@ const SAMPLES = [
 /** Lab 3.2: with fresh context every question gets its own session and an empty diary, so saved responses don't depend on each other. */
 const FRESH_KEY = 'diabite.freshContext'
 function readFresh(): boolean {
+  // In a demo the toggle is hidden, so a value left in this browser must not act unseen.
+  if (isDemo) return false
   try { return localStorage.getItem(FRESH_KEY) === '1' } catch { return false }
 }
 
@@ -288,7 +291,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
       }, abort.current.signal, await accessToken())
       setReply(res)
       // Lab 3.2: keep every successful exchange as evaluation data.
-      setSaved(saveResponse(q, res))
+      if (!isDemo) setSaved(saveResponse(q, res))
     } catch (e) {
       if (e instanceof SignInRequiredError) {
         onSessionEnded?.()
@@ -330,14 +333,14 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
           <span style={{ width: `${Math.min(100, Math.max(0, ((targets.glBudget - left) / Math.max(1, targets.glBudget)) * 100))}%` }} />
         </div>
         <h2 className="ask-title">What are you about to eat?</h2>
-        <div className="row lab-row">
+        {!isDemo && <div className="row lab-row">
           {saved > 0 && <button className="ghost" onClick={downloadResponses}>Download Responses</button>}
           {saved > 0 && <span className="muted">{saved} saved</span>}
           <label className="muted lab-toggle">
             <input type="checkbox" checked={fresh} onChange={toggleFresh} />
             Fresh context per question
           </label>
-        </div>
+        </div>}
         <p className="muted">Say it the way you'd say it to a friend. The agent does the counting — and shows its arithmetic.</p>
         <form className="ask-form" onSubmit={(e) => { e.preventDefault(); ask(text) }}>
           <input
@@ -434,7 +437,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
             </section>
           )}
 
-          {reply.trace && reply.trace.length > 0 && (
+          {!isDemo && reply.trace && reply.trace.length > 0 && (
             <section className="card">
               <h2>How this answer was made</h2>
               <ol className="trace">

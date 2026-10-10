@@ -115,7 +115,8 @@ const callOf = (r: Reply, op: string) => (r.trace ?? []).find((t) => t.tool === 
  * product's own language and failed this check the first time it was said.
  */
 function promisesOutcome(text: string): boolean {
-  const t = text
+  // The model writes "can’t" with a curly apostrophe; the clause below is cut on a straight one.
+  const t = text.replace(/[‘’ʼ]/g, "'")
     .replace(/\b(not|never|no)\s+(be\s+)?guarantee(d|s)?\b/gi, ' ')
     // The whole clause, not the verb: "I can't promise it will lower yours"
     // leaves "it will lower yours" behind if only the verb is cut.
