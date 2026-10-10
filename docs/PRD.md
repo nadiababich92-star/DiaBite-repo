@@ -45,6 +45,46 @@ the problem or the central claim:
    below, the later document wins: the durations here were set before the
    defect list and the validation work were written down.
 
+**Revised 10 October 2026.** Since the second revision, and none of it changing
+the problem or the central claim:
+
+1. **Packaged foods entered the catalogue** (9 October): 754 products from USDA
+   Branded Foods, costed for carbohydrate, fibre and energy from the label and
+   **never for a glycemic load**. A meal containing one is partial and is never
+   called "fits". The catalogue is now 6,806 records. The rule that keeps a
+   food with carbohydrate and no glycemic index out of it has one exception,
+   and that exception is its own kind of record.
+2. **Accounts were built** (10 October): sign-in by email link or code, the
+   profile and diary kept so they survive closing the tab, per-person limits,
+   a consent step and account deletion. The owner decided that a real sign-in
+   is wanted so that every user is a known person who can be asked what
+   happened. Required sign-in is scheduled to switch on 11 October. This
+   replaces the "no account" position in E1 and in the sensitive-data
+   paragraph below. The data lives in an EU region, so GDPR applies; the
+   consent text is a draft and no counsel has reviewed it.
+3. **The weekly menu returned** (10 October) with single-slot regeneration, no
+   dish repeated within three days and a shopping list, and is hidden for two
+   profiles it must not plan for: kidney disease or dialysis, and a history of
+   an eating disorder. Gout and gastroparesis are **not** guarded; that is a
+   question for a clinician.
+4. **A coverage study** (10 October, `eval/coverage/`) ran 231 everyday US foods
+   through the resolver with no model: 15 still resolve to nothing, and several
+   confident wrong matches (taco to taco seasoning, chili to chili powder, a
+   donut to an iced-coffee drink) were closed. Pizza, nachos and potato latkes
+   remain unknown because no glycemic index exists for them, which is the
+   honest answer.
+5. **The evaluations grew**: 273 engine cases (121 resolution, 31 clarification,
+   72 safety phrasings, 18 verifier, 17 answer parsing, 8 partial meals, 4
+   portions, 2 packaged) and 94 agent cases. The agent set on 10 October
+   answered 94 of 94 at a median of 3.6 s and a p90 of 6.9 s, 243 of 244
+   mechanical checks; the one miss was a check reading prose, which has been
+   corrected to read the tool result.
+6. **A new identity and interface were designed, not yet built**: a receipt
+   with a bite out of its corner, a marker on the one number that answers the
+   question, a light and a dark theme the user can choose, and the states that
+   were missing (over the budget, a food we do not have, waiting, logged).
+   Nothing about this is in the app until it is deployed.
+
 > Figures marked **[verify]** are from memory of published sources and must be
 > re-checked against the primary source before this document is submitted or
 > shown to stakeholders.
@@ -460,12 +500,12 @@ would matter more at a real launch.
 - Personal targets with their derivation on screen
 - Safety envelope: no dosing, red-flag escalation, honest "no verified data for that"
 - A measured evaluation set, however small
-- ~~The weekly menu generator~~ — withdrawn from the demo on 1 October; see Narrowing the scope
+- ~~The weekly menu generator~~ — withdrawn from the demo on 1 October; see Narrowing the scope; returned on 10 October as V1 (Epic D)
 
 **Deferred**
 
 - Photo and voice logging
-- Accounts, sync, export
+- ~~Accounts, sync, export~~ — accounts and sync were built on 10 October; export and deletion are in the account screen
 - Personalisation from history
 - Broad food coverage
 - Clinical review
@@ -477,7 +517,7 @@ would matter more at a real launch.
 | 1 | Environment, English UI, deploy. Engine functions wrapped as agent tools | As planned |
 | 2 | Agent loop working end to end on the existing seed data | As planned, on n8n — which was then replaced |
 | 3 | Verifier and the evaluation set | As planned, plus the move to Azure: engine into a container, agent into Foundry |
-| 4 | Visible tool trace; food data extended only where demo scenarios need it | Trace as planned. Food data went further than planned: a USDA coverage layer took the catalogue to 6,054 |
+| 4 | Visible tool trace; food data extended only where demo scenarios need it | Trace as planned. Food data went further than planned: a USDA coverage layer took the catalogue to 6,054, and packaged foods on 9 October to 6,806 |
 | 5 | Rehearsal, backup recording, remaining PRD sections, buffer | In progress. The buffer went on latency (p90 26 s → 6.2 s), on splitting one agent into three, and on nine defects the evaluations found |
 
 > **What this scope deliberately gives up.** V0 is measured on a narrow set,
@@ -485,6 +525,11 @@ would matter more at a real launch.
 > items, mostly, which have no published glycemic index to give. Both belong in
 > the pitch rather than hidden in it: the demo is evidence for an architectural
 > claim, not a product launch, and it is stronger when it says so.
+>
+> *Update, 10 October: packaged foods are now in the catalogue, costed for
+> carbohydrate but never for a glycemic load. A study of 231 everyday US foods
+> found 15 that still resolve to nothing. The two sets differ, so the figures
+> are not comparable.*
 
 ### Functional Requirements
 
@@ -530,24 +575,25 @@ don't matter.
 | C8 | As a sceptical user, I want to see how the answer was produced | An expandable trace shows each tool call, its result, and the verifier outcome for the answer | V0 |
 | C9 | As a user, I want it to remember what I like | Accepted and rejected suggestions bias future recommendations | V1 |
 
-#### Epic D — Weekly menu (already built, carried as-is)
+#### Epic D — Weekly menu (built; returned to the product on 10 October)
 
 | ID | User story | Acceptance criteria | Scope |
 |---|---|---|---|
 | D1 | As a user, I want a week of meals that fits my targets | 7 days × 4 meals within ±10% of energy target and at or under the glycemic-load budget | V0 |
 | D2 | As a user, I want a shopping list | Aggregated quantities per ingredient for the week | V0 |
-| D3 | As a user, I want to reject a dish and get another | Single-slot regeneration preserving all other constraints | V1 |
-| D4 | As a user, I don't want to eat the same thing constantly | No dish repeats within 3 days; at most 2 occurrences per week | V1 |
+| D3 | As a user, I want to reject a dish and get another | Single-slot regeneration preserving all other constraints | V1 — built |
+| D4 | As a user, I don't want to eat the same thing constantly | No dish repeats within 3 days; at most 2 occurrences per week | V1 — the 3-day gap is built; the weekly cap is not enforced |
 | D5 | As a user, I want menus that fit my time and budget | Cooking-time and cost constraints respected | Later |
+| D6 | As a user whose profile a fixed plan could harm, I do not want one | With kidney disease, dialysis or a history of an eating disorder no plan is shown, and a card says why and points to a clinician. Gout and gastroparesis are not yet guarded | V1 — built |
 
 #### Epic E — Trust, safety, and data
 
 | ID | User story | Acceptance criteria | Scope |
 |---|---|---|---|
-| E1 | As a user, I want my health data private | Stored locally by default; no account required to use the product | V0 |
+| E1 | As a user, I want my health data private | V0 as built: stored locally, no account. **Since 10 October:** sign-in is required (scheduled for 11 October); the profile and diary are stored in an EU region, readable only by their owner; meal sentences are not logged | V0, superseded |
 | E2 | As the team, we need to know when the agent is wrong | Every agent turn logs its tool calls, verifier result, and user correction, for evaluation | V0 |
 | E3 | As the team, we need the food data to be defensible | Every food record carries a source and a last-verified date; unverified records are flagged in-app | V0 |
-| E4 | As a user, I want to export or delete everything | One-tap full export and full deletion | V1 |
+| E4 | As a user, I want to export or delete everything | One-tap full export and full deletion | V1 — built, in the account screen |
 
 ### Non-functional requirements
 
@@ -568,7 +614,7 @@ don't matter.
    ingredients, where nutrients come from USDA values per 100 g and dish GI is
    a carb-weighted mean of ingredient GI; and, since 1 October, 4,618 USDA
    Survey foods as a coverage layer. That is the ingredient-first approach plus
-   a public-data floor under it, and it is the moat described in Week 1. What
+   a public-data floor under it, and it is the moat described in Week 1. Since 9 October 754 packaged products from USDA Branded Foods sit beside them as a kind of their own: carbohydrate, fibre and energy from the label, never a glycemic load. What
    remains: verifying each ingredient GI against its cited source before
    external use, and branded foods, which no public source gives a measured GI
    for at all. **Values must never be generated by the model:** inventing the
@@ -721,7 +767,7 @@ design* — and are assessed in the summary table.
 | Check | Result | Why |
 |---|---|---|
 | Is ML necessary? | **PASS** | Input is open-vocabulary natural language. Every rule-based food logger on the market solves this by making the user do the structuring through search-and-select — exactly the friction that kills adherence. |
-| Do you have data to train? | **N/A for V0** | No fine-tuning. What we need is a labelled evaluation set, built in Week 3 and now at 114 engine phrases (95 resolution and 19 clarification), 63 safety phrasings, 9 answer-parsing samples and 87 agent cases. User corrections at the confirmation step then become labelled data for free. |
+| Do you have data to train? | **N/A for V0** | No fine-tuning. What we need is a labelled evaluation set, built in Week 3 and now at 273 engine cases (121 resolution, 31 clarification, 72 safety phrasings, 18 verifier, 17 answer-parsing, 8 partial-meal, 4 portion, 2 packaged) and 94 agent cases (as of 10 October; the figures in the first draft were 114 engine phrases and 87 agent cases). User corrections at the confirmation step then become labelled data for free. |
 | Can it be solved by ML/AI? | **PASS** | Entity extraction from short text is well within current model capability. Portion estimation from words like "a bowl" is the weak spot. |
 | Can it meet accuracy requirements? | **RISK** | 90% top-1 entity match on a narrow food set is plausible. Portion estimation is inherently ±30% from language alone. Mitigation: ask when ambiguous, and the user confirms resolved foods before anything is saved. |
 | Can it scale? | **PASS** | Two model round trips per meal since 30 September, down from four; well under $0.05 a turn. The binding limit is not price but the deployment's tokens-per-minute quota, which one user never reaches and a back-to-back evaluation run does. |
@@ -819,9 +865,9 @@ applied there.
 
 | Release | Features | Duration |
 |---|---|---|
-| **MVP — V0, the demo** | Core loop (free text → verified numbers → verdict); verifier and visible tool trace; personal targets with derivation; safety gate; an evaluation set of 87 agent cases and 198 engine cases (resolution, clarification, safety phrasings, answer parsing, verifier) with reported accuracy; a memory store for food preferences on the advisor; a knowledge base over our own documents; in-app feedback form (rating and comment, no account) so the first users can answer back | Weeks 1–5 |
-| **MVP 1** | Persistent memory of preferences; single-slot menu regeneration and the menu returned to the product; frequent meals one tap; export and delete; ingredient GI values verified against their sources; packaged and restaurant foods added | +6 weeks |
-| **Launch** | Accounts and sync; photo logging; broad US food coverage including restaurant chains and packaged goods; clinical review of all copy; FDA general-wellness positioning confirmed with counsel | +3 months |
+| **MVP — V0, the demo** | Core loop (free text → verified numbers → verdict); verifier and visible tool trace; personal targets with derivation; safety gate; an evaluation set of 94 agent cases and 273 engine cases (resolution, clarification, safety phrasings, answer parsing, verifier) with reported accuracy; a memory store for food preferences on the advisor; a knowledge base over our own documents; in-app feedback form (rating and comment, no account) so the first users can answer back | Weeks 1–5 |
+| **MVP 1** | Persistent memory of preferences; single-slot menu regeneration and the menu returned to the product *(done 10 October)*; frequent meals one tap; export and delete *(done 10 October)*; ingredient GI values verified against their sources; packaged and restaurant foods added *(packaged foods done as carbohydrate only; restaurant foods not)* | +6 weeks |
+| **Launch** | Accounts and sync *(built 10 October; required sign-in scheduled for 11 October)*; photo logging; broad US food coverage including restaurant chains and packaged goods; clinical review of all copy; FDA general-wellness positioning confirmed with counsel | +3 months |
 | **Iteration** | CGM import; personalisation from measured glucose response; caregiver view; clinician summary | ongoing |
 
 The MVP row is the only one with a committed duration. The rest are ordered,
@@ -855,7 +901,7 @@ model or the food data. A run is a script — `npm run eval:agent` sends every
 case in `eval/cases.json` to the deployed agent, checks the mechanical
 expectations, and writes the transcript (`eval/agent-runs.jsonl`) and three
 Foundry uploads (all rows, the rows that used tools, and the rows that are not
-refusals). 87 cases, 191 of 193 checks at the run of 30 September (191 of 191 on 5 October, 180 of 183 on 8 October). Before the move to
+refusals). 87 cases, 191 of 193 checks at the run of 30 September (191 of 191 on 5 October, 180 of 183 on 8 October; on 10 October 94 cases, 243 of 244). Before the move to
 Foundry this was hand work: ask each question in the app, download the answers,
 reconcile them.
 
@@ -1133,7 +1179,7 @@ user would plausibly type, the food is identified 40/40 times and a usable GI ex
 31/40; across all foods holding at least 2 g of available carbohydrate, 67% carry a GI.
 Files: `data/foods-usda/`.
 
-**Three recipe/ingredient layers, 1,351 records.** 350 ingredients with nutrients per 100 g from
+**Three recipe/ingredient layers, 1,351 records** *(6,806 with the USDA coverage layer and packaged foods; see Food data)*. 350 ingredients with nutrients per 100 g from
 USDA FoodData Central and glycemic index from the International Tables of
 Glycemic Index 2021 (Atkinson et al., Am J Clin Nutr), each value tagged with
 its evidence tier and citation; 86 seed foods that cover the
@@ -1212,9 +1258,9 @@ which exists only to judge the system.
 
 | Set | What it is | How it is built |
 |---|---|---|
-| Food data (6,054 records) | The engine's source of truth | Three layers: 351 ingredients and ~85 everyday foods curated by hand, 1,000 recipes composed from them by `data/recipes-db/build.py`, and 4,618 USDA Survey (FNDDS) foods — "foods as eaten" — carrying nutrients, household portions and a glycemic index assigned by the five-level scheme of Aston et al. The curated records win a tie; coverage fills the gaps |
+| Food data (6,806 records) | The engine's source of truth | Four kinds: 754 packaged products from USDA Branded Foods (label data, never a glycemic load), and three layers: 351 ingredients and ~85 everyday foods curated by hand, 1,000 recipes composed from them by `data/recipes-db/build.py`, and 4,618 USDA Survey (FNDDS) foods — "foods as eaten" — carrying nutrients, household portions and a glycemic index assigned by the five-level scheme of Aston et al. The curated records win a tie; coverage fills the gaps |
 | GI cross-check (88 ingredients) | A second opinion on our GI values | Compared against published tables: 51 agree, 24 read lower in our table, 5 higher, 8 have no published match. Reviewed by hand before external use |
-| Engine cases (108) | Resolution, clarify bands, verifier probes | Hand-labelled phrases → the correct record id or `unknown`; deliberately over-samples foods we lack and cuisines where embeddings are weaker |
+| Engine cases (273) | Resolution, clarify bands, verifier probes | Hand-labelled phrases → the correct record id or `unknown`; deliberately over-samples foods we lack and cuisines where embeddings are weaker |
 | Agent cases (19, HHH) | Helpful / Honest / Harmless behaviour | Written as query + expected behaviour + mechanical checks, in `eval/cases.json` |
 | Agent runs | What the deployed agent actually did | `npm run eval:agent` replays every case against `POST /agent/ask` and writes the transcript plus two Foundry datasets |
 
@@ -1233,9 +1279,9 @@ stated in the PRD so the number is never quoted without it.
 
 | Purpose | Now | What V1 needs |
 |---|---|---|
-| Food coverage | 6,054 records. 13% of the food phrases in the test set still resolve to nothing, down from 18% before the coverage layer was loaded | Branded and restaurant items — Oreos, a KIND bar, a Starbucks frappuccino — which have no published glycemic index at all. See the open decision below |
-| Resolution ground truth | 114 labelled phrases (95 resolution, 19 clarification), of which 10 were added the day the coverage layer arrived and 4 record foods we still do not have | 300–500, drawn from what users actually type rather than what we imagined. The five moderated sessions are the mechanism: every phrase a participant types that we cannot resolve becomes a case that week |
-| Agent behaviour | 19 HHH cases | 40–60, with every safety phrasing the gate has ever missed |
+| Food coverage | 6,806 records. On 1 October 13% of the food phrases in the test set resolved to nothing, down from 18% before the coverage layer was loaded; on 10 October 15 of 231 everyday US foods did, on a different set | Branded and restaurant items — Oreos, a KIND bar, a Starbucks frappuccino — which have no published glycemic index at all. See the open decision below |
+| Resolution ground truth | 152 labelled phrases (121 resolution, 31 clarification; 114 on 1 October), of which 10 were added the day the coverage layer arrived and 4 record foods we still do not have | 300–500, drawn from what users actually type rather than what we imagined. The five moderated sessions are the mechanism: every phrase a participant types that we cannot resolve becomes a case that week |
+| Agent behaviour | 19 HHH cases (94 agent cases in all) | 40–60, with every safety phrasing the gate has ever missed |
 | GI verification | 88 ingredients cross-checked | All 350, each against its cited source, before anything is shown outside the demo |
 
 ### Iterative data collection
@@ -1393,9 +1439,11 @@ loop.
 **Efficacy and limits.** The product computes the glycemic load of a described
 meal against a personal budget, and shows the arithmetic. It does not know the
 user's medication, their glucose response, or what they ate when they did not
-log. Its food coverage reaches 6,054 foods and still misses one
-phrase in eight — branded items, mostly — and it is a reference tool, not
-medical advice, stated before any number and non-dismissible at onboarding.
+log. Its food coverage reaches 6,806 foods, including packaged
+products costed for carbohydrate only and never for a glycemic load; a food it
+does not have is named as unknown and the meal is called partial, never "fits".
+On 10 October 15 of 231 everyday US foods still resolved to nothing. It is a
+reference tool, not medical advice, stated before any number and non-dismissible at onboarding.
 **Nothing in it has been reviewed by a clinician yet:** the review pack is
 written and the first requests are out, and that is a gap in the product, not
 only in the paperwork.
@@ -1410,11 +1458,25 @@ apply: there is no covered entity and no provider relationship. The product
 does not ask for a diagnosis document, a lab result, or an identity.
 
 **Sensitive data.** Minimised by design. The diary lives in the browser; there
-is no account and no sync. What leaves the device is the meal sentence and the
+is no account and no sync. *Superseded on 10 October, see the next paragraph.* What leaves the device is the meal sentence and the
 day's totals, for the length of one answer. The feedback form stores a rating
 and a comment with insert-only access, so no visitor can read what anyone else
 wrote; the key shipped to the browser can do nothing else. Health data is never
 required to use the product.
+
+**Sensitive data, from 10 October.** The position above was true of the first
+build and is no longer true of the product. Sign-in is built and is scheduled
+to become required on 11 October, so the product now holds an email address, the
+whole profile (age, sex as chosen, height, weight, activity, diagnosis, medicine
+classes, kidney status, other conditions, allergies) and the diary, in a
+Supabase project in the EU (Ireland), readable and writable only by the person
+they belong to, and removed by one account-deletion call. Meal sentences are
+not logged for accounts. The controller is established in the EU, so GDPR
+applies to every user wherever they live, and these are health data. The
+consent text is a draft; no counsel has reviewed it, and no clinician has read
+the sign-in emergency line. HIPAA still does not apply. The honest summary for
+a stakeholder: the product asks for more than it did a week ago, and the legal
+review of that has not happened.
 
 **Human oversight.** The user confirms resolved foods before anything is saved,
 can open the full calculation, and is referred to their care team on every
@@ -1445,7 +1507,7 @@ a weight printed beside a food is the weight it was costed at; the Foundry
 judges reported with their spread, since task adherence moves four or five rows
 between runs of the same agent; resolution 83 of 83 on the engine's own set,
 *reported with its method*, on a narrow set, never as a headline; the share of
-phrases that resolve to nothing — 13%, and what they are; latency p90 6.2 s on 30 September and 8.2 s on 8 October
+phrases that resolve to nothing — 13%, and what they are; latency p90 6.2 s on 30 September, 8.2 s on 8 October and 6.9 s on 10 October
 against a 10 s target,
 **with the régime it was measured in stated next to it** — one user with
 pauses, not a back-to-back run, which queues against the per-minute token quota
@@ -1554,7 +1616,7 @@ them describe us:
 | Condition | Us |
 |---|---|
 | **Factual knowledge acquisition** | Exactly what we must not do. Glycemic values belong in a table with a source and a date, not in weights |
-| **Limited training data** | 114 labelled engine phrases and 87 agent cases. Enough to *evaluate*, nowhere near enough to *train* |
+| **Limited training data** | 152 labelled engine phrases (10 October; 114 at the first draft) and 94 agent cases. Enough to *evaluate*, nowhere near enough to *train* |
 | **Short-term task retention** | The day's budget and a person's preferences change hourly; that is state, not a weight |
 | **Computational constraints** | One person, five weeks, a free Azure trial. Even LoRA's modest cost is real when nothing else in the stack needs a GPU |
 | Task domain mismatch | The one that does *not* apply: food language is a genuine domain, which is why the next section exists |
