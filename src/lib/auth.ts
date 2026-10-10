@@ -1,5 +1,5 @@
 /**
- * Signing in: an emailed link and a six-digit code, no password.
+ * Signing in: an emailed link and a code, no password.
  *
  * The account is Supabase Auth; this file is the only place the app talks to it
  * about identity. Everything that can go wrong comes back as one of a few
@@ -56,9 +56,9 @@ export function engineUrl(path: '/health' | '/account'): string {
 }
 const healthUrl = () => engineUrl('/health')
 
-export { looksLikeEmail, problemOf } from './authCore'
+export { looksLikeCode, looksLikeEmail, problemOf } from './authCore'
 export type { SignInProblem } from './authCore'
-import { looksLikeEmail, problemOf, type SignInProblem } from './authCore'
+import { looksLikeCode, looksLikeEmail, problemOf, type SignInProblem } from './authCore'
 
 export async function sendLink(email: string): Promise<SignInProblem | null> {
   if (!supabase) return 'unavailable'
@@ -74,7 +74,7 @@ export async function sendLink(email: string): Promise<SignInProblem | null> {
 
 export async function verifyCode(email: string, code: string): Promise<SignInProblem | null> {
   if (!supabase) return 'unavailable'
-  if (!/^\d{6}$/.test(code)) return 'code'
+  if (!looksLikeCode(code)) return 'code'
   try {
     const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: 'email' })
     return error ? problemOf(error) : null

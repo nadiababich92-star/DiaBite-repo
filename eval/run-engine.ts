@@ -33,7 +33,7 @@ import { afterMealFor, computeItem, computeMeal } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
 import { withHangRetry } from '../server/agent'
 import { diffEntries, exportShape, fromRow, mergeById, toRow } from '../src/lib/syncCore'
-import { looksLikeEmail, problemOf } from '../src/lib/authCore'
+import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { generateWeek, menuHidden, regenerateSlot, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
 import { calculateTargets, DEFAULT_PROFILE } from '../src/lib/profile'
 import { CATEGORY_LABELS } from '../src/data/foods'
@@ -272,6 +272,7 @@ const accountMisses: string[] = []
   ok('where both have an id the later one wins', newer.length === 1 && newer[0].n === 2)
   ok('the export has exactly the keys consent, diary, email, exportedAt, profile',
     exportShape({ exportedAt: '', email: '', consent: { at: null, version: null }, profile: null, diary: [] }) === 'consent,diary,email,exportedAt,profile')
+  ok('the code may be 6 to 10 digits, whatever Supabase is set to', looksLikeCode('12345678') && looksLikeCode('123456') && looksLikeCode('1234567890') && !looksLikeCode('12345') && !looksLikeCode('12345678901') && !looksLikeCode('12a456'))
   ok('an address is an address', looksLikeEmail('name@example.com') && !looksLikeEmail('name@') && !looksLikeEmail('a b@c.de') && !looksLikeEmail(''))
   ok('a rate limit is a rate limit', problemOf({ status: 429, code: 'over_email_send_rate_limit' }) === 'rate')
   ok('a wrong code is a code problem', problemOf({ status: 403, code: 'otp_expired' }) === 'code' && problemOf({ status: 400, message: 'Token has expired or is invalid' }) === 'code')

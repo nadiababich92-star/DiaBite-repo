@@ -74,7 +74,7 @@ export default function SignIn({ notice, onCancel }: { notice?: string; onCancel
             </label>
             {problem && <p id="signin-problem" className="signin-problem" role="alert">{PROBLEM[problem]}</p>}
             <button className="primary" type="submit" disabled={busy}>{busy ? 'Sending…' : 'Email me a link'}</button>
-            <p className="muted">We send a link and a six-digit code. There is no password.</p>
+            <p className="muted">We send a link and a code. There is no password.</p>
             <p className="muted">By continuing you agree to how DiaBite keeps your data: your email address, your answers about yourself and your diary, stored in Ireland, which you can export or delete at any time.</p>
           </form>
         ) : (
@@ -84,14 +84,14 @@ export default function SignIn({ notice, onCancel }: { notice?: string; onCancel
               We sent a sign-in link to <b>{email.trim()}</b>. Open it on this device, or type the code from the email.
             </p>
             <label className="field">
-              <span>Six-digit code</span>
+              <span>Code from the email</span>
               <input ref={codeRef} className="signin-code" type="text" inputMode="numeric" autoComplete="one-time-code"
-                maxLength={6} pattern="[0-9]*" value={code}
-                onChange={(e) => { setCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setProblem(null) }}
+                maxLength={10} pattern="[0-9]*" value={code}
+                onChange={(e) => { setCode(e.target.value.replace(/\D/g, '').slice(0, 10)); setProblem(null) }}
                 aria-invalid={problem === 'code'} aria-describedby={problem ? 'signin-problem' : undefined} />
             </label>
             {problem && <p id="signin-problem" className="signin-problem" role="alert">{PROBLEM[problem]}</p>}
-            <button className="primary" type="submit" disabled={busy || code.length !== 6}>{busy ? 'Signing in…' : 'Sign in'}</button>
+            <button className="primary" type="submit" disabled={busy || code.length < 6}>{busy ? 'Signing in…' : 'Sign in'}</button>
             <div className="row">
               <button className="ghost" type="button" onClick={() => send()} disabled={busy || wait > 0}>
                 {wait > 0 ? `Send again in ${wait} s` : 'Send again'}

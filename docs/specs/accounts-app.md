@@ -90,4 +90,4 @@ A normal account (`demo@<owner's address>` or a plus-address) signed in once on 
 - Whether to show the wall comes from the engine: `GET /health` now carries `signIn: true|false`, so `REQUIRE_SIGN_IN` is one revision and no new build. If the engine cannot be reached the app shows the wall.
 - Pure parts live in `src/lib/syncCore.ts` and `src/lib/authCore.ts` and are tested in `npm run eval` (`account` section); the network parts in `sync.ts` and `auth.ts`.
 - A diary from before sign-in is set aside in `diabite.legacy.diary.v1` when it holds entries the account lacks; "Not now" leaves it there and it is offered again at the next sign-in; sign-out clears it with everything else.
-
+- The code length is **Supabase's** setting (it was 8 on the project, not 6); the app accepts 6 to 10 digits and says "a code", never "six-digit".

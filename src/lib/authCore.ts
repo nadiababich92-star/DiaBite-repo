@@ -15,3 +15,6 @@ export function problemOf(e: { status?: number; code?: string; name?: string; me
   return 'unavailable'
 }
 
+
+/** The length is Supabase's setting (6 to 10 digits), not ours: accept what it can send. */
+export const looksLikeCode = (c: string) => /^\d{6,10}$/.test(c)
