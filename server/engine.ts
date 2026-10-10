@@ -178,6 +178,10 @@ async function main() {
       const r = await fetch(`${base}/auth/v1/admin/users/${person.sub}`, {
         method: 'DELETE', headers: { apikey: service, authorization: `Bearer ${service}` }, signal: AbortSignal.timeout(15_000),
       })
+      // A token outlives the account it names, so a second press (or a retry after a lost
+      // reply) reaches Supabase for a person who is already gone. That is the answer the
+      // person wanted, not a failure.
+      if (r.status === 404) { console.warn(JSON.stringify({ evt: 'account_already_gone', who: sourceTag(person.sub) })); return res.json({ ok: true }) }
       if (!r.ok) { console.error(`DELETE /account: Supabase answered ${r.status}`); return res.status(502).json({ error: 'delete_failed' }) }
       console.warn(JSON.stringify({ evt: 'account_deleted', who: sourceTag(person.sub) }))
       res.json({ ok: true })

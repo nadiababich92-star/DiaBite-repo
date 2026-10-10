@@ -294,6 +294,10 @@ async function authSuite() {
     const failBody = await fail.text()
     check('S16', 'when the admin call fails the answer is 502 delete_failed and fixed text, nothing leaked',
       fail.status === 502 && failBody.includes('delete_failed') && !failBody.includes('stub-service-key'), `${fail.status} ${failBody}`)
+    adminStatus = 404
+    const gone = await del(await bearer(uid(6)))
+    check('S16b', 'deleting an account that is already gone is 200, not a failure (a token outlives its account)', gone.status === 200, String(gone.status))
+    adminStatus = 200
     await del(await bearer(uid(4))) // the second of two allowed in a day (the first was S15)
     const limited = await del(await bearer(uid(4)))
     check('S17', 'a third delete in a day from one person: 429', limited.status === 429, String(limited.status))
