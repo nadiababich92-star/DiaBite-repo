@@ -29,7 +29,7 @@ Measured on 8 October 2026 against the running service.
 | Product | Onboarding with targets and their derivation, ask screen, diary, weekly menu (built, never shown to a user), feedback form, phone layout |
 | Agents | Router (`gpt-5.4-nano`), meal specialist (`gpt-5.4-mini`, with tools), advisor (`gpt-5.4-mini`, no tools, no numbers, memory and knowledge base), all in Azure AI Foundry |
 | Catalogue | 6,054 foods: 351 ingredients, ~85 everyday foods, 1,000 recipes, 4,618 USDA survey foods |
-| Quality | Measured 9 October 2026. Engine: food resolution 101/101, clarification 24/24, safety phrasings 72/72, portions 4/4, partial meals 6/6, answer parsing 17/17, verifier 16/16, plus checks that no costable record has carbohydrate without a GI, that stored data is not trusted blindly and that a hung call is retried once. Live agent: 90 of 90 answered, 198 of 199 mechanical checks (the one miss was a check reading prose, since fixed). Foundry model-graded: task adherence 79/90 (mean 0.91), intent resolution 74/74 (4.93), tool-call accuracy 62/63 (4.95), groundedness 61/63 (4.84). Answer time median 9.6 s and p90 32.7 s on this run, from a laptop on a poor connection; the 8 October figure of 4.7 s / 8.2 s came from a good one, so the target (p90 under 10 s) is **not** shown to be met or missed by this run |
+| Quality | Measured 9 October 2026. Engine: food resolution 101/101, clarification 24/24, safety phrasings 72/72, portions 4/4, partial meals 6/6, answer parsing 17/17, verifier 16/16, plus checks that no costable record has carbohydrate without a GI, that stored data is not trusted blindly and that a hung call is retried once. Live agent after branded foods and the menu: **94 of 94 answered, 243 of 243 mechanical checks** (10 October; an earlier run on 9 October was 198 of 199, the miss being a check that read prose). Foundry model-graded: task adherence 79/90 (mean 0.91), intent resolution 74/74 (4.93), tool-call accuracy 62/63 (4.95), groundedness 61/63 (4.84). Answer time median 9.6 s and p90 32.7 s on this run, from a laptop on a poor connection; the 8 October figure of 4.7 s / 8.2 s came from a good one, so the target (p90 under 10 s) is **not** shown to be met or missed by this run |
 | Safety | Rules before any model (dosing, red flags, fasting, referral); public route limited per address, per conversation and per day; browser headers; secrets held as secrets |
 | Hosting | One container on Azure Container Apps serving app and engine at a permanent address; image built by GitHub Actions; deploy is a human step on purpose |
 | Cost, measured | About €0.0026 per question in model charges; about €26 a month fixed (always-on replica and registry, at list price) |
@@ -130,7 +130,7 @@ are a decision.
 
 ### WS2 — The food gap  ·  16–24 days
 
-*Why:* about 13% of what people type resolves to nothing, mostly branded
+*Why:* about 13% of what people type resolved to nothing before branded foods (13.6%, 17 of 125 food phrases on 9 October; **7.1%, 9 of 127, on 10 October** with 737 branded products loaded; what is left is kugel, which is deliberate, and General Tso's chicken, fried rice and biscuits and gravy, the composite dishes below), mostly branded
 foods with no published glycemic index. It is the most visible weakness and
 the first thing a user will hit.
 
