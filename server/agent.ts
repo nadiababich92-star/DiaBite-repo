@@ -656,6 +656,15 @@ export interface AskContext {
   /** The caller's address; absent for trusted callers, who are not rate limited. */
   clientKey?: string
   trusted?: boolean
+  /** The signed-in person, when the request carried a good token. */
+  person?: { sub: string } | null
+  /** REQUIRE_SIGN_IN: a model turn needs a person (the gate does not). */
+  requireSignIn?: boolean
+}
+
+/** A model turn was attempted without signing in. The engine turns this into 401. */
+export class SignInRequired extends Error {
+  constructor() { super('sign_in_required') }
 }
 
 export async function ask(req: AskRequest, ctx: AskContext = {}): Promise<AskResponse> {
@@ -703,7 +712,9 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
 
   // After the gate, before the router: a refusal costs nothing and is never
   // withheld, and the router is itself a model call. Throws RateLimited.
-  if (!ctx.trusted) chargeTurn(ctx.clientKey, req.sessionId)
+  // The gate above needs no token; everything below spends a model turn and does.
+  if (ctx.requireSignIn && !ctx.trusted && !ctx.person) throw new SignInRequired()
+  if (!ctx.trusted) chargeTurn(ctx.clientKey, req.sessionId, undefined, ctx.person?.sub)
 
   const { role, by } = await route(req.message)
   // Only a meal turn needs the day's budget parked for the engine to read.

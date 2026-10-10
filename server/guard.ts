@@ -27,6 +27,9 @@ export function limits() {
     ipDay: num('ASK_IP_DAY', 200),
     sessionHour: num('ASK_SESSION_HOUR', 60),
     dailyCeiling: num('ASK_DAILY_CEILING', 1000),
+    userHour: num('ASK_USER_HOUR', 60),
+    userDay: num('ASK_USER_DAY', 200),
+    deletePerDay: num('ACCOUNT_DELETE_DAY', 5),
   }
 }
 
@@ -112,7 +115,7 @@ class Windows {
 const windows = new Windows()
 let ceiling = { day: '', used: 0 }
 
-export type Scope = 'ip' | 'session' | 'daily'
+export type Scope = 'ip' | 'session' | 'daily' | 'user'
 export class RateLimited extends Error {
   constructor(public scope: Scope, public retryAfterSec: number) {
     super(`rate_limited:${scope}`)
@@ -128,7 +131,7 @@ const secondsToMidnight = (now: number) => Math.max(1, Math.ceil((DAY - (now % D
  * call. The daily ceiling is read first, so a turn refused at the ceiling
  * does not use up the person's own allowance.
  */
-export function chargeTurn(clientKey: string | undefined, sessionId: string, now = Date.now()): void {
+export function chargeTurn(clientKey: string | undefined, sessionId: string, now = Date.now(), userId?: string): void {
   const L = limits()
   if (L.off) return
 
@@ -142,10 +145,24 @@ export function chargeTurn(clientKey: string | undefined, sessionId: string, now
     const waitDay = windows.take(`ipd:${clientKey}`, L.ipDay, DAY, now)
     if (waitDay) throw new RateLimited('ip', waitDay)
   }
+  // A signed-in person is a more honest unit than an address: the same person on a phone and
+  // a laptop is one, and a clinic behind one address is many.
+  if (userId) {
+    const waitUserHour = windows.take(`uh:${userId}`, L.userHour, HOUR, now)
+    if (waitUserHour) throw new RateLimited('user', waitUserHour)
+    const waitUserDay = windows.take(`ud:${userId}`, L.userDay, DAY, now)
+    if (waitUserDay) throw new RateLimited('user', waitUserDay)
+  }
   const waitSession = windows.take(`s:${sessionId}`, L.sessionHour, HOUR, now)
   if (waitSession) throw new RateLimited('session', waitSession)
 
   ceiling.used++
+}
+
+/** Seconds to wait before this person may delete an account again; 0 if they may. */
+export function chargeDelete(userId: string, now = Date.now()): number {
+  const L = limits()
+  return L.off ? 0 : windows.take(`del:${userId}`, L.deletePerDay, DAY, now)
 }
 
 /** A short salted hash: enough to tell two sources apart in a log, not to name one. */

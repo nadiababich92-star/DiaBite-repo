@@ -11,7 +11,9 @@
  *
  * Cases come from docs/engineering/engineering-doc.md §10 (A1–A10).
  */
+import { createServer } from 'node:http'
 import { spawn } from 'node:child_process'
+import { SignJWT, exportJWK, generateKeyPair } from 'jose'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chargeTurn, addressKey, _reset, _state, RateLimited, MAX_KEYS } from '../server/guard'
@@ -196,6 +198,122 @@ async function httpSuite() {
   } finally { child3.kill() }
 }
 
+/**
+ * Sign-in: the token check, the gate before it, the per-person limit, the switch, and DELETE /account.
+ * The engine is given the test's own public key (AUTH_JWKS_JSON works outside production only) and a
+ * stand-in for Supabase's admin API, so this runs with no network and no Supabase.
+ */
+async function authSuite() {
+  const mine = await generateKeyPair('ES256')
+  const other = await generateKeyPair('ES256')
+  const jwk = { ...(await exportJWK(mine.publicKey)), kid: 'k1', alg: 'ES256', use: 'sig' }
+  const jwks = JSON.stringify({ keys: [jwk] })
+
+  const deletes: { url: string; auth: string | undefined; apikey: string | undefined }[] = []
+  let adminStatus = 200
+  const stub = createServer((req, res) => {
+    if (req.method === 'DELETE' && req.url?.startsWith('/auth/v1/admin/users/')) {
+      deletes.push({ url: req.url, auth: req.headers.authorization, apikey: req.headers.apikey as string | undefined })
+      res.statusCode = adminStatus; res.end('{}'); return
+    }
+    res.statusCode = 404; res.end()
+  })
+  await new Promise<void>((r) => stub.listen(0, '127.0.0.1', () => r()))
+  const stubUrl = `http://127.0.0.1:${(stub.address() as { port: number }).port}`
+  const ISS = `${stubUrl}/auth/v1`
+  const uid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`
+
+  const token = (sub: string, opts: { key?: CryptoKey; aud?: string; iss?: string; exp?: string | number } = {}) =>
+    new SignJWT({ role: 'authenticated', email: 'p@example.com' })
+      .setProtectedHeader({ alg: 'ES256', kid: 'k1' })
+      .setSubject(sub).setIssuer(opts.iss ?? ISS).setAudience(opts.aud ?? 'authenticated')
+      .setIssuedAt().setExpirationTime(opts.exp ?? '1h')
+      .sign(opts.key ?? mine.privateKey)
+  const bearer = async (sub: string, o?: Parameters<typeof token>[1]) => ({ authorization: `Bearer ${await token(sub, o)}` })
+
+  const child = start({
+    SUPABASE_URL: stubUrl, AUTH_JWKS_JSON: jwks, REQUIRE_SIGN_IN: 'on', SUPABASE_SERVICE_KEY: 'stub-service-key',
+    ASK_IP_10MIN: '1000', ASK_IP_DAY: '1000', ASK_SESSION_HOUR: '1000', ASK_DAILY_CEILING: '1000', ASK_USER_HOUR: '2', ASK_USER_DAY: '1000', ACCOUNT_DELETE_DAY: '2',
+  })
+  try {
+    await waitReady()
+    const none = await ask(meal('s1'))
+    check('S1', 'sign-in required: a model turn with no token is 401 sign_in_required',
+      none.status === 401 && none.json.error === 'sign_in_required', JSON.stringify([none.status, none.json]))
+
+    const dosing = await ask(meal('s2', 'how many units of insulin should I take for this meal'))
+    const red = await ask(meal('s3', 'my glucose is 320 and I am vomiting'))
+    check('S2', 'a dosing question with no token is still refused by the rule (200, never 401)',
+      dosing.status === 200 && dosing.json.blockedRule === 'dosing', JSON.stringify([dosing.status, dosing.json.blockedRule]))
+    check('S3', 'a red-flag message with no token is still answered (200, never 401)',
+      red.status === 200 && red.json.blockedRule === 'red_flag', JSON.stringify([red.status, red.json.blockedRule]))
+
+    const good = await ask(meal('s4'), await bearer(uid(1)))
+    check('S4', 'a valid token is admitted', ADMITTED.has(good.status), String(good.status))
+
+    const forged = await ask(meal('s5'), await bearer(uid(2), { key: other.privateKey }))
+    const expired = await ask(meal('s6'), await bearer(uid(2), { exp: Math.floor(Date.now() / 1000) - 60 }))
+    const wrongAud = await ask(meal('s7'), await bearer(uid(2), { aud: 'anon' }))
+    const wrongIss = await ask(meal('s8'), await bearer(uid(2), { iss: 'https://evil.example/auth/v1' }))
+    const notUuid = await ask(meal('s9'), await bearer('not-a-uuid'))
+    const garbage = await ask(meal('s10'), { authorization: 'Bearer abc.def' })
+    const basic = await ask(meal('s11'), { authorization: 'Basic abc' })
+    check('S5', 'a token signed by another key is 401', forged.status === 401, String(forged.status))
+    check('S6', 'an expired token is 401', expired.status === 401, String(expired.status))
+    check('S7', 'a token for another audience is 401', wrongAud.status === 401, String(wrongAud.status))
+    check('S8', 'a token from another issuer is 401', wrongIss.status === 401, String(wrongIss.status))
+    check('S9', 'a subject that is not a UUID, a garbage token and a Basic header are all 401',
+      notUuid.status === 401 && garbage.status === 401 && basic.status === 401, `${notUuid.status} ${garbage.status} ${basic.status}`)
+
+    // the limit is two model turns an hour per person; person 1 already spent one on S4
+    const second = await ask(meal('s12'), await bearer(uid(1)))
+    const third = await ask(meal('s13'), await bearer(uid(1)))
+    check('S10', 'the third model turn in an hour from one person: 429 scope user, with a retry time',
+      ADMITTED.has(second.status) && third.status === 429 && third.json.scope === 'user' && Number(third.json.retryAfterSec) > 0,
+      JSON.stringify([second.status, third.status, third.json]))
+    const gateAtLimit = await ask(meal('s14', 'how many units of insulin should I take'), await bearer(uid(1)))
+    check('S11', 'a gate message from that same person at the limit is still 200',
+      gateAtLimit.status === 200 && gateAtLimit.json.blockedRule === 'dosing', JSON.stringify([gateAtLimit.status, gateAtLimit.json.blockedRule]))
+    const another = await ask(meal('s15'), await bearer(uid(3)))
+    check('S12', 'another person is not affected by that limit', ADMITTED.has(another.status), String(another.status))
+
+    const keyed = await ask(meal('s16'), { 'x-api-key': KEY })
+    check('S13', 'a caller with the engine key needs no token (the agent evals)', ADMITTED.has(keyed.status), String(keyed.status))
+
+    // DELETE /account
+    const del = (h: Record<string, string> = {}) => fetch(`${BASE}/account`, { method: 'DELETE', headers: h })
+    const noTok = await del()
+    check('S14', 'DELETE /account with no token is 401 and calls nothing', noTok.status === 401 && deletes.length === 0, `${noTok.status} ${deletes.length}`)
+    const ok = await del(await bearer(uid(4)))
+    check('S15', 'DELETE /account with a token: 200, and the admin API is asked to delete exactly that person, with the service key',
+      ok.status === 200 && deletes.length === 1 && deletes[0].url.endsWith(`/users/${uid(4)}`)
+        && deletes[0].auth === 'Bearer stub-service-key' && deletes[0].apikey === 'stub-service-key',
+      JSON.stringify([ok.status, deletes]))
+    adminStatus = 500
+    const fail = await del(await bearer(uid(5)))
+    const failBody = await fail.text()
+    check('S16', 'when the admin call fails the answer is 502 delete_failed and fixed text, nothing leaked',
+      fail.status === 502 && failBody.includes('delete_failed') && !failBody.includes('stub-service-key'), `${fail.status} ${failBody}`)
+    await del(await bearer(uid(4))) // the second of two allowed in a day (the first was S15)
+    const limited = await del(await bearer(uid(4)))
+    check('S17', 'a third delete in a day from one person: 429', limited.status === 429, String(limited.status))
+    adminStatus = 200
+  } finally { child.kill() }
+
+  // The switch: with REQUIRE_SIGN_IN off the engine is anonymous again, so a rollback is one revision.
+  const off = start({
+    SUPABASE_URL: stubUrl, AUTH_JWKS_JSON: jwks, SUPABASE_SERVICE_KEY: 'stub-service-key',
+    ASK_IP_10MIN: '1000', ASK_IP_DAY: '1000', ASK_SESSION_HOUR: '1000', ASK_DAILY_CEILING: '1000',
+  })
+  try {
+    await waitReady()
+    const anon = await ask(meal('o1'))
+    check('S18', 'with REQUIRE_SIGN_IN off, a model turn with no token is admitted as before', ADMITTED.has(anon.status), String(anon.status))
+    const badTok = await ask(meal('o2'), { authorization: 'Bearer aaa.bbb.ccc' })
+    check('S19', 'with it off, a bad token does not turn a person away either', ADMITTED.has(badTok.status), String(badTok.status))
+  } finally { off.kill(); stub.close() }
+}
+
 function memorySuite() {
   // ── bounded memory, in process ─────────────────────────────────────────
   _reset()
@@ -239,6 +357,7 @@ function memorySuite() {
 async function main() {
   memorySuite()
   await httpSuite()
+  await authSuite()
   console.log(failed ? `\n${failed} FAILED` : '\nall abuse checks passed')
   process.exit(failed ? 1 : 0)
 }

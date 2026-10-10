@@ -33,9 +33,10 @@ import { afterMealFor, computeMeal, dayState, findAlternatives } from './compute
 import { verify } from './verify'
 import { getSession, noteResolution, putSession } from './sessions'
 import { openApiSpec } from './openapi'
-import { ask, type AskRequest } from './agent'
+import { ask, SignInRequired, type AskRequest } from './agent'
+import { personOf, signInRequired } from './auth'
 import { createHash, timingSafeEqual } from 'node:crypto'
-import { RateLimited, addressKey, originAllowed, sourceTag, validSessionId, validateAsk } from './guard'
+import { RateLimited, addressKey, chargeDelete, originAllowed, sourceTag, validSessionId, validateAsk } from './guard'
 import type {
   AlternativesRequest, ComputeMealRequest, DayStateRequest, ResolveRequest, VerifyRequest,
 } from './contract'
@@ -136,8 +137,10 @@ async function main() {
     // A caller holding the key (the agent evals, 87 cases from one address) is
     // exempt from the rate limits, never from the size caps above.
     const trusted = keyMatches(req.get('x-api-key'))
-    try { res.json(await ask(body, { clientKey: trusted ? undefined : addressKey(req.ip), trusted })) }
+    const person = trusted ? null : await personOf(req)
+    try { res.json(await ask(body, { clientKey: trusted ? undefined : addressKey(req.ip), trusted, person, requireSignIn: signInRequired() })) }
     catch (e) {
+      if (e instanceof SignInRequired) return res.status(401).json({ error: 'sign_in_required' })
       if (e instanceof RateLimited) {
         console.warn(JSON.stringify({ evt: 'rate_limited', scope: e.scope, source: sourceTag(addressKey(req.ip)), retryAfterSec: e.retryAfterSec }))
         res.set('Retry-After', String(e.retryAfterSec))
@@ -155,6 +158,32 @@ async function main() {
         })
       }
       res.status(502).json({ error: 'agent_unavailable' })
+    }
+  })
+
+  /**
+   * Delete the signed-in person's account and, through the foreign keys, their profile and
+   * diary. The browser cannot remove an auth user; this can, with the service key, which is a
+   * Container App secret and never leaves this function. Only the token's own `sub` is deleted.
+   */
+  app.delete('/account', async (req, res) => {
+    const person = await personOf(req)
+    if (!person) return res.status(401).json({ error: 'sign_in_required' })
+    const wait = chargeDelete(person.sub)
+    if (wait) { res.set('Retry-After', String(wait)); return res.status(429).json({ error: 'rate_limited', scope: 'user', retryAfterSec: wait }) }
+    const base = (process.env.SUPABASE_URL ?? '').replace(/\/$/, '')
+    const service = process.env.SUPABASE_SERVICE_KEY
+    if (!base || !service) { console.error('DELETE /account: SUPABASE_URL or SUPABASE_SERVICE_KEY is not set'); return res.status(502).json({ error: 'delete_failed' }) }
+    try {
+      const r = await fetch(`${base}/auth/v1/admin/users/${person.sub}`, {
+        method: 'DELETE', headers: { apikey: service, authorization: `Bearer ${service}` }, signal: AbortSignal.timeout(15_000),
+      })
+      if (!r.ok) { console.error(`DELETE /account: Supabase answered ${r.status}`); return res.status(502).json({ error: 'delete_failed' }) }
+      console.warn(JSON.stringify({ evt: 'account_deleted', who: sourceTag(person.sub) }))
+      res.json({ ok: true })
+    } catch (e) {
+      console.error('DELETE /account failed:', (e as Error).message)
+      res.status(502).json({ error: 'delete_failed' })
     }
   })
 
