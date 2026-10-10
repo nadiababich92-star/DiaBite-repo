@@ -35,7 +35,9 @@ import { looksLikeMeal, withHangRetry } from '../server/agent'
 import { diffEntries, exportShape, fromRow, mergeById, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary } from '../src/lib/history'
-import { generateWeek, menuHidden, regenerateSlot, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
+import { generateWeek, menuHidden, regenerateSlot, replayWeek, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
+import { loadWeekState } from '../src/lib/menuStore'
+import { addDays, dayLabel, gramStep, mealForNow, nudgeGrams, recentEntries } from '../src/lib/diary'
 import { calculateTargets, DEFAULT_PROFILE } from '../src/lib/profile'
 import { CATEGORY_LABELS } from '../src/data/foods'
 import { getSession, noteResolution, putSession } from '../server/sessions'
@@ -238,6 +240,26 @@ const menuMisses: string[] = []
   // (c) the same seed, the same answer
   const again = regenerateSlot(plan, 2, 'lunch', profile, targets, 99)
   if (again.plan.days[2].meals.find((m) => m.meal === 'lunch')!.dish.id !== newLunch) menuMisses.push('    a replacement is not deterministic for a seed')
+  // (c2) the week comes back exactly: the seed and the replacements, in order, rebuild the same plan
+  {
+    const edits = [{ day: 2, meal: 'lunch' as const, seed: 99 }, { day: 5, meal: 'dinner' as const, seed: 7 }, { day: 2, meal: 'lunch' as const, seed: 123 }]
+    let walked = generateWeek(profile, targets, 4242)
+    for (const e of edits) walked = regenerateSlot(walked, e.day, e.meal, profile, targets, e.seed).plan
+    const replayed = replayWeek(profile, targets, { seed: 4242, edits }).plan
+    const ids = (pl: typeof walked) => pl.days.map((d) => d.meals.map((m) => `${m.dish.id}@${m.scale}`).join(',')).join('|')
+    if (ids(replayed) !== ids(walked)) menuMisses.push('    a week rebuilt from its seed and replacements is not the week that was on screen')
+    if (replayWeek(profile, targets, { seed: 4242, edits: [] }).plan.days.map((d) => d.gl).join() !== generateWeek(profile, targets, 4242).days.map((d) => d.gl).join()) menuMisses.push('    a week with no replacements is not the generated week')
+    // What is stored is checked before it is used: rubbish means a new week, never a crash.
+    const g = globalThis as { localStorage?: unknown }
+    const store: Record<string, string> = {}
+    g.localStorage = { getItem: (k: string) => store[k] ?? null, setItem: (k: string, v: string) => { store[k] = v }, removeItem: (k: string) => { delete store[k] } }
+    store['diabite.menu.v1'] = JSON.stringify({ seed: 5, edits: [{ day: 2, meal: 'lunch', seed: 1 }, { day: 9, meal: 'lunch', seed: 1 }, { day: 1, meal: 'brunch', seed: 1 }, 'x', null] })
+    const loaded = loadWeekState()
+    if (loaded.seed !== 5 || loaded.edits.length !== 1) menuMisses.push('    a stored week keeps bad replacements (a day past Sunday, an unknown meal, junk)')
+    store['diabite.menu.v1'] = '{not json'
+    if (!Number.isFinite(loadWeekState().seed)) menuMisses.push('    a stored week that is not JSON does not give a new week')
+    delete g.localStorage
+  }
   // (d) who is not shown a plan
   const hide = (patch: object) => menuHidden({ ...profile, ...patch } as typeof profile)
   const hiddenOk = hide({ comorbidities: ['eatingDisorder'] }) && hide({ kidney: 'ckd' }) && hide({ kidney: 'dialysis' })
@@ -304,6 +326,15 @@ const accountMisses: string[] = []
     const carbsOnly = weekSummary([{ id: 'x', date: day(10), meal: 'snack' as const, foodId: 'branded:1', grams: 30, snapshot: { name: 'Bar', kcal: 100, carbs: 20, fiber: 1, protein: 2, fat: 3, availableCarbs: 19, gi: null, gl: 0, loadAvailable: false } }], 20, day(10))
     ok('a day with a packaged food says its load is only what could be counted', carbsOnly.days[6].partial && carbsOnly.days[6].logged)
     ok('the week crosses a month boundary', weekSummary([], 20, '2026-11-02').days[0].date === '2026-10-27')
+    // The diary's own small helpers.
+    ok('a day moved by days, across a month and a year', addDays('2026-10-31', 1) === '2026-11-01' && addDays('2026-01-01', -1) === '2025-12-31' && addDays('2026-03-01', -1) === '2026-02-28')
+    ok('a day is named Today, Yesterday, or by its date', dayLabel('2026-10-11', '2026-10-11') === 'Today' && dayLabel('2026-10-10', '2026-10-11') === 'Yesterday' && /Oct/.test(dayLabel('2026-10-05', '2026-10-11')))
+    ok('the meal for a food follows the clock', mealForNow(7) === 'breakfast' && mealForNow(12) === 'lunch' && mealForNow(16) === 'snack' && mealForNow(20) === 'dinner')
+    ok('a weight steps by a tenth in fives, never under five, never over a kilo and a half',
+      gramStep(180) === 20 && gramStep(10) === 5 && nudgeGrams(5, -1) === 5 && nudgeGrams(1500, 1) === 1500 && nudgeGrams(180, 1) === 200 && nudgeGrams(200, -1) === 180)
+    const mk = (id: string, date: string, foodId: string, grams: number) => ({ id, date, meal: 'lunch' as const, foodId, grams })
+    const rec = recentEntries([mk('1', '2026-10-09', 'egg', 110), mk('2', '2026-10-10', 'rice-white', 150), mk('3', '2026-10-10', 'egg', 110), mk('4', '2026-10-08', 'egg', 55)], 3)
+    ok('the foods logged again are newest first, one per food and weight', rec.map((e) => e.id).join() === '3,2,4')
     // The day is a calendar day, not 24 hours: across a clock change, in three zones, the week is still seven
     // different consecutive dates ending today, and the labels follow the calendar.
     const savedTz = process.env.TZ

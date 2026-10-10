@@ -120,6 +120,27 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
     await until(b, `/What are you\\s+about to eat/i.test(document.body.innerText)`)
     const demo = await text()
     check('M11', 'the demo link hides the builder-only row', !/Download Responses|Fresh context/.test(demo), demo.slice(0, 160))
+
+    // The menu and the diary, as a person uses them together.
+    const tab = async (name) => { await b.ev(`(()=>{[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes(${JSON.stringify(name)}))?.click()})()`); await sleep(500) }
+    const first = () => b.ev(`document.querySelector('.menu-meal .name')?.innerText ?? ''`)
+    await tab('Menu'); const dish = await first()
+    await tab('Diary'); await tab('Menu')
+    check('M18', 'the week stays the week: leave the Menu and come back, the same dish is on top', dish !== '' && dish === await first(), `${dish} -> ${await first()}`)
+    const entries = () => b.ev(`document.querySelectorAll('.entry').length`)
+    await tab('Diary'); const loggedBefore = await entries()
+    await tab('Menu'); await b.ev(`(()=>{[...document.querySelectorAll('button')].find(x=>x.innerText.trim()==='Add to today')?.click()})()`); await sleep(400)
+    await tab('Diary')
+    check('M19', '"Add to today" puts the planned meal into the diary, food by food', await entries() >= loggedBefore + 2, `${loggedBefore} -> ${await entries()}`)
+    const weight = () => b.ev(`document.querySelector('.entry .stepper .step-v')?.innerText ?? ''`)
+    const w0 = await weight()
+    await b.ev(`document.querySelector('.entry .stepper .step[aria-label^=More]')?.click()`); await sleep(300)
+    check('M20', 'a logged weight can be changed with the stepper', w0 !== '' && w0 !== await weight(), `${w0} -> ${await weight()}`)
+    const n = await entries()
+    await b.ev(`document.querySelector('.entry-x')?.click()`); await sleep(300)
+    const gone = await entries() === n - 1
+    await b.ev(`(()=>{[...document.querySelectorAll('.diary-notice button')].find(x=>x.innerText.includes('Undo'))?.click()})()`); await sleep(300)
+    check('M21', 'a deleted entry can be taken back', gone && await entries() === n, `${n} -> ${await entries()}`)
   }
   check('M12', 'no script error or console error on the page', errors.length === 0, errors.slice(0, 3).join(' | '))
 } finally { await b.close() }

@@ -40,3 +40,11 @@ Today: `shoppingList(plan)` grouped by category in the table. Add: a checkbox pe
 - `npm run eval`, new `menu` section: (a) over 200 seeds no dish appears twice within `REPEAT_GAP` days when the pool allows; (b) `regenerateSlot` changes exactly one slot and the day's totals equal the sum of its meals; (c) the same seed twice gives the same result; (d) `menuHidden` is true for the three profiles and false for ten others including `kidney: 'mentioned'`, gout, gastroparesis; (e) `generateWeek` is never called for a hidden profile (a spy in the component test, or the guard in `MenuPage` read in code review if no component test harness exists).
 - The shopping-list text of a fixed seed matches a recorded snapshot.
 - Screens: hidden profile (each of the three), shown profile at 375 px, replace on a day with a short pool, dark mode.
+
+## As built, 10 October 2026, evening
+
+- **The week is kept.** The Menu tab is unmounted whenever someone leaves it, and the week used to come from a fresh random number on every return. It is now stored as the seed plus the replacements made since, each with its own seed (`src/lib/menuStore.ts`, `replayWeek` in `src/lib/menu.ts`), and rebuilt exactly, because both generators are deterministic for a seed. It lives only on this device (key `diabite.menu.v1`) and does not sync with an account. If the person's restrictions change, the same seed is rebuilt for the new ones.
+- **One day at a time.** Seven day keys with each day's planned load, today pre-selected, and the open day as a card. The accordions are gone.
+- **Add to today.** Each planned meal can be put into today's diary at the weights the plan chose, one entry per food, under the meal it was planned for, with an Undo and a link to the diary. It is the local food ids that go in, so the diary prices them as it prices anything hand-logged.
+- **Not changed:** the 30 dishes, the repeat gap, the two profiles the plan is hidden for. Using the 1,000 recipes is a separate decision (they have not been reviewed by a dietitian).
+- Tested in `npm run eval` (`menu`: the replay equals the walked week, and a stored week with bad replacements or no JSON gives a sane week) and in the smoke test M18 to M21.

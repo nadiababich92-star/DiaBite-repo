@@ -208,6 +208,22 @@ Raised: `--surface`, 1px border, radius 12, 15px, 44px minimum height.
 A floating slab at the bottom: four items, each an icon above a 13px label. The
 selected item sits on a marker pill. Feedback is not in the bar; it lives in **You**.
 
+### The day, on the Diary
+A day is named (**Today**, **Yesterday**, or "Fri, Oct 9") between two 44px arrows; the next
+arrow stops at today. The one number that matters (what is **left**, or what a past day
+**used**) is large and on the marker, as in the answer; the other figures sit under it in a
+quiet list: a label, a groove with a bead, and plain numbers. Each meal is a card of foods;
+a food logged by hand has a weight stepper, a food logged from an answer shows the weight it
+was costed at (its numbers were computed then). Removing a food, or adding one, leaves one
+line under the figures that says so and can take it back for ten seconds. Foods logged before
+are offered as chips ("Again, to dinner") and add themselves in one tap.
+
+### The week, on the Menu
+Seven day keys (the day's name and its planned glycemic load), today pre-selected, and one
+day open as a card: a bar, then each meal with its glycemic load, its foods at their weights,
+the recipe behind a disclosure, **Add to today** and **Replace**. The week stays on this
+device until **Generate again** is pressed.
+
 ### Portions
 After an answer, **Change a portion** opens one row per food: its name and a stepper
 (a 44px minus and plus around the weight, in mono). A change settles for 0.4s, then the

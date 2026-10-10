@@ -4,11 +4,11 @@ import { isLabelled, parseMeal } from '../lib/answer'
 import { sessionId } from '../lib/session'
 import { accessToken } from '../lib/auth'
 import { askAgent, avoidOf, budgetOf, engineId, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
-import { viewEntry } from '../lib/diary'
+import { mealForNow, viewEntry } from '../lib/diary'
 import { useToday } from '../lib/useToday'
 import { isDemo } from '../lib/demo'
 import { downloadResponses, saveResponse, savedCount } from '../lib/responses'
-import type { DiaryEntry, MealType, Profile, Targets } from '../types'
+import type { DiaryEntry, Profile, Targets } from '../types'
 
 interface Props {
   profile: Profile
@@ -33,10 +33,6 @@ function readFresh(): boolean {
   try { return localStorage.getItem(FRESH_KEY) === '1' } catch { return false }
 }
 
-function mealForNow(): MealType {
-  const h = new Date().getHours()
-  return h < 11 ? 'breakfast' : h < 15 ? 'lunch' : h < 18 ? 'snack' : 'dinner'
-}
 
 /** The agent answers in light markdown: **bold** and line breaks. Nothing else is rendered. */
 /** The verdict, as a mark you can read before you read anything. */

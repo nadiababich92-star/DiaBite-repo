@@ -740,3 +740,58 @@ button.danger:disabled { opacity: 0.45; cursor: not-allowed; }
   /* The button that moves you on stays in reach while the form scrolls. */
   .onb-actions { position: sticky; bottom: 0; background: var(--surface); margin: 20px -20px -22px; padding: 12px 20px 16px; border-top: 1px solid var(--border); border-radius: 0 0 var(--radius) var(--radius); z-index: 2; }
 }
+
+/* ── The Diary and the Menu, day by day ─────────────────────────────────────── */
+.day-nav { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 8px; text-align: center; }
+.day-nav h2 { font-family: var(--serif); font-size: 22px; letter-spacing: -0.01em; }
+button.step-day { width: 44px; height: 44px; padding: 0; font-size: 26px; font-weight: 400; line-height: 1; border-radius: 12px; margin-bottom: 3px; display: flex; align-items: center; justify-content: center; }
+button.step-day:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+.back-today { display: block; margin: 4px auto 0; color: var(--accent); text-decoration: underline; font-size: 14px; min-height: 44px; }
+.back-today:hover { color: var(--accent); }
+
+.quiet-list { list-style: none; margin: 16px 0 0; padding: 0; }
+.quiet-row { display: grid; grid-template-columns: 112px minmax(0, 1fr) 128px; align-items: center; column-gap: 12px; min-height: 44px; border-top: 1px solid var(--border); font-size: 14px; }
+.quiet-row .bar { margin: 0; height: 8px; }
+.quiet-row .num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 13px; }
+.quiet-row .num em { font-style: normal; color: var(--text-faint); font-family: var(--font); display: block; }
+@media (max-width: 480px) { .quiet-row { grid-template-columns: 96px minmax(0, 1fr) 104px; column-gap: 8px; } }
+
+.diary-notice { margin: -4px 4px 12px; min-height: 22px; font-size: 14px; }
+.diary-notice .link { color: var(--accent); text-decoration: underline; font-weight: 600; min-height: 44px; }
+
+.entries { list-style: none; margin: 0; padding: 0; }
+.entry { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 12px 0; border-top: 2px dotted var(--dot); }
+.entry:first-child { border-top: none; }
+.entry-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 200px; }
+.entry-name { font-weight: 600; font-size: 15px; }
+.entry-sub { font-size: 13px; }
+.entry-side { display: flex; align-items: center; gap: 4px; flex: none; }
+.entry-x { width: 44px; height: 44px; padding: 0; font-size: 16px; color: var(--text-dim); }
+.entry-x:hover { color: var(--high); }
+
+.recent .label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 600; margin-bottom: 8px; }
+.recent .chip-toggle em { font-style: normal; color: var(--text-dim); font-size: 13px; margin-left: 4px; }
+
+.day-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; padding-bottom: 3px; margin-bottom: 14px; }
+.day-key {
+  appearance: none; font: inherit; cursor: pointer; color: var(--text); min-height: 58px; border-radius: 12px; padding: 4px 0;
+  background: var(--surface); border: 1px solid var(--border); box-shadow: var(--fx-key-soft);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px;
+}
+.day-key b { font-family: var(--mono); font-weight: 500; font-size: 13px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.day-key[aria-pressed='true'] { background: linear-gradient(var(--primary-1), var(--primary-2)); color: var(--primary-ink); border: 0; box-shadow: var(--fx-key); font-weight: 600; }
+.day-key[aria-pressed='true'] b { background: var(--marker); color: var(--marker-ink); border-radius: 4px; padding: 0 4px; }
+
+.menu-day .bar { margin: 10px 0 6px; }
+.menu-sub { margin: 0 0 6px; }
+.menu-meal { padding: 14px 0; border-top: 2px dotted var(--dot); }
+.menu-meal .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+.menu-meal .type { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 600; }
+.menu-meal .name { font-family: var(--serif); font-weight: 600; font-size: 18px; letter-spacing: -0.01em; line-height: 1.25; }
+.menu-nums { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.menu-meal .ingredients { font-size: 14px; color: var(--text-dim); margin: 8px 0 4px; }
+.recipe-more summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--accent); min-height: 44px; display: flex; align-items: center; }
+.recipe-more .recipe { margin: 0 0 8px; font-size: 14px; color: var(--text-dim); font-style: italic; }
+.menu-actions { gap: 12px; margin-top: 6px; }
+.menu-added { margin: 6px 0 0; font-size: 14px; }
+.menu-added .link { color: var(--accent); text-decoration: underline; font-weight: 600; min-height: 44px; }

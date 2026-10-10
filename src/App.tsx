@@ -181,9 +181,16 @@ export default function App() {
         <AskPage profile={profile} targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} onSessionEnded={sessionEnded} />
       )}
       {tab === 'diary' && (
-        <DiaryPage targets={targets} diary={diary} onChange={setDiary} />
+        <DiaryPage targets={targets} diary={diary} onChange={setDiary} onAsk={() => setTab('ask')} />
       )}
-      {tab === 'menu' && <MenuPage profile={profile} targets={targets} onAsk={() => setTab('ask')} />}
+      {tab === 'menu' && (
+        <MenuPage
+          profile={profile} targets={targets} onAsk={() => setTab('ask')}
+          onAdd={(added) => setDiary((d) => [...d, ...added])}
+          onRemove={(ids) => setDiary((d) => d.filter((e) => !ids.includes(e.id)))}
+          onOpenDiary={() => setTab('diary')}
+        />
+      )}
       {tab === 'profile' && (
         <ProfilePage
           profile={profile}

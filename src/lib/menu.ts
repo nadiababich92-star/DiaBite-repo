@@ -286,3 +286,21 @@ export function regenerateSlot(
     : d)
   return { plan: { ...plan, days }, relaxed, changed: true }
 }
+
+/**
+ * What it takes to bring a week back exactly: the seed it was generated from, and the
+ * replacements made since, in order, each with the seed that chose it. Both generators are
+ * deterministic for a seed, so this is a few numbers rather than a copy of the plan; and
+ * if the person's restrictions change meanwhile, the same week is rebuilt for the new ones.
+ */
+export interface WeekState { seed: number; edits: { day: number; meal: MealType; seed: number }[] }
+
+export function replayWeek(profile: Profile, targets: Targets, state: WeekState): { plan: WeekPlan; relaxed: boolean } {
+  let plan = generateWeek(profile, targets, state.seed)
+  let relaxed = false
+  for (const e of state.edits) {
+    const r = regenerateSlot(plan, e.day, e.meal, profile, targets, e.seed)
+    if (r.changed) { plan = r.plan; relaxed = relaxed || r.relaxed }
+  }
+  return { plan, relaxed }
+}
