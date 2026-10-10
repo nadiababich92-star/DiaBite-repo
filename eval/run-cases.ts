@@ -342,8 +342,12 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   }
   // "I used 200 g because no portion was given" is the disclosure this asks
   // for, in the words a person would use.
+  // Asking instead of costing is the other honest answer: when the engine
+  // returned a clarify and nothing was costed, no portion was assumed.
   if (e.answerMentionsAssumed === true) {
-    say('says the portion was assumed', /assum|default|no portion (was )?given|you did ?n'?t (give|say)|I used \d/i.test(answer))
+    const askedInstead = !called(r, 'compute_meal') && answer.includes('?') &&
+      !!(callOf(r, 'resolve_foods')?.result as { results?: { clarify?: string }[] } | undefined)?.results?.some((p) => p.clarify)
+    say('says the portion was assumed, or asked instead', askedInstead || /assum|default|no portion (was )?given|you did ?n'?t (give|say)|I used \d/i.test(answer))
   }
 
   // Proceeding past an ambiguity is allowed; doing it silently is not. If a
