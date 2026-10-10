@@ -19,7 +19,11 @@ export default function GlInfo({ budget, onClose }: { budget: number; onClose: (
     behind.forEach((el) => el.setAttribute('inert', ''))
     document.body.classList.add('modal-open')
     close.current?.focus()
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { onClose(); return }
+      // One control in the dialog: Tab stays on it rather than leaving the dialog.
+      if (e.key === 'Tab') { e.preventDefault(); close.current?.focus() }
+    }
     document.addEventListener('keydown', onKey)
     return () => {
       document.removeEventListener('keydown', onKey)

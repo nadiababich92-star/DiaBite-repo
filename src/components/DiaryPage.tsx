@@ -4,7 +4,7 @@ import { availableCarbs, glycemicLoad, sumNutrients } from '../lib/glycemic'
 import { MEAL_LABELS, MEAL_ORDER } from '../lib/menu'
 import { viewEntry } from '../lib/diary'
 import { weekSummary } from '../lib/history'
-import { todayISO } from '../lib/storage'
+import { useToday } from '../lib/useToday'
 import type { DiaryEntry, MealType, Targets } from '../types'
 import { GIPill, GLPill } from './Pills'
 
@@ -15,7 +15,10 @@ interface Props {
 }
 
 export default function DiaryPage({ targets, diary, onChange }: Props) {
-  const [date, setDate] = useState(todayISO)
+  // The day on show follows the calendar until the person picks another one.
+  const today = useToday()
+  const [picked, setDate] = useState<string | null>(null)
+  const date = picked ?? today
   const [meal, setMeal] = useState<MealType>('breakfast')
   const [query, setQuery] = useState('')
   const [grams, setGrams] = useState<number | ''>('')
@@ -57,7 +60,7 @@ export default function DiaryPage({ targets, diary, onChange }: Props) {
     setGrams('')
   }
 
-  const week = useMemo(() => weekSummary(diary, targets.glBudget, todayISO()), [diary, targets.glBudget])
+  const week = useMemo(() => weekSummary(diary, targets.glBudget, today), [diary, targets.glBudget, today])
 
   const pct = (value: number, target: number) => Math.min(100, (value / Math.max(1, target)) * 100)
 

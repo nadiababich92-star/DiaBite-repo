@@ -94,6 +94,24 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
       /THIS MEAL/i.test(meal.text) && /LEFT AFTER|OVER BY|LEFT SO FAR/i.test(meal.text) && /Verified/.test(meal.text) && /Show calculation/.test(meal.text), meal.text.slice(0, 200))
     check('M9', 'the answer arrives in under 15 seconds', meal.secs < 15, `${meal.secs.toFixed(1)} s`)
 
+    // The bowl's answer is on screen: the disclaimer's rest is one tap away, GL has a gloss, and a portion can change.
+    await b.ev(`(()=>{[...document.querySelectorAll('button')].find(x=>x.innerText.trim()==='Read more')?.click()})()`)
+    check('M15', 'the disclaimer shows its first sentence, and the rest opens on a tap',
+      /reference tool, not medical advice/i.test(await b.ev(`document.querySelector('.disclaimer')?.innerText ?? ''`))
+        && await until(b, `/never be used to calculate insulin doses/.test(document.querySelector('.disclaimer')?.innerText ?? '')`, 5), '')
+    await b.ev(`(()=>{[...document.querySelectorAll('button')].find(x=>x.innerText.includes('What is GL?'))?.click()})()`)
+    const glOpened = await until(b, `!!document.querySelector('[role=dialog]') && /how fast a food raises blood sugar/.test(document.querySelector('[role=dialog]').innerText)`, 5)
+    await b.ev(`(()=>{[...document.querySelectorAll('[role=dialog] button')].find(x=>x.innerText.includes('Got it'))?.click()})()`)
+    check('M16', '"What is GL?" opens a dialog with the gloss, and closes', glOpened && await until(b, `!document.querySelector('[role=dialog]')`, 5), '')
+    const before = Number(await b.ev(`document.querySelector('.figures .fig .fig-v')?.innerText ?? 'NaN'`))
+    await b.ev(`(()=>{[...document.querySelectorAll('button')].find(x=>x.innerText.includes('Change a portion'))?.click()})()`)
+    await until(b, `!!document.querySelector('.portions')`, 5)
+    await b.ev(`(()=>{const e=[...document.querySelectorAll('.step')].find(x=>/^More/.test(x.getAttribute('aria-label')||'')); e?.click()})()`)
+    const recounted = await until(b, `!!document.querySelector('.recalc')`, 20)
+    const after = Number(await b.ev(`document.querySelector('.recalc .fig .fig-v')?.innerText ?? 'NaN'`))
+    check('M17', 'a bigger portion: the engine counts the meal again and the new card shows a larger load, calculated not generated',
+      recounted && after > before && /Calculated by the engine/.test(await b.ev(`document.querySelector('.recalc')?.innerText ?? ''`)), `${before} -> ${after}`)
+
     const partial = await ask("A slice of grandma's kugel and two eggs")
     check('M10', 'a meal with an unknown food is never called "fits"; it shows what is left so far, or asks what the food is',
       !/FITS\b/i.test(partial.text.split('\n').slice(0, 40).join(' ').replace(/\bdoes not fit\b/gi, '')) && /LEFT SO FAR|ONE QUESTION FIRST/i.test(partial.text), partial.text.replace(/\s+/g, ' ').slice(-500))

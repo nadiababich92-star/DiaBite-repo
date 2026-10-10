@@ -304,6 +304,21 @@ const accountMisses: string[] = []
     const carbsOnly = weekSummary([{ id: 'x', date: day(10), meal: 'snack' as const, foodId: 'branded:1', grams: 30, snapshot: { name: 'Bar', kcal: 100, carbs: 20, fiber: 1, protein: 2, fat: 3, availableCarbs: 19, gi: null, gl: 0, loadAvailable: false } }], 20, day(10))
     ok('a day with a packaged food says its load is only what could be counted', carbsOnly.days[6].partial && carbsOnly.days[6].logged)
     ok('the week crosses a month boundary', weekSummary([], 20, '2026-11-02').days[0].date === '2026-10-27')
+    // The day is a calendar day, not 24 hours: across a clock change, in three zones, the week is still seven
+    // different consecutive dates ending today, and the labels follow the calendar.
+    const savedTz = process.env.TZ
+    const nextDay = (d: string) => { const [y, m, dd] = d.split('-').map(Number); const n = new Date(Date.UTC(y, m - 1, dd + 1)); return n.toISOString().slice(0, 10) }
+    const zoneProblems: string[] = []
+    for (const tz of ['America/Los_Angeles', 'Europe/Warsaw', 'Pacific/Auckland']) {
+      process.env.TZ = tz
+      for (const today of ['2026-03-08', '2026-03-29', '2026-04-05', '2026-09-27', '2026-10-25', '2026-11-01', '2026-11-02']) {
+        const ds = weekSummary([], 20, today).days.map((x) => x.date)
+        const consecutive = ds.every((d, i) => i === 0 || d === nextDay(ds[i - 1]))
+        if (ds.length !== 7 || ds[6] !== today || !consecutive || new Set(ds).size !== 7) zoneProblems.push(`${tz} ${today}: ${ds.join(',')}`)
+      }
+    }
+    if (savedTz === undefined) delete process.env.TZ; else process.env.TZ = savedTz
+    ok('across clock changes, in three zones, the week is seven consecutive dates ending today', zoneProblems.length === 0 && (console.log(zoneProblems.slice(0, 2).join(' | ')), true) && zoneProblems.length === 0)
   }
   ok('the code may be 6 to 10 digits, whatever Supabase is set to', looksLikeCode('12345678') && looksLikeCode('123456') && looksLikeCode('1234567890') && !looksLikeCode('12345') && !looksLikeCode('12345678901') && !looksLikeCode('12a456'))
   ok('an address is an address', looksLikeEmail('name@example.com') && !looksLikeEmail('name@') && !looksLikeEmail('a b@c.de') && !looksLikeEmail(''))

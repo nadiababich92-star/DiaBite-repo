@@ -18,7 +18,8 @@
     "eval:dataset": "tsx eval/build-dataset.ts",
     "deploy": "bash scripts/deploy.sh",
     "sync:foods": "tsx scripts/sync-foods.ts",
-    "smoke": "node eval/smoke.mjs"
+    "smoke": "node eval/smoke.mjs",
+    "rehearsal": "node eval/rehearsal.mjs"
   },
   "dependencies": {
     "@azure/ai-agents": "^1.1.0",

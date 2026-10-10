@@ -618,8 +618,13 @@ button:focus-visible, a:focus-visible, [role="tab"]:focus-visible, summary:focus
 
 /* Touch targets of at least 44px where a finger is the pointer. */
 @media (hover: none) and (pointer: coarse) {
-  button.primary, button.ghost, button.link, nav.tabs button { min-height: 44px; }
+  button.primary, button.ghost, button.link, nav.tabs button, .step { min-height: 44px; }
   button.link { min-width: 44px; }
+  /* A finger is a pointer too: fields, toggles and rating dots reach 44px. */
+  input:not([type='checkbox']):not([type='radio']), select, .chip-toggle, .chip-btn, .theme-option { min-height: 44px; }
+  .rating-dot { width: 44px; height: 44px; }
+  .check-row { min-height: 44px; align-items: center; }
+  .check-row input { min-height: 0; }
 }
 
 body.modal-open { overflow: hidden; }

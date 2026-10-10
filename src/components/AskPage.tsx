@@ -5,7 +5,7 @@ import { sessionId } from '../lib/session'
 import { accessToken } from '../lib/auth'
 import { askAgent, avoidOf, budgetOf, engineId, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
 import { viewEntry } from '../lib/diary'
-import { todayISO } from '../lib/storage'
+import { useToday } from '../lib/useToday'
 import { isDemo } from '../lib/demo'
 import { downloadResponses, saveResponse, savedCount } from '../lib/responses'
 import type { DiaryEntry, MealType, Profile, Targets } from '../types'
@@ -348,7 +348,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
   }
   const abort = useRef<AbortController | null>(null)
 
-  const today = todayISO()
+  const today = useToday()
   const todayEntries = useMemo(() => diary.filter((e) => e.date === today), [diary, today])
   const usedGL = useMemo(() => todayEntries.reduce((s, e) => s + viewEntry(e).gl, 0), [todayEntries])
   const left = Math.max(0, Math.round((targets.glBudget - usedGL) * 10) / 10)
