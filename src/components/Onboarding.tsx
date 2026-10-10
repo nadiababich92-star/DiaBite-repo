@@ -11,7 +11,10 @@ import type {
 
 interface Props {
   initial: Profile
-  onDone: (p: Profile) => void
+  /** The second argument is true when the person agreed to what DiaBite keeps (new accounts). */
+  onDone: (p: Profile, consented?: boolean) => void
+  /** A new account must agree, on the first screen, to what DiaBite keeps about them. */
+  askConsent?: boolean
   /** Present when an existing user reopened onboarding from the profile tab. */
   onCancel?: () => void
 }
@@ -33,10 +36,11 @@ function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
 }
 
-export default function Onboarding({ initial, onDone, onCancel }: Props) {
+export default function Onboarding({ initial, onDone, askConsent, onCancel }: Props) {
   const [p, setP] = useState<Profile>({ ...initial, onboarded: false })
   const [step, setStep] = useState(0)
   const [agreed, setAgreed] = useState(false)
+  const [consented, setConsented] = useState(false)
 
   const set = <K extends keyof Profile>(key: K, value: Profile[K]) => setP((prev) => ({ ...prev, [key]: value }))
 
@@ -72,8 +76,9 @@ export default function Onboarding({ initial, onDone, onCancel }: Props) {
   }
 
   const last = step === STEPS.length - 1
-  const canGoOn = !exit
-  const next = () => (last ? agreed && onDone({ ...p, onboarded: true }) : setStep(step + 1))
+  // The first screen of a new account does not move on until what is kept has been agreed to.
+  const canGoOn = !exit && !(askConsent && step === 0 && !consented)
+  const next = () => (last ? agreed && onDone({ ...p, onboarded: true }, askConsent ? consented : undefined) : setStep(step + 1))
 
   const { ft, in: inch } = cmToFtIn(p.heightCm)
   const imperial = p.units === 'imperial'
@@ -109,6 +114,25 @@ export default function Onboarding({ initial, onDone, onCancel }: Props) {
           <>
             {step === 0 && (
               <>
+                {askConsent && (
+                  <div className="consent">
+                    <h2>What DiaBite keeps</h2>
+                    <ul>
+                      <li>Your email address.</li>
+                      <li>Your answers about yourself: age, sex, height, weight, activity, diagnosis, the classes of medicine you take, kidney status, other conditions, allergies and how you eat.</li>
+                      <li>What you log in your diary.</li>
+                    </ul>
+                    <p className="muted">
+                      It is stored in Ireland. You can export it or delete it all, at any time, from the Profile tab.
+                      DiaBite never asks for a medicine dose and never sells your data.
+                    </p>
+                    <label className="check-row onb-flag">
+                      <input type="checkbox" checked={consented} aria-label="I agree that DiaBite keeps this about me"
+                        onChange={(e) => setConsented(e.target.checked)} />
+                      <span>I agree that DiaBite keeps this about me</span>
+                    </label>
+                  </div>
+                )}
                 <h2>First, the numbers the formula needs</h2>
                 <p className="muted">
                   Energy and protein targets come from the Mifflin-St Jeor equation, which needs these

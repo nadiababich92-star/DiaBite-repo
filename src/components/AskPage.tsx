@@ -1,7 +1,8 @@
 import { useMemo, useRef, useState } from 'react'
 import { isLabelled, parseMeal } from '../lib/answer'
 import { sessionId } from '../lib/session'
-import { askAgent, avoidOf, budgetOf, engineId, MAX_QUESTION, RateLimitedError, receiptFrom, type AgentResponse, type Receipt, type TraceStep } from '../lib/agent'
+import { accessToken } from '../lib/auth'
+import { askAgent, avoidOf, budgetOf, engineId, MAX_QUESTION, RateLimitedError, receiptFrom, SignInRequiredError, type AgentResponse, type Receipt, type TraceStep } from '../lib/agent'
 import { viewEntry } from '../lib/diary'
 import { todayISO } from '../lib/storage'
 import { downloadResponses, saveResponse, savedCount } from '../lib/responses'
@@ -12,6 +13,8 @@ interface Props {
   targets: Targets
   diary: DiaryEntry[]
   onLog: (entries: DiaryEntry[]) => void
+  /** The engine said the sign-in is no longer good (it expired, or sign-in became required). */
+  onSessionEnded?: () => void
 }
 
 const SAMPLES = [
@@ -240,13 +243,13 @@ function summarize(step: TraceStep): string {
   }
 }
 
-export default function AskPage({ profile, targets, diary, onLog }: Props) {
+export default function AskPage({ profile, targets, diary, onLog, onSessionEnded }: Props) {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   // Set when the engine says "not now". Never locks the button: the safety rules
   // still answer while a limit is on, so only the server may decide who waits.
-  const [limited, setLimited] = useState<{ scope: 'ip' | 'session' | 'daily'; minutes: number } | null>(null)
+  const [limited, setLimited] = useState<{ scope: 'ip' | 'session' | 'daily' | 'user'; minutes: number } | null>(null)
   const [reply, setReply] = useState<AgentResponse | null>(null)
   const [asked, setAsked] = useState('')
   const [showReceipt, setShowReceipt] = useState(false)
@@ -282,12 +285,14 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
         entries: fresh ? [] : todayEntries.map((e) => (e.snapshot?.servings
           ? { foodId: engineId(e), servings: e.snapshot.servings }
           : { foodId: engineId(e), grams: e.grams })),
-      }, abort.current.signal)
+      }, abort.current.signal, await accessToken())
       setReply(res)
       // Lab 3.2: keep every successful exchange as evaluation data.
       setSaved(saveResponse(q, res))
     } catch (e) {
-      if (e instanceof RateLimitedError) {
+      if (e instanceof SignInRequiredError) {
+        onSessionEnded?.()
+      } else if (e instanceof RateLimitedError) {
         setLimited({ scope: e.scope, minutes: Math.max(1, Math.ceil(e.retryAfterSec / 60)) })
       } else if ((e as Error).name !== 'AbortError') setError((e as Error).message)
     } finally {
@@ -369,6 +374,8 @@ export default function AskPage({ profile, targets, diary, onLog }: Props) {
           <p style={{ margin: 0 }}>
             {limited.scope === 'daily'
               ? 'DiaBite has reached its limit for today and will be back tomorrow. Dosing and safety questions still work.'
+              : limited.scope === 'user'
+              ? `You've asked a lot of questions today. Try again in about ${limited.minutes} ${limited.minutes === 1 ? 'minute' : 'minutes'}.`
               : `You've asked a lot of questions in a short time. Please try again in about ${limited.minutes} ${limited.minutes === 1 ? 'minute' : 'minutes'}.`}
           </p>
         </section>

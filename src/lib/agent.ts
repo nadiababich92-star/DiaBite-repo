@@ -11,7 +11,7 @@
 import type { DiaryEntry, Profile, Targets } from '../types'
 
 /** Dev: proxied by Vite to the Container App (see vite.config.ts). Prod: set VITE_AGENT_URL. */
-const AGENT_URL = import.meta.env.VITE_AGENT_URL ?? '/agent'
+export const AGENT_URL = import.meta.env.VITE_AGENT_URL ?? '/agent'
 
 export interface AgentRequest {
   sessionId: string
@@ -71,9 +71,14 @@ export function avoidOf(p: Profile): AgentRequest['avoid'] {
 
 /** The engine said "not now": over a limit, with how long to wait. Not an agent answer. */
 export class RateLimitedError extends Error {
-  constructor(public scope: 'ip' | 'session' | 'daily', public retryAfterSec: number) {
+  constructor(public scope: 'ip' | 'session' | 'daily' | 'user', public retryAfterSec: number) {
     super('rate_limited')
   }
+}
+
+/** The engine wants a signed-in person and was not given a good token. */
+export class SignInRequiredError extends Error {
+  constructor() { super('sign_in_required') }
 }
 
 /** Longest question the engine accepts; the input stops there rather than failing late. */
@@ -86,13 +91,13 @@ export const MAX_QUESTION = 500
  */
 export const ASK_TIMEOUT_MS = 100_000
 
-export async function askAgent(req: AgentRequest, signal?: AbortSignal): Promise<AgentResponse> {
+export async function askAgent(req: AgentRequest, signal?: AbortSignal, token?: string | null): Promise<AgentResponse> {
   const ctl = new AbortController()
   const timer = setTimeout(() => ctl.abort(new Error('timeout')), ASK_TIMEOUT_MS)
   const onAbort = () => ctl.abort(signal?.reason)
   if (signal?.aborted) onAbort(); else signal?.addEventListener('abort', onAbort, { once: true })
   try {
-    return await askOnce(req, ctl.signal)
+    return await askOnce(req, ctl.signal, token)
   } catch (e) {
     if (ctl.signal.aborted && !signal?.aborted) throw new Error('That is taking too long. Please try again in a moment.')
     throw e
@@ -102,16 +107,17 @@ export async function askAgent(req: AgentRequest, signal?: AbortSignal): Promise
   }
 }
 
-async function askOnce(req: AgentRequest, signal: AbortSignal): Promise<AgentResponse> {
+async function askOnce(req: AgentRequest, signal: AbortSignal, token?: string | null): Promise<AgentResponse> {
   const res = await fetch(AGENT_URL, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
     body: JSON.stringify(req),
     signal,
   })
+  if (res.status === 401) throw new SignInRequiredError()
   if (res.status === 404) throw new Error('The agent is not reachable — is the engine deployed?')
   if (res.status === 429) {
-    const body = await res.json().catch(() => ({})) as { scope?: 'ip' | 'session' | 'daily'; retryAfterSec?: number }
+    const body = await res.json().catch(() => ({})) as { scope?: 'ip' | 'session' | 'daily' | 'user'; retryAfterSec?: number }
     const wait = Number(body.retryAfterSec ?? res.headers.get('retry-after')) || 60
     throw new RateLimitedError(body.scope ?? 'ip', wait)
   }

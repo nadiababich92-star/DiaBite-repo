@@ -5,7 +5,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
  *
  * Only the publishable key belongs here — it is visible to anyone who opens the
  * app, and everything it may do is decided by row-level security (for this
- * project: insert one row into public.feedback, nothing else). A service-role
+ * project: insert into public.feedback, and read or write the signed-in
+ * person's own profile and diary, nothing else). A service-role
  * key must never reach the frontend; Vite inlines every VITE_* value into the
  * bundle it ships.
  *
@@ -18,8 +19,10 @@ const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 export const supabase: SupabaseClient | null =
   url && key
     ? createClient(url, key, {
-        // No login anywhere in the app, so there is no session to persist.
-        auth: { persistSession: false, autoRefreshToken: false },
+        // A signed-in person keeps their session across visits. The link in the email is
+        // handled in the implicit flow on purpose: the person may ask for it on a laptop
+        // and tap it on a phone, which a PKCE link (bound to the browser that asked) refuses.
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'implicit' },
       })
     : null
 

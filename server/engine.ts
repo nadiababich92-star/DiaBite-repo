@@ -122,7 +122,7 @@ async function main() {
     })
   }
 
-  app.get('/health', (_req, res) => res.json({ ok: true, records: records.length }))
+  app.get('/health', (_req, res) => res.json({ ok: true, records: records.length, signIn: signInRequired() }))
 
   app.get('/openapi.json', (_req, res) => res.json(openApiSpec()))
 

@@ -32,6 +32,8 @@ import { parseMeal } from '../src/lib/answer'
 import { afterMealFor, computeItem, computeMeal } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
 import { withHangRetry } from '../server/agent'
+import { diffEntries, exportShape, fromRow, mergeById, toRow } from '../src/lib/syncCore'
+import { looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { generateWeek, menuHidden, regenerateSlot, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
 import { calculateTargets, DEFAULT_PROFILE } from '../src/lib/profile'
 import { CATEGORY_LABELS } from '../src/data/foods'
@@ -244,6 +246,41 @@ const menuMisses: string[] = []
 console.log(`\nmenu      ${menuMisses.length === 0 ? 'ok' : 'WRONG'}`)
 menuMisses.forEach((m) => console.log(m))
 
+// ── account ───────────────────────────────────────────────────────────────
+// Sign-in and sync: the parts that need no network. The rows themselves are proved in
+// the database (docs/security/security-plan.md); the engine's checks are in eval:abuse.
+
+const accountMisses: string[] = []
+{
+  const ok = (name: string, cond: boolean) => { if (!cond) accountMisses.push(`    ${name}`) }
+  const e1 = { id: '1760000000000-0', date: '2026-10-10', meal: 'lunch' as const, foodId: 'seed:egg', grams: 110, snapshot: { name: 'Egg', kcal: 156, carbs: 0.8, fiber: 0, protein: 13, fat: 11, availableCarbs: 0.8, gi: null, gl: 0 } }
+  const e2 = { id: '1760000000000-1', date: '2026-10-10', meal: 'dinner' as const, foodId: 'seed:oats', grams: 200 }
+  const row = toRow('00000000-0000-4000-8000-000000000001', e1)
+  ok('an entry survives the trip to a row and back', JSON.stringify(fromRow(row)) === JSON.stringify(e1))
+  ok('a row with a meal outside the four is dropped, never rendered', fromRow({ ...row, meal: 'brunch' }) === null)
+  ok('a row with no grams is dropped', fromRow({ ...row, grams: 0 }) === null && fromRow({ ...row, grams: 'x' as never }) === null)
+  const synced = new Map([[e1.id, JSON.stringify(e1)]])
+  const d1 = diffEntries(synced, [e1, e2])
+  ok('a new entry is pushed and an unchanged one is not', d1.upsert.length === 1 && d1.upsert[0].id === e2.id && d1.remove.length === 0)
+  const d2 = diffEntries(synced, [{ ...e1, grams: 55 }])
+  ok('an edited entry is pushed', d2.upsert.length === 1 && d2.upsert[0].grams === 55)
+  const d3 = diffEntries(new Map([[e1.id, JSON.stringify(e1)], [e2.id, JSON.stringify(e2)]]), [e2])
+  ok('a removed entry is deleted on the server', d3.remove.length === 1 && d3.remove[0] === e1.id && d3.upsert.length === 0)
+  const merged = mergeById([e1], [e1, e2], () => '')
+  ok('moving a diary twice leaves one of each entry', merged.length === 2 && mergeById(merged, [e1, e2], () => '').length === 2)
+  const newer = mergeById([{ id: 'a', n: 1, t: '2026-10-10T10:00' }], [{ id: 'a', n: 2, t: '2026-10-10T11:00' }], (x) => x.t)
+  ok('where both have an id the later one wins', newer.length === 1 && newer[0].n === 2)
+  ok('the export has exactly the keys consent, diary, email, exportedAt, profile',
+    exportShape({ exportedAt: '', email: '', consent: { at: null, version: null }, profile: null, diary: [] }) === 'consent,diary,email,exportedAt,profile')
+  ok('an address is an address', looksLikeEmail('name@example.com') && !looksLikeEmail('name@') && !looksLikeEmail('a b@c.de') && !looksLikeEmail(''))
+  ok('a rate limit is a rate limit', problemOf({ status: 429, code: 'over_email_send_rate_limit' }) === 'rate')
+  ok('a wrong code is a code problem', problemOf({ status: 403, code: 'otp_expired' }) === 'code' && problemOf({ status: 400, message: 'Token has expired or is invalid' }) === 'code')
+  ok('our SMTP failing is "unavailable", never the raw text', problemOf({ status: 500, code: 'unexpected_failure', message: 'Error sending confirmation email' }) === 'unavailable')
+  ok('no connection is "network"', problemOf({ name: 'AuthRetryableFetchError', status: 0 }) === 'network')
+}
+console.log(`\naccount   ${accountMisses.length === 0 ? 'ok' : 'WRONG'}`)
+accountMisses.forEach((m) => console.log(m))
+
 // ── hang ──────────────────────────────────────────────────────────────────
 // A call to Foundry that hangs gets one more try; an error that is the caller's
 // own is not retried; a second hang is an error, not a loop.
@@ -327,6 +364,7 @@ if (answerMisses.length) { console.log('an answer was parsed wrong'); process.ex
 if (portionMisses.length) { console.log('a default serving is wrong'); process.exit(1) }
 if (partialMisses.length) { console.log('a partial meal was called a fit'); process.exit(1) }
 if (menuMisses.length) { console.log('the weekly menu broke a rule'); process.exit(1) }
+if (accountMisses.length) { console.log('the account sync or the sign-in messages misbehaved'); process.exit(1) }
 if (hangMisses.length) { console.log('the hang retry misbehaved'); process.exit(1) }
 if (imageMisses.length) { console.log('the image is missing a data file the engine reads'); process.exit(1) }
 if (brandedMisses.length) { console.log('a branded product was given a load, or the layer is the wrong size'); process.exit(1) }

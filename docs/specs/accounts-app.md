@@ -82,3 +82,12 @@ A normal account (`demo@<owner's address>` or a plus-address) signed in once on 
 - `npm run eval`, `account` section: the sync merge by id (two entries with the same id keep the newer `updated_at`; an import twice yields one); the outbox bound at 500; `sanitizeProfile` on a server row; the export JSON has exactly the keys profile, diary, consent.
 - Screens, light and dark, 375 px: all three sign-in views and the problem messages; the consent card; the move dialog; the account block; the delete dialog.
 - By hand, once, on the live service: a real address from a real phone (link, then code), consent, onboarding, one question, the diary on a second device, export, sign-out clears local, delete leaves nothing (read as the service role: both tables empty for that id).
+
+## As built, 10 October 2026
+
+- The six-digit code is **one** numeric field (`autocomplete="one-time-code"`, wide letter-spacing), not six cells: a pasted or auto-filled code just works, and a screen reader meets one field.
+- The sign-in uses Supabase's **implicit** flow, not PKCE as first written: a link asked for on a laptop must work when tapped on a phone, and a PKCE link only works in the browser that asked.
+- Whether to show the wall comes from the engine: `GET /health` now carries `signIn: true|false`, so `REQUIRE_SIGN_IN` is one revision and no new build. If the engine cannot be reached the app shows the wall.
+- Pure parts live in `src/lib/syncCore.ts` and `src/lib/authCore.ts` and are tested in `npm run eval` (`account` section); the network parts in `sync.ts` and `auth.ts`.
+- A diary from before sign-in is set aside in `diabite.legacy.diary.v1` when it holds entries the account lacks; "Not now" leaves it there and it is offered again at the next sign-in; sign-out clears it with everything else.
+
