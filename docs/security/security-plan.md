@@ -132,6 +132,10 @@ modern browsers ignore it and old ones had bugs with it. The CSP does that job.
 
 Still open from the review and not changed here: the daily ceiling counts UTC days (a cost counter, correct as one; only the "back tomorrow" wording is off for the US), the unauthenticated feedback and session routes keep their existing limits, and the Profile tab lets a person choose a carbohydrate approach the onboarding blocks, which is a clinical decision.
 
+### Added 10 October, evening: `POST /meal/recompute`
+
+A new public route (no tool key, because a browser cannot hold one): it costs the same foods at the weights a person chose, against the day held for their session. **No model runs.** Controls: body validated before anything else (a session id of the same shape as `/agent/ask`, 1 to 20 foods, exactly one of grams 1 to 3000 or servings 0.1 to 20, food ids of at most 80 safe characters; anything else is 400); the sign-in wall applies when required (401 without a token); a per-address limit of 60 a minute (`RECOMPUTE_MIN`), exempt for a caller holding the engine key; a food this build cannot cost is a 400, never a 500; the 1 MB body cap applies. What it can leak: nothing about other people, because it reads only the day parked under the caller's own session id, which is unguessable to anyone who does not hold it. Residual risk: an address inside the limit can use a little CPU. Proved by `npm run eval:abuse` R1 to R7 and S13b, S13c, and by the live smoke test M13 and M14.
+
 ### Added 10 October: the email secret
 The sign-in emails go through Azure Communication Services using a client secret held only in Supabase. It expires; the expiry date is in Entra (App registrations, `diabite-smtp`, Certificates and secrets). A reminder a month before is the owner's, and the first thing to check if emails stop. It is never written in the repository, the chat or `.env.example`.
 

@@ -30,6 +30,17 @@ For a packaged food the card says, in substance: *"I can give you the carbohydra
 **Q25. Partial meals: "I can't judge the day".**
 When part of a meal cannot be scored, the app declines to say it fits and asks about the missing food, or says it already does not fit. Would you rather it showed a *range* (the load of the part it could cost, up to a stated ceiling), or is declining the safer thing for this audience?
 
+## Three more, added the evening of 10 October
+
+**Q26. "What is GL?" in two sentences.**
+Next to the main figure there is a link, "What is GL?", that opens: *"Glycemic load puts two things into one number: how fast a food raises blood sugar, and how much carbohydrate is in your portion. Your day has a budget of N. Each meal spends some of it, and the number you see is what is left."* Is that accurate and safe for a person with type 2 diabetes who has never heard the term? Is "how fast a food raises blood sugar" a fair gloss of the glycemic index, and is there a sentence you would add or strike?
+
+**Q27. A shorter disclaimer.**
+The banner used to show its whole text (reference tool, not medical advice, the numbers are published averages, not for insulin dosing, discuss changes with your clinician). It now shows only its first sentence, *"This is a reference tool, not medical advice."*, with the rest one tap away under "Read more". The whole text is unchanged and is also agreed to at the end of onboarding. Is a one-sentence banner with the rest on a tap enough, or must the dosing sentence always be visible?
+
+**Q28. Changing a portion after the answer.**
+After an answer the person can change any food's weight; the engine counts the meal again and a card above the original answer shows the new figures and a new verdict word taken from the same rule as before (fits, does not fit, or "I can't judge" when a food is missing). The explanation text written for the original portions stays below, marked as the original. Should the app also let someone *add* a food or *remove* one this way, or keep that to a new question? Is "Original answer, before you changed a portion" a clear enough label?
+
 ## How to answer
 
 Select any text and comment, or reply with question numbers. Partial answers are welcome.

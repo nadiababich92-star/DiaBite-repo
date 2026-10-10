@@ -84,6 +84,12 @@ the problem or the central claim:
    question, a light and a dark theme the user can choose, and the states that
    were missing (over the budget, a food we do not have, waiting, logged).
    Nothing about this is in the app until it is deployed.
+7. **A portion can be changed after an answer** (10 October, evening). The engine
+   costs the same foods again at the new weights (`POST /meal/recompute`, no
+   model) and the verdict word comes from its own `fits`. This is the first part
+   of B1's "the user can correct any match before saving", by weight. The
+   disclaimer shows its first sentence and the rest on a tap, and "What is GL?"
+   explains the unit; both wordings wait for a clinician (questions 26 and 27).
 
 > Figures marked **[verify]** are from memory of published sources and must be
 > re-checked against the primary source before this document is submitted or

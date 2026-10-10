@@ -208,6 +208,21 @@ Raised: `--surface`, 1px border, radius 12, 15px, 44px minimum height.
 A floating slab at the bottom: four items, each an icon above a 13px label. The
 selected item sits on a marker pill. Feedback is not in the bar; it lives in **You**.
 
+### Portions
+After an answer, **Change a portion** opens one row per food: its name and a stepper
+(a 44px minus and plus around the weight, in mono). A change settles for 0.4s, then the
+engine counts the meal again; a card above the original answer shows the new figures
+with the verdict word taken from `fits`, and the original is dimmed under the label
+"Original answer, before you changed a portion". No figure is worked out in the browser.
+
+### Plain-words link
+**What is GL?** sits under the main figure as an underlined link and opens a short
+dialog, drawn into `.app` so the rest of the page can go inert behind it.
+
+### Onboarding progress
+Five bars (cut-in grooves, the filled ones beaded) and one line, *"Step name, N of 5"*.
+On a phone the button that moves you on stays at the bottom while the form scrolls.
+
 ### Logo and wordmark
 The mark is a receipt with a bite out of its top-right corner, a torn bottom edge
 and one highlighted line. The wordmark is **Dia** and a marker-highlighted **Bite**
@@ -248,7 +263,9 @@ Almost none, and never for its own sake.
 4. Plain words. No medical jargon without a gloss, no "AI-powered", no
    exclamation marks, no emoji in product copy.
 5. The disclaimer is a banner that never leaves the screen and is read before
-   any number. Its text is a clinical and legal matter: do not shorten it for
-   layout.
+   any number. Its first sentence, "This is a reference tool, not medical advice.",
+   is always shown; the rest is one tap away under "Read more". The words
+   themselves are a clinical and legal matter (docs/clinical-review-addendum.md,
+   Q27): do not edit them for layout.
 6. If the product does not know something, the interface says so in the same
    voice and weight as an answer.
