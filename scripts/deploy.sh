@@ -37,23 +37,41 @@ done
 [ "${CONCLUSION:-}" = "success" ] || { echo "build for $SHA is $STATUS/$CONCLUSION — not deploying"; exit 1; }
 
 echo "deploying…"
+PREVIOUS_IMAGE=$(az containerapp show -g "$RG" -n "$APP" --query "properties.template.containers[0].image" -o tsv)
 az containerapp update -g "$RG" -n "$APP" --image "$REGISTRY/$APP:$SHA" --query properties.latestRevisionName -o tsv >/dev/null
 
 LATEST=$(az containerapp show -g "$RG" -n "$APP" --query properties.latestRevisionName -o tsv)
-for r in $(az containerapp revision list -g "$RG" -n "$APP" --query "[?properties.active].name" -o tsv); do
-  [ "$r" = "$LATEST" ] || az containerapp revision deactivate -g "$RG" -n "$APP" --revision "$r" >/dev/null 2>&1
-done
-
 FQDN=$(az containerapp show -g "$RG" -n "$APP" --query properties.configuration.ingress.fqdn -o tsv)
+
+# The old revisions stay until the new one has answered. They used to be switched off
+# first, and on 9 October a new revision that could not start left nothing to fall back
+# on: the app was down for twelve minutes.
 echo "waiting for $LATEST to answer…"
+LIVE=""
 for _ in $(seq 1 30); do
-  if curl -fsS -m 15 "https://$FQDN/health" 2>/dev/null | grep -q '"ok":true'; then
-    echo "live: $(curl -s -m 15 "https://$FQDN/health")"
-    exit 0
-  fi
+  if curl -fsS -m 15 "https://$FQDN/health" 2>/dev/null | grep -q '"ok":true'; then LIVE=yes; break; fi
   sleep 12
 done
 
-echo "revision never answered; its state:"
-az containerapp revision show -g "$RG" -n "$APP" --revision "$LATEST" --query "properties.runningState" -o tsv
-exit 1
+if [ -z "$LIVE" ]; then
+  echo "revision never answered; its state:"
+  az containerapp revision show -g "$RG" -n "$APP" --revision "$LATEST" --query "properties.runningState" -o tsv
+  echo "to go back:  az containerapp update -g $RG -n $APP --image $PREVIOUS_IMAGE"
+  exit 1
+fi
+
+for r in $(az containerapp revision list -g "$RG" -n "$APP" --query "[?properties.active].name" -o tsv); do
+  [ "$r" = "$LATEST" ] || az containerapp revision deactivate -g "$RG" -n "$APP" --revision "$r" >/dev/null 2>&1
+done
+echo "live: $(curl -s -m 15 "https://$FQDN/health")"
+
+# Check the thing, not the report (CLAUDE.md rule 1): the page, the closed routes, the safety rules, a real question.
+if [ -z "${SKIP_SMOKE:-}" ] && command -v node >/dev/null 2>&1; then
+  if node eval/smoke.mjs "https://$FQDN"; then
+    echo "smoke: passed"
+  else
+    echo
+    echo "SMOKE FAILED on $LATEST. To go back:  az containerapp update -g $RG -n $APP --image $PREVIOUS_IMAGE"
+    exit 2
+  fi
+fi
