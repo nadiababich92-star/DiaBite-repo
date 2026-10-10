@@ -351,7 +351,9 @@ async function withRateLimitRetry<T>(run: () => Promise<T>): Promise<T> {
       if (!limited || attempt >= 2) throw e
       const reset = Number(err.headers?.['x-ratelimit-reset-tokens'])
       const wait = Number.isFinite(reset) && reset > 0 ? Math.min(reset, 65) * 1000 : (attempt + 1) * 8000
-      console.warn(`rate limited, waiting ${Math.round(wait / 1000)}s`)
+      const h = err.headers ?? {}
+      const seen = Object.entries(h).filter(([k]) => /ratelimit|retry-after/i.test(k)).map(([k, v]) => `${k}=${v}`).join(' ')
+      console.warn(`rate limited, waiting ${Math.round(wait / 1000)}s | ${String((e as Error).message ?? '').slice(0, 200)} | ${seen}`)
       await sleep(wait)
     }
   }
