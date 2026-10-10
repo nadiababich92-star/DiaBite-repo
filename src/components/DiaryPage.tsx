@@ -3,6 +3,7 @@ import { CATEGORY_LABELS, FOODS, getFood } from '../data/foods'
 import { availableCarbs, glycemicLoad, sumNutrients } from '../lib/glycemic'
 import { MEAL_LABELS, MEAL_ORDER } from '../lib/menu'
 import { viewEntry } from '../lib/diary'
+import { weekSummary } from '../lib/history'
 import { todayISO } from '../lib/storage'
 import type { DiaryEntry, MealType, Targets } from '../types'
 import { GIPill, GLPill } from './Pills'
@@ -56,6 +57,8 @@ export default function DiaryPage({ targets, diary, onChange }: Props) {
     setGrams('')
   }
 
+  const week = useMemo(() => weekSummary(diary, targets.glBudget, todayISO()), [diary, targets.glBudget])
+
   const pct = (value: number, target: number) => Math.min(100, (value / Math.max(1, target)) * 100)
 
   return (
@@ -81,6 +84,27 @@ export default function DiaryPage({ targets, diary, onChange }: Props) {
             <div className="sub">1 BU = 12 g of carbs</div>
           </div>
         </div>
+      </section>
+
+      <section className="card">
+        <h2>The last seven days</h2>
+        <ol className="week" aria-label="Glycemic load used each of the last seven days, against your daily budget">
+          {week.days.map((d) => (
+            <li key={d.date} className={d.logged ? (d.within ? 'ok' : 'over') : 'none'}>
+              <span className="wk-day">{d.label}</span>
+              <span className="wk-bar" aria-hidden="true"><i style={{ width: `${d.logged ? Math.min(100, (d.used / Math.max(1, targets.glBudget)) * 100) : 0}%` }} /></span>
+              <span className="wk-num">
+                {d.logged ? `${d.used.toFixed(0)} of ${targets.glBudget}` : 'not logged'}
+                {d.logged && d.partial && <em> + carbs only</em>}
+              </span>
+            </li>
+          ))}
+        </ol>
+        <p className="muted">
+          {week.loggedDays === 0
+            ? 'Log what you eat and the week fills in here.'
+            : `${week.withinDays} of the ${week.loggedDays} ${week.loggedDays === 1 ? 'day' : 'days'} you logged stayed within your glycemic-load budget.`}
+        </p>
       </section>
 
       <section className="card">

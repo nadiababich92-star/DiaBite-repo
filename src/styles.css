@@ -492,3 +492,14 @@ body.modal-open { overflow: hidden; }
 .account-delete { margin-top: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; gap: 10px; }
 button.danger { background: var(--high); color: var(--bg); border: none; border-radius: 8px; padding: 9px 16px; font-weight: 600; cursor: pointer; align-self: flex-start; }
 button.danger:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* The week: a thin bar per day, plain numbers, no colour but the verdict's (green within, red over). */
+.week { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.week li { display: grid; grid-template-columns: 44px minmax(0, 1fr) 118px; align-items: center; gap: 10px; font-size: 14px; }
+.wk-day { color: var(--text-dim); }
+.wk-bar { height: 3px; border-radius: 99px; background: var(--border); overflow: hidden; display: block; }
+.wk-bar i { display: block; height: 100%; border-radius: 99px; background: var(--low); }
+.week li.over .wk-bar i { background: var(--high); }
+.wk-num { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 13px; text-align: right; color: var(--text); }
+.week li.none .wk-num { color: var(--text-faint); font-family: var(--font); }
+.wk-num em { font-style: normal; color: var(--text-faint); font-family: var(--font); }

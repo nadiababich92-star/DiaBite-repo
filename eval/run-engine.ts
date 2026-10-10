@@ -34,6 +34,7 @@ import { sanitizeProfile } from '../src/lib/storage'
 import { looksLikeMeal, withHangRetry } from '../server/agent'
 import { diffEntries, exportShape, fromRow, mergeById, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
+import { weekSummary } from '../src/lib/history'
 import { generateWeek, menuHidden, regenerateSlot, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
 import { calculateTargets, DEFAULT_PROFILE } from '../src/lib/profile'
 import { CATEGORY_LABELS } from '../src/data/foods'
@@ -292,6 +293,18 @@ const accountMisses: string[] = []
   ok('where both have an id the later one wins', newer.length === 1 && newer[0].n === 2)
   ok('the export has exactly the keys consent, diary, email, exportedAt, profile',
     exportShape({ exportedAt: '', email: '', consent: { at: null, version: null }, profile: null, diary: [] }) === 'consent,diary,email,exportedAt,profile')
+  {
+    const day = (n: number) => `2026-10-${String(n).padStart(2, '0')}`
+    const egg = (id: string, date: string, grams = 110) => ({ id, date, meal: 'lunch' as const, foodId: 'egg', grams })
+    const rice = (id: string, date: string) => ({ id, date, meal: 'dinner' as const, foodId: 'rice-white', grams: 400 })
+    const w = weekSummary([egg('a', day(10)), egg('b', day(10)), rice('c', day(8)), rice('d', day(8)), rice('e', day(8))], 20, day(10))
+    ok('the week is seven days ending today, oldest first', w.days.length === 7 && w.days[6].date === day(10) && w.days[0].date === day(4))
+    ok('a day with nothing logged is not logged, never "within"', !w.days[0].logged && !w.days[0].within && w.loggedDays === 2)
+    ok('a day over the budget is logged and not within; a light day is within', w.days[4].logged && !w.days[4].within && w.days[6].within && w.withinDays === 1)
+    const carbsOnly = weekSummary([{ id: 'x', date: day(10), meal: 'snack' as const, foodId: 'branded:1', grams: 30, snapshot: { name: 'Bar', kcal: 100, carbs: 20, fiber: 1, protein: 2, fat: 3, availableCarbs: 19, gi: null, gl: 0, loadAvailable: false } }], 20, day(10))
+    ok('a day with a packaged food says its load is only what could be counted', carbsOnly.days[6].partial && carbsOnly.days[6].logged)
+    ok('the week crosses a month boundary', weekSummary([], 20, '2026-11-02').days[0].date === '2026-10-27')
+  }
   ok('the code may be 6 to 10 digits, whatever Supabase is set to', looksLikeCode('12345678') && looksLikeCode('123456') && looksLikeCode('1234567890') && !looksLikeCode('12345') && !looksLikeCode('12345678901') && !looksLikeCode('12a456'))
   ok('an address is an address', looksLikeEmail('name@example.com') && !looksLikeEmail('name@') && !looksLikeEmail('a b@c.de') && !looksLikeEmail(''))
   ok('a rate limit is a rate limit', problemOf({ status: 429, code: 'over_email_send_rate_limit' }) === 'rate')
