@@ -12,7 +12,7 @@ const PROBLEM: Record<SignInProblem, string> = {
 
 const RESEND_SECONDS = 60
 
-export default function SignIn({ notice }: { notice?: string }) {
+export default function SignIn({ notice, onCancel }: { notice?: string; onCancel?: () => void }) {
   const [step, setStep] = useState<'address' | 'code'>('address')
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
@@ -100,6 +100,7 @@ export default function SignIn({ notice }: { notice?: string }) {
             </div>
           </form>
         )}
+        {onCancel && <button className="link" type="button" onClick={onCancel}>Not now</button>}
       </section>
     </div>
   )

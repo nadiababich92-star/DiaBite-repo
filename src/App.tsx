@@ -10,6 +10,7 @@ import MenuPage from './components/MenuPage'
 import ProfilePage from './components/ProfilePage'
 import { calculateTargets } from './lib/profile'
 import { signOutAndClear, useAuth, useSignInRequired } from './lib/auth'
+import { supabaseConfigured } from './lib/supabase'
 import { loadDiary, loadProfile, saveDiary, saveProfile } from './lib/storage'
 import { CONSENT_VERSION, LEGACY_DIARY_KEY, PENDING_KEY, loadAccount, mergeById, useAccountSync } from './lib/sync'
 import type { DiaryEntry, Profile } from './types'
@@ -42,6 +43,7 @@ export default function App() {
   const [consent, setConsent] = useState<{ at: string | null; version: string | null }>({ at: null, version: null })
   const [waiting, setWaiting] = useState(0) // entries from before sign-in, held aside
   const [notice, setNotice] = useState('')
+  const [signingIn, setSigningIn] = useState(false)
   const sync = useAccountSync({ userId: auth.userId, ready: account === 'ready', profile, diary, consent })
   const prime = sync.prime
   const wasSignedIn = useRef(false)
@@ -80,7 +82,7 @@ export default function App() {
   }, [prime])
 
   useEffect(() => {
-    if (auth.status === 'signedIn' && auth.userId) { wasSignedIn.current = true; void load(auth.userId) }
+    if (auth.status === 'signedIn' && auth.userId) { wasSignedIn.current = true; setSigningIn(false); void load(auth.userId) }
     if (auth.status === 'signedOut') {
       // Signed out: nothing of the account stays on screen or in memory.
       if (wasSignedIn.current) { setProfile(loadProfile()); setDiary(loadDiary()); setWaiting(0) }
@@ -106,6 +108,8 @@ export default function App() {
     return <div className="app"><p className="muted" role="status">Opening DiaBite…</p></div>
   }
   if (signInRequired && auth.status === 'signedOut') return <SignIn notice={notice} />
+  // Not required, but wanted: someone signing in from the Profile tab to keep their diary across devices.
+  if (!signInRequired && auth.status === 'signedOut' && signingIn) return <SignIn notice={notice} onCancel={() => setSigningIn(false)} />
   if (auth.status === 'signedIn' && account === 'failed') {
     return (
       <div className="app">
@@ -196,6 +200,13 @@ export default function App() {
         />
       )}
       {tab === 'profile' && auth.status === 'signedIn' && auth.userId && <AccountBlock userId={auth.userId} email={auth.email} />}
+      {tab === 'profile' && auth.status === 'signedOut' && !signInRequired && supabaseConfigured && (
+        <section className="card">
+          <h2>Keep your profile and diary</h2>
+          <p className="muted">Sign in with your email and they follow you to any device. Without it they stay in this browser only.</p>
+          <button className="primary" onClick={() => setSigningIn(true)}>Sign in</button>
+        </section>
+      )}
       </main>
 
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
