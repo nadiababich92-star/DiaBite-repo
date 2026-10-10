@@ -75,7 +75,7 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
       await b.ev(`(()=>{const i=document.querySelector('input[type=text]'); i.focus(); i.select()})()`)
       await b.send('Input.insertText', { text: q })
       const t0 = Date.now()
-      await b.ev(`__click('Ask')`)
+      await b.ev(`__click('Check this meal')`)
       // wait for the request to start before waiting for it to end, or the previous answer is read as this one
       for (let i = 0; i < 10; i++) { if (await b.ev('__busy()')) break; await sleep(300) }
       for (let i = 0; i < 100; i++) { await sleep(400); if (!await b.ev('__busy()')) break }

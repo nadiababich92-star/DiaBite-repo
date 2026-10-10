@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { looksLikeEmail, sendLink, verifyCode, type SignInProblem } from '../lib/auth'
+import Logo, { Wordmark } from './Logo'
 
 /** The product's own words for each thing that can go wrong; a raw error string is never shown. */
 const PROBLEM: Record<SignInProblem, string> = {
@@ -52,8 +53,8 @@ export default function SignIn({ notice, onCancel }: { notice?: string; onCancel
   return (
     <div className="app">
       <header className="masthead">
-        <h1>DiaBite</h1>
-        <p>Nutrition for type 2 diabetes and insulin resistance</p>
+        <Logo />
+        <Wordmark />
       </header>
 
       <section className="card signin">

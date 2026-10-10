@@ -6,6 +6,8 @@ import {
   CONDITION_LABELS,
   GOAL_LABELS,
 } from '../lib/profile'
+import { loadTheme, saveTheme } from '../lib/theme'
+import type { ThemeChoice } from '../lib/theme'
 import type { Activity, CarbApproach, Condition, Goal, Profile, Sex, Targets } from '../types'
 
 interface Props {
@@ -14,10 +16,14 @@ interface Props {
   onChange: (p: Profile) => void
   /** Reopens the onboarding flow, where the medical answers live. */
   onRedoOnboarding: () => void
+  /** Opens the feedback form. It lives here, not in the navigation bar. */
+  onFeedback: () => void
 }
 
-export default function ProfilePage({ profile, targets, onChange, onRedoOnboarding }: Props) {
+export default function ProfilePage({ profile, targets, onChange, onRedoOnboarding, onFeedback }: Props) {
   const [query, setQuery] = useState('')
+  const [theme, setTheme] = useState<ThemeChoice>(loadTheme)
+  const choose = (c: ThemeChoice) => { setTheme(c); saveTheme(c) }
 
   const set = <K extends keyof Profile>(key: K, value: Profile[K]) =>
     onChange({ ...profile, [key]: value })
@@ -32,6 +38,22 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
 
   return (
     <>
+      <section className="card">
+        <h2>Appearance</h2>
+        <div className="theme-options" role="group" aria-label="Appearance">
+          <button className="theme-option" aria-pressed={theme === 'system'} onClick={() => choose('system')}>
+            <span className="theme-swatch" aria-hidden="true"><i className="p" /><i className="n" /></span>Follow my phone
+          </button>
+          <button className="theme-option" aria-pressed={theme === 'paper'} onClick={() => choose('paper')}>
+            <span className="theme-swatch" aria-hidden="true"><i className="p" /></span>Paper
+          </button>
+          <button className="theme-option" aria-pressed={theme === 'night'} onClick={() => choose('night')}>
+            <span className="theme-swatch" aria-hidden="true"><i className="n" /></span>Night
+          </button>
+        </div>
+        <p className="muted theme-note">Follow my phone switches to Night after dark on its own.</p>
+      </section>
+
       <section className="card">
         <h2>About you</h2>
         <div className="grid">
@@ -220,6 +242,12 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
             ))}
           </div>
         )}
+      </section>
+
+      <section className="card">
+        <h2>Help</h2>
+        <p className="muted">Tell us what was wrong, unclear or missing. It goes to the people building DiaBite.</p>
+        <button className="ghost" onClick={onFeedback}>Send feedback</button>
       </section>
     </>
   )

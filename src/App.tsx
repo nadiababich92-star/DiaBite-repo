@@ -4,6 +4,7 @@ import AskPage from './components/AskPage'
 import DiaryPage from './components/DiaryPage'
 import FeedbackModal from './components/FeedbackModal'
 import ImportPrompt from './components/ImportPrompt'
+import Logo, { Wordmark } from './components/Logo'
 import SignIn from './components/SignIn'
 import Onboarding from './components/Onboarding'
 import MenuPage from './components/MenuPage'
@@ -17,11 +18,12 @@ import type { DiaryEntry, Profile } from './types'
 
 type Tab = 'ask' | 'diary' | 'menu' | 'profile'
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'ask', label: 'Can I eat this?' },
-  { id: 'diary', label: 'Diary' },
-  { id: 'menu', label: 'Weekly menu' },
-  { id: 'profile', label: 'Profile' },
+// Four places, reachable with a thumb. Icons are drawn here so they take the colour of the bar.
+const TABS: { id: Tab; label: string; icon: JSX.Element }[] = [
+  { id: 'ask', label: 'Ask', icon: <><circle cx="12" cy="12" r="9" /><path d="M8 12.5l3 3 5-6" /></> },
+  { id: 'diary', label: 'Diary', icon: <><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z" /><path d="M8 17h11" /></> },
+  { id: 'menu', label: 'Menu', icon: <><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></> },
+  { id: 'profile', label: 'You', icon: <><circle cx="12" cy="8" r="4" /><path d="M4 21c1-4 4-6 8-6s7 2 8 6" /></> },
 ]
 
 type AccountState = 'none' | 'loading' | 'ready' | 'failed'
@@ -129,8 +131,8 @@ export default function App() {
     return (
       <div className="app">
         <header className="masthead">
-          <h1>DiaBite</h1>
-          <p>Nutrition for type 2 diabetes and insulin resistance</p>
+          <Logo />
+          <Wordmark />
         </header>
         <Onboarding
           initial={profile}
@@ -148,8 +150,8 @@ export default function App() {
   return (
     <div className="app">
       <header className="masthead">
-        <h1>DiaBite</h1>
-        <p>Nutrition for type 2 diabetes and insulin resistance</p>
+        <Logo />
+        <Wordmark />
       </header>
 
       <div className="disclaimer">
@@ -165,24 +167,6 @@ export default function App() {
         </section>
       )}
 
-      <nav className="tabs">
-        <div className="tab-row" role="tablist">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              role="tab"
-              id={`tab-${t.id}`}
-              aria-controls={`panel-${t.id}`}
-              aria-selected={tab === t.id}
-              onClick={() => setTab(t.id)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <button className="tab-action" onClick={() => setFeedbackOpen(true)}>Feedback</button>
-      </nav>
-
       <main role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
       {tab === 'ask' && (
         <AskPage profile={profile} targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} onSessionEnded={sessionEnded} />
@@ -197,6 +181,7 @@ export default function App() {
           targets={targets}
           onChange={setProfile}
           onRedoOnboarding={() => setOnboarding(true)}
+          onFeedback={() => setFeedbackOpen(true)}
         />
       )}
       {tab === 'profile' && auth.status === 'signedIn' && auth.userId && <AccountBlock userId={auth.userId} email={auth.email} />}
@@ -208,6 +193,22 @@ export default function App() {
         </section>
       )}
       </main>
+
+      <nav className="tabs" role="tablist" aria-label="Main">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            role="tab"
+            id={`tab-${t.id}`}
+            aria-controls={`panel-${t.id}`}
+            aria-selected={tab === t.id}
+            onClick={() => setTab(t.id)}
+          >
+            <span className="tab-ico" aria-hidden="true"><svg viewBox="0 0 24 24">{t.icon}</svg></span>
+            {t.label}
+          </button>
+        ))}
+      </nav>
 
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
       {waiting > 0 && !feedbackOpen && <ImportPrompt count={waiting} onMove={moveLegacyDiary} onLater={() => setWaiting(0)} />}

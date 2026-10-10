@@ -347,7 +347,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
             type="text" value={text} onChange={(e) => setText(e.target.value)}
             placeholder="e.g. two slices of pepperoni pizza" disabled={busy} maxLength={MAX_QUESTION} aria-label="What are you about to eat?"
           />
-          <button className="primary" type="submit" disabled={busy || !text.trim()}>{busy ? 'Thinking…' : 'Ask'}</button>
+          <button className="primary" type="submit" disabled={busy || !text.trim()}>{busy ? 'Thinking…' : 'Check this meal'}</button>
         </form>
         {!reply && !busy && (
           <div className="chips-col">
