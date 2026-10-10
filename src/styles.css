@@ -698,3 +698,40 @@ button.danger:disabled { opacity: 0.45; cursor: not-allowed; }
 .ask-hero .ask-title { font-size: 30px; line-height: 1.15; margin: 0 0 8px; max-width: 20ch; }
 .ask-hero.compact .ask-title { display: none; }
 @media (max-width: 560px) { .ask-hero .ask-title { font-size: 28px; } }
+
+/* ── The disclaimer's one tap, the GL link, the portions, the progress ─────── */
+.disclaimer-toggle { padding: 12px 4px; margin: -12px 0; min-height: 44px; color: var(--accent); text-decoration: underline; font-size: 13px; }
+.disclaimer-toggle:hover { color: var(--accent); }
+.gl-link { color: var(--accent); text-decoration: underline; font-size: 14px; font-weight: 600; min-height: 44px; padding: 0 2px; margin: -6px 0 6px; }
+.gl-link:hover { color: var(--accent); }
+
+.answer.stale { opacity: 0.72; }
+.answer.recalc { margin-bottom: 14px; }
+.answer.recalc .verify-row .link { color: var(--accent); text-decoration: underline; font-weight: 600; font-size: 14px; }
+
+.portions h2 { margin-bottom: 4px; }
+.portion-list { list-style: none; margin: 12px 0 4px; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.portion-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 2px dotted var(--dot); padding-bottom: 10px; }
+.portion-list li:last-child { border-bottom: none; padding-bottom: 0; }
+.portion-name { font-size: 15px; min-width: 0; }
+.stepper { display: inline-flex; align-items: center; gap: 4px; flex: none; }
+.step {
+  width: 44px; height: 44px; border-radius: 12px; cursor: pointer; font: inherit; font-size: 22px; font-weight: 600; line-height: 1; padding: 0;
+  background: var(--surface); color: var(--text); border: 1px solid var(--border); box-shadow: var(--fx-key-soft);
+}
+.step:hover { border-color: var(--accent); }
+.step-v { min-width: 70px; text-align: center; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 500; }
+.portion-state { min-height: 20px; margin: 6px 0 0; }
+
+/* Onboarding: where you are, as a bar. */
+.onb-progress { margin: 0 0 16px; }
+.onb-bars { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.onb-bars i { display: block; height: 8px; border-radius: 4px; background: var(--groove); box-shadow: var(--groove-fx); }
+.onb-bars i.on { background: var(--bead); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) inset; }
+.onb-where { margin: 8px 0 0; display: flex; justify-content: space-between; font-size: 14px; color: var(--text-dim); }
+.onb-where b { color: var(--text); font-weight: 600; }
+.onb-where span { font-family: var(--mono); font-size: 13px; }
+@media (max-width: 560px) {
+  /* The button that moves you on stays in reach while the form scrolls. */
+  .onb-actions { position: sticky; bottom: 0; background: var(--surface); margin: 20px -20px -22px; padding: 12px 20px 16px; border-top: 1px solid var(--border); border-radius: 0 0 var(--radius) var(--radius); z-index: 2; }
+}

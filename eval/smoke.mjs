@@ -43,6 +43,12 @@ const red = await fetch(`${URL_}/agent/ask`, { method: 'POST', headers: { 'conte
 const redBody = await red.json().catch(() => ({}))
 check('M6', 'a red-flag message is answered by the rule, never turned away', red.status === 200 && redBody.blockedRule === 'red_flag', JSON.stringify([red.status, redBody.blockedRule]))
 
+const rcBad = await fetch(`${URL_}/meal/recompute`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sessionId: `smoke-${Date.now()}`, items: [] }) })
+check('M13', 'a portion change with nothing to cost is refused with 400, not an error', rcBad.status === 400, String(rcBad.status))
+const rcOk = await fetch(`${URL_}/meal/recompute`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sessionId: `smoke-${Date.now()}`, items: [{ foodId: 'seed:rice-white', grams: 180 }] }) })
+const rcJson = await rcOk.json().catch(() => ({}))
+check('M14', 'the engine costs a portion with no model: 180 g of white rice carries a load of 36.3', rcOk.status === 200 && rcJson.totals?.gl === 36.3, JSON.stringify([rcOk.status, rcJson.totals?.gl]))
+
 // ── the page, as a person ─────────────────────────────────────────────────
 const b = await launch({ port: 9500 + Math.floor(Math.random() * 400), width: 900, height: 1100, dpr: 1 })
 const errors = []

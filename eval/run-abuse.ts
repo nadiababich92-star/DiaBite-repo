@@ -74,7 +74,7 @@ function start(env: Record<string, string>) {
 async function httpSuite() {
   // ── window limit: 3 asks per 10 minutes from one address ───────────────
   const child = start({
-    ASK_IP_10MIN: '3', ASK_IP_DAY: '1000', ASK_SESSION_HOUR: '1000', ASK_DAILY_CEILING: '1000',
+    ASK_IP_10MIN: '3', ASK_IP_DAY: '1000', ASK_SESSION_HOUR: '1000', ASK_DAILY_CEILING: '1000', RECOMPUTE_MIN: '4',
   })
   try {
     await waitReady()
@@ -117,6 +117,36 @@ async function httpSuite() {
 
     const big = await ask({ ...meal('a5b'), entries: Array.from({ length: 101 }, () => ({})) })
     check('A5b', '101 diary entries: 400, field entries', big.status === 400 && big.json.field === 'entries', JSON.stringify([big.status, big.json]))
+
+    // ── /meal/recompute: a portion changed, no model, same arithmetic ─────
+    const rc = (body: unknown, headers: Record<string, string> = {}) => fetch(`${BASE}/meal/recompute`, {
+      method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(body),
+    }).then(async (r) => ({ status: r.status, json: await r.json().catch(() => ({})) as Record<string, any>, retry: r.headers.get('retry-after') }))
+    // Park a day for one session, as the agent route does, so afterMeal has a budget to subtract from.
+    await fetch(`${BASE}/session/rc-1`, { method: 'PUT', headers: { 'content-type': 'application/json', 'x-api-key': KEY },
+      body: JSON.stringify({ budget: { glBudget: 49, carbsG: 108, kcal: 1660 }, entries: [] }) })
+    const r1 = await rc({ sessionId: 'rc-1', items: [{ foodId: 'seed:rice-white', grams: 180 }] })
+    const r2 = await rc({ sessionId: 'rc-1', items: [{ foodId: 'seed:rice-white', grams: 360 }] })
+    check('R1', 'a portion recomputed against the held day: totals and afterMeal come from the engine',
+      r1.status === 200 && typeof r1.json.totals?.gl === 'number' && r1.json.afterMeal?.fits === true
+        && Math.abs(r1.json.afterMeal.remaining.gl - (49 - r1.json.totals.gl)) < 0.11, JSON.stringify([r1.status, r1.json.afterMeal]))
+    check('R2', 'twice the weight is twice the load, and past the budget the verdict is the engine\'s: fits false',
+      r2.status === 200 && Math.abs(r2.json.totals.gl - 2 * r1.json.totals.gl) < 0.2 && r2.json.afterMeal?.fits === false, JSON.stringify([r2.status, r2.json.afterMeal]))
+    const r3 = await rc({ sessionId: 'rc-never', items: [{ foodId: 'seed:rice-white', grams: 180 }] })
+    check('R3', 'no day held for the session: totals only, no afterMeal, so no verdict can be invented',
+      r3.status === 200 && r3.json.afterMeal === undefined && typeof r3.json.totals?.gl === 'number', JSON.stringify(r3))
+    const bads = await Promise.all([
+      rc({ sessionId: 'rc-1', items: [] }), rc({ sessionId: 'rc-1', items: [{ foodId: 'seed:rice-white', grams: -5 }] }),
+      rc({ sessionId: 'rc-1', items: [{ foodId: 'seed:rice-white' }] }), rc({ sessionId: 'a/b', items: [{ foodId: 'seed:egg', grams: 50 }] }),
+    ])
+    check('R4', 'empty list, a negative weight, no weight, a bad session id: all 400 invalid_request',
+      bads.every((b) => b.status === 400 && b.json.error === 'invalid_request'), JSON.stringify(bads.map((b) => b.status)))
+    const ghost = await rc({ sessionId: 'rc-1', items: [{ foodId: 'seed:no-such-food', grams: 50 }] })
+    check('R5', 'a food this build cannot cost: 400, never a 500', ghost.status === 400, String(ghost.status))
+    const over = await rc({ sessionId: 'rc-1', items: [{ foodId: 'seed:rice-white', grams: 180 }] })
+    check('R6', 'past RECOMPUTE_MIN from one address: 429 with Retry-After', over.status === 429 && Number(over.retry) > 0, JSON.stringify([over.status, over.retry]))
+    const rcKeyed = await rc({ sessionId: 'rc-1', items: [{ foodId: 'seed:rice-white', grams: 180 }] }, { 'x-api-key': KEY })
+    check('R7', 'a caller with the engine key is exempt from the limit', rcKeyed.status === 200, String(rcKeyed.status))
 
     const huge = await fetch(`${BASE}/agent/ask`, {
       method: 'POST', headers: { 'content-type': 'application/json' },
@@ -280,6 +310,12 @@ async function authSuite() {
     const keyed = await ask(meal('s16'), { 'x-api-key': KEY })
     check('S13', 'a caller with the engine key needs no token (the agent evals)', ADMITTED.has(keyed.status), String(keyed.status))
 
+    const rcAnon = await fetch(`${BASE}/meal/recompute`, { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ sessionId: 'rc-s', items: [{ foodId: 'seed:egg', grams: 50 }] }) })
+    check('S13b', 'with required sign-in, /meal/recompute without a token is 401', rcAnon.status === 401, String(rcAnon.status))
+    const rcSigned = await fetch(`${BASE}/meal/recompute`, { method: 'POST', headers: { 'content-type': 'application/json', ...(await bearer(uid(9))) },
+      body: JSON.stringify({ sessionId: 'rc-s', items: [{ foodId: 'seed:egg', grams: 50 }] }) })
+    check('S13c', 'and with a valid token it answers', rcSigned.status === 200, String(rcSigned.status))
     // DELETE /account
     const del = (h: Record<string, string> = {}) => fetch(`${BASE}/account`, { method: 'DELETE', headers: h })
     const noTok = await del()

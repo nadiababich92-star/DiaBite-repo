@@ -170,7 +170,7 @@ interface MealResult {
   totals: { gl: number }
   /** The budget before this meal; compute_meal returns it when it was given a session. */
   dayState?: { remaining?: { gl: number } }
-  afterMeal?: { partial?: { unknownFoods: string[]; unscored?: string[] } }
+  afterMeal?: { remaining?: { gl: number }; fits?: boolean | null; partial?: { unknownFoods: string[]; unscored?: string[] } }
 }
 
 interface DayStateResult { remaining: { gl: number } }
@@ -216,6 +216,11 @@ export function receiptFrom(trace: TraceStep[] | undefined): Receipt | null {
     }
   }
 
+  return buildReceipt(m, leftBefore, [...sources].map(([text, verified]) => ({ text, verified })))
+}
+
+/** The receipt of one costed meal. The same lines whether the agent asked for the meal or the person changed a portion. */
+function buildReceipt(m: MealResult, leftBefore: number | null, sources: Receipt['sources']): Receipt {
   const lines: ReceiptLine[] = m.items.map((it) => ({
     foodId: it.foodId, name: it.name,
     portion: it.servings ? `${it.servings} serving${it.servings === 1 ? '' : 's'}` : `${it.grams} g`,
@@ -226,9 +231,59 @@ export function receiptFrom(trace: TraceStep[] | undefined): Receipt | null {
   return {
     lines, total: m.totals.gl, leftBefore,
     leftAfter: leftBefore === null ? null : Math.round((leftBefore - m.totals.gl) * 10) / 10,
-    sources: [...sources].map(([text, verified]) => ({ text, verified })),
+    sources,
     ...(m.afterMeal?.partial?.unknownFoods.length ? { partial: m.afterMeal.partial.unknownFoods } : {}),
     ...(m.afterMeal?.partial?.unscored?.length ? { unscored: m.afterMeal.partial.unscored } : {}),
     ...(m.items.length > 0 && m.items.every((it) => it.gl === null) ? { carbsOnly: true } : {}),
+  }
+}
+
+/** A meal costed again with a portion the person changed: the engine's numbers, and its verdict. */
+export interface Recalc {
+  receipt: Receipt
+  mealGl: number
+  before: number | null
+  after: number | null
+  /** The engine's own comparison: true fits, false does not, null a partial meal, undefined no day held. */
+  fits: boolean | null | undefined
+}
+
+const recomputeUrl = () => {
+  const u = new URL(AGENT_URL, window.location.origin)
+  u.pathname = u.pathname.replace(/\/agent(\/ask)?\/?$/, '/meal/recompute')
+  return u.toString()
+}
+
+/**
+ * Ask the engine to cost the same foods at other weights. No model runs, and no
+ * number is worked out here: the browser sends weights and shows what comes back.
+ */
+export async function recomputeMeal(
+  sessionId: string,
+  items: { foodId: string; grams?: number; servings?: number }[],
+  sources: Receipt['sources'],
+  token?: string | null,
+  signal?: AbortSignal,
+): Promise<Recalc> {
+  const res = await fetch(recomputeUrl(), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
+    body: JSON.stringify({ sessionId, items }),
+    signal,
+  })
+  if (res.status === 401) throw new SignInRequiredError()
+  if (res.status === 429) {
+    const body = await res.json().catch(() => ({})) as { retryAfterSec?: number }
+    throw new RateLimitedError('ip', Number(body.retryAfterSec ?? res.headers.get('retry-after')) || 60)
+  }
+  if (!res.ok) throw new Error(`Recalculation failed (${res.status})`)
+  const m = (await res.json()) as MealResult
+  if (!m?.items || typeof m.totals?.gl !== 'number') throw new Error('Unexpected reply from the engine')
+  const before = typeof m.dayState?.remaining?.gl === 'number' ? m.dayState.remaining.gl : null
+  const after = typeof m.afterMeal?.remaining?.gl === 'number' ? m.afterMeal.remaining.gl : null
+  return {
+    receipt: buildReceipt(m, before, sources),
+    mealGl: m.totals.gl, before, after,
+    fits: m.afterMeal ? m.afterMeal.fits : undefined,
   }
 }

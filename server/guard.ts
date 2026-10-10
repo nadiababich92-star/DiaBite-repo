@@ -30,6 +30,7 @@ export function limits() {
     userHour: num('ASK_USER_HOUR', 60),
     userDay: num('ASK_USER_DAY', 200),
     deletePerDay: num('ACCOUNT_DELETE_DAY', 5),
+    recomputeMin: num('RECOMPUTE_MIN', 60),
   }
 }
 
@@ -163,6 +164,34 @@ export function chargeTurn(clientKey: string | undefined, sessionId: string, now
 export function chargeDelete(userId: string, now = Date.now()): number {
   const L = limits()
   return L.off ? 0 : windows.take(`del:${userId}`, L.deletePerDay, DAY, now)
+}
+
+/**
+ * Seconds to wait before this address may recompute a portion again; 0 if it may.
+ * No model runs behind it, so the limit is about CPU and noise, not money: 60 a minute.
+ */
+export function chargeRecompute(clientKey: string, now = Date.now()): number {
+  const L = limits()
+  return L.off ? 0 : windows.take(`rc:${clientKey}`, L.recomputeMin, MIN, now)
+}
+
+export const MAX_RECOMPUTE_ITEMS = 20
+
+/** The shape of a portion change: a session, and at most 20 foods with a weight or a count of servings. */
+export function validateRecompute(body: unknown): Invalid | null {
+  const b = body as { sessionId?: unknown; items?: unknown } | null
+  if (!b || typeof b !== 'object') return { field: 'body' }
+  if (!validSessionId(b.sessionId)) return { field: 'sessionId' }
+  if (!Array.isArray(b.items) || b.items.length < 1 || b.items.length > MAX_RECOMPUTE_ITEMS) return { field: 'items' }
+  for (const it of b.items as { foodId?: unknown; grams?: unknown; servings?: unknown }[]) {
+    if (!it || typeof it !== 'object') return { field: 'items' }
+    if (typeof it.foodId !== 'string' || it.foodId.length < 1 || it.foodId.length > 80 || !/^[\w:.\-]+$/.test(it.foodId)) return { field: 'items.foodId' }
+    const g = it.grams, sv = it.servings
+    if ((g === undefined) === (sv === undefined)) return { field: 'items.grams' } // exactly one of the two
+    if (g !== undefined && !(typeof g === 'number' && Number.isFinite(g) && g >= 1 && g <= 3000)) return { field: 'items.grams' }
+    if (sv !== undefined && !(typeof sv === 'number' && Number.isFinite(sv) && sv >= 0.1 && sv <= 20)) return { field: 'items.servings' }
+  }
+  return null
 }
 
 /** A short salted hash: enough to tell two sources apart in a log, not to name one. */

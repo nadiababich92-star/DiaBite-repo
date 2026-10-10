@@ -36,7 +36,7 @@ import { openApiSpec } from './openapi'
 import { ask, SignInRequired, type AskRequest } from './agent'
 import { personOf, signInRequired } from './auth'
 import { createHash, timingSafeEqual } from 'node:crypto'
-import { RateLimited, addressKey, chargeDelete, originAllowed, sourceTag, validSessionId, validateAsk } from './guard'
+import { RateLimited, addressKey, chargeDelete, chargeRecompute, originAllowed, sourceTag, validSessionId, validateAsk, validateRecompute } from './guard'
 import type {
   AlternativesRequest, ComputeMealRequest, DayStateRequest, ResolveRequest, VerifyRequest,
 } from './contract'
@@ -307,6 +307,44 @@ async function main() {
     if (!held) return { unknown: true as const, sessionId: sessionId ?? '' }
     return dayState(held.budget, costable(held.entries))
   }
+
+  /**
+   * The same meal, with a portion the person changed. No model runs: this is the
+   * arithmetic of compute_meal and the day's budget held for the session, so a
+   * number on the screen after a change was computed, exactly as before. The
+   * browser calls it (it cannot hold the tool key), so it carries the same
+   * sign-in wall and a per-address limit, and refuses anything it cannot cost.
+   */
+  app.post('/meal/recompute', async (req, res) => {
+    const bad = validateRecompute(req.body)
+    if (bad) return res.status(400).json({ error: 'invalid_request', field: bad.field })
+    const body = req.body as { sessionId: string; items: { foodId: string; grams?: number; servings?: number }[] }
+    const trusted = keyMatches(req.get('x-api-key'))
+    if (!trusted) {
+      const person = await personOf(req)
+      if (signInRequired() && !person) return res.status(401).json({ error: 'sign_in_required' })
+      const key = addressKey(req.ip)
+      const wait = key ? chargeRecompute(key) : 0
+      if (wait) { res.set('Retry-After', String(wait)); return res.status(429).json({ error: 'rate_limited', scope: 'ip', retryAfterSec: wait }) }
+    }
+    try {
+      const meal = computeMeal(body.items)
+      const day = dayStateFor(body.sessionId)
+      const top = driverOf(meal.items)
+      const out: Record<string, unknown> = { ...meal, ...(top ? { driver: top } : {}) }
+      if (day && !('unknown' in day)) {
+        out.dayState = day
+        const unknownFoods = getSession(body.sessionId)?.unknownFoods ?? []
+        const unscored = meal.items.filter((it) => !it.loadAvailable).map((it) => it.name)
+        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, unscored)
+      }
+      res.json(out)
+    } catch (e) {
+      // A food this build cannot cost is the caller's mistake, not an outage.
+      console.warn('meal/recompute refused:', (e as Error).message)
+      res.status(400).json({ error: 'invalid_request', field: 'items.foodId' })
+    }
+  })
 
   app.post('/tools/resolve_foods', async (req, res) => {
     const body = req.body as ResolveRequest

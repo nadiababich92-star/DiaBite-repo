@@ -15,6 +15,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/agent': { target: new URL(AGENT_WEBHOOK).origin, changeOrigin: true, rewrite: () => new URL(AGENT_WEBHOOK).pathname },
+      '/meal': { target: new URL(AGENT_WEBHOOK).origin, changeOrigin: true },
     },
   },
 })

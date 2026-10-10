@@ -85,13 +85,12 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel }: Pr
 
   return (
     <div className="onb">
-      <ol className="onb-steps" aria-label="Onboarding progress">
-        {STEPS.map((s, i) => (
-          <li key={s} className={i === step ? 'on' : i < step ? 'done' : ''} aria-current={i === step ? 'step' : undefined}>
-            <span className="n">{i + 1}</span> {s}
-          </li>
-        ))}
-      </ol>
+      <div className="onb-progress" role="progressbar" aria-label="Onboarding progress" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1} aria-valuetext={`Step ${step + 1} of ${STEPS.length}: ${STEPS[step]}`}>
+        <div className="onb-bars" aria-hidden="true">
+          {STEPS.map((s, i) => <i key={s} className={i <= step ? 'on' : ''} />)}
+        </div>
+        <p className="onb-where"><b>{STEPS[step]}</b> <span>{step + 1} of {STEPS.length}</span></p>
+      </div>
 
       <section className="card onb-card">
         {exit ? (
@@ -135,8 +134,7 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel }: Pr
                 )}
                 <h2>First, the numbers the formula needs</h2>
                 <p className="muted">
-                  Energy and protein targets come from the Mifflin-St Jeor equation, which needs these
-                  five. Nothing here leaves your browser.
+                  They set your daily targets with the Mifflin-St Jeor equation. You can change them any time.
                 </p>
                 <div className="grid">
                   <label className="field">
@@ -384,7 +382,6 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel }: Pr
               <button className="primary" onClick={next} disabled={!canGoOn || (last && !agreed)}>
                 {last ? 'Start using DiaBite' : 'Continue'}
               </button>
-              {!last && <span className="muted">Step {step + 1} of {STEPS.length}</span>}
               {onCancel && <button className="link" onClick={onCancel}>Cancel</button>}
             </div>
           </>

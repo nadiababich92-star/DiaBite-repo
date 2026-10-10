@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import GlInfo from './GlInfo'
 import { isLabelled, parseMeal } from '../lib/answer'
 import { sessionId } from '../lib/session'
 import { accessToken } from '../lib/auth'
-import { askAgent, avoidOf, budgetOf, engineId, MAX_QUESTION, RateLimitedError, receiptFrom, SignInRequiredError, type AgentResponse, type Receipt, type TraceStep } from '../lib/agent'
+import { askAgent, avoidOf, budgetOf, engineId, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
 import { viewEntry } from '../lib/diary'
 import { todayISO } from '../lib/storage'
 import { isDemo } from '../lib/demo'
@@ -68,7 +69,7 @@ const bold = (line: string, key: string) =>
  * the prose agrees with them — laid out so the one that matters is the one
  * you see.
  */
-function Figures({ reply }: { reply: AgentResponse }) {
+function Figures({ reply, onGl }: { reply: AgentResponse; onGl?: () => void }) {
   const meal = reply.trace?.find((t) => t.tool.endsWith('compute_meal'))?.result as
     | { totals?: { gl?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean | null } }
     | undefined
@@ -95,18 +96,91 @@ function Figures({ reply }: { reply: AgentResponse }) {
   const partial = meal?.afterMeal?.fits === null
   const fits = meal?.afterMeal?.fits !== false
   return (
-    <div className="figures">
-      <div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{mealGl}</span></div>
-      <div className="fig"><span className="fig-k">before</span><span className="fig-v">{before}</span></div>
-      <div className={`fig fig-lead ${partial ? '' : fits ? 'ok' : 'over'}`}>
-        <span className="fig-k">{partial ? 'left so far' : fits ? 'left after' : 'over by'}</span>
-        <span className="fig-v">{fits ? after : Math.abs(after)}</span>
+    <>
+      <div className="figures">
+        <div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{mealGl}</span></div>
+        <div className="fig"><span className="fig-k">before</span><span className="fig-v">{before}</span></div>
+        <div className={`fig fig-lead ${partial ? '' : fits ? 'ok' : 'over'}`}>
+          <span className="fig-k">{partial ? 'left so far' : fits ? 'left after' : 'over by'}</span>
+          <span className="fig-v">{fits ? after : Math.abs(after)}</span>
+        </div>
       </div>
-    </div>
+      {onGl && <button className="link gl-link" onClick={onGl}>What is GL?</button>}
+    </>
   )
 }
 
-function Answer({ text, reply }: { text: string; reply?: AgentResponse }) {
+/**
+ * The same meal at the weights the person chose, costed by the engine. The verdict
+ * word is the engine's `fits` and nothing else: true, false, or null for a meal with
+ * a food missing. No number here is worked out in the browser.
+ */
+function RecalcCard({ rc, onBack, onGl }: { rc: Recalc; onBack: () => void; onGl: () => void }) {
+  const tone = rc.fits === true ? 'good' : rc.fits === false ? 'bad' : rc.fits === null ? 'partial' : 'ask'
+  const label = tone === 'good' ? 'Fits' : tone === 'bad' ? 'Not today' : tone === 'partial' ? 'Part of the meal' : 'One question first'
+  const verdict = tone === 'good' ? 'This fits your day.' : tone === 'bad' ? 'This does not fit today.'
+    : tone === 'partial' ? "I can't judge the day on a partial total." : "I no longer hold today's budget, so ask again for a verdict."
+  const lead = rc.after === null ? null : Math.abs(rc.after)
+  return (
+    <section className={`card answer tone-${tone} recalc`} role="status" aria-live="polite">
+      <div className="eyebrow-line"><StatusDot tone={tone} />{label}</div>
+      <div className="answer-text">
+        <p className="a-verdict">{verdict}</p>
+        {rc.before !== null && lead !== null ? (
+          <>
+            <div className="figures">
+              <div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{rc.mealGl}</span></div>
+              <div className="fig"><span className="fig-k">before</span><span className="fig-v">{rc.before}</span></div>
+              <div className={`fig fig-lead ${tone === 'partial' ? '' : rc.fits ? 'ok' : 'over'}`}>
+                <span className="fig-k">{tone === 'partial' ? 'left so far' : rc.fits ? 'left after' : 'over by'}</span>
+                <span className="fig-v">{lead}</span>
+              </div>
+            </div>
+            <button className="link gl-link" onClick={onGl}>What is GL?</button>
+          </>
+        ) : (
+          <div className="figures"><div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{rc.mealGl}</span></div></div>
+        )}
+        <p className="a-why">Recalculated with your portions. The explanation below was written for the original ones.</p>
+      </div>
+      <div className="verify-row">
+        <span className="pill low">Calculated by the engine, nothing generated</span>
+        {' '}<button className="link" onClick={onBack}>Back to the original</button>
+      </div>
+    </section>
+  )
+}
+
+/** Each food's weight, with a step down and a step up. The engine does the sums when the weight settles. */
+function PortionEditor({ lines, grams, busy, error, onNudge }: {
+  lines: ReceiptLine[]; grams: Record<number, number>; busy: boolean; error: string; onNudge: (i: number, dir: 1 | -1) => void
+}) {
+  return (
+    <section className="card portions">
+      <h2>Not what you ate?</h2>
+      <p className="muted">Change a portion and the engine counts it again.</p>
+      <ul className="portion-list">
+        {lines.map((l, i) => {
+          const value = grams[i] ?? l.servings ?? l.grams
+          const unit = l.servings ? (value === 1 ? 'serving' : 'servings') : 'g'
+          return (
+            <li key={`${l.foodId}-${i}`}>
+              <span className="portion-name">{l.name}</span>
+              <span className="stepper">
+                <button className="step" aria-label={`Less ${l.name}`} onClick={() => onNudge(i, -1)}>−</button>
+                <span className="step-v" aria-live="polite">{value} {unit}</span>
+                <button className="step" aria-label={`More ${l.name}`} onClick={() => onNudge(i, 1)}>+</button>
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+      <p className="muted portion-state" role="status">{busy ? 'Counting again…' : error}</p>
+    </section>
+  )
+}
+
+function Answer({ text, reply, onGl }: { text: string; reply?: AgentResponse; onGl?: () => void }) {
   const costed = !!reply?.trace?.some((x) => x.tool.endsWith('compute_meal') && typeof (x.result as { totals?: unknown } | undefined)?.totals === 'object')
   const parts = parseMeal(text, { costed })
   const m = reply?.trace?.find((t) => t.tool.endsWith('compute_meal'))?.result as
@@ -124,7 +198,7 @@ function Answer({ text, reply }: { text: string; reply?: AgentResponse }) {
     return (
       <div className="answer-text">
         <p className="a-verdict">{bold(parts.verdict, 'v')}</p>
-        {reply && <Figures reply={reply} />}
+        {reply && <Figures reply={reply} onGl={onGl} />}
         {parts.numbers && !figuresShown && <p className="a-numbers">{bold(parts.numbers, 'n')}</p>}
         {parts.why && <p className="a-why">{bold(parts.why, 'w')}</p>}
         {parts.next && (
@@ -257,6 +331,14 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
   const [asked, setAsked] = useState('')
   const [showReceipt, setShowReceipt] = useState(false)
   const [logged, setLogged] = useState(false)
+  // Changing a portion: which session the answer was made in, what the person changed, and what the engine said back.
+  const [turn, setTurn] = useState('')
+  const [editing, setEditing] = useState(false)
+  const [grams, setGrams] = useState<Record<number, number>>({})
+  const [recalc, setRecalc] = useState<Recalc | null>(null)
+  const [recalcBusy, setRecalcBusy] = useState(false)
+  const [recalcError, setRecalcError] = useState('')
+  const [glOpen, setGlOpen] = useState(false)
   const [saved, setSaved] = useState<number>(savedCount)
   const [fresh, setFresh] = useState<boolean>(readFresh)
   const toggleFresh = () => {
@@ -272,6 +354,42 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
   const left = Math.max(0, Math.round((targets.glBudget - usedGL) * 10) / 10)
 
   const receipt = useMemo(() => receiptFrom(reply?.trace), [reply])
+  // What is logged and shown as the calculation: the portions the person chose, once they have chosen.
+  const active = recalc?.receipt ?? receipt
+
+  function nudge(i: number, dir: 1 | -1) {
+    if (!receipt) return
+    const l = receipt.lines[i]
+    const base = grams[i] ?? l.servings ?? l.grams
+    const step = l.servings ? 0.5 : Math.max(5, Math.round((base * 0.1) / 5) * 5)
+    const next = l.servings ? Math.min(12, Math.max(0.5, base + dir * step)) : Math.min(1500, Math.max(5, base + dir * step))
+    setGrams((g) => ({ ...g, [i]: Math.round(next * 100) / 100 }))
+    setLogged(false)
+  }
+
+  // Let the weight settle for a moment, then ask the engine to count it again.
+  useEffect(() => {
+    if (!receipt || !turn) return
+    const changed = receipt.lines.some((l, i) => grams[i] !== undefined && grams[i] !== (l.servings ?? l.grams))
+    if (!changed) { setRecalc(null); setRecalcError(''); return }
+    const ctl = new AbortController()
+    const timer = setTimeout(async () => {
+      setRecalcBusy(true); setRecalcError('')
+      try {
+        const items = receipt.lines.map((l, i) => {
+          const v = grams[i] ?? l.servings ?? l.grams
+          return l.servings ? { foodId: l.foodId, servings: v } : { foodId: l.foodId, grams: v }
+        })
+        setRecalc(await recomputeMeal(turn, items, receipt.sources, await accessToken(), ctl.signal))
+      } catch (e) {
+        if ((e as Error).name === 'AbortError') return
+        if (e instanceof SignInRequiredError) onSessionEnded?.()
+        else if (e instanceof RateLimitedError) setRecalcError('That is a lot of changes at once. Try again in a minute.')
+        else setRecalcError("Couldn't count that again. Your original answer is unchanged.")
+      } finally { setRecalcBusy(false) }
+    }, 400)
+    return () => { clearTimeout(timer); ctl.abort() }
+  }, [grams, receipt, turn, onSessionEnded])
 
   async function ask(message: string) {
     const q = message.trim()
@@ -279,9 +397,12 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
     abort.current?.abort()
     abort.current = new AbortController()
     setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(false); setLogged(false); setAsked(q)
+    setEditing(false); setGrams({}); setRecalc(null); setRecalcError('')
+    const sid = fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId()
+    setTurn(sid)
     try {
       const res = await askAgent({
-        sessionId: fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId(),
+        sessionId: sid,
         message: q,
         budget: budgetOf(targets),
         avoid: avoidOf(profile),
@@ -304,10 +425,10 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
   }
 
   function logIt() {
-    if (!receipt) return
+    if (!active) return
     const meal = mealForNow()
     const stamp = Date.now()
-    onLog(receipt.lines.map((l, i) => ({
+    onLog(active.lines.map((l, i) => ({
       id: `${stamp}-${i}`, date: today, meal, foodId: l.foodId, grams: l.grams,
       snapshot: {
         name: l.name, kcal: l.kcal, carbs: l.carbs, fiber: l.fiber, protein: l.protein, fat: l.fat,
@@ -403,14 +524,16 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
       {reply && (
         <>
           <p className="muted asked">{asked}</p>
-          <section className={`card answer tone-${tone}`} role="status" aria-live="polite">
+          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRecalc(null) }} onGl={() => setGlOpen(true)} />}
+          {recalc && <p className="muted asked">Original answer, before you changed a portion</p>}
+          <section className={`card answer tone-${tone}${recalc ? ' stale' : ''}`} role="status" aria-live="polite">
             <div className="eyebrow-line">
               <StatusDot tone={tone} />
               {reply.blocked ? 'Not something I\'ll answer' :
                tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Not today' :
                tone === 'advice' ? 'Advice' : tone === 'carbs' ? 'Carbs only' : tone === 'partial' ? 'Part of the meal' : 'One question first'}
             </div>
-            <Answer text={reply.answer} reply={reply} />
+            <Answer text={reply.answer} reply={reply} onGl={recalc ? undefined : () => setGlOpen(true)} />
             {!reply.blocked && (
               <div className="verify-row">
                 {reply.verified ? (
@@ -434,15 +557,20 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
 
           {receipt && (
             <div className="row" style={{ marginBottom: 12 }}>
-              <button className="primary" onClick={logIt} disabled={logged}>{logged ? 'Logged' : receipt.partial || receipt.unscored ? 'Log what was counted' : 'Log it'}</button>
+              <button className="primary" onClick={logIt} disabled={logged}>{logged ? 'Logged' : active?.partial || active?.unscored ? 'Log what was counted' : 'Log it'}</button>
               <button className="ghost" onClick={() => setShowReceipt((v) => !v)}>{showReceipt ? 'Hide calculation' : 'Show calculation'}</button>
+              {!receipt.carbsOnly && <button className="ghost" aria-expanded={editing} onClick={() => setEditing((v) => !v)}>{editing ? 'Done' : 'Change a portion'}</button>}
             </div>
           )}
 
-          {showReceipt && receipt && (
+          {editing && receipt && !receipt.carbsOnly && (
+            <PortionEditor lines={receipt.lines} grams={grams} busy={recalcBusy} error={recalcError} onNudge={nudge} />
+          )}
+
+          {showReceipt && active && (
             <section className="card">
               <h2>The receipt</h2>
-              <ReceiptView r={receipt} />
+              <ReceiptView r={active} />
             </section>
           )}
 
@@ -470,6 +598,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
         </>
       )}
       </div>
+      {glOpen && <GlInfo budget={targets.glBudget} onClose={() => setGlOpen(false)} />}
     </div>
   )
 }

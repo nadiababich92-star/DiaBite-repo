@@ -33,6 +33,8 @@ export default function App() {
   const signInRequired = useSignInRequired()
   const [tab, setTab] = useState<Tab>('ask')
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+  // The first sentence of the disclaimer is always shown; the rest opens on a tap.
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false)
   // Onboarding is the first screen until it has been completed once (PRD A4);
   // afterwards it can be reopened from the profile tab.
   const [onboarding, setOnboarding] = useState(false)
@@ -155,10 +157,17 @@ export default function App() {
       </header>
 
       <div className="disclaimer">
-        <strong>This is a reference tool, not medical advice.</strong> The numbers come from
-        published formulas and averaged glycemic-index values. They do not account for your
-        therapy and must never be used to calculate insulin doses. Discuss any change to your
-        diet with your clinician.
+        <strong>This is a reference tool, not medical advice.</strong>
+        {' '}
+        {disclaimerOpen && (
+          <span id="disclaimer-rest">
+            The numbers come from published formulas and averaged glycemic-index values. They do not
+            account for your therapy and must never be used to calculate insulin doses. Discuss any
+            change to your diet with your clinician.{' '}
+          </span>
+        )}
+        <button className="link disclaimer-toggle" aria-expanded={disclaimerOpen} aria-controls="disclaimer-rest"
+          onClick={() => setDisclaimerOpen((v) => !v)}>{disclaimerOpen ? 'Show less' : 'Read more'}</button>
       </div>
 
       {sync.status === 'error' && (
