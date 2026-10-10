@@ -322,6 +322,8 @@ export interface AskResponse {
   attempts?: number
   /** True when both attempts failed the verifier and this text came from tool results. */
   templated?: boolean
+  /** Where the time went, in milliseconds: the router, parking the day, and each agent call. */
+  timing?: { routeMs: number; parkMs: number; agentMs: number[] }
   /** True when the answer failed the verifier twice and there was nothing to rebuild it from: no model text is shown. */
   withheld?: boolean
   /** Which specialist answered, and what the router decided. */
@@ -420,6 +422,7 @@ function logTurn(req: AskRequest, res: AskResponse, ms: number): void {
     session: req.sessionId,
     ...(LOG_QUESTIONS ? { question: req.message } : { questionLength: req.message.length }),
     ms,
+    ...(res.timing ? { timing: res.timing } : {}),
     blocked: res.blocked,
     rule: res.blockedRule ?? null,
     route: res.route ?? null,
@@ -718,9 +721,13 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   if (ctx.requireSignIn && !ctx.trusted && !ctx.person) throw new SignInRequired()
   if (!ctx.trusted) chargeTurn(ctx.clientKey, req.sessionId, undefined, ctx.person?.sub)
 
+  const clock = { t0: Date.now(), route: 0, park: 0, agent: [] as number[] }
   const { role, by } = await route(req.message)
+  clock.route = Date.now() - clock.t0
   // Only a meal turn needs the day's budget parked for the engine to read.
+  const parkAt = Date.now()
   if (role === 'meal') await parkDayState(req)
+  clock.park = Date.now() - parkAt
 
   let previous = previousResponseFor(req.sessionId)
   // Advisory turns carry what this person has said they like; meal turns do
@@ -739,7 +746,9 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   // unbounded "try again" loop is how a wrong number becomes a long wait.
   while (attempts < 2) {
     attempts++
+    const agentAt = Date.now()
     const res = await runAgent(role, input, previous, role === 'meal', req.sessionId)
+    clock.agent.push(Date.now() - agentAt)
 
     responseId = res.id
     previous = res.id
@@ -787,6 +796,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
     answer, blocked: false,
     verified: v.ok, unmatchedNumbers: v.unmatched, matchedNumbers: v.matched,
     toolCalls: trace.length, trace, responseId, attempts, templated, withheld,
+    timing: { routeMs: clock.route, parkMs: clock.park, agentMs: clock.agent },
     route: role, routedBy: by,
   }
 }
