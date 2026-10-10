@@ -135,3 +135,21 @@ Still open from the review and not changed here: the daily ceiling counts UTC da
 ### Added 10 October: the email secret
 The sign-in emails go through Azure Communication Services using a client secret held only in Supabase. It expires; the expiry date is in Entra (App registrations, `diabite-smtp`, Certificates and secrets). A reminder a month before is the owner's, and the first thing to check if emails stop. It is never written in the repository, the chat or `.env.example`.
 
+### Added 10 October: the accounts tables and their row-level security proof
+Migration `20261010130000_accounts.sql` applied to the project (`profiles`, `diary_entries`, `feedback.user_id`). The proof ran as one block that raises at the end, so nothing was kept; afterwards both tables held 0 rows and no proof user remained.
+
+| Step | Result |
+|---|---|
+| A inserts own profile and two diary rows | allowed |
+| A inserts a profile, and a diary row, for B | rejected (42501) |
+| A reads | sees 2 diary rows and 1 profile: only its own |
+| A updates or deletes B's rows | 0 rows affected |
+| A moves its own profile to B | rejected (42501) |
+| The same diary id upserted twice | 1 row |
+| grams 0 and 6000; a meal outside the four; a snapshot over 4,000 bytes; profile data that is an array | each rejected by its check |
+| A third row with the diary limit set to 2 | rejected, "diary is full" |
+| `anon` reads either table, or inserts a profile | denied (42501) |
+| Deleting user A | both tables empty for A; B's row remains |
+
+The Supabase security advisor then reported one warning, "leaked password protection disabled", which concerns passwords; DiaBite has none (sign-in is a link and a code), so it is noted and left.
+

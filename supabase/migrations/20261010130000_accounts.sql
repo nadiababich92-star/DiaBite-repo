@@ -38,11 +38,14 @@ create index if not exists diary_entries_user_day_idx on public.diary_entries (u
 create or replace function public.limit_diary_rows() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  if (select count(*) from public.diary_entries where user_id = new.user_id) >= 20000 then
+  -- 20,000 unless the session setting says otherwise; the setting exists so the row-level
+  -- security proof can test the limit without inserting 20,000 rows.
+  if (select count(*) from public.diary_entries where user_id = new.user_id) >= coalesce(nullif(current_setting('diabite.diary_limit', true), '')::int, 20000) then
     raise exception 'diary is full' using errcode = 'check_violation';
   end if;
   return new;
 end $$;
+revoke all on function public.limit_diary_rows() from public, anon, authenticated;
 drop trigger if exists diary_entries_limit on public.diary_entries;
 create trigger diary_entries_limit before insert on public.diary_entries
   for each row execute function public.limit_diary_rows();
