@@ -191,3 +191,11 @@ export function afterMealFor(
     ...(partial ? { partial: { unknownFoods, ...(unscored.length ? { unscored } : {}) } } : {}),
   }
 }
+
+/** The scored item with the largest load; none when no item has one (a meal of branded products). */
+export function driverOf(items: MealItemResult[]): { foodId: string; name: string; gl: number } | undefined {
+  const scored = items.filter((it) => it.gl !== null)
+  if (!scored.length) return undefined
+  const top = scored.reduce((a, b) => ((b.gl ?? 0) > (a.gl ?? 0) ? b : a))
+  return { foodId: top.foodId, name: top.name, gl: top.gl as number }
+}

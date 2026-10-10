@@ -29,7 +29,7 @@ import { resolvePhrases } from '../server/resolve'
 import { verify } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
-import { afterMealFor, computeItem, computeMeal } from '../server/compute'
+import { afterMealFor, computeItem, computeMeal, driverOf } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
 import { looksLikeMeal, withHangRetry } from '../server/agent'
 import { diffEntries, exportShape, fromRow, mergeById, toRow } from '../src/lib/syncCore'
@@ -161,6 +161,13 @@ const brandedMisses: string[] = []
     const meal = computeMeal([{ foodId: c.foodId, grams: c.grams }])
     if (meal.totals.gl !== 0) brandedMisses.push(`    ${c.id}: the meal total carries a load`)
   }
+}
+{
+  // The engine names the driver, so the answer does not compare numbers itself.
+  const m = computeMeal([{ foodId: 'ing:apple', grams: 100 }, { foodId: 'ing:almonds', grams: 100 }])
+  const d = driverOf(m.items)
+  if (!d || !/apple/i.test(d.name)) brandedMisses.push(`    the driver of apple and almonds is ${d?.name}`)
+  if (driverOf(computeMeal([{ foodId: 'branded:2529927', grams: 34 }]).items) !== undefined) brandedMisses.push('    a meal of branded products has a driver')
 }
 console.log(`\nbranded   ${brandedMisses.length === 0 ? 'ok' : 'WRONG'}`)
 brandedMisses.forEach((m) => console.log(m))

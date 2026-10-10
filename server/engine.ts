@@ -29,7 +29,7 @@ import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
-import { afterMealFor, computeMeal, dayState, findAlternatives } from './compute'
+import { afterMealFor, computeMeal, dayState, driverOf, findAlternatives } from './compute'
 import { verify } from './verify'
 import { getSession, noteResolution, putSession } from './sessions'
 import { openApiSpec } from './openapi'
@@ -336,7 +336,12 @@ async function main() {
     try {
       const meal = computeMeal(body.items)
       const day = dayStateFor(body.sessionId)
-      const out: Record<string, unknown> = { ...meal, ...(day ? { dayState: day } : {}) }
+      const top = driverOf(meal.items)
+      const out: Record<string, unknown> = {
+        ...meal,
+        ...(top ? { driver: top } : {}),
+        ...(day ? { dayState: day } : {}),
+      }
 
       // Swaps in the same breath, but only when the meal needs them: over what
       // is left of the day, or heavy on its own. Asking for them on a meal that

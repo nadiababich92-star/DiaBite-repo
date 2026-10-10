@@ -138,6 +138,12 @@ export interface ComputeMealResponse {
     /** Foods the user named that the database does not have; absent on a whole meal. */
     partial?: { unknownFoods: string[]; /** Branded items: carbohydrate counted, load not available. */ unscored?: string[] }
   }
+  /**
+   * The scored item with the largest glycemic load, named by the engine so the answer reads it
+   * rather than comparing numbers (the model named the almonds for an apple and almonds). Absent
+   * when no item has a load, as in a meal of branded products.
+   */
+  driver?: { foodId: string; name: string; gl: number }
   /** Swaps for the heaviest item, when the meal needed them. */
   alternatives?: Alternative[]
   /** Which item the alternatives replace. */

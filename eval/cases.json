@@ -2429,7 +2429,8 @@
         ]
       },
       "expect": {
-        "dayStateRemainingConsistent": true
+        "dayStateRemainingConsistent": true,
+        "whyNamesDriver": true
       },
       "judge": "mechanical",
       "tags": []
@@ -3091,7 +3092,7 @@
       "id": "H10",
       "dimension": "honest",
       "query": "General Tso's chicken and fried rice",
-      "ground_truth": "Both come back unknown — \"fried\" changes a food enough that the engine will not call it white rice — so the answer says so and asks for the ingredients. A high lexical score is not a match.",
+      "ground_truth": "General Tso's chicken is a branded product (carbohydrate, no load) and fried rice is USDA's own record: costs both, says the load of one is not available, does not call the day a fit.",
       "context": {
         "budget": {
           "glBudget": 54,
@@ -3106,9 +3107,13 @@
         ]
       },
       "expect": {
-        "resolveUnknown": true,
-        "noComputeMeal": true,
-        "answerHasQuestion": true
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "engineUnscored": true,
+        "noFitsClaim": true
       },
       "judge": "mechanical",
       "tags": []

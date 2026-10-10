@@ -91,7 +91,7 @@ export function openApiSpec() {
               },
             },
           },
-          responses: { '200': { description: 'Per-item numbers and totals, plus `dayState`, `afterMeal` and any `alternatives` when a session id was passed. A branded product has `loadAvailable: false` and `gl: null`: carbohydrate, fibre and calories are given, a glycemic load is not, and `afterMeal.partial.unscored` names it.' } },
+          responses: { '200': { description: 'Per-item numbers and totals, plus `dayState`, `afterMeal` and any `alternatives` when a session id was passed. A branded product has `loadAvailable: false` and `gl: null`: carbohydrate, fibre and calories are given, a glycemic load is not, and `afterMeal.partial.unscored` names it. `driver` is the scored item with the largest load.' } },
         },
       },
 
