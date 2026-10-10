@@ -132,3 +132,6 @@ modern browsers ignore it and old ones had bugs with it. The CSP does that job.
 
 Still open from the review and not changed here: the daily ceiling counts UTC days (a cost counter, correct as one; only the "back tomorrow" wording is off for the US), the unauthenticated feedback and session routes keep their existing limits, and the Profile tab lets a person choose a carbohydrate approach the onboarding blocks, which is a clinical decision.
 
+### Added 10 October: the email secret
+The sign-in emails go through Azure Communication Services using a client secret held only in Supabase. It expires; the expiry date is in Entra (App registrations, `diabite-smtp`, Certificates and secrets). A reminder a month before is the owner's, and the first thing to check if emails stop. It is never written in the repository, the chat or `.env.example`.
+

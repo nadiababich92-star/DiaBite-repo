@@ -33,3 +33,15 @@ Supabase dashboard → project **DiaBite-feedback** (region eu-west-1):
 - Whether anyone may sign in or only an allow-list, and if a list, the first addresses.
 
 I then build the tables with their row-level security first, test them on a Supabase branch, and only then touch the app.
+
+## As set up, 10 October 2026 (nothing here is secret)
+
+| Item | Value |
+|---|---|
+| Communication Services | `diabite-comms` (global, data location Europe) |
+| Email Communication Services | `diabite-mail-nb`, Azure managed domain, connected to `diabite-comms` |
+| Sender (MailFrom) | `DoNotReply@ccddc8f5-09d0-4a8d-86bc-acb7610b7aec.azurecomm.net` |
+| SMTP | `smtp.azurecomm.net`, port 587, STARTTLS |
+| SMTP identity | Entra app `diabite-smtp`; role **Communication and Email Service Owner** on `diabite-comms` (checked from the CLI on 10 October) |
+| The secret | A client secret for that app, created 10 October, kept **only** in Supabase (Authentication, SMTP). The first one was lost and replaced. **Replace it a month before it expires**: create a new secret in Entra, paste it into Supabase, delete the old one. If it lapses, sign-in emails stop silently |
+
