@@ -667,3 +667,31 @@ button.danger:disabled { opacity: 0.45; cursor: not-allowed; }
 .theme-swatch .p { background: #f1ece0; } .theme-swatch .p::after { background: #fffcf5; border-color: #dcd3bf; }
 .theme-swatch .n { background: #0a1812; } .theme-swatch .n::after { background: #14281f; border-color: #2a4235; }
 .theme-note { margin: 8px 0 0; }
+
+/* ── Wide screens ─────────────────────────────────────────────────────────
+ * A laptop is a pointer and a wide window, not a thumb and a tall one. The
+ * navigation moves to the top, beside the logo, and the ask box stays on the
+ * left while its answer opens on the right, so the verdict is on the first
+ * screen instead of below the fold. */
+@media (min-width: 760px) {
+  .app { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; align-content: start; padding-bottom: 64px; }
+  .app > * { grid-column: 1 / -1; }
+  .app > header.masthead { grid-column: 1; grid-row: 1; }
+  .app > nav.tabs {
+    grid-column: 2; grid-row: 1; align-self: center; position: static; transform: none; width: auto; margin: 0;
+    display: flex; gap: 2px; padding: 4px; border-radius: 18px; box-shadow: var(--fx-raised);
+  }
+  nav.tabs button { flex-direction: row; gap: 8px; min-height: 44px; padding: 0 14px 0 8px; border-radius: 14px; font-size: 15px; }
+  nav.tabs .tab-ico, nav.tabs button[aria-selected='true'] .tab-ico { width: 24px; height: 24px; background: none; box-shadow: none; border-radius: 0; }
+  nav.tabs button[aria-selected='true'] { background: var(--marker); color: var(--marker-ink); box-shadow: var(--marker-glow); }
+}
+@media (min-width: 980px) {
+  .app { max-width: 1120px; }
+  main > .card, main > .day, main > details { max-width: 840px; }
+  .ask-layout { display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 0 24px; align-items: start; }
+  .ask-layout .ask-hero { position: sticky; top: 16px; }
+  .ask-layout .ask-result > :first-child { margin-top: 0; }
+  .ask-layout .ask-hero .ask-form { flex-direction: column; }
+  .ask-layout .ask-hero .ask-form button { width: 100%; }
+  .ask-layout .ask-result:empty::before { content: 'Your answer will open here.'; display: block; color: var(--text-faint); padding: 28px 4px; }
+}

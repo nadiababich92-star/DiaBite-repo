@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { isLabelled, parseMeal } from '../lib/answer'
 import { sessionId } from '../lib/session'
 import { accessToken } from '../lib/auth'
@@ -317,10 +317,18 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
     setLogged(true)
   }
 
+  // On a narrow screen the answer opens below the question; bring it into view so nobody has to hunt for it.
+  const resultRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!reply || window.innerWidth >= 980) return
+    const calm = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    resultRef.current?.scrollIntoView({ block: 'start', behavior: calm ? 'auto' : 'smooth' })
+  }, [reply])
+
   const tone = reply ? (reply.blocked ? 'blocked' : verdictTone(reply.answer, reply.route, reply)) : null
 
   return (
-    <>
+    <div className="ask-layout">
       <section className="card ask-hero">
         <div className="ask-budget">
           <span className="label">glycemic load left today</span>
@@ -359,6 +367,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
         )}
       </section>
 
+      <div className="ask-result" ref={resultRef}>
       {busy && (
         <section className="card thinking" role="status" aria-live="polite">
           {/* What happens, in order, with nothing claiming to know where we
@@ -460,6 +469,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
           </div>
         </>
       )}
-    </>
+      </div>
+    </div>
   )
 }
