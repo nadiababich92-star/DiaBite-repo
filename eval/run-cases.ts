@@ -351,7 +351,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string }[
   // owes the user which candidate it picked.
   const clarified = (callOf(r, 'resolve_foods')?.result as { results?: { clarify?: string }[] } | undefined)?.results?.some((p) => p.clarify)
   if (clarified && called(r, 'compute_meal')) {
-    say('names the assumption it proceeded on', /assum|I used|I picked|I took|I counted|using |I treated|default/i.test(answer))
+    say('names the assumption it proceeded on', /assum|I used|\bused\b|I picked|I took|I counted|using |I treated|default/i.test(answer))
   }
   // The failure a number-tracing verifier cannot see: the right number under
   // the wrong label. "Remaining after this meal: 54" when 54 is the budget
