@@ -67,11 +67,22 @@ echo "live: $(curl -s -m 15 "https://$FQDN/health")"
 
 # Check the thing, not the report (CLAUDE.md rule 1): the page, the closed routes, the safety rules, a real question.
 if [ -z "${SKIP_SMOKE:-}" ] && command -v node >/dev/null 2>&1; then
-  if node eval/smoke.mjs "https://$FQDN"; then
+  # Three deploys in a row failed their first smoke and passed every rerun. A cold container is
+  # the suspect, but the cause is not proven, so the failing lines are kept and a second try is
+  # allowed AND reported: a pass on the second try is not a clean pass.
+  SMOKE_OUT="$(mktemp)"
+  if node eval/smoke.mjs "https://$FQDN" >"$SMOKE_OUT" 2>&1; then
     echo "smoke: passed"
   else
-    echo
-    echo "SMOKE FAILED on $LATEST. To go back:  az containerapp update -g $RG -n $APP --image $PREVIOUS_IMAGE"
-    exit 2
+    echo "smoke: FIRST TRY FAILED:"; grep -E "^(FAIL|[A-Za-z]*Error)" "$SMOKE_OUT" | cut -c1-300
+    echo "retrying once in 30 s"; sleep 30
+    if node eval/smoke.mjs "https://$FQDN" >"$SMOKE_OUT" 2>&1; then
+      echo "smoke: passed on the SECOND try (see the failure above)"
+    else
+      grep -E "^(FAIL|PASS)|Error" "$SMOKE_OUT" | cut -c1-300
+      echo
+      echo "SMOKE FAILED on $LATEST. To go back:  az containerapp update -g $RG -n $APP --image $PREVIOUS_IMAGE"
+      exit 2
+    fi
   fi
 fi
