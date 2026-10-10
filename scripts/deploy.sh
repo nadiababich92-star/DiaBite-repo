@@ -63,6 +63,13 @@ fi
 for r in $(az containerapp revision list -g "$RG" -n "$APP" --query "[?properties.active].name" -o tsv); do
   [ "$r" = "$LATEST" ] || az containerapp revision deactivate -g "$RG" -n "$APP" --revision "$r" >/dev/null 2>&1
 done
+# The ingress answers 404 "Container App is stopped or does not exist" for a few seconds while the old
+# revision is deactivated and the new one takes the traffic. That, not the app, is why the first smoke
+# failed after four deploys in a row. Wait until /health answers with JSON before checking anything.
+for i in $(seq 1 45); do
+  if curl -s -m 10 "https://$FQDN/health" | grep -q '"ok":true'; then break; fi
+  sleep 4
+done
 echo "live: $(curl -s -m 15 "https://$FQDN/health")"
 
 # Check the thing, not the report (CLAUDE.md rule 1): the page, the closed routes, the safety rules, a real question.
