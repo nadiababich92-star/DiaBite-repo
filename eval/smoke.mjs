@@ -18,6 +18,8 @@ const URL_ = (process.argv[2] ?? process.env.SMOKE_URL ?? 'https://diabite-engin
 let failed = 0
 const check = (id, what, ok, detail = '') => { if (!ok) failed++; console.log(`${ok ? 'PASS' : 'FAIL'}  ${id}  ${what}${ok ? '' : `  → ${detail}`}`) }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+/** Poll the page until a condition holds, so a cold start is waited for, not guessed at. */
+const until = async (b, js, seconds = 25) => { for (let i = 0; i < seconds * 4; i++) { try { if (await b.ev(js)) return true } catch { /* the page is still loading */ } await sleep(250) } return false }
 
 // ── the service, without a browser ────────────────────────────────────────
 const health = await (await fetch(`${URL_}/health`)).json().catch(() => ({}))
@@ -47,7 +49,8 @@ const errors = []
 b.on('Runtime.exceptionThrown', (p) => errors.push(p.exceptionDetails?.text ?? 'exception'))
 b.on('Runtime.consoleAPICalled', (p) => { if (p.type === 'error') errors.push((p.args?.[0]?.value ?? '').toString().slice(0, 120)) })
 try {
-  await b.send('Page.navigate', { url: URL_ }); await sleep(2800)
+  await b.send('Page.navigate', { url: URL_ })
+  await until(b, `document.body && /Email me a link|First, the numbers|What are you/.test(document.body.innerText)`)
   await b.ev(`
 window.__setNum = (labelText, v) => { const el = [...document.querySelectorAll('label.field')].find(l => l.innerText.trim().startsWith(labelText))?.querySelector('input'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set; set.call(el,String(v)); el.dispatchEvent(new Event('input',{bubbles:true})) }
 window.__click = (text) => { const el=[...document.querySelectorAll('button')].find(e=>e.innerText.trim().startsWith(text)); if(!el) throw new Error('no button '+text); el.click() }
@@ -60,10 +63,12 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
     check('M7', 'sign-in is required: the first screen is the sign-in screen with the emergency line',
       /Email me a link/.test(t) && /call emergency services/i.test(t) && !/Can I eat this\?/.test(t), t.slice(0, 120))
   } else {
+    await until(b, `!!document.querySelector('label.field input')`)
     await b.ev(`__setNum('Age', 52)`); await b.ev(`__click('Continue')`); await sleep(250)
     await b.ev(`__click('Type 2 diabetes')`); await b.ev(`__click('Continue')`); await sleep(250)
     await b.ev(`__click('Continue')`); await sleep(250); await b.ev(`__click('Continue')`); await sleep(250)
-    await b.ev(`__check('I understand this is not medical advice')`); await b.ev(`__click('Start using DiaBite')`); await sleep(1200)
+    await b.ev(`__check('I understand this is not medical advice')`); await b.ev(`__click('Start using DiaBite')`)
+    await until(b, `/What are you\\s+about to eat/i.test(document.body.innerText)`)
     check('M7', 'onboarding completes and the ask screen opens', /What are you\s+about to eat/i.test(await text()), (await text()).slice(0, 120))
 
     const ask = async (q) => {
@@ -85,7 +90,8 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
     check('M10', 'a meal with an unknown food is never called "fits" and says what is left so far',
       !/FITS\b/i.test(partial.text.split('\n').slice(0, 40).join(' ').replace(/\bdoes not fit\b/gi, '')) && /LEFT SO FAR/i.test(partial.text), partial.text.slice(0, 260))
 
-    await b.send('Page.navigate', { url: `${URL_}/?demo` }); await sleep(2500)
+    await b.send('Page.navigate', { url: `${URL_}/?demo` })
+    await until(b, `/What are you\\s+about to eat/i.test(document.body.innerText)`)
     const demo = await text()
     check('M11', 'the demo link hides the builder-only row', !/Download Responses|Fresh context/.test(demo), demo.slice(0, 160))
   }
