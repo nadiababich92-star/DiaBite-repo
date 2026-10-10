@@ -1,0 +1,238 @@
+# One food per line, the way a person says it. Grouped by how Americans actually eat.
+# breakfast
+scrambled eggs
+fried egg
+egg white omelet
+cheese omelette
+bacon
+turkey sausage
+breakfast sausage patty
+hash browns
+buttermilk pancakes
+waffle
+french toast
+oatmeal
+steel cut oats
+instant oatmeal packet
+cream of wheat
+grits
+granola
+cheerios
+frosted flakes
+greek yogurt
+plain yogurt
+yogurt with fruit on the bottom
+cottage cheese
+english muffin
+bagel with cream cheese
+everything bagel
+toast with butter
+avocado toast
+breakfast burrito
+egg mcmuffin
+sausage egg and cheese biscuit
+biscuits and gravy
+smoothie
+protein shake
+chia pudding
+# bread, grains, sides
+white bread
+whole wheat bread
+sourdough
+rye bread
+flour tortilla
+corn tortilla
+pita
+naan
+white rice
+brown rice
+jasmine rice
+basmati rice
+fried rice
+cauliflower rice
+quinoa
+couscous
+pasta
+whole wheat pasta
+spaghetti
+mac and cheese
+ramen noodles
+rice noodles
+egg noodles
+mashed potatoes
+baked potato
+french fries
+sweet potato fries
+hash brown
+roasted potatoes
+corn on the cob
+cornbread
+stuffing
+dinner roll
+garlic bread
+# proteins
+grilled chicken breast
+fried chicken
+chicken thigh
+chicken wings
+rotisserie chicken
+chicken nuggets
+chicken tenders
+turkey breast
+ground turkey
+ground beef
+hamburger patty
+steak
+sirloin
+ribeye
+pork chop
+pulled pork
+bbq ribs
+ham
+hot dog
+meatballs
+meatloaf
+salmon
+tuna
+canned tuna
+shrimp
+fish sticks
+fried fish
+cod
+tilapia
+tofu
+tempeh
+black beans
+pinto beans
+refried beans
+chickpeas
+lentils
+hummus
+edamame
+peanut butter
+almond butter
+almonds
+walnuts
+cashews
+mixed nuts
+trail mix
+# vegetables, fruit
+broccoli
+spinach
+kale
+romaine lettuce
+side salad
+caesar salad
+cobb salad
+coleslaw
+green beans
+asparagus
+zucchini
+cauliflower
+brussels sprouts
+carrots
+tomatoes
+cucumber
+bell pepper
+mushrooms
+onions
+avocado
+guacamole
+salsa
+kimchi
+sauerkraut
+apple
+banana
+orange
+grapes
+strawberries
+blueberries
+watermelon
+mango
+pineapple
+pear
+peach
+raisins
+dried cranberries
+applesauce
+orange juice
+apple juice
+# restaurant and mixed dishes
+cheeseburger
+big mac
+whopper
+chicken sandwich
+turkey sandwich
+blt
+grilled cheese
+peanut butter and jelly sandwich
+subway footlong
+chipotle burrito bowl
+burrito
+taco
+chicken quesadilla
+nachos
+enchiladas
+pizza
+cheese pizza slice
+pepperoni pizza
+chicken parmesan
+lasagna
+spaghetti and meatballs
+beef stew
+chili
+chicken noodle soup
+tomato soup
+clam chowder
+pad thai
+chicken tikka masala
+butter chicken
+beef and broccoli
+orange chicken
+general tso's chicken
+sushi roll
+california roll
+pho
+bibimbap
+falafel
+gyro
+shawarma
+pierogi
+borscht
+stuffed cabbage
+potato latkes
+matzo ball soup
+# snacks, sweets, drinks
+potato chips
+tortilla chips
+popcorn
+pretzels
+crackers
+rice cakes
+granola bar
+protein bar
+oreos
+chocolate chip cookie
+brownie
+ice cream
+frozen yogurt
+dark chocolate
+candy bar
+snickers
+m&ms
+gummy bears
+cake
+cheesecake
+apple pie
+donut
+muffin
+croissant
+coca cola
+diet coke
+sweet tea
+coffee with cream
+latte
+orange soda
+beer
+red wine
+whiskey

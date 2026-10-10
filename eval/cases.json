@@ -1054,6 +1054,87 @@
         "tags": [
           "everyday"
         ]
+      },
+      {
+        "phrase": "donut",
+        "expect": [
+          "usda:2708062"
+        ],
+        "tags": [
+          "coverage-study"
+        ]
+      },
+      {
+        "phrase": "dinner roll",
+        "expect": [
+          "usda:2707654"
+        ],
+        "tags": [
+          "coverage-study"
+        ]
+      },
+      {
+        "phrase": "pulled pork",
+        "expect": [
+          "usda:2706399"
+        ],
+        "tags": [
+          "coverage-study"
+        ]
+      },
+      {
+        "phrase": "pancakes",
+        "expect": [
+          "usda:2708299"
+        ],
+        "tags": [
+          "coverage-study"
+        ]
+      },
+      {
+        "phrase": "meatloaf",
+        "expect": [
+          "usda:2706499"
+        ],
+        "tags": [
+          "coverage-study"
+        ]
+      },
+      {
+        "phrase": "egg noodles",
+        "expect": [
+          "usda:2708352"
+        ],
+        "tags": [
+          "coverage-study"
+        ]
+      },
+      {
+        "phrase": "fried chicken",
+        "expect": [
+          "usda:2705949"
+        ],
+        "tags": [
+          "coverage-study"
+        ]
+      },
+      {
+        "phrase": "chili con carne",
+        "expect": [
+          "usda:2706375"
+        ],
+        "tags": [
+          "coverage-study"
+        ]
+      },
+      {
+        "phrase": "fried egg",
+        "expect": [
+          "seed:egg"
+        ],
+        "tags": [
+          "coverage-study"
+        ]
       }
     ],
     "clarify": [
@@ -1191,6 +1272,26 @@
         "phrase": "Red Bull",
         "band": "high",
         "why": "a named product"
+      },
+      {
+        "phrase": "taco",
+        "band": "medium",
+        "why": "a taco is a shell and a filling; the name alone matched a seasoning"
+      },
+      {
+        "phrase": "pizza",
+        "band": "medium",
+        "why": "a pizza is a crust and what is on it; the name alone matched a dessert"
+      },
+      {
+        "phrase": "chili",
+        "band": "medium",
+        "why": "the dish or the spice; the name alone matched the spice"
+      },
+      {
+        "phrase": "nachos",
+        "band": "medium",
+        "why": "the name alone matched a bag of Doritos"
       }
     ],
     "verify": [

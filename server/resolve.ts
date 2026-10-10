@@ -79,6 +79,9 @@ const CATEGORY_WORDS = new Set([
   // to 94 (roasted), so "potato" with no word about how it was cooked is a
   // question, not a record. Sweet potatoes are a different food and not caught.
   'potato', 'potatoes',
+  // A taco is a shell and what is in it, a pizza is a crust and what is on it,
+  // and a name with nothing after it matched a seasoning, a dessert, a bag of chips.
+  'taco', 'tacos', 'pizza', 'nachos', 'chili',
 ])
 
 /**
@@ -90,6 +93,11 @@ const CATEGORY_WORDS = new Set([
 const CATEGORY_QUESTION: Record<string, string> = {
   potato: 'How was the potato cooked: boiled, baked, mashed, roasted or fried?',
   potatoes: 'How were the potatoes cooked: boiled, baked, mashed, roasted or fried?',
+  taco: 'What is in the taco, and is the shell corn or flour?',
+  tacos: 'What is in the tacos, and is the shell corn or flour?',
+  pizza: 'What is on the pizza, and is the crust thin or thick?',
+  nachos: 'What is on the nachos: cheese, beef, chicken or beans?',
+  chili: 'Chili the dish (with meat, with beans), or chili powder?',
 }
 
 /**
@@ -254,7 +262,9 @@ function band(phrase: string, cands: ResolveCandidate[]): Confidence {
   const top = cands[0]
   if (!top || top.score < LOW_MAX) return 'low'
   // A preparation the record never mentions makes it a different food.
-  const stated = tokens(phrase).filter((t) => STATE_WORDS.has(t))
+  // Unless the record was written down under exactly those words: "fried egg"
+  // is one of Egg's everyday names, and Egg's name does not say fried.
+  const stated = aliasesOf().get(norm(phrase)) === top.id ? [] : tokens(phrase).filter((t) => STATE_WORDS.has(t))
   if (stated.length) {
     const n = norm(plainName(top.name))
     if (stated.some((t) => !n.includes(t))) return 'low'
