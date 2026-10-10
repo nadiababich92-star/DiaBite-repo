@@ -68,7 +68,9 @@ const INGREDIENT_PORTION_G: Record<string, number> = {
 }
 
 const ALIASES: Record<string, string[]> = {
-  'rice-white': ['rice', 'white rice', 'steamed rice', 'jasmine rice', 'sushi rice', 'fried rice'],
+  // Not 'fried rice': it has oil, egg and a different glycemic index, and naming it white rice
+  // would cost one food under another's name. It is a dish of its own (USDA's 'Rice, fried').
+  'rice-white': ['rice', 'white rice', 'steamed rice', 'jasmine rice', 'sushi rice'],
   'rice-brown': ['brown rice'],
   'rice-basmati': ['basmati'],
   'pasta-durum': ['spaghetti', 'pasta', 'penne', 'linguine', 'fettuccine', 'noodles', 'macaroni', 'rigatoni'],

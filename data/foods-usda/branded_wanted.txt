@@ -382,3 +382,16 @@ chipotle burrito bowl
 krispy kreme original glazed
 kraft macaroni cheese
 starbucks caramel frappuccino
+
+# composite dishes the curated tables cannot build faithfully (no white rice, grits, flour or sugar there)
+quaker instant grits original
+quaker quick grits
+grits
+pillsbury grands biscuits
+pillsbury buttermilk biscuits
+sausage gravy
+biscuits gravy
+fried rice
+chicken fried rice
+general tso chicken
+orange chicken

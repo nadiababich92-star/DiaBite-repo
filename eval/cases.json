@@ -718,19 +718,19 @@
       {
         "phrase": "general tso's chicken",
         "expect": [
-          "unknown"
+          "branded:1621189"
         ],
         "tags": [
-          "unknown"
+          "branded"
         ]
       },
       {
         "phrase": "biscuits and gravy",
         "expect": [
-          "unknown"
+          "branded:476408"
         ],
         "tags": [
-          "unknown"
+          "branded"
         ]
       },
       {
@@ -1035,6 +1035,24 @@
         ],
         "tags": [
           "branded-not"
+        ]
+      },
+      {
+        "phrase": "fried rice",
+        "expect": [
+          "usda:2708952"
+        ],
+        "tags": [
+          "everyday"
+        ]
+      },
+      {
+        "phrase": "grits",
+        "expect": [
+          "usda:2708363"
+        ],
+        "tags": [
+          "everyday"
         ]
       }
     ],

@@ -70,8 +70,12 @@ with open(SRC / 'branded_food.csv', newline='', encoding='utf-8') as f:
         if unit in ('g', 'grm'): grams = size
         elif unit in ('ml', 'mlt') and DRINK.search(cat + ' ' + d): grams = size
         else: continue
+        # A dry mix, a seasoning or a powder is an ingredient, not the dish its name resembles:
+        # 'Biscuit Gravy Mix' must never stand in for biscuits and gravy.
+        ingredient_only = bool(re.search(r'\b(mix|seasoning|powder|packet)\b', d, re.I))
         for i in set(hit):
             if not seeds[i][1] <= text: continue
+            if ingredient_only and not (seeds[i][1] & {'mix', 'seasoning', 'powder', 'packet'}): continue
             extra = len(text - seeds[i][1])
             rank = (extra, -(len(r['modified_date'] or '') and int(r['modified_date'].replace('-', '') or 0)))
             if True:
