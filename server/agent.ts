@@ -66,7 +66,10 @@ const PROJECT_ENDPOINT = process.env.PROJECT_ENDPOINT ?? ''
  */
 const MODELS: Record<string, string> = {
   triage: process.env.MODEL_TRIAGE ?? 'gpt-54-nano',
-  meal: process.env.MODEL_MEAL ?? process.env.MODEL_DEPLOYMENT_NAME ?? 'gpt-54-mini',
+  // Not MODEL_DEPLOYMENT_NAME: the Container App still carries the old gpt-5-mini there, and
+  // publishing the agents with the app's environment put the meal agent back on it (50k tokens a
+  // minute, twice as slow) on 9 and 10 October.
+  meal: process.env.MODEL_MEAL ?? 'gpt-54-mini',
   advisor: process.env.MODEL_ADVISOR ?? 'gpt-54-mini',
 }
 const AGENT_PREFIX = process.env.AGENT_PREFIX ?? 'diabite'
