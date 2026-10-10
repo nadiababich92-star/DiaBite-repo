@@ -76,6 +76,8 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
       await b.send('Input.insertText', { text: q })
       const t0 = Date.now()
       await b.ev(`__click('Ask')`)
+      // wait for the request to start before waiting for it to end, or the previous answer is read as this one
+      for (let i = 0; i < 10; i++) { if (await b.ev('__busy()')) break; await sleep(300) }
       for (let i = 0; i < 100; i++) { await sleep(400); if (!await b.ev('__busy()')) break }
       await sleep(500)
       return { text: await text(), secs: (Date.now() - t0) / 1000 }
@@ -88,7 +90,7 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
 
     const partial = await ask("A slice of grandma's kugel and two eggs")
     check('M10', 'a meal with an unknown food is never called "fits" and says what is left so far',
-      !/FITS\b/i.test(partial.text.split('\n').slice(0, 40).join(' ').replace(/\bdoes not fit\b/gi, '')) && /LEFT SO FAR/i.test(partial.text), partial.text.slice(0, 260))
+      !/FITS\b/i.test(partial.text.split('\n').slice(0, 40).join(' ').replace(/\bdoes not fit\b/gi, '')) && /LEFT SO FAR/i.test(partial.text), partial.text.replace(/\s+/g, ' ').slice(-500))
 
     await b.send('Page.navigate', { url: `${URL_}/?demo` })
     await until(b, `/What are you\\s+about to eat/i.test(document.body.innerText)`)
