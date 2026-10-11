@@ -35,7 +35,9 @@ import { looksLikeMeal, withHangRetry } from '../server/agent'
 import { diffEntries, exportShape, fromRow, mergeById, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary } from '../src/lib/history'
-import { generateWeek, menuHidden, regenerateSlot, replayWeek, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
+import { generateWeek, menuHidden, regenerateSlot, replayWeek, setRecipes, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
+import { toDishes } from '../src/lib/recipes'
+import { ALLERGEN_PATTERNS, PATTERN_PATTERNS } from '../src/lib/dietary'
 import { loadWeekState } from '../src/lib/menuStore'
 import { addDays, dayLabel, gramStep, mealForNow, nudgeGrams, recentEntries } from '../src/lib/diary'
 import { calculateTargets, DEFAULT_PROFILE } from '../src/lib/profile'
@@ -261,6 +263,65 @@ const menuMisses: string[] = []
     store['diabite.menu.v1'] = '{not json'
     if (!Number.isFinite(loadWeekState().seed)) menuMisses.push('    a stored week that is not JSON does not give a new week')
     delete g.localStorage
+  }
+  // (c3) with the recipe database in the library: more to choose from, and the same rules
+  {
+    const raw = JSON.parse(readFileSync(join(ROOT, 'src', 'data', 'menu-recipes.json'), 'utf8'))
+    const dishes = toDishes(raw)
+    if (dishes.length < 500) menuMisses.push(`    only ${dishes.length} recipes reached the menu`)
+    setRecipes(dishes)
+    const week = generateWeek(profile, targets, 31)
+    const meals = week.days.flatMap((d) => d.meals)
+    if (week.days.length !== 7 || meals.length !== 28) menuMisses.push('    a week from the recipe library is not seven days of four meals')
+    const recipeShare = meals.filter((m) => m.dish.recipeId).length / meals.length
+    const scalesOk = meals.every((m) => !m.dish.serving || (m.scale >= 0.5 && m.scale <= 2 && Math.abs(m.scale * 4 - Math.round(m.scale * 4)) < 1e-9))
+    if (!scalesOk) menuMisses.push('    a recipe is served in a portion that is not a quarter between half and two servings')
+    const gap = week.days.every((d, i) => d.meals.every((m) => week.days.slice(Math.max(0, i - 2), i).every((e) => e.meals.every((x) => x.dish.id !== m.dish.id))))
+    if (!gap) menuMisses.push('    a dish came back inside the three-day gap, with the recipes in')
+    const dayOk = week.days.every((d) => Math.abs(d.totals.kcal - d.meals.reduce((t, m) => t + m.nutrients.kcal, 0)) < 0.01 && Math.abs(d.gl - d.meals.reduce((t, m) => t + m.gl, 0)) < 0.01)
+    if (!dayOk) menuMisses.push('    a day total is not the sum of its meals, with the recipes in')
+    const linear = meals.filter((m) => m.dish.serving).every((m) => Math.abs(m.gl - m.dish.serving!.gl * m.scale) < 1e-9)
+    if (!linear) menuMisses.push('    a recipe load is not its per-serving load times the portion')
+    // variety: with the library this large no dish repeats inside a week, and two weeks are not the same week
+    let repeats = 0; const seen = new Set<string>()
+    for (let seed = 1; seed <= 40; seed++) {
+      const w = generateWeek(profile, targets, seed)
+      const ids = w.days.flatMap((d) => d.meals.map((m) => m.dish.id))
+      repeats += ids.length - new Set(ids).size
+      for (const id of ids) seen.add(id)
+    }
+    if (repeats > 0) menuMisses.push(`    a dish came back inside a single week, with plenty to choose from (${repeats} repeats in 40 weeks)`)
+    if (seen.size < 250) menuMisses.push(`    forty weeks used only ${seen.size} different dishes: the generator keeps choosing the same few`)
+    console.log(`          forty weeks used ${seen.size} different dishes, ${repeats} repeats inside a week`)
+    // a week rebuilt from its seed and replacements is the same week, recipes or not
+    const edits = [{ day: 1, meal: 'dinner' as const, seed: 5 }, { day: 4, meal: 'lunch' as const, seed: 77 }]
+    let walked = generateWeek(profile, targets, 909)
+    for (const e of edits) walked = regenerateSlot(walked, e.day, e.meal, profile, targets, e.seed).plan
+    const same = replayWeek(profile, targets, { seed: 909, edits }).plan.days.map((d) => d.meals.map((m) => m.dish.id).join()).join('|') === walked.days.map((d) => d.meals.map((m) => m.dish.id).join()).join('|')
+    if (!same) menuMisses.push('    a week with recipes in it does not rebuild from its seed')
+    // what a person avoids, read off the ingredient names of every recipe in forty weeks
+    const text = (m: (typeof meals)[number]) => [m.dish.name, ...(m.dish.ingredients ?? m.dish.items.map((it) => it.foodId)).map((i) => (typeof i === 'string' ? i : i.name))].join(' ')
+    const avoided = (patch: object, test: RegExp) => {
+      let bad = 0
+      for (let seed = 1; seed <= 40; seed++) {
+        const w = generateWeek({ ...profile, ...patch } as typeof profile, targets, seed)
+        bad += w.days.flatMap((d) => d.meals).filter((m) => m.dish.ingredients && test.test(text(m))).length
+      }
+      return bad
+    }
+    const celiac = avoided({ allergens: ['gluten'] }, ALLERGEN_PATTERNS.gluten)
+    const vegan = avoided({ pattern: 'vegan' }, PATTERN_PATTERNS.vegan)
+    const nutFree = avoided({ allergens: ['peanuts', 'treenuts'] }, new RegExp(`${ALLERGEN_PATTERNS.peanuts.source}|${ALLERGEN_PATTERNS.treenuts.source}`, 'i'))
+    const noEgg = avoided({ excludedFoodIds: ['egg'] }, /\begg/i)
+    if (celiac || vegan || nutFree || noEgg) menuMisses.push(`    a recipe offered what the person avoids (gluten ${celiac}, vegan ${vegan}, nuts ${nutFree}, egg ${noEgg})`)
+    // the shopping list covers every ingredient above a pinch, and a recipe's name is one line however many times it is cooked
+    const list = shoppingList(week)
+    const names = new Set(list.map((x) => x.name))
+    const missing = meals.filter((m) => m.dish.ingredients).flatMap((m) => m.dish.ingredients!.filter((i) => i.grams * m.scale >= 40).map((i) => i.name)).filter((n) => !names.has(n))
+    if (missing.length) menuMisses.push(`    the shopping list lacks ${missing.slice(0, 3).join(', ')}`)
+    if (new Set(list.map((x) => x.name)).size !== list.length) menuMisses.push('    the shopping list repeats a line')
+    console.log(`          recipes in the library: ${dishes.length}; ${(recipeShare * 100).toFixed(0)}% of a week's meals are from it`)
+    setRecipes([])
   }
   // (d) who is not shown a plan
   const hide = (patch: object) => menuHidden({ ...profile, ...patch } as typeof profile)

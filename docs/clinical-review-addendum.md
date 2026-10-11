@@ -41,6 +41,9 @@ The banner used to show its whole text (reference tool, not medical advice, the 
 **Q28. Changing a portion after the answer.**
 After an answer the person can change any food's weight; the engine counts the meal again and a card above the original answer shows the new figures and a new verdict word taken from the same rule as before (fits, does not fit, or "I can't judge" when a food is missing). The explanation text written for the original portions stays below, marked as the original. Should the app also let someone *add* a food or *remove* one this way, or keep that to a new question? Is "Original answer, before you changed a portion" a clear enough label?
 
+**Q29. The menu now draws on 880 recipes.**
+The weekly menu used to choose from 30 hand-written dishes. It now also draws on 880 recipes from the recipe database (about 340 of them American, the rest Italian, Tex-Mex, Mediterranean and others): every recipe's nutrition, glycemic index and load were computed from its ingredient table, and nobody has read them as a dietitian would. Desserts, drinks and side dishes are left out. A week still shows "These meals have not been reviewed by a clinician yet". Is that line enough while they are unreviewed, or should a recipe carry a visible "unreviewed" mark until a dietitian has signed off, and is there a category you would take out of the menu altogether (for instance sandwiches and wraps, or soups with starchy thickeners)?
+
 ## How to answer
 
 Select any text and comment, or reply with question numbers. Partial answers are welcome.

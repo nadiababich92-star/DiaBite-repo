@@ -65,7 +65,18 @@ function mulberry32(seed: number): () => number {
 const MIN_SCALE = 0.6
 const MAX_SCALE = 1.75
 
+/** A recipe is served in quarters: half a serving to two, never 0.83 of one. */
+const RECIPE_MIN = 0.5
+const RECIPE_MAX = 2
+
 function evaluate(dish: Dish, scale: number) {
+  if (dish.serving) {
+    const s = dish.serving
+    return {
+      nutrients: { kcal: s.kcal * scale, carbs: s.carbs * scale, fiber: s.fiber * scale, protein: s.protein * scale, fat: s.fat * scale },
+      gl: s.gl * scale, gi: s.gi,
+    }
+  }
   const parts = dish.items.map((it) => ({ food: getFood(it.foodId), grams: it.grams * scale }))
   const nutrients = sumNutrients(parts.map((p) => nutrientsFor(p.food, p.grams)))
   const gl = parts.reduce((sum, p) => sum + glycemicLoad(p.food, p.grams), 0)
@@ -78,6 +89,7 @@ function evaluate(dish: Dish, scale: number) {
  */
 function fitScale(dish: Dish, targetKcal: number): number {
   const base = evaluate(dish, 1).nutrients.kcal
+  if (dish.serving) return base <= 0 ? 1 : Math.min(RECIPE_MAX, Math.max(RECIPE_MIN, Math.round((targetKcal / base) * 4) / 4))
   if (base <= 0) return 1
   const raw = targetKcal / base
   return Math.min(MAX_SCALE, Math.max(MIN_SCALE, Math.round(raw * 20) / 20))
@@ -111,6 +123,19 @@ function score(
 const REPEAT_GAP = 3
 
 /**
+ * With a large library the best-fitting dishes are few, and picking the single best every time brings the same
+ * ones back every third day. So the pick is among the first few by score, favouring the best, and a dish already
+ * on this week's plan is passed over for as long as this many fresh ones remain.
+ */
+const PICK_FROM = 100
+/** A dish is only in the running if it scores within this of the best: variety must not cost fit. */
+const FIT_MARGIN = 1.0
+const FRESH_ENOUGH = 6
+/** The dishes in the running, best first, and which one this draw takes (favouring the best). */
+const inTheRunning = <T extends { s: number }>(sorted: T[]) => sorted.filter((x) => x.s <= sorted[0].s + FIT_MARGIN).slice(0, PICK_FROM)
+const pickIndex = (rnd: () => number, n: number) => Math.floor(rnd() ** 1.2 * n)
+
+/**
  * Profiles a fixed plan of meals and calories is not DiaBite's to write: a
  * history of disordered eating, and kidney disease or dialysis (where protein
  * and potassium decide the plate). Until a clinician says otherwise the menu is
@@ -122,27 +147,53 @@ export function menuHidden(profile: Profile): boolean {
   return profile.comorbidities.includes('eatingDisorder') || profile.kidney === 'ckd' || profile.kidney === 'dialysis'
 }
 
+/**
+ * The recipes the menu may choose from, once they have been loaded (they are a separate file, fetched
+ * when the Menu opens). Until then the library is the curated dishes alone. Set once, in file order, so a
+ * week rebuilt from its seed is the week that was built.
+ */
+let RECIPES: Dish[] = []
+export const setRecipes = (list: Dish[]) => { RECIPES = list }
+export const recipeCount = () => RECIPES.length
+const library = (): Dish[] => (RECIPES.length ? [...DISHES, ...RECIPES] : DISHES)
+
+/** Words that name a food someone excluded by hand, to be looked for in a recipe's ingredients. Over-matching is the cheap mistake. */
+const GENERIC = new Set(['white', 'brown', 'red', 'green', 'black', 'cooked', 'raw', 'fresh', 'dried', 'whole', 'plain', 'low', 'fat', 'mixed', 'sweet', 'with', 'and', 'the'])
+export function excludedKeywords(foodId: string): string[] {
+  const name = (getFood(foodId)?.name ?? '').toLowerCase().split(/[,(]/)[0]
+  return [...new Set([...foodId.toLowerCase().split(/[-_ ]/), ...name.split(/[^a-z]+/)].filter((w) => w.length >= 3 && !GENERIC.has(w)))]
+}
+
 /** The dishes this person may be offered: the same answers the agent respects. */
 function availableDishes(profile: Profile) {
   const excluded = new Set(profile.excludedFoodIds)
+  const keywords = [...excluded].flatMap(excludedKeywords)
 
   // A week of meals has to respect the same answers the agent respects. It did
   // not: onboarding has been collecting allergens and an eating pattern while
   // this filtered on the hand-picked exclusions alone, so a celiac could be
   // handed a week with pasta in it.
   const avoid = { allergens: profile.allergens, pattern: profile.pattern }
-  const forbidden = (d: (typeof DISHES)[number]) => {
+  const forbidden = (d: Dish) => {
+    if (d.ingredients) {
+      // A recipe: its ingredients are names, so the hand-picked exclusions are looked for by word.
+      const names = d.ingredients.map((i) => i.name.toLowerCase())
+      // The name counts too: "Egg Roll Bowl" is not what someone who left out egg meant to be offered.
+      const title = d.name.toLowerCase()
+      if (keywords.some((k) => title.includes(k) || names.some((n) => n.includes(k)))) return true
+      return dietaryReason([d.name, ...d.ingredients.map((i) => i.name)].join(' '), avoid) !== null
+    }
     if (d.items.some((it) => excluded.has(it.foodId))) return true
     const text = [d.name, ...d.items.map((it) => getFood(it.foodId)?.name ?? '')].join(' ')
     return dietaryReason(text, avoid) !== null
   }
-  return DISHES.filter((d) => !forbidden(d))
+  return library().filter((d) => !forbidden(d))
 }
 
 export function generateWeek(profile: Profile, targets: Targets, seed = Date.now()): WeekPlan {
   const rnd = mulberry32(seed)
   const available = availableDishes(profile)
-  const pool = { available: available.length, total: DISHES.length }
+  const pool = { available: available.length, total: library().length }
 
   /** dishId -> index of the day the dish was last used. */
   const lastUsed = new Map<string, number>()
@@ -167,9 +218,10 @@ export function generateWeek(profile: Profile, targets: Targets, seed = Date.now
         })
 
       // If exclusions leave no candidates, relax the repeat rule.
+      const fresh = candidates.filter((d) => !lastUsed.has(d.id))
       const pool =
         candidates.length > 0
-          ? candidates
+          ? (fresh.length >= FRESH_ENOUGH ? fresh : candidates)
           : available.filter((d) => d.meals.includes(meal) && !usedToday.has(d.id))
 
       if (pool.length === 0) continue
@@ -184,7 +236,8 @@ export function generateWeek(profile: Profile, targets: Targets, seed = Date.now
         })
         .sort((a, b) => a.s - b.s)
 
-      const pick = scored[0]
+      const running = inTheRunning(scored)
+      const pick = running[pickIndex(rnd, running.length)]
       usedToday.add(pick.dish.id)
       lastUsed.set(pick.dish.id, dayIndex)
       meals.push({
@@ -210,20 +263,24 @@ export function generateWeek(profile: Profile, targets: Targets, seed = Date.now
 
 /** Aggregated weekly shopping list: food -> total grams. */
 export function shoppingList(plan: WeekPlan): { name: string; grams: number; category: FoodCategory }[] {
-  const totals = new Map<string, number>()
+  // One line per food, whichever dish it comes from: "Olive oil" in a curated dish and in a recipe is one line.
+  const totals = new Map<string, { name: string; grams: number; category: FoodCategory }>()
+  const add = (name: string, grams: number, category: FoodCategory) => {
+    const key = name.trim().toLowerCase()
+    const prev = totals.get(key)
+    totals.set(key, { name: prev?.name ?? name, grams: (prev?.grams ?? 0) + grams, category: prev?.category ?? category })
+  }
   for (const day of plan.days) {
     for (const m of day.meals) {
-      for (const item of m.dish.items) {
-        totals.set(item.foodId, (totals.get(item.foodId) ?? 0) + item.grams * m.scale)
-      }
+      for (const item of m.dish.items) { const f = getFood(item.foodId); add(f.name, item.grams * m.scale, f.category) }
+      for (const ing of m.dish.ingredients ?? []) add(ing.name, ing.grams * m.scale, ing.category)
     }
   }
-  return [...totals.entries()]
-    .map(([id, grams]) => {
-      const food = getFood(id)
-      // To the nearest 5 g: a list of "412 g" claims a precision the plan never had.
-      return { name: food.name, grams: Math.max(5, Math.round(grams / 5) * 5), category: food.category }
-    })
+  // To the nearest 5 g: a list of "412 g" claims a precision the plan never had. A pinch of spice is
+  // not shopping: under 5 g across the whole week it stays in the recipe.
+  return [...totals.values()]
+    .filter((x) => x.grams >= 5)
+    .map((x) => ({ name: x.name, grams: Math.max(5, Math.round(x.grams / 5) * 5), category: x.category }))
     .sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name))
 }
 
@@ -264,6 +321,10 @@ export function regenerateSlot(
   const nearby = (id: string) => plan.days.some((d, i) => i !== dayIndex && Math.abs(i - dayIndex) < REPEAT_GAP && d.meals.some((m) => m.dish.id === id))
 
   let candidates = available.filter((d) => !inDay.has(d.id) && !nearby(d.id))
+  // Not a dish that is anywhere else on this week's plan, while enough others remain.
+  const onPlan = new Set(plan.days.flatMap((d) => d.meals.map((m) => m.dish.id)))
+  const fresh = candidates.filter((d) => !onPlan.has(d.id))
+  if (fresh.length >= FRESH_ENOUGH) candidates = fresh
   let relaxed = false
   if (candidates.length === 0) { candidates = available.filter((d) => !inDay.has(d.id)); relaxed = true }
   if (candidates.length === 0) return { plan, relaxed: false, changed: false }
@@ -276,10 +337,12 @@ export function regenerateSlot(
       const ev = evaluate(dish, scale)
       return { dish, scale, ev, s: score(ev, targetKcal, targetCarbs, targetGL) + rnd() * 0.15 }
     })
-    .sort((a, b) => a.s - b.s)[0]
+    .sort((a, b) => a.s - b.s)
+  const running = inTheRunning(best)
+  const chosen = running[pickIndex(rnd, running.length)]
 
   const meals = day.meals.map((m, i) => i === slot
-    ? { meal, dish: best.dish, scale: best.scale, nutrients: best.ev.nutrients, gl: best.ev.gl, gi: best.ev.gi }
+    ? { meal, dish: chosen.dish, scale: chosen.scale, nutrients: chosen.ev.nutrients, gl: chosen.ev.gl, gi: chosen.ev.gi }
     : m)
   const days = plan.days.map((d, i) => i === dayIndex
     ? { ...d, meals, totals: sumNutrients(meals.map((m) => m.nutrients)), gl: meals.reduce((t, m) => t + m.gl, 0) }

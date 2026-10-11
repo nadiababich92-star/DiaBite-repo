@@ -167,7 +167,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
                       <span className="entry-name">{v.name}</span>
                       <span className="muted entry-sub">
                         <GIPill gi={v.gi} />{' '}
-                        {e.snapshot && <span className="pill none">from Ask</span>}
+                        {e.snapshot && <span className="pill none">{e.foodId.startsWith('rec:') ? 'recipe' : 'from Ask'}</span>}
                         {' '}{v.availableCarbs.toFixed(1)} g carbs · GL {v.loadAvailable ? v.gl.toFixed(1) : '—'}
                       </span>
                     </div>

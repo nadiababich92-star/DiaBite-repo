@@ -55,6 +55,17 @@ export interface Dish {
   recipe: string
   /** Dietary restrictions the dish does NOT meet; derived automatically. */
   tags?: string[]
+
+  // A dish from the recipe database carries its own numbers, as the engine's build computed them
+  // from the ingredient table, for one serving; `items` is then empty and `ingredients` is what to buy.
+  /** The nutrition of one serving, copied from the recipe database, never worked out here. */
+  serving?: { kcal: number; protein: number; fat: number; carbs: number; fiber: number; gl: number; gi: number | null }
+  /** The recipe's ingredients per serving, with a shopping category each. */
+  ingredients?: { name: string; grams: number; category: FoodCategory }[]
+  /** The recipe database's id (`DB-0001`); the engine knows it as `rec:DB-0001`. */
+  recipeId?: string
+  cuisine?: string
+  minutes?: number
 }
 
 /** A single diary entry. */

@@ -793,3 +793,6 @@ button.step-day:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; 
 .menu-actions { gap: 12px; margin-top: 6px; }
 .menu-added { margin: 6px 0 0; font-size: 14px; }
 .menu-added .link { color: var(--accent); text-decoration: underline; font-weight: 600; min-height: 44px; }
+
+.menu-serving { font-size: 14px; margin: 6px 0 0; }
+.recipe-steps { margin: 0 0 8px; padding-left: 22px; font-size: 14px; color: var(--text-dim); display: flex; flex-direction: column; gap: 6px; }

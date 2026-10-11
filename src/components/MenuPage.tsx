@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CATEGORY_LABELS, getFood } from '../data/foods'
-import { MEAL_LABELS, regenerateSlot, replayWeek, shoppingList, shoppingText, menuHidden } from '../lib/menu'
+import { MEAL_LABELS, recipeCount, regenerateSlot, replayWeek, shoppingList, shoppingText, menuHidden } from '../lib/menu'
+import { loadMenuRecipes } from '../lib/recipes'
 import type { PlannedDay, PlannedMeal, WeekState } from '../lib/menu'
 import { loadWeekState, newWeekState, saveWeekState } from '../lib/menuStore'
 import { useToday } from '../lib/useToday'
@@ -49,11 +50,25 @@ export default function MenuPage({ profile, targets, onAsk, onAdd, onRemove, onO
 
   useEffect(() => saveWeekState(week), [week])
 
+  // The recipes are a file of their own, fetched when the Menu first opens. The week waits for it, so that
+  // a week rebuilt from its seed is always built from the same library.
+  const [ready, setReady] = useState(recipeCount() > 0)
+  const [recipesFailed, setRecipesFailed] = useState(false)
+  useEffect(() => {
+    if (ready) return
+    let live = true
+    loadMenuRecipes().catch(() => { if (live) setRecipesFailed(true) }).finally(() => { if (live) setReady(true) })
+    return () => { live = false }
+  }, [ready])
+
   // Not computed at all for a profile that is not shown a plan.
-  const built = useMemo(() => (hidden ? null : replayWeek(profile, targets, week)), [hidden, profile, targets, week])
+  const built = useMemo(() => (hidden || !ready ? null : replayWeek(profile, targets, week)), [hidden, ready, profile, targets, week])
   const plan = built?.plan ?? null
   const list = useMemo(() => (plan ? shoppingList(plan) : []), [plan])
 
+  if (!hidden && !ready) {
+    return <section className="card" role="status"><p className="muted" style={{ margin: 0 }}>Getting the recipes…</p></section>
+  }
   if (hidden || !plan) {
     return (
       <section className="card">
@@ -99,7 +114,16 @@ export default function MenuPage({ profile, targets, onAsk, onAdd, onRemove, onO
   // The meal goes into today's diary at the weight the plan chose, food by food.
   const addToToday = (d: number, m: PlannedMeal) => {
     const stamp = Date.now()
-    const entries: DiaryEntry[] = m.dish.items.map((it, i) => ({
+    // A recipe goes in as one entry carrying the numbers it was planned with, like a meal logged from an answer.
+    const s = m.dish.serving
+    const entries: DiaryEntry[] = s && m.dish.recipeId ? [{
+      id: `${stamp}-0-${Math.random().toString(36).slice(2, 6)}`, date: today, meal: m.meal,
+      foodId: `rec:${m.dish.recipeId}`, grams: m.scale,
+      snapshot: {
+        name: m.dish.name, kcal: s.kcal * m.scale, carbs: s.carbs * m.scale, fiber: s.fiber * m.scale, protein: s.protein * m.scale, fat: s.fat * m.scale,
+        availableCarbs: Math.max(0, s.carbs - s.fiber) * m.scale, gi: s.gi, gl: s.gl * m.scale, loadAvailable: true, servings: m.scale,
+      },
+    }] : m.dish.items.map((it, i) => ({
       id: `${stamp}-${i}-${Math.random().toString(36).slice(2, 6)}`, date: today, meal: m.meal,
       foodId: it.foodId, grams: Math.max(1, Math.round(it.grams * m.scale)),
     }))
@@ -126,6 +150,7 @@ export default function MenuPage({ profile, targets, onAsk, onAdd, onRemove, onO
               These meals have not been reviewed by a clinician yet. Treat them as ideas, and check anything
               that matters for your health with your doctor or dietitian.
             </p>
+            {recipesFailed && <p className="muted" style={{ margin: '4px 0 0' }}>The larger recipe file did not load, so this week is built from the short list.</p>}
             {plan.pool.available < plan.pool.total && (
               <p className="muted" style={{ margin: '4px 0 0' }}>
                 {plan.pool.available} of {plan.pool.total} dishes fit what you avoid
@@ -223,7 +248,10 @@ function DayCard({ day, dayIndex, budget, added, slotKey, onReplace, onAdd, onUn
       {day.meals.map((m) => {
         const key = slotKey(dayIndex, m)
         const done = added[key]
-        const ingredients = m.dish.items.map((it) => `${getFood(it.foodId).name} - ${Math.round(it.grams * m.scale)} g`).join(' · ')
+        const ingredients = m.dish.ingredients
+          ? m.dish.ingredients.map((i) => `${i.name} - ${Math.round(i.grams * m.scale)} g`).join(' · ')
+          : m.dish.items.map((it) => `${getFood(it.foodId).name} - ${Math.round(it.grams * m.scale)} g`).join(' · ')
+        const steps = m.dish.recipe.split('\n').filter(Boolean)
         return (
           <div className="menu-meal" key={m.meal}>
             <div className="head">
@@ -237,9 +265,12 @@ function DayCard({ day, dayIndex, budget, added, slotKey, onReplace, onAdd, onUn
               </span>
             </div>
             <p className="ingredients"><GIPill gi={m.gi} /> {ingredients}</p>
+            {m.dish.serving && (
+              <p className="muted menu-serving">{m.scale === 1 ? '1 serving' : `${m.scale} servings`}{m.dish.minutes ? ` · ${m.dish.minutes} min` : ''}{m.dish.cuisine ? ` · ${m.dish.cuisine}` : ''}</p>
+            )}
             <details className="recipe-more">
               <summary>Recipe</summary>
-              <p className="recipe">{m.dish.recipe}</p>
+              {steps.length > 1 ? <ol className="recipe-steps">{steps.map((st, i) => <li key={i}>{st.replace(/^\d+\.\s*/, '')}</li>)}</ol> : <p className="recipe">{m.dish.recipe}</p>}
             </details>
             {done ? (
               <p className="menu-added" role="status">

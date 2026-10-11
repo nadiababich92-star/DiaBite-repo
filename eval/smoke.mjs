@@ -135,7 +135,7 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
     await tab('Diary'); const loggedBefore = await entries()
     await tab('Menu'); await b.ev(`(()=>{[...document.querySelectorAll('button')].find(x=>x.innerText.trim()==='Add to today')?.click()})()`); await sleep(400)
     await tab('Diary')
-    check('M19', '"Add to today" puts the planned meal into the diary, food by food', await entries() >= loggedBefore + 2, `${loggedBefore} -> ${await entries()}`)
+    check('M19', '"Add to today" puts the planned meal into the diary (a recipe as one entry, a curated dish food by food)', await entries() >= loggedBefore + 1, `${loggedBefore} -> ${await entries()}`)
     const weight = () => b.ev(`document.querySelector('.entry .stepper .step-v')?.innerText ?? ''`)
     const w0 = await weight()
     await b.ev(`document.querySelector('.entry .stepper .step[aria-label^=More]')?.click()`); await sleep(300)
