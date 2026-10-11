@@ -3713,8 +3713,8 @@
     {
       "id": "U2",
       "dimension": "honest",
-      "query": "A bowl of nachos with cheese",
-      "ground_truth": "Nachos: carbohydrate and calories from USDA, no glycemic index in our data, so no load; does not say it fits.",
+      "query": "Two hard candies",
+      "ground_truth": "Hard candy: carbohydrate and calories from USDA, no glycemic index in our data, so no load; never says the load is zero or that it fits.",
       "context": {
         "budget": {
           "glBudget": 54,
