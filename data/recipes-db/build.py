@@ -37,7 +37,7 @@ for f in sorted(glob.glob(os.path.join(os.path.dirname(__file__), "recipes_*.jso
         line = line.strip()
         if line:
             recipes.append(json.loads(line))
-assert len(recipes) == 1000, len(recipes)
+assert len(recipes) >= 1000, len(recipes)
 
 rows = []
 for i, r in enumerate(recipes, 1):

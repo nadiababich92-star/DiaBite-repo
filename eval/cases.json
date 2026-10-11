@@ -1135,6 +1135,60 @@
         "tags": [
           "coverage-study"
         ]
+      },
+      {
+        "phrase": "cobb salad",
+        "expect": [
+          "rec:DB-1083"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "huevos rancheros",
+        "expect": [
+          "rec:DB-1004"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "jalapeno poppers",
+        "expect": [
+          "rec:DB-1098"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "blackened catfish",
+        "expect": [
+          "rec:DB-1055"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "chicken pot pie soup",
+        "expect": [
+          "rec:DB-1031"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "creamed spinach",
+        "expect": [
+          "rec:DB-1075"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
       }
     ],
     "clarify": [
