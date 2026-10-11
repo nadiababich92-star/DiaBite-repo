@@ -207,6 +207,8 @@ const expectOk = (name: string, ok: boolean) => { if (!ok) storedMisses.push(`  
   expectOk('a string where a boolean belongs is refused', typeof p.onboarded === 'boolean')
   expectOk('a valid value survives', p.sex === 'male' && p.comorbidities.includes('gout'))
   expectOk('null and arrays give the default profile', sanitizeProfile(null).age === sanitizeProfile([]).age)
+  expectOk('bread units are off for a profile that never heard of them, and on only when stored as true',
+    sanitizeProfile({}).showBreadUnits === false && sanitizeProfile({ showBreadUnits: true }).showBreadUnits === true && sanitizeProfile({ showBreadUnits: 'yes' }).showBreadUnits === false)
 }
 console.log(`\nstored    ${storedMisses.length === 0 ? 'ok' : 'WRONG'}`)
 storedMisses.forEach((m) => console.log(m))

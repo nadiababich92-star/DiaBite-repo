@@ -14,11 +14,13 @@ interface Props {
   onChange: (entries: DiaryEntry[]) => void
   /** Take the person to the Ask tab, from an empty day. */
   onAsk?: () => void
+  /** Bread units are an opt-in display setting (You); off, they are not shown at all. */
+  showBreadUnits?: boolean
 }
 
 const newId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 
-export default function DiaryPage({ targets, diary, onChange, onAsk }: Props) {
+export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUnits = false }: Props) {
   // The day on show follows the calendar until the person moves to another one.
   const today = useToday()
   const [picked, setPicked] = useState<string | null>(null)
@@ -73,6 +75,24 @@ export default function DiaryPage({ targets, diary, onChange, onAsk }: Props) {
     setNotice({ text: `Added ${viewEntry(e).name} to ${MEAL_LABELS[meal].toLowerCase()}.`, undo: () => onChange(latest.current.filter((x) => x.id !== copy.id)) })
   }
 
+  // The day before the one on show: what was eaten there can be put here, a meal at a time or all of it.
+  const sourceDate = addDays(date, -1)
+  const sourceEntries = useMemo(() => diary.filter((e) => e.date === sourceDate), [diary, sourceDate])
+  const sourceMeals = MEAL_ORDER.filter((m) => sourceEntries.some((e) => e.meal === m))
+  const sourceName = sourceDate === addDays(today, -1) ? 'yesterday' : dayLabel(sourceDate, today)
+
+  function copyFrom(meals: MealType[]) {
+    const chosen = sourceEntries.filter((e) => meals.includes(e.meal))
+    if (chosen.length === 0) return
+    const copies = chosen.map((e) => ({ ...e, id: newId(), date }))
+    const ids = new Set(copies.map((c) => c.id))
+    onChange([...diary, ...copies])
+    setNotice({
+      text: `Copied ${meals.length === sourceMeals.length ? 'all of' : meals.map((m) => MEAL_LABELS[m].toLowerCase()).join(' and ')} from ${sourceName}.`,
+      undo: () => onChange(latest.current.filter((x) => !ids.has(x.id))),
+    })
+  }
+
   function remove(e: DiaryEntry) {
     onChange(diary.filter((x) => x.id !== e.id))
     setNotice({ text: `Removed ${viewEntry(e).name}.`, undo: () => onChange([...latest.current, e]) })
@@ -110,7 +130,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk }: Props) {
           <Quiet label="Calories" value={`${totals.kcal.toFixed(0)} of ${targets.kcal}`} pct={pct(totals.kcal, targets.kcal)} over={totals.kcal > targets.kcal} />
           <Quiet label="Protein" value={`${totals.protein.toFixed(0)} of ${targets.proteinG} g`} pct={pct(totals.protein, targets.proteinG)} over={false} />
           <Quiet label="Fibre" value={`${totals.fiber.toFixed(0)} of ${targets.fiberG} g`} pct={pct(totals.fiber, targets.fiberG)} over={false} />
-          <li className="quiet-row"><span>Bread units</span><span /><span className="num">{totals.xe.toFixed(1)} <em>1 BU = 12 g</em></span></li>
+          {showBreadUnits && <li className="quiet-row"><span>Bread units</span><span /><span className="num">{totals.xe.toFixed(1)} <em>1 BU = 12 g</em></span></li>}
         </ul>
       </section>
 
@@ -121,7 +141,10 @@ export default function DiaryPage({ targets, diary, onChange, onAsk }: Props) {
       {dayEntries.length === 0 && (
         <div className="empty">
           <p style={{ margin: '0 0 10px' }}>Nothing logged for {isToday ? 'today' : 'this day'} yet.</p>
-          {onAsk && isToday && <button className="primary" onClick={onAsk}>Ask about a meal</button>}
+          <div className="row" style={{ justifyContent: 'center' }}>
+            {onAsk && isToday && <button className="primary" onClick={onAsk}>Ask about a meal</button>}
+            {sourceMeals.length > 0 && <button className="ghost" onClick={() => copyFrom(sourceMeals)}>Copy {sourceName}</button>}
+          </div>
         </div>
       )}
 
@@ -171,8 +194,22 @@ export default function DiaryPage({ targets, diary, onChange, onAsk }: Props) {
       <section className="card">
         <h2>Add a food</h2>
 
-        {recent.length > 0 && (
+        {sourceMeals.length > 0 && (
           <div className="recent">
+            <span className="label">Copy from {sourceName}</span>
+            <div className="chips">
+              {sourceMeals.map((m) => (
+                <button key={m} className="chip-toggle" onClick={() => copyFrom([m])}>
+                  {MEAL_LABELS[m]} <em>{sourceEntries.filter((e) => e.meal === m).length} {sourceEntries.filter((e) => e.meal === m).length === 1 ? 'food' : 'foods'}</em>
+                </button>
+              ))}
+              {sourceMeals.length > 1 && <button className="chip-toggle" onClick={() => copyFrom(sourceMeals)}>Whole day</button>}
+            </div>
+          </div>
+        )}
+
+        {recent.length > 0 && (
+          <div className="recent" style={{ marginTop: sourceMeals.length > 0 ? 16 : 0 }}>
             <span className="label">Again, to {MEAL_LABELS[meal].toLowerCase()}</span>
             <div className="chips">
               {recent.map((e) => (

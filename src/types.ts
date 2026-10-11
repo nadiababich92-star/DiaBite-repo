@@ -138,6 +138,8 @@ export interface Profile {
   pattern: Pattern
   /** Inches and pounds on screen; the stored values stay metric. */
   units: 'imperial' | 'metric'
+  /** Show bread units (1 BU = 12 g of carbohydrate) beside grams. An opt-in display setting, off by default (PRD B8). */
+  showBreadUnits: boolean
   /** The disclaimer was acknowledged and onboarding finished (PRD A4). */
   onboarded: boolean
 }

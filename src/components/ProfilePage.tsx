@@ -136,6 +136,10 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
 
       <section className="card">
         <h2>Your daily targets</h2>
+        <label className="check-row">
+          <input type="checkbox" checked={profile.showBreadUnits} onChange={(e) => set('showBreadUnits', e.target.checked)} />
+          <span>Also show bread units <em className="muted">(1 BU = 12 g of carbohydrate)</em></span>
+        </label>
         <div className="stats">
           <div className="stat">
             <div className="label">Calories</div>
@@ -145,7 +149,7 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
           <div className="stat">
             <div className="label">Carbohydrate</div>
             <div className="value">{targets.carbsG} g</div>
-            <div className="sub">≈ {(targets.carbsG / 12).toFixed(1)} BU</div>
+            <div className="sub">{profile.showBreadUnits ? `≈ ${(targets.carbsG / 12).toFixed(1)} BU` : 'grams a day'}</div>
           </div>
           <div className="stat">
             <div className="label">Protein</div>

@@ -181,7 +181,7 @@ export default function App() {
         <AskPage profile={profile} targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} onSessionEnded={sessionEnded} />
       )}
       {tab === 'diary' && (
-        <DiaryPage targets={targets} diary={diary} onChange={setDiary} onAsk={() => setTab('ask')} />
+        <DiaryPage targets={targets} diary={diary} onChange={setDiary} onAsk={() => setTab('ask')} showBreadUnits={profile.showBreadUnits} />
       )}
       {tab === 'menu' && (
         <MenuPage

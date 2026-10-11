@@ -335,6 +335,7 @@ export const DEFAULT_PROFILE: Profile = {
   allergens: [],
   pattern: 'none',
   units: 'imperial',
+  showBreadUnits: false,
   onboarded: false,
 }
 
