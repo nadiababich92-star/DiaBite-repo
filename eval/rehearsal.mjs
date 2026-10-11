@@ -100,6 +100,25 @@ for (let i = 0; i < 8; i++) {
 }
 check('W8', 'device A after a reload: sees the meal logged on device B as well as its own', /egg/i.test(at) && /yogurt/i.test(at), at.replace(/\n+/g, ' | ').slice(0, 400))
 
+// ── the menu and the diary, signed in: the week stays, a recipe goes into the diary and to the server ─────
+const tabA = async (name) => { await A.b.ev(`(()=>{[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes(${JSON.stringify(name)}))?.click()})()`); await sleep(900) }
+await tabA('Menu')
+for (let i = 0; i < 40 && !(await A.b.ev(`!!document.querySelector('.menu-meal')`)); i++) await sleep(300)
+const dish1 = await A.b.ev(`document.querySelector('.menu-meal .name')?.innerText ?? ''`)
+await tabA('Diary'); await tabA('Menu'); await sleep(500)
+check('W12', 'signed in, the week stays the week across tabs, and the recipes are loaded', dish1 !== '' && dish1 === await A.b.ev(`document.querySelector('.menu-meal .name')?.innerText ?? ''`), dish1)
+const before = (await rows('diary_entries')).length
+await A.b.ev(`(()=>{[...document.querySelectorAll('button')].find(x=>x.innerText.trim()==='Add to today')?.click()})()`); await sleep(5000)
+const after = (await rows('diary_entries')).length
+check('W13', '"Add to today" reaches the account', after > before, `${before} -> ${after}`)
+await tabA('Diary')
+check('W14', 'bread units are off until switched on', !/Bread units/.test(await A.text()), '')
+await tabA('You')
+await A.b.ev(`(()=>{const c=[...document.querySelectorAll('.check-row input')].find(i=>/bread units/i.test(i.closest('.check-row').innerText)); c?.click()})()`); await sleep(3500)
+await tabA('Diary')
+const profRow = (await rows('profiles'))[0]
+check('W15', 'switching bread units on shows them, and the choice is kept with the profile', /Bread units/.test(await A.text()) && profRow?.data?.showBreadUnits === true, JSON.stringify(profRow?.data?.showBreadUnits))
+
 // ── the account can be removed, and takes everything with it ────────────────
 await A.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('You'))?.click()`); await sleep(800)
 const del = await fetch(`${APP}/account`, { method: 'DELETE', headers: { authorization: `Bearer ${session.access_token}` } })
