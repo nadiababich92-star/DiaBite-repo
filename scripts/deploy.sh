@@ -16,6 +16,18 @@ git diff --quiet || { echo "working tree is dirty — commit first"; exit 1; }
 # The workflow only builds when the image's inputs change, so a commit that
 # touches docs or .gitignore never produces a run. Deploy the image of the
 # most recent commit that did: its contents are what HEAD would produce.
+# A push does not create its build run at once. Without this wait, `gh run list` answers
+# "nothing" for a fresh HEAD, the loop below concludes the image did not change, and the
+# previous commit's image goes live instead (it did, on 11 October: the recipes were
+# in the commit and the old catalogue was in the app).
+if git diff-tree --no-commit-id --name-only -r HEAD | grep -qE '^(Dockerfile|\.dockerignore|package(-lock)?\.json|server/|agent/|src/|data/foods-usda/foods_usda\\.json|data/recipes-db/(ingredients|recipes_db)\\.json|data/recipes-db/embeddings\\.|index\.html|vite\.config\.ts|tsconfig\.json)'; then
+  for _ in $(seq 1 18); do
+    gh run list --repo "$REPO" --workflow build-engine --commit "$(git rev-parse HEAD)" --limit 1 \
+      --json status -q '.[0].status' 2>/dev/null | grep -q . && break
+    echo "HEAD changes the image but its build has not started; waiting…"; sleep 10
+  done
+fi
+
 SHA=""
 for candidate in $(git log -20 --format=%H); do
   if gh run list --repo "$REPO" --workflow build-engine --commit "$candidate" --limit 1 \
