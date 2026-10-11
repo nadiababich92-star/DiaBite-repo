@@ -8,7 +8,12 @@
 import type { Nutrients } from '../src/types'
 import type { Level } from '../src/lib/glycemic'
 
-export type FoodKind = 'ingredient' | 'recipe' | 'branded'
+/**
+ * `branded`: a packaged product (USDA Branded Foods). `unrated`: an everyday food USDA gives
+ * nutrients for but to which no glycemic index has been assigned (pizza, ready-to-eat cereal,
+ * candy). Both are costed for carbohydrate, fibre and energy and never for a load.
+ */
+export type FoodKind = 'ingredient' | 'recipe' | 'branded' | 'unrated'
 
 export interface FoodSummary {
   id: string
@@ -85,7 +90,7 @@ export interface MealItemResult extends Nutrients {
   availableCarbs: number
   gi: number | null
   /**
-   * Null for a branded product: no glycemic index is published for packaged food,
+   * Null for a branded or unrated food: no glycemic index exists in our data for it,
    * so no load is computed and none is estimated. `loadAvailable` says so in words
    * a program can read; a 0 here would be a claim.
    */

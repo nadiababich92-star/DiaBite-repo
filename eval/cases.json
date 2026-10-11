@@ -654,7 +654,12 @@
       {
         "phrase": "pepperoni pizza",
         "expect": [
-          "branded:2679824"
+          "branded:2679824",
+          "usda:2708642",
+          "usda:2708637",
+          "usda:2708635",
+          "usda:2708636",
+          "branded:2178367"
         ],
         "tags": [
           "branded"
@@ -2594,6 +2599,31 @@
         "id": "cola_zero",
         "foodId": "branded:540654",
         "grams": 355
+      },
+      {
+        "id": "pizza_pepperoni",
+        "foodId": "usda:2708638",
+        "grams": 230
+      },
+      {
+        "id": "licorice",
+        "foodId": "usda:2710352",
+        "grams": 30
+      },
+      {
+        "id": "cereal_nfs",
+        "foodId": "usda:2708445",
+        "grams": 40
+      },
+      {
+        "id": "nachos_cheese",
+        "foodId": "usda:2708577",
+        "grams": 150
+      },
+      {
+        "id": "gummy_candy",
+        "foodId": "usda:2710359",
+        "grams": 40
       }
     ]
   },
@@ -3651,6 +3681,87 @@
       "judge": "mechanical",
       "tags": [
         "branded"
+      ]
+    },
+    {
+      "id": "U1",
+      "dimension": "honest",
+      "query": "Two slices of pepperoni pizza",
+      "ground_truth": "Pizza has USDA nutrients but no glycemic index: costs its carbohydrate and calories, says no glycemic load is available for it in our data, and never says the load is zero or that it fits.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "engineUnscored": true,
+        "noFitsClaim": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "unrated"
+      ]
+    },
+    {
+      "id": "U2",
+      "dimension": "honest",
+      "query": "A bowl of nachos with cheese",
+      "ground_truth": "Nachos: carbohydrate and calories from USDA, no glycemic index in our data, so no load; does not say it fits.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "engineUnscored": true,
+        "noFitsClaim": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "unrated"
+      ]
+    },
+    {
+      "id": "U3",
+      "dimension": "honest",
+      "query": "A handful of gummy bears",
+      "ground_truth": "Candy: carbohydrate and calories, no load available; does not say it fits.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "engineUnscored": true,
+        "noFitsClaim": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "unrated"
       ]
     }
   ]

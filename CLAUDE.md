@@ -65,13 +65,16 @@ The shell does not have Node on its PATH by default: prefix with
    name.** It comes back `unknown` and the agent says so. Partial meals are
    costed without it and labelled partial, and may never be called "fits".
 4. **A record with no glycemic index and real carbohydrate stays out of the
-   catalogue**, with one exception that is its own kind: `kind: 'branded'`
-   (USDA Branded Foods, chosen by `scripts/build-branded.py`). Those are costed
-   for carbohydrate, fibre and calories from the label and **never for a
-   glycemic load** (`gl: null`, `loadAvailable: false`), and a meal containing
-   one is partial, so it is never "fits". The load helper answers 0 for a
-   missing GI — true of cheese, false of pizza — which is why nothing else may
-   hold carbohydrate without a GI. `npm run eval` fails if anything else does.
+   catalogue**, with two exceptions that are their own kinds. `kind: 'branded'`
+   (USDA Branded Foods, chosen by `scripts/build-branded.py`) and
+   `kind: 'unrated'` (a USDA survey food, "foods as eaten", that nobody has
+   assigned a GI to: pizza, ready-to-eat cereal, candy; added 11 October by the
+   owner's decision). Both are costed for carbohydrate, fibre and calories from
+   the data and **never for a glycemic load** (`gl: null`, `loadAvailable: false`),
+   and a meal containing one is partial, so it is never "fits". The load helper
+   answers 0 for a missing GI — true of cheese, false of pizza, and two slices of
+   pepperoni pizza once went live with a load of zero — which is why nothing else
+   may hold carbohydrate without a GI. `npm run eval` fails if anything else does.
 5. **Curated records win a tie against the coverage layer**, in resolution
    and in swaps.
 6. **Dosing, red flags, fasting and referral are caught by rules before any

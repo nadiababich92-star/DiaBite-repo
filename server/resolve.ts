@@ -56,7 +56,7 @@ const GENERIC_FIRST_WORD = new Set(['chip', 'cheese', 'cereal', 'bar', 'cookie',
  * cornbread (no GI) over cornbread from a mix (GI 60), and why "miso" left our
  * own measured paste for a USDA row with no GI at all.
  */
-const NO_GI_PENALTY = 0.16
+const NO_GI_PENALTY = 0.24
 // A word the record's name never mentions is a difference the score should
 // feel. "frozen yogurt" is not yogurt and "mac and cheese" is not cheddar,
 // however close the embeddings sit.
@@ -191,7 +191,7 @@ function lexicalScore(phrase: string, name: string): number {
 
 function kindPrior(phrase: string, kind: string): number {
   const n = tokens(phrase).length
-  if (n <= 2 && kind === 'ingredient') return KIND_PRIOR
+  if (n <= 2 && (kind === 'ingredient' || kind === 'unrated')) return KIND_PRIOR
   if (n >= 4 && kind === 'recipe') return KIND_PRIOR
   return 0
 }
@@ -373,7 +373,7 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
   const vectors = await embed(clean)
 
   return Promise.all(clean.map(async (phrase, i) => {
-    const hits = await store.search(vectors[i], Math.max(topK * 3, 15))
+    const hits = await store.search(vectors[i], Math.max(topK * 6, 45))
     // An exact everyday name belongs in the running whatever the vectors said.
     const named = aliasesOf().get(norm(phrase))
     if (named && !hits.some((h) => h.id === named)) hits.unshift({ id: named, score: ALIAS_SCORE })

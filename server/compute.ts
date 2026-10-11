@@ -20,14 +20,15 @@ const r1 = (x: number) => Math.round(x * 10) / 10
 
 export function computeItem(input: MealItemInput): MealItemResult {
   const rec = getRecord(input.foodId)
-  if (rec.kind === 'branded') {
-    // Label data: carbohydrate, fibre and energy are real, the glycemic load is
-    // not available and is not estimated (the promise, and PLAN's option three).
+  if (rec.kind === 'branded' || rec.kind === 'unrated') {
+    // Carbohydrate, fibre and energy are real; the glycemic load is not available
+    // and is not estimated (the promise, and PLAN's option three). A branded product
+    // gets them from its label, an unrated food from USDA's survey table.
     const grams = input.grams ?? rec.defaultPortion
     const p = rec.per100!
     const k = grams / 100
     return {
-      foodId: rec.id, name: rec.name, kind: 'branded', grams,
+      foodId: rec.id, name: rec.name, kind: rec.kind, grams,
       kcal: r1(p.kcal * k), carbs: r1(p.carbs * k), fiber: r1(p.fiber * k), protein: r1(p.protein * k), fat: r1(p.fat * k),
       availableCarbs: r1(Math.max(0, p.carbs - p.fiber) * k), gi: null, gl: null, glLevel: null, loadAvailable: false,
     }
@@ -57,7 +58,7 @@ export function computeItem(input: MealItemInput): MealItemResult {
 }
 
 export function totalsOf(items: MealItemResult[]): MealTotals {
-  // A null load (a branded item) adds nothing: the total is the scored part, and
+  // A null load (a branded or unrated item) adds nothing: the total is the scored part, and
   // afterMeal.partial.unscored says that it is only that.
   const sum = (k: keyof MealItemResult) => r1(items.reduce((s, it) => s + ((it[k] as number | null) ?? 0), 0))
   const gl = sum('gl')
@@ -116,8 +117,8 @@ export async function findAlternatives(
     const rec = byId.get(id)
     // Dropped before ranking, not after: an allergen is not a tie-breaker.
     if (rec && isAvoided(rec, avoid)) return false
-    // A branded item has no load to compare, so it is never a swap.
-    if (rec?.kind === 'branded') return false
+    // A branded or unrated item has no load to compare, so it is never a swap.
+    if (rec?.kind === 'branded' || rec?.kind === 'unrated') return false
     if (req.sameCategory && anchor) return rec?.category === anchor.category
     return true
   }

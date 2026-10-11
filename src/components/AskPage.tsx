@@ -273,7 +273,7 @@ function ReceiptView({ r }: { r: Receipt }) {
       )}
       <div className="receipt-foot">
         GL = GI × available carbs ÷ 100. Available carbs = total − fibre.
-        {r.unscored && ' No glycemic index is published for packaged products, so none is estimated.'}
+        {r.unscored && ' Where our data has no glycemic index for a food, none is estimated: its carbohydrate, fibre and calories are counted and its load is not.'}
         {r.sources.length > 0 && (
           <ul className="receipt-sources">
             {r.sources.map((s) => (

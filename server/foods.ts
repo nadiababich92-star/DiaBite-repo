@@ -145,9 +145,10 @@ const num = (v: number | string | null): number | null => (v === null ? null : N
  */
 export function carbsWithoutLoad(r: { gi: number | null; per100?: Nutrients; kind?: string }): boolean {
   if (r.gi !== null && r.gi > 0) return false
-  // The one exception, by design: a branded product is *labelled* as carbohydrate
-  // without a load, costed for carbohydrate only, and never for a glycemic load.
-  if (r.kind === 'branded') return false
+  // The two exceptions, by design: a branded product and an unrated food are
+  // *labelled* as carbohydrate without a load, costed for carbohydrate only, and
+  // never for a glycemic load. Nothing else may hold carbohydrate without a GI.
+  if (r.kind === 'branded' || r.kind === 'unrated') return false
   return !!r.per100 && Math.max(0, r.per100.carbs - (r.per100.fiber ?? 0)) >= 5
 }
 
@@ -254,6 +255,8 @@ const USDA_ALIASES: Record<string, string[]> = {
   'usda:2706375': ['chili con carne', 'beef chili'],                     // Chili with meat and beans
   'usda:2708352': ['egg noodles', 'noodles'],                             // Noodles, cooked
   'usda:2705949': ['fried chicken'],                                      // Chicken, NS as to part, fried, coated, skin eaten
+  'usda:2709552': ['potato pancake', 'potato pancakes', 'latke', 'latkes', 'potato latkes'], // Potato pancake (no GI: carbohydrate only)
+  'usda:2710359': ['gummy bears', 'gummy bear', 'gummies', 'gummy candy', 'gummy worms'],      // Candy, gummy (no GI: carbohydrate only)
   'usda:2705848': ['pot roast'],                                          // Beef, pot roast
   'usda:2706979': ['blt', 'blt sandwich', 'bacon lettuce tomato sandwich'], // Bacon, lettuce, tomato sandwich on white
 }
@@ -284,23 +287,25 @@ function usdaRecords(): FoodRecord[] {
     // table uses; level 5 means the build refused to guess, and both reach the
     // user as "I do not have a glycemic index for this".
     const gi = typeof r.gi === 'number' && r.gi > 0 ? r.gi : null
-    // A carbohydrate food with no glycemic index cannot be costed, and the
-    // engine's load helper answers 0 for a missing GI — which is true of
-    // cheese and false of pizza. Deployed for an hour, the layer told someone
-    // that two slices of pepperoni pizza carried a glycemic load of zero.
-    // Until "carbs known, load unknown" is an answer this product can give,
-    // a row we cannot cost does not enter the catalogue: not having the food
-    // is the honest failure, and the one the agent already handles.
+    // A carbohydrate food with no glycemic index cannot be given a load, and the
+    // engine's load helper answers 0 for a missing GI, which is true of cheese
+    // and false of pizza. Deployed for an hour, the layer once told someone that
+    // two slices of pepperoni pizza carried a glycemic load of zero. Such a row
+    // now enters as kind `unrated`: carbohydrate, fibre and energy are costed,
+    // the load is not available and is not estimated (see compute.ts), and a
+    // meal that contains one is partial and never "fits".
     const available = Math.max(0, (r.per100.carbs ?? 0) - (r.per100.fiber ?? 0))
-    if (gi === null && available >= 5) continue
+    const unrated = gi === null && available >= 5
     const name = readableName(r.name)
     out.push({
-      id: `usda:${r.fdc_id}`, kind: 'ingredient', name, gi, giLevel: giLevel(gi),
+      id: `usda:${r.fdc_id}`, kind: unrated ? 'unrated' : 'ingredient', name, gi, giLevel: giLevel(gi),
       aliases: USDA_ALIASES[`usda:${r.fdc_id}`],
       category: 'grains', unit: 'g', defaultPortion: householdPortion(r.portions),
       searchText: `${name}. ${r.name}. ${r.category}.`,
       per100: { kcal: r.per100.kcal, protein: r.per100.protein, fat: r.per100.fat, carbs: r.per100.carbs, fiber: r.per100.fiber },
-      source: `USDA FoodData Central, Survey (FNDDS)${r.gi_basis ? `; glycemic index ${r.gi_basis}` : ''}.`,
+      source: unrated
+        ? 'USDA FoodData Central, Survey (FNDDS): nutrients only. No glycemic index is assigned to this food, so no glycemic load is computed.'
+        : `USDA FoodData Central, Survey (FNDDS)${r.gi_basis ? `; glycemic index ${r.gi_basis}` : ''}.`,
     })
   }
   return out

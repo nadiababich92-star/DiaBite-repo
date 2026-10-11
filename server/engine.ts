@@ -400,7 +400,7 @@ async function main() {
       const remaining = day && !('unknown' in day) ? day.remaining.gl : undefined
       const needsHelp = meal.totals.glLevel === 'high' || (remaining !== undefined && meal.totals.gl > remaining)
       if (body.withAlternatives && needsHelp) {
-        // Only a scored item can be "the heaviest": a branded one has no load to swap on.
+        // Only a scored item can be "the heaviest": a branded or unrated one has no load to swap on.
         const heaviest = meal.items.filter((it) => it.gl !== null).sort((a, b) => (b.gl ?? 0) - (a.gl ?? 0))[0]
         if (heaviest && heaviest.gl !== null) {
           const avoid = body.sessionId ? getSession(body.sessionId)?.avoid : undefined

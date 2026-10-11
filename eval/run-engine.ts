@@ -153,7 +153,27 @@ const brandedMisses: string[] = []
   const all = records.filter((r) => r.kind === 'branded')
   if (all.length < 300 || all.length > 2000) brandedMisses.push(`    ${all.length} branded records, expected 300 to 2,000`)
   if (all.some((r) => r.gi !== null)) brandedMisses.push('    a branded record has a glycemic index')
-  if (records.some((r) => r.kind !== 'branded' && carbsWithoutLoad(r))) brandedMisses.push('    a non-branded record has carbohydrate and no GI')
+  // The second kind that may hold carbohydrate without a GI: an everyday USDA food nobody has assigned one to.
+  const unrated = records.filter((r) => r.kind === 'unrated')
+  if (unrated.length < 500 || unrated.length > 1200) brandedMisses.push(`    ${unrated.length} unrated records, expected 500 to 1,200`)
+  if (unrated.some((r) => r.gi !== null || !r.id.startsWith('usda:'))) brandedMisses.push('    an unrated record has a glycemic index or is not a USDA survey food')
+  if (records.some((r) => r.kind !== 'branded' && r.kind !== 'unrated' && carbsWithoutLoad(r))) brandedMisses.push('    a record that is neither branded nor unrated has carbohydrate and no GI')
+  // The failure that once went live for an hour: two slices of pepperoni pizza with a glycemic load of zero.
+  {
+    const pizza = unrated.find((r) => /^Pizza with pepperoni, from restaurant/i.test(r.name))
+    if (!pizza) brandedMisses.push('    no pepperoni pizza among the unrated foods')
+    else {
+      const m = computeMeal([{ foodId: pizza.id, grams: 230 }])
+      const it = m.items[0]
+      if (it.loadAvailable !== false || it.gl !== null) brandedMisses.push(`    pizza has a load: ${JSON.stringify(it)}`)
+      const a = afterMealFor({ gl: 54, carbsG: 107, kcal: 1653 }, m.totals, [], [it.name])
+      if (a.fits === true) brandedMisses.push('    a meal of pizza alone was called a fit')
+      if (!a.partial?.unscored?.length) brandedMisses.push('    pizza is not named as unscored')
+      const mixed = computeMeal([{ foodId: pizza.id, grams: 230 }, { foodId: 'ing:apple', grams: 150 }])
+      const d = driverOf(mixed.items)
+      if (!d || !/apple/i.test(d.name)) brandedMisses.push(`    the driver of pizza and an apple is ${d?.name}; an item with no load cannot be the driver`)
+    }
+  }
   for (const c of cases.engine.branded) {
     const rec = records.find((r) => r.id === c.foodId)
     if (!rec) { brandedMisses.push(`    ${c.id}: ${c.foodId} is not in the catalogue`); continue }
