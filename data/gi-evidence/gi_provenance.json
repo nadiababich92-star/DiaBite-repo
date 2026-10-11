@@ -2514,5 +2514,383 @@
   "examples": [
    "31 — Whey protein, consumed with 19.4 g lactose in water (Sweden 2004)"
   ]
+ },
+ {
+  "key": "white_rice",
+  "name": "White rice, long-grain, cooked",
+  "current": 77,
+  "recommended": 77,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 11,
+   "median": 77,
+   "min": 56.0,
+   "max": 96.0
+  },
+  "deviation": {
+   "n": 21,
+   "median": 70,
+   "min": 17.0,
+   "max": 114.0
+  },
+  "sydney": {
+   "n": 46,
+   "median": 72,
+   "min": 17.0,
+   "max": 114.0
+  },
+  "delta": 0,
+  "examples": [
+   "56 — White rice (Satou Co. Ltd, Japan) with roasted ground soybean (Mitake Food Ind.  (Japan 2003)",
+   "64 — White rice, Carnaroli, regular (Scotti, Italy) (Italy 2009)",
+   "70 — White rice, Ponni, cooked in rice cooker for 33 min (India 2012*)",
+   "72 — White rice, Sona Masuri variety, cooked in rice cooker for 35 min (India 2012*)",
+   "77 — White rice, Ponni, refined, harvested 2014, pressure-cooked for 30 min White ric (India 2014)"
+  ]
+ },
+ {
+  "key": "potato_boiled",
+  "name": "Potato, boiled, peeled",
+  "current": 66,
+  "recommended": 66,
+  "basis": "ISO+deviation",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 66,
+   "min": 66.0,
+   "max": 66.0
+  },
+  "deviation": {
+   "n": 4,
+   "median": 67,
+   "min": 55.0,
+   "max": 87.0
+  },
+  "sydney": {
+   "n": 3,
+   "median": 56,
+   "min": 55.0,
+   "max": 70.0
+  },
+  "delta": 0,
+  "examples": [
+   "66 — Potato, NS, boiled (China 2005)"
+  ]
+ },
+ {
+  "key": "potato_baked",
+  "name": "Potato, baked, flesh (russet)",
+  "current": 85,
+  "recommended": 85,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 5,
+   "median": 85,
+   "min": 57.0,
+   "max": 111.0
+  },
+  "sydney": {
+   "n": 5,
+   "median": 85,
+   "min": 57.0,
+   "max": 111.0
+  },
+  "delta": 0,
+  "examples": [
+   "57 — Russet potatoes, baked without fat (Canada 1985)",
+   "80 — Russet potatoes, baked without fat, 45-60 min (USA 1981)",
+   "85 — Russet potatoes, cut into quarters, baked in foil for 1 h at 230oC, peeled (USA 2012)",
+   "94 — Russet potatoes, baked without fat (USA 1980)",
+   "111 — Russet potatoes, baked without fat (USA 1977)"
+  ]
+ },
+ {
+  "key": "french_fries_baked",
+  "name": "Oven fries, frozen shoestring, baked",
+  "current": 64,
+  "recommended": 64,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 2,
+   "median": 64,
+   "min": 64.0,
+   "max": 65.0
+  },
+  "deviation": null,
+  "sydney": {
+   "n": 2,
+   "median": 64,
+   "min": 64.0,
+   "max": 65.0
+  },
+  "delta": 0,
+  "examples": [
+   "64 — French Fries French Fries, baked 15 min (OreIda Golden Fries, H.J. Heinz Co, Pit (USA 2005)",
+   "65 — French Fries, cooked in oven for 20 min from frozen (McCain Superfries, McCains, (Australia 2010)"
+  ]
+ },
+ {
+  "key": "white_bread",
+  "name": "White bread",
+  "current": 72,
+  "recommended": 72,
+  "basis": "ISO",
+  "pref_western": true,
+  "iso": {
+   "n": 26,
+   "median": 72,
+   "min": 50.0,
+   "max": 100.0
+  },
+  "deviation": {
+   "n": 16,
+   "median": 68,
+   "min": 54.0,
+   "max": 89.0
+  },
+  "sydney": {
+   "n": 44,
+   "median": 70,
+   "min": 50.0,
+   "max": 100.0
+  },
+  "delta": 0,
+  "examples": [
+   "50 — White bread, toasted (Hovis, UK) (UK 2005)",
+   "59 — White bread (UK 2006)",
+   "59 — White bread with 2.5 g Filtered Molasses Concentrate added per 100 g (6.04 g FMC (Australia 2014*)",
+   "60 — White bread (Giant Eagle King Size Enriched bread, Pittsburgh, PA, USA)11 (USA 2011*)",
+   "62 — White bread (Pepperidge Farm Original White Bread, USA) 11 (USA 2016*)"
+  ]
+ },
+ {
+  "key": "hamburger_bun",
+  "name": "Hamburger bun, white",
+  "current": 62,
+  "recommended": 62,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 1,
+   "median": 62,
+   "min": 62.0,
+   "max": 62.0
+  },
+  "sydney": {
+   "n": 1,
+   "median": 62,
+   "min": 62.0,
+   "max": 62.0
+  },
+  "delta": 0,
+  "examples": [
+   "62 — Hamburger bun (Loblaw's, Toronto, Canada) (Canada 1984- 1992)"
+  ]
+ },
+ {
+  "key": "flour_tortilla",
+  "name": "Flour tortilla, 8-inch",
+  "current": 34,
+  "recommended": 34,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 2,
+   "median": 34,
+   "min": 30.0,
+   "max": 38.0
+  },
+  "sydney": {
+   "n": 2,
+   "median": 34,
+   "min": 30.0,
+   "max": 38.0
+  },
+  "delta": 0,
+  "examples": [
+   "30 — Wheat tortilla (Mexico 1999)",
+   "38 — Wheat tortilla, made from wheat white flour (Mexico 2000)"
+  ]
+ },
+ {
+  "key": "white_pasta",
+  "name": "White pasta, cooked al dente",
+  "current": 49,
+  "recommended": 49,
+  "basis": "ISO",
+  "pref_western": true,
+  "iso": {
+   "n": 5,
+   "median": 49,
+   "min": 44.0,
+   "max": 56.0
+  },
+  "deviation": {
+   "n": 25,
+   "median": 43,
+   "min": 29.0,
+   "max": 62.0
+  },
+  "sydney": {
+   "n": 31,
+   "median": 45,
+   "min": 29.0,
+   "max": 64.0
+  },
+  "delta": 0,
+  "examples": [
+   "44 — Spaghetti, white, boiled 15 min in salted water (Unico, Concord, ON, Canada) (Canada 1999)",
+   "48 — Spaghetti, white (Unico, Canada) (Canada 2001)",
+   "49 — Spaghetti, white (Vetta, Greens Foods, Glendenning, Australia), boiled for 12 mi (Australia 1996)",
+   "50 — Penne pasta, white (SanRemo Penne, San Remo Macaroni Co. Pty Ltd, SA), tested by (Australia 2014)",
+   "56 — Spaghetti pasta, dried (Budget, Safeway Traders Ltd, New Zealand) 13 White spagh (New Zealand 2011*)"
+  ]
+ },
+ {
+  "key": "egg_noodles",
+  "name": "Egg noodles, cooked",
+  "current": 60,
+  "recommended": 60,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 1,
+   "median": 60,
+   "min": 60.0,
+   "max": 60.0
+  },
+  "sydney": {
+   "n": 1,
+   "median": 60,
+   "min": 60.0,
+   "max": 60.0
+  },
+  "delta": 0,
+  "examples": [
+   "60 — Noodles, wheat (Malaysia 2011)"
+  ]
+ },
+ {
+  "key": "grits",
+  "name": "Grits, cooked with water",
+  "current": 68,
+  "recommended": 68,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 68,
+   "min": 68.0,
+   "max": 68.0
+  },
+  "deviation": null,
+  "sydney": {
+   "n": 1,
+   "median": 68,
+   "min": 68.0,
+   "max": 68.0
+  },
+  "delta": 0,
+  "examples": [
+   "68 — Cornmeal porridge (China 2005)"
+  ]
+ },
+ {
+  "key": "bagel",
+  "name": "Bagel, plain",
+  "current": 75,
+  "recommended": 75,
+  "basis": "deviation",
+  "pref_western": false,
+  "iso": null,
+  "deviation": {
+   "n": 2,
+   "median": 75,
+   "min": 73.0,
+   "max": 77.0
+  },
+  "sydney": {
+   "n": 3,
+   "median": 73,
+   "min": 61.0,
+   "max": 77.0
+  },
+  "delta": 0,
+  "examples": [
+   "73 — Bagel, white, frozen (Lender's Bakery, Montreal, Canada) (Canada 1984- 1992)",
+   "77 — Bagel (South Korea 2018)"
+  ]
+ },
+ {
+  "key": "tortilla_chips",
+  "name": "Tortilla chips, plain",
+  "current": 58,
+  "recommended": 58,
+  "basis": "ISO+deviation",
+  "pref_western": false,
+  "iso": {
+   "n": 1,
+   "median": 42,
+   "min": 42.0,
+   "max": 42.0
+  },
+  "deviation": {
+   "n": 1,
+   "median": 75,
+   "min": 75.0,
+   "max": 75.0
+  },
+  "sydney": {
+   "n": 3,
+   "median": 72,
+   "min": 42.0,
+   "max": 75.0
+  },
+  "delta": 0,
+  "examples": [
+   "42 — Corn chips, plain, salted (Doritos™ original, Smith's Snack Food Co., Australia) (Australia 1998)"
+  ]
+ },
+ {
+  "key": "sugar_white",
+  "name": "White sugar",
+  "current": 63,
+  "recommended": 63,
+  "basis": "ISO",
+  "pref_western": false,
+  "iso": {
+   "n": 10,
+   "median": 63,
+   "min": 59.0,
+   "max": 91.0
+  },
+  "deviation": {
+   "n": 25,
+   "median": 68,
+   "min": 36.0,
+   "max": 163.0
+  },
+  "sydney": {
+   "n": 37,
+   "median": 66,
+   "min": 36.0,
+   "max": 163.0
+  },
+  "delta": 0,
+  "examples": [
+   "59 — Sucrose Sucrose (Australia 2007)",
+   "60 — Sucrose, cane sugar (Australia 2016)",
+   "60 — Sucrose (LoGiCane) (Horizon Science, Australia)13 (Australia 2014*)",
+   "61 — Sucrose (Australia 2007)",
+   "62 — Sucrose (LoGiCane) (Horizon Science, Australia)13 (Australia 2014*)"
+  ]
  }
 ]

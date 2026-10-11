@@ -6,7 +6,7 @@
       {
         "phrase": "white rice",
         "expect": [
-          "seed:rice-white"
+          "ing:white_rice"
         ],
         "tags": [
           "everyday"
@@ -89,7 +89,7 @@
       {
         "phrase": "white bread",
         "expect": [
-          "seed:bread-white"
+          "ing:white_bread"
         ],
         "tags": [
           "everyday"
@@ -98,7 +98,7 @@
       {
         "phrase": "bagel",
         "expect": [
-          "seed:bread-white"
+          "ing:bagel"
         ],
         "tags": [
           "everyday"
@@ -681,7 +681,7 @@
       {
         "phrase": "grits",
         "expect": [
-          "usda:2708363"
+          "ing:grits"
         ],
         "tags": [
           "coverage"
@@ -700,7 +700,7 @@
       {
         "phrase": "tortilla chips",
         "expect": [
-          "usda:2708202"
+          "ing:tortilla_chips"
         ],
         "tags": [
           "coverage"
@@ -1049,7 +1049,7 @@
       {
         "phrase": "grits",
         "expect": [
-          "usda:2708363"
+          "ing:grits"
         ],
         "tags": [
           "everyday"
@@ -1103,7 +1103,7 @@
       {
         "phrase": "egg noodles",
         "expect": [
-          "usda:2708352"
+          "ing:egg_noodles"
         ],
         "tags": [
           "coverage-study"
@@ -1194,6 +1194,105 @@
         "phrase": "grilled salmon",
         "expect": [
           "usda:2706287"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "shrimp and grits",
+        "expect": [
+          "rec:DB-1116"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "jambalaya",
+        "expect": [
+          "rec:DB-1157"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "chili mac",
+        "expect": [
+          "rec:DB-1154"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "chicken alfredo",
+        "expect": [
+          "rec:DB-1150"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "patty melt",
+        "expect": [
+          "rec:DB-1134"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "chicken fried rice",
+        "expect": [
+          "rec:DB-1155"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "fish and chips",
+        "expect": [
+          "rec:DB-1166"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "twice baked potato",
+        "expect": [
+          "rec:DB-1183"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "pot roast",
+        "expect": [
+          "usda:2705848"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "blt",
+        "expect": [
+          "usda:2706979"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "white rice",
+        "expect": [
+          "ing:white_rice"
         ],
         "tags": [
           "new-recipes"

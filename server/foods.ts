@@ -254,6 +254,19 @@ const USDA_ALIASES: Record<string, string[]> = {
   'usda:2706375': ['chili con carne', 'beef chili'],                     // Chili with meat and beans
   'usda:2708352': ['egg noodles', 'noodles'],                             // Noodles, cooked
   'usda:2705949': ['fried chicken'],                                      // Chicken, NS as to part, fried, coated, skin eaten
+  'usda:2705848': ['pot roast'],                                          // Beef, pot roast
+  'usda:2706979': ['blt', 'blt sandwich', 'bacon lettuce tomato sandwich'], // Bacon, lettuce, tomato sandwich on white
+}
+
+/**
+ * Everyday names for recipes whose own name is longer than the phrase people
+ * use. A recipe's search text carries its cuisine, category and eight
+ * ingredients, which dilutes a three-word phrase: "fish and chips" never
+ * reached "Fish and Chips (Oven-Baked)". Keyed by recipe name, not id, so the
+ * alias survives a rebuild that renumbers the library.
+ */
+const RECIPE_ALIASES: Record<string, string[]> = {
+  'Fish and Chips (Oven-Baked)': ['fish and chips', 'fish & chips'],
 }
 
 function usdaRecords(): FoodRecord[] {
@@ -367,7 +380,8 @@ export function loadFoods() {
     records.push({
       id: `rec:${r.id}`, kind: 'recipe', name: r.name, gi, giLevel: giLevel(gi),
       category: r.category, cuisine: r.cuisine, unit: 'serving', defaultPortion: 1,
-      searchText: `${r.name}. ${r.cuisine} ${r.category}. ${names.slice(0, 8).join(', ')}. ${r.diet_tags}`,
+      searchText: `${r.name}. ${(RECIPE_ALIASES[r.name] ?? []).join(', ')}${RECIPE_ALIASES[r.name] ? '. ' : ''}${r.cuisine} ${r.category}. ${names.slice(0, 8).join(', ')}. ${r.diet_tags}`,
+      aliases: RECIPE_ALIASES[r.name],
       perServing: {
         kcal: r.kcal, protein: r.protein_g, fat: r.fat_g, carbs: r.carbs_g, fiber: r.fiber_g,
         availableCarbs, gl: r.glycemic_load,

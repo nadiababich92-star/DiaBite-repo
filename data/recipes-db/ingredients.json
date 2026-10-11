@@ -972,7 +972,7 @@
    "carbs": 4,
    "fiber": 0
   },
-  "gi": 27
+  "gi": 36
  },
  {
   "id": "almond_milk",
@@ -998,7 +998,7 @@
    "carbs": 1.2,
    "fiber": 0.4
   },
-  "gi": 30
+  "gi": 36
  },
  {
   "id": "coconut_milk",
@@ -1115,7 +1115,7 @@
    "carbs": 20,
    "fiber": 7.9
   },
-  "gi": 29
+  "gi": 36
  },
  {
   "id": "red_lentils",
@@ -1128,7 +1128,7 @@
    "carbs": 20,
    "fiber": 6
   },
-  "gi": 26
+  "gi": 21
  },
  {
   "id": "chickpeas",
@@ -1141,7 +1141,7 @@
    "carbs": 27,
    "fiber": 7.6
   },
-  "gi": 28
+  "gi": 38
  },
  {
   "id": "black_beans",
@@ -1167,7 +1167,7 @@
    "carbs": 22.8,
    "fiber": 6.4
   },
-  "gi": 24
+  "gi": 34
  },
  {
   "id": "pinto_beans",
@@ -1180,7 +1180,7 @@
    "carbs": 26,
    "fiber": 9
   },
-  "gi": 39
+  "gi": 33
  },
  {
   "id": "white_beans",
@@ -1232,7 +1232,7 @@
    "carbs": 20.8,
    "fiber": 6.5
   },
-  "gi": 33
+  "gi": 50
  },
  {
   "id": "split_peas",
@@ -1245,7 +1245,7 @@
    "carbs": 21,
    "fiber": 8.3
   },
-  "gi": 25
+  "gi": 32
  },
  {
   "id": "refried_beans",
@@ -1271,7 +1271,7 @@
    "carbs": 14,
    "fiber": 6
   },
-  "gi": 25
+  "gi": 15
  },
  {
   "id": "spinach",
@@ -1570,7 +1570,7 @@
    "carbs": 14,
    "fiber": 5.7
   },
-  "gi": 51
+  "gi": 38
  },
  {
   "id": "zucchini",
@@ -1648,7 +1648,7 @@
    "carbs": 8,
    "fiber": 3
   },
-  "gi": 64
+  "gi": 75
  },
  {
   "id": "eggplant",
@@ -1834,7 +1834,7 @@
  },
  {
   "id": "turnip",
-  "name": "Turnip",
+  "name": "Turnip (GI of swede/rutabaga, closest tested)",
   "group": "veg",
   "per100": {
    "kcal": 28,
@@ -1843,7 +1843,7 @@
    "carbs": 6.4,
    "fiber": 1.8
   },
-  "gi": 30
+  "gi": 72
  },
  {
   "id": "radish",
@@ -2120,7 +2120,7 @@
  },
  {
   "id": "sweet_potato",
-  "name": "Sweet potato",
+  "name": "Sweet potato, boiled/simmered",
   "group": "veg",
   "per100": {
    "kcal": 86,
@@ -2129,11 +2129,24 @@
    "carbs": 20,
    "fiber": 3
   },
-  "gi": 61
+  "gi": 46
+ },
+ {
+  "id": "sweet_potato_roasted",
+  "name": "Sweet potato, baked/roasted",
+  "group": "veg",
+  "per100": {
+   "kcal": 86,
+   "protein": 1.6,
+   "fat": 0.1,
+   "carbs": 20,
+   "fiber": 3
+  },
+  "gi": 85
  },
  {
   "id": "new_potato",
-  "name": "New potatoes, boiled & cooled",
+  "name": "New potatoes, boiled",
   "group": "veg",
   "per100": {
    "kcal": 87,
@@ -2142,7 +2155,7 @@
    "carbs": 20,
    "fiber": 1.8
   },
-  "gi": 56
+  "gi": 71
  },
  {
   "id": "olives",
@@ -2415,7 +2428,7 @@
    "carbs": 15,
    "fiber": 3.1
   },
-  "gi": 38
+  "gi": 28
  },
  {
   "id": "orange",
@@ -2454,7 +2467,7 @@
    "carbs": 9.5,
    "fiber": 1.5
   },
-  "gi": 42
+  "gi": 57
  },
  {
   "id": "plum",
@@ -2467,7 +2480,7 @@
    "carbs": 11.4,
    "fiber": 1.4
   },
-  "gi": 40
+  "gi": 32
  },
  {
   "id": "cherries",
@@ -2480,7 +2493,7 @@
    "carbs": 16,
    "fiber": 2.1
   },
-  "gi": 22
+  "gi": 29
  },
  {
   "id": "kiwi",
@@ -2519,7 +2532,7 @@
    "carbs": 15,
    "fiber": 1.6
   },
-  "gi": 51
+  "gi": 42
  },
  {
   "id": "pineapple",
@@ -2532,7 +2545,7 @@
    "carbs": 13,
    "fiber": 1.4
   },
-  "gi": 59
+  "gi": 70
  },
  {
   "id": "pomegranate",
@@ -2584,7 +2597,7 @@
    "carbs": 75,
    "fiber": 6.7
   },
-  "gi": 42
+  "gi": 54
  },
  {
   "id": "coconut_shredded",
@@ -2623,7 +2636,7 @@
    "carbs": 24,
    "fiber": 1.8
   },
-  "gi": 55
+  "gi": 68
  },
  {
   "id": "wild_rice",
@@ -2636,7 +2649,7 @@
    "carbs": 21,
    "fiber": 1.8
   },
-  "gi": 45
+  "gi": 57
  },
  {
   "id": "barley",
@@ -2649,11 +2662,11 @@
    "carbs": 28,
    "fiber": 3.8
   },
-  "gi": 28
+  "gi": 44
  },
  {
   "id": "farro",
-  "name": "Farro, cooked",
+  "name": "Farro (pearled spelt), cooked",
   "group": "grain",
   "per100": {
    "kcal": 130,
@@ -2662,7 +2675,7 @@
    "carbs": 26,
    "fiber": 3.5
   },
-  "gi": 40
+  "gi": 63
  },
  {
   "id": "bulgur",
@@ -2688,7 +2701,7 @@
    "carbs": 20,
    "fiber": 2.7
   },
-  "gi": 45
+  "gi": 51
  },
  {
   "id": "rolled_oats",
@@ -2701,7 +2714,7 @@
    "carbs": 68,
    "fiber": 10
   },
-  "gi": 55
+  "gi": 57
  },
  {
   "id": "steel_cut_oats",
@@ -2753,7 +2766,7 @@
    "carbs": 26.5,
    "fiber": 3.9
   },
-  "gi": 42
+  "gi": 54
  },
  {
   "id": "chickpea_pasta",
@@ -2796,7 +2809,7 @@
  },
  {
   "id": "whole_grain_bread",
-  "name": "Whole grain bread (100% whole wheat)",
+  "name": "Whole wheat bread (100% whole wheat)",
   "group": "grain",
   "per100": {
    "kcal": 250,
@@ -2805,7 +2818,7 @@
    "carbs": 43,
    "fiber": 6.5
   },
-  "gi": 51
+  "gi": 71
  },
  {
   "id": "ezekiel_bread",
@@ -2818,7 +2831,7 @@
    "carbs": 44,
    "fiber": 9
   },
-  "gi": 36
+  "gi": 62
  },
  {
   "id": "rye_bread",
@@ -2883,7 +2896,176 @@
    "carbs": 45,
    "fiber": 7
   },
-  "gi": 50
+  "gi": 45
+ },
+ {
+  "id": "white_rice",
+  "name": "White rice, long-grain, cooked",
+  "group": "grain",
+  "per100": {
+   "kcal": 129,
+   "protein": 2.67,
+   "fat": 0.28,
+   "carbs": 28,
+   "fiber": 0.4
+  },
+  "gi": 77
+ },
+ {
+  "id": "potato_boiled",
+  "name": "Potato, boiled, peeled",
+  "group": "veg",
+  "per100": {
+   "kcal": 93,
+   "protein": 1.95,
+   "fat": 0.1,
+   "carbs": 21.5,
+   "fiber": 1.5
+  },
+  "gi": 66
+ },
+ {
+  "id": "potato_baked",
+  "name": "Potato, baked, flesh (russet)",
+  "group": "veg",
+  "per100": {
+   "kcal": 93,
+   "protein": 1.95,
+   "fat": 0.1,
+   "carbs": 21.5,
+   "fiber": 1.5
+  },
+  "gi": 85
+ },
+ {
+  "id": "french_fries_baked",
+  "name": "Oven fries, frozen shoestring, baked",
+  "group": "veg",
+  "per100": {
+   "kcal": 158,
+   "protein": 2.75,
+   "fat": 5.48,
+   "carbs": 25.6,
+   "fiber": 2.0
+  },
+  "gi": 64
+ },
+ {
+  "id": "white_bread",
+  "name": "White bread",
+  "group": "grain",
+  "per100": {
+   "kcal": 267,
+   "protein": 9.43,
+   "fat": 3.59,
+   "carbs": 49.2,
+   "fiber": 2.3
+  },
+  "gi": 72
+ },
+ {
+  "id": "hamburger_bun",
+  "name": "Hamburger bun, white",
+  "group": "grain",
+  "per100": {
+   "kcal": 267,
+   "protein": 9.43,
+   "fat": 3.59,
+   "carbs": 49.2,
+   "fiber": 2.3
+  },
+  "gi": 62
+ },
+ {
+  "id": "flour_tortilla",
+  "name": "Flour tortilla, 8-inch",
+  "group": "grain",
+  "per100": {
+   "kcal": 306,
+   "protein": 8.2,
+   "fat": 7.99,
+   "carbs": 49.4,
+   "fiber": 3.5
+  },
+  "gi": 34
+ },
+ {
+  "id": "white_pasta",
+  "name": "White pasta, cooked al dente",
+  "group": "grain",
+  "per100": {
+   "kcal": 157,
+   "protein": 5.76,
+   "fat": 0.92,
+   "carbs": 30.7,
+   "fiber": 1.8
+  },
+  "gi": 49
+ },
+ {
+  "id": "egg_noodles",
+  "name": "Egg noodles, cooked",
+  "group": "grain",
+  "per100": {
+   "kcal": 137,
+   "protein": 4.51,
+   "fat": 2.06,
+   "carbs": 25,
+   "fiber": 1.2
+  },
+  "gi": 60
+ },
+ {
+  "id": "grits",
+  "name": "Grits, cooked with water",
+  "group": "grain",
+  "per100": {
+   "kcal": 58,
+   "protein": 1.2,
+   "fat": 0.28,
+   "carbs": 12.4,
+   "fiber": 0.7
+  },
+  "gi": 68
+ },
+ {
+  "id": "bagel",
+  "name": "Bagel, plain",
+  "group": "grain",
+  "per100": {
+   "kcal": 264,
+   "protein": 10.56,
+   "fat": 1.32,
+   "carbs": 52.4,
+   "fiber": 1.6
+  },
+  "gi": 75
+ },
+ {
+  "id": "tortilla_chips",
+  "name": "Tortilla chips, plain",
+  "group": "grain",
+  "per100": {
+   "kcal": 472,
+   "protein": 7.1,
+   "fat": 20.7,
+   "carbs": 67.8,
+   "fiber": 5.4
+  },
+  "gi": 58
+ },
+ {
+  "id": "sugar_white",
+  "name": "White sugar",
+  "group": "pantry",
+  "per100": {
+   "kcal": 401,
+   "protein": 0,
+   "fat": 0.32,
+   "carbs": 99.6,
+   "fiber": 0
+  },
+  "gi": 63
  },
  {
   "id": "whole_grain_crackers",
@@ -2909,7 +3091,7 @@
    "carbs": 78,
    "fiber": 14.5
   },
-  "gi": 55
+  "gi": 70
  },
  {
   "id": "almond_flour",
@@ -2948,7 +3130,7 @@
    "carbs": 88,
    "fiber": 3.4
   },
-  "gi": 85
+  "gi": 65
  },
  {
   "id": "psyllium",
@@ -3013,7 +3195,7 @@
    "carbs": 28,
    "fiber": 10.6
   },
-  "gi": 15
+  "gi": 28
  },
  {
   "id": "cashews",
@@ -3026,7 +3208,7 @@
    "carbs": 30,
    "fiber": 3.3
   },
-  "gi": 22
+  "gi": 27
  },
  {
   "id": "peanuts",
@@ -3780,7 +3962,7 @@
    "carbs": 82,
    "fiber": 0.2
   },
-  "gi": 58
+  "gi": 54
  },
  {
   "id": "maple_syrup",

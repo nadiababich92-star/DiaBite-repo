@@ -2408,6 +2408,201 @@ GI_SOURCE = {
    "45 — English Muffin, Whole Grain Multigrain, President's Choice® Blue Menu™ (Loblaw B (Canada 2007)"
   ]
  },
+ "white_rice": {
+  "gi": 77,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov",
+  "checked": "2026-09-26",
+  "gi_source": "2021 International Tables, Suppl. Table 1 (ISO 26642:2010-compliant studies)",
+  "evidence": "median of 11 tested foods, range 56-96",
+  "confidence": "high",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233",
+  "measured_median": 77,
+  "candidate_from_evidence": 77,
+  "examples": [
+   "56 — White rice (Satou Co. Ltd, Japan) with roasted ground soybean (Mitake Food Ind.  (Japan 2003)",
+   "64 — White rice, Carnaroli, regular (Scotti, Italy) (Italy 2009)",
+   "70 — White rice, Ponni, cooked in rice cooker for 33 min (India 2012*)"
+  ]
+ },
+ "potato_boiled": {
+  "gi": 66,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov",
+  "checked": "2026-09-26",
+  "gi_source": "2021 International Tables, Suppl. Tables 1+2 (incl. studies with method deviations)",
+  "evidence": "median of 5 tested foods, range 55-87",
+  "confidence": "medium",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233",
+  "measured_median": 66,
+  "candidate_from_evidence": 66,
+  "examples": [
+   "66 — Potato, NS, boiled (China 2005)"
+  ]
+ },
+ "potato_baked": {
+  "gi": 85,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov",
+  "checked": "2026-09-26",
+  "gi_source": "2021 International Tables, Suppl. Tables 1+2 (incl. studies with method deviations)",
+  "evidence": "median of 5 tested foods, range 57-111",
+  "confidence": "medium",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233",
+  "measured_median": 85,
+  "candidate_from_evidence": 85,
+  "examples": [
+   "57 — Russet potatoes, baked without fat (Canada 1985)",
+   "80 — Russet potatoes, baked without fat, 45-60 min (USA 1981)",
+   "85 — Russet potatoes, cut into quarters, baked in foil for 1 h at 230oC, peeled (USA 2012)"
+  ]
+ },
+ "french_fries_baked": {
+  "gi": 64,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov",
+  "checked": "2026-09-26",
+  "gi_source": "2021 International Tables, Suppl. Table 1 (ISO 26642:2010-compliant studies)",
+  "evidence": "median of 2 tested foods, range 64-65",
+  "confidence": "high",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233",
+  "measured_median": 64,
+  "candidate_from_evidence": 64,
+  "examples": [
+   "64 — French Fries French Fries, baked 15 min (OreIda Golden Fries, H.J. Heinz Co, Pit (USA 2005)",
+   "65 — French Fries, cooked in oven for 20 min from frozen (McCain Superfries, McCains, (Australia 2010)"
+  ]
+ },
+ "white_bread": {
+  "gi": 72,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov",
+  "checked": "2026-09-26",
+  "gi_source": "2021 International Tables, Suppl. Table 1 (ISO 26642:2010-compliant studies)",
+  "evidence": "median of 26 tested foods, range 50-100",
+  "confidence": "high",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233",
+  "measured_median": 72,
+  "candidate_from_evidence": 72,
+  "examples": [
+   "50 — White bread, toasted (Hovis, UK) (UK 2005)",
+   "59 — White bread (UK 2006)",
+   "59 — White bread with 2.5 g Filtered Molasses Concentrate added per 100 g (6.04 g FMC (Australia 2014*)"
+  ]
+ },
+ "hamburger_bun": {
+  "gi": 62,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov",
+  "checked": "2026-09-26",
+  "gi_source": "2021 International Tables, Suppl. Tables 1+2 (incl. studies with method deviations)",
+  "evidence": "median of 1 tested foods, range 62-62",
+  "confidence": "medium",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233",
+  "measured_median": 62,
+  "candidate_from_evidence": 62,
+  "examples": [
+   "62 — Hamburger bun (Loblaw's, Toronto, Canada) (Canada 1984- 1992)"
+  ]
+ },
+ "flour_tortilla": {
+  "gi": 34,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov",
+  "checked": "2026-09-26",
+  "gi_source": "2021 International Tables, Suppl. Tables 1+2 (incl. studies with method deviations)",
+  "evidence": "median of 2 tested foods, range 30-38",
+  "confidence": "medium",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233",
+  "measured_median": 34,
+  "candidate_from_evidence": 34,
+  "examples": [
+   "30 — Wheat tortilla (Mexico 1999)",
+   "38 — Wheat tortilla, made from wheat white flour (Mexico 2000)"
+  ]
+ },
+ "white_pasta": {
+  "gi": 49,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov",
+  "checked": "2026-09-26",
+  "gi_source": "2021 International Tables, Suppl. Table 1 (ISO 26642:2010-compliant studies)",
+  "evidence": "median of 5 tested foods, range 44-56",
+  "confidence": "high",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233",
+  "measured_median": 49,
+  "candidate_from_evidence": 49,
+  "examples": [
+   "44 — Spaghetti, white, boiled 15 min in salted water (Unico, Concord, ON, Canada) (Canada 1999)",
+   "48 — Spaghetti, white (Unico, Canada) (Canada 2001)",
+   "49 — Spaghetti, white (Vetta, Greens Foods, Glendenning, Australia), boiled for 12 mi (Australia 1996)"
+  ]
+ },
+ "egg_noodles": {
+  "gi": 60,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov",
+  "checked": "2026-09-26",
+  "gi_source": "2021 International Tables, Suppl. Tables 1+2 (incl. studies with method deviations)",
+  "evidence": "median of 1 tested foods, range 60-60",
+  "confidence": "medium",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233",
+  "measured_median": 60,
+  "candidate_from_evidence": 60,
+  "examples": [
+   "60 — Noodles, wheat (Malaysia 2011)"
+  ]
+ },
+ "grits": {
+  "gi": 68,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov",
+  "checked": "2026-09-26",
+  "gi_source": "2021 International Tables, Suppl. Tables 1+2 (incl. studies with method deviations)",
+  "evidence": "median of 1 tested foods, range 68-68",
+  "confidence": "medium",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233",
+  "measured_median": 68,
+  "candidate_from_evidence": 68,
+  "examples": [
+   "68 — Cornmeal porridge (China 2005)"
+  ]
+ },
+ "bagel": {
+  "gi": 75,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov",
+  "checked": "2026-09-26",
+  "gi_source": "2021 International Tables, Suppl. Tables 1+2 (incl. studies with method deviations)",
+  "evidence": "median of 2 tested foods, range 73-77",
+  "confidence": "medium",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233",
+  "measured_median": 75,
+  "candidate_from_evidence": 75,
+  "examples": [
+   "73 — Bagel, white, frozen (Lender's Bakery, Montreal, Canada) (Canada 1984- 1992)",
+   "77 — Bagel (South Korea 2018)"
+  ]
+ },
+ "tortilla_chips": {
+  "gi": 58,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov",
+  "checked": "2026-09-26",
+  "gi_source": "2021 International Tables, Suppl. Tables 1+2 (incl. studies with method deviations)",
+  "evidence": "median of 2 tested foods, range 42-75",
+  "confidence": "medium",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233",
+  "measured_median": 58,
+  "candidate_from_evidence": 58,
+  "examples": [
+   "42 — Corn chips, plain, salted (Doritos™ original, Smith's Snack Food Co., Australia) (Australia 1998)"
+  ]
+ },
+ "sugar_white": {
+  "gi": 63,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov",
+  "checked": "2026-09-26",
+  "gi_source": "2021 International Tables, Suppl. Table 1 (ISO 26642:2010-compliant studies)",
+  "evidence": "median of 10 tested foods, range 59-91",
+  "confidence": "high",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233",
+  "measured_median": 63,
+  "candidate_from_evidence": 63,
+  "examples": [
+   "59 — Sucrose Sucrose (Australia 2007)",
+   "60 — Sucrose, cane sugar (Australia 2016)",
+   "60 — Sucrose (LoGiCane) (Horizon Science, Australia)13 (Australia 2014*)"
+  ]
+ },
  "whole_grain_crackers": {
   "gi": 55,
   "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov",

@@ -1,0 +1,270 @@
+category             dish                                                 srv  kcal  prot  net C  GI    GL meas%
+Beef, Pork & Lamb    Baked Ziti with Turkey Sausage                         6   405    25   40.5  45  18.2    91
+Beef, Pork & Lamb    Beef Stroganoff over Egg Noodles                       5   369    26   27.8  53  14.7    86
+Beef, Pork & Lamb    Beef Tacos with Corn Tortillas                         4   414    28   27.4  47  12.9    85
+Beef, Pork & Lamb    Beef and Broccoli over White Rice                      4   367    29   29.6  67  19.8    84
+Beef, Pork & Lamb    Chili Cheese Baked Potato                              3   460    30   42.6  69  29.4    90
+Beef, Pork & Lamb    Chili Mac                                              6   375    27   31.6  42  13.3    86
+Beef, Pork & Lamb    Meatloaf Dinner with Mashed Potatoes and Green Beans   6   380    27   33.4  57  19.0    85
+Beef, Pork & Lamb    Red Beans and Rice                                     6   304    18   39.1  52  20.4    89
+Beef, Pork & Lamb    Shepherd's Pie with Mashed Potato Topping              6   332    22   30.6  58  17.7    92
+Beef, Pork & Lamb    Smothered Pork Chops with Rice                         4   416    38   30.4  66  20.1    85
+Beef, Pork & Lamb    Spaghetti with Meat Sauce                              5   416    26   39.9  46  18.3    94
+Breakfast            Bacon, Egg and Cheese Bagel Sandwich                   2   349    21   26.4  72  19.0    96
+Breakfast            Bagel with Cream Cheese and Lox                        2   277    15   28.4  68  19.3    90
+Breakfast            Biscuit-Style Egg Muffin with Sausage                  4   314    20   20.2  67  13.6    93
+Breakfast            Breakfast Hash with Potatoes and Peppers               3   330    17   29.1  56  16.3    83
+Breakfast            Cheese Grits with a Fried Egg                          3   244    12   18.2  66  12.0    96
+Breakfast            Cheesy Potato and Egg Breakfast Skillet                4   341    18   25.2  63  15.9    95
+Breakfast            Cinnamon Oatmeal with Peanut Butter                    2   288    12   32.4  44  14.2    94
+Breakfast            Diner Home Fries with Eggs                             3   240     9   26.5  61  16.2    90
+Breakfast            Egg and Cheese Breakfast Quesadilla                    2   311    15   20.8  32   6.7    88
+Breakfast            Egg in a Hole                                          2   215    10   19.3  70  13.5    97
+Breakfast            French Toast with Cinnamon and Berries                 4   274    12   29.0  64  18.6    86
+Breakfast            Greek Yogurt with Walnuts and Honey Drizzle            2   201    17   10.3  25   2.6    90
+Breakfast            Ham and Cheese Western Omelet                          2   405    33    5.0   9   0.5     0
+Breakfast            Hash Brown-Style Potato Cakes                          4   161     4   21.1  63  13.3    95
+Breakfast            Peanut Butter and Banana Toast                         2   241     8   31.2  61  19.0    93
+Breakfast            Shrimp and Grits                                       4   279    29   17.3  60  10.4    84
+Breakfast            Turkey Bacon, Egg and Tomato Breakfast Wrap            2   324    19   20.7  31   6.4    89
+Dessert              Apple Crisp with Oat Topping                           6   205     3   24.4  45  11.0    97
+Dessert              Banana Oat Cookies                                    10   110     3   14.6  54   7.9    97
+Dessert              Chocolate Pudding Cups                                 4   135     9   12.8  39   5.0    85
+Dessert              Creamy Rice Pudding                                    5   162     6   25.7  65  16.7    99
+Dessert              Strawberry Shortcake-Style Parfait                     4   120     9   13.2  40   5.3    99
+Drinks & Smoothies   Banana Peanut Butter Smoothie                          2   254    14   23.7  37   8.8    91
+Drinks & Smoothies   Blueberry Oat Smoothie                                 2   223    13   27.6  43  11.9    99
+Drinks & Smoothies   Peanut Butter Hot Cocoa                                2   176    11   13.5  25   3.4    80
+Drinks & Smoothies   Sugar-Free Lemonade                                    4     7     0    2.0  20   0.4     0
+Poultry              Baked Chicken Thighs with Roasted Potatoes             4   437    39   34.2  60  20.5    88
+Poultry              Chicken Alfredo with Broccoli                          4   527    38   39.4  45  17.7    88
+Poultry              Chicken Enchiladas                                     5   410    30   31.6  45  14.2    88
+Poultry              Chicken Fried Rice                                     4   373    26   37.9  72  27.3    97
+Poultry              Chicken Pot Pie Skillet                                5   262    27   19.7  51  10.0    90
+Poultry              Chicken and Noodles                                    5   262    26   25.4  54  13.7    91
+Poultry              Chicken and Rice Casserole                             6   312    27   23.0  67  15.4    84
+Poultry              Oven BBQ Chicken Thighs with Slaw and Beans            4   364    44   17.4  28   4.9     3
+Poultry              Sausage and Peppers over White Rice                    4   358    19   31.8  58  18.4    75
+Poultry              Southern Baked Chicken Legs with Rice                  4   389    39   26.9  72  19.3    92
+Poultry              Spaghetti and Turkey Meatballs                         5   388    28   35.5  47  16.7    98
+Poultry              Spanish Rice with Ground Turkey                        5   271    18   26.6  68  18.1    83
+Poultry              Teriyaki-Style Chicken Bowls                           4   339    30   30.4  67  20.4    87
+Salad                Barbecue Chicken Salad                                 3   293    35   14.0  34   4.8    72
+Salad                Chef Salad                                             3   278    24    5.3   8   0.4     0
+Salad                Greek-Style Pasta Salad                                6   227     7   25.9  45  11.7    89
+Salad                Italian Sub Salad                                      3   229    19    6.0   8   0.5     0
+Sandwiches & Wraps   BLT Sandwich with Avocado                              2   374    15   26.3  66  17.4    89
+Sandwiches & Wraps   Cheese Pizza-Style Flatbread                           3   274    14   21.2  32   6.8    93
+Sandwiches & Wraps   Cheeseburger on a Bun                                  4   433    32   30.3  59  17.9    93
+Sandwiches & Wraps   Chicken Burrito Bowl                                   4   435    37   39.4  61  24.0    92
+Sandwiches & Wraps   Chicken Quesadilla                                     3   450    29   28.9  32   9.2    85
+Sandwiches & Wraps   Chicken Salad Sandwich                                 3   326    27   25.0  68  17.0    97
+Sandwiches & Wraps   Classic Grilled Cheese Sandwich                        2   290    12   23.8  71  16.9    98
+Sandwiches & Wraps   Ham and Cheddar Sandwich                               2   300    21   25.8  66  17.0    91
+Sandwiches & Wraps   Hot Dog with Sauerkraut and Mustard                    4   274    19   21.9  54  11.8    86
+Sandwiches & Wraps   Meatball Sub                                           4   449    35   32.4  57  18.5    95
+Sandwiches & Wraps   Patty Melt                                             2   530    37   28.4  62  17.6    83
+Sandwiches & Wraps   Pepperoni-Style Turkey Flatbread                       3   287    17   23.0  30   6.9    86
+Sandwiches & Wraps   Philly Cheesesteak Sandwich                            3   496    38   33.8  54  18.3    83
+Sandwiches & Wraps   Pulled Pork Sandwich with Slaw                         6   385    26   31.0  58  18.0    92
+Sandwiches & Wraps   Steak and Bean Burrito                                 4   524    31   51.1  45  23.0    96
+Sandwiches & Wraps   Tuna Salad Sandwich on White                           2   315    29   24.1  70  16.9    97
+Sandwiches & Wraps   Turkey Burger on a Whole Bun with Avocado              4   400    30   30.2  59  17.8    93
+Sandwiches & Wraps   Turkey Chili Dogs                                      4   396    31   23.7  52  12.3    79
+Sandwiches & Wraps   Turkey and Swiss on White with Mustard                 2   285    21   27.5  62  17.1    85
+Sandwiches & Wraps   Turkey, Bacon and Avocado Club Sandwich                2   374    19   32.4  63  20.4    87
+Seafood              Fish and Chips (Oven-Baked)                            4   438    37   31.2  59  18.4    93
+Seafood              Jambalaya                                              6   331    30   28.9  63  18.2    76
+Seafood              Shrimp Fried Rice                                      4   347    24   37.9  72  27.3    97
+Seafood              Southern Salmon Croquettes with Lemon Dill Yogurt      4   263    27    7.2  52   3.7    79
+Seafood              Tuna Noodle Casserole                                  5   377    26   35.6  53  18.9    94
+Side Dish            Baked Potato with Broccoli and Cheddar                 2   263    12   33.9  77  26.1    92
+Side Dish            Cheesy Scalloped Potatoes (Lightened)                  6   220     8   28.0  60  16.8    94
+Side Dish            Classic Coleslaw                                       6    64     2    3.0  14   0.4    18
+Side Dish            Classic Potato Salad                                   6   201     6   21.4  63  13.5    96
+Side Dish            Creamed Corn                                           5   157     5   18.3  48   8.8    97
+Side Dish            Garlic Bread                                           6   133     4   14.6  70  10.2    96
+Side Dish            Green Bean Casserole (Lightened)                       6   128     7    8.6  17   1.5    19
+Side Dish            Mashed Potatoes with Garlic and Butter                 5   189     4   31.5  64  20.2    99
+Side Dish            Oven-Roasted Potatoes with Rosemary                    4   164     3   25.6  65  16.6    98
+Side Dish            Rice Pilaf with Peas and Carrots                       5   180     4   31.4  72  22.6    97
+Side Dish            Southern Baked Beans                                   8   189    11   18.0  30   5.4     0
+Side Dish            Spanish Rice                                           6   157     3   29.7  73  21.7    93
+Side Dish            Steakhouse Oven Fries                                  4   191     3   28.6  63  18.0    99
+Side Dish            Sweet Potato Casserole with Pecans                     6   190     4   20.9  45   9.4    97
+Side Dish            Twice Baked Potato with Cheddar and Chives             4   303    12   31.2  82  25.6    99
+Snack & Appetizer    Bagel Chips with Hummus                                4   142     5   16.0  63  10.1    94
+Snack & Appetizer    Baked Pepper Jack Quesadilla Wedges                    4   229    10   20.6  33   6.8    89
+Snack & Appetizer    Cheese and Fruit Snack Plate                           2   318    14   18.6  42   7.8    92
+Snack & Appetizer    Chips with Fresh Salsa and Guacamole                   4   184     3   18.2  52   9.5    86
+Snack & Appetizer    Loaded Nachos with Beans and Chicken                   4   446    24   27.2  47  12.8    90
+Snack & Appetizer    Loaded Potato Skins with Bacon and Cheddar             4   271    12   25.2  81  20.4    98
+Snack & Appetizer    Turkey and Cheese Roll-Ups                             4   133    14    2.6   2   0.1     0
+Soup & Stew          Chicken Noodle Soup with Egg Noodles                   5   200    23   16.3  49   8.0    83
+Soup & Stew          Chicken and Rice Soup                                  5   209    22   21.0  65  13.7    87
+Soup & Stew          Corn Chowder                                           5   212    10   29.9  52  15.5    92
+Soup & Stew          Hearty Beef and Potato Stew                            6   289    24   20.4  55  11.2    84
+Soup & Stew          Loaded Baked Potato Soup                               5   298    13   30.2  56  16.9    88
+Soup & Stew          Slow Cooker Beef Chili with Beans                      8   323    28   22.1  32   7.1    66
+Soup & Stew          Tomato Soup with Grilled Cheese Dippers                4   246    10   26.6  51  13.6    57
+Soup & Stew          Vegetable Beef Soup                                    6   200    16   16.5  47   7.7    67
+Soup & Stew          White Bean and Ham Soup                                6   180    14   16.9  28   4.7     8
+Vegetarian & Vegan   Classic Macaroni and Cheese                            6   328    14   31.8  47  14.9    99
+
+111 dishes; median 289 kcal, median GL 14.9
+
+FLAGS
+  - b1_breakfast_sandwich.jsonl:1 French Toast with Cinnamon and Berries: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:1 French Toast with Cinnamon and Berries: glycemic load 18.6 a serving
+  - b1_breakfast_sandwich.jsonl:2 Egg in a Hole: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:3 Bagel with Cream Cheese and Lox: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:3 Bagel with Cream Cheese and Lox: glycemic load 19.3 a serving
+  - b1_breakfast_sandwich.jsonl:4 Bacon, Egg and Cheese Bagel Sandwich: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:4 Bacon, Egg and Cheese Bagel Sandwich: glycemic load 19.0 a serving
+  - b1_breakfast_sandwich.jsonl:5 Shrimp and Grits: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:6 Cheese Grits with a Fried Egg: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:7 Breakfast Hash with Potatoes and Peppers: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:8 Diner Home Fries with Eggs: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:9 Egg and Cheese Breakfast Quesadilla: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:10 Ham and Cheese Western Omelet: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:11 Cheesy Potato and Egg Breakfast Skillet: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:12 Peanut Butter and Banana Toast: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:12 Peanut Butter and Banana Toast: glycemic load 19.0 a serving
+  - b1_breakfast_sandwich.jsonl:13 Biscuit-Style Egg Muffin with Sausage: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:14 Hash Brown-Style Potato Cakes: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:14 Hash Brown-Style Potato Cakes: only 4 g protein
+  - b1_breakfast_sandwich.jsonl:15 Cinnamon Oatmeal with Peanut Butter: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:16 Greek Yogurt with Walnuts and Honey Drizzle: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:17 Turkey Bacon, Egg and Tomato Breakfast Wrap: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:18 Classic Grilled Cheese Sandwich: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:19 Turkey, Bacon and Avocado Club Sandwich: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:19 Turkey, Bacon and Avocado Club Sandwich: glycemic load 20.4 a serving
+  - b1_breakfast_sandwich.jsonl:20 BLT Sandwich with Avocado: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:21 Cheeseburger on a Bun: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:22 Turkey Burger on a Whole Bun with Avocado: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:23 Patty Melt: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:24 Hot Dog with Sauerkraut and Mustard: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:25 Chicken Salad Sandwich: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:25 Chicken Salad Sandwich: 2 steps
+  - b1_breakfast_sandwich.jsonl:26 Tuna Salad Sandwich on White: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:26 Tuna Salad Sandwich on White: 2 steps
+  - b1_breakfast_sandwich.jsonl:27 Philly Cheesesteak Sandwich: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:27 Philly Cheesesteak Sandwich: glycemic load 18.3 a serving
+  - b1_breakfast_sandwich.jsonl:28 Meatball Sub: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:28 Meatball Sub: glycemic load 18.5 a serving
+  - b1_breakfast_sandwich.jsonl:29 Pulled Pork Sandwich with Slaw: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:30 Chicken Quesadilla: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:31 Steak and Bean Burrito: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:31 Steak and Bean Burrito: glycemic load 23.0 a serving
+  - b1_breakfast_sandwich.jsonl:32 Chicken Burrito Bowl: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:32 Chicken Burrito Bowl: glycemic load 24.0 a serving
+  - b1_breakfast_sandwich.jsonl:33 Turkey and Swiss on White with Mustard: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:33 Turkey and Swiss on White with Mustard: 2 steps
+  - b1_breakfast_sandwich.jsonl:34 Ham and Cheddar Sandwich: the name is already in the database
+  - b1_breakfast_sandwich.jsonl:34 Ham and Cheddar Sandwich: 2 steps
+  - b2_mains.jsonl:1 Classic Macaroni and Cheese: the name is already in the database
+  - b2_mains.jsonl:2 Baked Ziti with Turkey Sausage: the name is already in the database
+  - b2_mains.jsonl:2 Baked Ziti with Turkey Sausage: glycemic load 18.2 a serving
+  - b2_mains.jsonl:3 Spaghetti with Meat Sauce: the name is already in the database
+  - b2_mains.jsonl:3 Spaghetti with Meat Sauce: glycemic load 18.3 a serving
+  - b2_mains.jsonl:4 Spaghetti and Turkey Meatballs: the name is already in the database
+  - b2_mains.jsonl:5 Chicken Alfredo with Broccoli: the name is already in the database
+  - b2_mains.jsonl:6 Tuna Noodle Casserole: the name is already in the database
+  - b2_mains.jsonl:6 Tuna Noodle Casserole: glycemic load 18.9 a serving
+  - b2_mains.jsonl:7 Beef Stroganoff over Egg Noodles: the name is already in the database
+  - b2_mains.jsonl:8 Chicken and Noodles: the name is already in the database
+  - b2_mains.jsonl:9 Chili Mac: the name is already in the database
+  - b2_mains.jsonl:10 Chicken Fried Rice: the name is already in the database
+  - b2_mains.jsonl:10 Chicken Fried Rice: glycemic load 27.3 a serving
+  - b2_mains.jsonl:11 Shrimp Fried Rice: the name is already in the database
+  - b2_mains.jsonl:11 Shrimp Fried Rice: glycemic load 27.3 a serving
+  - b2_mains.jsonl:12 Jambalaya: the name is already in the database
+  - b2_mains.jsonl:12 Jambalaya: glycemic load 18.2 a serving
+  - b2_mains.jsonl:13 Red Beans and Rice: the name is already in the database
+  - b2_mains.jsonl:13 Red Beans and Rice: glycemic load 20.4 a serving
+  - b2_mains.jsonl:14 Chicken and Rice Casserole: the name is already in the database
+  - b2_mains.jsonl:15 Spanish Rice with Ground Turkey: the name is already in the database
+  - b2_mains.jsonl:15 Spanish Rice with Ground Turkey: glycemic load 18.1 a serving
+  - b2_mains.jsonl:16 Chicken Enchiladas: the name is already in the database
+  - b2_mains.jsonl:17 Beef Tacos with Corn Tortillas: the name is already in the database
+  - b2_mains.jsonl:18 Loaded Nachos with Beans and Chicken: the name is already in the database
+  - b2_mains.jsonl:19 Shepherd's Pie with Mashed Potato Topping: the name is already in the database
+  - b2_mains.jsonl:20 Meatloaf Dinner with Mashed Potatoes and Green Beans: the name is already in the database
+  - b2_mains.jsonl:20 Meatloaf Dinner with Mashed Potatoes and Green Beans: glycemic load 19.0 a serving
+  - b2_mains.jsonl:21 Fish and Chips (Oven-Baked): the name is already in the database
+  - b2_mains.jsonl:21 Fish and Chips (Oven-Baked): glycemic load 18.4 a serving
+  - b2_mains.jsonl:22 Southern Salmon Croquettes with Lemon Dill Yogurt: the name is already in the database
+  - b2_mains.jsonl:23 Chicken Pot Pie Skillet: the name is already in the database
+  - b2_mains.jsonl:24 Baked Chicken Thighs with Roasted Potatoes: the name is already in the database
+  - b2_mains.jsonl:24 Baked Chicken Thighs with Roasted Potatoes: glycemic load 20.5 a serving
+  - b2_mains.jsonl:25 Sausage and Peppers over White Rice: the name is already in the database
+  - b2_mains.jsonl:25 Sausage and Peppers over White Rice: glycemic load 18.4 a serving
+  - b2_mains.jsonl:26 Beef and Broccoli over White Rice: the name is already in the database
+  - b2_mains.jsonl:26 Beef and Broccoli over White Rice: glycemic load 19.8 a serving
+  - b2_mains.jsonl:27 Teriyaki-Style Chicken Bowls: the name is already in the database
+  - b2_mains.jsonl:27 Teriyaki-Style Chicken Bowls: glycemic load 20.4 a serving
+  - b2_mains.jsonl:28 Southern Baked Chicken Legs with Rice: the name is already in the database
+  - b2_mains.jsonl:28 Southern Baked Chicken Legs with Rice: glycemic load 19.3 a serving
+  - b3_soup_side_salad.jsonl:1 Loaded Baked Potato Soup: the name is already in the database
+  - b3_soup_side_salad.jsonl:2 Corn Chowder: the name is already in the database
+  - b3_soup_side_salad.jsonl:3 Chicken and Rice Soup: the name is already in the database
+  - b3_soup_side_salad.jsonl:4 Hearty Beef and Potato Stew: the name is already in the database
+  - b3_soup_side_salad.jsonl:5 Chicken Noodle Soup with Egg Noodles: the name is already in the database
+  - b3_soup_side_salad.jsonl:6 Tomato Soup with Grilled Cheese Dippers: the name is already in the database
+  - b3_soup_side_salad.jsonl:6 Tomato Soup with Grilled Cheese Dippers: only 57% of its carbohydrate has a measured GI
+  - b3_soup_side_salad.jsonl:7 Vegetable Beef Soup: the name is already in the database
+  - b3_soup_side_salad.jsonl:7 Vegetable Beef Soup: 2 steps
+  - b3_soup_side_salad.jsonl:8 White Bean and Ham Soup: the name is already in the database
+  - b3_soup_side_salad.jsonl:8 White Bean and Ham Soup: only 8% of its carbohydrate has a measured GI
+  - b3_soup_side_salad.jsonl:9 Mashed Potatoes with Garlic and Butter: the name is already in the database
+  - b3_soup_side_salad.jsonl:9 Mashed Potatoes with Garlic and Butter: glycemic load 20.2 a serving
+  - b3_soup_side_salad.jsonl:10 Twice Baked Potato with Cheddar and Chives: the name is already in the database
+  - b3_soup_side_salad.jsonl:10 Twice Baked Potato with Cheddar and Chives: glycemic load 25.6 a serving
+  - b3_soup_side_salad.jsonl:11 Baked Potato with Broccoli and Cheddar: the name is already in the database
+  - b3_soup_side_salad.jsonl:11 Baked Potato with Broccoli and Cheddar: glycemic load 26.1 a serving
+  - b3_soup_side_salad.jsonl:12 Oven-Roasted Potatoes with Rosemary: the name is already in the database
+  - b3_soup_side_salad.jsonl:13 Classic Potato Salad: the name is already in the database
+  - b3_soup_side_salad.jsonl:14 Steakhouse Oven Fries: the name is already in the database
+  - b3_soup_side_salad.jsonl:15 Garlic Bread: the name is already in the database
+  - b3_soup_side_salad.jsonl:16 Rice Pilaf with Peas and Carrots: the name is already in the database
+  - b3_soup_side_salad.jsonl:16 Rice Pilaf with Peas and Carrots: glycemic load 22.6 a serving
+  - b3_soup_side_salad.jsonl:17 Southern Baked Beans: the name is already in the database
+  - b3_soup_side_salad.jsonl:17 Southern Baked Beans: only 0% of its carbohydrate has a measured GI
+  - b3_soup_side_salad.jsonl:18 Green Bean Casserole (Lightened): the name is already in the database
+  - b3_soup_side_salad.jsonl:19 Creamed Corn: the name is already in the database
+  - b3_soup_side_salad.jsonl:20 Sweet Potato Casserole with Pecans: the name is already in the database
+  - b3_soup_side_salad.jsonl:21 Classic Coleslaw: the name is already in the database
+  - b3_soup_side_salad.jsonl:22 Spanish Rice: the name is already in the database
+  - b3_soup_side_salad.jsonl:22 Spanish Rice: glycemic load 21.7 a serving
+  - b3_soup_side_salad.jsonl:23 Cheesy Scalloped Potatoes (Lightened): the name is already in the database
+  - b3_soup_side_salad.jsonl:24 Italian Sub Salad: the name is already in the database
+  - b3_soup_side_salad.jsonl:25 Chef Salad: the name is already in the database
+  - b3_soup_side_salad.jsonl:26 Greek-Style Pasta Salad: the name is already in the database
+  - b3_soup_side_salad.jsonl:27 Barbecue Chicken Salad: the name is already in the database
+  - b4_snack_dessert_more.jsonl:1 Loaded Potato Skins with Bacon and Cheddar: the name is already in the database
+  - b4_snack_dessert_more.jsonl:1 Loaded Potato Skins with Bacon and Cheddar: glycemic load 20.4 a serving
+  - b4_snack_dessert_more.jsonl:2 Chips with Fresh Salsa and Guacamole: the name is already in the database
+  - b4_snack_dessert_more.jsonl:3 Turkey and Cheese Roll-Ups: the name is already in the database
+  - b4_snack_dessert_more.jsonl:4 Baked Pepper Jack Quesadilla Wedges: the name is already in the database
+  - b4_snack_dessert_more.jsonl:5 Bagel Chips with Hummus: the name is already in the database
+  - b4_snack_dessert_more.jsonl:6 Cheese and Fruit Snack Plate: the name is already in the database
+  - b4_snack_dessert_more.jsonl:7 Smothered Pork Chops with Rice: the name is already in the database
+  - b4_snack_dessert_more.jsonl:7 Smothered Pork Chops with Rice: glycemic load 20.1 a serving
+  - b4_snack_dessert_more.jsonl:8 Oven BBQ Chicken Thighs with Slaw and Beans: the name is already in the database
+  - b4_snack_dessert_more.jsonl:8 Oven BBQ Chicken Thighs with Slaw and Beans: only 3% of its carbohydrate has a measured GI
+  - b4_snack_dessert_more.jsonl:9 Slow Cooker Beef Chili with Beans: the name is already in the database
+  - b4_snack_dessert_more.jsonl:10 Chili Cheese Baked Potato: the name is already in the database
+  - b4_snack_dessert_more.jsonl:10 Chili Cheese Baked Potato: glycemic load 29.4 a serving
+  - b4_snack_dessert_more.jsonl:11 Turkey Chili Dogs: the name is already in the database
+  - b4_snack_dessert_more.jsonl:12 Cheese Pizza-Style Flatbread: the name is already in the database
+  - b4_snack_dessert_more.jsonl:13 Pepperoni-Style Turkey Flatbread: the name is already in the database
+  - b4_snack_dessert_more.jsonl:14 Apple Crisp with Oat Topping: the name is already in the database
+  - b4_snack_dessert_more.jsonl:15 Creamy Rice Pudding: the name is already in the database
+  - b4_snack_dessert_more.jsonl:16 Chocolate Pudding Cups: the name is already in the database
+  - b4_snack_dessert_more.jsonl:17 Banana Oat Cookies: the name is already in the database
+  - b4_snack_dessert_more.jsonl:18 Strawberry Shortcake-Style Parfait: the name is already in the database
+  - b4_snack_dessert_more.jsonl:19 Peanut Butter Hot Cocoa: the name is already in the database
+  - b4_snack_dessert_more.jsonl:20 Sugar-Free Lemonade: the name is already in the database
+  - b4_snack_dessert_more.jsonl:20 Sugar-Free Lemonade: 7 kcal a serving
+  - b4_snack_dessert_more.jsonl:21 Banana Peanut Butter Smoothie: the name is already in the database
+  - b4_snack_dessert_more.jsonl:22 Blueberry Oat Smoothie: the name is already in the database

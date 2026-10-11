@@ -243,6 +243,20 @@ ING = {
 "corn_tortilla":("Corn tortilla",218,5.7,2.9,45,6.3,52,"grain"),
 "whole_wheat_pita":("Whole wheat pita",266,10,2.6,55,7.4,57,"grain"),
 "whole_wheat_english_muffin":("Whole wheat English muffin",220,9,2,45,7,45,"grain"),
+# ── Everyday American staples (added 2026-10-11). Nutrients: USDA FNDDS 2019-2020 / FoundationFoods, no added fat.
+"white_rice":("White rice, long-grain, cooked",129,2.67,0.28,28,0.4,77,"grain"),
+"potato_boiled":("Potato, boiled, peeled",93,1.95,0.1,21.5,1.5,66,"veg"),
+"potato_baked":("Potato, baked, flesh (russet)",93,1.95,0.1,21.5,1.5,85,"veg"),
+"french_fries_baked":("Oven fries, frozen shoestring, baked",158,2.75,5.48,25.6,2.0,64,"veg"),
+"white_bread":("White bread",267,9.43,3.59,49.2,2.3,72,"grain"),
+"hamburger_bun":("Hamburger bun, white",267,9.43,3.59,49.2,2.3,62,"grain"),
+"flour_tortilla":("Flour tortilla, 8-inch",306,8.2,7.99,49.4,3.5,34,"grain"),
+"white_pasta":("White pasta, cooked al dente",157,5.76,0.92,30.7,1.8,49,"grain"),
+"egg_noodles":("Egg noodles, cooked",137,4.51,2.06,25,1.2,60,"grain"),
+"grits":("Grits, cooked with water",58,1.2,0.28,12.4,0.7,68,"grain"),
+"bagel":("Bagel, plain",264,10.56,1.32,52.4,1.6,75,"grain"),
+"tortilla_chips":("Tortilla chips, plain",472,7.1,20.7,67.8,5.4,58,"grain"),
+"sugar_white":("White sugar",401,0,0.32,99.6,0,63,"pantry"),
 "whole_grain_crackers":("Whole grain seed crackers",420,10,14,66,10,55,"grain"),
 "popcorn":("Popcorn, air-popped",387,13,4.5,78,14.5,70,"grain"),
 "almond_flour":("Almond flour",590,21,50,21,12,15,"nut"),
@@ -381,8 +395,8 @@ ING = {
 MEAT = {k for k,v in ING.items() if v[7]=="protein" and k!="pork_rinds"} | {"pork_rinds"}
 FISH = {k for k,v in ING.items() if v[7]=="seafood"} | {"fish_sauce","anchovies"}
 DAIRY = {k for k,v in ING.items() if v[7]=="dairy"} | {"whey_protein"}
-EGG = {"egg","egg_white","mayo"}
-GLUTEN = {"whole_wheat_pasta","whole_grain_bread","rye_bread","whole_wheat_pita","whole_wheat_english_muffin",
+EGG = {"egg","egg_white","mayo","egg_noodles"}
+GLUTEN = {"white_bread","hamburger_bun","flour_tortilla","white_pasta","egg_noodles","bagel","whole_wheat_pasta","whole_grain_bread","rye_bread","whole_wheat_pita","whole_wheat_english_muffin",
           "farro","barley","bulgur","soy_sauce","whole_grain_crackers","low_carb_tortilla","soba","rolled_oats",
           "steel_cut_oats","oat_flour","oat_bran","miso","gochujang"}
 NUTS = {"almonds","walnuts","pecans","pistachios","cashews","macadamia","hazelnuts","pine_nuts","almond_butter",

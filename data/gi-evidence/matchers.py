@@ -129,4 +129,18 @@ M = {
 "balsamic_vinegar": (r"^balsamic vinegar|^vinegar, balsamic", None, None, "product"),
 "low_carb_tortilla": (r"^(tortilla|wrap).{0,40}(low.carb|high fib(re|er))", None, None, "product"),
 "whey_protein": (r"^whey protein$|^whey protein,", r"sport|beverage", None, "product"),
+# ── everyday American staples (2026-10-11) ───────────────────────────────
+"white_rice": (r"^(rice, white|white rice)\b", r"instant|quick|brown|basmati|sushi|parboil|converted|jasmine|glutinous|sticky|fried|pudding|cake|noodle|puff|wild|cross|doongara|low|high amylose|waxy", WEST, "whole"),
+"potato_boiled": (r"^(potato(es)?|white potato(es)?|russet),? .{0,50}boiled", r"sweet|mash|instant|baked|roast|fried|crisp|starch|canned|new|baby|cooled|salad", WEST, "whole"),
+"potato_baked": (r"^(potato(es)?|russet|white potato(es)?),? .{0,50}baked", r"sweet|mash|instant|boiled|fried|crisp|starch|canned|new|baby|stuffed|filled", WEST, "whole"),
+"french_fries_baked": (r"^french fries,? .{0,30}(baked|cooked in oven)", r"microwave", None, "product"),
+"white_bread": (r"^(bread, )?white (wheat )?bread\b|^white bread\b", r"sourdough|fibre|fiber|high|whole|sprouted|gluten|low|barley|oat|seed", WEST, "product"),
+"hamburger_bun": (r"^hamburger bun\b", None, None, "product"),
+"flour_tortilla": (r"^wheat tortilla", r"served|bean|taco", None, "product"),
+"white_pasta": (r"^(spaghetti|pasta|macaroni|penne|fusilli|linguine|fettuccine|rigatoni),? (white|boiled|cooked)|^(spaghetti|macaroni|penne),? ?(boiled|cooked|durum)?\b", r"whole|wholemeal|wholegrain|instant|canned|cheese|sauce|egg|gluten|chickpea|lentil|bean|rice|soy|corn|tomato|meat|vegetable|filled|ravioli|tortellini|fresh|protein|low", WEST, "product"),
+"egg_noodles": (r"^(egg )?noodles?,? (egg|boiled|cooked|wheat|fine)|^egg noodles", r"instant|rice|buckwheat|mung|bean|soba|udon|gluten|low|ramen|served", None, "product"),
+"grits": (r"^cornmeal porridge|^(corn )?grits|^hominy grits", r"instant|cheese|flavou?r", None, "product"),
+"bagel": (r"^bagel", r"whole|rye|multi|seed|oat", WEST, "product"),
+"tortilla_chips": (r"^(corn chips|tortilla chips|corn tortilla chips|taco chips)", r"low", None, "product"),
+"sugar_white": (r"^(sucrose|sugar|table sugar|white sugar|granulated sugar)\b", r"free|cane juice|brown|fruit|beet|sweetened|artificial|reduced", None, "product"),
 }
