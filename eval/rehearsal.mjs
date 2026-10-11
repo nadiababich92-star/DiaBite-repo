@@ -75,7 +75,8 @@ const B = await device(9702, 'B')
 t = await B.text()
 check('W5', 'device B: no onboarding, the ask screen opens at once (the profile came from the server)', /What are you\s+about to eat/i.test(t) && !/What DiaBite keeps/.test(t), t.slice(0, 160))
 await B.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('Diary'))?.click()`); await sleep(1200)
-const dt = await B.text()
+let dt = ''
+for (let i = 0; i < 6; i++) { dt = await B.text(); if (/egg/i.test(dt)) break; await sleep(2000) }
 check('W6', 'device B: the Diary shows the meal logged on device A', /egg/i.test(dt), dt.slice(0, 300).replace(/\n+/g, ' | '))
 await B.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('You'))?.click()`); await sleep(800)
 const pt = await B.text()
@@ -88,9 +89,15 @@ await B.b.send('Input.insertText', { text: 'A cup of plain greek yogurt' })
 await B.click('Check this meal')
 for (let i = 0; i < 90; i++) { await sleep(500); if (!(await B.b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break }
 await sleep(800); console.log('   log:', await B.click('Log it')); await sleep(4000)
-await A.b.send('Page.reload'); await sleep(3500)
-await A.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('Diary'))?.click()`); await sleep(1200)
-const at = await A.text()
+// The write from B has to reach the server and A has to read it: wait for it, up to 20 seconds, so a slow
+// network is not mistaken for a sync that does not work (and a sync that really does not work still fails).
+let at = ''
+for (let i = 0; i < 8; i++) {
+  await A.b.send('Page.reload'); await sleep(3500)
+  await A.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('Diary'))?.click()`); await sleep(1000)
+  at = await A.text()
+  if (/egg/i.test(at) && /yogurt/i.test(at)) break
+}
 check('W8', 'device A after a reload: sees the meal logged on device B as well as its own', /egg/i.test(at) && /yogurt/i.test(at), at.replace(/\n+/g, ' | ').slice(0, 400))
 
 // ── the account can be removed, and takes everything with it ────────────────

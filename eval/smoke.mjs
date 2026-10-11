@@ -47,7 +47,11 @@ const rcBad = await fetch(`${URL_}/meal/recompute`, { method: 'POST', headers: {
 check('M13', 'a portion change with nothing to cost is refused with 400, not an error', rcBad.status === 400, String(rcBad.status))
 const rcOk = await fetch(`${URL_}/meal/recompute`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sessionId: `smoke-${Date.now()}`, items: [{ foodId: 'seed:rice-white', grams: 180 }] }) })
 const rcJson = await rcOk.json().catch(() => ({}))
-check('M14', 'the engine costs a portion with no model: 180 g of white rice carries a load of 36.3', rcOk.status === 200 && rcJson.totals?.gl === 36.3, JSON.stringify([rcOk.status, rcJson.totals?.gl]))
+// With the sign-in wall up a stranger is turned away; without it the engine costs the portion, and no model runs.
+check('M14', health.signIn === true
+  ? 'with sign-in required, a portion change from a stranger is 401'
+  : 'the engine costs a portion with no model: 180 g of white rice carries a load of 36.3',
+  health.signIn === true ? rcOk.status === 401 : rcOk.status === 200 && rcJson.totals?.gl === 36.3, JSON.stringify([rcOk.status, rcJson.totals?.gl]))
 
 // ── the page, as a person ─────────────────────────────────────────────────
 const b = await launch({ port: 9500 + Math.floor(Math.random() * 400), width: 900, height: 1100, dpr: 1 })
