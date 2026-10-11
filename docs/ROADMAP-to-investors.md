@@ -1,9 +1,9 @@
 # DiaBite — the plan to the first investor meeting, with no budget
 
-**Written:** 11 October 2026 · **Status:** Draft for the owner · **Horizon:** 16 weeks, 12 October 2026 to 31 January 2027
+**Written:** 11 October 2026 · **Status:** Draft for the owner · **Horizon:** about 16 weeks of work, counted from 12 October 2026; the end is set by the gates below, not by a calendar date
 **Companions:** `docs/PRD-post-course.md` (the full scope after the course), `docs/COST-post-course.md` (what the paid parts cost), `docs/PLAN.md` (the earlier plan this replaces for the near term), `docs/CLINICAL_REVIEW.md`.
 
-> **Two assumptions to confirm.** (1) The first investor meeting is in **February 2027**; if it is earlier, drop Phase 3's beta to one week, not the sessions. (2) **Nothing is bought until money arrives.** No dietitian, no counsel, no penetration test, no accessibility audit, no contractors, no participant incentives. Every line below is something the owner and the builder can do for free, and each paid item is named once, in the use-of-funds table at the end, so the investor sees it as what the round pays for and not as a hole.
+> **Two ground rules, confirmed by the owner on 11 October.** (1) **There is no investor date yet.** Recruiting and the meeting both start when the product is ready, so the phases below are ordered by **gates**, not by dates: a phase ends when its gate is met. The week counts are the builder's estimate of effort. (2) **Nothing is bought until money arrives.** No dietitian, no counsel, no penetration test, no accessibility audit, no contractors, no participant incentives. Every line below is something the owner and the builder can do for free, and each paid item is named once, in the use-of-funds table at the end, so the investor sees it as what the round pays for and not as a hole.
 
 ---
 
@@ -32,7 +32,7 @@ The product has to survive a stranger. Mostly my work; the owner decides and rev
 | # | Work | Done when | Who |
 |---|---|---|---|
 | 1.1 | **Recipes to 2,000.** 642 left after batch 3: about five batches of ~130, each shown to the owner before it is loaded. After each batch, run the coverage study on the 231 everyday phrases and on the short names of the new dishes: a recipe that borrows a plain food's name, or duplicates an existing dish, makes the engine ask "which one?" | 2,000 recipes live; unknown rate on the 231-phrase set no worse than today (11 holes) | Builder |
-| 1.2 | **Close the holes in the everyday list:** pizza, nachos, latkes, gummies and M&Ms stay unknown for want of a published GI. For each, decide with the owner: leave unknown (honest), or add as carbohydrate-only with the "glycemic load not available" answer | The remaining 11 holes each have a stated decision | Owner decides, builder builds |
+| 1.2 | **Carbohydrate-only answers for foods with no glycemic index (owner's decision, 11 October).** 785 USDA survey foods with real carbohydrate and no assigned GI (pizza, hot-dog and egg sandwiches, ready-to-eat cereal, candy, puddings, sweet drinks) are outside the catalogue today, so the app says "I don't have that". They come in the way packaged foods already do: carbohydrate, fibre and calories are shown and costed, the glycemic load is **not**, the answer says that no glycemic index exists in our data but the carbohydrate information does, and a meal containing one is partial, so it is never "fits". Needs a change to rule 4 in `CLAUDE.md`, the engine, the answer wording and a republish of the agents; specified before it is built | The 785 foods answer with carbohydrate and the explicit label; the evals check the engine's own flags, not the prose | Builder, after the owner approves the spec |
 | 1.3 | **Turn the prose-reading agent checks into tool-result checks** (rule 7). H9, H10, F16, F19 failed on wording, not on the product. Flaky red hides real red | Agent eval is green or red for a reason a person would accept | Builder |
 | 1.4 | **Find the 46-second outlier** in the last agent run (p90 is 6 s; one request took 46 s). A demo is lost by its worst request, not its median | Cause named; a retry or a timeout so no request exceeds 15 s in 100 | Builder |
 | 1.5 | **Look at the Menu and You tabs on a laptop and a phone with eyes**, not tests (memory: never seen after the layout change) | Screenshots at 1366×768 and 390×844 reviewed by the owner | Builder, owner |
@@ -66,7 +66,7 @@ The protocol is written (`docs/USER_SESSIONS.md`). What is missing is people. Th
 | 3.3 | **A free security pass, published.** `npm audit`, OWASP ZAP baseline against the staging address, Mozilla Observatory headers, a Supabase row-level-security test (one account cannot read another's rows), and the existing abuse suite. Findings and fixes go into `docs/security/security-plan.md` as "self-assessed, not independently tested" | Report written; high findings fixed | Builder |
 | 3.4 | **A free accessibility pass.** axe and Lighthouse on every screen, keyboard-only and VoiceOver walk-throughs, 200% zoom. Contrast is already computed | Report; the blockers fixed | Builder |
 | 3.5 | **A written safety case** (2 pages): what the rules gate catches (dosing, red flags, fasting, referral), what the verifier guarantees, the 72 safety phrasings, what is not guarded (gout, gastroparesis) and why the product says so. The physicians who hold the review pack: ask for a short, unpaid, **honest** note on what each did and did not look at. It is not a sign-off and is never called one | Safety case written; notes collected or declined | Builder writes, owner asks |
-| 3.6 | **Close the free legal items.** (a) Write to the University of Sydney glycemic index database (the address is in `data/recipes-db/sydney_gi_db.json`) asking permission to cite their values in the product: `gi_sources.py` uses them as medium-confidence evidence and their terms say not to redistribute without permission. (b) Check the licence of every data source in one table (`docs/data-sources.md`): USDA public domain, the International Tables citation, Supabase, Open Food Facts if used. (c) A plain-language privacy page that says exactly what we store and how to delete it (the delete works), marked as a draft awaiting counsel | One table; the permission request sent; privacy page live | Owner sends, builder drafts |
+| 3.6 | **Close the free legal items.** (a) **Deferred to before commercial use (owner, 11 October):** write to the University of Sydney glycemic index database (the address is in `data/recipes-db/sydney_gi_db.json`) asking permission to cite their values in the product: `gi_sources.py` uses them as medium-confidence evidence and their terms say not to redistribute without permission. Name it on the use-of-funds slide as a known item. (b) Check the licence of every data source in one table (`docs/data-sources.md`): USDA public domain, the International Tables citation, Supabase, Open Food Facts if used. (c) A plain-language privacy page that says exactly what we store and how to delete it (the delete works), marked as a draft awaiting counsel | One table; the Sydney request listed as a launch item; privacy page live | Owner sends, builder drafts |
 | 3.7 | **The real cost per active user** from the beta, replacing the assumed figures in `docs/COST-post-course.md` and `docs/FINANCIAL_PLAN.md` | Numbers from Cost Management and the traces | Builder |
 
 **Gate 3:** two weeks of real use are on record, with the numbers, whether good or bad. A weak retention number honestly reported is more fundable than a missing one.
@@ -115,7 +115,7 @@ From `docs/COST-post-course.md`, ranges are assumptions until quoted:
 
 ## 5. Risks that can end this plan, in order of likelihood
 
-1. **Not enough people say yes.** The most likely failure and the one that costs the most. Start 2.1 in week 1, not week 5. If recruiting stalls by week 6, widen the net before lowering the bar.
+1. **Not enough people say yes.** The most likely failure and the one that costs the most. Recruiting starts when Gate 1 is met, and from then on is the owner's first job. If it stalls for three weeks, widen the net before lowering the bar.
 2. **The service stops for a dull reason** (trial expiry, a paused free database, a key rotating) the week of the demo. 1.7 and 1.8 are first-month work for this reason.
 3. **A strong early recipe count crowds the search.** More recipes can make resolution worse (the earlier plan warned of it). 1.1's coverage check after every batch is the control; it already caught three displacements.
 4. **A beta finding is a safety finding.** A wrong answer for a real person with a real condition outranks everything on this page, and moves the whole schedule back, as the PRD says.
@@ -126,7 +126,11 @@ From `docs/COST-post-course.md`, ranges are assumptions until quoted:
 ## 6. Decisions I need from the owner
 
 1. Is **February** the first investor meeting? (Moves every phase if not.)
-2. **Phase 1.2:** the 11 remaining unknown everyday foods: leave unknown, or carbohydrate-only? (The earlier answer for packaged foods was carbohydrate-only; this extends it to pizza, nachos, gummies.)
-3. **Recruiting:** which communities you already belong to and are willing to post in, by their rules.
-4. **Founders Hub:** are you willing to apply (it needs a company or an idea-stage application, not funding)?
-5. **The Sydney request:** are you willing to send it? (Their terms are the one legal item I found that is not about counsel; it takes ten minutes.)
+**Answered on 11 October:**
+1. *The meeting date:* none yet. Recruiting starts when the product is ready; phases are gate-driven.
+2. *Foods with no glycemic index:* show carbohydrate only and say that the glycemic index is not in our data (phase 1.2).
+3. *Recruiting:* open to communities when the time comes; the owner will choose them and post by their rules.
+4. *Founders Hub:* explained in the chat; the owner has not decided. It is a free Microsoft program that can give Azure credits to a startup with only an idea; the amount at the idea stage is small and the current terms must be checked on Microsoft's page before applying.
+5. *The Sydney request:* **not now.** Sending it makes sense before commercial use. Until then the product is a demonstration, and the request moves from phase 3 to the launch checklist (see 3.6).
+
+**Still open:** the Founders Hub application, and the 1.2 spec.
