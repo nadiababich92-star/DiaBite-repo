@@ -51,7 +51,7 @@ the problem or the central claim:
 1. **Packaged foods entered the catalogue** (9 October): 754 products from USDA
    Branded Foods, costed for carbohydrate, fibre and energy from the label and
    **never for a glycemic load**. A meal containing one is partial and is never
-   called "fits". The catalogue is now 6,918 records. The rule that keeps a
+   called "fits". The catalogue is now 6,917 records. The rule that keeps a
    food with carbohydrate and no glycemic index out of it has one exception,
    and that exception is its own kind of record.
 2. **Accounts were built** (10 October): sign-in by email link or code, the
@@ -1264,7 +1264,7 @@ which exists only to judge the system.
 
 | Set | What it is | How it is built |
 |---|---|---|
-| Food data (6,918 records) | The engine's source of truth | Four kinds: 754 packaged products from USDA Branded Foods (label data, never a glycemic load), and three layers: 351 ingredients and ~85 everyday foods curated by hand, 1,112 recipes composed from them by `data/recipes-db/build.py`, and 4,618 USDA Survey (FNDDS) foods — "foods as eaten" — carrying nutrients, household portions and a glycemic index assigned by the five-level scheme of Aston et al. The curated records win a tie; coverage fills the gaps |
+| Food data (6,917 records) | The engine's source of truth | Four kinds: 754 packaged products from USDA Branded Foods (label data, never a glycemic load), and three layers: 351 ingredients and ~85 everyday foods curated by hand, 1,111 recipes composed from them by `data/recipes-db/build.py`, and 4,618 USDA Survey (FNDDS) foods — "foods as eaten" — carrying nutrients, household portions and a glycemic index assigned by the five-level scheme of Aston et al. The curated records win a tie; coverage fills the gaps |
 | GI cross-check (88 ingredients) | A second opinion on our GI values | Compared against published tables: 51 agree, 24 read lower in our table, 5 higher, 8 have no published match. Reviewed by hand before external use |
 | Engine cases (273) | Resolution, clarify bands, verifier probes | Hand-labelled phrases → the correct record id or `unknown`; deliberately over-samples foods we lack and cuisines where embeddings are weaker |
 | Agent cases (19, HHH) | Helpful / Honest / Harmless behaviour | Written as query + expected behaviour + mechanical checks, in `eval/cases.json` |
@@ -1285,7 +1285,7 @@ stated in the PRD so the number is never quoted without it.
 
 | Purpose | Now | What V1 needs |
 |---|---|---|
-| Food coverage | 6,918 records. On 1 October 13% of the food phrases in the test set resolved to nothing, down from 18% before the coverage layer was loaded; on 10 October 15 of 231 everyday US foods did, on a different set | Branded and restaurant items — Oreos, a KIND bar, a Starbucks frappuccino — which have no published glycemic index at all. See the open decision below |
+| Food coverage | 6,917 records. On 1 October 13% of the food phrases in the test set resolved to nothing, down from 18% before the coverage layer was loaded; on 10 October 15 of 231 everyday US foods did, on a different set | Branded and restaurant items — Oreos, a KIND bar, a Starbucks frappuccino — which have no published glycemic index at all. See the open decision below |
 | Resolution ground truth | 152 labelled phrases (121 resolution, 31 clarification; 114 on 1 October), of which 10 were added the day the coverage layer arrived and 4 record foods we still do not have | 300–500, drawn from what users actually type rather than what we imagined. The five moderated sessions are the mechanism: every phrase a participant types that we cannot resolve becomes a case that week |
 | Agent behaviour | 19 HHH cases (94 agent cases in all) | 40–60, with every safety phrasing the gate has ever missed |
 | GI verification | 88 ingredients cross-checked | All 350, each against its cited source, before anything is shown outside the demo |
@@ -1445,7 +1445,7 @@ loop.
 **Efficacy and limits.** The product computes the glycemic load of a described
 meal against a personal budget, and shows the arithmetic. It does not know the
 user's medication, their glucose response, or what they ate when they did not
-log. Its food coverage reaches 6,918 foods, including packaged
+log. Its food coverage reaches 6,917 foods, including packaged
 products costed for carbohydrate only and never for a glycemic load; a food it
 does not have is named as unknown and the meal is called partial, never "fits".
 On 10 October 15 of 231 everyday US foods still resolved to nothing. It is a

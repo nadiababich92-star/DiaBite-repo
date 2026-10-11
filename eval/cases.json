@@ -1139,7 +1139,7 @@
       {
         "phrase": "cobb salad",
         "expect": [
-          "rec:DB-1083"
+          "rec:DB-1082"
         ],
         "tags": [
           "new-recipes"
@@ -1157,7 +1157,7 @@
       {
         "phrase": "jalapeno poppers",
         "expect": [
-          "rec:DB-1098"
+          "rec:DB-1097"
         ],
         "tags": [
           "new-recipes"
@@ -1184,7 +1184,16 @@
       {
         "phrase": "creamed spinach",
         "expect": [
-          "rec:DB-1075"
+          "rec:DB-1074"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "grilled salmon",
+        "expect": [
+          "usda:2706287"
         ],
         "tags": [
           "new-recipes"

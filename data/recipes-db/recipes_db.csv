@@ -11846,7 +11846,7 @@ Sesame seeds — 6 g (0.2 oz)
 Cucumber — 100 g (3.5 oz)","[{""ingredient_id"": ""ground_beef"", ""name"": ""Ground beef 90% lean"", ""grams"": 500.0, ""note"": """"}, {""ingredient_id"": ""butter_lettuce"", ""name"": ""Butter lettuce"", ""grams"": 160.0, ""note"": """"}, {""ingredient_id"": ""gochujang"", ""name"": ""Gochujang (small amount)"", ""grams"": 20.0, ""note"": """"}, {""ingredient_id"": ""coconut_aminos"", ""name"": ""Coconut aminos"", ""grams"": 30.0, ""note"": """"}, {""ingredient_id"": ""garlic"", ""name"": ""Garlic"", ""grams"": 8.0, ""note"": """"}, {""ingredient_id"": ""ginger"", ""name"": ""Fresh ginger"", ""grams"": 6.0, ""note"": """"}, {""ingredient_id"": ""green_onion"", ""name"": ""Green onions (scallions)"", ""grams"": 30.0, ""note"": """"}, {""ingredient_id"": ""sesame_seeds"", ""name"": ""Sesame seeds"", ""grams"": 6.0, ""note"": """"}, {""ingredient_id"": ""cucumber"", ""name"": ""Cucumber"", ""grams"": 100.0, ""note"": """"}]",261,26.5,13.4,7.5,1.2,6.3,32,low,2.0,low,,"0% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",0,"dairy-free, nut-free, low-carb, high-protein","1. Brown the beef with garlic and ginger.
 2. Stir in gochujang and coconut aminos.
 3. Spoon into lettuce leaves and top with green onion, cucumber and sesame.","[""Brown the beef with garlic and ginger."", ""Stir in gochujang and coconut aminos."", ""Spoon into lettuce leaves and top with green onion, cucumber and sesame.""]"
-DB-1051,Baked Salmon with Dill and Roasted Broccoli,Seafood,American,4,10,18,28,baked-salmon-with-dill-and-roasted-broccoli.jpg,"Baked Salmon with Dill and Roasted Broccoli, healthy food photography, plated, natural light",,"Salmon fillet — 560 g (19.8 oz)
+DB-1051,Sheet-Pan Dill Salmon and Broccoli,Seafood,American,4,10,18,28,sheet-pan-dill-salmon-and-broccoli.jpg,"Sheet-Pan Dill Salmon and Broccoli, healthy food photography, plated, natural light",,"Salmon fillet — 560 g (19.8 oz)
 Broccoli — 400 g (14.1 oz)
 Lemon (with juice & zest) — 60 g (2.1 oz)
 Fresh dill — 5 g (0.2 oz)
@@ -11924,7 +11924,7 @@ Dill pickles — 20 g (0.7 oz)","[{""ingredient_id"": ""crab"", ""name"": ""Crab
 2. Chill 15 minutes.
 3. Pan-fry in oil 4 minutes a side.
 4. Stir the yogurt, lemon and chopped pickle for the sauce.","[""Mix the crab, egg, almond flour, celery, Old Bay and mustard gently and form cakes."", ""Chill 15 minutes."", ""Pan-fry in oil 4 minutes a side."", ""Stir the yogurt, lemon and chopped pickle for the sauce.""]"
-DB-1058,Grilled Salmon Burgers,Seafood,American,4,15,10,25,grilled-salmon-burgers.jpg,"Grilled Salmon Burgers, healthy food photography, plated, natural light",,"Salmon fillet — 500 g (17.6 oz)
+DB-1058,Salmon Patty Lettuce Wraps with Avocado,Seafood,American,4,15,10,25,salmon-patty-lettuce-wraps-with-avocado.jpg,"Salmon Patty Lettuce Wraps with Avocado, healthy food photography, plated, natural light",,"Salmon fillet — 500 g (17.6 oz)
 Egg, large (50 g each) — 50 g (1.8 oz)
 Oat bran, dry — 30 g (1.1 oz)
 Dijon mustard — 10 g (0.4 oz)
@@ -12093,16 +12093,7 @@ Fresh cilantro — 8 g (0.3 oz)
 Extra-virgin olive oil — 15 g (0.5 oz)","[{""ingredient_id"": ""corn"", ""name"": ""Sweet corn kernels"", ""grams"": 150.0, ""note"": """"}, {""ingredient_id"": ""black_beans"", ""name"": ""Black beans, cooked"", ""grams"": 200.0, ""note"": """"}, {""ingredient_id"": ""tomato"", ""name"": ""Tomato"", ""grams"": 150.0, ""note"": """"}, {""ingredient_id"": ""red_onion"", ""name"": ""Red onion"", ""grams"": 50.0, ""note"": """"}, {""ingredient_id"": ""jalapeno"", ""name"": ""Jalapeño"", ""grams"": 10.0, ""note"": """"}, {""ingredient_id"": ""lime_juice"", ""name"": ""Lime juice"", ""grams"": 30.0, ""note"": """"}, {""ingredient_id"": ""cilantro"", ""name"": ""Fresh cilantro"", ""grams"": 8.0, ""note"": """"}, {""ingredient_id"": ""olive_oil"", ""name"": ""Extra-virgin olive oil"", ""grams"": 15.0, ""note"": """"}]",117,5.0,3.7,18.0,4.9,13.0,36,low,4.7,low,,"84% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",84,"vegan, gluten-free, dairy-free, nut-free, low-carb, no-cook","1. Combine the corn, beans, tomato, onion and jalapeno.
 2. Dress with lime juice and oil.
 3. Fold in cilantro and chill briefly.","[""Combine the corn, beans, tomato, onion and jalapeno."", ""Dress with lime juice and oil."", ""Fold in cilantro and chill briefly.""]"
-DB-1074,Garlic Roasted Broccoli with Lemon,Side Dish,American,4,5,20,25,garlic-roasted-broccoli-with-lemon.jpg,"Garlic Roasted Broccoli with Lemon, healthy food photography, plated, natural light",,"Broccoli — 500 g (17.6 oz)
-Garlic — 10 g (0.4 oz)
-Extra-virgin olive oil — 20 g (0.7 oz)
-Lemon (with juice & zest) — 40 g (1.4 oz)
-Parmesan, grated — 20 g (0.7 oz)
-Salt — 2 g (0.1 oz)","[{""ingredient_id"": ""broccoli"", ""name"": ""Broccoli"", ""grams"": 500.0, ""note"": """"}, {""ingredient_id"": ""garlic"", ""name"": ""Garlic"", ""grams"": 10.0, ""note"": """"}, {""ingredient_id"": ""olive_oil"", ""name"": ""Extra-virgin olive oil"", ""grams"": 20.0, ""note"": """"}, {""ingredient_id"": ""lemon"", ""name"": ""Lemon (with juice & zest)"", ""grams"": 40.0, ""note"": """"}, {""ingredient_id"": ""parmesan"", ""name"": ""Parmesan, grated"", ""grams"": 20.0, ""note"": """"}, {""ingredient_id"": ""salt"", ""name"": ""Salt"", ""grams"": 2.0, ""note"": """"}]",115,5.7,7.0,10.2,3.6,6.6,17,low,1.1,low,,"0% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",0,"vegetarian, gluten-free, nut-free, low-carb","1. Heat the oven to 425°F.
-2. Toss the broccoli with oil, garlic and salt.
-3. Roast 18 to 20 minutes.
-4. Finish with lemon and parmesan.","[""Heat the oven to 425°F."", ""Toss the broccoli with oil, garlic and salt."", ""Roast 18 to 20 minutes."", ""Finish with lemon and parmesan.""]"
-DB-1075,Creamed Spinach,Side Dish,American,4,5,12,17,creamed-spinach.jpg,"Creamed Spinach, healthy food photography, plated, natural light",,"Spinach — 500 g (17.6 oz)
+DB-1074,Creamed Spinach,Side Dish,American,4,5,12,17,creamed-spinach.jpg,"Creamed Spinach, healthy food photography, plated, natural light",,"Spinach — 500 g (17.6 oz)
 Cream cheese — 80 g (2.8 oz)
 Garlic — 4 g (0.1 oz)
 Parmesan, grated — 20 g (0.7 oz)
@@ -12111,7 +12102,7 @@ Ground nutmeg — 1 g (0.0 oz)
 Butter — 10 g (0.4 oz)","[{""ingredient_id"": ""spinach"", ""name"": ""Spinach"", ""grams"": 500.0, ""note"": """"}, {""ingredient_id"": ""cream_cheese"", ""name"": ""Cream cheese"", ""grams"": 80.0, ""note"": """"}, {""ingredient_id"": ""garlic"", ""name"": ""Garlic"", ""grams"": 4.0, ""note"": """"}, {""ingredient_id"": ""parmesan"", ""name"": ""Parmesan, grated"", ""grams"": 20.0, ""note"": """"}, {""ingredient_id"": ""milk"", ""name"": ""Milk, 2%"", ""grams"": 60.0, ""note"": """"}, {""ingredient_id"": ""nutmeg"", ""name"": ""Ground nutmeg"", ""grams"": 1.0, ""note"": """"}, {""ingredient_id"": ""butter"", ""name"": ""Butter"", ""grams"": 10.0, ""note"": """"}]",147,7.3,11.2,6.7,2.8,3.8,15,low,0.6,low,"Negligible carbohydrate (<5 g net/serving): GI has little practical meaning, glycemic load is what matters.","19% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",19,"vegetarian, gluten-free, nut-free, low-carb","1. Wilt the spinach with butter and garlic.
 2. Stir in cream cheese and milk until smooth.
 3. Add parmesan and nutmeg.","[""Wilt the spinach with butter and garlic."", ""Stir in cream cheese and milk until smooth."", ""Add parmesan and nutmeg.""]"
-DB-1076,Cheesy Zucchini Boats,Side Dish,American,4,15,25,40,cheesy-zucchini-boats.jpg,"Cheesy Zucchini Boats, healthy food photography, plated, natural light",,"Zucchini — 600 g (21.2 oz)
+DB-1075,Cheesy Zucchini Boats,Side Dish,American,4,15,25,40,cheesy-zucchini-boats.jpg,"Cheesy Zucchini Boats, healthy food photography, plated, natural light",,"Zucchini — 600 g (21.2 oz)
 Ground turkey 93% lean — 200 g (7.1 oz)
 Marinara sauce, no sugar added — 150 g (5.3 oz)
 Mozzarella, part-skim — 80 g (2.8 oz)
@@ -12121,7 +12112,7 @@ Extra-virgin olive oil — 10 g (0.4 oz)","[{""ingredient_id"": ""zucchini"", ""
 2. Brown the turkey with the onion and chopped zucchini flesh.
 3. Stir in marinara and fill the boats.
 4. Top with cheeses and bake at 400°F for 20 minutes.","[""Halve the zucchini and scoop out the centres."", ""Brown the turkey with the onion and chopped zucchini flesh."", ""Stir in marinara and fill the boats."", ""Top with cheeses and bake at 400°F for 20 minutes.""]"
-DB-1077,Stuffed Portobello Mushrooms,Vegetarian & Vegan,American,4,15,20,35,stuffed-portobello-mushrooms.jpg,"Stuffed Portobello Mushrooms, healthy food photography, plated, natural light",,"Portobello mushrooms — 480 g (16.9 oz)
+DB-1076,Stuffed Portobello Mushrooms,Vegetarian & Vegan,American,4,15,20,35,stuffed-portobello-mushrooms.jpg,"Stuffed Portobello Mushrooms, healthy food photography, plated, natural light",,"Portobello mushrooms — 480 g (16.9 oz)
 Spinach — 100 g (3.5 oz)
 Ricotta, part-skim — 120 g (4.2 oz)
 Mozzarella, part-skim — 60 g (2.1 oz)
@@ -12131,7 +12122,7 @@ Extra-virgin olive oil — 15 g (0.5 oz)","[{""ingredient_id"": ""portobello"", 
 2. Mix the wilted spinach, ricotta, garlic and sun-dried tomato.
 3. Fill the caps and top with mozzarella.
 4. Bake 18 to 20 minutes.","[""Heat the oven to 400°F and brush the caps with oil."", ""Mix the wilted spinach, ricotta, garlic and sun-dried tomato."", ""Fill the caps and top with mozzarella."", ""Bake 18 to 20 minutes.""]"
-DB-1078,Vegetarian Black Bean Burgers,Vegetarian & Vegan,American,4,15,15,30,vegetarian-black-bean-burgers.jpg,"Vegetarian Black Bean Burgers, healthy food photography, plated, natural light",,"Black beans, cooked — 400 g (14.1 oz)
+DB-1077,Vegetarian Black Bean Burgers,Vegetarian & Vegan,American,4,15,15,30,vegetarian-black-bean-burgers.jpg,"Vegetarian Black Bean Burgers, healthy food photography, plated, natural light",,"Black beans, cooked — 400 g (14.1 oz)
 Rolled oats, dry — 50 g (1.8 oz)
 Egg, large (50 g each) — 50 g (1.8 oz)
 Yellow onion — 60 g (2.1 oz)
@@ -12143,7 +12134,7 @@ Tomato — 120 g (4.2 oz)
 Avocado — 80 g (2.8 oz)","[{""ingredient_id"": ""black_beans"", ""name"": ""Black beans, cooked"", ""grams"": 400.0, ""note"": """"}, {""ingredient_id"": ""rolled_oats"", ""name"": ""Rolled oats, dry"", ""grams"": 50.0, ""note"": """"}, {""ingredient_id"": ""egg"", ""name"": ""Egg, large (50 g each)"", ""grams"": 50.0, ""note"": """"}, {""ingredient_id"": ""onion"", ""name"": ""Yellow onion"", ""grams"": 60.0, ""note"": """"}, {""ingredient_id"": ""cumin"", ""name"": ""Ground cumin"", ""grams"": 2.0, ""note"": """"}, {""ingredient_id"": ""smoked_paprika"", ""name"": ""Smoked paprika"", ""grams"": 2.0, ""note"": """"}, {""ingredient_id"": ""olive_oil"", ""name"": ""Extra-virgin olive oil"", ""grams"": 15.0, ""note"": """"}, {""ingredient_id"": ""butter_lettuce"", ""name"": ""Butter lettuce"", ""grams"": 100.0, ""note"": """"}, {""ingredient_id"": ""tomato"", ""name"": ""Tomato"", ""grams"": 120.0, ""note"": """"}, {""ingredient_id"": ""avocado"", ""name"": ""Avocado"", ""grams"": 80.0, ""note"": """"}]",280,13.4,9.5,37.6,12.4,25.2,36,low,9.1,low,,"88% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",88,"vegetarian, dairy-free, nut-free, high-fiber","1. Mash the beans with oats, egg, onion and spices and shape four patties.
 2. Pan-fry in oil 5 minutes a side.
 3. Serve in lettuce with tomato and avocado.","[""Mash the beans with oats, egg, onion and spices and shape four patties."", ""Pan-fry in oil 5 minutes a side."", ""Serve in lettuce with tomato and avocado.""]"
-DB-1079,Eggplant Parmesan Stacks,Vegetarian & Vegan,Italian,4,20,35,55,eggplant-parmesan-stacks.jpg,"Eggplant Parmesan Stacks, healthy food photography, plated, natural light",,"Eggplant — 600 g (21.2 oz)
+DB-1078,Eggplant Parmesan Stacks,Vegetarian & Vegan,Italian,4,20,35,55,eggplant-parmesan-stacks.jpg,"Eggplant Parmesan Stacks, healthy food photography, plated, natural light",,"Eggplant — 600 g (21.2 oz)
 Marinara sauce, no sugar added — 300 g (10.6 oz)
 Mozzarella, part-skim — 120 g (4.2 oz)
 Parmesan, grated — 30 g (1.1 oz)
@@ -12154,7 +12145,7 @@ Extra-virgin olive oil — 20 g (0.7 oz)","[{""ingredient_id"": ""eggplant"", ""
 2. Bake on an oiled tray at 425°F until golden, 20 minutes.
 3. Stack with marinara and mozzarella.
 4. Bake 12 minutes more and finish with basil and parmesan.","[""Slice the eggplant and dip in egg, then almond flour."", ""Bake on an oiled tray at 425°F until golden, 20 minutes."", ""Stack with marinara and mozzarella."", ""Bake 12 minutes more and finish with basil and parmesan.""]"
-DB-1080,Cauliflower Mac and Cheese,Vegetarian & Vegan,American,5,10,25,35,cauliflower-mac-and-cheese.jpg,"Cauliflower Mac and Cheese, healthy food photography, plated, natural light",,"Cauliflower — 600 g (21.2 oz)
+DB-1079,Cauliflower Mac and Cheese,Vegetarian & Vegan,American,5,10,25,35,cauliflower-mac-and-cheese.jpg,"Cauliflower Mac and Cheese, healthy food photography, plated, natural light",,"Cauliflower — 600 g (21.2 oz)
 Whole wheat pasta, cooked al dente — 100 g (3.5 oz)
 Cheddar cheese — 150 g (5.3 oz)
 Milk, 2% — 200 g (7.1 oz)
@@ -12165,7 +12156,7 @@ Extra-virgin olive oil — 5 g (0.2 oz)","[{""ingredient_id"": ""cauliflower"", 
 2. Warm the milk, cream cheese, mustard and paprika.
 3. Melt in the cheddar.
 4. Fold in the pasta and cauliflower and bake 10 minutes at 400°F.","[""Boil the pasta and cauliflower florets together until tender; drain."", ""Warm the milk, cream cheese, mustard and paprika."", ""Melt in the cheddar."", ""Fold in the pasta and cauliflower and bake 10 minutes at 400°F.""]"
-DB-1081,Lentil Sloppy Joes,Vegetarian & Vegan,American,5,10,35,45,lentil-sloppy-joes.jpg,"Lentil Sloppy Joes, healthy food photography, plated, natural light",,"Lentils, cooked — 250 g (8.8 oz)
+DB-1080,Lentil Sloppy Joes,Vegetarian & Vegan,American,5,10,35,45,lentil-sloppy-joes.jpg,"Lentil Sloppy Joes, healthy food photography, plated, natural light",,"Lentils, cooked — 250 g (8.8 oz)
 Tomato sauce, canned, no sugar added — 300 g (10.6 oz)
 Yellow onion — 120 g (4.2 oz)
 Bell pepper — 100 g (3.5 oz)
@@ -12178,7 +12169,7 @@ Whole wheat English muffin — 285 g (10.1 oz)","[{""ingredient_id"": ""lentils"
 2. Sauté the onion and pepper and add the sauce, paste, mustard, vinegar and chili.
 3. Combine and simmer 10 minutes.
 4. Spoon over toasted muffins.","[""Simmer the lentils in the broth until tender, 20 minutes."", ""Sauté the onion and pepper and add the sauce, paste, mustard, vinegar and chili."", ""Combine and simmer 10 minutes."", ""Spoon over toasted muffins.""]"
-DB-1082,Chopped Italian-Style Salad with Chickpeas,Salad,American,4,15,0,15,chopped-italian-style-salad-with-chickpeas.jpg,"Chopped Italian-Style Salad with Chickpeas, healthy food photography, plated, natural light",,"Romaine lettuce — 200 g (7.1 oz)
+DB-1081,Chopped Italian-Style Salad with Chickpeas,Salad,American,4,15,0,15,chopped-italian-style-salad-with-chickpeas.jpg,"Chopped Italian-Style Salad with Chickpeas, healthy food photography, plated, natural light",,"Romaine lettuce — 200 g (7.1 oz)
 Chickpeas, cooked — 200 g (7.1 oz)
 Cucumber — 120 g (4.2 oz)
 Cherry tomatoes — 150 g (5.3 oz)
@@ -12190,7 +12181,7 @@ Extra-virgin olive oil — 25 g (0.9 oz)
 Italian seasoning — 2 g (0.1 oz)","[{""ingredient_id"": ""romaine"", ""name"": ""Romaine lettuce"", ""grams"": 200.0, ""note"": """"}, {""ingredient_id"": ""chickpeas"", ""name"": ""Chickpeas, cooked"", ""grams"": 200.0, ""note"": """"}, {""ingredient_id"": ""cucumber"", ""name"": ""Cucumber"", ""grams"": 120.0, ""note"": """"}, {""ingredient_id"": ""cherry_tomato"", ""name"": ""Cherry tomatoes"", ""grams"": 150.0, ""note"": """"}, {""ingredient_id"": ""red_onion"", ""name"": ""Red onion"", ""grams"": 40.0, ""note"": """"}, {""ingredient_id"": ""mozzarella"", ""name"": ""Mozzarella, part-skim"", ""grams"": 60.0, ""note"": """"}, {""ingredient_id"": ""olives"", ""name"": ""Olives (kalamata/green)"", ""grams"": 40.0, ""note"": """"}, {""ingredient_id"": ""red_wine_vinegar"", ""name"": ""Red wine vinegar"", ""grams"": 20.0, ""note"": """"}, {""ingredient_id"": ""olive_oil"", ""name"": ""Extra-virgin olive oil"", ""grams"": 25.0, ""note"": """"}, {""ingredient_id"": ""italian_seasoning"", ""name"": ""Italian seasoning"", ""grams"": 2.0, ""note"": """"}]",213,9.4,11.3,20.0,6.2,13.9,31,low,4.3,low,,"70% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",70,"vegetarian, gluten-free, nut-free, low-carb, no-cook","1. Chop the romaine, cucumber, tomatoes and onion.
 2. Add the chickpeas, mozzarella and olives.
 3. Whisk the vinegar, oil and seasoning and toss through.","[""Chop the romaine, cucumber, tomatoes and onion."", ""Add the chickpeas, mozzarella and olives."", ""Whisk the vinegar, oil and seasoning and toss through.""]"
-DB-1083,Cobb Salad,Salad,American,3,15,10,25,cobb-salad.jpg,"Cobb Salad, healthy food photography, plated, natural light",,"Romaine lettuce — 200 g (7.1 oz)
+DB-1082,Cobb Salad,Salad,American,3,15,10,25,cobb-salad.jpg,"Cobb Salad, healthy food photography, plated, natural light",,"Romaine lettuce — 200 g (7.1 oz)
 Chicken breast, skinless — 300 g (10.6 oz)
 Egg, large (50 g each) — 150 g (5.3 oz)
 Bacon — 30 g (1.1 oz)
@@ -12202,7 +12193,7 @@ Red wine vinegar — 15 g (0.5 oz)
 Dijon mustard — 5 g (0.2 oz)","[{""ingredient_id"": ""romaine"", ""name"": ""Romaine lettuce"", ""grams"": 200.0, ""note"": """"}, {""ingredient_id"": ""chicken_breast"", ""name"": ""Chicken breast, skinless"", ""grams"": 300.0, ""note"": """"}, {""ingredient_id"": ""egg"", ""name"": ""Egg, large (50 g each)"", ""grams"": 150.0, ""note"": """"}, {""ingredient_id"": ""bacon"", ""name"": ""Bacon"", ""grams"": 30.0, ""note"": """"}, {""ingredient_id"": ""avocado"", ""name"": ""Avocado"", ""grams"": 120.0, ""note"": """"}, {""ingredient_id"": ""tomato"", ""name"": ""Tomato"", ""grams"": 150.0, ""note"": """"}, {""ingredient_id"": ""blue_cheese"", ""name"": ""Blue cheese, crumbled"", ""grams"": 40.0, ""note"": """"}, {""ingredient_id"": ""olive_oil"", ""name"": ""Extra-virgin olive oil"", ""grams"": 20.0, ""note"": """"}, {""ingredient_id"": ""red_wine_vinegar"", ""name"": ""Red wine vinegar"", ""grams"": 15.0, ""note"": """"}, {""ingredient_id"": ""dijon"", ""name"": ""Dijon mustard"", ""grams"": 5.0, ""note"": """"}]",438,37.4,28.4,8.4,4.7,3.7,12,low,0.4,low,"Negligible carbohydrate (<5 g net/serving): GI has little practical meaning, glycemic load is what matters.","0% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",0,"gluten-free, nut-free, low-carb, high-protein","1. Grill and slice the chicken; hard-boil and slice the eggs; crisp the bacon.
 2. Arrange the romaine on a platter with rows of each topping.
 3. Whisk the oil, vinegar and mustard and drizzle.","[""Grill and slice the chicken; hard-boil and slice the eggs; crisp the bacon."", ""Arrange the romaine on a platter with rows of each topping."", ""Whisk the oil, vinegar and mustard and drizzle.""]"
-DB-1084,Wedge Salad with Yogurt Blue Cheese Dressing,Salad,American,4,10,0,10,wedge-salad-with-yogurt-blue-cheese-dressing.jpg,"Wedge Salad with Yogurt Blue Cheese Dressing, healthy food photography, plated, natural light",,"Iceberg lettuce — 400 g (14.1 oz)
+DB-1083,Wedge Salad with Yogurt Blue Cheese Dressing,Salad,American,4,10,0,10,wedge-salad-with-yogurt-blue-cheese-dressing.jpg,"Wedge Salad with Yogurt Blue Cheese Dressing, healthy food photography, plated, natural light",,"Iceberg lettuce — 400 g (14.1 oz)
 Greek yogurt, plain 2% — 100 g (3.5 oz)
 Blue cheese, crumbled — 40 g (1.4 oz)
 Cherry tomatoes — 100 g (3.5 oz)
@@ -12211,7 +12202,7 @@ Red onion — 30 g (1.1 oz)
 Lemon juice — 10 g (0.4 oz)","[{""ingredient_id"": ""iceberg"", ""name"": ""Iceberg lettuce"", ""grams"": 400.0, ""note"": """"}, {""ingredient_id"": ""greek_yogurt"", ""name"": ""Greek yogurt, plain 2%"", ""grams"": 100.0, ""note"": """"}, {""ingredient_id"": ""blue_cheese"", ""name"": ""Blue cheese, crumbled"", ""grams"": 40.0, ""note"": """"}, {""ingredient_id"": ""cherry_tomato"", ""name"": ""Cherry tomatoes"", ""grams"": 100.0, ""note"": """"}, {""ingredient_id"": ""turkey_bacon"", ""name"": ""Turkey bacon"", ""grams"": 40.0, ""note"": """"}, {""ingredient_id"": ""red_onion"", ""name"": ""Red onion"", ""grams"": 30.0, ""note"": """"}, {""ingredient_id"": ""lemon_juice"", ""name"": ""Lemon juice"", ""grams"": 10.0, ""note"": """"}]",97,7.6,5.1,6.3,1.6,4.6,13,low,0.6,low,"Negligible carbohydrate (<5 g net/serving): GI has little practical meaning, glycemic load is what matters.","22% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",22,"gluten-free, nut-free, low-carb","1. Cut the iceberg into wedges.
 2. Blend the yogurt, blue cheese and lemon into a dressing.
 3. Top with tomatoes, crisp bacon and onion.","[""Cut the iceberg into wedges."", ""Blend the yogurt, blue cheese and lemon into a dressing."", ""Top with tomatoes, crisp bacon and onion.""]"
-DB-1085,Apple Walnut Chicken Salad,Salad,American,3,15,0,15,apple-walnut-chicken-salad.jpg,"Apple Walnut Chicken Salad, healthy food photography, plated, natural light",,"Rotisserie chicken, skin removed — 300 g (10.6 oz)
+DB-1084,Apple Walnut Chicken Salad,Salad,American,3,15,0,15,apple-walnut-chicken-salad.jpg,"Apple Walnut Chicken Salad, healthy food photography, plated, natural light",,"Rotisserie chicken, skin removed — 300 g (10.6 oz)
 Apple — 120 g (4.2 oz)
 Celery — 60 g (2.1 oz)
 Walnuts — 30 g (1.1 oz)
@@ -12221,7 +12212,7 @@ Mixed salad greens — 100 g (3.5 oz)
 Dijon mustard — 5 g (0.2 oz)","[{""ingredient_id"": ""rotisserie_chicken"", ""name"": ""Rotisserie chicken, skin removed"", ""grams"": 300.0, ""note"": """"}, {""ingredient_id"": ""apple"", ""name"": ""Apple"", ""grams"": 120.0, ""note"": """"}, {""ingredient_id"": ""celery"", ""name"": ""Celery"", ""grams"": 60.0, ""note"": """"}, {""ingredient_id"": ""walnuts"", ""name"": ""Walnuts"", ""grams"": 30.0, ""note"": """"}, {""ingredient_id"": ""greek_yogurt"", ""name"": ""Greek yogurt, plain 2%"", ""grams"": 90.0, ""note"": """"}, {""ingredient_id"": ""lemon_juice"", ""name"": ""Lemon juice"", ""grams"": 10.0, ""note"": """"}, {""ingredient_id"": ""mixed_greens"", ""name"": ""Mixed salad greens"", ""grams"": 100.0, ""note"": """"}, {""ingredient_id"": ""dijon"", ""name"": ""Dijon mustard"", ""grams"": 5.0, ""note"": """"}]",280,28.5,14.4,10.3,2.7,7.6,27,low,2.1,low,,"77% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",77,"gluten-free, low-carb, high-protein, no-cook","1. Shred the chicken and dice the apple and celery.
 2. Mix with yogurt, lemon and mustard.
 3. Fold in the walnuts and serve on the greens.","[""Shred the chicken and dice the apple and celery."", ""Mix with yogurt, lemon and mustard."", ""Fold in the walnuts and serve on the greens.""]"
-DB-1086,Taco Salad with Ground Turkey,Salad,Tex-Mex,4,15,12,27,taco-salad-with-ground-turkey.jpg,"Taco Salad with Ground Turkey, healthy food photography, plated, natural light",,"Ground turkey 93% lean — 450 g (15.9 oz)
+DB-1085,Taco Salad with Ground Turkey,Salad,Tex-Mex,4,15,12,27,taco-salad-with-ground-turkey.jpg,"Taco Salad with Ground Turkey, healthy food photography, plated, natural light",,"Ground turkey 93% lean — 450 g (15.9 oz)
 Taco seasoning, low sodium — 12 g (0.4 oz)
 Romaine lettuce — 250 g (8.8 oz)
 Black beans, cooked — 150 g (5.3 oz)
@@ -12234,7 +12225,7 @@ Extra-virgin olive oil — 10 g (0.4 oz)","[{""ingredient_id"": ""ground_turkey"
 2. Arrange the romaine, beans and tomato in bowls.
 3. Add the turkey, cheddar and avocado.
 4. Top with salsa mixed with yogurt.","[""Brown the turkey in oil with taco seasoning."", ""Arrange the romaine, beans and tomato in bowls."", ""Add the turkey, cheddar and avocado."", ""Top with salsa mixed with yogurt.""]"
-DB-1087,Spinach Salad with Warm Bacon Dressing,Salad,American,3,10,8,18,spinach-salad-with-warm-bacon-dressing.jpg,"Spinach Salad with Warm Bacon Dressing, healthy food photography, plated, natural light",,"Spinach — 200 g (7.1 oz)
+DB-1086,Spinach Salad with Warm Bacon Dressing,Salad,American,3,10,8,18,spinach-salad-with-warm-bacon-dressing.jpg,"Spinach Salad with Warm Bacon Dressing, healthy food photography, plated, natural light",,"Spinach — 200 g (7.1 oz)
 Egg, large (50 g each) — 100 g (3.5 oz)
 Bacon — 40 g (1.4 oz)
 Red onion — 30 g (1.1 oz)
@@ -12245,7 +12236,7 @@ Extra-virgin olive oil — 10 g (0.4 oz)","[{""ingredient_id"": ""spinach"", ""n
 2. Whisk in vinegar, mustard and oil for a warm dressing.
 3. Toss with the spinach, mushrooms and onion.
 4. Top with sliced boiled egg and bacon.","[""Crisp the bacon and keep a spoonful of fat."", ""Whisk in vinegar, mustard and oil for a warm dressing."", ""Toss with the spinach, mushrooms and onion."", ""Top with sliced boiled egg and bacon.""]"
-DB-1088,West Coast Shrimp Louie Salad,Salad,American,3,15,4,19,west-coast-shrimp-louie-salad.jpg,"West Coast Shrimp Louie Salad, healthy food photography, plated, natural light",,"Shrimp, peeled — 300 g (10.6 oz)
+DB-1087,West Coast Shrimp Louie Salad,Salad,American,3,15,4,19,west-coast-shrimp-louie-salad.jpg,"West Coast Shrimp Louie Salad, healthy food photography, plated, natural light",,"Shrimp, peeled — 300 g (10.6 oz)
 Romaine lettuce — 200 g (7.1 oz)
 Avocado — 100 g (3.5 oz)
 Cherry tomatoes — 120 g (4.2 oz)
@@ -12256,7 +12247,7 @@ Lemon juice — 10 g (0.4 oz)","[{""ingredient_id"": ""shrimp"", ""name"": ""Shr
 2. Arrange the romaine, avocado, tomatoes and sliced eggs.
 3. Stir the yogurt, tomato paste and lemon for a pink dressing.
 4. Top with shrimp.","[""Poach the shrimp 3 minutes and cool."", ""Arrange the romaine, avocado, tomatoes and sliced eggs."", ""Stir the yogurt, tomato paste and lemon for a pink dressing."", ""Top with shrimp.""]"
-DB-1089,Southwest Chicken Chopped Salad,Salad,Tex-Mex,4,15,10,25,southwest-chicken-chopped-salad.jpg,"Southwest Chicken Chopped Salad, healthy food photography, plated, natural light",,"Chicken breast, skinless — 450 g (15.9 oz)
+DB-1088,Southwest Chicken Chopped Salad,Salad,Tex-Mex,4,15,10,25,southwest-chicken-chopped-salad.jpg,"Southwest Chicken Chopped Salad, healthy food photography, plated, natural light",,"Chicken breast, skinless — 450 g (15.9 oz)
 Romaine lettuce — 200 g (7.1 oz)
 Sweet corn kernels — 80 g (2.8 oz)
 Black beans, cooked — 120 g (4.2 oz)
@@ -12269,7 +12260,7 @@ Extra-virgin olive oil — 25 g (0.9 oz)
 Fresh cilantro — 6 g (0.2 oz)","[{""ingredient_id"": ""chicken_breast"", ""name"": ""Chicken breast, skinless"", ""grams"": 450.0, ""note"": """"}, {""ingredient_id"": ""romaine"", ""name"": ""Romaine lettuce"", ""grams"": 200.0, ""note"": """"}, {""ingredient_id"": ""corn"", ""name"": ""Sweet corn kernels"", ""grams"": 80.0, ""note"": """"}, {""ingredient_id"": ""black_beans"", ""name"": ""Black beans, cooked"", ""grams"": 120.0, ""note"": """"}, {""ingredient_id"": ""cherry_tomato"", ""name"": ""Cherry tomatoes"", ""grams"": 120.0, ""note"": """"}, {""ingredient_id"": ""avocado"", ""name"": ""Avocado"", ""grams"": 100.0, ""note"": """"}, {""ingredient_id"": ""lime_juice"", ""name"": ""Lime juice"", ""grams"": 25.0, ""note"": """"}, {""ingredient_id"": ""chili_powder"", ""name"": ""Chili powder"", ""grams"": 3.0, ""note"": """"}, {""ingredient_id"": ""cumin"", ""name"": ""Ground cumin"", ""grams"": 2.0, ""note"": """"}, {""ingredient_id"": ""olive_oil"", ""name"": ""Extra-virgin olive oil"", ""grams"": 25.0, ""note"": """"}, {""ingredient_id"": ""cilantro"", ""name"": ""Fresh cilantro"", ""grams"": 6.0, ""note"": """"}]",307,30.3,13.8,17.0,6.6,10.4,33,low,3.4,low,,"75% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",75,"gluten-free, dairy-free, nut-free, low-carb, high-protein","1. Season the chicken with chili powder and cumin and grill; slice.
 2. Chop the romaine and combine with corn, beans, tomatoes and avocado.
 3. Whisk the lime juice and oil and toss with the chicken and cilantro.","[""Season the chicken with chili powder and cumin and grill; slice."", ""Chop the romaine and combine with corn, beans, tomatoes and avocado."", ""Whisk the lime juice and oil and toss with the chicken and cilantro.""]"
-DB-1090,Buffalo Cauliflower Bites with Yogurt Dill Dip,Snack & Appetizer,American,4,10,25,35,buffalo-cauliflower-bites-with-yogurt-dill-dip.jpg,"Buffalo Cauliflower Bites with Yogurt Dill Dip, healthy food photography, plated, natural light",,"Cauliflower — 500 g (17.6 oz)
+DB-1089,Buffalo Cauliflower Bites with Yogurt Dill Dip,Snack & Appetizer,American,4,10,25,35,buffalo-cauliflower-bites-with-yogurt-dill-dip.jpg,"Buffalo Cauliflower Bites with Yogurt Dill Dip, healthy food photography, plated, natural light",,"Cauliflower — 500 g (17.6 oz)
 Almond flour — 40 g (1.4 oz)
 Hot sauce (Tabasco/Frank's) — 40 g (1.4 oz)
 Extra-virgin olive oil — 20 g (0.7 oz)
@@ -12279,7 +12270,7 @@ Fresh dill — 3 g (0.1 oz)
 Celery — 60 g (2.1 oz)","[{""ingredient_id"": ""cauliflower"", ""name"": ""Cauliflower"", ""grams"": 500.0, ""note"": """"}, {""ingredient_id"": ""almond_flour"", ""name"": ""Almond flour"", ""grams"": 40.0, ""note"": """"}, {""ingredient_id"": ""hot_sauce"", ""name"": ""Hot sauce (Tabasco/Frank's)"", ""grams"": 40.0, ""note"": """"}, {""ingredient_id"": ""olive_oil"", ""name"": ""Extra-virgin olive oil"", ""grams"": 20.0, ""note"": """"}, {""ingredient_id"": ""garlic_powder"", ""name"": ""Garlic powder"", ""grams"": 3.0, ""note"": """"}, {""ingredient_id"": ""greek_yogurt"", ""name"": ""Greek yogurt, plain 2%"", ""grams"": 80.0, ""note"": """"}, {""ingredient_id"": ""dill"", ""name"": ""Fresh dill"", ""grams"": 3.0, ""note"": """"}, {""ingredient_id"": ""celery"", ""name"": ""Celery"", ""grams"": 60.0, ""note"": """"}]",155,6.8,10.9,10.4,4.1,6.3,14,low,0.9,low,,"13% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",13,"vegetarian, gluten-free, low-carb","1. Toss the florets with almond flour, oil and garlic powder and roast at 450°F for 20 minutes.
 2. Toss with hot sauce.
 3. Stir the yogurt with dill and serve with celery sticks.","[""Toss the florets with almond flour, oil and garlic powder and roast at 450°F for 20 minutes."", ""Toss with hot sauce."", ""Stir the yogurt with dill and serve with celery sticks.""]"
-DB-1091,Deviled Eggs with Paprika,Snack & Appetizer,American,6,15,12,27,deviled-eggs-with-paprika.jpg,"Deviled Eggs with Paprika, healthy food photography, plated, natural light",,"Egg, large (50 g each) — 360 g (12.7 oz)
+DB-1090,Deviled Eggs with Paprika,Snack & Appetizer,American,6,15,12,27,deviled-eggs-with-paprika.jpg,"Deviled Eggs with Paprika, healthy food photography, plated, natural light",,"Egg, large (50 g each) — 360 g (12.7 oz)
 Greek yogurt, plain 2% — 50 g (1.8 oz)
 Dijon mustard — 10 g (0.4 oz)
 Paprika — 1 g (0.0 oz)
@@ -12288,7 +12279,7 @@ Salt — 1 g (0.0 oz)","[{""ingredient_id"": ""egg"", ""name"": ""Egg, large (50
 2. Mash the yolks with yogurt, mustard and salt.
 3. Pipe or spoon back into the whites.
 4. Dust with paprika and chives.","[""Hard-boil the eggs, cool and halve."", ""Mash the yolks with yogurt, mustard and salt."", ""Pipe or spoon back into the whites."", ""Dust with paprika and chives.""]"
-DB-1092,Guacamole with Veggie Dippers,Snack & Appetizer,Tex-Mex,4,10,0,10,guacamole-with-veggie-dippers.jpg,"Guacamole with Veggie Dippers, healthy food photography, plated, natural light",,"Avocado — 300 g (10.6 oz)
+DB-1091,Guacamole with Veggie Dippers,Snack & Appetizer,Tex-Mex,4,10,0,10,guacamole-with-veggie-dippers.jpg,"Guacamole with Veggie Dippers, healthy food photography, plated, natural light",,"Avocado — 300 g (10.6 oz)
 Lime juice — 20 g (0.7 oz)
 Red onion — 30 g (1.1 oz)
 Tomato — 60 g (2.1 oz)
@@ -12299,7 +12290,7 @@ Bell pepper — 150 g (5.3 oz)
 Salt — 2 g (0.1 oz)","[{""ingredient_id"": ""avocado"", ""name"": ""Avocado"", ""grams"": 300.0, ""note"": """"}, {""ingredient_id"": ""lime_juice"", ""name"": ""Lime juice"", ""grams"": 20.0, ""note"": """"}, {""ingredient_id"": ""red_onion"", ""name"": ""Red onion"", ""grams"": 30.0, ""note"": """"}, {""ingredient_id"": ""tomato"", ""name"": ""Tomato"", ""grams"": 60.0, ""note"": """"}, {""ingredient_id"": ""cilantro"", ""name"": ""Fresh cilantro"", ""grams"": 8.0, ""note"": """"}, {""ingredient_id"": ""jalapeno"", ""name"": ""Jalapeño"", ""grams"": 8.0, ""note"": """"}, {""ingredient_id"": ""cucumber"", ""name"": ""Cucumber"", ""grams"": 150.0, ""note"": """"}, {""ingredient_id"": ""bell_pepper"", ""name"": ""Bell pepper"", ""grams"": 150.0, ""note"": """"}, {""ingredient_id"": ""salt"", ""name"": ""Salt"", ""grams"": 2.0, ""note"": """"}]",145,2.4,11.5,11.9,6.4,5.4,15,low,0.8,low,,"0% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",0,"vegan, gluten-free, dairy-free, nut-free, low-carb, no-cook","1. Mash the avocado with lime juice and salt.
 2. Fold in the onion, tomato, cilantro and jalapeno.
 3. Serve with cucumber and pepper strips.","[""Mash the avocado with lime juice and salt."", ""Fold in the onion, tomato, cilantro and jalapeno."", ""Serve with cucumber and pepper strips.""]"
-DB-1093,Baked Zucchini Chips,Snack & Appetizer,American,4,10,30,40,baked-zucchini-chips.jpg,"Baked Zucchini Chips, healthy food photography, plated, natural light",,"Zucchini — 450 g (15.9 oz)
+DB-1092,Baked Zucchini Chips,Snack & Appetizer,American,4,10,30,40,baked-zucchini-chips.jpg,"Baked Zucchini Chips, healthy food photography, plated, natural light",,"Zucchini — 450 g (15.9 oz)
 Parmesan, grated — 40 g (1.4 oz)
 Almond flour — 30 g (1.1 oz)
 Egg, large (50 g each) — 50 g (1.8 oz)
@@ -12307,7 +12298,7 @@ Garlic powder — 2 g (0.1 oz)
 Extra-virgin olive oil — 10 g (0.4 oz)","[{""ingredient_id"": ""zucchini"", ""name"": ""Zucchini"", ""grams"": 450.0, ""note"": """"}, {""ingredient_id"": ""parmesan"", ""name"": ""Parmesan, grated"", ""grams"": 40.0, ""note"": """"}, {""ingredient_id"": ""almond_flour"", ""name"": ""Almond flour"", ""grams"": 30.0, ""note"": """"}, {""ingredient_id"": ""egg"", ""name"": ""Egg, large (50 g each)"", ""grams"": 50.0, ""note"": """"}, {""ingredient_id"": ""garlic_powder"", ""name"": ""Garlic powder"", ""grams"": 2.0, ""note"": """"}, {""ingredient_id"": ""olive_oil"", ""name"": ""Extra-virgin olive oil"", ""grams"": 10.0, ""note"": """"}]",148,8.4,10.7,5.9,2.1,3.8,13,low,0.5,low,"Negligible carbohydrate (<5 g net/serving): GI has little practical meaning, glycemic load is what matters.","0% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",0,"vegetarian, gluten-free, low-carb","1. Slice the zucchini thin.
 2. Dip in egg, then a mix of parmesan, almond flour and garlic powder.
 3. Bake on an oiled tray at 425°F for 25 to 30 minutes.","[""Slice the zucchini thin."", ""Dip in egg, then a mix of parmesan, almond flour and garlic powder."", ""Bake on an oiled tray at 425°F for 25 to 30 minutes.""]"
-DB-1094,Chicken Salad Cucumber Cups,Snack & Appetizer,American,4,15,0,15,chicken-salad-cucumber-cups.jpg,"Chicken Salad Cucumber Cups, healthy food photography, plated, natural light",,"Rotisserie chicken, skin removed — 200 g (7.1 oz)
+DB-1093,Chicken Salad Cucumber Cups,Snack & Appetizer,American,4,15,0,15,chicken-salad-cucumber-cups.jpg,"Chicken Salad Cucumber Cups, healthy food photography, plated, natural light",,"Rotisserie chicken, skin removed — 200 g (7.1 oz)
 Cucumber — 300 g (10.6 oz)
 Greek yogurt, plain 2% — 60 g (2.1 oz)
 Celery — 30 g (1.1 oz)
@@ -12315,7 +12306,7 @@ Dijon mustard — 5 g (0.2 oz)
 Fresh dill — 3 g (0.1 oz)","[{""ingredient_id"": ""rotisserie_chicken"", ""name"": ""Rotisserie chicken, skin removed"", ""grams"": 200.0, ""note"": """"}, {""ingredient_id"": ""cucumber"", ""name"": ""Cucumber"", ""grams"": 300.0, ""note"": """"}, {""ingredient_id"": ""greek_yogurt"", ""name"": ""Greek yogurt, plain 2%"", ""grams"": 60.0, ""note"": """"}, {""ingredient_id"": ""celery"", ""name"": ""Celery"", ""grams"": 30.0, ""note"": """"}, {""ingredient_id"": ""dijon"", ""name"": ""Dijon mustard"", ""grams"": 5.0, ""note"": """"}, {""ingredient_id"": ""dill"", ""name"": ""Fresh dill"", ""grams"": 3.0, ""note"": """"}]",105,13.7,3.9,3.6,0.5,3.1,14,low,0.4,low,"Negligible carbohydrate (<5 g net/serving): GI has little practical meaning, glycemic load is what matters.","19% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",19,"gluten-free, nut-free, low-carb, no-cook","1. Cut the cucumbers into thick rounds and scoop a shallow well.
 2. Mix the chicken, yogurt, celery, mustard and dill.
 3. Fill the cups.","[""Cut the cucumbers into thick rounds and scoop a shallow well."", ""Mix the chicken, yogurt, celery, mustard and dill."", ""Fill the cups.""]"
-DB-1095,Spinach Artichoke Dip with Veggies,Snack & Appetizer,American,6,10,20,30,spinach-artichoke-dip-with-veggies.jpg,"Spinach Artichoke Dip with Veggies, healthy food photography, plated, natural light",,"Artichoke hearts, canned in water — 200 g (7.1 oz)
+DB-1094,Spinach Artichoke Dip with Veggies,Snack & Appetizer,American,6,10,20,30,spinach-artichoke-dip-with-veggies.jpg,"Spinach Artichoke Dip with Veggies, healthy food photography, plated, natural light",,"Artichoke hearts, canned in water — 200 g (7.1 oz)
 Spinach — 150 g (5.3 oz)
 Greek yogurt, plain 2% — 150 g (5.3 oz)
 Cream cheese — 80 g (2.8 oz)
@@ -12326,7 +12317,7 @@ Celery — 150 g (5.3 oz)","[{""ingredient_id"": ""artichoke_hearts"", ""name"":
 2. Stir with yogurt, cream cheese, parmesan and garlic.
 3. Bake at 375°F for 18 minutes.
 4. Serve with carrot and celery sticks.","[""Chop the artichokes and wilt the spinach."", ""Stir with yogurt, cream cheese, parmesan and garlic."", ""Bake at 375°F for 18 minutes."", ""Serve with carrot and celery sticks.""]"
-DB-1096,Turkey Pepperoni Pizza Bites,Snack & Appetizer,Italian,4,10,15,25,turkey-pepperoni-pizza-bites.jpg,"Turkey Pepperoni Pizza Bites, healthy food photography, plated, natural light",,"Portobello mushrooms — 360 g (12.7 oz)
+DB-1095,Turkey Pepperoni Pizza Bites,Snack & Appetizer,Italian,4,10,15,25,turkey-pepperoni-pizza-bites.jpg,"Turkey Pepperoni Pizza Bites, healthy food photography, plated, natural light",,"Portobello mushrooms — 360 g (12.7 oz)
 Marinara sauce, no sugar added — 100 g (3.5 oz)
 Mozzarella, part-skim — 80 g (2.8 oz)
 Turkey sausage — 60 g (2.1 oz)
@@ -12334,7 +12325,7 @@ Italian seasoning — 2 g (0.1 oz)","[{""ingredient_id"": ""portobello"", ""name
 2. Spoon marinara into each cap.
 3. Top with mozzarella and sliced sausage.
 4. Bake 15 minutes.","[""Heat the oven to 400°F and remove the portobello stems."", ""Spoon marinara into each cap."", ""Top with mozzarella and sliced sausage."", ""Bake 15 minutes.""]"
-DB-1097,Roasted Chickpea Snack Mix,Snack & Appetizer,American,5,5,30,35,roasted-chickpea-snack-mix.jpg,"Roasted Chickpea Snack Mix, healthy food photography, plated, natural light",,"Chickpeas, cooked — 400 g (14.1 oz)
+DB-1096,Roasted Chickpea Snack Mix,Snack & Appetizer,American,5,5,30,35,roasted-chickpea-snack-mix.jpg,"Roasted Chickpea Snack Mix, healthy food photography, plated, natural light",,"Chickpeas, cooked — 400 g (14.1 oz)
 Almonds — 30 g (1.1 oz)
 Pumpkin seeds (pepitas) — 20 g (0.7 oz)
 Extra-virgin olive oil — 15 g (0.5 oz)
@@ -12343,7 +12334,7 @@ Garlic powder — 2 g (0.1 oz)
 Salt — 2 g (0.1 oz)","[{""ingredient_id"": ""chickpeas"", ""name"": ""Chickpeas, cooked"", ""grams"": 400.0, ""note"": """"}, {""ingredient_id"": ""almonds"", ""name"": ""Almonds"", ""grams"": 30.0, ""note"": """"}, {""ingredient_id"": ""pumpkin_seeds"", ""name"": ""Pumpkin seeds (pepitas)"", ""grams"": 20.0, ""note"": """"}, {""ingredient_id"": ""olive_oil"", ""name"": ""Extra-virgin olive oil"", ""grams"": 15.0, ""note"": """"}, {""ingredient_id"": ""smoked_paprika"", ""name"": ""Smoked paprika"", ""grams"": 3.0, ""note"": """"}, {""ingredient_id"": ""garlic_powder"", ""name"": ""Garlic powder"", ""grams"": 2.0, ""note"": """"}, {""ingredient_id"": ""salt"", ""name"": ""Salt"", ""grams"": 2.0, ""note"": """"}]",218,9.7,10.1,24.0,7.3,16.7,36,low,6.0,low,,"93% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",93,"vegan, gluten-free, dairy-free, high-fiber, meal-prep","1. Pat the chickpeas dry.
 2. Toss with the oil and spices.
 3. Roast at 400°F for 25 minutes, adding nuts and seeds for the last 5.","[""Pat the chickpeas dry."", ""Toss with the oil and spices."", ""Roast at 400°F for 25 minutes, adding nuts and seeds for the last 5.""]"
-DB-1098,Pepper Jack Stuffed Jalapeno Poppers,Snack & Appetizer,Tex-Mex,5,15,20,35,pepper-jack-stuffed-jalapeno-poppers.jpg,"Pepper Jack Stuffed Jalapeno Poppers, healthy food photography, plated, natural light",,"Jalapeño — 250 g (8.8 oz)
+DB-1097,Pepper Jack Stuffed Jalapeno Poppers,Snack & Appetizer,Tex-Mex,5,15,20,35,pepper-jack-stuffed-jalapeno-poppers.jpg,"Pepper Jack Stuffed Jalapeno Poppers, healthy food photography, plated, natural light",,"Jalapeño — 250 g (8.8 oz)
 Cream cheese — 100 g (3.5 oz)
 Pepper jack cheese — 60 g (2.1 oz)
 Turkey bacon — 40 g (1.4 oz)
@@ -12351,11 +12342,11 @@ Garlic powder — 2 g (0.1 oz)","[{""ingredient_id"": ""jalapeno"", ""name"": ""
 2. Mix the cream cheese, pepper jack and garlic powder and fill.
 3. Wrap in a strip of bacon if you like.
 4. Bake at 400°F for 20 minutes.","[""Halve and seed the jalapenos."", ""Mix the cream cheese, pepper jack and garlic powder and fill."", ""Wrap in a strip of bacon if you like."", ""Bake at 400°F for 20 minutes.""]"
-DB-1099,Apple Slices with Peanut Butter and Cinnamon,Snack & Appetizer,American,2,3,0,3,apple-slices-with-peanut-butter-and-cinnamon.jpg,"Apple Slices with Peanut Butter and Cinnamon, healthy food photography, plated, natural light",,"Apple — 240 g (8.5 oz)
+DB-1098,Apple Slices with Peanut Butter and Cinnamon,Snack & Appetizer,American,2,3,0,3,apple-slices-with-peanut-butter-and-cinnamon.jpg,"Apple Slices with Peanut Butter and Cinnamon, healthy food photography, plated, natural light",,"Apple — 240 g (8.5 oz)
 Peanut butter, natural — 32 g (1.1 oz)
 Ground cinnamon — 1 g (0.0 oz)","[{""ingredient_id"": ""apple"", ""name"": ""Apple"", ""grams"": 240.0, ""note"": """"}, {""ingredient_id"": ""peanut_butter"", ""name"": ""Peanut butter, natural"", ""grams"": 32.0, ""note"": """"}, {""ingredient_id"": ""cinnamon"", ""name"": ""Ground cinnamon"", ""grams"": 1.0, ""note"": """"}]",158,4.4,8.2,20.4,4.1,16.3,33,low,5.4,low,,"85% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",85,"vegan, gluten-free, dairy-free, no-cook","1. Slice the apple.
 2. Serve with peanut butter and a dusting of cinnamon.","[""Slice the apple."", ""Serve with peanut butter and a dusting of cinnamon.""]"
-DB-1100,Flourless Peanut Butter Cookies,Dessert,American,10,10,12,22,flourless-peanut-butter-cookies.jpg,"Flourless Peanut Butter Cookies, healthy food photography, plated, natural light",,"Peanut butter, natural — 250 g (8.8 oz)
+DB-1099,Flourless Peanut Butter Cookies,Dessert,American,10,10,12,22,flourless-peanut-butter-cookies.jpg,"Flourless Peanut Butter Cookies, healthy food photography, plated, natural light",,"Peanut butter, natural — 250 g (8.8 oz)
 Egg, large (50 g each) — 50 g (1.8 oz)
 Monk fruit/erythritol sweetener — 40 g (1.4 oz)
 Vanilla extract — 5 g (0.2 oz)
@@ -12364,7 +12355,7 @@ Salt — 1 g (0.0 oz)","[{""ingredient_id"": ""peanut_butter"", ""name"": ""Pean
 2. Mix everything into a dough.
 3. Scoop ten small balls and flatten with a fork.
 4. Bake 10 to 12 minutes.","[""Heat the oven to 350°F."", ""Mix everything into a dough."", ""Scoop ten small balls and flatten with a fork."", ""Bake 10 to 12 minutes.""]"
-DB-1101,Dark Chocolate Avocado Mousse,Dessert,American,4,10,0,10,dark-chocolate-avocado-mousse.jpg,"Dark Chocolate Avocado Mousse, healthy food photography, plated, natural light",,"Avocado — 200 g (7.1 oz)
+DB-1100,Dark Chocolate Avocado Mousse,Dessert,American,4,10,0,10,dark-chocolate-avocado-mousse.jpg,"Dark Chocolate Avocado Mousse, healthy food photography, plated, natural light",,"Avocado — 200 g (7.1 oz)
 Cocoa powder, unsweetened — 25 g (0.9 oz)
 Almond milk, unsweetened — 100 g (3.5 oz)
 Vanilla extract — 4 g (0.1 oz)
@@ -12372,7 +12363,7 @@ Monk fruit/erythritol sweetener — 20 g (0.7 oz)
 Raspberries — 80 g (2.8 oz)","[{""ingredient_id"": ""avocado"", ""name"": ""Avocado"", ""grams"": 200.0, ""note"": """"}, {""ingredient_id"": ""cocoa_powder"", ""name"": ""Cocoa powder, unsweetened"", ""grams"": 25.0, ""note"": """"}, {""ingredient_id"": ""almond_milk"", ""name"": ""Almond milk, unsweetened"", ""grams"": 100.0, ""note"": """"}, {""ingredient_id"": ""vanilla_extract"", ""name"": ""Vanilla extract"", ""grams"": 4.0, ""note"": """"}, {""ingredient_id"": ""monk_fruit_sweetener"", ""name"": ""Monk fruit/erythritol sweetener"", ""grams"": 20.0, ""note"": """"}, {""ingredient_id"": ""raspberries"", ""name"": ""Raspberries"", ""grams"": 80.0, ""note"": """"}]",111,2.6,8.8,10.6,6.7,3.8,22,low,0.8,low,"Negligible carbohydrate (<5 g net/serving): GI has little practical meaning, glycemic load is what matters.","0% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",0,"vegan, gluten-free, dairy-free, low-carb, no-cook","1. Blend the avocado, cocoa, almond milk, vanilla and sweetener until silky.
 2. Chill 1 hour.
 3. Serve with raspberries.","[""Blend the avocado, cocoa, almond milk, vanilla and sweetener until silky."", ""Chill 1 hour."", ""Serve with raspberries.""]"
-DB-1102,Baked Cinnamon Apples,Dessert,American,4,10,30,40,baked-cinnamon-apples.jpg,"Baked Cinnamon Apples, healthy food photography, plated, natural light",,"Apple — 600 g (21.2 oz)
+DB-1101,Baked Cinnamon Apples,Dessert,American,4,10,30,40,baked-cinnamon-apples.jpg,"Baked Cinnamon Apples, healthy food photography, plated, natural light",,"Apple — 600 g (21.2 oz)
 Walnuts — 40 g (1.4 oz)
 Ground cinnamon — 4 g (0.1 oz)
 Butter — 15 g (0.5 oz)
@@ -12380,14 +12371,14 @@ Rolled oats, dry — 30 g (1.1 oz)
 Water / ice — 60 g (2.1 oz)","[{""ingredient_id"": ""apple"", ""name"": ""Apple"", ""grams"": 600.0, ""note"": """"}, {""ingredient_id"": ""walnuts"", ""name"": ""Walnuts"", ""grams"": 40.0, ""note"": """"}, {""ingredient_id"": ""cinnamon"", ""name"": ""Ground cinnamon"", ""grams"": 4.0, ""note"": """"}, {""ingredient_id"": ""butter"", ""name"": ""Butter"", ""grams"": 15.0, ""note"": """"}, {""ingredient_id"": ""rolled_oats"", ""name"": ""Rolled oats, dry"", ""grams"": 30.0, ""note"": """"}, {""ingredient_id"": ""water"", ""name"": ""Water / ice"", ""grams"": 60.0, ""note"": """"}]",201,3.0,10.3,28.3,5.5,22.8,39,low,8.9,low,,"96% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",96,vegetarian,"1. Heat the oven to 375°F.
 2. Core the apples and fill with oats, walnuts, cinnamon and butter.
 3. Add water to the dish and bake 30 minutes.","[""Heat the oven to 375°F."", ""Core the apples and fill with oats, walnuts, cinnamon and butter."", ""Add water to the dish and bake 30 minutes.""]"
-DB-1103,Greek Yogurt Berry Bark,Dessert,American,6,10,0,10,greek-yogurt-berry-bark.jpg,"Greek Yogurt Berry Bark, healthy food photography, plated, natural light",,"Greek yogurt, plain 2% — 450 g (15.9 oz)
+DB-1102,Greek Yogurt Berry Bark,Dessert,American,6,10,0,10,greek-yogurt-berry-bark.jpg,"Greek Yogurt Berry Bark, healthy food photography, plated, natural light",,"Greek yogurt, plain 2% — 450 g (15.9 oz)
 Mixed berries, frozen — 100 g (3.5 oz)
 Pistachios, shelled — 25 g (0.9 oz)
 Stevia-sweetened dark chocolate chips — 20 g (0.7 oz)
 Vanilla extract — 3 g (0.1 oz)","[{""ingredient_id"": ""greek_yogurt"", ""name"": ""Greek yogurt, plain 2%"", ""grams"": 450.0, ""note"": """"}, {""ingredient_id"": ""mixed_berries"", ""name"": ""Mixed berries, frozen"", ""grams"": 100.0, ""note"": """"}, {""ingredient_id"": ""pistachios"", ""name"": ""Pistachios, shelled"", ""grams"": 25.0, ""note"": """"}, {""ingredient_id"": ""sugar_free_chocolate_chips"", ""name"": ""Stevia-sweetened dark chocolate chips"", ""grams"": 20.0, ""note"": """"}, {""ingredient_id"": ""vanilla_extract"", ""name"": ""Vanilla extract"", ""grams"": 3.0, ""note"": """"}]",103,8.7,4.8,6.7,1.5,5.2,20,low,1.0,low,,"76% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",76,"vegetarian, gluten-free, low-carb, no-cook","1. Spread the vanilla-stirred yogurt on a lined tray.
 2. Scatter with berries, pistachios and chocolate.
 3. Freeze 3 hours and break into pieces.","[""Spread the vanilla-stirred yogurt on a lined tray."", ""Scatter with berries, pistachios and chocolate."", ""Freeze 3 hours and break into pieces.""]"
-DB-1104,Pumpkin Pie Chia Pudding,Dessert,American,3,5,0,5,pumpkin-pie-chia-pudding.jpg,"Pumpkin Pie Chia Pudding, healthy food photography, plated, natural light",,"Pumpkin puree, canned — 150 g (5.3 oz)
+DB-1103,Pumpkin Pie Chia Pudding,Dessert,American,3,5,0,5,pumpkin-pie-chia-pudding.jpg,"Pumpkin Pie Chia Pudding, healthy food photography, plated, natural light",,"Pumpkin puree, canned — 150 g (5.3 oz)
 Chia seeds — 30 g (1.1 oz)
 Almond milk, unsweetened — 250 g (8.8 oz)
 Pumpkin pie spice — 3 g (0.1 oz)
@@ -12395,7 +12386,7 @@ Vanilla extract — 3 g (0.1 oz)
 Monk fruit/erythritol sweetener — 8 g (0.3 oz)","[{""ingredient_id"": ""pumpkin_puree"", ""name"": ""Pumpkin puree, canned"", ""grams"": 150.0, ""note"": """"}, {""ingredient_id"": ""chia_seeds"", ""name"": ""Chia seeds"", ""grams"": 30.0, ""note"": """"}, {""ingredient_id"": ""almond_milk"", ""name"": ""Almond milk, unsweetened"", ""grams"": 250.0, ""note"": """"}, {""ingredient_id"": ""pumpkin_pie_spice"", ""name"": ""Pumpkin pie spice"", ""grams"": 3.0, ""note"": """"}, {""ingredient_id"": ""vanilla_extract"", ""name"": ""Vanilla extract"", ""grams"": 3.0, ""note"": """"}, {""ingredient_id"": ""monk_fruit_sweetener"", ""name"": ""Monk fruit/erythritol sweetener"", ""grams"": 8.0, ""note"": """"}]",84,2.8,4.2,9.6,5.1,4.4,50,low,2.2,low,"Negligible carbohydrate (<5 g net/serving): GI has little practical meaning, glycemic load is what matters.","57% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",57,"vegan, gluten-free, dairy-free, low-carb, no-cook, meal-prep","1. Whisk everything together.
 2. Refrigerate at least 4 hours.
 3. Stir and serve cold.","[""Whisk everything together."", ""Refrigerate at least 4 hours."", ""Stir and serve cold.""]"
-DB-1105,Almond Flour Blueberry Muffins,Dessert,American,8,10,22,32,almond-flour-blueberry-muffins.jpg,"Almond Flour Blueberry Muffins, healthy food photography, plated, natural light",,"Almond flour — 200 g (7.1 oz)
+DB-1104,Almond Flour Blueberry Muffins,Dessert,American,8,10,22,32,almond-flour-blueberry-muffins.jpg,"Almond Flour Blueberry Muffins, healthy food photography, plated, natural light",,"Almond flour — 200 g (7.1 oz)
 Egg, large (50 g each) — 150 g (5.3 oz)
 Blueberries — 120 g (4.2 oz)
 Greek yogurt, plain 2% — 100 g (3.5 oz)
@@ -12406,41 +12397,41 @@ Butter — 30 g (1.1 oz)","[{""ingredient_id"": ""almond_flour"", ""name"": ""Al
 2. Whisk the almond flour, baking powder and sweetener.
 3. Mix in eggs, yogurt, melted butter and vanilla, then fold in the blueberries.
 4. Bake 20 to 22 minutes.","[""Heat the oven to 350°F and line eight muffin cups."", ""Whisk the almond flour, baking powder and sweetener."", ""Mix in eggs, yogurt, melted butter and vanilla, then fold in the blueberries."", ""Bake 20 to 22 minutes.""]"
-DB-1106,Sugar-Free Chocolate Dipped Strawberries,Dessert,American,4,10,3,13,sugar-free-chocolate-dipped-strawberries.jpg,"Sugar-Free Chocolate Dipped Strawberries, healthy food photography, plated, natural light",,"Strawberries — 300 g (10.6 oz)
+DB-1105,Sugar-Free Chocolate Dipped Strawberries,Dessert,American,4,10,3,13,sugar-free-chocolate-dipped-strawberries.jpg,"Sugar-Free Chocolate Dipped Strawberries, healthy food photography, plated, natural light",,"Strawberries — 300 g (10.6 oz)
 Stevia-sweetened dark chocolate chips — 60 g (2.1 oz)
 Coconut oil — 5 g (0.2 oz)","[{""ingredient_id"": ""strawberries"", ""name"": ""Strawberries"", ""grams"": 300.0, ""note"": """"}, {""ingredient_id"": ""sugar_free_chocolate_chips"", ""name"": ""Stevia-sweetened dark chocolate chips"", ""grams"": 60.0, ""note"": """"}, {""ingredient_id"": ""coconut_oil"", ""name"": ""Coconut oil"", ""grams"": 5.0, ""note"": """"}]",105,1.4,7.8,8.8,3.3,5.5,36,low,2.0,low,,"100% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",100,"vegan, gluten-free, dairy-free, nut-free, low-carb","1. Melt the chocolate with the coconut oil.
 2. Dip the dry strawberries.
 3. Set on parchment in the fridge for 15 minutes.","[""Melt the chocolate with the coconut oil."", ""Dip the dry strawberries."", ""Set on parchment in the fridge for 15 minutes.""]"
-DB-1107,Green Smoothie with Spinach and Pineapple,Drinks & Smoothies,American,2,5,0,5,green-smoothie-with-spinach-and-pineapple.jpg,"Green Smoothie with Spinach and Pineapple, healthy food photography, plated, natural light",,"Spinach — 60 g (2.1 oz)
+DB-1106,Green Smoothie with Spinach and Pineapple,Drinks & Smoothies,American,2,5,0,5,green-smoothie-with-spinach-and-pineapple.jpg,"Green Smoothie with Spinach and Pineapple, healthy food photography, plated, natural light",,"Spinach — 60 g (2.1 oz)
 Pineapple — 100 g (3.5 oz)
 Greek yogurt, plain 2% — 200 g (7.1 oz)
 Almond milk, unsweetened — 200 g (7.1 oz)
 Chia seeds — 10 g (0.4 oz)
 Lime juice — 10 g (0.4 oz)","[{""ingredient_id"": ""spinach"", ""name"": ""Spinach"", ""grams"": 60.0, ""note"": """"}, {""ingredient_id"": ""pineapple"", ""name"": ""Pineapple"", ""grams"": 100.0, ""note"": """"}, {""ingredient_id"": ""greek_yogurt"", ""name"": ""Greek yogurt, plain 2%"", ""grams"": 200.0, ""note"": """"}, {""ingredient_id"": ""almond_milk"", ""name"": ""Almond milk, unsweetened"", ""grams"": 200.0, ""note"": """"}, {""ingredient_id"": ""chia_seeds"", ""name"": ""Chia seeds"", ""grams"": 10.0, ""note"": """"}, {""ingredient_id"": ""lime_juice"", ""name"": ""Lime juice"", ""grams"": 10.0, ""note"": """"}]",145,12.6,4.9,14.7,3.1,11.6,42,low,4.9,low,,"84% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",84,"vegetarian, gluten-free, low-carb, no-cook","1. Blend everything until smooth.
 2. Serve cold.","[""Blend everything until smooth."", ""Serve cold.""]"
-DB-1108,Peanut Butter Chocolate Protein Shake,Drinks & Smoothies,American,1,3,0,3,peanut-butter-chocolate-protein-shake.jpg,"Peanut Butter Chocolate Protein Shake, healthy food photography, plated, natural light",,"Whey protein powder, unsweetened — 30 g (1.1 oz)
+DB-1107,Peanut Butter Chocolate Protein Shake,Drinks & Smoothies,American,1,3,0,3,peanut-butter-chocolate-protein-shake.jpg,"Peanut Butter Chocolate Protein Shake, healthy food photography, plated, natural light",,"Whey protein powder, unsweetened — 30 g (1.1 oz)
 Almond milk, unsweetened — 250 g (8.8 oz)
 Peanut butter, natural — 16 g (0.6 oz)
 Cocoa powder, unsweetened — 8 g (0.3 oz)
 Water / ice — 60 g (2.1 oz)","[{""ingredient_id"": ""whey_protein"", ""name"": ""Whey protein powder, unsweetened"", ""grams"": 30.0, ""note"": """"}, {""ingredient_id"": ""almond_milk"", ""name"": ""Almond milk, unsweetened"", ""grams"": 250.0, ""note"": """"}, {""ingredient_id"": ""peanut_butter"", ""name"": ""Peanut butter, natural"", ""grams"": 16.0, ""note"": """"}, {""ingredient_id"": ""cocoa_powder"", ""name"": ""Cocoa powder, unsweetened"", ""grams"": 8.0, ""note"": """"}, {""ingredient_id"": ""water"", ""name"": ""Water / ice"", ""grams"": 60.0, ""note"": """"}]",264,30.5,13.6,11.7,3.9,7.8,22,low,1.7,low,,"27% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",27,"vegetarian, gluten-free, low-carb, high-protein, no-cook",1. Blend with ice until smooth.,"[""Blend with ice until smooth.""]"
-DB-1109,Mixed Berry Kefir Smoothie with Flax,Drinks & Smoothies,American,2,5,0,5,mixed-berry-kefir-smoothie-with-flax.jpg,"Mixed Berry Kefir Smoothie with Flax, healthy food photography, plated, natural light",,"Kefir, plain — 300 g (10.6 oz)
+DB-1108,Mixed Berry Kefir Smoothie with Flax,Drinks & Smoothies,American,2,5,0,5,mixed-berry-kefir-smoothie-with-flax.jpg,"Mixed Berry Kefir Smoothie with Flax, healthy food photography, plated, natural light",,"Kefir, plain — 300 g (10.6 oz)
 Mixed berries, frozen — 150 g (5.3 oz)
 Ground flaxseed — 15 g (0.5 oz)
 Vanilla extract — 3 g (0.1 oz)","[{""ingredient_id"": ""kefir"", ""name"": ""Kefir, plain"", ""grams"": 300.0, ""note"": """"}, {""ingredient_id"": ""mixed_berries"", ""name"": ""Mixed berries, frozen"", ""grams"": 150.0, ""note"": """"}, {""ingredient_id"": ""flaxseed"", ""name"": ""Ground flaxseed"", ""grams"": 15.0, ""note"": """"}, {""ingredient_id"": ""vanilla_extract"", ""name"": ""Vanilla extract"", ""grams"": 3.0, ""note"": """"}]",140,6.9,5.0,16.6,5.0,11.6,37,low,4.3,low,,"52% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",52,"vegetarian, gluten-free, nut-free, low-carb, no-cook",1. Blend everything until smooth.,"[""Blend everything until smooth.""]"
-DB-1110,Iced Green Tea with Lemon and Mint,Drinks & Smoothies,American,4,5,5,10,iced-green-tea-with-lemon-and-mint.jpg,"Iced Green Tea with Lemon and Mint, healthy food photography, plated, natural light",,"Brewed green tea — 1000 g (35.3 oz)
+DB-1109,Iced Green Tea with Lemon and Mint,Drinks & Smoothies,American,4,5,5,10,iced-green-tea-with-lemon-and-mint.jpg,"Iced Green Tea with Lemon and Mint, healthy food photography, plated, natural light",,"Brewed green tea — 1000 g (35.3 oz)
 Lemon juice — 40 g (1.4 oz)
 Fresh mint — 6 g (0.2 oz)
 Stevia (liquid) — 1 g (0.0 oz)","[{""ingredient_id"": ""green_tea"", ""name"": ""Brewed green tea"", ""grams"": 1000.0, ""note"": """"}, {""ingredient_id"": ""lemon_juice"", ""name"": ""Lemon juice"", ""grams"": 40.0, ""note"": """"}, {""ingredient_id"": ""mint"", ""name"": ""Fresh mint"", ""grams"": 6.0, ""note"": """"}, {""ingredient_id"": ""stevia"", ""name"": ""Stevia (liquid)"", ""grams"": 1.0, ""note"": """"}]",3,0.1,0.0,0.8,0.1,0.7,20,low,0.1,low,"Negligible carbohydrate (<5 g net/serving): GI has little practical meaning, glycemic load is what matters.","0% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",0,"vegan, gluten-free, dairy-free, nut-free, low-carb, no-cook","1. Steep the tea and chill.
 2. Add lemon, mint and a pinch of stevia.
 3. Serve over ice.","[""Steep the tea and chill."", ""Add lemon, mint and a pinch of stevia."", ""Serve over ice.""]"
-DB-1111,Golden Turmeric Latte,Drinks & Smoothies,American,2,3,5,8,golden-turmeric-latte.jpg,"Golden Turmeric Latte, healthy food photography, plated, natural light",,"Almond milk, unsweetened — 400 g (14.1 oz)
+DB-1110,Golden Turmeric Latte,Drinks & Smoothies,American,2,3,5,8,golden-turmeric-latte.jpg,"Golden Turmeric Latte, healthy food photography, plated, natural light",,"Almond milk, unsweetened — 400 g (14.1 oz)
 Ground turmeric — 2 g (0.1 oz)
 Ground cinnamon — 1 g (0.0 oz)
 Fresh ginger — 3 g (0.1 oz)
 Black pepper — 1 g (0.0 oz)
 Vanilla extract — 2 g (0.1 oz)","[{""ingredient_id"": ""almond_milk"", ""name"": ""Almond milk, unsweetened"", ""grams"": 400.0, ""note"": """"}, {""ingredient_id"": ""turmeric"", ""name"": ""Ground turmeric"", ""grams"": 2.0, ""note"": """"}, {""ingredient_id"": ""cinnamon"", ""name"": ""Ground cinnamon"", ""grams"": 1.0, ""note"": """"}, {""ingredient_id"": ""ginger"", ""name"": ""Fresh ginger"", ""grams"": 3.0, ""note"": """"}, {""ingredient_id"": ""black_pepper"", ""name"": ""Black pepper"", ""grams"": 1.0, ""note"": """"}, {""ingredient_id"": ""vanilla_extract"", ""name"": ""Vanilla extract"", ""grams"": 2.0, ""note"": """"}]",40,1.4,2.5,3.0,0.6,2.3,19,low,0.4,low,"Negligible carbohydrate (<5 g net/serving): GI has little practical meaning, glycemic load is what matters.","0% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",0,"vegan, gluten-free, dairy-free, low-carb","1. Warm the almond milk with the spices.
 2. Whisk until frothy and serve.","[""Warm the almond milk with the spices."", ""Whisk until frothy and serve.""]"
-DB-1112,Cucumber Mint Sparkling Cooler,Drinks & Smoothies,American,2,5,0,5,cucumber-mint-sparkling-cooler.jpg,"Cucumber Mint Sparkling Cooler, healthy food photography, plated, natural light",,"Sparkling water — 500 g (17.6 oz)
+DB-1111,Cucumber Mint Sparkling Cooler,Drinks & Smoothies,American,2,5,0,5,cucumber-mint-sparkling-cooler.jpg,"Cucumber Mint Sparkling Cooler, healthy food photography, plated, natural light",,"Sparkling water — 500 g (17.6 oz)
 Cucumber — 100 g (3.5 oz)
 Fresh mint — 6 g (0.2 oz)
 Lime juice — 20 g (0.7 oz)","[{""ingredient_id"": ""sparkling_water"", ""name"": ""Sparkling water"", ""grams"": 500.0, ""note"": """"}, {""ingredient_id"": ""cucumber"", ""name"": ""Cucumber"", ""grams"": 100.0, ""note"": """"}, {""ingredient_id"": ""mint"", ""name"": ""Fresh mint"", ""grams"": 6.0, ""note"": """"}, {""ingredient_id"": ""lime_juice"", ""name"": ""Lime juice"", ""grams"": 20.0, ""note"": """"}]",11,0.5,0.1,2.9,0.5,2.4,17,low,0.4,low,"Negligible carbohydrate (<5 g net/serving): GI has little practical meaning, glycemic load is what matters.","0% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",0,"vegan, gluten-free, dairy-free, nut-free, low-carb, no-cook","1. Muddle the cucumber and mint with the lime juice.
