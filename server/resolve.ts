@@ -56,7 +56,15 @@ const GENERIC_FIRST_WORD = new Set(['chip', 'cheese', 'cereal', 'bar', 'cookie',
  * cornbread (no GI) over cornbread from a mix (GI 60), and why "miso" left our
  * own measured paste for a USDA row with no GI at all.
  */
-const NO_GI_PENALTY = 0.24
+const NO_GI_PENALTY = 0.16
+/**
+ * An *unrated* food (carbohydrate, no glycemic index assigned) is weaker than a food
+ * whose GI is null only because it has no carbohydrate (grilled salmon): the first
+ * cannot be given a load and the second does not need one. Raised from the shared
+ * penalty on 11 October so a scored recipe beats an exact-named unrated food (kung pao
+ * chicken); applying it to zero-carbohydrate foods made "grilled salmon" ask a question.
+ */
+const UNRATED_PENALTY = 0.24
 // A word the record's name never mentions is a difference the score should
 // feel. "frozen yogurt" is not yogurt and "mac and cheese" is not cheddar,
 // however close the embeddings sit.
@@ -390,7 +398,7 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
         const base = exact
           ? Math.max(ALIAS_SCORE, h.score)
           : Math.min(1, h.score + lexicalScore(phrase, rec.name) + kindPrior(phrase, rec.kind))
-        const penalty = h.id.startsWith('usda:') ? (rec.gi === null ? NO_GI_PENALTY : COVERAGE_PENALTY) : 0
+        const penalty = h.id.startsWith('usda:') ? (rec.gi === null ? (rec.kind === 'unrated' ? UNRATED_PENALTY : NO_GI_PENALTY) : COVERAGE_PENALTY) : 0
         const branded = h.id.startsWith('branded:') ? ((brandWord(rec.name) && tokens(phrase).map(stem).includes(brandWord(rec.name))) ? 0 : BRANDED_PENALTY + COVERAGE_PENALTY) : 0
         const school = /\bschool\b/i.test(rec.name) && !/\bschool\b/i.test(phrase) ? SCHOOL_PENALTY : 0
         const score = base - penalty - school - branded
