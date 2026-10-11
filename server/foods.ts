@@ -267,6 +267,10 @@ const USDA_ALIASES: Record<string, string[]> = {
  */
 const RECIPE_ALIASES: Record<string, string[]> = {
   'Fish and Chips (Oven-Baked)': ['fish and chips', 'fish & chips'],
+  'Black-Eyed Pea Salad (Texas Caviar)': ['texas caviar', 'cowboy caviar'],
+  'Bratwurst-Style Turkey Sausage with Sauerkraut and Apple': ['brats', 'bratwurst'],
+  "Oyster Po' Boy on a Bun": ['po boy', "po' boy", 'poboy'],
+  "Shrimp Po' Boy Lettuce Boats": ['po boy', "po' boy", 'poboy'],
 }
 
 function usdaRecords(): FoodRecord[] {

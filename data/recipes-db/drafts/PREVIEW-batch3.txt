@@ -1,0 +1,311 @@
+category             dish                                                 srv  kcal  prot  net C  GI    GL meas%
+Beef, Pork & Lamb    Baked Spaghetti Casserole                              8   359    26   31.0  44  13.7    91
+Beef, Pork & Lamb    Barbecue Ribs, Oven-Baked                              4   523    49    3.3  26   0.9     0
+Beef, Pork & Lamb    Bratwurst-Style Turkey Sausage with Sauerkraut and A   4   246    18   10.4  21   2.2    42
+Beef, Pork & Lamb    Brisket-Style Slow Cooker Beef with Barbecue Rub       8   291    31    2.9  14   0.4     0
+Beef, Pork & Lamb    Carne Asada Street Tacos                               4   320    28   26.8  48  12.9    87
+Beef, Pork & Lamb    Carolina Pulled Pork Plate with Vinegar Slaw           6   336    25   13.4  61   8.2    82
+Beef, Pork & Lamb    Glazed Ham Steak with Pineapple                        4   227    27    6.4  48   3.1    67
+Beef, Pork & Lamb    Hamburger Helper-Style Skillet with Whole Pasta        6   325    24   23.9  45  10.7    85
+Beef, Pork & Lamb    Kalua-Style Pork with Cabbage                          8   367    34    2.2  15   0.3     0
+Beef, Pork & Lamb    Louisiana Red Rice with Smoked Sausage                 5   250    11   30.4  66  20.1    82
+Beef, Pork & Lamb    Midwest Hotdish with Ground Beef and Green Beans       6   354    25   26.5  54  14.3    82
+Beef, Pork & Lamb    Mini Meatloaf Muffins                                  6   161    18    4.8  43   2.1    67
+Beef, Pork & Lamb    Mongolian-Style Beef with Scallions                    4   281    29    7.9  36   2.8    40
+Beef, Pork & Lamb    Pizza Pasta Bake                                       6   247    14   27.0  45  12.1    93
+Beef, Pork & Lamb    Pork Tenderloin with Apple Cider Glaze                 4   261    33    7.8  27   2.1    56
+Beef, Pork & Lamb    Pork and Cabbage Stir-Fry                              4   291    24    6.1  22   1.4    22
+Beef, Pork & Lamb    Rosemary Lamb Chops with Roasted Vegetables            4   341    33    4.2  18   0.8     0
+Beef, Pork & Lamb    Southern Cabbage and Sausage Skillet                   4   204    14    9.4  13   1.2     0
+Beef, Pork & Lamb    Spaghetti Carbonara                                    4   404    24   36.3  47  17.1    96
+Beef, Pork & Lamb    Standing Rib-Style Roast with Horseradish Yogurt       8   274    41    1.4  17   0.2    55
+Beef, Pork & Lamb    Stuffed Acorn Squash with Sausage and Apple            4   277    14   24.3  43  10.5    86
+Beef, Pork & Lamb    Tamale Pie Casserole                                   6   321    25   20.3  49   9.9    84
+Breakfast            Apple Cinnamon Baked Oatmeal                           6   283    11   33.3  49  16.3    97
+Breakfast            Egg Foo Young                                          3   262    26    5.3  28   1.5    32
+Breakfast            Greek Diner Omelet with Feta and Spinach               2   356    25    4.0   7   0.3     0
+Breakfast            Peach Pecan Overnight Oats                             2   324    15   31.2  48  15.0    97
+Breakfast            Peanut Butter Banana Quesadilla                        2   256     8   30.8  38  11.7    93
+Breakfast            Scrambled Egg Muffin Cups with Ham                     6   134    12    1.2   6   0.1     0
+Breakfast            Spinach and Mushroom Quiche without Crust              6   187    14    4.3  18   0.8    46
+Dessert              Apple Nachos with Peanut Butter and Pecans             4   195     4   15.5  33   5.1    87
+Dessert              Chocolate Banana Frozen Yogurt Pops                    6    73     7    8.2  37   3.0    92
+Dessert              Cinnamon Apple Quesadilla                              3   236     7   26.5  34   9.0    99
+Dessert              Georgia Peach Cottage Cheese Cup                       2   238    18   15.2  35   5.3    53
+Dessert              Gingerbread Spiced Chia Pudding                        3    87     3    2.2  16   0.4     0
+Dessert              Pumpkin Custard (Crustless Pie)                        8    83     4    8.7  56   4.9    94
+Poultry              BBQ Chicken Quarters with Corn on the Cob              4   361    39   22.5  50  11.3    91
+Poultry              Baked General Tso-Style Chicken                        4   290    36    9.9  43   4.2    54
+Poultry              Blackened Chicken with Dirty Cauliflower Rice          4   333    41    6.8  15   1.0     0
+Poultry              Butter Chicken with Cauliflower Rice                   4   351    34   10.0  21   2.1     0
+Poultry              Cajun Chicken Pasta                                    4   455    33   33.3  44  14.7    87
+Poultry              Caprese Chicken Skillet                                4   307    39    3.9  18   0.7     0
+Poultry              Chicken Divan Casserole                                6   248    28    5.6  16   0.9    39
+Poultry              Chicken Lo Mein with Vegetables                        4   354    27   32.5  54  17.5    88
+Poultry              Chicken Marsala                                        4   277    34    5.2  34   1.8    41
+Poultry              Chicken Nuggets, Baked with Almond Crumb               4   338    39    2.1  13   0.3     0
+Poultry              Chicken Tinga Tostadas                                 4   357    34   27.2  43  11.7    85
+Poultry              Cowboy Caviar Chicken Bowls                            4   395    37   36.0  59  21.3    92
+Poultry              Gyro Chicken Bowls with Tzatziki                       4   389    35   26.6  63  16.8    83
+Poultry              Hawaiian Chicken Skewers with Pineapple                4   317    32   30.6  68  20.8    87
+Poultry              Herb-Roasted Turkey Breast with Pan Gravy              8   277    49    3.5  34   1.2    36
+Poultry              King Ranch Chicken Casserole (Lightened)               6   293    28   19.6  44   8.6    84
+Poultry              Kung Pao Chicken with Peanuts                          4   327    34    7.3  31   2.3    44
+Poultry              Orange Chicken with Fresh Juice                        4   284    35   12.8  43   5.5    71
+Poultry              Seattle-Style Teriyaki Chicken Plate                   4   329    31   28.1  70  19.7    88
+Poultry              Smoked Turkey Breast with Dry Rub                      6   223    40    1.4  15   0.2     0
+Poultry              Smothered Chicken Thighs with Onion Gravy              4   322    38   10.7  22   2.4    16
+Poultry              Southwest Stuffed Peppers with Turkey and Rice         4   401    29   30.4  53  16.1    73
+Poultry              Sweet and Sour Chicken with Pineapple                  4   345    31   33.2  66  21.9    85
+Poultry              Turkey Pot Pie Casserole with Cauliflower Topping      6   211    27   10.2  30   3.1    60
+Salad                Antipasto Salad                                        4   187    11    5.4  10   0.5     0
+Salad                Black-Eyed Pea Salad (Texas Caviar)                    6   141     6   14.0  46   6.4    88
+Salad                Cajun Shrimp Stuffed Avocado                           4   234    17    2.9  16   0.5     0
+Salad                California Cobb Burrito Bowl                           3   385    37    6.6  33   2.2    50
+Salad                Deviled Egg Salad Stuffed Tomatoes                     4   140    12    4.0  12   0.5    15
+Salad                Egg Salad Lettuce Cups for Lunch                       3   168    15    2.3   9   0.2    35
+Salad                Southern Chicken Salad with Pecans and Apple           4   273    25    5.2  26   1.4    74
+Sandwiches & Wraps   Cape Cod Turkey Burger with Cranberry Mustard          4   363    30   30.1  60  18.1    93
+Sandwiches & Wraps   Lobster Roll Lettuce Wraps                             4   159    21    1.4  15   0.2    35
+Sandwiches & Wraps   Maine-Style Lobster Roll on a Toasted Bun              3   300    25   28.6  61  17.5    98
+Sandwiches & Wraps   Moo Shu Chicken Lettuce Wraps                          4   241    28    4.4  20   0.9    23
+Sandwiches & Wraps   Oyster Po' Boy on a Bun                                3   476    18   35.0  51  17.8    80
+Sandwiches & Wraps   Shrimp Po' Boy Lettuce Boats                           4   200    24    2.3  16   0.4     0
+Sandwiches & Wraps   Sloppy Joes on Hamburger Buns                          6   315    22   31.6  58  18.3    89
+Sandwiches & Wraps   Taco Pizza on a Tortilla                               3   340    22   21.7  32   6.9    85
+Seafood              Baked Salmon with Dijon and Dill                       4   352    30    0.5  18   0.1     0
+Seafood              Crawfish-Style Shrimp Étouffée                         4   308    30   32.1  64  20.5    77
+Seafood              Fish Sticks, Baked                                     4   280    31    2.8  13   0.4    29
+Seafood              Fish Tostadas with Lime Cabbage                        4   295    28   21.2  45   9.5    85
+Seafood              Low-Country Boil                                       6   310    32   28.4  56  15.9    86
+Seafood              New England Baked Cod with Herb Crumbs                 4   228    30    9.8  50   4.9    60
+Seafood              Pacific Northwest Cedar-Style Salmon with Asparagus    4   383    32    3.0  18   0.5     0
+Seafood              Poke Bowl with Tuna and Cucumber                       3   338    29   30.2  72  21.7    92
+Seafood              San Diego Shrimp Ceviche Cups                          4   147    21    4.9  17   0.8     0
+Seafood              Shrimp with Snow Peas and Garlic Sauce                 4   196    26    6.8  30   2.0    25
+Seafood              Southern Pan-Fried Catfish with Slaw                   4   347    31    4.8  13   0.6    15
+Side Dish            Boston Baked Beans without Molasses                    8   185    11   17.5  30   5.3     0
+Side Dish            Bread Stuffing with Celery and Sage                    8   167     5   20.8  66  13.8    90
+Side Dish            Cheesy Broccoli Rice Cups                              6   171     8   19.1  69  13.2    90
+Side Dish            Collard Greens with Smoked Turkey Wing Style           5    81     7    4.3  14   0.6     0
+Side Dish            Cranberry Sauce with Orange (Low Sugar)                8    26     0    4.4  44   1.9    27
+Side Dish            Fried Okra, Oven-Baked                                 4   179     8    5.9  18   1.1     0
+Side Dish            Mashed Cauliflower and Potato                          6   103     3   13.1  55   7.2    81
+Side Dish            Roasted Brussels Sprouts with Pecans and Cranberries   6   131     4    6.4  19   1.2     0
+Side Dish            Southern Green Beans with New Potatoes                 6    97     5   14.2  51   7.2    64
+Side Dish            Sweet Potato Mash with Cinnamon                        5   156     3   24.5  45  11.0   100
+Side Dish            Thyme Roasted Carrots                                  6    86     1    8.0  39   3.1    99
+Side Dish            Tomato Pie-Style Baked Tomatoes                        4   206    10    5.0  12   0.6     0
+Snack & Appetizer    Ants on a Log                                          4   132     6    3.3  14   0.5     0
+Snack & Appetizer    Bacon-Wrapped Dates, Small Portion                     6   161     7   11.0  51   5.6    94
+Snack & Appetizer    Banana Dog Roll-Up                                     2   264     8   32.7  39  12.8    94
+Snack & Appetizer    Cheese Curd-Style Baked Cauliflower Bites              4   187    10    4.9  13   0.6     0
+Snack & Appetizer    Cheese Quesadilla Triangles                            4   267    11   22.4  33   7.4    99
+Snack & Appetizer    Corn Dog Muffins with Turkey Franks                    6   166    12    8.0  52   4.2    83
+Snack & Appetizer    Holiday Cheese and Veggie Platter                      8   156     8    5.1  20   1.0    54
+Snack & Appetizer    Hummus and Veggie Snack Cups                           4   104     4    9.0  22   2.0    64
+Snack & Appetizer    Lunchbox Turkey Bento with Cheddar Roll-Ups and Blue   2   290    17   19.2  43   8.3    75
+Snack & Appetizer    Peanut Butter Oat Energy Bites                        12   118     4    7.6  47   3.6    79
+Snack & Appetizer    Pigs in a Blanket with Turkey Franks                   6   182    11   12.6  31   3.9    91
+Snack & Appetizer    Pimento-Style Cheese Celery Boats                      6   170     7    2.0  10   0.2     0
+Snack & Appetizer    Shrimp Cocktail with Horseradish Tomato Sauce          6    74    15    2.0  27   0.5     0
+Snack & Appetizer    Turkey and Cheese Pinwheels                            4   248    12   20.4  31   6.3    90
+Snack & Appetizer    Yogurt-Dipped Frozen Berries                           4    71     6    8.7  40   3.5    99
+Soup & Stew          Cheeseburger Soup                                      6   275    21   15.3  51   7.8    84
+Soup & Stew          Chicken and Sausage Jambalaya Soup                     6   223    22   17.3  56   9.7    64
+Soup & Stew          Chicken and Wild Rice Soup                             6   196    23   16.1  43   6.9    21
+Soup & Stew          Creole Shrimp and Okra Stew                            4   191    23   10.5  24   2.5     0
+Soup & Stew          Egg Drop Soup                                          4    90     7    3.6  33   1.2    46
+Soup & Stew          Gumbo with Chicken and Sausage                         6   328    26   25.1  56  14.1    66
+Soup & Stew          Homemade Chicken Noodle Cups                           4   168    19   14.4  53   7.6    92
+Soup & Stew          Hot and Sour Soup                                      4   146    15    5.2  28   1.5    32
+Soup & Stew          Italian Wedding Soup                                   6   185    18   10.0  41   4.1    84
+Soup & Stew          Pasta e Fagioli                                        6   200     9   28.3  36  10.2    78
+Soup & Stew          Pumpkin Soup with Toasted Pepitas                      5   134     4    9.4  44   4.1    53
+Soup & Stew          Seafood Chowder with Potatoes                          6   223    27   15.9  48   7.6    81
+Soup & Stew          Seafood Gumbo with Shrimp and Crab                     6   176    23    8.1  19   1.5     0
+Soup & Stew          She-Crab-Style Soup (Lightened)                        4   147    17    6.2  21   1.3    58
+Soup & Stew          Taco Soup                                              6   301    25   17.9  33   5.9    74
+Soup & Stew          Tex-Mex Chicken Tortilla Soup                          6   245    24   18.5  38   7.0    73
+Soup & Stew          Texas-Style Beef Chili without Beans                   6   280    26    6.5  25   1.6     0
+Soup & Stew          Zuppa Toscana-Style Soup                               6   191    11   15.3  52   8.0    69
+Vegetarian & Vegan   Eggplant Rollatini                                     4   305    19   12.3  19   2.3    25
+Vegetarian & Vegan   Hoppin' John with Black-Eyed Peas                      6   244    15   34.2  60  20.5    90
+Vegetarian & Vegan   Mac and Cheese Cups with Hidden Cauliflower            6   232    12   20.5  44   9.0    91
+Vegetarian & Vegan   Pasta Primavera                                        4   330    13   40.7  44  17.9    85
+Vegetarian & Vegan   Stuffed Shells with Ricotta and Spinach                6   337    21   32.7  43  14.0    88
+Vegetarian & Vegan   Vegetable Fried Rice with Egg                          4   296    10   37.9  71  26.9    97
+
+136 dishes; median 256 kcal, median GL 4.2
+
+FLAGS
+  - c1_south_cajun.jsonl:1 Gumbo with Chicken and Sausage: the name is already in the database
+  - c1_south_cajun.jsonl:2 Seafood Gumbo with Shrimp and Crab: the name is already in the database
+  - c1_south_cajun.jsonl:3 Crawfish-Style Shrimp Étouffée: the name is already in the database
+  - c1_south_cajun.jsonl:3 Crawfish-Style Shrimp Étouffée: glycemic load 20.5 a serving
+  - c1_south_cajun.jsonl:4 Blackened Chicken with Dirty Cauliflower Rice: the name is already in the database
+  - c1_south_cajun.jsonl:5 Louisiana Red Rice with Smoked Sausage: the name is already in the database
+  - c1_south_cajun.jsonl:5 Louisiana Red Rice with Smoked Sausage: glycemic load 20.1 a serving
+  - c1_south_cajun.jsonl:6 Hoppin' John with Black-Eyed Peas: the name is already in the database
+  - c1_south_cajun.jsonl:6 Hoppin' John with Black-Eyed Peas: glycemic load 20.5 a serving
+  - c1_south_cajun.jsonl:6 Hoppin' John with Black-Eyed Peas: 2 steps
+  - c1_south_cajun.jsonl:7 Smothered Chicken Thighs with Onion Gravy: the name is already in the database
+  - c1_south_cajun.jsonl:7 Smothered Chicken Thighs with Onion Gravy: only 16% of its carbohydrate has a measured GI
+  - c1_south_cajun.jsonl:8 Southern Pan-Fried Catfish with Slaw: the name is already in the database
+  - c1_south_cajun.jsonl:9 Shrimp Po' Boy Lettuce Boats: the name is already in the database
+  - c1_south_cajun.jsonl:10 Oyster Po' Boy on a Bun: the name is already in the database
+  - c1_south_cajun.jsonl:11 Cajun Chicken Pasta: the name is already in the database
+  - c1_south_cajun.jsonl:12 Creole Shrimp and Okra Stew: the name is already in the database
+  - c1_south_cajun.jsonl:12 Creole Shrimp and Okra Stew: only 0% of its carbohydrate has a measured GI
+  - c1_south_cajun.jsonl:13 Collard Greens with Smoked Turkey Wing Style: the name is already in the database
+  - c1_south_cajun.jsonl:14 Fried Okra, Oven-Baked: the name is already in the database
+  - c1_south_cajun.jsonl:15 Southern Cabbage and Sausage Skillet: the name is already in the database
+  - c1_south_cajun.jsonl:16 Black-Eyed Pea Salad (Texas Caviar): the name is already in the database
+  - c1_south_cajun.jsonl:16 Black-Eyed Pea Salad (Texas Caviar): 141 kcal a serving
+  - c1_south_cajun.jsonl:17 Southern Chicken Salad with Pecans and Apple: the name is already in the database
+  - c1_south_cajun.jsonl:18 Tomato Pie-Style Baked Tomatoes: the name is already in the database
+  - c1_south_cajun.jsonl:19 Pimento-Style Cheese Celery Boats: the name is already in the database
+  - c1_south_cajun.jsonl:20 Georgia Peach Cottage Cheese Cup: the name is already in the database
+  - c1_south_cajun.jsonl:20 Georgia Peach Cottage Cheese Cup: only 53% of its carbohydrate has a measured GI
+  - c1_south_cajun.jsonl:21 Low-Country Boil: the name is already in the database
+  - c1_south_cajun.jsonl:22 She-Crab-Style Soup (Lightened): the name is already in the database
+  - c1_south_cajun.jsonl:22 She-Crab-Style Soup (Lightened): 147 kcal a serving
+  - c1_south_cajun.jsonl:23 Carolina Pulled Pork Plate with Vinegar Slaw: the name is already in the database
+  - c1_south_cajun.jsonl:24 Southern Green Beans with New Potatoes: the name is already in the database
+  - c1_south_cajun.jsonl:25 Deviled Egg Salad Stuffed Tomatoes: the name is already in the database
+  - c1_south_cajun.jsonl:25 Deviled Egg Salad Stuffed Tomatoes: 140 kcal a serving
+  - c1_south_cajun.jsonl:26 Chicken and Sausage Jambalaya Soup: the name is already in the database
+  - c1_south_cajun.jsonl:26 Chicken and Sausage Jambalaya Soup: 2 steps
+  - c1_south_cajun.jsonl:27 Cajun Shrimp Stuffed Avocado: the name is already in the database
+  - c1_south_cajun.jsonl:28 Peach Pecan Overnight Oats: the name is already in the database
+  - c2_regional.jsonl:1 Texas-Style Beef Chili without Beans: the name is already in the database
+  - c2_regional.jsonl:2 Brisket-Style Slow Cooker Beef with Barbecue Rub: the name is already in the database
+  - c2_regional.jsonl:3 Smoked Turkey Breast with Dry Rub: the name is already in the database
+  - c2_regional.jsonl:4 Barbecue Ribs, Oven-Baked: the name is already in the database
+  - c2_regional.jsonl:5 BBQ Chicken Quarters with Corn on the Cob: the name is already in the database
+  - c2_regional.jsonl:6 Cowboy Caviar Chicken Bowls: the name is already in the database
+  - c2_regional.jsonl:6 Cowboy Caviar Chicken Bowls: glycemic load 21.3 a serving
+  - c2_regional.jsonl:7 Tex-Mex Chicken Tortilla Soup: the name is already in the database
+  - c2_regional.jsonl:8 Carne Asada Street Tacos: the name is already in the database
+  - c2_regional.jsonl:9 Chicken Tinga Tostadas: the name is already in the database
+  - c2_regional.jsonl:10 Fish Tostadas with Lime Cabbage: the name is already in the database
+  - c2_regional.jsonl:11 Taco Soup: the name is already in the database
+  - c2_regional.jsonl:12 Tamale Pie Casserole: the name is already in the database
+  - c2_regional.jsonl:13 Midwest Hotdish with Ground Beef and Green Beans: the name is already in the database
+  - c2_regional.jsonl:14 Chicken and Wild Rice Soup: the name is already in the database
+  - c2_regional.jsonl:14 Chicken and Wild Rice Soup: only 21% of its carbohydrate has a measured GI
+  - c2_regional.jsonl:15 Bratwurst-Style Turkey Sausage with Sauerkraut and Apple: the name is already in the database
+  - c2_regional.jsonl:15 Bratwurst-Style Turkey Sausage with Sauerkraut and Apple: only 42% of its carbohydrate has a measured GI
+  - c2_regional.jsonl:16 Cheese Curd-Style Baked Cauliflower Bites: the name is already in the database
+  - c2_regional.jsonl:17 New England Baked Cod with Herb Crumbs: the name is already in the database
+  - c2_regional.jsonl:18 Lobster Roll Lettuce Wraps: the name is already in the database
+  - c2_regional.jsonl:19 Maine-Style Lobster Roll on a Toasted Bun: the name is already in the database
+  - c2_regional.jsonl:20 Boston Baked Beans without Molasses: the name is already in the database
+  - c2_regional.jsonl:20 Boston Baked Beans without Molasses: only 0% of its carbohydrate has a measured GI
+  - c2_regional.jsonl:21 Cape Cod Turkey Burger with Cranberry Mustard: the name is already in the database
+  - c2_regional.jsonl:21 Cape Cod Turkey Burger with Cranberry Mustard: glycemic load 18.1 a serving
+  - c2_regional.jsonl:22 Hawaiian Chicken Skewers with Pineapple: the name is already in the database
+  - c2_regional.jsonl:22 Hawaiian Chicken Skewers with Pineapple: glycemic load 20.8 a serving
+  - c2_regional.jsonl:23 Poke Bowl with Tuna and Cucumber: the name is already in the database
+  - c2_regional.jsonl:23 Poke Bowl with Tuna and Cucumber: glycemic load 21.7 a serving
+  - c2_regional.jsonl:24 Kalua-Style Pork with Cabbage: the name is already in the database
+  - c2_regional.jsonl:25 Pacific Northwest Cedar-Style Salmon with Asparagus: the name is already in the database
+  - c2_regional.jsonl:26 Seattle-Style Teriyaki Chicken Plate: the name is already in the database
+  - c2_regional.jsonl:26 Seattle-Style Teriyaki Chicken Plate: glycemic load 19.7 a serving
+  - c2_regional.jsonl:27 California Cobb Burrito Bowl: the name is already in the database
+  - c2_regional.jsonl:28 San Diego Shrimp Ceviche Cups: the name is already in the database
+  - c2_regional.jsonl:28 San Diego Shrimp Ceviche Cups: 147 kcal a serving
+  - c2_regional.jsonl:29 Southwest Stuffed Peppers with Turkey and Rice: the name is already in the database
+  - c3_takeout.jsonl:1 Egg Drop Soup: the name is already in the database
+  - c3_takeout.jsonl:1 Egg Drop Soup: 90 kcal a serving
+  - c3_takeout.jsonl:1 Egg Drop Soup: only 7 g protein
+  - c3_takeout.jsonl:2 Hot and Sour Soup: the name is already in the database
+  - c3_takeout.jsonl:2 Hot and Sour Soup: 146 kcal a serving
+  - c3_takeout.jsonl:3 Baked General Tso-Style Chicken: the name is already in the database
+  - c3_takeout.jsonl:4 Orange Chicken with Fresh Juice: the name is already in the database
+  - c3_takeout.jsonl:5 Kung Pao Chicken with Peanuts: the name is already in the database
+  - c3_takeout.jsonl:6 Sweet and Sour Chicken with Pineapple: the name is already in the database
+  - c3_takeout.jsonl:6 Sweet and Sour Chicken with Pineapple: glycemic load 21.9 a serving
+  - c3_takeout.jsonl:7 Chicken Lo Mein with Vegetables: the name is already in the database
+  - c3_takeout.jsonl:8 Shrimp with Snow Peas and Garlic Sauce: the name is already in the database
+  - c3_takeout.jsonl:9 Mongolian-Style Beef with Scallions: the name is already in the database
+  - c3_takeout.jsonl:10 Egg Foo Young: the name is already in the database
+  - c3_takeout.jsonl:11 Moo Shu Chicken Lettuce Wraps: the name is already in the database
+  - c3_takeout.jsonl:12 Vegetable Fried Rice with Egg: the name is already in the database
+  - c3_takeout.jsonl:12 Vegetable Fried Rice with Egg: glycemic load 26.9 a serving
+  - c3_takeout.jsonl:13 Pork and Cabbage Stir-Fry: the name is already in the database
+  - c3_takeout.jsonl:14 Chicken Marsala: the name is already in the database
+  - c3_takeout.jsonl:15 Spaghetti Carbonara: the name is already in the database
+  - c3_takeout.jsonl:16 Pasta Primavera: the name is already in the database
+  - c3_takeout.jsonl:17 Stuffed Shells with Ricotta and Spinach: the name is already in the database
+  - c3_takeout.jsonl:18 Pasta e Fagioli: the name is already in the database
+  - c3_takeout.jsonl:19 Italian Wedding Soup: the name is already in the database
+  - c3_takeout.jsonl:20 Antipasto Salad: the name is already in the database
+  - c3_takeout.jsonl:21 Caprese Chicken Skillet: the name is already in the database
+  - c3_takeout.jsonl:22 Eggplant Rollatini: the name is already in the database
+  - c3_takeout.jsonl:22 Eggplant Rollatini: only 25% of its carbohydrate has a measured GI
+  - c3_takeout.jsonl:23 Zuppa Toscana-Style Soup: the name is already in the database
+  - c3_takeout.jsonl:24 Gyro Chicken Bowls with Tzatziki: the name is already in the database
+  - c3_takeout.jsonl:25 Greek Diner Omelet with Feta and Spinach: the name is already in the database
+  - c3_takeout.jsonl:26 Butter Chicken with Cauliflower Rice: the name is already in the database
+  - c4_holiday_casserole.jsonl:1 Herb-Roasted Turkey Breast with Pan Gravy: the name is already in the database
+  - c4_holiday_casserole.jsonl:2 Bread Stuffing with Celery and Sage: the name is already in the database
+  - c4_holiday_casserole.jsonl:3 Cranberry Sauce with Orange (Low Sugar): the name is already in the database
+  - c4_holiday_casserole.jsonl:3 Cranberry Sauce with Orange (Low Sugar): 26 kcal a serving
+  - c4_holiday_casserole.jsonl:4 Pumpkin Custard (Crustless Pie): the name is already in the database
+  - c4_holiday_casserole.jsonl:5 Roasted Brussels Sprouts with Pecans and Cranberries: the name is already in the database
+  - c4_holiday_casserole.jsonl:6 Mashed Cauliflower and Potato: the name is already in the database
+  - c4_holiday_casserole.jsonl:7 Thyme Roasted Carrots: the name is already in the database
+  - c4_holiday_casserole.jsonl:8 Glazed Ham Steak with Pineapple: the name is already in the database
+  - c4_holiday_casserole.jsonl:9 Sweet Potato Mash with Cinnamon: the name is already in the database
+  - c4_holiday_casserole.jsonl:10 Turkey Pot Pie Casserole with Cauliflower Topping: the name is already in the database
+  - c4_holiday_casserole.jsonl:11 Chicken Divan Casserole: the name is already in the database
+  - c4_holiday_casserole.jsonl:12 Baked Spaghetti Casserole: the name is already in the database
+  - c4_holiday_casserole.jsonl:13 King Ranch Chicken Casserole (Lightened): the name is already in the database
+  - c4_holiday_casserole.jsonl:14 Hamburger Helper-Style Skillet with Whole Pasta: the name is already in the database
+  - c4_holiday_casserole.jsonl:15 Stuffed Acorn Squash with Sausage and Apple: the name is already in the database
+  - c4_holiday_casserole.jsonl:16 Pork Tenderloin with Apple Cider Glaze: the name is already in the database
+  - c4_holiday_casserole.jsonl:17 Rosemary Lamb Chops with Roasted Vegetables: the name is already in the database
+  - c4_holiday_casserole.jsonl:18 Standing Rib-Style Roast with Horseradish Yogurt: the name is already in the database
+  - c4_holiday_casserole.jsonl:19 Baked Salmon with Dijon and Dill: the name is already in the database
+  - c4_holiday_casserole.jsonl:20 Seafood Chowder with Potatoes: the name is already in the database
+  - c4_holiday_casserole.jsonl:21 Spinach and Mushroom Quiche without Crust: the name is already in the database
+  - c4_holiday_casserole.jsonl:22 Holiday Cheese and Veggie Platter: the name is already in the database
+  - c4_holiday_casserole.jsonl:23 Shrimp Cocktail with Horseradish Tomato Sauce: the name is already in the database
+  - c4_holiday_casserole.jsonl:24 Bacon-Wrapped Dates, Small Portion: the name is already in the database
+  - c4_holiday_casserole.jsonl:25 Pumpkin Soup with Toasted Pepitas: the name is already in the database
+  - c4_holiday_casserole.jsonl:25 Pumpkin Soup with Toasted Pepitas: 134 kcal a serving
+  - c4_holiday_casserole.jsonl:25 Pumpkin Soup with Toasted Pepitas: only 4 g protein
+  - c4_holiday_casserole.jsonl:26 Apple Cinnamon Baked Oatmeal: the name is already in the database
+  - c4_holiday_casserole.jsonl:27 Gingerbread Spiced Chia Pudding: the name is already in the database
+  - c5_kids_lunchbox.jsonl:1 Turkey and Cheese Pinwheels: the name is already in the database
+  - c5_kids_lunchbox.jsonl:2 Mini Meatloaf Muffins: the name is already in the database
+  - c5_kids_lunchbox.jsonl:3 Chicken Nuggets, Baked with Almond Crumb: the name is already in the database
+  - c5_kids_lunchbox.jsonl:4 Fish Sticks, Baked: the name is already in the database
+  - c5_kids_lunchbox.jsonl:5 Cheese Quesadilla Triangles: the name is already in the database
+  - c5_kids_lunchbox.jsonl:6 Ants on a Log: the name is already in the database
+  - c5_kids_lunchbox.jsonl:7 Banana Dog Roll-Up: the name is already in the database
+  - c5_kids_lunchbox.jsonl:8 Pizza Pasta Bake: the name is already in the database
+  - c5_kids_lunchbox.jsonl:9 Cheeseburger Soup: the name is already in the database
+  - c5_kids_lunchbox.jsonl:10 Peanut Butter Banana Quesadilla: the name is already in the database
+  - c5_kids_lunchbox.jsonl:10 Peanut Butter Banana Quesadilla: only 8 g protein
+  - c5_kids_lunchbox.jsonl:10 Peanut Butter Banana Quesadilla: 2 steps
+  - c5_kids_lunchbox.jsonl:11 Scrambled Egg Muffin Cups with Ham: the name is already in the database
+  - c5_kids_lunchbox.jsonl:11 Scrambled Egg Muffin Cups with Ham: 134 kcal a serving
+  - c5_kids_lunchbox.jsonl:12 Yogurt-Dipped Frozen Berries: the name is already in the database
+  - c5_kids_lunchbox.jsonl:13 Lunchbox Turkey Bento with Cheddar Roll-Ups and Blueberries: the name is already in the database
+  - c5_kids_lunchbox.jsonl:14 Sloppy Joes on Hamburger Buns: the name is already in the database
+  - c5_kids_lunchbox.jsonl:14 Sloppy Joes on Hamburger Buns: glycemic load 18.3 a serving
+  - c5_kids_lunchbox.jsonl:15 Mac and Cheese Cups with Hidden Cauliflower: the name is already in the database
+  - c5_kids_lunchbox.jsonl:16 Taco Pizza on a Tortilla: the name is already in the database
+  - c5_kids_lunchbox.jsonl:17 Pigs in a Blanket with Turkey Franks: the name is already in the database
+  - c5_kids_lunchbox.jsonl:18 Apple Nachos with Peanut Butter and Pecans: the name is already in the database
+  - c5_kids_lunchbox.jsonl:19 Peanut Butter Oat Energy Bites: the name is already in the database
+  - c5_kids_lunchbox.jsonl:20 Hummus and Veggie Snack Cups: the name is already in the database
+  - c5_kids_lunchbox.jsonl:21 Homemade Chicken Noodle Cups: the name is already in the database
+  - c5_kids_lunchbox.jsonl:21 Homemade Chicken Noodle Cups: 2 steps
+  - c5_kids_lunchbox.jsonl:22 Corn Dog Muffins with Turkey Franks: the name is already in the database
+  - c5_kids_lunchbox.jsonl:23 Cinnamon Apple Quesadilla: the name is already in the database
+  - c5_kids_lunchbox.jsonl:24 Chocolate Banana Frozen Yogurt Pops: the name is already in the database
+  - c5_kids_lunchbox.jsonl:25 Cheesy Broccoli Rice Cups: the name is already in the database
+  - c5_kids_lunchbox.jsonl:26 Egg Salad Lettuce Cups for Lunch: the name is already in the database

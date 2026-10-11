@@ -718,7 +718,7 @@
       {
         "phrase": "general tso's chicken",
         "expect": [
-          "branded:1621189"
+          "rec:DB-1282"
         ],
         "tags": [
           "branded"
@@ -1293,6 +1293,69 @@
         "phrase": "white rice",
         "expect": [
           "ing:white_rice"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "egg drop soup",
+        "expect": [
+          "rec:DB-1280"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "kung pao chicken",
+        "expect": [
+          "rec:DB-1284"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "spaghetti carbonara",
+        "expect": [
+          "rec:DB-1294"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "tamale pie",
+        "expect": [
+          "rec:DB-1262"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "texas caviar",
+        "expect": [
+          "rec:DB-1238"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "brats",
+        "expect": [
+          "rec:DB-1265"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "low country boil",
+        "expect": [
+          "rec:DB-1243"
         ],
         "tags": [
           "new-recipes"
