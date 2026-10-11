@@ -257,6 +257,7 @@ const USDA_ALIASES: Record<string, string[]> = {
   'usda:2705949': ['fried chicken'],                                      // Chicken, NS as to part, fried, coated, skin eaten
   'usda:2709552': ['potato pancake', 'potato pancakes', 'latke', 'latkes', 'potato latkes'], // Potato pancake (no GI: carbohydrate only)
   'usda:2710359': ['gummy bears', 'gummy bear', 'gummies', 'gummy candy', 'gummy worms'],      // Candy, gummy (no GI: carbohydrate only)
+  'usda:2706071': ['buffalo wings', 'buffalo wing', 'hot wings'],            // Chicken wings with sauce, from fast food / restaurant
   'usda:2705848': ['pot roast'],                                          // Beef, pot roast
   'usda:2706979': ['blt', 'blt sandwich', 'bacon lettuce tomato sandwich'], // Bacon, lettuce, tomato sandwich on white
 }
@@ -274,6 +275,7 @@ const RECIPE_ALIASES: Record<string, string[]> = {
   'Bratwurst-Style Turkey Sausage with Sauerkraut and Apple': ['brats', 'bratwurst'],
   "Oyster Po' Boy on a Bun": ['po boy', "po' boy", 'poboy'],
   "Shrimp Po' Boy Lettuce Boats": ['po boy', "po' boy", 'poboy'],
+  'Cucumber Lime Agua Fresca': ['agua fresca', 'cucumber agua fresca'],
 }
 
 function usdaRecords(): FoodRecord[] {

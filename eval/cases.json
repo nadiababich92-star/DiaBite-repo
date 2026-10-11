@@ -1365,6 +1365,69 @@
         "tags": [
           "new-recipes"
         ]
+      },
+      {
+        "phrase": "vegan chili",
+        "expect": [
+          "rec:DB-1399"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "butternut squash soup",
+        "expect": [
+          "rec:DB-1488"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "panna cotta",
+        "expect": [
+          "rec:DB-1368"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "agua fresca",
+        "expect": [
+          "rec:DB-1389"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "wedge salad",
+        "expect": [
+          "rec:DB-1474"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "mashed cauliflower",
+        "expect": [
+          "rec:DB-1311"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "buffalo wings",
+        "expect": [
+          "usda:2706071"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
       }
     ],
     "clarify": [

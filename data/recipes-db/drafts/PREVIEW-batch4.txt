@@ -1,0 +1,337 @@
+category             dish                                                 srv  kcal  prot  net C  GI    GL meas%
+Breakfast            Almond Flour Pancakes with Berries                     3   368    16    9.0  25   2.2    11
+Breakfast            Blueberry Oat Breakfast Muffins                       10   116     5   15.8  54   8.5    30
+Breakfast            Breakfast Sausage Patties with Apple                   4   188    19    3.1  35   1.1    94
+Breakfast            Cheddar Broccoli Egg Cups                              6   132    10    2.0  14   0.3    23
+Breakfast            Chilaquiles-Style Egg Skillet                          3   337    14   20.0  45   9.0    78
+Breakfast            Cottage Cheese Pancakes                                3   267    19   19.0  42   8.0    15
+Breakfast            Greek Yogurt Breakfast Bowl with Nuts and Seeds        2   263    21   13.9  30   4.2    87
+Breakfast            Ham and Cheese Egg Roll-Ups                            4   226    20    1.2   0   0.0     0
+Breakfast            Oat Flour Banana Pancakes                              3   300    12   36.8  51  18.8    33
+Breakfast            Peanut Butter Overnight Oats                           2   339    17   32.8  45  14.8    92
+Breakfast            Protein Waffles from Oats and Eggs                     3   238    14   23.9  51  12.2    96
+Breakfast            Pumpkin Oat Pancakes                                   4   237    10   26.5  53  14.0    12
+Breakfast            Sausage and Egg Breakfast Casserole                    8   219    17    4.4  15   0.7    34
+Breakfast            Savory Oatmeal with Egg and Spinach                    2   285    18   25.3  53  13.4    92
+Breakfast            Spinach Feta Breakfast Wrap                            2   341    17   21.2  31   6.6    87
+Breakfast            Sweet Potato Breakfast Boats                           4   302    17   26.9  44  11.9    95
+Breakfast            Zucchini Bread Oatmeal Bake                            6   234    10   24.1  50  12.0    92
+Dessert              Almond Flour Banana Muffins                           10   165     6    7.3  40   2.9    70
+Dessert              Apple Cinnamon Muffins with Oat Flour                 10   123     5   14.6  49   7.1    16
+Dessert              Baked Pears with Walnuts and Cinnamon                  4   204     5   20.1  26   5.2    95
+Dessert              Berry Cobbler with Oat Topping                         8   172     4   15.9  50   7.9    61
+Dessert              Chocolate Avocado Pudding Cups                         4   124     3    3.3  18   0.6     0
+Dessert              Chocolate Peanut Butter Protein Pudding                3   146    14    6.8  13   0.9    59
+Dessert              Coconut Macaroons without Added Sugar                 12    88     2    1.1  41   0.5     0
+Dessert              Flourless Chocolate Brownies with Black Beans         12   124     5    9.7  39   3.8    89
+Dessert              Frozen Banana Soft Serve                               2   168     4   26.0  49  12.7    94
+Dessert              Lemon Ricotta Cheesecake Cups                          6   100     8    5.9  27   1.6    51
+Dessert              Mixed Berry Chia Jam Parfait                           4   156    10    9.4  28   2.6    32
+Dessert              New York-Style Crustless Cheesecake                   10   208     7    6.9  38   2.6    70
+Dessert              Oatmeal Cranberry Cookies                             14    99     3   10.9  56   6.1    73
+Dessert              Peach Crisp with Pecans                                8   154     3   16.3  57   9.3    98
+Dessert              Peanut Butter Chocolate No-Bake Bars                  12   145     5    8.5  44   3.7    77
+Dessert              Pumpkin Spice Muffins with Oat Flour                  10   128     5   15.2  55   8.4    25
+Dessert              Strawberry Frozen Yogurt Bark                          8    67     6    4.1  24   1.0    99
+Dessert              Sweet Potato Brownie Bites                            12    94     3    5.3  36   1.9    71
+Dessert              Vanilla Panna Cotta with Berry Compote                 6   161     4    5.9  27   1.6    41
+Drinks & Smoothies   Almond Joy Protein Shake                               1   328    30    7.8  25   1.9    27
+Drinks & Smoothies   Blueberry Spinach Smoothie                             2   162    13   14.5  38   5.5    90
+Drinks & Smoothies   Chocolate Peanut Butter Smoothie                       2   258    15   23.0  35   8.1    84
+Drinks & Smoothies   Cinnamon Dolce Latte with Almond Milk                  2    30     1    1.4  17   0.2     0
+Drinks & Smoothies   Cold Brew with Cream                                   2    53     0    0.4   0   0.0     0
+Drinks & Smoothies   Cucumber Lime Agua Fresca                              4    14     1    3.2  17   0.5     0
+Drinks & Smoothies   Ginger Turmeric Wellness Tea                           2    11     0    2.1  17   0.4     0
+Drinks & Smoothies   Golden Milk with Cinnamon and Black Pepper             2   112     7   11.1  25   2.8    86
+Drinks & Smoothies   Homemade Hot Cocoa with Almond Milk                    2    59     3    3.6  21   0.8     0
+Drinks & Smoothies   Iced Coffee with Almond Milk and Cinnamon              2    21     1    0.9  18   0.2     0
+Drinks & Smoothies   Iced Tea Lemonade, Unsweetened                         4     6     0    1.7  20   0.3     0
+Drinks & Smoothies   Kefir Berry Lassi                                      2    97     6   11.4  37   4.2    52
+Drinks & Smoothies   Mint Chocolate Chip Green Shake                        2   121     3    2.5  20   0.5    24
+Drinks & Smoothies   Peach Ginger Smoothie                                  2   126    11   13.0  40   5.2    92
+Drinks & Smoothies   Protein Coffee Shake                                   1   150    25    4.2  26   1.1    49
+Drinks & Smoothies   Pumpkin Pie Smoothie                                   2   145    12   14.4  43   6.2    89
+Drinks & Smoothies   Spiced Apple Cider Warm Drink, Unsweetened             4    50     0   10.6  36   3.8    95
+Drinks & Smoothies   Strawberry Banana Smoothie with Yogurt                 2   179    14   22.1  38   8.4   100
+Drinks & Smoothies   Strawberry Mint Sparkling Cooler                       4    19     0    3.5  36   1.3    82
+Drinks & Smoothies   Tropical Green Smoothie                                2   147     2   16.3  51   8.3    76
+Poultry              Air Fryer Chicken Thighs with Smoked Paprika           4   274    36    3.9  15   0.6     0
+Poultry              Sheet Pan Sausage with Potatoes and Green Beans        4   335    18   25.9  54  14.0    77
+Poultry              Slow Cooker Turkey Meatballs in Marinara               6   255    26    5.0  29   1.5    70
+Salad                Asian Chicken Salad with Sesame Dressing               3   290    30    6.2  23   1.4    29
+Salad                Chicken Caesar Salad with Yogurt Dressing              3   290    37    3.6  14   0.5    30
+Salad                Cucumber Dill Chicken Salad Cups                       4   148    20    3.6  14   0.5    22
+Salad                Greek Chicken Salad with Tzatziki                      3   264    35    7.9  14   1.1    17
+Salad                Kale Caesar with Chickpea Croutons                     4   213    13   14.3  30   4.3    74
+Salad                Marinated Mushroom and Artichoke Salad                 4   114     4    5.2  15   0.8     0
+Salad                Quinoa Black Bean Salad Jars                           4   300    11   31.8  45  14.3    94
+Salad                Roasted Sweet Potato and Black Bean Salad              4   209     7   26.4  65  17.1    93
+Salad                Spinach Strawberry Salad with Pecans                   4   163     4    4.9  32   1.6    58
+Salad                Taco Salad with Lime Crema                             4   358    30   10.1  23   2.3    64
+Salad                Tuna Salad Stuffed Avocado                             2   330    29    4.1  15   0.6    25
+Salad                Wedge Salad with Blue Cheese and Tomatoes              4   124     9    4.7  13   0.6    17
+Sandwiches & Wraps   Caprese Sandwich on Ezekiel Bread                      2   282    16   21.6  53  11.5    81
+Sandwiches & Wraps   Egg and Avocado Breakfast Sandwich on English Muffin   2   270    13   23.9  42  10.0    91
+Sandwiches & Wraps   Grilled Chicken Pesto Panini                           2   406    34   25.9  66  17.1    91
+Sandwiches & Wraps   Hummus and Roasted Vegetable Sandwich                  2   274    11   26.7  53  14.2    80
+Sandwiches & Wraps   Roast Beef and Horseradish Wrap                        2   248    23   20.6  32   6.6    93
+Sandwiches & Wraps   Turkey Avocado Ranch Wrap                              2   277    17   23.8  28   6.7    81
+Seafood              Air Fryer Salmon with Lemon and Dill                   4   346    30    2.7  17   0.5     0
+Seafood              Air Fryer Shrimp with Garlic and Lime                  3   180    30    1.6  25   0.4     0
+Seafood              Sheet Pan Salmon with Brussels Sprouts                 4   404    32    7.2  16   1.2     0
+Seafood              Sheet Pan Shrimp and Vegetable Bake                    4   201    27    5.3  15   0.8     0
+Side Dish            Air Fryer Brussels Sprouts with Bacon                  4   127     8    6.4  16   1.0     0
+Side Dish            Broccoli Slaw with Peanut Dressing                     5    70     3    5.4  18   1.0    13
+Side Dish            Cheddar Chive Cauliflower Biscuits                     8   153     8    2.8  13   0.4     0
+Side Dish            Garlic Roasted Green Beans with Almonds                4   130     4    7.0  17   1.2     0
+Side Dish            Lemon Parmesan Asparagus                               4    93     6    3.2  16   0.5     0
+Side Dish            Mushroom Wild Rice Pilaf                               5   165     6   20.1  51  10.3     0
+Side Dish            Quinoa Tabbouleh                                       5   154     4   15.4  47   7.2    83
+Side Dish            Sauteed Spinach with Garlic                            4    67     4    2.8  19   0.5     0
+Side Dish            Spiced Roasted Carrots and Chickpeas                   5   186     8   17.8  37   6.6    97
+Side Dish            Zucchini Fritters with Greek Yogurt Dip                4   207    12    4.9  13   0.6    24
+Snack & Appetizer    Air Fryer Cauliflower Wings                            4   128     6    5.7  14   0.8    17
+Snack & Appetizer    Air Fryer Turkey Meatballs                             5   206    23    3.4  45   1.5    75
+Snack & Appetizer    Antipasto Skewers                                      6    93     6    2.9  14   0.4     0
+Snack & Appetizer    Buffalo Chicken Thigh Bites with Celery and Blue Che   4   314    41    1.6  11   0.2     0
+Snack & Appetizer    Caprese Dip with Veggie Dippers                        6   132     6    4.9  20   1.0    34
+Snack & Appetizer    Cheddar and Apple Slices with Walnuts                  2   218     8   12.7  34   4.3    92
+Snack & Appetizer    Cinnamon Baked Apple Chips                             4    67     0   14.7  36   5.3    99
+Snack & Appetizer    Cottage Cheese with Cherry Tomatoes and Everything S   2   166    17    8.5  11   0.9     0
+Snack & Appetizer    Edamame with Sea Salt and Lime                         4   122    12    4.3  18   0.8     0
+Snack & Appetizer    Roasted Red Pepper Hummus with Crudités                6   182     7   15.5  34   5.3    73
+Snack & Appetizer    Spicy Roasted Chickpea Crunch                          5   162     7   15.9  37   5.9    97
+Snack & Appetizer    Stuffed Mini Peppers with Cream Cheese and Chives      6    91     2    3.5  12   0.4     0
+Soup & Stew          Butternut Squash Soup with Sage                        5   143     2   17.7  42   7.5    79
+Soup & Stew          Chicken Zucchini Noodle Soup                           5   139    21    5.3  18   1.0    26
+Soup & Stew          Creamy Cauliflower and Leek Soup                       5   102     4   10.8  14   1.5    13
+Soup & Stew          Lentil and Spinach Soup                                6   107     7   13.7  27   3.7    52
+Soup & Stew          Miso Mushroom Soup with Tofu                           4   129    12    8.1  13   1.1     0
+Soup & Stew          Slow Cooker Chicken Tortilla Chili                     6   228    29   14.6  33   4.8    65
+Soup & Stew          Slow Cooker Pot Roast Chili with Beans                 8   261    25   10.7  30   3.2    58
+Soup & Stew          Tomato Basil Soup with White Beans                     5   151     8   18.6  29   5.4    50
+Soup & Stew          Turkey Vegetable Soup with Kale                        6   151    16    6.5  24   1.6    21
+Vegetarian & Vegan   Black Bean Burger Bowls with Avocado Crema             4   267    15   25.3  36   9.1    91
+Vegetarian & Vegan   Black Bean and Sweet Potato Enchiladas                 5   338    14   40.9  53  21.7    91
+Vegetarian & Vegan   Caprese Stuffed Portobello Caps                        4   150    10    6.3  16   1.0     0
+Vegetarian & Vegan   Cauliflower Steak with Chimichurri                     4   158     4    7.1  16   1.1     0
+Vegetarian & Vegan   Chickpea Salad Sandwich Filling in Lettuce Cups        4   190    12   21.6  36   7.8    93
+Vegetarian & Vegan   Creamy Tomato Basil Pasta with White Beans             4   396    17   47.1  42  19.8    86
+Vegetarian & Vegan   Edamame and Vegetable Stir-Fry with Brown Rice         4   256    14   29.3  53  15.5    74
+Vegetarian & Vegan   Eggplant and Chickpea Curry                            5   213     8   20.8  32   6.7    56
+Vegetarian & Vegan   Falafel Bowls with Tahini Sauce                        4   428    17   45.2  43  19.4    73
+Vegetarian & Vegan   Lentil Bolognese over Zucchini Noodles                 4   193    12   17.9  30   5.4    69
+Vegetarian & Vegan   Lentil Shepherd's Pie with Mashed Potato Crust         6   240     9   36.8  54  19.9    92
+Vegetarian & Vegan   Mediterranean Chickpea Bowls                           4   378    15   37.3  41  15.3    89
+Vegetarian & Vegan   Peanut Tofu Stir-Fry with Broccoli                     4   275    23    7.1  16   1.1     0
+Vegetarian & Vegan   Portobello Fajita Wraps                                4   319     9   36.4  29  10.5    76
+Vegetarian & Vegan   Roasted Cauliflower and Chickpea Tacos                 4   350    12   39.6  44  17.4    89
+Vegetarian & Vegan   Spinach and Ricotta Stuffed Mushrooms                  4   156    14    7.0  15   1.0     0
+Vegetarian & Vegan   Stuffed Bell Peppers with Quinoa and Black Beans       4   301    14   33.4  39  13.0    76
+Vegetarian & Vegan   Sweet Potato and Black Bean Chili                      6   185     9   27.3  35   9.6    78
+Vegetarian & Vegan   Tempeh Tacos with Cabbage Slaw                         4   369    20   28.4  45  12.8    82
+Vegetarian & Vegan   Tofu Scramble Breakfast Burrito Bowl                   3   446    28   34.9  58  20.2    85
+Vegetarian & Vegan   Vegan Chili with Three Beans                           6   237    13   27.1  30   8.1    75
+Vegetarian & Vegan   Vegetable Lo Mein with Tofu                            4   321    18   29.9  52  15.5    85
+
+134 dishes; median 180 kcal, median GL 3.7
+
+FLAGS
+  - d1_dessert_drink.jsonl:1 Flourless Chocolate Brownies with Black Beans: the name is already in the database
+  - d1_dessert_drink.jsonl:2 Oatmeal Cranberry Cookies: the name is already in the database
+  - d1_dessert_drink.jsonl:3 Peanut Butter Chocolate No-Bake Bars: the name is already in the database
+  - d1_dessert_drink.jsonl:4 Lemon Ricotta Cheesecake Cups: the name is already in the database
+  - d1_dessert_drink.jsonl:5 New York-Style Crustless Cheesecake: the name is already in the database
+  - d1_dessert_drink.jsonl:6 Berry Cobbler with Oat Topping: the name is already in the database
+  - d1_dessert_drink.jsonl:7 Peach Crisp with Pecans: the name is already in the database
+  - d1_dessert_drink.jsonl:8 Baked Pears with Walnuts and Cinnamon: the name is already in the database
+  - d1_dessert_drink.jsonl:9 Chocolate Peanut Butter Protein Pudding: the name is already in the database
+  - d1_dessert_drink.jsonl:10 Vanilla Panna Cotta with Berry Compote: the name is already in the database
+  - d1_dessert_drink.jsonl:11 Coconut Macaroons without Added Sugar: the name is already in the database
+  - d1_dessert_drink.jsonl:12 Pumpkin Spice Muffins with Oat Flour: the name is already in the database
+  - d1_dessert_drink.jsonl:12 Pumpkin Spice Muffins with Oat Flour: only 25% of its carbohydrate has a measured GI
+  - d1_dessert_drink.jsonl:13 Almond Flour Banana Muffins: the name is already in the database
+  - d1_dessert_drink.jsonl:14 Apple Cinnamon Muffins with Oat Flour: the name is already in the database
+  - d1_dessert_drink.jsonl:14 Apple Cinnamon Muffins with Oat Flour: only 16% of its carbohydrate has a measured GI
+  - d1_dessert_drink.jsonl:15 Chocolate Avocado Pudding Cups: the name is already in the database
+  - d1_dessert_drink.jsonl:16 Frozen Banana Soft Serve: the name is already in the database
+  - d1_dessert_drink.jsonl:17 Strawberry Frozen Yogurt Bark: the name is already in the database
+  - d1_dessert_drink.jsonl:18 Mixed Berry Chia Jam Parfait: the name is already in the database
+  - d1_dessert_drink.jsonl:19 Sweet Potato Brownie Bites: the name is already in the database
+  - d1_dessert_drink.jsonl:20 Cinnamon Baked Apple Chips: the name is already in the database
+  - d1_dessert_drink.jsonl:21 Iced Coffee with Almond Milk and Cinnamon: the name is already in the database
+  - d1_dessert_drink.jsonl:21 Iced Coffee with Almond Milk and Cinnamon: 21 kcal a serving
+  - d1_dessert_drink.jsonl:22 Cold Brew with Cream: the name is already in the database
+  - d1_dessert_drink.jsonl:22 Cold Brew with Cream: 53 kcal a serving
+  - d1_dessert_drink.jsonl:23 Homemade Hot Cocoa with Almond Milk: the name is already in the database
+  - d1_dessert_drink.jsonl:23 Homemade Hot Cocoa with Almond Milk: 59 kcal a serving
+  - d1_dessert_drink.jsonl:24 Strawberry Banana Smoothie with Yogurt: the name is already in the database
+  - d1_dessert_drink.jsonl:25 Peach Ginger Smoothie: the name is already in the database
+  - d1_dessert_drink.jsonl:26 Tropical Green Smoothie: the name is already in the database
+  - d1_dessert_drink.jsonl:27 Chocolate Peanut Butter Smoothie: the name is already in the database
+  - d1_dessert_drink.jsonl:28 Blueberry Spinach Smoothie: the name is already in the database
+  - d1_dessert_drink.jsonl:29 Pumpkin Pie Smoothie: the name is already in the database
+  - d1_dessert_drink.jsonl:30 Iced Tea Lemonade, Unsweetened: the name is already in the database
+  - d1_dessert_drink.jsonl:30 Iced Tea Lemonade, Unsweetened: 6 kcal a serving
+  - d1_dessert_drink.jsonl:31 Cucumber Lime Agua Fresca: the name is already in the database
+  - d1_dessert_drink.jsonl:31 Cucumber Lime Agua Fresca: 14 kcal a serving
+  - d1_dessert_drink.jsonl:32 Strawberry Mint Sparkling Cooler: the name is already in the database
+  - d1_dessert_drink.jsonl:32 Strawberry Mint Sparkling Cooler: 19 kcal a serving
+  - d1_dessert_drink.jsonl:33 Golden Milk with Cinnamon and Black Pepper: the name is already in the database
+  - d1_dessert_drink.jsonl:34 Protein Coffee Shake: the name is already in the database
+  - d1_dessert_drink.jsonl:35 Almond Joy Protein Shake: the name is already in the database
+  - d1_dessert_drink.jsonl:36 Mint Chocolate Chip Green Shake: the name is already in the database
+  - d1_dessert_drink.jsonl:37 Kefir Berry Lassi: the name is already in the database
+  - d1_dessert_drink.jsonl:37 Kefir Berry Lassi: only 52% of its carbohydrate has a measured GI
+  - d1_dessert_drink.jsonl:38 Ginger Turmeric Wellness Tea: the name is already in the database
+  - d1_dessert_drink.jsonl:38 Ginger Turmeric Wellness Tea: 11 kcal a serving
+  - d1_dessert_drink.jsonl:39 Spiced Apple Cider Warm Drink, Unsweetened: the name is already in the database
+  - d1_dessert_drink.jsonl:39 Spiced Apple Cider Warm Drink, Unsweetened: 50 kcal a serving
+  - d1_dessert_drink.jsonl:40 Cinnamon Dolce Latte with Almond Milk: the name is already in the database
+  - d1_dessert_drink.jsonl:40 Cinnamon Dolce Latte with Almond Milk: 30 kcal a serving
+  - d2_veg_sides.jsonl:1 Vegan Chili with Three Beans: the name is already in the database
+  - d2_veg_sides.jsonl:2 Lentil Shepherd's Pie with Mashed Potato Crust: the name is already in the database
+  - d2_veg_sides.jsonl:2 Lentil Shepherd's Pie with Mashed Potato Crust: glycemic load 19.9 a serving
+  - d2_veg_sides.jsonl:3 Black Bean and Sweet Potato Enchiladas: the name is already in the database
+  - d2_veg_sides.jsonl:3 Black Bean and Sweet Potato Enchiladas: glycemic load 21.7 a serving
+  - d2_veg_sides.jsonl:4 Eggplant and Chickpea Curry: the name is already in the database
+  - d2_veg_sides.jsonl:4 Eggplant and Chickpea Curry: only 56% of its carbohydrate has a measured GI
+  - d2_veg_sides.jsonl:5 Tofu Scramble Breakfast Burrito Bowl: the name is already in the database
+  - d2_veg_sides.jsonl:5 Tofu Scramble Breakfast Burrito Bowl: glycemic load 20.2 a serving
+  - d2_veg_sides.jsonl:6 Peanut Tofu Stir-Fry with Broccoli: the name is already in the database
+  - d2_veg_sides.jsonl:7 Chickpea Salad Sandwich Filling in Lettuce Cups: the name is already in the database
+  - d2_veg_sides.jsonl:8 Stuffed Bell Peppers with Quinoa and Black Beans: the name is already in the database
+  - d2_veg_sides.jsonl:9 Cauliflower Steak with Chimichurri: the name is already in the database
+  - d2_veg_sides.jsonl:9 Cauliflower Steak with Chimichurri: only 4 g protein
+  - d2_veg_sides.jsonl:10 Portobello Fajita Wraps: the name is already in the database
+  - d2_veg_sides.jsonl:11 Mediterranean Chickpea Bowls: the name is already in the database
+  - d2_veg_sides.jsonl:12 Lentil Bolognese over Zucchini Noodles: the name is already in the database
+  - d2_veg_sides.jsonl:13 Spinach and Ricotta Stuffed Mushrooms: the name is already in the database
+  - d2_veg_sides.jsonl:14 Black Bean Burger Bowls with Avocado Crema: the name is already in the database
+  - d2_veg_sides.jsonl:15 Edamame and Vegetable Stir-Fry with Brown Rice: the name is already in the database
+  - d2_veg_sides.jsonl:16 Tempeh Tacos with Cabbage Slaw: the name is already in the database
+  - d2_veg_sides.jsonl:17 Creamy Tomato Basil Pasta with White Beans: the name is already in the database
+  - d2_veg_sides.jsonl:17 Creamy Tomato Basil Pasta with White Beans: glycemic load 19.8 a serving
+  - d2_veg_sides.jsonl:18 Sweet Potato and Black Bean Chili: the name is already in the database
+  - d2_veg_sides.jsonl:19 Falafel Bowls with Tahini Sauce: the name is already in the database
+  - d2_veg_sides.jsonl:19 Falafel Bowls with Tahini Sauce: glycemic load 19.4 a serving
+  - d2_veg_sides.jsonl:20 Vegetable Lo Mein with Tofu: the name is already in the database
+  - d2_veg_sides.jsonl:21 Caprese Stuffed Portobello Caps: the name is already in the database
+  - d2_veg_sides.jsonl:22 Quinoa Black Bean Salad Jars: the name is already in the database
+  - d2_veg_sides.jsonl:23 Roasted Cauliflower and Chickpea Tacos: the name is already in the database
+  - d2_veg_sides.jsonl:24 Garlic Roasted Green Beans with Almonds: the name is already in the database
+  - d2_veg_sides.jsonl:25 Lemon Parmesan Asparagus: the name is already in the database
+  - d2_veg_sides.jsonl:26 Sauteed Spinach with Garlic: the name is already in the database
+  - d2_veg_sides.jsonl:27 Zucchini Fritters with Greek Yogurt Dip: the name is already in the database
+  - d2_veg_sides.jsonl:28 Broccoli Slaw with Peanut Dressing: the name is already in the database
+  - d2_veg_sides.jsonl:29 Mushroom Wild Rice Pilaf: the name is already in the database
+  - d2_veg_sides.jsonl:29 Mushroom Wild Rice Pilaf: only 0% of its carbohydrate has a measured GI
+  - d2_veg_sides.jsonl:30 Quinoa Tabbouleh: the name is already in the database
+  - d2_veg_sides.jsonl:31 Cheddar Chive Cauliflower Biscuits: the name is already in the database
+  - d2_veg_sides.jsonl:32 Spiced Roasted Carrots and Chickpeas: the name is already in the database
+  - d3_breakfast_onepan.jsonl:1 Oat Flour Banana Pancakes: the name is already in the database
+  - d3_breakfast_onepan.jsonl:1 Oat Flour Banana Pancakes: glycemic load 18.8 a serving
+  - d3_breakfast_onepan.jsonl:1 Oat Flour Banana Pancakes: only 33% of its carbohydrate has a measured GI
+  - d3_breakfast_onepan.jsonl:2 Almond Flour Pancakes with Berries: the name is already in the database
+  - d3_breakfast_onepan.jsonl:3 Cottage Cheese Pancakes: the name is already in the database
+  - d3_breakfast_onepan.jsonl:3 Cottage Cheese Pancakes: only 15% of its carbohydrate has a measured GI
+  - d3_breakfast_onepan.jsonl:4 Pumpkin Oat Pancakes: the name is already in the database
+  - d3_breakfast_onepan.jsonl:4 Pumpkin Oat Pancakes: only 12% of its carbohydrate has a measured GI
+  - d3_breakfast_onepan.jsonl:5 Protein Waffles from Oats and Eggs: the name is already in the database
+  - d3_breakfast_onepan.jsonl:6 Blueberry Oat Breakfast Muffins: the name is already in the database
+  - d3_breakfast_onepan.jsonl:6 Blueberry Oat Breakfast Muffins: 116 kcal a serving
+  - d3_breakfast_onepan.jsonl:6 Blueberry Oat Breakfast Muffins: only 5 g protein
+  - d3_breakfast_onepan.jsonl:6 Blueberry Oat Breakfast Muffins: only 30% of its carbohydrate has a measured GI
+  - d3_breakfast_onepan.jsonl:7 Zucchini Bread Oatmeal Bake: the name is already in the database
+  - d3_breakfast_onepan.jsonl:7 Zucchini Bread Oatmeal Bake: 2 steps
+  - d3_breakfast_onepan.jsonl:8 Sausage and Egg Breakfast Casserole: the name is already in the database
+  - d3_breakfast_onepan.jsonl:9 Ham and Cheese Egg Roll-Ups: the name is already in the database
+  - d3_breakfast_onepan.jsonl:9 Ham and Cheese Egg Roll-Ups: 2 steps
+  - d3_breakfast_onepan.jsonl:10 Spinach Feta Breakfast Wrap: the name is already in the database
+  - d3_breakfast_onepan.jsonl:10 Spinach Feta Breakfast Wrap: 2 steps
+  - d3_breakfast_onepan.jsonl:11 Chilaquiles-Style Egg Skillet: the name is already in the database
+  - d3_breakfast_onepan.jsonl:12 Sweet Potato Breakfast Boats: the name is already in the database
+  - d3_breakfast_onepan.jsonl:13 Greek Yogurt Breakfast Bowl with Nuts and Seeds: the name is already in the database
+  - d3_breakfast_onepan.jsonl:13 Greek Yogurt Breakfast Bowl with Nuts and Seeds: 2 steps
+  - d3_breakfast_onepan.jsonl:14 Peanut Butter Overnight Oats: the name is already in the database
+  - d3_breakfast_onepan.jsonl:14 Peanut Butter Overnight Oats: 2 steps
+  - d3_breakfast_onepan.jsonl:15 Savory Oatmeal with Egg and Spinach: the name is already in the database
+  - d3_breakfast_onepan.jsonl:15 Savory Oatmeal with Egg and Spinach: 2 steps
+  - d3_breakfast_onepan.jsonl:16 Breakfast Sausage Patties with Apple: the name is already in the database
+  - d3_breakfast_onepan.jsonl:17 Cheddar Broccoli Egg Cups: the name is already in the database
+  - d3_breakfast_onepan.jsonl:17 Cheddar Broccoli Egg Cups: 132 kcal a serving
+  - d3_breakfast_onepan.jsonl:18 Sheet Pan Sausage with Potatoes and Green Beans: the name is already in the database
+  - d3_breakfast_onepan.jsonl:18 Sheet Pan Sausage with Potatoes and Green Beans: 2 steps
+  - d3_breakfast_onepan.jsonl:19 Sheet Pan Salmon with Brussels Sprouts: the name is already in the database
+  - d3_breakfast_onepan.jsonl:20 Sheet Pan Shrimp and Vegetable Bake: the name is already in the database
+  - d3_breakfast_onepan.jsonl:21 Slow Cooker Chicken Tortilla Chili: the name is already in the database
+  - d3_breakfast_onepan.jsonl:22 Slow Cooker Pot Roast Chili with Beans: the name is already in the database
+  - d3_breakfast_onepan.jsonl:22 Slow Cooker Pot Roast Chili with Beans: 2 steps
+  - d3_breakfast_onepan.jsonl:22 Slow Cooker Pot Roast Chili with Beans: only 58% of its carbohydrate has a measured GI
+  - d3_breakfast_onepan.jsonl:23 Slow Cooker Turkey Meatballs in Marinara: the name is already in the database
+  - d3_breakfast_onepan.jsonl:23 Slow Cooker Turkey Meatballs in Marinara: 2 steps
+  - d3_breakfast_onepan.jsonl:24 Air Fryer Chicken Thighs with Smoked Paprika: the name is already in the database
+  - d3_breakfast_onepan.jsonl:25 Air Fryer Salmon with Lemon and Dill: the name is already in the database
+  - d3_breakfast_onepan.jsonl:26 Air Fryer Cauliflower Wings: the name is already in the database
+  - d3_breakfast_onepan.jsonl:27 Air Fryer Shrimp with Garlic and Lime: the name is already in the database
+  - d3_breakfast_onepan.jsonl:27 Air Fryer Shrimp with Garlic and Lime: 2 steps
+  - d3_breakfast_onepan.jsonl:28 Air Fryer Turkey Meatballs: the name is already in the database
+  - d3_breakfast_onepan.jsonl:29 Air Fryer Brussels Sprouts with Bacon: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:1 Roast Beef and Horseradish Wrap: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:1 Roast Beef and Horseradish Wrap: 2 steps
+  - d4_sandwich_salad_snack.jsonl:2 Turkey Avocado Ranch Wrap: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:3 Grilled Chicken Pesto Panini: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:4 Caprese Sandwich on Ezekiel Bread: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:4 Caprese Sandwich on Ezekiel Bread: 2 steps
+  - d4_sandwich_salad_snack.jsonl:5 Hummus and Roasted Vegetable Sandwich: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:5 Hummus and Roasted Vegetable Sandwich: 2 steps
+  - d4_sandwich_salad_snack.jsonl:6 Egg and Avocado Breakfast Sandwich on English Muffin: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:6 Egg and Avocado Breakfast Sandwich on English Muffin: 2 steps
+  - d4_sandwich_salad_snack.jsonl:7 Tuna Salad Stuffed Avocado: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:7 Tuna Salad Stuffed Avocado: 2 steps
+  - d4_sandwich_salad_snack.jsonl:8 Chicken Caesar Salad with Yogurt Dressing: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:9 Greek Chicken Salad with Tzatziki: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:10 Asian Chicken Salad with Sesame Dressing: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:10 Asian Chicken Salad with Sesame Dressing: 2 steps
+  - d4_sandwich_salad_snack.jsonl:11 Spinach Strawberry Salad with Pecans: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:11 Spinach Strawberry Salad with Pecans: 2 steps
+  - d4_sandwich_salad_snack.jsonl:12 Kale Caesar with Chickpea Croutons: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:13 Roasted Sweet Potato and Black Bean Salad: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:14 Cucumber Dill Chicken Salad Cups: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:14 Cucumber Dill Chicken Salad Cups: 148 kcal a serving
+  - d4_sandwich_salad_snack.jsonl:14 Cucumber Dill Chicken Salad Cups: 2 steps
+  - d4_sandwich_salad_snack.jsonl:15 Wedge Salad with Blue Cheese and Tomatoes: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:15 Wedge Salad with Blue Cheese and Tomatoes: 124 kcal a serving
+  - d4_sandwich_salad_snack.jsonl:16 Marinated Mushroom and Artichoke Salad: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:16 Marinated Mushroom and Artichoke Salad: 114 kcal a serving
+  - d4_sandwich_salad_snack.jsonl:16 Marinated Mushroom and Artichoke Salad: 2 steps
+  - d4_sandwich_salad_snack.jsonl:17 Taco Salad with Lime Crema: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:18 Antipasto Skewers: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:19 Buffalo Chicken Thigh Bites with Celery and Blue Cheese: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:20 Caprese Dip with Veggie Dippers: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:21 Edamame with Sea Salt and Lime: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:22 Roasted Red Pepper Hummus with Crudités: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:23 Stuffed Mini Peppers with Cream Cheese and Chives: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:24 Spicy Roasted Chickpea Crunch: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:25 Cheddar and Apple Slices with Walnuts: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:26 Cottage Cheese with Cherry Tomatoes and Everything Seasoning: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:27 Creamy Cauliflower and Leek Soup: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:27 Creamy Cauliflower and Leek Soup: 102 kcal a serving
+  - d4_sandwich_salad_snack.jsonl:27 Creamy Cauliflower and Leek Soup: only 4 g protein
+  - d4_sandwich_salad_snack.jsonl:27 Creamy Cauliflower and Leek Soup: only 13% of its carbohydrate has a measured GI
+  - d4_sandwich_salad_snack.jsonl:28 Lentil and Spinach Soup: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:28 Lentil and Spinach Soup: 107 kcal a serving
+  - d4_sandwich_salad_snack.jsonl:28 Lentil and Spinach Soup: only 7 g protein
+  - d4_sandwich_salad_snack.jsonl:28 Lentil and Spinach Soup: only 52% of its carbohydrate has a measured GI
+  - d4_sandwich_salad_snack.jsonl:29 Butternut Squash Soup with Sage: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:29 Butternut Squash Soup with Sage: 143 kcal a serving
+  - d4_sandwich_salad_snack.jsonl:29 Butternut Squash Soup with Sage: only 2 g protein
+  - d4_sandwich_salad_snack.jsonl:30 Chicken Zucchini Noodle Soup: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:30 Chicken Zucchini Noodle Soup: 139 kcal a serving
+  - d4_sandwich_salad_snack.jsonl:30 Chicken Zucchini Noodle Soup: 2 steps
+  - d4_sandwich_salad_snack.jsonl:31 Miso Mushroom Soup with Tofu: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:31 Miso Mushroom Soup with Tofu: 129 kcal a serving
+  - d4_sandwich_salad_snack.jsonl:32 Tomato Basil Soup with White Beans: the name is already in the database
+  - d4_sandwich_salad_snack.jsonl:32 Tomato Basil Soup with White Beans: only 8 g protein
+  - d4_sandwich_salad_snack.jsonl:32 Tomato Basil Soup with White Beans: only 50% of its carbohydrate has a measured GI
+  - d4_sandwich_salad_snack.jsonl:33 Turkey Vegetable Soup with Kale: the name is already in the database
