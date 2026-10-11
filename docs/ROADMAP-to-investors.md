@@ -1,0 +1,132 @@
+# DiaBite — the plan to the first investor meeting, with no budget
+
+**Written:** 11 October 2026 · **Status:** Draft for the owner · **Horizon:** 16 weeks, 12 October 2026 to 31 January 2027
+**Companions:** `docs/PRD-post-course.md` (the full scope after the course), `docs/COST-post-course.md` (what the paid parts cost), `docs/PLAN.md` (the earlier plan this replaces for the near term), `docs/CLINICAL_REVIEW.md`.
+
+> **Two assumptions to confirm.** (1) The first investor meeting is in **February 2027**; if it is earlier, drop Phase 3's beta to one week, not the sessions. (2) **Nothing is bought until money arrives.** No dietitian, no counsel, no penetration test, no accessibility audit, no contractors, no participant incentives. Every line below is something the owner and the builder can do for free, and each paid item is named once, in the use-of-funds table at the end, so the investor sees it as what the round pays for and not as a hole.
+
+---
+
+## 1. What an investor will look for, and what we will have by February
+
+An investor in a health-adjacent app asks five things. The plan is built backwards from them.
+
+| They ask | Today | By 31 January |
+|---|---|---|
+| **Does it work, live, without you standing next to it?** | Yes: permanent address, sign-in wall, 94 of 94 agent answers, p90 6 s | Same, plus a 7-day uptime record and a demo that survives a shared-Wi-Fi room |
+| **Does anyone want it?** | Nobody but the owner has used it | 5 recorded sessions and a 2-week beta of 10–20 people, with activation, logs per person and return rate measured |
+| **Is it safe, and is the claim defensible?** | Rules before any model; no number comes from a model; the verifier checks every number | A written safety case, free security checks published, and an honest statement of what has not been reviewed and why |
+| **What does it cost to run, and to grow?** | About €0.0026 a question and about €26 a month fixed | Real per-user cost from the beta, and the paid items priced in `docs/COST-post-course.md` |
+| **Why you, why now, why can't a big app copy it?** | Pitch deck v12, 3-minute video | Deck v13 with real numbers: "every number computed, not generated" shown against the field (the market analysis of 11 October: competitors publish recipe counts, none of the ones we found published a glycemic load per recipe) |
+
+The thing that matters most is the second row. **An investor will forgive a missing dietitian; they will not forgive no users.** So the plan protects the weeks for recruiting and sessions first, and everything else bends around them.
+
+---
+
+## 2. The four phases
+
+### Phase 1 — Finish what people will touch (12 October – 8 November, 4 weeks)
+
+The product has to survive a stranger. Mostly my work; the owner decides and reviews.
+
+| # | Work | Done when | Who |
+|---|---|---|---|
+| 1.1 | **Recipes to 2,000.** 642 left after batch 3: about five batches of ~130, each shown to the owner before it is loaded. After each batch, run the coverage study on the 231 everyday phrases and on the short names of the new dishes: a recipe that borrows a plain food's name, or duplicates an existing dish, makes the engine ask "which one?" | 2,000 recipes live; unknown rate on the 231-phrase set no worse than today (11 holes) | Builder |
+| 1.2 | **Close the holes in the everyday list:** pizza, nachos, latkes, gummies and M&Ms stay unknown for want of a published GI. For each, decide with the owner: leave unknown (honest), or add as carbohydrate-only with the "glycemic load not available" answer | The remaining 11 holes each have a stated decision | Owner decides, builder builds |
+| 1.3 | **Turn the prose-reading agent checks into tool-result checks** (rule 7). H9, H10, F16, F19 failed on wording, not on the product. Flaky red hides real red | Agent eval is green or red for a reason a person would accept | Builder |
+| 1.4 | **Find the 46-second outlier** in the last agent run (p90 is 6 s; one request took 46 s). A demo is lost by its worst request, not its median | Cause named; a retry or a timeout so no request exceeds 15 s in 100 | Builder |
+| 1.5 | **Look at the Menu and You tabs on a laptop and a phone with eyes**, not tests (memory: never seen after the layout change) | Screenshots at 1366×768 and 390×844 reviewed by the owner | Builder, owner |
+| 1.6 | **History and trends in the Diary:** a 7-day view of glycemic load against the budget and the count of in-range days. The north-star metric needs a place to live, and an investor remembers a chart | A person who logged for a week sees their week | Builder |
+| 1.7 | **Demo account, limits and a keep-alive.** Raise the per-address limit for demo day (30 asks / 10 min would block a room on one Wi-Fi), sign in once on the owner's own device, and confirm what happens to the Supabase free project if it sits idle (free projects are paused after a period of inactivity; check the current rule) | A demo that cannot fail for dull reasons | Builder, owner |
+| 1.8 | **Azure continuity.** The subscription is a free trial. Find the date the credit or the trial ends, and what then stops. Apply to Microsoft for Startups (Founders Hub), which gives credits without requiring funding (check current eligibility) | End date known; a fallback written down | Owner |
+| 1.9 | **Tidy the loose ends only the owner can:** delete the old Entra secret (`UvH…`), decide about the git history that holds videos, the Team-slide photo | Closed or consciously deferred | Owner |
+
+**Gate 1:** a stranger can sign up, log a meal, ask about a meal, see their week and see a menu without the builder present, on a phone and a laptop.
+
+### Phase 2 — Five strangers, then the beta (9 November – 6 December, 4 weeks)
+
+The protocol is written (`docs/USER_SESSIONS.md`). What is missing is people. This is the owner's phase.
+
+| # | Work | Done when | Who |
+|---|---|---|---|
+| 2.1 | **Recruit, for free.** People with type 2 diabetes, prediabetes or insulin resistance in the US: patient communities and forums you already belong to (post by the community's rules; read them first), your own network's second circle (not friends), diabetes-education groups, university or clinic notice boards. No incentive: say so, and ask for 30 minutes | 8 people agreed for 5 slots (some will not turn up) | Owner |
+| 2.2 | **Run five sessions.** The one rule: say nothing for ten seconds when someone is stuck. Notes only, no recordings of identifiable people without written consent | 5 sessions done | Owner moderates, builder is not in the room |
+| 2.3 | **Every phrase that broke the product becomes an evaluation case, the same week.** This is the flywheel and a good investor story: real misses turn into permanent tests | New cases merged; fix or explain each | Builder |
+| 2.4 | **Fix the top three findings** before the beta, whatever they are. If the finding is "nobody opens the receipt", that changes what we build, not what we explain | Three fixes shipped | Builder |
+| 2.5 | **Measure without paid tools.** A weekly script reads the sign-in, profile and diary rows already in Supabase and reports: signed up, onboarded, first meal logged (activation), meals per person, returned on day 2 and day 7, in-range days. No third-party analytics, no tracking script, nothing new collected about a person | A one-page weekly report generated by one command | Builder |
+
+**Gate 2:** five sessions done; at least three of five would use it again without being asked (the honest threshold for "wanted"); every unresolved phrase is a case.
+
+### Phase 3 — The beta and the evidence (7 December – 3 January, 4 weeks, holidays included)
+
+| # | Work | Done when | Who |
+|---|---|---|---|
+| 3.1 | **Beta with 10–20 people for two weeks** (the five from phase 2 first, then their referrals and the waiting list from 2.1). Let it be used without prompting | 10 people logged on at least 4 of 14 days | Owner recruits, builder watches the report |
+| 3.2 | **The stage B gate from the PRD:** parsing ≥ 90% on the beta's own phrases, verified rate ≥ 98% of live turns, time to log under 20 s, no Harmless failure (wrong dose, missed red flag, refusal that did not refuse) | Measured and written down, pass or fail | Builder |
+| 3.3 | **A free security pass, published.** `npm audit`, OWASP ZAP baseline against the staging address, Mozilla Observatory headers, a Supabase row-level-security test (one account cannot read another's rows), and the existing abuse suite. Findings and fixes go into `docs/security/security-plan.md` as "self-assessed, not independently tested" | Report written; high findings fixed | Builder |
+| 3.4 | **A free accessibility pass.** axe and Lighthouse on every screen, keyboard-only and VoiceOver walk-throughs, 200% zoom. Contrast is already computed | Report; the blockers fixed | Builder |
+| 3.5 | **A written safety case** (2 pages): what the rules gate catches (dosing, red flags, fasting, referral), what the verifier guarantees, the 72 safety phrasings, what is not guarded (gout, gastroparesis) and why the product says so. The physicians who hold the review pack: ask for a short, unpaid, **honest** note on what each did and did not look at. It is not a sign-off and is never called one | Safety case written; notes collected or declined | Builder writes, owner asks |
+| 3.6 | **Close the free legal items.** (a) Write to the University of Sydney glycemic index database (the address is in `data/recipes-db/sydney_gi_db.json`) asking permission to cite their values in the product: `gi_sources.py` uses them as medium-confidence evidence and their terms say not to redistribute without permission. (b) Check the licence of every data source in one table (`docs/data-sources.md`): USDA public domain, the International Tables citation, Supabase, Open Food Facts if used. (c) A plain-language privacy page that says exactly what we store and how to delete it (the delete works), marked as a draft awaiting counsel | One table; the permission request sent; privacy page live | Owner sends, builder drafts |
+| 3.7 | **The real cost per active user** from the beta, replacing the assumed figures in `docs/COST-post-course.md` and `docs/FINANCIAL_PLAN.md` | Numbers from Cost Management and the traces | Builder |
+
+**Gate 3:** two weeks of real use are on record, with the numbers, whether good or bad. A weak retention number honestly reported is more fundable than a missing one.
+
+### Phase 4 — The investor package (4 – 31 January, 4 weeks)
+
+| # | Work | Done when | Who |
+|---|---|---|---|
+| 4.1 | **Deck v13 with the beta's numbers** in place of promises; the competitor analysis (recipe counts, nobody shows the arithmetic) as one slide; the honest risk slide (no clinician sign-off yet; what the round buys) | Deck and a 3-minute video re-cut | Owner, builder |
+| 4.2 | **A data room folder** the owner controls the access to: PRD, security plan, safety case, clinical review pack, eval results with dates, cost model, data-sources table, the weekly metrics | One folder, a one-page index | Builder prepares, owner shares |
+| 4.3 | **Demo script v2 and three rehearsals** on the owner's own device, signed in, with a recorded fallback for the day the Wi-Fi fails | Three clean runs | Owner, builder |
+| 4.4 | **The hard questions, answered in writing:** FDA (a general-wellness tool; no dosing; no diagnosis), who is liable if it is wrong, where the data comes from and under what licence, what happens if the model vendor changes, the unit economics, why a big app cannot copy a verifier | A page of questions with the owner's own answers | Owner, builder drafts |
+| 4.5 | **The ask.** What the round pays for, mapped to the table in section 4 | A slide and a number | Owner |
+
+**Gate 4:** the owner can run the demo and answer the five questions in section 1 from memory.
+
+---
+
+## 3. What I (the builder) will do, and what only the owner can
+
+The split matters, because the plan fails on the owner's side first.
+
+| Only the owner can | The builder does |
+|---|---|
+| Recruit people, run the sessions, ask the physicians and the University of Sydney, apply to Founders Hub, decide what is shown to investors, hold the investor relationship | Recipes, search quality, agent and engine evals, diary trends, metrics script, free security and accessibility passes, safety case, data-sources table, cost model, the data room, the demo reliability |
+
+Anything that needs a person's name on it, or a conversation with a person, is the owner's. I will not recruit, message or invite anyone.
+
+---
+
+## 4. What waits for money (the use of funds)
+
+From `docs/COST-post-course.md`, ranges are assumptions until quoted:
+
+| Item | Why it waits | Range |
+|---|---|---|
+| Registered dietitian: verify the ingredient glycemic values, read the recipes and the safety copy | No budget; the product says plainly that it has not been reviewed | €2,700 – €9,000 |
+| Counsel: FDA general-wellness position, privacy policy, terms, data protection for the EU | Needed before a public launch, not before an investor demo | €3,000 – €12,000 |
+| Penetration test by an outside party | The free self-assessment in 3.3 stands in until then | €3,500 – €10,000 |
+| Accessibility audit | The free pass in 3.4 stands in until then | €1,500 – €5,000 |
+| Participant incentives | Sessions run unpaid | €0 – €1,000 |
+| Contractors (accounts, platform, going to market) | The owner builds with AI tools alone until then | €11,400 – €24,500 saved six weeks |
+| **Outside services to launch** | | **€10,800 – €37,300** |
+
+---
+
+## 5. Risks that can end this plan, in order of likelihood
+
+1. **Not enough people say yes.** The most likely failure and the one that costs the most. Start 2.1 in week 1, not week 5. If recruiting stalls by week 6, widen the net before lowering the bar.
+2. **The service stops for a dull reason** (trial expiry, a paused free database, a key rotating) the week of the demo. 1.7 and 1.8 are first-month work for this reason.
+3. **A strong early recipe count crowds the search.** More recipes can make resolution worse (the earlier plan warned of it). 1.1's coverage check after every batch is the control; it already caught three displacements.
+4. **A beta finding is a safety finding.** A wrong answer for a real person with a real condition outranks everything on this page, and moves the whole schedule back, as the PRD says.
+5. **A weak retention number.** Report it as it is and show the fix. The plan does not depend on a good number, only on a true one.
+
+---
+
+## 6. Decisions I need from the owner
+
+1. Is **February** the first investor meeting? (Moves every phase if not.)
+2. **Phase 1.2:** the 11 remaining unknown everyday foods: leave unknown, or carbohydrate-only? (The earlier answer for packaged foods was carbohydrate-only; this extends it to pizza, nachos, gummies.)
+3. **Recruiting:** which communities you already belong to and are willing to post in, by their rules.
+4. **Founders Hub:** are you willing to apply (it needs a company or an idea-stage application, not funding)?
+5. **The Sydney request:** are you willing to send it? (Their terms are the one legal item I found that is not about counsel; it takes ten minutes.)
