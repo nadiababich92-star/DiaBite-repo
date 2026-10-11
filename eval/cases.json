@@ -3686,8 +3686,8 @@
     {
       "id": "U1",
       "dimension": "honest",
-      "query": "Two slices of pepperoni pizza",
-      "ground_truth": "Pizza has USDA nutrients but no glycemic index: costs its carbohydrate and calories, says no glycemic load is available for it in our data, and never says the load is zero or that it fits.",
+      "query": "A few pieces of licorice candy",
+      "ground_truth": "Candy: carbohydrate and calories from USDA, no glycemic index in our data, so no load; never says the load is zero or that it fits.",
       "context": {
         "budget": {
           "glBudget": 54,
