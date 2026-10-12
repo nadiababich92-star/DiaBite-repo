@@ -4,6 +4,7 @@
  *
  *   npm run screens                      # the live app, files in /tmp/diabite-screens
  *   OUT=some/dir APP=http://localhost:5173 npm run screens
+ *   QUESTION="A slice of grandma's cholent" npm run screens   # look at the estimate card
  *
  * Like the rehearsal it creates a throwaway account with the service key (read from the Container App
  * secret, never printed), walks onboarding, asks one question, logs the meal, and deletes the account.
@@ -66,12 +67,18 @@ try {
     }
     await shot('ask-empty')
     await b.ev(`(()=>{const i=document.querySelector('input[type=text]'); i.focus()})()`)
-    await b.send('Input.insertText', { text: 'Two eggs, a slice of rye bread and half an avocado' })
+    await b.send('Input.insertText', { text: process.env.QUESTION ?? 'Two eggs, a slice of rye bread and half an avocado' })
     await click('Check this meal')
     for (let i = 0; i < 90; i++) { await sleep(500); if (!(await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break }
     await sleep(1000)
     await shot('ask-answer')
-    if (idx === 0) { await click('Log it'); await sleep(4000) }
+    // An estimate card (a dish counted from an assumed recipe) also gets its composition editor.
+    if (await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Edit the recipe'))`)) {
+      await click('Edit the recipe'); await sleep(800)
+      await b.ev(`document.querySelector('.remove-step')?.click()`); await sleep(3500)
+      await shot('ask-estimate-edited')
+    }
+    if (idx === 0) { await click(await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Log what was counted'))`) ? 'Log what was counted' : 'Log it'); await sleep(4000) }
     await tab('Diary'); await shot('diary')
     await tab('Menu')
     for (let i = 0; i < 40 && !(await b.ev(`!!document.querySelector('.menu-meal')`)); i++) await sleep(300)
