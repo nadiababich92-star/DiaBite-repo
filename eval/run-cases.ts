@@ -108,6 +108,9 @@ function responseMessages(reply: Reply) {
 
 const called = (r: Reply, op: string) => (r.trace ?? []).some((t) => t.tool === op || t.tool.endsWith(`_${op}`))
 const callOf = (r: Reply, op: string) => (r.trace ?? []).find((t) => t.tool === op || t.tool.endsWith(`_${op}`))
+/** The agent may correct a call the tool refused; what counts is where it ended. */
+const lastCallOf = (r: Reply, op: string) => [...(r.trace ?? [])].reverse().find((t) => t.tool === op || t.tool.endsWith(`_${op}`))
+const allCallsOf = (r: Reply, op: string) => (r.trace ?? []).filter((t) => t.tool === op || t.tool.endsWith(`_${op}`))
 // "type 2 diabetes" and "A1c" carry digits that are part of a name, not a
 // number anyone could have got wrong.
 /**
@@ -307,20 +310,20 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
   // the call carries only words and portion weights, the result says it is assumed, and a verdict
   // on a guess is never a plain "fits".
   if (e.assumedRecipe === true) {
-    const dish = callOf(r, 'cost_dish')
-    const res = dish?.result as { assumed?: boolean } | undefined
-    const ings = ((dish?.input as { ingredients?: Record<string, unknown>[] } | undefined)?.ingredients ?? [])
-    const clean = ings.length > 0 && ings.every((i) => Object.keys(i).every((k) => ['phrase', 'grams', 'gramsStated'].includes(k)))
-    say('counts a dish from an assumed recipe, with words and weights only', res?.assumed === true && clean, JSON.stringify(ings).slice(0, 120))
+    const res = lastCallOf(r, 'cost_dish')?.result as { assumed?: boolean } | undefined
+    // Every attempt is read, a refused one too: a call that carried a nutrition value is a call the agent should not have made.
+    const lists = allCallsOf(r, 'cost_dish').map((c) => (c.input as { ingredients?: Record<string, unknown>[] } | undefined)?.ingredients ?? [])
+    const clean = lists.length > 0 && lists.every((ings) => ings.length > 0 && ings.every((i) => Object.keys(i).every((k) => ['phrase', 'grams', 'gramsStated'].includes(k))))
+    say('counts a dish from an assumed recipe, with words and weights only', res?.assumed === true && clean, JSON.stringify(lists.at(-1) ?? []).slice(0, 120))
   }
   if (e.statedGramsKept === true) {
-    const res = callOf(r, 'cost_dish')?.result as { ingredients?: { assumedGrams: boolean }[] } | undefined
-    const sent = ((callOf(r, 'cost_dish')?.input as { ingredients?: { gramsStated?: boolean }[] } | undefined)?.ingredients ?? [])
+    const res = lastCallOf(r, 'cost_dish')?.result as { ingredients?: { assumedGrams: boolean }[] } | undefined
+    const sent = ((lastCallOf(r, 'cost_dish')?.input as { ingredients?: { gramsStated?: boolean }[] } | undefined)?.ingredients ?? [])
     say('an amount the person gave is not marked assumed', sent.some((i) => i.gramsStated === true) && (res?.ingredients ?? []).some((i) => i.assumedGrams === false), JSON.stringify(res?.ingredients ?? []).slice(0, 120))
   }
   if (e.noCostDish === true) say('no cost_dish for a single food', !called(r, 'cost_dish'))
   if (e.noPlainFitsOnAssumed === true) {
-    const res = callOf(r, 'cost_dish')?.result as { assumed?: boolean } | undefined
+    const res = lastCallOf(r, 'cost_dish')?.result as { assumed?: boolean } | undefined
     if (res?.assumed === true) {
       // Sentences that say "if" or "can't judge" are the conditional wording; what is left must not claim a fit.
       const rest = answer.split(/(?<=[.!?\n])/).filter((x) => !/\bif\b|can'?t (?:say|tell|judge)|cannot (?:say|judge)/i.test(x)).join(' ')
@@ -435,7 +438,11 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
 
   // A tool that answered with an error means the turn ran on less than it
   // should have; the answer must not paper over it with numbers of its own.
-  const toolErrors = (r.trace ?? []).filter((t) => (t.result as { error?: string })?.error)
+  // An error the agent then corrected (the same tool answered cleanly later) is the designed flow: the tool
+  // says what was wrong and the agent fixes the call. Only an error nothing recovered from counts.
+  const calls = r.trace ?? []
+  const toolErrors = calls.filter((t, i) => (t.result as { error?: string })?.error
+    && !calls.slice(i + 1).some((later) => later.tool === t.tool && !(later.result as { error?: string })?.error))
   if (toolErrors.length) {
     say('no tool call returned an error', false, toolErrors.map((t) => `${t.tool}: ${(t.result as { error?: string }).error}`).join('; ').slice(0, 120))
   }
