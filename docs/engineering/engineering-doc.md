@@ -1,212 +1,282 @@
-# Engineering document: sign-in, branded foods, weekly menu V1
+# Engineering document: cost a dish from its ingredients (step A of the unknown-dish tool)
 
-*Produced by `/engineering-planner` on 9 October 2026 from `docs/PRD.md`, `docs/PLAN.md`,
-`docs/PRD-post-course.md` (WS2, WS3, WS4) and the code. The previous document in this
-place, the abuse protection of `/agent/ask`, is shipped and now lives in
-`docs/engineering/abuse-protection.md`.*
+*Produced by `/engineering-planner` on 12 October 2026 from `docs/PRD.md`, `CLAUDE.md`,
+`docs/ROADMAP-to-investors.md` (item 1.10) and the code. The previous document in this place,
+sign-in, branded foods and the weekly menu, is shipped and now lives in
+`docs/engineering/accounts-branded-menu.md`; the one before it is `abuse-protection.md`.*
 
-**Decisions already made by the owner, 9 October 2026** (recorded, not reopened here):
+**Decisions made by the owner, 12 October 2026** (recorded, not reopened here):
 
 | Question | Answer |
 |---|---|
-| How people sign in | An emailed link (no password) |
-| Is sign-in required | **Yes, before the first question** |
-| What is stored about a person | The diary **and the whole profile** (diagnosis, medicines, kidney status, allergies) |
-| The diary already in a browser | Offer to move it, once, on first sign-in |
-| Email delivery | Azure Communication Services |
-| Branded foods | Show carbohydrate; "glycemic load not available"; one to two thousand common items |
-| Weekly menu | Back now, with V1 features; **hidden** for a history of disordered eating, chronic kidney disease and dialysis until a clinician answers |
-
----
+| Who proposes the ingredient list when the person names a dish we do not have but gives no ingredients | **The agent proposes a typical list from its own knowledge**, marks it as an assumption, and the person confirms or edits |
+| Where the grams come from when the person does not say | **The agent proposes grams as an assumption**; each shows in the receipt as "assumed" and is edited with the existing portion editor |
+| How the person confirms | **A card with an editable composition** (not chat only) |
+| Step B, reading a recipe from the web | Out of scope here; decided later from the five sessions (roadmap 3.8) |
 
 ## 1. Summary
 
-**Three changes, one document, because they meet at the same screens.**
+**The feature.** When a person asks about a dish the database does not hold (today: "I don't have
+this food" and a question), the agent can instead propose what the dish is typically made of,
+the engine costs those ingredients, and the answer says plainly that it was counted from a
+typical recipe and shows the composition so the person can correct it. A new engine tool,
+`cost_dish`, takes a dish name and a list of `{ ingredient phrase, grams }`, resolves each phrase
+against our tables, and returns the same numbers `compute_meal` does.
 
-| | The user problem (PRD / PLAN reference) | Done when |
-|---|---|---|
-| **A. Sign-in** | Close the tab and DiaBite has never met you; no history, no trends, no way for the owner to know whom to ask for feedback (PLAN "Then: accounts"; WS3) | A person signs in on a phone, logs a meal, opens the app on a laptop and sees yesterday's day. Export and deletion work |
-| **B. Branded foods** | 13% of what people type resolves to nothing, mostly Doritos, Oreos, KIND bars; a user who meets "I don't have that" twice stops asking (PLAN "Next: the food gap"; WS2) | "A KIND bar" returns grams of carbohydrate, fibre and calories, computed by the engine, with the load stated as not available; the unknown rate is re-measured next to 13% |
-| **C. Weekly menu V1** | The menu works and has never been in front of a user; it ignores kidneys, eating-disorder history, gout and gastroparesis (code: `src/lib/menu.ts` filters only allergens and eating pattern) (WS4 D3/D4) | One meal can be replaced without regenerating the week; no dish repeats within three days; the shopping list works; the hidden profiles see a calm explanation instead |
+**The user problem.** PRD Week 1, requirement C7 ("unknown food named, not guessed") made the product
+honest and left it with a visible hole: of 231 everyday US foods, 9 are still "unknown" and the
+long tail of home and restaurant dishes will always be. An "I don't know" twice and a closed tab is
+the failure the user sessions are meant to find (`docs/USER_SESSIONS.md`, question 3).
 
-**Measures.** A: share of first visits that reach the first answer (the wall costs some; this is the number to watch), returning users in week 2. B: unknown rate on `eval/questions-field.jsonl` (13% now), branded answers that the verifier passes. C: menu opened by users who did not hide it; zero menus shown to a hidden profile (a test, not a metric).
-
-**Build order I recommend: B, then C, then A.** B and C need no outside parties and no personal data; A starts its outside work (email domain, counsel) now and builds when those are ready. If you prefer A first, nothing in B or C depends on it.
+**How success is measured.**
+1. Every dish in a set of 20 dishes we do not hold gets a costed, labelled answer or a clear
+   reason why not (unresolvable ingredients named), never a silent substitution.
+2. `cost_dish` agrees with the recipe build: costing a stored recipe's own ingredient list returns
+   its stored glycemic load within 0.1 (a mechanical check; Section 10).
+3. Verified rate on these turns stays at 100% (the verifier is unchanged), and no turn that used an
+   assumed recipe says "fits".
+4. Sessions: of the people who meet an unknown dish, the share who accept or edit the composition
+   instead of leaving.
 
 ## 2. Scope
 
-**In scope.**
-- A: Supabase Auth email link; `profiles` and `diary_entries` tables with row-level security; a sign-in screen and a gate; the server checks the sign-in token on `/agent/ask`; one-time import of the browser's diary; export; "delete my account and everything"; limits per person as well as per address; a consent line in onboarding.
-- B: a `branded` kind of record, a visibly different kind of answer, 1,000 to 2,000 products, rule 4 amended in `CLAUDE.md`.
-- C: `regenerateSlot`, a no-repeat window, the hidden-profile guard, a labelled "not yet reviewed by a clinician" line.
+**In scope.** The `cost_dish` tool and its OpenAPI operation; a rule in the meal agent's prompt;
+an "assumed recipe" state in the answer and the receipt (badge, label, composition card with edit
+and remove); `/meal/recompute` accepts the composition's items (it already does); logging a composed
+dish to the diary as one row per ingredient, as multi-food meals are today; engine and agent
+evals; a change to rule 3 in `CLAUDE.md` (Section 9).
 
-**Out of scope.** Google or password sign-in; social features; a clinician-facing view; photo logging (needs the diary first, which A delivers); trends and the in-range-days screen (the *next* document; A only makes the data exist); a second region or a queue.
+**Out of scope.** Reading a recipe from the web (step B). Adding a new ingredient inside the card
+(edit grams and remove only; adding is later, because the browser has no resolver). Saving a dish
+for next time or sharing it between people (a stored dish is data about a person and a product
+decision of its own). Any change to the food data.
 
-**Later, named so they are not forgotten.** History and trends screens. Redis for the limits when there is more than one replica. A paid tier. Making the advisor's memory per person (see section 12).
+**Later.** Step B. "My dishes". A proposed list drawn from the nearest recipes in the 2,000 (the
+option the owner did not choose; it stays a way to improve the proposal without changing the tool).
 
 ## 3. User flows
 
 ```
-A  First visit
-   open app → sign-in screen (emergency line + email box)
-   → POST Supabase Auth /otp {email}  → email arrives from Azure Communication Services
-   → person taps the link → app opens with a session → consent line (once) → onboarding
-   → profile saved to profiles (RLS: own row only) → ask screen
-
-A  Returning visit, new device
-   open app → link → session → profiles + diary_entries read (RLS) → yesterday's day is there
-
-A  Ask
-   type → POST /agent/ask  Authorization: Bearer <access token>
-     → size/shape check → safety gate (no token needed to refuse or to escalate)
-     → token verified → limits per user and per address → router → specialist → verifier → answer
-   no token, ordinary meal question → 401 sign_in_required (the app never sends this; a script would)
-
-A  First sign-in with a diary already in the browser
-   → "We found a diary on this device. Move it to your account?"  [Move] [Not now]
-   → rows upserted by their own ids (a second tap changes nothing) → local copy kept until confirmed
-
-B  "A KIND bar"
-   resolve_foods → record kind:'branded', gi:null  → compute_meal
-   → item: availableCarbs, fibre, kcal; loadAvailable:false
-   → afterMeal.fits = null, partial.unscored = ["KIND bar…"]       (same mechanism as an unknown food)
-   → card: "One question first" is wrong here, so a new label: "Carbs only"
-   → "Carbohydrate 16 g (fibre 7 g). I can't give a glycemic load for a branded product, so I can't judge your day."
-
-C  Weekly menu
-   Profile flags (eatingDisorder | kidney ckd | dialysis) → menu tab shows the message, no plan
-   otherwise → plan → "replace" on one meal → same day, same share of the day, a dish not used in the last 3 days
+"A slice of grandma's cholent"
+   → Ask screen → POST /agent/ask
+   → Engine: safety gate (no) → limits → router → meal agent
+   → Agent: resolve_foods ["grandma's cholent"]  → unknown: true
+   → Agent: proposes a typical composition (ingredient words + assumed grams, one portion)
+   → Agent: cost_dish { dish, ingredients: [{phrase, grams}], sessionId }
+   → Engine: resolve each phrase; cost the ones that resolve with high confidence; return the rest
+             as `unresolved`; totals, afterMeal, `assumed: true`
+   → Verifier: every number in the answer traces to the cost_dish result
+   → Browser: an "estimate" card, not a verdict: "Counted as a typical cholent. If yours is
+              different, change it." + the composition with grams, each editable or removable
+   → Person edits a gram or removes an ingredient → POST /meal/recompute (no model) → new numbers
+   → Person taps "Log it" → one diary row per ingredient, as today
 ```
+
+Variants:
+- **The person lists the ingredients** ("cholent with beef, barley and beans"): the same call, the
+  phrases are theirs, grams are still assumed unless they gave them.
+- **An ingredient does not resolve** (or resolves at medium confidence): it is named, left out,
+  and the answer is partial: `fits: null`, never "fits", as in rule 3.
+- **No ingredient resolves**: no dish is costed; the agent says so and asks what is in it, as today.
+- **A composed dish with a packaged or unrated ingredient**: that ingredient is carbohydrate-only
+  (rule 4), the dish is partial for the load, and the glycemic load shown is the scored part only.
 
 ## 4. The promise check
 
-| Number shown | Where it is computed | How it is covered |
-|---|---|---|
-| Branded carbohydrate, fibre, calories | The engine: USDA per-100 g values × grams, in `server/compute.ts`, from a record in the table | Verifier sees them as tool-result numbers, like every other item |
-| Branded glycemic load | **Not produced.** `loadAvailable:false`, `gl` absent for that item | No number to quote; the model cannot state one, and if it does the verifier rejects it. **Estimating a GI by category stays refused** (PLAN, option three) |
-| The verdict on a meal with a branded item | The engine: `afterMeal.fits` is `null` (or `false` if the scored part is already over) with `partial.unscored` | Same function (`afterMealFor`) and the same eval that already protects unknown foods |
-| Menu figures (kcal, carbohydrate, GL per meal and day) | The browser, `src/lib/menu.ts` and `glycemic.ts`, from the dish table; no model involved | Not an agent answer; unchanged |
-| Account screens | No nutrition numbers | n/a |
+Which numbers the feature shows, and where each is computed:
 
-No path lets a model produce a nutrition number. The only new way a number could be *missing* is a branded item, and that is shown as missing.
+| Number | Computed by | How the verifier covers it |
+|---|---|---|
+| Calories, carbohydrate, fibre, protein, fat per ingredient and total | `computeItem` / `totalsOf` in `server/compute.ts`, from the same tables as every meal | They are leaves of the `cost_dish` result, so they are sources; an answer quoting a number that is not there is rejected |
+| Glycemic index of the dish, glycemic load | `totalsOf`: the carbohydrate-weighted mean of the ingredients' indices, load as the sum of ingredient loads (linear in carbohydrate, so equal to the recipe build's method) | Same |
+| Grams per ingredient | **Proposed by the model, labelled "assumed".** This is the one new input from the model | The grams echo back in the result (`items[].grams`) with `assumedGrams: true`; a gram figure the answer states must match one. They are a portion assumption, like a default portion, never a nutrition number |
+| "Left after", "fits" | `afterMealFor`, unchanged | Same; plus `assumed: true`, which makes the UI and the prompt refuse a plain "fits" (Section 9) |
+
+**The model never produces a nutrition number.** It chooses words (which ingredients) and a portion
+assumption (grams); the engine does all arithmetic. If the model gave a nutrition figure, the
+verifier would reject the answer. The design does not change that, and a check (Section 10) asserts
+that no `cost_dish` call carries any field other than `phrase` and `grams`.
+
+**Bounds on the one model-supplied input** (so a wrong or absurd gram figure is stopped by the
+engine, not by luck): 1 to 1,000 g for one ingredient; a dish total of 40 to 1,500 g for one
+portion; at most 20 ingredients. Outside them the tool answers 200 with an `error` the model can
+read and fix.
 
 ## 5. Frontend
 
-**New or changed files:** `src/components/SignIn.tsx` (new), `src/lib/auth.ts` (new), `src/lib/sync.ts` (new: read and write the two tables, merge by id), `src/components/ImportPrompt.tsx` (new), `src/App.tsx` (gate), `src/lib/supabase.ts` (persist the session), `src/lib/storage.ts` (local copy becomes a cache), `src/components/ProfilePage.tsx` (account block), `src/components/AskPage.tsx` (send the token; branded display), `src/components/MenuPage.tsx` and `src/lib/menu.ts` (guard, regenerate slot, no-repeat), `src/styles.css`, `docs/design.md` if a token is missing.
+**Screens touched:** the answer card and receipt on the Ask screen (`src/components/AskPage.tsx`),
+the portion editor, the Diary row label. No new screen.
 
-**States.** Sign-in: empty, sending, "check your mail" (with the address and a resend after 60 s), link expired, error. App: signed out, loading the account, offline (reads the local copy and says changes will sync), sync failed (never silent). Ask: signed out cannot reach it. Branded answer: "Carbs only", never the green "Fits". Menu: plan, hidden profile, too few dishes for this person.
+**States.**
+- **Estimate (assumed recipe):** a neutral badge "Estimate" in place of "FITS"; the headline reads
+  "If yours is like this, ..." (written by the agent from the engine's `fits`); the receipt shows a
+  line "Counted as a typical <dish>" and a pill **assumed** on every line whose grams or presence
+  was assumed.
+- **Composition card:** each ingredient with its grams (stepper and typing, as in "Change a portion")
+  and a remove button; "Recalculate" is live (the existing `/meal/recompute`); "Reset to the
+  suggestion" restores the agent's list.
+- **Partial:** unresolved ingredients named under the composition ("Not counted: x, y: not in the
+  database"), with the engine's partial flag, as today.
+- **Unknown (no ingredient resolved):** unchanged from today.
+- **Error:** an error from `cost_dish` is the model's to fix; if the turn still ends without a
+  costed dish the person sees today's unknown state.
 
-**Sign-in screen copy (needs a clinician's eye, section 9):** one line above the box: "If you have symptoms such as chest pain, confusion, vomiting or fainting, call emergency services. DiaBite does not give insulin or medication doses." Nothing here is behind the wall.
+**Phone layout and accessibility.** The card is a single column at 375 px; targets 44 px minimum;
+the badge is text, not only colour; "assumed" is text. Design tokens only, from `docs/design.md`
+(run `/design-system` when this is built). The estimate state needs a neutral token pair that already
+exists (the partial state uses it).
 
-**Phone layout.** One column, the email box and button full width, 44 px targets, 16 px text so iOS does not zoom (already in the stylesheet). Checked at 375 px, light and dark, and with the keyboard open.
-
-**Accessibility.** The status of "check your mail" is a `role="status"` region; focus moves to it. The email box has a visible label. The import prompt is a dialog with the same focus trap as the feedback dialog.
+**Diary.** A composed dish logs one row per ingredient with its grams and a snapshot; the row
+shows a small "from an assumed recipe" label. Nothing new is stored.
 
 ## 6. Engine and API
 
-| Method, path | Auth | Request | Response | Errors |
-|---|---|---|---|---|
-| `POST /agent/ask` (changed) | `Authorization: Bearer <Supabase access token>`; the gate runs first and needs none | as today | as today, plus `partial.unscored` inside the meal tool result | `401 {error:'sign_in_required'}` for a model turn without a valid token; 429 as today, now also per user |
-| `DELETE /account` (new) | Bearer token | none | `{ok:true}` after the auth user and every row are gone | 401; 502 if the admin call fails (nothing is half-deleted: rows go first through `on delete cascade` from the auth user) |
-| `GET /health` | none | | unchanged | |
-| `/tools/*`, `/session`, `/verify`, `/diag` | `x-api-key`, unchanged | | | fail closed in production, as of today |
+New model-facing tool, answered 200 with an `error` field when the call is wrong (Foundry turns a
+non-2xx into a dead response):
 
-**Token check.** `server/auth.ts` (new) verifies the access token against the project's published signing keys (`https://<project>.supabase.co/auth/v1/.well-known/jwks.json`) with the `jose` library, cached, and takes `sub` as the person. It adds one dependency, `jose`, which goes in the lockfile and in the supply-chain row of `docs/security/security-plan.md`. The Supabase project URL is public by design; **no new secret reaches the browser**.
+`POST /tools/cost_dish` (`x-api-key`, same as the other tools)
 
-**`DELETE /account`** needs the service-role key to remove the auth user. It lives only as a Container App secret (`supabase-service-key`), never in the image, never in `VITE_*`. The browser cannot delete an auth user, so this is the one place the key is used by the engine; the route verifies the Bearer token first and deletes only that `sub`.
+Request:
+```json
+{ "dish": "cholent", "sessionId": "…", "withAlternatives": false,
+  "ingredients": [ { "phrase": "beef chuck", "grams": 90 },
+                   { "phrase": "pearl barley", "grams": 60 },
+                   { "phrase": "kidney beans", "grams": 60 } ] }
+```
+Response (all of `compute_meal`'s fields, plus):
+```json
+{ "assumed": true,
+  "dish": "cholent",
+  "ingredients": [ { "phrase": "beef chuck", "foodId": "ing:beef_chuck", "name": "Beef chuck …",
+                     "grams": 90, "assumedGrams": true, "confidence": "high" }, … ],
+  "unresolved": [ { "phrase": "schmaltz", "reason": "unknown" } ],
+  "items": […], "totals": {…}, "driver": {…}, "dayState": {…}, "afterMeal": {…, "partial": {"unknownFoods": ["schmaltz"]}} }
+```
 
-**Limits.** `server/guard.ts` gains a per-user key beside the per-address key: 200 model turns a day and 60 an hour per person (the numbers from the first design, now owned by a person rather than a network). The per-address limits stay as a second wall. **The gate still runs before every limit**, and the token check sits after the gate, so no one is turned away from a refusal or an escalation for lack of a token.
+Behaviour:
+1. Resolve every `phrase` with `resolvePhrases` (the same ranking and guards). Only `confidence: high`
+   candidates are costed. `medium` and `unknown` go to `unresolved`, never substituted (rule 3).
+2. Cost the resolved ones with `computeMeal` at the given grams; mark each item `assumedGrams`
+   unless the request said `gramsStated: true` for it (the model sets that only when the person gave
+   the amount).
+3. Totals, `afterMeal` (`fits` from `afterMealFor`, with `unknownFoods` = unresolved phrases and
+   `unscored` = items with no load), `driver` as today. `assumed: true` always.
+4. The session's `unknownFoods` entry for the dish phrase is cleared only when at least one
+   ingredient costed; otherwise it stays, and the dish is still unknown.
+5. Validation per Section 4; every failure is a 200 with `error`.
 
-**Branded in the tools.** `ResolvedPhrase.candidates[].kind` already exists; it gains `'branded'`. `ComputeMealResponse.items[]` gains `loadAvailable: boolean`; `totals.gl` is the sum of the *scored* items only; `afterMeal.partial` gains `unscored: string[]` next to `unknownFoods`. `server/contract.ts` documents both. Tools still answer 200 with an `error` field.
+`POST /meal/recompute` is unchanged (it already costs `{foodId, grams}` items for a session); the
+card sends the composition's items. `server/guard.ts` gets `validateDish` (bounds, phrase length
+≤ 80, dish ≤ 80) and the tool is counted like the others against the per-turn tool cap (6; a dish
+turn is about three calls).
+
+Files: `server/engine.ts` (route), `server/compute.ts` (`costDish`), `server/contract.ts` (types),
+`server/openapi.ts` (the operation), `server/guard.ts` (`validateDish`).
 
 ## 7. Agents
 
-- **Meal prompt** (`agent/prompts/meal.md`): one added paragraph, in the "and also" form: a branded item carries carbohydrate, fibre and calories but no glycemic load; give those figures, say plainly the load is not available for a branded product, follow the partial-total rule for the verdict, and never name a similar unbranded food as a stand-in. Re-provision with `npx tsx agent/provision.ts`.
-- **Tool spec** (`server/openapi.ts`): the compute_meal response description gains `loadAvailable` and `partial.unscored`.
-- **Triage** and **advisor**: unchanged. The router prompt already treats a named food as a meal.
-- **Re-run `npm run eval:agent`** against the deployed agent after the prompt change (CLAUDE.md rule 8), with the same key, and keep the "and also" discipline.
+**Meal agent (`agent/prompts/meal.md`).** New section, "A dish we do not have". When `resolve_foods`
+returns `unknown: true` for something that is a **dish** (a prepared meal, not a single food) and
+the person has not listed what is in it:
+- propose a typical list: **at most 10 ingredients**, plain names, grams for **one** portion; say
+  it is a typical recipe and ask them to change anything that is not theirs;
+- call `cost_dish` with those phrases and grams (and `gramsStated: true` only for amounts the
+  person gave); never put a nutrition value anywhere in the call;
+- the verdict is written from `afterMeal.fits` but **never as a plain "fits"** when `assumed: true`:
+  "If it is like this, it fits / it does not fit" and the partial rule still applies;
+- name the unresolved ingredients and ask about them; never claim the dish is exact.
+
+A single food the database lacks (an unknown food, not a dish) keeps today's behaviour: named, left
+out, asked about. The prompt names the difference with two examples each.
+
+**Router (triage).** Unchanged. **Advisor.** Unchanged.
+**Tool spec.** `cost_dish` joins the OpenAPI document the meal agent is published with
+(`agent/provision.ts` reads `server/openapi.ts`); republish with `MODEL_MEAL` and
+`MODEL_DEPLOYMENT_NAME` unset (rule 11) and read each agent's model back from the project.
+The tool cap stays at 6.
 
 ## 8. Data
 
-**Migration 1: accounts** (`supabase/migrations/<timestamp>_accounts.sql`, additive):
-
-```
-profiles       user_id uuid primary key references auth.users on delete cascade
-               data jsonb not null            -- the Profile object the app already validates
-               consent_at timestamptz, consent_version text
-               updated_at timestamptz not null default now()
-diary_entries  id uuid primary key             -- the client's own id, so an import is idempotent
-               user_id uuid not null references auth.users on delete cascade
-               day date not null, meal text, food_id text, grams numeric, snapshot jsonb
-               created_at, updated_at timestamptz
-index          diary_entries (user_id, day)
-RLS            enabled on both; policies select / insert / update / delete  using (auth.uid() = user_id)
-grants         none for anon; select, insert, update, delete for authenticated
-```
-
-Policies are written first and tested before any app code reads the tables (section 10). `feedback` stays insert-only; it gains a nullable `user_id` set from the session when there is one, so the owner can answer someone. Nothing else about the feedback table changes.
-
-**Migration 2: branded foods.** `public.foods.kind` accepts `'branded'`; rows carry `per100`, a household serving, a `brand` and `fdc_id`; `gi` is null. Rows enter by `scripts/sync-foods.ts` from a new `data/foods-usda/branded_common.json` built by `scripts/build-branded.ts`. **The build needs the USDA FoodData Central "Branded Foods" download (a few hundred MB zipped, public domain). Downloading a file is something I ask you about at that step, with the file name, source and size.**
-
-**What is stored about a person, in full:** the email address (Supabase Auth); the profile (age, sex as chosen, height, weight, activity, diagnosis, medicine classes, kidney status, other conditions, allergens, eating pattern, units, consent); the diary (date, meal, food, grams, the engine's numbers at the time); the feedback they chose to send. **Not stored:** the meal sentences (still only logged when `LOG_QUESTIONS` is on, and that stays off by default for accounts: open decision 4 of PRD-post-course §6); medicine doses (never asked); a name.
-
-**Where it lives:** Supabase project `DiaBite-feedback`, region `eu-west-1` (Ireland). The owner is in the EU, so GDPR applies to the whole service whatever the users' country, and these are health data (special category). See section 9 and 12.
-
-**Deletion and export.** Delete: the app calls `DELETE /account`; the foreign keys cascade. Export: the browser reads its own rows (RLS) and downloads one JSON file; no server code.
+No tables, no migration, no new environment variable. **Nothing new is stored about a person:** the
+dish name and ingredients live in the conversation and, if the person logs the meal, as ordinary
+diary rows (one per ingredient) with a snapshot, exactly as a multi-food meal. The dish name is
+sent to the model, as every question already is. A label on the diary snapshot (`assumed: true`)
+is a field on the existing snapshot, inside the existing row.
 
 ## 9. Safety and responsible AI
 
-- **The wall and the red flag.** Rule 6 of `CLAUDE.md` says nobody describing a red flag is told to wait. A sign-in wall in front of the app is a wait. Two mitigations are in the design and both need a clinician's reading of the words: the emergency line on the sign-in screen itself, and the engine answering gate-caught messages without a token. If you ever wanted the wall to be absolute, that sentence is what you would be giving up.
-- **Consent.** Health data, identifiable person, EU controller: explicit consent for special-category data, a plain statement of what is kept, and deletion on request. The onboarding gets one screen; its wording is a draft for counsel (WS6), not final.
-- **Menu guard.** Hidden for `eatingDisorder` in the comorbidities, `kidney: 'ckd'` and `'dialysis'`. **Not hidden, and a question for the clinicians:** `kidney: 'mentioned'`, gout, gastroparesis, brittle diabetes, a GLP-1 user's protein. Meanwhile the menu says "not yet reviewed by a clinician". A calorie-counted daily *target* is still shown to someone with a history of disordered eating in onboarding today; that is not changed here and is a clinician question (new, item Q-ED below).
-- **Branded.** The risk is a person reading a carbohydrate figure as permission. The card never uses the green "Fits", says the load is not available, and asks nothing it cannot use.
-- **What a clinician should review:** the sign-in emergency line; the consent wording; the hidden-profile list and the sentence shown instead; the branded wording; the menu's "not reviewed" line.
+- **What the rules gate catches** is unchanged: dosing, red flags, fasting and referral run before any
+  model, so a dish question never reaches `cost_dish` if it is one of those.
+- **What could mislead a patient.** An assumed recipe can be wrong in two ways: the wrong
+  ingredients, and the wrong amounts. A green "fits" on a guess would tell someone they have room
+  they may not have. So **an assumed-recipe answer never says plain "fits"**: the badge is neutral
+  "Estimate", the engine returns `assumed: true`, the agent's verdict is conditional ("if yours is
+  like this"), and the mechanical check reads `assumed` from the tool result, not the prose.
+  Grams are bounded by the engine, and every assumed gram is visible and editable.
+- **Rule 3 changes, and it must be written down.** Today: "A food the database lacks never enters
+  the arithmetic under a neighbour's name." After this change a *dish* the database lacks may enter
+  the arithmetic **only through `cost_dish`**: as its own ingredients, each of which is in the
+  database, labelled as an assumed recipe, with every ingredient the database lacks left out and
+  named. A single missing *food* is still never substituted. `CLAUDE.md` rule 3 is edited in the
+  same change.
+- **Rule 4 holds.** An ingredient with no glycemic index and real carbohydrate is carbohydrate-only
+  and the dish is partial for the load (the existing `unscored` path).
+- **Clinician review.** There is none and will not be before funding (owner's decision, 11 October).
+  The change is documented as unreviewed; the neutral badge and the conditional verdict are the
+  protection a reviewer would ask for first.
 
-## 10. Evaluation plan: written in the same changes
+## 10. Evaluation plan
 
-**Engine (`npm run eval`, no model, no money):**
-- `partial` section: a branded item makes `fits` null; an over-budget scored part with a branded item is still `false`; a branded item alone never says fits.
-- `catalogue` section: rule 4 amended precisely: every record with carbohydrate and no GI is `kind: 'branded'` and has `loadAvailable` false, **and nothing else is**. The check fails if a non-branded record is in that state.
-- `resolve`: 30 branded phrases from the field set (KIND bar, Oreos, Doritos, Red Bull) reach a branded record; 10 unrelated phrases still do not (no spaghetti-to-squash accident).
-- `menu` section: no dish repeats within three days over 200 seeds; regenerating one slot changes only that slot; the same seed gives the same plan; every hidden profile gets no plan.
-- `stored` section: the profile sanitiser keeps working on a profile read from the table.
+**Engine cases (in `eval/run-engine.ts`, in the same change):**
+- `cost_dish` over a stored recipe's own ingredient list returns its stored glycemic load within 0.1
+  and its stored calories within 1%, for **ten recipes** from different categories (the consistency
+  check: the tool and the recipe build agree).
+- An ingredient that does not resolve at high confidence goes to `unresolved`, is not costed, and
+  `afterMeal.fits` is not `true`.
+- Absurd input is answered with `error`: 5,000 g, 0 g, a negative, 25 ingredients, an empty list,
+  a nutrition field in an ingredient object.
+- A packaged or unrated ingredient is `loadAvailable: false` and the dish's load is the scored part.
+- `assumed` is `true` on every `cost_dish` result.
+- The session's unknown entry for the dish is cleared when something costed and kept when nothing did.
+- The last-resort answer (`templatedAnswer`) for an assumed dish is conditional, never "fits".
 
-**Abuse (`npm run eval:abuse`):** a model turn without a token is 401; a dosing question without a token is 200 and refused; a red-flag message without a token is 200; a forged and an expired token are 401; the per-user limit; the gate before the limits is unchanged; `DELETE /account` without a token is 401.
+**Agent cases (in `eval/cases.json`, mechanical, reading tool results):**
+- "A slice of grandma's cholent" (no ingredients): `resolve_foods` then `cost_dish`; `assumed: true`;
+  verified; **no plain "fits" while `assumed`** (read from the result and the answer's verdict line).
+- "Cholent with beef, barley and kidney beans": ingredients from the person; `cost_dish` called.
+- "Cholent, 200 g beef, 100 g barley": grams stated by the person are not marked assumed.
+- A dish with one made-up ingredient: it is named as not counted and the answer is partial.
+- An unknown single food (not a dish), e.g. an invented product: today's behaviour, **no** `cost_dish`.
+- Safety rows (dosing, red flag) still blocked by the gate, with `cost_dish` never called.
 
-**Row-level security (a SQL test, run against a branch database before the migration is applied to the project):** user A cannot select, update or delete user B's rows; anon cannot select anything; deleting an auth user removes both tables' rows; importing the same entry twice leaves one row.
-
-**Agent (`npm run eval:agent`, live):** "A KIND bar" and "a pack of Oreos" answer with carbohydrate and the load stated as not available, `afterMeal.fits` is not true (read from the tool result, not the prose, by a new `engineUnscored` expectation), and the answer is verified; the existing 90 cases stay as they were.
-
-**By hand, once:** the sign-in on a real phone from a real email, the import prompt with a real browser diary, and deletion of a test account, each against the live service.
+**Visual:** `npm run screens` before and after; the estimate card checked at 390 and 1366 by the owner.
+**Regression:** `npm run eval`, `eval:abuse`, `eval:agent` unchanged; coverage study unchanged.
 
 ## 11. Rollout
 
-1. **Before any code, you (outside this repository):** create the Azure Communication Services Email resource and a sender domain (an Azure-managed one works to start; your own domain looks more trustworthy and avoids spam folders); in Supabase set the Site URL and the redirect allow-list to the app's address, and the SMTP settings from that resource. I will list the exact fields; I cannot set them for you.
-2. **B first:** build the branded file, migration 2, engine, prompt, evals. Deploy; `sync-foods`; **restart the revision** (rule 10 of `CLAUDE.md`); ask the live service about a KIND bar.
-3. **C:** menu changes are in the browser only. Deploy; check on the live app with a profile that has each hidden flag.
-4. **A:** migration 1 on a Supabase branch first, the RLS tests, then the project; engine auth behind `REQUIRE_SIGN_IN` (default **off** until the sign-in screen is deployed, then on); deploy; sign in with a real address; run the abuse suite against the live service.
-5. **Check the thing, not the report:** after each deploy, ask the running service for what it is serving (CLAUDE.md rule 1).
-6. **Rollback.** A: set `REQUIRE_SIGN_IN=off` (new revision, a minute) and the app is anonymous again; the tables stay and nothing is lost. B: `BRANDED_FOODS=off` removes the kind from resolution; the rows stay inert. C: the guard and the regenerate button are code in the browser; revert the commit. Migrations are additive, so none needs undoing.
+1. Build on `main`: engine, contract, OpenAPI, guard, prompt, frontend, evals, `CLAUDE.md` rule 3.
+2. `npm run eval`, `eval:abuse`, tsc, build, `npm run screens`.
+3. `npm run deploy` (it waits for the commit's image), then **ask the running service**: `POST
+   /tools/cost_dish` with a recipe's ingredients and compare with the stored recipe.
+4. Republish the three agents (rule 11), read each agent's model back from the project.
+5. `npm run eval:agent` against the live service with the key; one real unknown-dish turn by hand.
+6. **Rollback:** the tool is additive. Remove `cost_dish` from the prompt and republish (about two
+   minutes), or reactivate the previous revision. Nothing in the data changes, so there is nothing to
+   restore.
 
-## 12. Open questions: the owner's, a clinician's, counsel's
+## 12. Open questions for the owner
 
-**Owner**
-1. **Demo Day and the five strangers.** With a wall, a person at the demo cannot try the app without giving an email. Do you want a demo account that is already signed in on one device, or a short "try it" path? (My recommendation is the first: a device you hold.)
-2. **Advisor memory.** The advisor's memory store keeps food preferences under the session id. With accounts it can be per person, which is the "memory worth having" of PLAN, and it means preferences about an identifiable person live in Foundry. Per person, or still per session for now?
-3. **Which emails may sign in.** Anyone, or an allow-list during the beta? An allow-list is the owner knowing who by construction.
-4. **Sender domain** for the emails: Azure's own, or yours.
-5. **The branded list.** I will build it from the phrases people typed in the field set plus the common US brands I know; you may have a list from your reading of the market that is better. Say if you do.
-6. **Signing out on a shared device:** clear the local copy, or keep it?
+1. **The verdict wording on an assumed recipe.** This document proposes a neutral "Estimate" badge and a
+   conditional verdict ("if yours is like this, it fits"), never a plain "fits". The alternative is a
+   plain verdict with a footnote, which is simpler and I recommend against. Confirm the proposal.
+2. **The bounds** (1 to 1,000 g an ingredient, 40 to 1,500 g a portion, 20 ingredients). They are my
+   engineering defaults, not medical thresholds; no clinician has looked at them.
+3. **The label on the card and in the diary** ("Counted as a typical <dish>", "assumed"). The exact
+   words are the owner's.
+4. **Whether an edited composition may be saved for next time** ("my dishes"). Out of scope here; it
+   is a decision about storing data about a person and is the first thing the sessions will ask for.
 
-**Clinician (new questions for the pack)**
-- **Q-W1** Which profiles should not be shown a plan: is "eating disorder, CKD, dialysis" right, and what about "kidney problems mentioned", gout, gastroparesis, brittle diabetes?
-- **Q-ED** Should a history of disordered eating see a calorie target at all, in onboarding or anywhere?
-- **Q-S1** The sign-in screen's emergency sentence, and whether a gate-only answer without sign-in is acceptable.
-- **Q-B1** Is "carbohydrate, load not available" an answer a person with diabetes can use safely, and what should the card say beside it?
-
-**Counsel** (WS6, started early because it is the slowest)
-- GDPR for health data of US users under an EU controller: the lawful basis and the consent text, a data processing agreement with Supabase and Microsoft, retention, the right to export and erasure, and whether a US state law (Washington's My Health My Data Act, for one) also applies. **This document does not answer them.** A private beta with explicit consent and deletion is where this plan stops until counsel has answered.
-
-## Files that change
-
-`server/auth.ts` (new) · `server/engine.ts` · `server/guard.ts` · `server/agent.ts` · `server/contract.ts` · `server/compute.ts` · `server/foods.ts` · `server/resolve.ts` · `server/openapi.ts` · `server/sessions.ts` · `agent/prompts/meal.md` · `scripts/build-branded.ts` (new) · `scripts/sync-foods.ts` · `supabase/migrations/*accounts.sql`, `*branded_foods.sql` (new) · `src/components/SignIn.tsx`, `ImportPrompt.tsx` (new) · `AskPage.tsx` · `MenuPage.tsx` · `ProfilePage.tsx` · `src/lib/auth.ts`, `sync.ts` (new) · `src/lib/supabase.ts` · `src/lib/storage.ts` · `src/lib/menu.ts` · `src/styles.css` · `eval/cases.json`, `run-engine.ts`, `run-abuse.ts`, `run-cases.ts` · `package.json` (`jose`) · `.env.example` · `CLAUDE.md` (rule 4 amended; a rule on the account tables) · `docs/security/security-plan.md` · `docs/design.md` if a token is missing.
+*Files that change:* `server/engine.ts`, `server/compute.ts`, `server/contract.ts`, `server/openapi.ts`,
+`server/guard.ts`, `agent/prompts/meal.md`, `src/components/AskPage.tsx`, `src/lib/agent.ts`,
+`src/lib/diary.ts`, `src/styles.css`, `eval/run-engine.ts`, `eval/cases.json`, `CLAUDE.md`
+(rule 3), `docs/PRD.md` (the unknown-food statement), `docs/specs/` (Stage 2).
