@@ -107,6 +107,12 @@ The shell does not have Node on its PATH by default: prefix with
     median 20 s instead of 3). After any provision, read the model of each agent
     from the project (`GET <project>/agents/<name>?api-version=v1`), not from the
     script's report.
+12. **Sample an agent with a fresh session id every time.** A session continues
+    its conversation: the second request with the same id is not a first turn
+    ("I still don't have that dish"), and a loop that reuses an id measures the
+    wrong thing. One bad batch of twelve sent an afternoon down the wrong prompt
+    edit. Use `uuid`, never `$RANDOM`; and one agent run is an anecdote, so
+    sample twelve before changing a prompt, and again after.
 
 ---
 
