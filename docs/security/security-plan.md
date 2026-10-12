@@ -164,3 +164,7 @@ A model-facing tool route, key-protected like the other `/tools/*` routes. Its i
 object may carry only `phrase`, `grams` and `gramsStated`, so a nutrition value in the call is refused, not
 ignored. Every failure answers 200 with an `error`, as the other tool routes do. `eval:abuse` D1 to D7 prove
 the bounds. It adds no new secret, table or environment variable.
+
+### Supabase Data API change, 30 October 2026
+
+Per Supabase's changelog (supabase.com/changelog/45329), from 30 October 2026 new tables in `public` are no longer exposed to the Data API automatically; existing tables keep their grants and nothing changes for them. **Every migration that adds a table after that date must include its `grant` statements as well as RLS and policies**, or the API answers 42501. Row-level security is unaffected.

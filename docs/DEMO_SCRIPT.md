@@ -158,6 +158,13 @@ five beats, when an unknown answer reads as honesty rather than as a failure.
 
 ---
 
+## Before a room: the limits
+
+One address is allowed 30 asks in 10 minutes and 200 a day, which one Wi-Fi in a full room would use up.
+The morning of the demo: `bash scripts/demo-limits.sh on` (300 and 1,000; the daily ceiling of 1,000 model
+turns is unchanged, so the cost bound is the same), and afterwards `bash scripts/demo-limits.sh off`. Each
+run prints what the running service is serving. Sign in once on your own device the day before.
+
 ## If Azure is slow
 
 **A turn is 5–9 seconds normally.** If one takes longer than fifteen, do not
