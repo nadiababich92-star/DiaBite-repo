@@ -329,6 +329,8 @@ export interface AskResponse {
   timing?: { routeMs: number; parkMs: number; agentMs: number[] }
   /** True when the answer failed the verifier twice and there was nothing to rebuild it from: no model text is shown. */
   withheld?: boolean
+  /** An advisory answer kept without the sentences that held a number it may not state. */
+  stripped?: boolean
   /** Which specialist answered, and what the router decided. */
   route?: Role
   routedBy?: 'triage' | 'gate' | 'fallback'
@@ -760,6 +762,25 @@ export function stripCitations(text: string): string {
     .trimEnd()
 }
 
+/** Shorter than this, what is left of an advisory answer is a fragment, not advice. */
+const MIN_ADVICE_CHARS = 60
+
+/**
+ * An advisory answer without the sentences that contain a digit. The advisor may state no number at all,
+ * so a sentence with one is the part that cannot be shown; the rest is prose. A line keeps its list marker
+ * ("1.", "-"), which is not a figure, and a line with nothing left is dropped.
+ */
+export function withoutNumbers(text: string): string {
+  const out: string[] = []
+  for (const line of text.split('\n')) {
+    const [, marker = '', body = ''] = /^(\s*(?:\d+[.)]|[-*•])\s+)?(.*)$/.exec(line) ?? []
+    const kept = body.split(/(?<=[.!?])\s+/).filter((sentence) => !/\d/.test(sentence)).join(' ')
+    if (kept.trim() === '') { if (body.trim() === '' && out.at(-1) !== '') out.push(''); continue }
+    out.push(marker + kept)
+  }
+  return out.join('\n').trim()
+}
+
 /** What a person reads when the model's text could not be checked. No figure in it, by design. */
 const WITHHELD =
   "I couldn't check the numbers in my own answer against the calculation, so I'm not going to show them. " +
@@ -843,11 +864,16 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
     if (v.ok) break
 
     console.warn(`verifier rejected attempt ${attempts}: ${JSON.stringify(v.unmatched)}`)
-    input =
-      `These numbers in your answer came from nowhere: ${v.unmatched.join(', ')}. ` +
-      `Every number you state must appear in a tool result from this conversation. ` +
-      `Answer the same question again using only those numbers. Do not calculate anything yourself, ` +
-      `and do not mention this correction.`
+    // The advisor has no tools, so "use the numbers from a tool result" asks for something it cannot do:
+    // it is told to say it in words instead.
+    input = role === 'advisor'
+      ? `Your answer contained numbers (${v.unmatched.join(', ')}). You have no calculator and no data, so you ` +
+        `may not state any number or percentage at all. Answer the same question again in plain words ` +
+        `("a small amount", "most days"), with no digits and no quantities, and do not mention this correction.`
+      : `These numbers in your answer came from nowhere: ${v.unmatched.join(', ')}. ` +
+        `Every number you state must appear in a tool result from this conversation. ` +
+        `Answer the same question again using only those numbers. Do not calculate anything yourself, ` +
+        `and do not mention this correction.`
   }
 
   let templated = false
@@ -857,6 +883,21 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
       answer = fallback
       templated = true
       v = verify({ answer, toolResults: trace.map((t) => t.result), userText: req.message })
+    }
+  }
+
+  // An advisory answer that still carries a number after both attempts: keep what it said without the
+  // sentences that hold a digit, if enough is left to be an answer. Nothing unverified is shown, and a person
+  // who asked about keto gets the advice instead of an apology.
+  let stripped = false
+  if (!v.ok && role === 'advisor') {
+    const kept = withoutNumbers(answer)
+    const again = verify({ answer: kept, toolResults: [], userText: req.message })
+    if (kept.length >= MIN_ADVICE_CHARS && again.ok) {
+      console.warn(`advice kept without its numbers: ${JSON.stringify(v.unmatched)}`)
+      answer = kept
+      v = again
+      stripped = true
     }
   }
 
@@ -879,7 +920,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   return {
     answer, blocked: false,
     verified: v.ok, unmatchedNumbers: v.unmatched, matchedNumbers: v.matched,
-    toolCalls: trace.length, trace, responseId, attempts, templated, withheld,
+    toolCalls: trace.length, trace, responseId, attempts, templated, withheld, stripped,
     timing: { routeMs: clock.route, parkMs: clock.park, agentMs: clock.agent },
     route: role, routedBy: by,
   }

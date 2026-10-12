@@ -31,7 +31,7 @@ import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
 import { afterMealFor, computeItem, computeMeal, driverOf, planDish, uninvertPhrase } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
-import { looksLikeMeal, templatedAnswer, withHangRetry } from '../server/agent'
+import { looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers } from '../server/agent'
 import { diffEntries, exportShape, fromRow, mergeById, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
@@ -281,6 +281,21 @@ const dishMisses: string[] = []
   if (!/can't judge/.test(templatedAnswer(trace10b) ?? '')) dishMisses.push('    the last-resort answer for a partial estimate does not say it cannot judge')
 }
 console.log(`\ncost-dish ${dishMisses.length === 0 ? 'ok' : 'WRONG'}`)
+// An advisory answer that still holds a figure after two attempts: the sentences with a digit go, the rest stays.
+{
+  const advice = 'Keto is not usually the first thing to try without your care team. It often means eating under 50 g of carbohydrate a day. Many people find it hard to keep up, and it can interact with some medicines. Talk it through with your doctor first.'
+  const kept = withoutNumbers(advice)
+  const bits: string[] = []
+  if (/\d/.test(kept)) bits.push('a digit survived')
+  if (!kept.includes('Keto is not usually') || !kept.includes('Talk it through')) bits.push('the advice around the number was cut')
+  if (kept.includes('under 50 g')) bits.push('the sentence with the figure stayed')
+  if (withoutNumbers('1. Eat slowly.\n2. Walk after meals.') !== '1. Eat slowly.\n2. Walk after meals.') bits.push('a list marker was taken for a figure')
+  if (withoutNumbers('Aim for 30 g.') !== '') bits.push('a lone sentence with a figure stayed')
+  console.log(`\nadvice-strip ${bits.length === 0 ? 'ok' : 'WRONG'}`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) { console.log('an advisory answer kept a number or lost its advice'); process.exit(1) }
+}
+
 dishMisses.forEach((m) => console.log(m))
 
 // ── image ─────────────────────────────────────────────────────────────────

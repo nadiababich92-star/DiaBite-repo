@@ -100,7 +100,9 @@ export function openApiSpec() {
           operationId: 'cost_dish',
           summary: 'Count a dish the database does not have, from its typical ingredients',
           description:
-            'Use ONLY for a prepared dish that resolve_foods returned as unknown, never for a single food. ' +
+            'Use ONLY for a prepared dish that resolve_foods returned as unknown (a family recipe, a restaurant plate). ' +
+      'NEVER for a single food: a brand product, a snack bar, a cake, a fruit ("Zebra Cake", "dragon fruit") that resolve_foods ' +
+      'returned as unknown is named, left out and asked about, and this tool is not called for it. ' +
             'Give the dish exactly as the person named it, and its typical ingredients as plain names with the ' +
             'weight in grams of each for ONE portion. The engine finds each ingredient in the database and ' +
             'counts the ones it finds; the others come back in `unresolved` and must be named to the person. ' +
