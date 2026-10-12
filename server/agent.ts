@@ -462,12 +462,13 @@ function lastCall(trace: ToolCallTrace[], operation: string): ToolCallTrace | un
 export function templatedAnswer(trace: ToolCallTrace[]): string | null {
   const meal = lastCall(trace, 'compute_meal')?.result as
     | {
-        totals?: { gl: number }
+        totals?: { gl: number; carbs?: number; fiber?: number; kcal?: number }
         // The budget rides in the same reply as the meal, so there is no second
         // tool to read. (It once read get_day_state, which the agent no longer
         // has, and the last-resort answer lost its verdict.)
-        afterMeal?: { remaining?: { gl: number }; fits?: boolean | null; partial?: { unknownFoods: string[] } }
+        afterMeal?: { remaining?: { gl: number }; fits?: boolean | null; partial?: { unknownFoods: string[]; unscored?: string[] } }
         dayState?: { remaining?: { gl: number } }
+        items?: { loadAvailable?: boolean }[]
       }
     | undefined
   const gl = meal?.totals?.gl
@@ -476,6 +477,12 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
   const left = meal?.dayState?.remaining?.gl
   const after = meal?.afterMeal?.remaining?.gl
   const unknownFoods = meal?.afterMeal?.partial?.unknownFoods ?? []
+  // Foods the engine costed for carbohydrate but not for a load (a packaged product,
+  // or a food USDA gives no glycemic index): their load is not zero, it is not available.
+  const unscored = meal?.afterMeal?.partial?.unscored ?? []
+  const items = meal?.items ?? []
+  const onlyUnscored = items.length > 0 && items.every((it) => it.loadAvailable === false)
+  const t = meal?.totals
 
   const lines: string[] = []
   if (unknownFoods.length > 0) {
@@ -486,8 +493,22 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
       : `**Verdict:** I can't judge the day on a partial total: ${missing} is not in the database, so it is left out.`)
     lines.push(`**Numbers:** the glycemic load of the rest of the meal is ${gl}.`)
     lines.push(`**Question:** what is in ${missing}?`)
+  } else if (onlyUnscored && unscored.length > 0) {
+    // Nothing in the meal has a load. The honest figures are the ones the data has.
+    lines.push(`**Verdict:** I can't judge the day on this: our data has no glycemic index for ${unscored.join(', ')}, so its glycemic load is not available.`)
+    if (typeof t?.carbs === 'number' && typeof t?.fiber === 'number' && typeof t?.kcal === 'number') {
+      lines.push(`**Numbers:** carbohydrate ${t.carbs} g, fibre ${t.fiber} g, ${t.kcal} calories.`)
+    }
+  } else if (unscored.length > 0) {
+    // Some foods have a load and some do not: what can be judged is only a part of the meal.
+    lines.push(meal?.afterMeal?.fits === false
+      ? `**Verdict:** the part of this meal that has a load already does not fit what is left of today's budget.`
+      : `**Verdict:** I can't judge the day on a partial total: our data has no glycemic index for ${unscored.join(', ')}, so it is not scored.`)
+    lines.push(`**Numbers:** the glycemic load of the scored part of the meal is ${gl}.`)
   } else if (typeof left === 'number' && typeof after === 'number') {
-    lines.push(after >= 0
+    // The engine's own comparison, never a second subtraction here.
+    const fits = meal?.afterMeal?.fits ?? after >= 0
+    lines.push(fits
       ? `**Verdict:** it fits what is left of today's budget.`
       : `**Verdict:** it does not fit what is left of today's budget.`)
     lines.push(`**Numbers:** this meal's glycemic load is ${gl}. You had ${left} left before it, which leaves ${after} after.`)

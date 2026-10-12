@@ -31,7 +31,7 @@ import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
 import { afterMealFor, computeItem, computeMeal, driverOf } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
-import { looksLikeMeal, withHangRetry } from '../server/agent'
+import { looksLikeMeal, templatedAnswer, withHangRetry } from '../server/agent'
 import { diffEntries, exportShape, fromRow, mergeById, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary } from '../src/lib/history'
@@ -193,6 +193,16 @@ const brandedMisses: string[] = []
   const d = driverOf(m.items)
   if (!d || !/apple/i.test(d.name)) brandedMisses.push(`    the driver of apple and almonds is ${d?.name}`)
   if (driverOf(computeMeal([{ foodId: 'branded:2529927', grams: 34 }]).items) !== undefined) brandedMisses.push('    a meal of branded products has a driver')
+}
+{
+  // The last-resort answer is written from tool results alone, and once said "it fits" with a load of
+  // zero for a packaged product (11 October, H18): a meal with nothing scored is not a fit.
+  const branded = computeMeal([{ foodId: 'branded:1300677', grams: 100 }])
+  const trace = [{ tool: 'diabite_engine_compute_meal', input: {}, result: { ...branded, ...{ afterMeal: afterMealFor({ gl: 54, carbsG: 107, kcal: 1653 }, branded.totals, [], branded.items.map((i) => i.name)), dayState: { remaining: { gl: 54 } } } } }] as never
+  const text = templatedAnswer(trace) ?? ''
+  if (/\bfits\b/i.test(text) && !/can't judge/i.test(text)) brandedMisses.push('    the last-resort answer says a meal of a packaged product fits')
+  if (/load is 0\b|load of 0\b/i.test(text)) brandedMisses.push('    the last-resort answer says the load of a packaged product is zero')
+  if (!/can't judge/i.test(text)) brandedMisses.push(`    the last-resort answer does not say it cannot judge: ${text.slice(0, 120)}`)
 }
 console.log(`\nbranded   ${brandedMisses.length === 0 ? 'ok' : 'WRONG'}`)
 brandedMisses.forEach((m) => console.log(m))
