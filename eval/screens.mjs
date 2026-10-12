@@ -102,6 +102,10 @@ try {
     }
     if (idx === 0) { await click(await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Log what was counted'))`) ? 'Log what was counted' : 'Log it'); await sleep(4000) }
     await tab('Diary'); await shot('diary')
+    if (await b.ev(`!!document.querySelector('.week-sum')`)) {
+      await b.ev(`document.querySelector('.week-sum').scrollIntoView({block:'start'}); window.scrollBy(0,-90)`); await sleep(600)
+      await shot('diary-week')
+    }
     await tab('Menu')
     for (let i = 0; i < 40 && !(await b.ev(`!!document.querySelector('.menu-meal')`)); i++) await sleep(300)
     await shot('menu')
