@@ -116,7 +116,7 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
     check('M17', 'a bigger portion: the engine counts the meal again and the new card shows a larger load, calculated not generated',
       recounted && after > before && /Calculated by the engine/.test(await b.ev(`document.querySelector('.recalc')?.innerText ?? ''`)), `${before} -> ${after}`)
 
-    const partial = await ask("A slice of grandma's kugel and two eggs")
+    const partial = await ask("A slice of grandma's cholent and two eggs")
     check('M10', 'a meal with an unknown food is never called "fits"; it shows what is left so far, or asks what the food is',
       !/FITS\b/i.test(partial.text.split('\n').slice(0, 40).join(' ').replace(/\bdoes not fit\b/gi, '')) && /LEFT SO FAR|ONE QUESTION FIRST/i.test(partial.text), partial.text.replace(/\s+/g, ' ').slice(-500))
 

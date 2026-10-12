@@ -485,11 +485,11 @@ for (const c of cases.engine.partial) {
     // The session carries what resolve_foods could not find, and a retry under
     // another name clears it; a new turn starts clean.
     putSession('eval-partial', { glBudget: 40, carbsG: 150, kcal: 1700 }, [])
-    noteResolution('eval-partial', [{ phrase: 'kugel', unknown: true }, { phrase: 'eggs', unknown: false }])
+    noteResolution('eval-partial', [{ phrase: 'cholent', unknown: true }, { phrase: 'eggs', unknown: false }])
     const held = afterMealFor(room(20), { gl: 5, carbs: 10, kcal: 100 }, getSession('eval-partial')?.unknownFoods).fits
-    noteResolution('eval-partial', [{ phrase: 'kugel', unknown: false }])
+    noteResolution('eval-partial', [{ phrase: 'cholent', unknown: false }])
     const retried = afterMealFor(room(20), { gl: 5, carbs: 10, kcal: 100 }, getSession('eval-partial')?.unknownFoods).fits
-    noteResolution('eval-partial', [{ phrase: 'kugel', unknown: true }])
+    noteResolution('eval-partial', [{ phrase: 'cholent', unknown: true }])
     putSession('eval-partial', { glBudget: 40, carbsG: 150, kcal: 1700 }, [])
     const fresh = getSession('eval-partial')?.unknownFoods.length === 0
     if (held !== null || retried !== c.fitsAfterRetry || !fresh) partialMisses.push(`    ${c.id} held=${held} retried=${retried} fresh=${fresh}`)

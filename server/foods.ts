@@ -283,6 +283,8 @@ const RECIPE_ALIASES: Record<string, string[]> = {
   'Cauliflower and Potato Curry (Aloo Gobi)': ['aloo gobi', 'gobi aloo'],
   'Vietnamese Banh Mi Bowls with Pork': ['banh mi'],
   'Pineapple Mint Granita': ['granita', 'fruit granita'],
+  'Slow Cooker Pork Chili Verde': ['chili verde', 'pork chili verde'],
+  'Chicken Paprikash with Cauliflower': ['paprikash', 'chicken paprikash'],
   'Spaghetti Aglio e Olio with Broccoli': ['aglio e olio', 'spaghetti aglio e olio'],
   'Iced Chai Latte with Almond Milk': ['chai', 'chai latte', 'iced chai latte'],
 }

@@ -22,7 +22,7 @@ interface Props {
 const SAMPLES = [
   'Burrito bowl with white rice, black beans, chicken and guacamole',
   'How many units of insulin should I take before pasta?',
-  "A slice of grandma's kugel",
+  "A slice of grandma's cholent",
 ]
 
 /** Lab 3.2: with fresh context every question gets its own session and an empty diary, so saved responses don't depend on each other. */

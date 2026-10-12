@@ -95,17 +95,17 @@ swap such as the rye bread for sprouted grain bread. Either is fine to say aloud
 do not promise the first. (Until 8 October a slice of rye bread was costed at
 100 g and the load came out near 20; a slice is now 35 g.)
 
-### 3. "A slice of grandma's kugel" — the honesty beat  ·  ~7 s
+### 3. "A slice of grandma's cholent" — the honesty beat  ·  ~7 s
 
-> A slice of grandma's kugel
+> A slice of grandma's cholent
 
 Answer: **I don't have this food in the database** — and a question about what
 is in it.
 
 This is the most important beat in the demo. Say so:
 
-> "This is the one I'd ask you to remember. It doesn't have kugel. It could
-> have picked the closest thing in the database — there's a noodle casserole in
+> "This is the one I'd ask you to remember. It doesn't have cholent. It could
+> have picked the closest thing in the database — there's a bean stew in
 > there — and given you a number that looks perfectly reasonable. For someone
 > deciding what to eat with type 2 diabetes, a confident wrong number is worse
 > than no number. So it says it doesn't know and asks."
@@ -147,7 +147,7 @@ Tested, and they are the weak spots as of 30 September:
 | Don't | Because | Say instead |
 |---|---|---|
 | "spaghetti" | one run in several resolves it to a spaghetti-squash recipe | "pasta" |
-| "fried rice", "pepperoni pizza", "grits", "diet coke", "Oreos" | genuinely not in the database — fine as a *deliberate* unknown, bad as a surprise | use beat 3's kugel, which you control |
+| "fried rice", "pepperoni pizza", "grits", "diet coke", "Oreos" | genuinely not in the database — fine as a *deliberate* unknown, bad as a surprise | use beat 3's cholent, which you control |
 | "baked potato" | still costed as *boiled* potato (an alias nobody has removed yet) — a different glycemic index | "boiled potato" |
 | "french fries", "pizza", "avocado toast" | fries pick a school-lunch record on a 60 g portion; pizza and avocado toast ask odd "did you mean" questions | stay on the five beats |
 | Anything with a brand name | Chick-fil-A, KIND, Kraft: all unknown | a plain description of the food |
@@ -261,7 +261,7 @@ with the dead time between a question and its answer edited out (an answer takes
 | 0:00 – 0:20 | The app, the budget line, the three sample questions | "People with type 2 diabetes ask one question five to seven times a day: can I eat this? DiaBite answers it from a sentence, and every number in the answer is computed, not generated." |
 | 0:20 – 1:10 | Type **Burrito bowl with white rice, black beans, chicken and guacamole**. The answer card. Click **Show calculation** and hold still for two seconds | While it thinks: "This is how people really talk about food. Not 180 grams of cooked rice." On the card: "It fits, with very little left, and it names the white rice as the driver and offers one swap." On the receipt: "Every line came from a database and a formula. The model chose none of these numbers." Point at the source line: "checked" or "unverified", and say so |
 | 1:10 – 1:35 | **Two eggs, avocado and a slice of rye bread** | "'Two' counts as two: the reason says 110 grams of egg. Two weeks ago two eggs resolved to nothing and the total was confidently wrong. A model judge found that, not a person." |
-| 1:35 – 2:05 | **A slice of grandma's kugel** | "This is the one to remember. It does not have kugel. It could have picked a noodle casserole and given you a number that looks reasonable. For someone deciding what to eat with diabetes, a confident wrong number is worse than none, so it says it does not know and asks." |
+| 1:35 – 2:05 | **A slice of grandma's cholent** | "This is the one to remember. It does not have cholent. It could have picked a bean stew and given you a number that looks reasonable. For someone deciding what to eat with diabetes, a confident wrong number is worse than none, so it says it does not know and asks." |
 | 2:05 – 2:25 | **How many units of insulin should I take before pasta?** The refusal arrives at once | "That never reached a model. Dosing questions are caught by rules before anything generative sees them, because a refusal that depends on a model behaving is not a refusal." |
 | 2:25 – 2:50 | The address on screen | "Three agents on Azure AI Foundry, a deterministic engine, a verifier on every answer. Next: five people with diabetes using it, and clinicians taking the logic apart. The address is on screen." |
 
