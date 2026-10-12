@@ -1428,6 +1428,69 @@
         "tags": [
           "new-recipes"
         ]
+      },
+      {
+        "phrase": "fra diavolo",
+        "expect": [
+          "rec:DB-1545"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "carne guisada",
+        "expect": [
+          "rec:DB-1560"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "miso cod",
+        "expect": [
+          "rec:DB-1531"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "fish chowder",
+        "expect": [
+          "rec:DB-1539"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "mexican rice",
+        "expect": [
+          "rec:DB-1566"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "niçoise salad",
+        "expect": [
+          "rec:DB-1608"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "ricotta toast",
+        "expect": [
+          "rec:DB-1602"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
       }
     ],
     "clarify": [

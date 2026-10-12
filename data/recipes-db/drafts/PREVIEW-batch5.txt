@@ -1,0 +1,308 @@
+category             dish                                                 srv  kcal  prot  net C  GI    GL meas%
+Beef, Pork & Lamb    Barbacoa-Style Beef Tacos                              6   397    33   22.5  48  10.8    86
+Beef, Pork & Lamb    Beef Chimichangas, Baked                               4   505    30   35.2  34  12.0    78
+Beef, Pork & Lamb    Beef Stir-Fry with Snap Peas and Peppers               4   271    26    7.1  28   2.0    24
+Beef, Pork & Lamb    Beef and Bean Burrito Bowls                            4   457    31   32.2  59  19.0    88
+Beef, Pork & Lamb    Beef and Vegetable Kebabs                              4   258    29    5.6  15   0.8     0
+Beef, Pork & Lamb    Bison Meatloaf with Mushrooms                          6   202    25    6.0  41   2.5    56
+Beef, Pork & Lamb    Classic Meat Lasagna                                   8   379    29   23.3  41   9.5    83
+Beef, Pork & Lamb    Corned Beef-Style Brisket with Cabbage and Carrots     6   374    34   17.5  48   8.4    68
+Beef, Pork & Lamb    Garlic Herb Pork Tenderloin Medallions                 4   247    34    2.3  20   0.5     0
+Beef, Pork & Lamb    Greek Lamb Meatballs in Tomato Sauce                   5   344    20    6.8  41   2.8    86
+Beef, Pork & Lamb    Grilled Pork Souvlaki with Tzatziki                    4   368    38   22.7  51  11.6    91
+Beef, Pork & Lamb    Grilled Sirloin with Chimichurri and Roasted Zucchin   4   292    32    2.7  18   0.5     0
+Beef, Pork & Lamb    Ground Beef and Cabbage Skillet                        4   251    25    7.8  19   1.5     0
+Beef, Pork & Lamb    Ham and Potato Casserole                               6   294    19   25.8  56  14.4    92
+Beef, Pork & Lamb    Hawaiian Pork Chops with Pineapple Salsa               4   292    34    7.5  58   4.3    78
+Beef, Pork & Lamb    Italian Beef Stew with Peppers and Tomatoes            6   308    29    6.6  22   1.5     0
+Beef, Pork & Lamb    Italian Sausage with Peppers and Onions over Polenta   4   332    21   22.5  46  10.3    66
+Beef, Pork & Lamb    Lamb Burgers with Feta and Cucumber Yogurt             4   427    27    3.5  13   0.5    34
+Beef, Pork & Lamb    Meatball Marinara Bake with Zucchini Noodles           4   385    37    6.6  22   1.5    46
+Beef, Pork & Lamb    Moroccan-Spiced Lamb with Chickpeas                    5   330    31   17.5  34   5.9    67
+Beef, Pork & Lamb    Pizza-Stuffed Bell Peppers                             4   249    20   10.5  15   1.6    17
+Beef, Pork & Lamb    Pork Carnitas Bowls with Cabbage and Lime              6   361    30    5.5  25   1.4    29
+Beef, Pork & Lamb    Pork Chops with Mushroom Pan Sauce                     4   293    35    2.1  17   0.4     0
+Beef, Pork & Lamb    Pork Chops with Sauteed Apples and Onions              4   323    34   10.2  30   3.1    71
+Beef, Pork & Lamb    Salisbury Steak with Mushroom Gravy                    5   272    29    7.8  41   3.2    61
+Beef, Pork & Lamb    Sausage and Broccoli Rabe Orecchiette Style Pasta      4   380    22   34.4  43  14.8    84
+Beef, Pork & Lamb    Slow Cooker Lamb Shoulder with Rosemary and Garlic     6   301    35    5.7  28   1.6    49
+Beef, Pork & Lamb    Spicy Pork Lettuce Wraps                               4   255    23    4.5  32   1.4     0
+Beef, Pork & Lamb    Steak Tips with Garlic Butter Mushrooms                4   256    33    2.4  19   0.5     0
+Beef, Pork & Lamb    Taco-Stuffed Zucchini Boats                            4   268    24    5.6  18   1.0     0
+Beef, Pork & Lamb    Turkey Chili Stuffed Baked Potatoes                    4   400    27   40.8  71  28.9    89
+Beef, Pork & Lamb    Zucchini Lasagna with Turkey Ricotta Filling           6   309    29    8.3  20   1.7    32
+Breakfast            Bacon and Egg Fried Cauliflower Rice                   3   204    16    5.4  14   0.8     0
+Breakfast            Breakfast Burrito Bowl with Sweet Potato               3   341    16   27.2  63  17.2    90
+Breakfast            Breakfast Pizza on a Tortilla                          2   332    22   21.2  31   6.6    90
+Breakfast            Brunch Egg Bake with Spinach and Tomato                6   145    11    4.3  16   0.7    38
+Breakfast            Denver Omelet Muffins                                  6   138    12    2.1  10   0.2     0
+Breakfast            Huevos Divorciados                                     2   467    24   37.5  44  16.5    62
+Breakfast            Ricotta Toast with Berries                             2   238    12   19.4  49   9.5    63
+Breakfast            Smoked Salmon Scramble with Chives                     2   278    21    1.3   1   0.0     0
+Breakfast            Spinach Mushroom Frittata                              4   194    14    3.2  11   0.4     0
+Breakfast            Turkey Sausage Breakfast Hash with Peppers             4   289    18   17.6  36   6.3    72
+Dessert              Chocolate Hazelnut Chia Pudding                        3   134     5    3.3  18   0.6     0
+Dessert              Cinnamon Almond Baked Apples                           4   167     3   18.7  34   6.4    93
+Dessert              Greek Yogurt Panna Cotta                               5    96    11    7.0  22   1.5    98
+Dessert              Lemon Blueberry Yogurt Muffins                        10   113     5   15.4  53   8.2    32
+Dessert              Peanut Butter Banana Ice Cream                         3   182     6   23.7  46  10.9    89
+Dessert              Spiced Pear and Walnut Crumble                         6   199     3   22.8  41   9.4    97
+Poultry              Broccoli Chicken Rice Bake                             6   282    26   22.4  62  13.9    83
+Poultry              Cheesy Cauliflower and Turkey Bake                     5   209    25    6.5  18   1.2    22
+Poultry              Chicken Burrito Smothered with Enchilada Sauce         4   546    39   52.7  44  23.2    93
+Poultry              Chicken Enchilada Casserole with Zucchini              6   285    28   16.6  38   6.3    69
+Poultry              Chicken Mole-Style Skillet                             5   243    31    6.0  24   1.4     0
+Poultry              Chicken Parmesan Meatball Skillet                      5   310    30    7.7  38   2.9    81
+Poultry              Chicken Tamale Pie Muffins                             6   222    21   14.9  53   7.9    92
+Poultry              Pesto Chicken with Roasted Tomatoes and Zucchini       4   323    37    4.3  13   0.6     0
+Poultry              Shredded Chicken Tostadas                              4   340    30   24.5  46  11.3    71
+Salad                Cobb-Style Chopped Salad with Turkey                   3   374    26    6.0   6   0.4     0
+Salad                Cucumber Edamame Salad with Sesame                     4   105     7    5.0  17   0.8     0
+Salad                Italian Chopped Chicken Salad                          4   295    25   10.1  31   3.1    72
+Salad                Lentil Salad with Feta and Cucumber                    4   228    12   15.9  31   4.9    76
+Salad                Mexican Street Corn Salad in a Cup                     5   123     6   15.0  47   7.1    91
+Salad                Pesto Zucchini Noodle Salad with Cherry Tomatoes       3   186     9    6.3  14   0.9     0
+Salad                Pumpkin Seed and Cranberry Spinach Salad with Chicke   3   316    34    1.8  25   0.5     0
+Salad                Roasted Vegetable and Chickpea Grain Bowl              4   339    12   35.3  43  15.2    86
+Salad                Salmon Niçoise-Style Salad                             3   484    32   17.5  54   9.5    69
+Salad                Shaved Brussels Sprout Salad with Parmesan             4   182     8    6.2  14   0.9     0
+Salad                Shrimp and Avocado Stuffed Tomatoes                    4   131    17    4.8  15   0.7     0
+Salad                Taco Salad Bowl with Chicken and Black Beans           4   269    30   13.5  31   4.2    70
+Sandwiches & Wraps   Black Bean and Corn Quesadillas                        4   336    15   31.7  35  11.1    94
+Sandwiches & Wraps   Buffalo Chicken Wrap with Ranch                        3   309    36   20.2  32   6.5    95
+Sandwiches & Wraps   Bunless Burger Bowls with Special Sauce                4   300    29    4.3  17   0.7    18
+Sandwiches & Wraps   Chicken Salad Lettuce Sandwiches                       3   229    28    2.8  14   0.4    39
+Sandwiches & Wraps   Cuban-Style Pork and Swiss Wrap                        3   352    33   19.5  32   6.2    94
+Sandwiches & Wraps   Egg Salad Sandwich with Cucumber                       2   331    25   21.5  62  13.3    90
+Sandwiches & Wraps   Falafel Pita with Tahini and Tomato                    3   371    16   48.6  48  23.3    92
+Sandwiches & Wraps   Garden Veggie Wrap with Hummus                         2   257    10   26.5  29   7.7    88
+Sandwiches & Wraps   Greek Chicken Pita with Tzatziki                       3   369    41   33.8  51  17.2    89
+Sandwiches & Wraps   Open-Faced Turkey Melt with Apple and Cheddar          2   317    22   26.9  56  15.0    89
+Sandwiches & Wraps   Refried Bean and Cheese Burrito                        3   302    14   28.6  35  10.0    64
+Sandwiches & Wraps   Tuna Melt on Whole Grain                               2   353    38   20.4  65  13.3    93
+Seafood              Baked Trout with Almonds and Green Beans               4   289    32    5.2  15   0.8     0
+Seafood              Blackened Mahi Mahi Tacos with Mango Slaw              4   304    28   29.1  48  14.0    91
+Seafood              Clam Linguine with White Wine and Garlic               4   324    21   34.1  42  14.3    85
+Seafood              Cod Veracruz with Tomatoes and Olives                  4   204    27    6.5  27   1.8     0
+Seafood              Fish Tacos Baja with Cabbage Crema                     4   332    29   26.3  48  12.6    91
+Seafood              Garlic Butter Shrimp and Broccoli Skillet              4   186    28    4.7  18   0.8     0
+Seafood              Grilled Swordfish with Tomato Olive Relish             4   261    29    1.8  15   0.3     0
+Seafood              Lemon Garlic Shrimp over Spaghetti Squash              4   211    27   12.4  21   2.6     0
+Seafood              Lobster Tail with Lemon Butter and Asparagus           3   253    31    2.8  18   0.5     0
+Seafood              Mackerel with Roasted Fennel and Orange                4   378    28    5.6  27   1.5    43
+Seafood              Miso-Glazed Cod with Bok Choy                          4   166    28    3.4  24   0.8     0
+Seafood              Pan-Seared Halibut with Lemon Caper Sauce              4   217    34    1.6  19   0.3     0
+Seafood              Salmon Teriyaki Bowls with Broccoli                    4   450    34   29.0  68  19.7    86
+Seafood              Sardine and Avocado Toast                              2   291    20   13.8  57   7.9    89
+Seafood              Seared Sea Scallops with Cauliflower Puree             4   226    24    7.3  12   0.9    10
+Seafood              Seared Tuna Steak with Avocado Mash                    3   257    36    3.0  18   0.5     0
+Seafood              Shrimp Fra Diavolo over Spaghetti                      4   346    30   35.2  46  16.2    82
+Seafood              Snapper Veracruz-Style with Roasted Peppers            4   218    29    5.9  17   1.0     0
+Seafood              Tuna Poke Salad with Avocado and Cucumber              3   230    27    4.0  17   0.7     0
+Side Dish            Cheddar Grits Muffins                                  8   155     6    6.8  55   3.8    82
+Side Dish            Creamy Coleslaw with Apple and Dill                    6    67     3    4.8  23   1.1    54
+Side Dish            Creamy Spinach Artichoke Baked Cups                    6    95     8    3.4  15   0.5     0
+Side Dish            Elote-Style Zucchini Boats                             4   108     7   10.8  35   3.8    62
+Side Dish            Ginger Glazed Carrots                                  5    85     1    9.5  39   3.7    98
+Side Dish            Herbed Roasted Baby Potatoes                           5   152     2   22.4  70  15.7    97
+Side Dish            Lemon Herb Quinoa Pilaf                                5   189     6   19.4  51   9.9    94
+Side Dish            Mexican Rice with Tomato and Peas                      6   156     4   28.3  72  20.4    93
+Side Dish            Roasted Garlic Mashed Sweet Potatoes                   5   160     3   25.3  45  11.4    96
+Side Dish            Skillet Corn with Jalapeno and Lime                    5   123     4   15.4  50   7.7    95
+Snack & Appetizer    Baked Parmesan Zucchini Fries                          4   156    10    5.4  18   1.0    20
+Snack & Appetizer    Chicken Taquitos, Baked                                5   288    19   17.0  49   8.3    91
+Snack & Appetizer    Crab-Stuffed Mushrooms                                 6   106    11    2.5  11   0.3     0
+Snack & Appetizer    Deviled Egg Salad Bites on Cucumber                    6    87     8    2.3  12   0.3    14
+Snack & Appetizer    Greek Yogurt Ranch Veggie Dip Cups                     5    66     6    6.4  21   1.3    63
+Snack & Appetizer    Pesto Chicken Skewers                                  5   176    21    1.8  15   0.3     0
+Snack & Appetizer    Salmon Salad Cucumber Bites                            6    61     8    2.1  15   0.3    16
+Soup & Stew          Carne Guisada, Slow-Simmered Beef                      6   316    29   13.4  50   6.7    62
+Soup & Stew          Chicken and Dumpling-Style Soup with Cauliflower       5   239    26    7.1  18   1.3    23
+Soup & Stew          Cioppino-Style Seafood Stew                            5   228    28   10.9  21   2.3     0
+Soup & Stew          Cream of Mushroom Soup (Lightened)                     4   100     7    8.2  18   1.5    29
+Soup & Stew          Fish Chowder with Corn and Potatoes                    6   189    19   18.1  51   9.2    89
+Soup & Stew          Hearty Chicken and Vegetable Stew                      6   208    23   15.0  52   7.8    86
+Soup & Stew          Menudo-Style Beef Soup                                 6   267    27   11.2  26   2.9    70
+Soup & Stew          Pozole Rojo with Pork                                  6   307    27   14.0  25   3.5    67
+Soup & Stew          Sausage Kale and White Bean Soup                       6   184    15   13.8  24   3.3    68
+Soup & Stew          Sopa de Lima with Chicken                              5   156    21    9.4  33   3.1    49
+Soup & Stew          Split Pea Soup with Smoked Turkey                      6   116    11   11.2  25   2.8    69
+Soup & Stew          Turkey Sausage Minestrone                              6   172    14   14.7  27   4.0    61
+Soup & Stew          Venison Chili                                          6   193    25   12.2  30   3.7    56
+Vegetarian & Vegan   Baked Gnocchi-Style Cauliflower with Marinara and Mo   4   227    15    9.7  21   2.0    36
+
+131 dishes; median 258 kcal, median GL 3.1
+
+FLAGS
+  - e1_meat.jsonl:1 Garlic Herb Pork Tenderloin Medallions: the name is already in the database
+  - e1_meat.jsonl:2 Pork Chops with Mushroom Pan Sauce: the name is already in the database
+  - e1_meat.jsonl:3 Grilled Sirloin with Chimichurri and Roasted Zucchini: the name is already in the database
+  - e1_meat.jsonl:4 Italian Beef Stew with Peppers and Tomatoes: the name is already in the database
+  - e1_meat.jsonl:5 Steak Tips with Garlic Butter Mushrooms: the name is already in the database
+  - e1_meat.jsonl:6 Beef and Vegetable Kebabs: the name is already in the database
+  - e1_meat.jsonl:7 Lamb Burgers with Feta and Cucumber Yogurt: the name is already in the database
+  - e1_meat.jsonl:8 Slow Cooker Lamb Shoulder with Rosemary and Garlic: the name is already in the database
+  - e1_meat.jsonl:9 Greek Lamb Meatballs in Tomato Sauce: the name is already in the database
+  - e1_meat.jsonl:10 Ground Beef and Cabbage Skillet: the name is already in the database
+  - e1_meat.jsonl:11 Taco-Stuffed Zucchini Boats: the name is already in the database
+  - e1_meat.jsonl:12 Beef Stir-Fry with Snap Peas and Peppers: the name is already in the database
+  - e1_meat.jsonl:13 Meatball Marinara Bake with Zucchini Noodles: the name is already in the database
+  - e1_meat.jsonl:14 Pork Carnitas Bowls with Cabbage and Lime: the name is already in the database
+  - e1_meat.jsonl:15 Pozole Rojo with Pork: the name is already in the database
+  - e1_meat.jsonl:16 Barbacoa-Style Beef Tacos: the name is already in the database
+  - e1_meat.jsonl:16 Barbacoa-Style Beef Tacos: 2 steps
+  - e1_meat.jsonl:17 Grilled Pork Souvlaki with Tzatziki: the name is already in the database
+  - e1_meat.jsonl:18 Italian Sausage with Peppers and Onions over Polenta-Style Grits: the name is already in the database
+  - e1_meat.jsonl:19 Pork Chops with Sauteed Apples and Onions: the name is already in the database
+  - e1_meat.jsonl:20 Corned Beef-Style Brisket with Cabbage and Carrots: the name is already in the database
+  - e1_meat.jsonl:20 Corned Beef-Style Brisket with Cabbage and Carrots: 2 steps
+  - e1_meat.jsonl:21 Salisbury Steak with Mushroom Gravy: the name is already in the database
+  - e1_meat.jsonl:22 Moroccan-Spiced Lamb with Chickpeas: the name is already in the database
+  - e1_meat.jsonl:23 Beef and Bean Burrito Bowls: the name is already in the database
+  - e1_meat.jsonl:23 Beef and Bean Burrito Bowls: glycemic load 19.0 a serving
+  - e1_meat.jsonl:24 Hawaiian Pork Chops with Pineapple Salsa: the name is already in the database
+  - e1_meat.jsonl:25 Spicy Pork Lettuce Wraps: the name is already in the database
+  - e1_meat.jsonl:26 Venison Chili: the name is already in the database
+  - e1_meat.jsonl:26 Venison Chili: 2 steps
+  - e1_meat.jsonl:26 Venison Chili: only 56% of its carbohydrate has a measured GI
+  - e1_meat.jsonl:27 Bison Meatloaf with Mushrooms: the name is already in the database
+  - e2_seafood.jsonl:1 Pan-Seared Halibut with Lemon Caper Sauce: the name is already in the database
+  - e2_seafood.jsonl:2 Blackened Mahi Mahi Tacos with Mango Slaw: the name is already in the database
+  - e2_seafood.jsonl:3 Baked Trout with Almonds and Green Beans: the name is already in the database
+  - e2_seafood.jsonl:4 Seared Sea Scallops with Cauliflower Puree: the name is already in the database
+  - e2_seafood.jsonl:5 Lemon Garlic Shrimp over Spaghetti Squash: the name is already in the database
+  - e2_seafood.jsonl:5 Lemon Garlic Shrimp over Spaghetti Squash: only 0% of its carbohydrate has a measured GI
+  - e2_seafood.jsonl:6 Cod Veracruz with Tomatoes and Olives: the name is already in the database
+  - e2_seafood.jsonl:7 Salmon Teriyaki Bowls with Broccoli: the name is already in the database
+  - e2_seafood.jsonl:7 Salmon Teriyaki Bowls with Broccoli: glycemic load 19.7 a serving
+  - e2_seafood.jsonl:8 Tuna Poke Salad with Avocado and Cucumber: the name is already in the database
+  - e2_seafood.jsonl:9 Grilled Swordfish with Tomato Olive Relish: the name is already in the database
+  - e2_seafood.jsonl:10 Crab-Stuffed Mushrooms: the name is already in the database
+  - e2_seafood.jsonl:11 Garlic Butter Shrimp and Broccoli Skillet: the name is already in the database
+  - e2_seafood.jsonl:12 Miso-Glazed Cod with Bok Choy: the name is already in the database
+  - e2_seafood.jsonl:13 Sardine and Avocado Toast: the name is already in the database
+  - e2_seafood.jsonl:14 Mackerel with Roasted Fennel and Orange: the name is already in the database
+  - e2_seafood.jsonl:14 Mackerel with Roasted Fennel and Orange: 2 steps
+  - e2_seafood.jsonl:15 Snapper Veracruz-Style with Roasted Peppers: the name is already in the database
+  - e2_seafood.jsonl:16 Seared Tuna Steak with Avocado Mash: the name is already in the database
+  - e2_seafood.jsonl:17 Shrimp and Avocado Stuffed Tomatoes: the name is already in the database
+  - e2_seafood.jsonl:17 Shrimp and Avocado Stuffed Tomatoes: 131 kcal a serving
+  - e2_seafood.jsonl:18 Clam Linguine with White Wine and Garlic: the name is already in the database
+  - e2_seafood.jsonl:19 Lobster Tail with Lemon Butter and Asparagus: the name is already in the database
+  - e2_seafood.jsonl:20 Fish Chowder with Corn and Potatoes: the name is already in the database
+  - e2_seafood.jsonl:21 Cioppino-Style Seafood Stew: the name is already in the database
+  - e2_seafood.jsonl:21 Cioppino-Style Seafood Stew: only 0% of its carbohydrate has a measured GI
+  - e3_italian_mexican.jsonl:1 Zucchini Lasagna with Turkey Ricotta Filling: the name is already in the database
+  - e3_italian_mexican.jsonl:2 Classic Meat Lasagna: the name is already in the database
+  - e3_italian_mexican.jsonl:3 Chicken Parmesan Meatball Skillet: the name is already in the database
+  - e3_italian_mexican.jsonl:4 Sausage and Broccoli Rabe Orecchiette Style Pasta: the name is already in the database
+  - e3_italian_mexican.jsonl:5 Shrimp Fra Diavolo over Spaghetti: the name is already in the database
+  - e3_italian_mexican.jsonl:6 Turkey Sausage Minestrone: the name is already in the database
+  - e3_italian_mexican.jsonl:7 Baked Gnocchi-Style Cauliflower with Marinara and Mozzarella: the name is already in the database
+  - e3_italian_mexican.jsonl:8 Italian Chopped Chicken Salad: the name is already in the database
+  - e3_italian_mexican.jsonl:8 Italian Chopped Chicken Salad: 2 steps
+  - e3_italian_mexican.jsonl:9 Pizza-Stuffed Bell Peppers: the name is already in the database
+  - e3_italian_mexican.jsonl:9 Pizza-Stuffed Bell Peppers: only 17% of its carbohydrate has a measured GI
+  - e3_italian_mexican.jsonl:10 Pesto Chicken with Roasted Tomatoes and Zucchini: the name is already in the database
+  - e3_italian_mexican.jsonl:11 Chicken Burrito Smothered with Enchilada Sauce: the name is already in the database
+  - e3_italian_mexican.jsonl:11 Chicken Burrito Smothered with Enchilada Sauce: glycemic load 23.2 a serving
+  - e3_italian_mexican.jsonl:12 Beef Chimichangas, Baked: the name is already in the database
+  - e3_italian_mexican.jsonl:13 Chicken Tamale Pie Muffins: the name is already in the database
+  - e3_italian_mexican.jsonl:14 Huevos Divorciados: the name is already in the database
+  - e3_italian_mexican.jsonl:15 Mexican Street Corn Salad in a Cup: the name is already in the database
+  - e3_italian_mexican.jsonl:15 Mexican Street Corn Salad in a Cup: 123 kcal a serving
+  - e3_italian_mexican.jsonl:16 Black Bean and Corn Quesadillas: the name is already in the database
+  - e3_italian_mexican.jsonl:17 Shredded Chicken Tostadas: the name is already in the database
+  - e3_italian_mexican.jsonl:18 Chicken Mole-Style Skillet: the name is already in the database
+  - e3_italian_mexican.jsonl:19 Fish Tacos Baja with Cabbage Crema: the name is already in the database
+  - e3_italian_mexican.jsonl:20 Carne Guisada, Slow-Simmered Beef: the name is already in the database
+  - e3_italian_mexican.jsonl:21 Menudo-Style Beef Soup: the name is already in the database
+  - e3_italian_mexican.jsonl:22 Sopa de Lima with Chicken: the name is already in the database
+  - e3_italian_mexican.jsonl:23 Refried Bean and Cheese Burrito: the name is already in the database
+  - e3_italian_mexican.jsonl:23 Refried Bean and Cheese Burrito: 2 steps
+  - e3_italian_mexican.jsonl:24 Chicken Taquitos, Baked: the name is already in the database
+  - e3_italian_mexican.jsonl:25 Elote-Style Zucchini Boats: the name is already in the database
+  - e3_italian_mexican.jsonl:26 Mexican Rice with Tomato and Peas: the name is already in the database
+  - e3_italian_mexican.jsonl:26 Mexican Rice with Tomato and Peas: glycemic load 20.4 a serving
+  - e4_sandwich_side_soup.jsonl:1 Chicken Salad Lettuce Sandwiches: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:1 Chicken Salad Lettuce Sandwiches: 2 steps
+  - e4_sandwich_side_soup.jsonl:2 Open-Faced Turkey Melt with Apple and Cheddar: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:3 Egg Salad Sandwich with Cucumber: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:4 Falafel Pita with Tahini and Tomato: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:4 Falafel Pita with Tahini and Tomato: glycemic load 23.3 a serving
+  - e4_sandwich_side_soup.jsonl:5 Tuna Melt on Whole Grain: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:5 Tuna Melt on Whole Grain: 2 steps
+  - e4_sandwich_side_soup.jsonl:6 Bunless Burger Bowls with Special Sauce: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:7 Cuban-Style Pork and Swiss Wrap: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:8 Greek Chicken Pita with Tzatziki: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:9 Buffalo Chicken Wrap with Ranch: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:10 Garden Veggie Wrap with Hummus: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:10 Garden Veggie Wrap with Hummus: 2 steps
+  - e4_sandwich_side_soup.jsonl:11 Cheddar Grits Muffins: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:12 Roasted Garlic Mashed Sweet Potatoes: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:13 Herbed Roasted Baby Potatoes: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:14 Creamy Coleslaw with Apple and Dill: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:15 Ginger Glazed Carrots: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:16 Creamy Spinach Artichoke Baked Cups: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:17 Lemon Herb Quinoa Pilaf: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:18 Skillet Corn with Jalapeno and Lime: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:19 Turkey Chili Stuffed Baked Potatoes: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:19 Turkey Chili Stuffed Baked Potatoes: glycemic load 28.9 a serving
+  - e4_sandwich_side_soup.jsonl:20 Chicken Enchilada Casserole with Zucchini: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:21 Broccoli Chicken Rice Bake: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:21 Broccoli Chicken Rice Bake: 2 steps
+  - e4_sandwich_side_soup.jsonl:22 Ham and Potato Casserole: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:23 Cheesy Cauliflower and Turkey Bake: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:24 Hearty Chicken and Vegetable Stew: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:25 Split Pea Soup with Smoked Turkey: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:25 Split Pea Soup with Smoked Turkey: 116 kcal a serving
+  - e4_sandwich_side_soup.jsonl:25 Split Pea Soup with Smoked Turkey: 2 steps
+  - e4_sandwich_side_soup.jsonl:26 Sausage Kale and White Bean Soup: the name is already in the database
+  - e4_sandwich_side_soup.jsonl:27 Cream of Mushroom Soup (Lightened): the name is already in the database
+  - e4_sandwich_side_soup.jsonl:27 Cream of Mushroom Soup (Lightened): 100 kcal a serving
+  - e4_sandwich_side_soup.jsonl:27 Cream of Mushroom Soup (Lightened): only 7 g protein
+  - e4_sandwich_side_soup.jsonl:28 Chicken and Dumpling-Style Soup with Cauliflower: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:1 Denver Omelet Muffins: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:1 Denver Omelet Muffins: 138 kcal a serving
+  - e5_brunch_salad_snack_dessert.jsonl:1 Denver Omelet Muffins: 2 steps
+  - e5_brunch_salad_snack_dessert.jsonl:2 Breakfast Pizza on a Tortilla: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:2 Breakfast Pizza on a Tortilla: 2 steps
+  - e5_brunch_salad_snack_dessert.jsonl:3 Brunch Egg Bake with Spinach and Tomato: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:3 Brunch Egg Bake with Spinach and Tomato: 145 kcal a serving
+  - e5_brunch_salad_snack_dessert.jsonl:3 Brunch Egg Bake with Spinach and Tomato: 2 steps
+  - e5_brunch_salad_snack_dessert.jsonl:4 Smoked Salmon Scramble with Chives: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:4 Smoked Salmon Scramble with Chives: 2 steps
+  - e5_brunch_salad_snack_dessert.jsonl:5 Breakfast Burrito Bowl with Sweet Potato: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:6 Bacon and Egg Fried Cauliflower Rice: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:7 Spinach Mushroom Frittata: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:7 Spinach Mushroom Frittata: 2 steps
+  - e5_brunch_salad_snack_dessert.jsonl:8 Ricotta Toast with Berries: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:8 Ricotta Toast with Berries: 2 steps
+  - e5_brunch_salad_snack_dessert.jsonl:9 Turkey Sausage Breakfast Hash with Peppers: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:10 Taco Salad Bowl with Chicken and Black Beans: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:11 Cobb-Style Chopped Salad with Turkey: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:12 Lentil Salad with Feta and Cucumber: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:12 Lentil Salad with Feta and Cucumber: 2 steps
+  - e5_brunch_salad_snack_dessert.jsonl:13 Shaved Brussels Sprout Salad with Parmesan: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:13 Shaved Brussels Sprout Salad with Parmesan: 2 steps
+  - e5_brunch_salad_snack_dessert.jsonl:14 Salmon Niçoise-Style Salad: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:15 Roasted Vegetable and Chickpea Grain Bowl: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:15 Roasted Vegetable and Chickpea Grain Bowl: 2 steps
+  - e5_brunch_salad_snack_dessert.jsonl:16 Cucumber Edamame Salad with Sesame: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:16 Cucumber Edamame Salad with Sesame: 105 kcal a serving
+  - e5_brunch_salad_snack_dessert.jsonl:16 Cucumber Edamame Salad with Sesame: 2 steps
+  - e5_brunch_salad_snack_dessert.jsonl:17 Pesto Zucchini Noodle Salad with Cherry Tomatoes: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:17 Pesto Zucchini Noodle Salad with Cherry Tomatoes: 2 steps
+  - e5_brunch_salad_snack_dessert.jsonl:18 Pumpkin Seed and Cranberry Spinach Salad with Chicken: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:19 Chocolate Hazelnut Chia Pudding: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:20 Greek Yogurt Panna Cotta: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:21 Cinnamon Almond Baked Apples: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:22 Lemon Blueberry Yogurt Muffins: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:22 Lemon Blueberry Yogurt Muffins: only 32% of its carbohydrate has a measured GI
+  - e5_brunch_salad_snack_dessert.jsonl:23 Peanut Butter Banana Ice Cream: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:24 Spiced Pear and Walnut Crumble: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:25 Deviled Egg Salad Bites on Cucumber: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:26 Baked Parmesan Zucchini Fries: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:27 Greek Yogurt Ranch Veggie Dip Cups: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:28 Pesto Chicken Skewers: the name is already in the database
+  - e5_brunch_salad_snack_dessert.jsonl:29 Salmon Salad Cucumber Bites: the name is already in the database

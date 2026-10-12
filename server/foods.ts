@@ -276,6 +276,9 @@ const RECIPE_ALIASES: Record<string, string[]> = {
   "Oyster Po' Boy on a Bun": ['po boy', "po' boy", 'poboy'],
   "Shrimp Po' Boy Lettuce Boats": ['po boy', "po' boy", 'poboy'],
   'Cucumber Lime Agua Fresca': ['agua fresca', 'cucumber agua fresca'],
+  'Shrimp Fra Diavolo over Spaghetti': ['fra diavolo', 'shrimp fra diavolo'],
+  'Carne Guisada, Slow-Simmered Beef': ['carne guisada'],
+  'Miso-Glazed Cod with Bok Choy': ['miso cod', 'miso glazed cod'],
 }
 
 function usdaRecords(): FoodRecord[] {
