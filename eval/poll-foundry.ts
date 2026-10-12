@@ -26,8 +26,9 @@ const done = new Map<string, Run>()
 for (let i = 0; i < 360 && pending.size; i++) {
   for (const key of [...pending]) {
     const [evalId, runId] = key.split(':')
-    const run = (await openai.evals.runs.retrieve(runId, { eval_id: evalId } as never)) as unknown as Run
-    if (['completed', 'failed', 'canceled'].includes(run.status)) { pending.delete(key); done.set(key, run) }
+    // Right after a run is queued the history service can answer 400 for a minute or so; that is a wait, not a failure.
+    const run = await (openai.evals.runs.retrieve(runId, { eval_id: evalId } as never) as Promise<unknown>).then((r) => r as Run, () => null)
+    if (run && ['completed', 'failed', 'canceled'].includes(run.status)) { pending.delete(key); done.set(key, run) }
   }
   if (pending.size) await sleep(20_000)
 }

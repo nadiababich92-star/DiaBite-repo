@@ -2864,6 +2864,26 @@
       {
         "id": "ing:egg",
         "grams": 50
+      },
+      {
+        "id": "usda:2710360",
+        "grams": 15
+      },
+      {
+        "id": "usda:2710361",
+        "grams": 10
+      },
+      {
+        "id": "usda:2710371",
+        "grams": 5
+      },
+      {
+        "id": "usda:2710358",
+        "grams": 2
+      },
+      {
+        "id": "usda:2710359",
+        "grams": 60
       }
     ],
     "partial": [

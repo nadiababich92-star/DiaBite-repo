@@ -225,8 +225,17 @@ interface UsdaRow {
   gi: number | null; gi_level: number | string | null; gi_basis?: string
 }
 
+/** Sweets are eaten by the piece or the pouch, never by the cup, and a piece can weigh 2 g. */
+const CONFECTIONERY = /^(candy|chewing gum|gum\b|lollipop|marshmallow|jelly bean)/i
+
 /** The portion a person would say, not the one a lab would weigh. */
-function householdPortion(rows: { label: string; grams: number }[] | undefined): number {
+function householdPortion(rows: { label: string; grams: number }[] | undefined, name = ''): number {
+  if (CONFECTIONERY.test(name)) {
+    // "1 cup" of hard candy is 160 g and made "two hard candies" 320 g; the first listed piece-sized
+    // portion is what someone means. Nothing under a gram, nothing over a pouch.
+    const sweet = (rows ?? []).filter((p) => p.grams >= 1 && p.grams <= 100 && !/\bcup\b|\bdry\b|yields|not specified|sharing|movie/i.test(p.label))
+    if (sweet.length) return Math.round(sweet[0].grams)
+  }
   const usable = (rows ?? []).filter((p) => p.grams > 10 && p.grams <= 600 && !/\bdry\b|yields|not specified/i.test(p.label))
   const cup = usable.find((p) => /\bcup\b/i.test(p.label))
   return Math.round(cup?.grams ?? usable[0]?.grams ?? 100)
@@ -313,7 +322,7 @@ function usdaRecords(): FoodRecord[] {
     out.push({
       id: `usda:${r.fdc_id}`, kind: unrated ? 'unrated' : 'ingredient', name, gi, giLevel: giLevel(gi),
       aliases: USDA_ALIASES[`usda:${r.fdc_id}`],
-      category: 'grains', unit: 'g', defaultPortion: householdPortion(r.portions),
+      category: 'grains', unit: 'g', defaultPortion: householdPortion(r.portions, r.name),
       searchText: `${name}. ${r.name}. ${r.category}.`,
       per100: { kcal: r.per100.kcal, protein: r.per100.protein, fat: r.per100.fat, carbs: r.per100.carbs, fiber: r.per100.fiber },
       source: unrated
