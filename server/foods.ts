@@ -81,12 +81,12 @@ const ALIASES: Record<string, string[]> = {
   // 'potato' stays as the default to name when a meal has one among several foods;
   // resolve.ts keeps it from being certain (CATEGORY_WORDS). 'baked potato' is gone: a
   // baked potato is not a boiled one, and the records we hold say GI 83 against 78.
-  'potato-boil': ['potato', 'potatoes', 'boiled potatoes'],
+  'potato-boil': ['potato', 'potatoes', 'boiled potatoes', 'boiled potato'],
   'potato-mash': ['mashed potatoes', 'mash'],
   'sweetpotato': ['sweet potato', 'yam'],
   'oats': ['oatmeal', 'porridge', 'oats'],
   'oats-instant': ['instant oats', 'quick oats'],
-  'egg': ['eggs', 'scrambled eggs', 'fried egg', 'boiled egg', 'omelette', 'omelet'],
+  'egg': ['eggs', 'scrambled eggs', 'fried egg', 'boiled egg', 'boiled eggs', 'hard-boiled egg', 'hard-boiled eggs', 'hard boiled egg', 'hard boiled eggs', 'soft-boiled egg', 'omelette', 'omelet'],
   'chicken': ['chicken', 'grilled chicken', 'chicken breast'],
   'beef': ['steak', 'beef'],
   'cheese': ['cheddar', 'cheese', 'cheese slice', 'swiss cheese'],

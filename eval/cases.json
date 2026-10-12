@@ -1680,6 +1680,36 @@
         "tags": [
           "new-recipes"
         ]
+      },
+      {
+        "phrase": "hard-boiled egg",
+        "expect": [
+          "seed:egg"
+        ],
+        "tags": [
+          "named",
+          "dish-ingredient"
+        ]
+      },
+      {
+        "phrase": "hard-boiled eggs",
+        "expect": [
+          "seed:egg"
+        ],
+        "tags": [
+          "named",
+          "dish-ingredient"
+        ]
+      },
+      {
+        "phrase": "hard boiled egg",
+        "expect": [
+          "seed:egg"
+        ],
+        "tags": [
+          "named",
+          "dish-ingredient"
+        ]
       }
     ],
     "clarify": [

@@ -126,7 +126,7 @@ export function openApiSpec() {
                         required: ['phrase', 'grams'],
                         additionalProperties: false,
                         properties: {
-                          phrase: { type: 'string', description: 'A plain ingredient name, as it is cooked in the dish when it could be cooked several ways: "beef chuck", "boiled potatoes" (not "potatoes"), "cooked white rice" (not "rice"). A bare name that could be cooked several ways makes the engine ask, and then the dish cannot be judged.' },
+                          phrase: { type: 'string', description: 'A plain ingredient name, as it is cooked in the dish when it could be cooked several ways: "beef chuck", "boiled potatoes" (not "potatoes", and never the inverted "potatoes, boiled"), "cooked white rice" (not "rice"). A bare name that could be cooked several ways makes the engine ask, and then the dish cannot be judged.' },
                           grams: { type: 'number', description: 'Weight of this ingredient in one portion, in grams.' },
                           gramsStated: { type: 'boolean', description: 'True only when the person gave this amount.' },
                         },
