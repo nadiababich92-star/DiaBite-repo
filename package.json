@@ -19,7 +19,8 @@
     "deploy": "bash scripts/deploy.sh",
     "sync:foods": "tsx scripts/sync-foods.ts",
     "smoke": "node eval/smoke.mjs",
-    "rehearsal": "node eval/rehearsal.mjs"
+    "rehearsal": "node eval/rehearsal.mjs",
+    "screens": "node eval/screens.mjs"
   },
   "dependencies": {
     "@azure/ai-agents": "^1.1.0",

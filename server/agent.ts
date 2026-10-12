@@ -638,6 +638,14 @@ async function runAgent(role: Role, input: string, previous?: string, forceTools
   const responses = agentClient().responses as unknown as {
     create(body: never, opts: { timeout: number; maxRetries: number }): Promise<unknown>
   }
+  // The router answers in one word, about a second. Waiting 45 s for it, and then trying again,
+  // cost a person 46 s once (11 October, `routeMs` in the agent eval) for a step that already has a
+  // fallback: so it gets a short bound and no second attempt, and a hang means "meal".
+  if (role === 'triage') {
+    return (await withRateLimitRetry(() =>
+      responses.create(payload as never, { timeout: TRIAGE_TIMEOUT_MS, maxRetries: 0 }),
+    )) as unknown as Turn
+  }
   return (await withRateLimitRetry(() => withHangRetry(() =>
     responses.create(payload as never, { timeout: CALL_TIMEOUT_MS, maxRetries: 0 }),
   ))) as unknown as Turn
@@ -650,7 +658,9 @@ async function runAgent(role: Role, input: string, previous?: string, forceTools
  * hang or a dropped connection gets one more try; anything else is the
  * caller's error and is not retried.
  */
-const CALL_TIMEOUT_MS = Number(process.env.CALL_TIMEOUT_MS ?? 45_000)
+const CALL_TIMEOUT_MS = Number(process.env.CALL_TIMEOUT_MS ?? 30_000)
+/** One word out, about a second: a hang past this is not worth waiting for; the router falls back to the meal agent. */
+const TRIAGE_TIMEOUT_MS = Number(process.env.TRIAGE_TIMEOUT_MS ?? 8_000)
 export async function withHangRetry<T>(run: () => Promise<T>): Promise<T> {
   try {
     return await run()
