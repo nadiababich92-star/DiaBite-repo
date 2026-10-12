@@ -87,12 +87,26 @@ export function computeMeal(items: MealItemInput[]): ComputeMealResponse {
  * ingredient the database lacks is still left out and named (rule 3). The model supplied the words
  * and the portion weights; every nutrition figure comes from `computeMeal` over what is returned.
  */
+/** The words that say how a food was prepared; USDA writes them last ("Potatoes, boiled"). */
+const PREPARED = /^(boiled|hard-boiled|soft-boiled|cooked|raw|baked|roasted|fried|grilled|steamed|dried|canned|stewed|mashed|sauteed|sautéed|poached|drained)$/
+
+/**
+ * "potatoes, boiled" -> "boiled potatoes". A model writing in the style of a food table puts the
+ * preparation after a comma, and the resolver reads that as a different, ambiguous phrase. The words
+ * are the same and only their order changes: nothing is substituted for what was written (rule 3).
+ */
+export function uninvertPhrase(phrase: string): string {
+  const parts = phrase.split(',').map((p) => p.trim())
+  if (parts.length !== 2 || !parts[0] || !PREPARED.test(parts[1].toLowerCase())) return phrase
+  return `${parts[1]} ${parts[0]}`
+}
+
 export async function planDish(store: VectorStore, req: CostDishRequest): Promise<{
   costed: MealItemInput[]
   ingredients: DishIngredientResult[]
   unresolved: UnresolvedIngredient[]
 }> {
-  const resolved = await resolvePhrases(store, req.ingredients.map((i) => i.phrase), 3)
+  const resolved = await resolvePhrases(store, req.ingredients.map((i) => uninvertPhrase(i.phrase)), 3)
   const costed: MealItemInput[] = []
   const ingredients: DishIngredientResult[] = []
   const unresolved: UnresolvedIngredient[] = []

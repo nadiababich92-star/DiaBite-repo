@@ -29,7 +29,7 @@ import { resolvePhrases } from '../server/resolve'
 import { verify } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
-import { afterMealFor, computeItem, computeMeal, driverOf, planDish } from '../server/compute'
+import { afterMealFor, computeItem, computeMeal, driverOf, planDish, uninvertPhrase } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
 import { looksLikeMeal, templatedAnswer, withHangRetry } from '../server/agent'
 import { diffEntries, exportShape, fromRow, mergeById, toRow } from '../src/lib/syncCore'
@@ -240,6 +240,12 @@ const dishMisses: string[] = []
   // 2. An unknown phrase is not costed.
   const p2 = await planDish(store, { dish: 'cholent', ingredients: [{ phrase: 'beef chuck', grams: 90 }, { phrase: 'zzzqx', grams: 40 }] })
   if (p2.costed.length !== 1 || p2.unresolved[0]?.phrase !== 'zzzqx' || p2.unresolved[0]?.reason !== 'unknown') dishMisses.push(`    an unknown ingredient was costed or not named: ${JSON.stringify(p2.unresolved)}`)
+  // 2b. A food-table spelling ("potatoes, boiled") is read as the same words in the usual order, and
+  //     only that: a bare "potatoes" stays ambiguous, and a comma that is not a preparation is untouched.
+  const inv = ['potatoes, boiled', 'egg, hard-boiled', 'rice, cooked'].map(uninvertPhrase)
+  if (inv.join('|') !== 'boiled potatoes|hard-boiled egg|cooked rice' || uninvertPhrase('salt, pepper') !== 'salt, pepper' || uninvertPhrase('potatoes') !== 'potatoes' || uninvertPhrase('a, b, boiled') !== 'a, b, boiled') dishMisses.push(`    the preparation word was not moved to the front, or something else was changed: ${inv.join(' | ')}`)
+  const p2b = await planDish(store, { dish: 'cholent', ingredients: [{ phrase: 'potatoes, boiled', grams: 100 }, { phrase: 'potatoes', grams: 100 }] })
+  if (p2b.costed.length !== 1 || p2b.ingredients[0]?.foodId !== 'seed:potato-boil' || p2b.unresolved[0]?.phrase !== 'potatoes' || p2b.unresolved[0]?.reason !== 'ambiguous') dishMisses.push(`    "potatoes, boiled" should count as boiled potatoes and a bare "potatoes" should still ask: ${JSON.stringify({ c: p2b.ingredients.map((i) => i.foodId), u: p2b.unresolved })}`)
   // 3. An ambiguous phrase is not costed and carries the engine's question.
   const p3 = await planDish(store, { dish: 'x', ingredients: [{ phrase: 'chili', grams: 30 }, { phrase: 'beef chuck', grams: 90 }] })
   const chili = p3.unresolved.find((u) => u.phrase === 'chili')
