@@ -1,0 +1,24 @@
+# Keep the free Supabase project awake.
+#
+# Free projects are paused after 7 days with no database requests, and a paused project
+# takes the catalogue, sign-in and the diary with it. One cheap read every three days is
+# enough. The URL and publishable key are public by design (they ship in the browser
+# bundle); nothing secret is used here.
+name: keepalive
+
+on:
+  schedule:
+    - cron: '17 6 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read one row from the foods table
+        run: |
+          code=$(curl -s -o /tmp/out -w '%{http_code}' --max-time 30 \
+            'https://qennxqfbvgqyodjmkguo.supabase.co/rest/v1/foods?select=id&limit=1' \
+            -H 'apikey: sb_publishable_iU41mesTwmkEXpdeWA-hBw_12L4e1np')
+          echo "status $code"; head -c 200 /tmp/out; echo
+          [ "$code" = "200" ]
