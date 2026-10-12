@@ -63,7 +63,12 @@ The shell does not have Node on its PATH by default: prefix with
    an unpaginated read once left 813 withdrawn foods in the table.
 3. **A food the database lacks never enters the arithmetic under a neighbour's
    name.** It comes back `unknown` and the agent says so. Partial meals are
-   costed without it and labelled partial, and may never be called "fits".
+   costed without it and labelled partial, and may never be called "fits". One
+   exception, narrow and with its own tool: a prepared **dish** the database lacks
+   may be counted through `cost_dish`, as its own ingredients, each in the
+   database, labelled as an assumed recipe (`assumed: true`); an ingredient the
+   database lacks is left out and named; and an assumed-recipe answer is an
+   estimate, never a plain "fits".
 4. **A record with no glycemic index and real carbohydrate stays out of the
    catalogue**, with two exceptions that are their own kinds. `kind: 'branded'`
    (USDA Branded Foods, chosen by `scripts/build-branded.py`) and

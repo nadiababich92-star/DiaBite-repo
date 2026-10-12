@@ -95,6 +95,57 @@ export function openApiSpec() {
         },
       },
 
+      '/tools/cost_dish': {
+        post: {
+          operationId: 'cost_dish',
+          summary: 'Count a dish the database does not have, from its typical ingredients',
+          description:
+            'Use ONLY for a prepared dish that resolve_foods returned as unknown, never for a single food. ' +
+            'Give the dish exactly as the person named it, and its typical ingredients as plain names with the ' +
+            'weight in grams of each for ONE portion. The engine finds each ingredient in the database and ' +
+            'counts the ones it finds; the others come back in `unresolved` and must be named to the person. ' +
+            'You supply words and portion weights only: never a nutrition value, which the engine computes. ' +
+            'Set `gramsStated: true` on an ingredient only when the person gave that amount. ' +
+            'The result always has `assumed: true`: it is an estimate from a typical recipe, not a record of the meal.',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['dish', 'ingredients'],
+                  properties: {
+                    sessionId: { type: 'string', description: 'The session id you were given, passed through unchanged.' },
+                    dish: { type: 'string', description: 'The dish as the person named it, the same text you sent to resolve_foods.' },
+                    ingredients: {
+                      type: 'array',
+                      minItems: 1,
+                      maxItems: 20,
+                      items: {
+                        type: 'object',
+                        required: ['phrase', 'grams'],
+                        additionalProperties: false,
+                        properties: {
+                          phrase: { type: 'string', description: 'A plain ingredient name, for example "beef chuck".' },
+                          grams: { type: 'number', description: 'Weight of this ingredient in one portion, in grams.' },
+                          gramsStated: { type: 'boolean', description: 'True only when the person gave this amount.' },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description:
+                'Everything compute_meal returns, plus `assumed: true`, `dish`, `ingredients` (what was counted, with `assumedGrams`), and `unresolved` (what was not counted and why). `afterMeal.fits` is the engine\u2019s comparison; with `assumed: true` it is conditional. On a wrong call the body has an `error` to read and fix.',
+            },
+          },
+        },
+      },
+
       '/tools/get_day_state': {
         post: {
           operationId: 'get_day_state',

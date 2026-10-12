@@ -191,6 +191,42 @@ async function httpSuite() {
       method: 'PUT', headers: { 'content-type': 'application/json', 'x-api-key': KEY }, body: JSON.stringify({ budget: { glBudget: 1 }, entries: [] }),
     })
     check('A15', 'PUT /session refuses an id over 64 characters and accepts a normal one', badPut.status === 400 && okPut.status === 200, `${badPut.status} ${okPut.status}`)
+    // ── cost_dish: a dish counted from an assumed recipe, through the real route ─────
+    const post = (path: string, body: unknown, headers: Record<string, string> = { 'x-api-key': KEY }) => fetch(`${BASE}${path}`, {
+      method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(body),
+    }).then(async (r) => ({ status: r.status, json: await r.json().catch(() => ({})) as Record<string, any> }))
+    const park = (id: string) => fetch(`${BASE}/session/${id}`, { method: 'PUT', headers: { 'content-type': 'application/json', 'x-api-key': KEY },
+      body: JSON.stringify({ budget: { glBudget: 49, carbsG: 108, kcal: 1660 }, entries: [] }) })
+    await park('cd-1')
+    await post('/tools/resolve_foods', { phrases: ["grandma's cholent"], sessionId: 'cd-1' })
+    const cholent = [{ phrase: 'beef chuck', grams: 90 }, { phrase: 'pearl barley', grams: 60 }, { phrase: 'kidney beans', grams: 60 }, { phrase: 'onion', grams: 40 }]
+    const d1 = await post('/tools/cost_dish', { dish: 'cholent', sessionId: 'cd-1', ingredients: cholent })
+    check('D1', 'cost_dish: 200, assumed true, every ingredient counted with assumed grams, and the engine\'s own budget arithmetic',
+      d1.status === 200 && d1.json.assumed === true && d1.json.ingredients?.length === 4 && d1.json.ingredients.every((i: any) => i.assumedGrams === true)
+        && d1.json.unresolved?.length === 0 && Math.abs(d1.json.afterMeal.remaining.gl - (49 - d1.json.totals.gl)) < 0.11, JSON.stringify([d1.status, d1.json.afterMeal, d1.json.unresolved]))
+    check('D2', 'the dish was unknown and is now its ingredients: the session no longer holds it, so the verdict is true or false, not null',
+      typeof d1.json.afterMeal?.fits === 'boolean' && d1.json.afterMeal.partial === undefined, JSON.stringify(d1.json.afterMeal))
+    const d2 = await post('/tools/cost_dish', { dish: 'cholent', sessionId: 'cd-1', ingredients: [{ phrase: 'beef chuck', grams: 200, gramsStated: true }, { phrase: 'pearl barley', grams: 100 }] })
+    check('D3', 'an amount the person gave comes back with assumedGrams false; one the agent assumed with true',
+      d2.json.ingredients?.[0]?.assumedGrams === false && d2.json.ingredients?.[1]?.assumedGrams === true, JSON.stringify(d2.json.ingredients))
+    await park('cd-2')
+    await post('/tools/resolve_foods', { phrases: ["grandma's zzzqx stew"], sessionId: 'cd-2' })
+    const d3 = await post('/tools/cost_dish', { dish: "grandma's zzzqx stew", sessionId: 'cd-2', ingredients: [{ phrase: 'zzzqx', grams: 100 }, { phrase: 'yyyvw', grams: 100 }] })
+    const after3 = await post('/tools/compute_meal', { sessionId: 'cd-2', items: [{ foodId: 'seed:rice-white', grams: 100 }] })
+    check('D4', 'nothing could be counted: assumed true, an error to read, nothing costed, and the dish stays unknown for the session',
+      d3.status === 200 && d3.json.assumed === true && typeof d3.json.error === 'string' && d3.json.items === undefined
+        && (after3.json.afterMeal?.partial?.unknownFoods ?? []).some((f: string) => /zzzqx/.test(f)), JSON.stringify([d3.json.error, after3.json.afterMeal?.partial]))
+    await park('cd-3')
+    const d4 = await post('/tools/cost_dish', { dish: 'cholent', sessionId: 'cd-3', ingredients: [...cholent, { phrase: 'zzzqx', grams: 20 }] })
+    check('D5', 'an ingredient that cannot be found is named, left out, and makes the meal partial: fits is not true',
+      d4.json.unresolved?.some((u: any) => u.phrase === 'zzzqx') && d4.json.afterMeal?.fits !== true && d4.json.afterMeal?.partial?.unknownFoods?.includes('zzzqx'), JSON.stringify([d4.json.unresolved, d4.json.afterMeal]))
+    const d5 = await post('/tools/cost_dish', { dish: 'cholent', ingredients: [{ phrase: 'beef chuck', grams: 5000 }] })
+    const d6 = await post('/tools/cost_dish', { dish: 'cholent', ingredients: [{ phrase: 'beef chuck', grams: 90, kcal: 300 }] })
+    check('D6', 'a wrong call is 200 with an error the model can read, never a 4xx that would kill the turn',
+      d5.status === 200 && typeof d5.json.error === 'string' && d6.status === 200 && /only phrase, grams and gramsStated/.test(d6.json.error), JSON.stringify([d5.json, d6.json]))
+    const noKeyDish = await post('/tools/cost_dish', { dish: 'cholent', ingredients: cholent }, {})
+    check('D7', 'cost_dish is a key-protected tool route: without the key it is refused', noKeyDish.status === 401 || noKeyDish.status === 403, String(noKeyDish.status))
+
     const wrongKey = await fetch(`${BASE}/tools/resolve_foods`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': KEY + 'x' }, body: '{}' })
     const noKey = await fetch(`${BASE}/tools/resolve_foods`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })
     check('A16', 'a wrong key and no key are both 401', wrongKey.status === 401 && noKey.status === 401, `${wrongKey.status} ${noKey.status}`)

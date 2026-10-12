@@ -157,3 +157,10 @@ Migration `20261010130000_accounts.sql` applied to the project (`profiles`, `dia
 
 The Supabase security advisor then reported one warning, "leaked password protection disabled", which concerns passwords; DiaBite has none (sign-in is a link and a code), so it is noted and left.
 
+### Added 12 October: `POST /tools/cost_dish`
+
+A model-facing tool route, key-protected like the other `/tools/*` routes. Its input is bounded (at most
+20 ingredients, 1 to 1,000 g each, 40 to 1,500 g in all, names up to 80 characters) and an ingredient
+object may carry only `phrase`, `grams` and `gramsStated`, so a nutrition value in the call is refused, not
+ignored. Every failure answers 200 with an `error`, as the other tool routes do. `eval:abuse` D1 to D7 prove
+the bounds. It adds no new secret, table or environment variable.

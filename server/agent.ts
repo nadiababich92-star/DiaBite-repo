@@ -460,7 +460,11 @@ function lastCall(trace: ToolCallTrace[], operation: string): ToolCallTrace | un
  * plainly. Blunter prose, but every figure is the engine's.
  */
 export function templatedAnswer(trace: ToolCallTrace[]): string | null {
-  const meal = lastCall(trace, 'compute_meal')?.result as
+  // The later of the two: a dish counted from an assumed recipe (cost_dish) is answered like a meal,
+  // but as an estimate, never a plain "fits".
+  const lastIndex = (op: string) => trace.map((t) => t.tool === op || t.tool.endsWith(`_${op}`)).lastIndexOf(true)
+  const dishCall = lastIndex('cost_dish') > lastIndex('compute_meal') ? lastCall(trace, 'cost_dish') : undefined
+  const meal = (dishCall ?? lastCall(trace, 'compute_meal'))?.result as
     | {
         totals?: { gl: number; carbs?: number; fiber?: number; kcal?: number }
         // The budget rides in the same reply as the meal, so there is no second
@@ -469,6 +473,8 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
         afterMeal?: { remaining?: { gl: number }; fits?: boolean | null; partial?: { unknownFoods: string[]; unscored?: string[] } }
         dayState?: { remaining?: { gl: number } }
         items?: { loadAvailable?: boolean }[]
+        assumed?: boolean
+        unresolved?: { phrase: string }[]
       }
     | undefined
   const gl = meal?.totals?.gl
@@ -485,6 +491,22 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
   const t = meal?.totals
 
   const lines: string[] = []
+  if (meal?.assumed === true) {
+    // An estimate from typical ingredients: conditional, and never a plain "fits".
+    const left = (meal.unresolved ?? []).map((u) => u.phrase)
+    const fits = meal.afterMeal?.fits
+    if (left.length > 0 || unscored.length > 0 || fits === null || fits === undefined) {
+      const names = [...left, ...unscored].join(', ')
+      lines.push(`**Verdict:** I can't judge the day on this${names ? `: ${names} is not counted` : ''}.`)
+    } else {
+      lines.push(fits === true
+        ? `**Verdict:** If your dish is like this, it fits what is left of today's budget.`
+        : `**Verdict:** If your dish is like this, it does not fit what is left of today's budget.`)
+    }
+    lines.push(`**Numbers:** this estimate's glycemic load is ${gl}.`)
+    lines.push('_Counted from a typical recipe; change anything that is not yours._')
+    return lines.join('\n\n')
+  }
   if (unknownFoods.length > 0) {
     // Understated by definition: never "fits", and say what is missing.
     const missing = unknownFoods.join(', ')

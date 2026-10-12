@@ -98,3 +98,15 @@ By the owner's decision, 785 USDA survey foods with real carbohydrate and no ass
 ## Eighth batch: heritage kitchens, beef and pork, sandwiches, sweets (12 October)
 
 `data/recipes-db/recipes_19.jsonl` adds 159 recipes (`DB-1842` to `DB-2000`), which makes the library exactly **2,000**: steak, pork and lamb mains, Eastern European, German, Irish, Scandinavian and Jewish dishes (goulash, borscht, paprikash, schnitzel, colcannon, noodle kugel), more sandwiches, wraps and salads, sides, sweets and drinks, breakfasts, soups, fish and vegetarian mains. Median load 3.2 a serving. Aliases for "chili verde" and "paprikash". The menu library (everything except Side Dish, Dessert and Drinks) is 1,662; the other 338 are searchable and loggable, never planned.
+
+## A dish we do not have (12 October)
+
+When someone names a prepared dish that is not among the recipes (grandma's cholent, the chicken thing
+from the place downstairs), the agent no longer stops at "I don't have it". It proposes a typical
+ingredient list with portion weights, or uses the one the person gave, and the engine counts it through
+`cost_dish`: each ingredient is found in the database, costed with the same arithmetic as a recipe, and
+the answer is labelled an **estimate** from an assumed recipe. An ingredient the database lacks is left
+out and named, and the answer is then partial. The card says "Estimate", never "Fits"; the person can
+change a gram or take an ingredient out and the engine counts again. Logged to the diary, each line carries
+"from an assumed recipe". The model supplies only ingredient words and portion weights, never a nutrition
+number. Specs: `docs/specs/cost-dish-*.md`. No clinician has reviewed this.

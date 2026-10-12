@@ -194,6 +194,38 @@ export function validateRecompute(body: unknown): Invalid | null {
   return null
 }
 
+/**
+ * The shape of a dish to be counted from an assumed recipe (cost_dish). The one number the model
+ * supplies is a portion weight, so it is bounded here; nothing else a model could add is allowed
+ * through. These are engineering defaults, not medical thresholds. Returns the text of an `error`
+ * the model can read and fix (a tool answers 200 even when the call was wrong), or null.
+ */
+export const MAX_DISH_INGREDIENTS = 20
+export const MIN_DISH_GRAMS = 40
+export const MAX_DISH_GRAMS = 1500
+export function validateDish(body: unknown): string | null {
+  const b = body as { dish?: unknown; ingredients?: unknown } | null
+  if (!b || typeof b !== 'object') return 'the request must be { dish, ingredients }.'
+  if (typeof b.dish !== 'string' || b.dish.trim().length < 1 || b.dish.length > 80) return 'dish must be the name of the dish, up to 80 characters.'
+  if (!Array.isArray(b.ingredients) || b.ingredients.length < 1 || b.ingredients.length > MAX_DISH_INGREDIENTS) {
+    return `ingredients must be a list of 1 to ${MAX_DISH_INGREDIENTS} items, each { phrase, grams }.`
+  }
+  let total = 0
+  for (const it of b.ingredients as Record<string, unknown>[]) {
+    if (!it || typeof it !== 'object' || Array.isArray(it)) return `ingredients must be a list of 1 to ${MAX_DISH_INGREDIENTS} items, each { phrase, grams }.`
+    if (Object.keys(it).some((k) => !['phrase', 'grams', 'gramsStated'].includes(k))) {
+      return 'ingredients take only phrase, grams and gramsStated: the engine computes everything else.'
+    }
+    if (typeof it.phrase !== 'string' || it.phrase.trim().length < 1 || it.phrase.length > 80) return 'each ingredient needs a short phrase, such as "beef chuck".'
+    const g = it.grams
+    if (!(typeof g === 'number' && Number.isFinite(g) && g >= 1 && g <= 1000)) return `grams for "${String(it.phrase).slice(0, 40)}" must be between 1 and 1000 for one portion.`
+    if (it.gramsStated !== undefined && typeof it.gramsStated !== 'boolean') return 'gramsStated must be true or false.'
+    total += g
+  }
+  if (total < MIN_DISH_GRAMS || total > MAX_DISH_GRAMS) return `the whole portion must weigh between ${MIN_DISH_GRAMS} and ${MAX_DISH_GRAMS} grams; this one is ${Math.round(total)}.`
+  return null
+}
+
 /** A short salted hash: enough to tell two sources apart in a log, not to name one. */
 const SALT = process.env.LOG_SALT ?? String(process.pid) + String(Date.now() >> 22)
 export const sourceTag = (key: string | undefined) =>

@@ -6,10 +6,10 @@ import { availableCarbs, dayGlLevel, glLevel, glycemicLoad, nutrientsFor } from 
 import { isAvoided, type AvoidList } from './avoid'
 import { asFood, getRecord, loadFoods, summary } from './foods'
 import { embed, type VectorStore } from './embeddings'
-import { sameFamily, sameFood } from './resolve'
+import { resolvePhrases, sameFamily, sameFood } from './resolve'
 import type {
-  Alternative, AlternativesRequest, ComputeMealResponse, DayBudget, DayStateResponse,
-  MealItemInput, MealItemResult, MealTotals,
+  Alternative, AlternativesRequest, ComputeMealResponse, CostDishRequest, DayBudget, DayStateResponse,
+  DishIngredientResult, MealItemInput, MealItemResult, MealTotals, UnresolvedIngredient,
 } from './contract'
 
 export const FORMULA =
@@ -76,6 +76,42 @@ export function totalsOf(items: MealItemResult[]): MealTotals {
 export function computeMeal(items: MealItemInput[]): ComputeMealResponse {
   const results = items.map(computeItem)
   return { items: results, totals: totalsOf(results), formula: FORMULA }
+}
+
+/**
+ * Sort a proposed dish into what can be counted and what cannot.
+ *
+ * Only a phrase that resolves with HIGH confidence and no clarifying question is counted. A medium
+ * or unknown phrase, an ambiguous one, and one that resolves to a whole recipe are returned in
+ * `unresolved` and never substituted: a dish may be counted from its own ingredients, but an
+ * ingredient the database lacks is still left out and named (rule 3). The model supplied the words
+ * and the portion weights; every nutrition figure comes from `computeMeal` over what is returned.
+ */
+export async function planDish(store: VectorStore, req: CostDishRequest): Promise<{
+  costed: MealItemInput[]
+  ingredients: DishIngredientResult[]
+  unresolved: UnresolvedIngredient[]
+}> {
+  const resolved = await resolvePhrases(store, req.ingredients.map((i) => i.phrase), 3)
+  const costed: MealItemInput[] = []
+  const ingredients: DishIngredientResult[] = []
+  const unresolved: UnresolvedIngredient[] = []
+  req.ingredients.forEach((ing, i) => {
+    const r = resolved[i]
+    const top = r?.candidates[0]
+    if (!r || r.unknown || !top) { unresolved.push({ phrase: ing.phrase, reason: 'unknown' }); return }
+    if (r.confidence !== 'high' || r.clarify) {
+      unresolved.push({ phrase: ing.phrase, reason: 'ambiguous', ...(r.clarify ? { clarify: r.clarify } : {}) })
+      return
+    }
+    if (top.kind === 'recipe') { unresolved.push({ phrase: ing.phrase, reason: 'not_an_ingredient' }); return }
+    costed.push({ foodId: top.id, grams: ing.grams })
+    ingredients.push({
+      phrase: ing.phrase, foodId: top.id, name: top.name, grams: ing.grams,
+      assumedGrams: ing.gramsStated !== true, confidence: r.confidence,
+    })
+  })
+  return { costed, ingredients, unresolved }
 }
 
 export function dayState(budget: DayBudget, entries: MealItemInput[]): DayStateResponse {

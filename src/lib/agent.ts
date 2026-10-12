@@ -157,6 +157,11 @@ export interface Receipt {
   unscored?: string[]
   /** Every item is branded: the card shows carbohydrate, not a load. */
   carbsOnly?: boolean
+  /**
+   * A dish counted from an assumed recipe (cost_dish): an estimate from typical ingredients, never a
+   * record of the meal. `assumedFoodIds` are the lines whose grams the agent assumed.
+   */
+  assumed?: { dish: string; assumedFoodIds: string[] }
   /** Where the numbers in this receipt came from, and whether anyone checked them (PRD E3). */
   sources: { text: string; verified: boolean }[]
 }
@@ -171,6 +176,10 @@ interface MealResult {
   /** The budget before this meal; compute_meal returns it when it was given a session. */
   dayState?: { remaining?: { gl: number } }
   afterMeal?: { remaining?: { gl: number }; fits?: boolean | null; partial?: { unknownFoods: string[]; unscored?: string[] } }
+  /** Present on a cost_dish result: the dish was counted from an assumed recipe. */
+  assumed?: boolean
+  dish?: string
+  ingredients?: { foodId: string; assumedGrams: boolean }[]
 }
 
 interface DayStateResult { remaining: { gl: number } }
@@ -188,10 +197,18 @@ function isCall(step: TraceStep, operation: string): boolean {
   return step.tool === operation || step.tool.endsWith(`_${operation}`)
 }
 
-/** Build the receipt from the trace: the last compute_meal call, against get_day_state. */
+/**
+ * The call that costed the meal: the later of compute_meal and cost_dish. Both return the same
+ * items, totals, day and verdict; a cost_dish result also says it was assumed.
+ */
+export function lastMealCall(trace: TraceStep[] | undefined): TraceStep | undefined {
+  return [...(trace ?? [])].reverse().find((t) => isCall(t, 'compute_meal') || isCall(t, 'cost_dish'))
+}
+
+/** Build the receipt from the trace: the last meal-costing call, against get_day_state. */
 export function receiptFrom(trace: TraceStep[] | undefined): Receipt | null {
   if (!trace) return null
-  const meal = [...trace].reverse().find((t) => isCall(t, 'compute_meal'))
+  const meal = lastMealCall(trace)
   if (!meal) return null
   const m = unwrap(meal.result) as MealResult
   if (!m?.items) return null
@@ -216,11 +233,14 @@ export function receiptFrom(trace: TraceStep[] | undefined): Receipt | null {
     }
   }
 
-  return buildReceipt(m, leftBefore, [...sources].map(([text, verified]) => ({ text, verified })))
+  const assumed = m.assumed === true
+    ? { dish: m.dish ?? 'dish', assumedFoodIds: (m.ingredients ?? []).filter((i) => i.assumedGrams).map((i) => i.foodId) }
+    : undefined
+  return buildReceipt(m, leftBefore, [...sources].map(([text, verified]) => ({ text, verified })), assumed)
 }
 
 /** The receipt of one costed meal. The same lines whether the agent asked for the meal or the person changed a portion. */
-function buildReceipt(m: MealResult, leftBefore: number | null, sources: Receipt['sources']): Receipt {
+function buildReceipt(m: MealResult, leftBefore: number | null, sources: Receipt['sources'], assumed?: Receipt['assumed']): Receipt {
   const lines: ReceiptLine[] = m.items.map((it) => ({
     foodId: it.foodId, name: it.name,
     portion: it.servings ? `${it.servings} serving${it.servings === 1 ? '' : 's'}` : `${it.grams} g`,
@@ -235,6 +255,7 @@ function buildReceipt(m: MealResult, leftBefore: number | null, sources: Receipt
     ...(m.afterMeal?.partial?.unknownFoods.length ? { partial: m.afterMeal.partial.unknownFoods } : {}),
     ...(m.afterMeal?.partial?.unscored?.length ? { unscored: m.afterMeal.partial.unscored } : {}),
     ...(m.items.length > 0 && m.items.every((it) => it.gl === null) ? { carbsOnly: true } : {}),
+    ...(assumed ? { assumed } : {}),
   }
 }
 
@@ -246,6 +267,8 @@ export interface Recalc {
   after: number | null
   /** The engine's own comparison: true fits, false does not, null a partial meal, undefined no day held. */
   fits: boolean | null | undefined
+  /** The meal is a dish counted from an assumed recipe: the card says "Estimate", never a plain "Fits". */
+  assumed?: boolean
 }
 
 const recomputeUrl = () => {
@@ -264,6 +287,7 @@ export async function recomputeMeal(
   sources: Receipt['sources'],
   token?: string | null,
   signal?: AbortSignal,
+  assumed?: Receipt['assumed'],
 ): Promise<Recalc> {
   const res = await fetch(recomputeUrl(), {
     method: 'POST',
@@ -282,8 +306,9 @@ export async function recomputeMeal(
   const before = typeof m.dayState?.remaining?.gl === 'number' ? m.dayState.remaining.gl : null
   const after = typeof m.afterMeal?.remaining?.gl === 'number' ? m.afterMeal.remaining.gl : null
   return {
-    receipt: buildReceipt(m, before, sources),
+    receipt: buildReceipt(m, before, sources, assumed),
     mealGl: m.totals.gl, before, after,
     fits: m.afterMeal ? m.afterMeal.fits : undefined,
+    ...(assumed ? { assumed: true } : {}),
   }
 }

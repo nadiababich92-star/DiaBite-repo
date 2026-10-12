@@ -95,6 +95,8 @@ export interface DiaryEntry {
     /** False for a branded product: `gl` is 0 only because no load exists, and the diary says so. */
     loadAvailable?: boolean
     servings?: number
+    /** Logged from a dish counted with an assumed recipe (an estimate): the diary says so. */
+    assumed?: boolean
   }
 }
 

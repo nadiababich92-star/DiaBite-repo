@@ -275,6 +275,7 @@ button.link:hover { color: var(--high); }
 .pill.medium { background: var(--medium-bg); color: var(--medium); }
 .pill.high { background: var(--high-bg); color: var(--high); }
 .pill.none { background: var(--surface-2); color: var(--text-dim); }
+.pill.assumed { white-space: nowrap; }
 
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th { text-align: left; font-size: 13px; color: var(--text-dim); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--border); }
@@ -395,7 +396,7 @@ tr:last-child td { border-bottom: none; }
 .tone-good .eyebrow-line { color: var(--low); }
 .tone-change .eyebrow-line { color: var(--medium); }
 .tone-bad .eyebrow-line, .tone-blocked .eyebrow-line { color: var(--high); }
-.tone-ask .eyebrow-line, .tone-carbs .eyebrow-line, .tone-partial .eyebrow-line { color: var(--text); }
+.tone-ask .eyebrow-line, .tone-carbs .eyebrow-line, .tone-partial .eyebrow-line, .tone-estimate .eyebrow-line { color: var(--text); }
 .tone-advice .eyebrow-line { color: var(--text-dim); }
 .answer.tone-good .eyebrow-line { background: var(--low-bg); }
 .answer.tone-change .eyebrow-line { background: var(--medium-bg); }
@@ -411,7 +412,7 @@ tr:last-child td { border-bottom: none; }
 .dot-good { background: var(--low); }
 .dot-change { background: var(--medium); }
 .dot-bad, .dot-blocked { background: var(--high); }
-.dot-ask, .dot-carbs, .dot-partial { background: var(--accent); }
+.dot-ask, .dot-carbs, .dot-partial, .dot-estimate { background: var(--accent); }
 .dot-advice { background: var(--text-faint); }
 .answer-text p { margin: 0 0 10px; font-size: 15.5px; line-height: 1.55; max-width: 60ch; }
 .answer-text strong { font-weight: 600; }
@@ -725,6 +726,9 @@ button.danger:disabled { opacity: 0.45; cursor: not-allowed; }
 .step:hover { border-color: var(--accent); }
 .step-v { min-width: 70px; text-align: center; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 500; }
 .portion-state { min-height: 20px; margin: 6px 0 0; }
+.portion-list li.removed .portion-name { text-decoration: line-through; color: var(--text-dim); }
+.remove-step { font-size: 20px; color: var(--text-dim); }
+.receipt-note { font-size: 14px; line-height: 1.5; margin: 0 0 8px; color: var(--text-dim); }
 
 /* Onboarding: where you are, as a bar. */
 .onb-progress { margin: 0 0 16px; }

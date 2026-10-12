@@ -3,7 +3,7 @@ import GlInfo from './GlInfo'
 import { isLabelled, parseMeal } from '../lib/answer'
 import { sessionId } from '../lib/session'
 import { accessToken } from '../lib/auth'
-import { askAgent, avoidOf, budgetOf, engineId, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
+import { askAgent, avoidOf, budgetOf, engineId, lastMealCall, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
 import { mealForNow, viewEntry } from '../lib/diary'
 import { useToday } from '../lib/useToday'
 import { isDemo } from '../lib/demo'
@@ -41,7 +41,7 @@ function StatusDot({ tone }: { tone: string | null }) {
     tone === 'good' ? 'M20 6L9 17l-5-5' :
     tone === 'change' ? 'M12 5v14M5 12h14' :
     tone === 'bad' || tone === 'blocked' ? 'M18 6L6 18M6 6l12 12' :
-    tone === 'advice' || tone === 'carbs' ? 'M12 8h.01M11 12h1v5h1' :
+    tone === 'advice' || tone === 'carbs' || tone === 'estimate' ? 'M12 8h.01M11 12h1v5h1' :
     'M12 17h.01M12 7v6'
   return (
     <span className={`status-dot dot-${tone ?? 'ask'}`} aria-hidden="true">
@@ -66,8 +66,8 @@ const bold = (line: string, key: string) =>
  * you see.
  */
 function Figures({ reply, onGl }: { reply: AgentResponse; onGl?: () => void }) {
-  const meal = reply.trace?.find((t) => t.tool.endsWith('compute_meal'))?.result as
-    | { totals?: { gl?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean | null } }
+  const meal = lastMealCall(reply.trace)?.result as
+    | { totals?: { gl?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean | null }; assumed?: boolean }
     | undefined
   const mealGl = meal?.totals?.gl
   // A meal of branded products only: the three tiles are what the label gives —
@@ -96,7 +96,7 @@ function Figures({ reply, onGl }: { reply: AgentResponse; onGl?: () => void }) {
       <div className="figures">
         <div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{mealGl}</span></div>
         <div className="fig"><span className="fig-k">before</span><span className="fig-v">{before}</span></div>
-        <div className={`fig fig-lead ${partial ? '' : fits ? 'ok' : 'over'}`}>
+        <div className={`fig fig-lead ${partial || meal?.assumed ? '' : fits ? 'ok' : 'over'}`}>
           <span className="fig-k">{partial ? 'left so far' : fits ? 'left after' : 'over by'}</span>
           <span className="fig-v">{fits ? after : Math.abs(after)}</span>
         </div>
@@ -112,9 +112,13 @@ function Figures({ reply, onGl }: { reply: AgentResponse; onGl?: () => void }) {
  * a food missing. No number here is worked out in the browser.
  */
 function RecalcCard({ rc, onBack, onGl }: { rc: Recalc; onBack: () => void; onGl: () => void }) {
-  const tone = rc.fits === true ? 'good' : rc.fits === false ? 'bad' : rc.fits === null ? 'partial' : 'ask'
-  const label = tone === 'good' ? 'Fits' : tone === 'bad' ? 'Not today' : tone === 'partial' ? 'Part of the meal' : 'One question first'
-  const verdict = tone === 'good' ? 'This fits your day.' : tone === 'bad' ? 'This does not fit today.'
+  // A dish counted from an assumed recipe stays an estimate through every recalculation: never a plain "Fits".
+  const tone = rc.assumed && rc.fits !== undefined ? 'estimate'
+    : rc.fits === true ? 'good' : rc.fits === false ? 'bad' : rc.fits === null ? 'partial' : 'ask'
+  const label = tone === 'estimate' ? 'Estimate' : tone === 'good' ? 'Fits' : tone === 'bad' ? 'Not today' : tone === 'partial' ? 'Part of the meal' : 'One question first'
+  const verdict = tone === 'estimate'
+    ? (rc.fits === true ? "If it's like this, it fits your day." : rc.fits === false ? "If it's like this, it does not fit today." : "I can't judge the day on this.")
+    : tone === 'good' ? 'This fits your day.' : tone === 'bad' ? 'This does not fit today.'
     : tone === 'partial' ? "I can't judge the day on a partial total." : "I no longer hold today's budget, so ask again for a verdict."
   const lead = rc.after === null ? null : Math.abs(rc.after)
   return (
@@ -127,8 +131,8 @@ function RecalcCard({ rc, onBack, onGl }: { rc: Recalc; onBack: () => void; onGl
             <div className="figures">
               <div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{rc.mealGl}</span></div>
               <div className="fig"><span className="fig-k">before</span><span className="fig-v">{rc.before}</span></div>
-              <div className={`fig fig-lead ${tone === 'partial' ? '' : rc.fits ? 'ok' : 'over'}`}>
-                <span className="fig-k">{tone === 'partial' ? 'left so far' : rc.fits ? 'left after' : 'over by'}</span>
+              <div className={`fig fig-lead ${tone === 'partial' || tone === 'estimate' ? '' : rc.fits ? 'ok' : 'over'}`}>
+                <span className="fig-k">{tone === 'partial' || rc.fits === null ? 'left so far' : rc.fits ? 'left after' : 'over by'}</span>
                 <span className="fig-v">{lead}</span>
               </div>
             </div>
@@ -147,39 +151,56 @@ function RecalcCard({ rc, onBack, onGl }: { rc: Recalc; onBack: () => void; onGl
   )
 }
 
-/** Each food's weight, with a step down and a step up. The engine does the sums when the weight settles. */
-function PortionEditor({ lines, grams, busy, error, onNudge }: {
+/**
+ * Each food's weight, with a step down and a step up. The engine does the sums when the weight settles.
+ * For a dish counted from an assumed recipe it is the composition card: an ingredient can also be taken
+ * out and put back, and the whole thing reset to what the agent suggested.
+ */
+function PortionEditor({ lines, grams, busy, error, onNudge, assumed, removed, onRemove, onReset }: {
   lines: ReceiptLine[]; grams: Record<number, number>; busy: boolean; error: string; onNudge: (i: number, dir: 1 | -1) => void
+  assumed?: Receipt['assumed']; removed: number[]; onRemove: (i: number) => void; onReset: () => void
 }) {
+  const edited = Object.keys(grams).length > 0 || removed.length > 0
   return (
     <section className="card portions">
-      <h2>Not what you ate?</h2>
-      <p className="muted">Change a portion and the engine counts it again.</p>
+      <h2>{assumed ? "Not your recipe?" : 'Not what you ate?'}</h2>
+      <p className="muted">{assumed ? 'Change a gram or take an ingredient out and the engine counts it again.' : 'Change a portion and the engine counts it again.'}</p>
       <ul className="portion-list">
         {lines.map((l, i) => {
           const value = grams[i] ?? l.servings ?? l.grams
           const unit = l.servings ? (value === 1 ? 'serving' : 'servings') : 'g'
+          const gone = removed.includes(i)
           return (
-            <li key={`${l.foodId}-${i}`}>
-              <span className="portion-name">{l.name}</span>
-              <span className="stepper">
-                <button className="step" aria-label={`Less ${l.name}`} onClick={() => onNudge(i, -1)}>−</button>
-                <span className="step-v" aria-live="polite">{value} {unit}</span>
-                <button className="step" aria-label={`More ${l.name}`} onClick={() => onNudge(i, 1)}>+</button>
+            <li key={`${l.foodId}-${i}`} className={gone ? 'removed' : undefined}>
+              <span className="portion-name">
+                {l.name}
+                {assumed?.assumedFoodIds.includes(l.foodId) && <> <span className="pill none assumed">assumed</span></>}
+                {gone && <> <span className="pill none">left out</span></>}
               </span>
+              {gone ? (
+                <button className="link" aria-label={`Put ${l.name} back`} onClick={() => onRemove(i)}>Put back</button>
+              ) : (
+                <span className="stepper">
+                  <button className="step" aria-label={`Less ${l.name}`} onClick={() => onNudge(i, -1)}>−</button>
+                  <span className="step-v" aria-live="polite">{value} {unit}</span>
+                  <button className="step" aria-label={`More ${l.name}`} onClick={() => onNudge(i, 1)}>+</button>
+                  {assumed && <button className="step remove-step" aria-label={`Remove ${l.name}`} onClick={() => onRemove(i)}>×</button>}
+                </span>
+              )}
             </li>
           )
         })}
       </ul>
+      {assumed && edited && <button className="link" onClick={onReset}>Reset to the suggestion</button>}
       <p className="muted portion-state" role="status">{busy ? 'Counting again…' : error}</p>
     </section>
   )
 }
 
 function Answer({ text, reply, onGl }: { text: string; reply?: AgentResponse; onGl?: () => void }) {
-  const costed = !!reply?.trace?.some((x) => x.tool.endsWith('compute_meal') && typeof (x.result as { totals?: unknown } | undefined)?.totals === 'object')
+  const costed = !!reply?.trace?.some((x) => (x.tool.endsWith('compute_meal') || x.tool.endsWith('cost_dish')) && typeof (x.result as { totals?: unknown } | undefined)?.totals === 'object')
   const parts = parseMeal(text, { costed })
-  const m = reply?.trace?.find((t) => t.tool.endsWith('compute_meal'))?.result as
+  const m = lastMealCall(reply?.trace)?.result as
     { totals?: { gl?: number }; afterMeal?: { remaining?: { gl?: number } } } | undefined
   const figuresShown = typeof m?.totals?.gl === 'number' && typeof m?.afterMeal?.remaining?.gl === 'number'
   if (parts) {
@@ -225,15 +246,18 @@ function Answer({ text, reply, onGl }: { text: string; reply?: AgentResponse; on
  * the glycemic index. Who answered decides the label; only a meal has a
  * verdict.
  */
-function verdictTone(answer: string, route?: string, reply?: AgentResponse): 'good' | 'change' | 'bad' | 'ask' | 'advice' | 'carbs' | 'partial' {
+function verdictTone(answer: string, route?: string, reply?: AgentResponse): 'good' | 'change' | 'bad' | 'ask' | 'advice' | 'carbs' | 'partial' | 'estimate' {
   if (route === 'advisor') return 'advice'
   // The engine already decided this. Reading it out of the prose worked only
   // while the prose was a label: the moment the verdict became a sentence a
   // person would say — "This one goes over today." — the badge over it read
   // "One question first". `afterMeal.fits` is the same comparison the answer
   // is built on, and it cannot be paraphrased.
-  const meal = reply?.trace?.find((t) => t.tool.endsWith('compute_meal'))?.result as
-    { afterMeal?: { fits?: boolean | null; partial?: { unscored?: string[] } }; items?: { loadAvailable?: boolean }[]; alternatives?: unknown[] } | undefined
+  const meal = lastMealCall(reply?.trace)?.result as
+    { afterMeal?: { fits?: boolean | null; partial?: { unscored?: string[] } }; items?: { loadAvailable?: boolean }[]; alternatives?: unknown[]; assumed?: boolean } | undefined
+  // A dish counted from an assumed recipe is an estimate, whatever the engine's comparison says: the
+  // badge never reads "Fits" for a guess. The engine states `assumed`; nothing here reads the sentence.
+  if (meal?.assumed === true && (meal.items ?? []).length > 0) return 'estimate'
   // A partial meal has no verdict to badge: a food is missing and the answer is
   // asking what is in it, which is what "One question first" says.
   // Every item branded: carbohydrate and no load. Some branded, some scored: the
@@ -255,10 +279,11 @@ function verdictTone(answer: string, route?: string, reply?: AgentResponse): 'go
 function ReceiptView({ r }: { r: Receipt }) {
   return (
     <div className="receipt">
+      {r.assumed && <p className="receipt-note">Counted as a typical <strong>{r.assumed.dish}</strong>. Change anything that isn't yours.</p>}
       <div className="receipt-head"><span>food · portion</span><span>avail carbs · GI · GL</span></div>
       {r.lines.map((l) => (
         <div className="receipt-line" key={l.foodId + l.portion}>
-          <span>{l.name} <em>{l.portion}</em></span>
+          <span>{l.name} <em>{l.portion}</em>{r.assumed?.assumedFoodIds.includes(l.foodId) && <> <span className="pill none assumed">assumed</span></>}</span>
           <span>{l.availableCarbs.toFixed(1)} · {l.gi ?? '—'} · <b>{l.gl === null ? '—' : l.gl.toFixed(1)}</b></span>
         </div>
       ))}
@@ -273,6 +298,7 @@ function ReceiptView({ r }: { r: Receipt }) {
       )}
       <div className="receipt-foot">
         GL = GI × available carbs ÷ 100. Available carbs = total − fibre.
+        {r.assumed && ' This dish is not in our database, so it is an estimate from typical ingredients, not a record of your meal.'}
         {r.unscored && ' Where our data has no glycemic index for a food, none is estimated: its carbohydrate, fibre and calories are counted and its load is not.'}
         {r.sources.length > 0 && (
           <ul className="receipt-sources">
@@ -293,7 +319,7 @@ function summarize(step: TraceStep): string {
   const r = res as Record<string, unknown> | null
   // Foundry names a call after the tool and the operation (diabite_engine_compute_meal).
   // Matching the bare name left every line of this panel blank in production.
-  const op = ['resolve_foods', 'compute_meal', 'get_day_state', 'find_alternatives'].find((o) => step.tool === o || step.tool.endsWith(`_${o}`))
+  const op = ['resolve_foods', 'compute_meal', 'cost_dish', 'get_day_state', 'find_alternatives'].find((o) => step.tool === o || step.tool.endsWith(`_${o}`))
   switch (op) {
     case 'resolve_foods': {
       const results = (r?.results as { confidence: string; unknown: boolean }[]) ?? []
@@ -303,6 +329,11 @@ function summarize(step: TraceStep): string {
     case 'compute_meal': {
       const t = r?.totals as { gl: number } | undefined
       return t ? `meal GL ${t.gl}` : 'computed'
+    }
+    case 'cost_dish': {
+      const t = r?.totals as { gl: number } | undefined
+      const n = ((r?.ingredients as unknown[]) ?? []).length
+      return t ? `${n} ingredients counted · estimate GL ${t.gl}` : 'could not count the dish'
     }
     case 'get_day_state': {
       const rem = r?.remaining as { gl: number } | undefined
@@ -331,6 +362,8 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
   const [turn, setTurn] = useState('')
   const [editing, setEditing] = useState(false)
   const [grams, setGrams] = useState<Record<number, number>>({})
+  // Ingredients of an assumed recipe the person took out (by line index).
+  const [removed, setRemoved] = useState<number[]>([])
   const [recalc, setRecalc] = useState<Recalc | null>(null)
   const [recalcBusy, setRecalcBusy] = useState(false)
   const [recalcError, setRecalcError] = useState('')
@@ -363,20 +396,28 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
     setLogged(false)
   }
 
+  function toggleRemoved(i: number) {
+    setRemoved((r) => (r.includes(i) ? r.filter((x) => x !== i) : [...r, i]))
+    setLogged(false)
+  }
+  function resetRecipe() { setGrams({}); setRemoved([]); setLogged(false) }
+
   // Let the weight settle for a moment, then ask the engine to count it again.
   useEffect(() => {
     if (!receipt || !turn) return
-    const changed = receipt.lines.some((l, i) => grams[i] !== undefined && grams[i] !== (l.servings ?? l.grams))
+    const changed = receipt.lines.some((l, i) => grams[i] !== undefined && grams[i] !== (l.servings ?? l.grams)) || removed.length > 0
     if (!changed) { setRecalc(null); setRecalcError(''); return }
+    if (removed.length >= receipt.lines.length) { setRecalc(null); setRecalcError('Keep at least one ingredient.'); return }
     const ctl = new AbortController()
     const timer = setTimeout(async () => {
       setRecalcBusy(true); setRecalcError('')
       try {
-        const items = receipt.lines.map((l, i) => {
+        const items = receipt.lines.flatMap((l, i) => {
+          if (removed.includes(i)) return []
           const v = grams[i] ?? l.servings ?? l.grams
-          return l.servings ? { foodId: l.foodId, servings: v } : { foodId: l.foodId, grams: v }
+          return [l.servings ? { foodId: l.foodId, servings: v } : { foodId: l.foodId, grams: v }]
         })
-        setRecalc(await recomputeMeal(turn, items, receipt.sources, await accessToken(), ctl.signal))
+        setRecalc(await recomputeMeal(turn, items, receipt.sources, await accessToken(), ctl.signal, receipt.assumed))
       } catch (e) {
         if ((e as Error).name === 'AbortError') return
         if (e instanceof SignInRequiredError) onSessionEnded?.()
@@ -385,7 +426,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
       } finally { setRecalcBusy(false) }
     }, 400)
     return () => { clearTimeout(timer); ctl.abort() }
-  }, [grams, receipt, turn, onSessionEnded])
+  }, [grams, removed, receipt, turn, onSessionEnded])
 
   async function ask(message: string) {
     const q = message.trim()
@@ -393,7 +434,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
     abort.current?.abort()
     abort.current = new AbortController()
     setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(false); setLogged(false); setAsked(q)
-    setEditing(false); setGrams({}); setRecalc(null); setRecalcError('')
+    setEditing(false); setGrams({}); setRemoved([]); setRecalc(null); setRecalcError('')
     const sid = fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId()
     setTurn(sid)
     try {
@@ -429,6 +470,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
       snapshot: {
         name: l.name, kcal: l.kcal, carbs: l.carbs, fiber: l.fiber, protein: l.protein, fat: l.fat,
         availableCarbs: l.availableCarbs, gi: l.gi, gl: l.gl ?? 0, loadAvailable: l.gl !== null, servings: l.servings,
+        ...(active.assumed ? { assumed: true } : {}),
       },
     })))
     setLogged(true)
@@ -520,14 +562,14 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
       {reply && (
         <>
           <p className="muted asked">{asked}</p>
-          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRecalc(null) }} onGl={() => setGlOpen(true)} />}
+          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setRecalc(null) }} onGl={() => setGlOpen(true)} />}
           {recalc && <p className="muted asked">Original answer, before you changed a portion</p>}
           <section className={`card answer tone-${tone}${recalc ? ' stale' : ''}`} role="status" aria-live="polite">
             <div className="eyebrow-line">
               <StatusDot tone={tone} />
               {reply.blocked ? 'Not something I\'ll answer' :
                tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Not today' :
-               tone === 'advice' ? 'Advice' : tone === 'carbs' ? 'Carbs only' : tone === 'partial' ? 'Part of the meal' : 'One question first'}
+               tone === 'advice' ? 'Advice' : tone === 'estimate' ? 'Estimate' : tone === 'carbs' ? 'Carbs only' : tone === 'partial' ? 'Part of the meal' : 'One question first'}
             </div>
             <Answer text={reply.answer} reply={reply} onGl={recalc ? undefined : () => setGlOpen(true)} />
             {!reply.blocked && (
@@ -555,12 +597,12 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
             <div className="row" style={{ marginBottom: 12 }}>
               <button className="primary" onClick={logIt} disabled={logged}>{logged ? 'Logged' : active?.partial || active?.unscored ? 'Log what was counted' : 'Log it'}</button>
               <button className="ghost" onClick={() => setShowReceipt((v) => !v)}>{showReceipt ? 'Hide calculation' : 'Show calculation'}</button>
-              {!receipt.carbsOnly && <button className="ghost" aria-expanded={editing} onClick={() => setEditing((v) => !v)}>{editing ? 'Done' : 'Change a portion'}</button>}
+              {!receipt.carbsOnly && <button className="ghost" aria-expanded={editing} onClick={() => setEditing((v) => !v)}>{editing ? 'Done' : receipt.assumed ? 'Edit the recipe' : 'Change a portion'}</button>}
             </div>
           )}
 
           {editing && receipt && !receipt.carbsOnly && (
-            <PortionEditor lines={receipt.lines} grams={grams} busy={recalcBusy} error={recalcError} onNudge={nudge} />
+            <PortionEditor lines={receipt.lines} grams={grams} busy={recalcBusy} error={recalcError} onNudge={nudge} assumed={receipt.assumed} removed={removed} onRemove={toggleRemoved} onReset={resetRecipe} />
           )}
 
           {showReceipt && active && (

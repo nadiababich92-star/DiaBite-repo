@@ -157,6 +157,51 @@ export interface ComputeMealResponse {
   formula: string
 }
 
+// ── cost_dish ─────────────────────────────────────────────────────────────
+
+export interface CostDishIngredient {
+  /** A plain ingredient name the agent chose: "beef chuck", "pearl barley". */
+  phrase: string
+  /** Weight of this ingredient in ONE portion of the dish. */
+  grams: number
+  /** True only when the person gave this amount; absent or false means the agent assumed it. */
+  gramsStated?: boolean
+}
+
+export interface CostDishRequest {
+  /** The dish as the person named it, the same text that was sent to resolve_foods. */
+  dish: string
+  ingredients: CostDishIngredient[]
+  sessionId?: string
+}
+
+export type UnresolvedReason = 'unknown' | 'ambiguous' | 'not_an_ingredient'
+
+export interface DishIngredientResult {
+  phrase: string
+  foodId: string
+  name: string
+  grams: number
+  /** True when the grams were assumed, false when the person stated them. */
+  assumedGrams: boolean
+  confidence: Confidence
+}
+
+export interface UnresolvedIngredient { phrase: string; reason: UnresolvedReason; clarify?: string }
+
+/**
+ * A dish counted from an assumed recipe. Everything compute_meal returns, plus what was and was
+ * not counted. `assumed` is always true: this is an estimate from typical ingredients, never a
+ * record of the meal, and no answer built on it may say a plain "fits".
+ */
+export interface CostDishResponse extends Partial<ComputeMealResponse> {
+  assumed: true
+  dish: string
+  ingredients: DishIngredientResult[]
+  unresolved: UnresolvedIngredient[]
+  error?: string
+}
+
 export interface DayBudget {
   glBudget: number
   carbsG: number

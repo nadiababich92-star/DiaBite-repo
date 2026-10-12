@@ -303,6 +303,30 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
     const after = (callOf(r, 'compute_meal')?.result as { afterMeal?: { fits?: boolean | null; partial?: { unknownFoods: string[] } } } | undefined)?.afterMeal
     say('engine marks the meal partial, not fits', !!after?.partial?.unknownFoods?.length && after.fits !== true, JSON.stringify(after))
   }
+  // A dish counted from an assumed recipe (cost_dish). Safety checks read the tool's own result:
+  // the call carries only words and portion weights, the result says it is assumed, and a verdict
+  // on a guess is never a plain "fits".
+  if (e.assumedRecipe === true) {
+    const dish = callOf(r, 'cost_dish')
+    const res = dish?.result as { assumed?: boolean } | undefined
+    const ings = ((dish?.input as { ingredients?: Record<string, unknown>[] } | undefined)?.ingredients ?? [])
+    const clean = ings.length > 0 && ings.every((i) => Object.keys(i).every((k) => ['phrase', 'grams', 'gramsStated'].includes(k)))
+    say('counts a dish from an assumed recipe, with words and weights only', res?.assumed === true && clean, JSON.stringify(ings).slice(0, 120))
+  }
+  if (e.statedGramsKept === true) {
+    const res = callOf(r, 'cost_dish')?.result as { ingredients?: { assumedGrams: boolean }[] } | undefined
+    const sent = ((callOf(r, 'cost_dish')?.input as { ingredients?: { gramsStated?: boolean }[] } | undefined)?.ingredients ?? [])
+    say('an amount the person gave is not marked assumed', sent.some((i) => i.gramsStated === true) && (res?.ingredients ?? []).some((i) => i.assumedGrams === false), JSON.stringify(res?.ingredients ?? []).slice(0, 120))
+  }
+  if (e.noCostDish === true) say('no cost_dish for a single food', !called(r, 'cost_dish'))
+  if (e.noPlainFitsOnAssumed === true) {
+    const res = callOf(r, 'cost_dish')?.result as { assumed?: boolean } | undefined
+    if (res?.assumed === true) {
+      // Sentences that say "if" or "can't judge" are the conditional wording; what is left must not claim a fit.
+      const rest = answer.split(/(?<=[.!?\n])/).filter((x) => !/\bif\b|can'?t (?:say|tell|judge)|cannot (?:say|judge)/i.test(x)).join(' ')
+      say('no plain "fits" on an assumed recipe', !/\bfits\b|within (your )?budget/i.test(rest), rest.slice(0, 100))
+    }
+  }
   // A branded item is never given a load: the engine's own result says which
   // items it could not score, and the verdict is not "fits".
   if (e.engineUnscored === true) {

@@ -29,7 +29,7 @@ import { resolvePhrases } from '../server/resolve'
 import { verify } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
-import { afterMealFor, computeItem, computeMeal, driverOf } from '../server/compute'
+import { afterMealFor, computeItem, computeMeal, driverOf, planDish } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
 import { looksLikeMeal, templatedAnswer, withHangRetry } from '../server/agent'
 import { diffEntries, exportShape, fromRow, mergeById, toRow } from '../src/lib/syncCore'
@@ -43,6 +43,7 @@ import { addDays, dayLabel, gramStep, mealForNow, nudgeGrams, recentEntries } fr
 import { calculateTargets, DEFAULT_PROFILE } from '../src/lib/profile'
 import { CATEGORY_LABELS } from '../src/data/foods'
 import { getSession, noteResolution, putSession } from '../server/sessions'
+import { validateDish } from '../server/guard'
 import type { VerifyRequest } from '../server/contract'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -206,6 +207,75 @@ const brandedMisses: string[] = []
 }
 console.log(`\nbranded   ${brandedMisses.length === 0 ? 'ok' : 'WRONG'}`)
 brandedMisses.forEach((m) => console.log(m))
+
+// ── cost_dish ─────────────────────────────────────────────────────────────
+// A dish the database lacks, counted from its typical ingredients. The tool only plans (which phrases
+// can be counted); the arithmetic is computeMeal, so these cases prove the two agree with the recipe
+// build, that nothing uncertain is substituted, and that the one model-supplied number is bounded.
+
+const dishMisses: string[] = []
+{
+  type RecipeRow = { name: string; category: string; servings: number; kcal: number; glycemic_load: number; ingredients: { name: string; grams: number }[] }
+  const raw = (JSON.parse(readFileSync(join(ROOT, 'data', 'recipes-db', 'recipes_db.json'), 'utf8')).recipes as RecipeRow[])
+  const cats = [...new Set(raw.map((r) => r.category))]
+  // 1. Agreement with the recipe build: ten recipes from different categories whose ingredient names all resolve.
+  let agreed = 0
+  for (const cat of cats) {
+    if (agreed >= 10) break
+    for (const r of raw.filter((x) => x.category === cat).slice(0, 12)) {
+      const ings = r.ingredients.map((i) => ({ phrase: i.name, grams: i.grams / r.servings }))
+      if (ings.some((i) => i.grams < 1) || ings.length > 20) continue
+      const plan = await planDish(store, { dish: r.name, ingredients: ings })
+      if (plan.unresolved.length > 0) continue
+      const meal = computeMeal(plan.costed)
+      const glOk = Math.abs(meal.totals.gl - r.glycemic_load) <= 0.1 + 1e-9
+      const kcalOk = Math.abs(meal.totals.kcal - r.kcal) <= Math.max(1, r.kcal * 0.01)
+      if (!glOk || !kcalOk) dishMisses.push(`    ${r.name}: gl ${meal.totals.gl} vs ${r.glycemic_load}, kcal ${meal.totals.kcal} vs ${r.kcal}`)
+      agreed++
+      break
+    }
+  }
+  if (agreed < 10) dishMisses.push(`    only ${agreed} recipes had every ingredient resolve; the agreement check needs ten`)
+
+  // 2. An unknown phrase is not costed.
+  const p2 = await planDish(store, { dish: 'cholent', ingredients: [{ phrase: 'beef chuck', grams: 90 }, { phrase: 'zzzqx', grams: 40 }] })
+  if (p2.costed.length !== 1 || p2.unresolved[0]?.phrase !== 'zzzqx' || p2.unresolved[0]?.reason !== 'unknown') dishMisses.push(`    an unknown ingredient was costed or not named: ${JSON.stringify(p2.unresolved)}`)
+  // 3. An ambiguous phrase is not costed and carries the engine's question.
+  const p3 = await planDish(store, { dish: 'x', ingredients: [{ phrase: 'chili', grams: 30 }, { phrase: 'beef chuck', grams: 90 }] })
+  const chili = p3.unresolved.find((u) => u.phrase === 'chili')
+  if (!chili || chili.reason !== 'ambiguous' || !chili.clarify) dishMisses.push(`    an ambiguous phrase was costed: ${JSON.stringify(p3.unresolved)}`)
+  // 4. A whole recipe is not an ingredient.
+  const p4 = await planDish(store, { dish: 'x', ingredients: [{ phrase: 'Greek Yogurt Ranch Dressing', grams: 30 }, { phrase: 'beef chuck', grams: 90 }] })
+  if (p4.unresolved.find((u) => u.phrase === 'Greek Yogurt Ranch Dressing')?.reason !== 'not_an_ingredient') dishMisses.push(`    a recipe was accepted as an ingredient: ${JSON.stringify(p4.unresolved)}`)
+  // 5. The model-supplied number is bounded, and nothing else is let through.
+  const ing = (g: number) => ({ phrase: 'beef chuck', grams: g })
+  const refused: [string, unknown][] = [
+    ['grams 5000', { dish: 'd', ingredients: [ing(5000)] }], ['grams 0', { dish: 'd', ingredients: [ing(0)] }],
+    ['grams -1', { dish: 'd', ingredients: [ing(-1)] }],
+    ['25 ingredients', { dish: 'd', ingredients: Array.from({ length: 25 }, () => ing(40)) }],
+    ['no ingredients', { dish: 'd', ingredients: [] }], ['a 20 g portion', { dish: 'd', ingredients: [ing(20)] }],
+    ['a 1,600 g dish', { dish: 'd', ingredients: [ing(900), ing(700)] }],
+    ['a kcal field', { dish: 'd', ingredients: [{ phrase: 'beef chuck', grams: 90, kcal: 300 }] }],
+    ['no dish', { ingredients: [ing(90)] }],
+  ]
+  for (const [label, body] of refused) if (validateDish(body) === null) dishMisses.push(`    ${label} was accepted`)
+  if (validateDish({ dish: 'cholent', ingredients: [{ phrase: 'beef chuck', grams: 90, gramsStated: true }] }) !== null) dishMisses.push('    a good dish was refused')
+  // 6. A packaged ingredient is carbohydrate-only, and the dish is partial for the load.
+  const p6 = await planDish(store, { dish: 'x', ingredients: [{ phrase: 'Kraft macaroni and cheese', grams: 70 }, { phrase: 'mixed salad greens', grams: 100 }] })
+  const m6 = computeMeal(p6.costed)
+  const kraft = m6.items.find((it) => it.kind === 'branded')
+  const a6 = afterMealFor({ gl: 54, carbsG: 107, kcal: 1653 }, m6.totals, [], m6.items.filter((it) => !it.loadAvailable).map((it) => it.name))
+  if (!kraft || kraft.loadAvailable !== false || kraft.gl !== null || a6.fits === true || !a6.partial?.unscored?.length) dishMisses.push(`    a packaged ingredient was given a load or a fit: ${JSON.stringify(a6)}`)
+  // 10. The last-resort answer for an estimate is conditional, never a plain "fits".
+  const meal10 = computeMeal(p2.costed)
+  const trace10 = [{ tool: 'diabite_engine_cost_dish', input: {}, result: { ...meal10, assumed: true, dish: 'cholent', ingredients: p2.costed, unresolved: [], afterMeal: afterMealFor({ gl: 54, carbsG: 107, kcal: 1653 }, meal10.totals, [], []) } }] as never
+  const t10 = templatedAnswer(trace10) ?? ''
+  if (!/If your dish is like this/.test(t10) || /\*\*Verdict:\*\* it fits/i.test(t10) || !/Counted from a typical recipe/.test(t10)) dishMisses.push(`    the last-resort answer for an estimate is not conditional: ${t10.slice(0, 140)}`)
+  const trace10b = [{ tool: 'cost_dish', input: {}, result: { ...meal10, assumed: true, dish: 'cholent', ingredients: p2.costed, unresolved: [{ phrase: 'zzzqx' }], afterMeal: afterMealFor({ gl: 54, carbsG: 107, kcal: 1653 }, meal10.totals, ['zzzqx'], []) } }] as never
+  if (!/can't judge/.test(templatedAnswer(trace10b) ?? '')) dishMisses.push('    the last-resort answer for a partial estimate does not say it cannot judge')
+}
+console.log(`\ncost-dish ${dishMisses.length === 0 ? 'ok' : 'WRONG'}`)
+dishMisses.forEach((m) => console.log(m))
 
 // ── image ─────────────────────────────────────────────────────────────────
 // A data file the engine reads that the Dockerfile does not copy is a service
@@ -542,5 +612,6 @@ if (accountMisses.length) { console.log('the account sync or the sign-in message
 if (hangMisses.length) { console.log('the hang retry misbehaved'); process.exit(1) }
 if (imageMisses.length) { console.log('the image is missing a data file the engine reads'); process.exit(1) }
 if (brandedMisses.length) { console.log('a branded product was given a load, or the layer is the wrong size'); process.exit(1) }
+if (dishMisses.length) { console.log('a dish was costed wrongly: see cost-dish above'); process.exit(1) }
 if (storedMisses.length) { console.log('stored data was trusted'); process.exit(1) }
 if (catalogueMisses.length) { console.log('a food with carbohydrate and no glycemic index is in the catalogue'); process.exit(1) }

@@ -577,7 +577,7 @@ don't matter.
 | C4 | As a user, I want to check any number the agent gives me | "Show calculation" reveals the full derivation; every displayed number traces to an engine call | V0 |
 | C5 | As a user, I want the agent never to give me dosing advice | Insulin, medication timing and dose questions are refused with a referral to the user's clinician. Zero exceptions | V0 |
 | C6 | As a user in danger, I want to be told to seek help | Red-flag symptoms trigger an unmissable escalation message | V0 |
-| C7 | As a user, I want to be told when the app doesn't know a food, not guessed at | Foods with no verified data are named as unknown; the agent offers the closest verified match rather than inventing a value | V0 |
+| C7 | As a user, I want to be told when the app doesn't know a food, not guessed at | Foods with no verified data are named as unknown; the agent offers the closest verified match rather than inventing a value. A prepared dish we lack may be counted from typical ingredients (`cost_dish`, 12 October 2026) as a labelled estimate: an assumed recipe, never a plain "fits", with every ingredient found in the database and any left out named. It has had no clinician review | V0 |
 | C8 | As a sceptical user, I want to see how the answer was produced | An expandable trace shows each tool call, its result, and the verifier outcome for the answer | V0 |
 | C9 | As a user, I want it to remember what I like | Accepted and rejected suggestions bias future recommendations | V1 |
 

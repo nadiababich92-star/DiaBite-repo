@@ -29,16 +29,16 @@ import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
-import { afterMealFor, computeMeal, dayState, driverOf, findAlternatives } from './compute'
+import { afterMealFor, computeMeal, dayState, driverOf, findAlternatives, planDish } from './compute'
 import { verify } from './verify'
 import { getSession, noteResolution, putSession } from './sessions'
 import { openApiSpec } from './openapi'
 import { ask, SignInRequired, type AskRequest } from './agent'
 import { personOf, signInRequired } from './auth'
 import { createHash, timingSafeEqual } from 'node:crypto'
-import { RateLimited, addressKey, chargeDelete, chargeRecompute, originAllowed, sourceTag, validSessionId, validateAsk, validateRecompute } from './guard'
+import { RateLimited, addressKey, chargeDelete, chargeRecompute, originAllowed, sourceTag, validSessionId, validateAsk, validateDish, validateRecompute } from './guard'
 import type {
-  AlternativesRequest, ComputeMealRequest, DayStateRequest, ResolveRequest, VerifyRequest,
+  AlternativesRequest, ComputeMealRequest, CostDishRequest, DayStateRequest, ResolveRequest, VerifyRequest,
 } from './contract'
 
 const PORT = Number(process.env.PORT ?? 8787)
@@ -418,6 +418,59 @@ async function main() {
     // An id the database does not hold is the common case here, and it is the
     // model's to correct: resolve the phrase again rather than lose the turn.
     catch (e) { res.json({ error: `${(e as Error).message}. Use an id that resolve_foods returned, and never invent one.` }) }
+  })
+
+  /**
+   * A prepared dish the database lacks, counted from the typical ingredients the agent proposed.
+   * The model supplies words and portion weights; every figure below is computed by computeMeal.
+   * The answer is always an estimate (`assumed: true`), so no verdict built on it may say a plain
+   * "fits" (see agent/prompts/meal.md and templatedAnswer). Like the other tools it answers 200
+   * with an `error` when the call was wrong.
+   */
+  app.post('/tools/cost_dish', async (req, res) => {
+    const body = req.body as CostDishRequest
+    const bad = validateDish(body)
+    if (bad) return res.json({ error: bad })
+    try {
+      const plan = await planDish(store, body)
+      if (plan.costed.length === 0) {
+        return res.json({
+          assumed: true, dish: body.dish, ingredients: [], unresolved: plan.unresolved,
+          error: 'None of these ingredients could be found with confidence, so the dish was not counted. Ask the person what is in it.',
+        })
+      }
+      const meal = computeMeal(plan.costed)
+      // The dish was unknown and is now represented by its ingredients; each ingredient left out
+      // makes the meal partial. Only when something was counted: otherwise the dish stays unknown.
+      if (body.sessionId) {
+        const held = getSession(body.sessionId)
+        if (held) {
+          const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+          const dishN = norm(body.dish)
+          held.unknownFoods = held.unknownFoods.filter((p) => {
+            const n = norm(p)
+            return !(n === dishN || n.includes(dishN) || (n.length >= 4 && dishN.includes(n)))
+          })
+          noteResolution(body.sessionId, plan.unresolved.map((u) => ({ phrase: u.phrase, unknown: true })))
+        }
+      }
+      const day = dayStateFor(body.sessionId)
+      const top = driverOf(meal.items)
+      const out: Record<string, unknown> = {
+        ...meal,
+        ...(top ? { driver: top } : {}),
+        ...(day ? { dayState: day } : {}),
+        assumed: true, dish: body.dish, ingredients: plan.ingredients, unresolved: plan.unresolved,
+      }
+      if (day && !('unknown' in day)) {
+        const unknownFoods = (body.sessionId ? getSession(body.sessionId)?.unknownFoods : undefined) ?? []
+        const unscored = meal.items.filter((it) => !it.loadAvailable).map((it) => it.name)
+        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, unscored)
+      }
+      res.json(out)
+    } catch (e) {
+      res.json({ error: `${(e as Error).message}. Check the ingredient names and try again.` })
+    }
   })
 
   app.post('/tools/get_day_state', (req, res) => {
