@@ -43,3 +43,12 @@ Upgrade the subscription (card), set the budget alert if she prefers the portal,
 ## What changes in the plan
 
 `docs/ROADMAP-to-investors.md` 1.8 becomes a deadline: **upgrade by 20 October**.
+
+## What Microsoft's own page says (read 12 October, learn.microsoft.com/en-us/startups/microsoft-for-startups/application)
+
+- **Eligibility:** early-stage **B2B** startups, pre-seed to Series B, privately held, working toward an MVP. DiaBite is a consumer app, and there is no registered company yet: the form asks for "registered startup name (must match your legal documents)".
+- **Before you apply:** a personal Microsoft account **with no prior Azure account**. This one already has Azure (the free trial), which is the "new Azure customer" problem noted above.
+- **Without an investor referral code:** you verify with LinkedIn and create a **new** Azure account with payment details, and get **$200** of starter credit, the same as the trial that is ending. More (up to $150,000) comes only after review "within three business days" and depends on business verification, usage and eligibility; the largest amounts are tied to an investor in Microsoft's network.
+- **Portal state, 12 October:** the trial shows EUR 137.31 of credit left, expiring 21 October 2026.
+
+**Conclusion:** applying is free and harmless to try, but it is unlikely to replace the upgrade: likely ineligible today (consumer, no company, existing Azure account) and the starter amount equals what is expiring. Revisit when there is a registered company or an investor with a referral code. The upgrade to pay-as-you-go by 20 October stands.
