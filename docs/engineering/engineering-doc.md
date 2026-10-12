@@ -266,6 +266,8 @@ is a field on the existing snapshot, inside the existing row.
 
 ## 12. Open questions for the owner
 
+*Answered 12 October 2026: questions 1 to 3 confirmed by the owner as built (neutral "Estimate" badge and conditional verdict; bounds 1 to 1,000 g an ingredient, 40 to 1,500 g a portion, 20 ingredients; the card and diary wording as shipped). Question 4 stays open for the sessions.*
+
 1. **The verdict wording on an assumed recipe.** This document proposes a neutral "Estimate" badge and a
    conditional verdict ("if yours is like this, it fits"), never a plain "fits". The alternative is a
    plain verdict with a footnote, which is simpler and I recommend against. Confirm the proposal.
