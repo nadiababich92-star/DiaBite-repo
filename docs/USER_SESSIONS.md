@@ -19,9 +19,11 @@ Not "do they like it". Five things we currently guess at:
 2. **What do they actually type?** Our 87 eval cases are phrases *we* invented,
    and the 18% unknown-food rate is measured against our own list. Real
    phrasing is the thing we cannot make up.
-3. **What happens at "I don't have that food"?** We believe an honest unknown
-   beats a confident guess. Watch whether they describe the ingredients, as we
-   assume, or close the tab.
+3. **What happens at "I don't have that food"?** A single food we lack is still named and left out. A
+   *dish* we lack (grandma's cholent, a restaurant plate) is now counted from typical ingredients and shown
+   as an **Estimate**, never a plain "fits". Watch whether they notice the word, whether they edit the
+   recipe card, whether the estimate makes them trust the answer more or less, and whether they close the tab
+   at a food it simply cannot find.
 4. **Do they understand the numbers?** "Glycemic load 23.8" is the unit the
    whole product speaks in. It may be reading as decoration next to the word
    "fits".
@@ -110,10 +112,12 @@ What do they do while it thinks for eight seconds?
 > "Now ask it about something you'd eat that it might not have — a brand, a
 > restaurant dish, something from your family."
 
-**Watch for:** the moment it says it doesn't have the food. Do they describe
-the ingredients, as we designed for? Do they try a different wording? Do they
-trust it more for having admitted it, or less? Ask afterwards — *"what did you
-make of that answer?"* — and then say nothing.
+**Watch for:** two different moments. For a **dish** (family recipe, restaurant plate) the app answers
+with an **Estimate** counted from typical ingredients: do they notice the badge and the words "counted from
+a typical recipe"? Do they open "Edit the recipe" and change a gram or remove an ingredient? Do they log it?
+For a **single food it does not have** (a brand, an unusual fruit) the app says it doesn't have it and asks:
+do they describe it, try another wording, or give up? Ask afterwards — *"what did you make of that
+answer?"* — and then say nothing.
 
 ### 4 · Why is the number what it is (5 min)
 
