@@ -1554,6 +1554,69 @@
         "tags": [
           "new-recipes"
         ]
+      },
+      {
+        "phrase": "aglio e olio",
+        "expect": [
+          "rec:DB-1735"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "granita",
+        "expect": [
+          "rec:DB-1768"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "chai latte",
+        "expect": [
+          "rec:DB-1704"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "ranch dressing",
+        "expect": [
+          "rec:DB-1811"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "creamed kale",
+        "expect": [
+          "rec:DB-1798"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "black bean burger",
+        "expect": [
+          "rec:DB-1785"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "salmon burger",
+        "expect": [
+          "rec:DB-1791"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
       }
     ],
     "clarify": [

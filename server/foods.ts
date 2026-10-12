@@ -282,6 +282,9 @@ const RECIPE_ALIASES: Record<string, string[]> = {
   'Tom Kha Gai-Style Coconut Chicken Soup': ['tom kha', 'tom kha gai'],
   'Cauliflower and Potato Curry (Aloo Gobi)': ['aloo gobi', 'gobi aloo'],
   'Vietnamese Banh Mi Bowls with Pork': ['banh mi'],
+  'Pineapple Mint Granita': ['granita', 'fruit granita'],
+  'Spaghetti Aglio e Olio with Broccoli': ['aglio e olio', 'spaghetti aglio e olio'],
+  'Iced Chai Latte with Almond Milk': ['chai', 'chai latte', 'iced chai latte'],
 }
 
 function usdaRecords(): FoodRecord[] {
