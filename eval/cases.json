@@ -1491,6 +1491,69 @@
         "tags": [
           "new-recipes"
         ]
+      },
+      {
+        "phrase": "chana masala",
+        "expect": [
+          "rec:DB-1625"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "tom kha",
+        "expect": [
+          "rec:DB-1633"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "aloo gobi",
+        "expect": [
+          "rec:DB-1629"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "banh mi",
+        "expect": [
+          "rec:DB-1641"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "avgolemono",
+        "expect": [
+          "rec:DB-1656"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "feijoada",
+        "expect": [
+          "rec:DB-1666"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
+      },
+      {
+        "phrase": "mujaddara",
+        "expect": [
+          "rec:DB-1653"
+        ],
+        "tags": [
+          "new-recipes"
+        ]
       }
     ],
     "clarify": [

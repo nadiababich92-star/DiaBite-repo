@@ -279,6 +279,9 @@ const RECIPE_ALIASES: Record<string, string[]> = {
   'Shrimp Fra Diavolo over Spaghetti': ['fra diavolo', 'shrimp fra diavolo'],
   'Carne Guisada, Slow-Simmered Beef': ['carne guisada'],
   'Miso-Glazed Cod with Bok Choy': ['miso cod', 'miso glazed cod'],
+  'Tom Kha Gai-Style Coconut Chicken Soup': ['tom kha', 'tom kha gai'],
+  'Cauliflower and Potato Curry (Aloo Gobi)': ['aloo gobi', 'gobi aloo'],
+  'Vietnamese Banh Mi Bowls with Pork': ['banh mi'],
 }
 
 function usdaRecords(): FoodRecord[] {

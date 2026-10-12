@@ -28,7 +28,7 @@ change that. If a change would let it, stop and say so.
 | Frontend | `src/` — React + Vite + TypeScript | Onboarding, ask screen, diary, weekly menu, profile, feedback form |
 | Engine | `server/` — Express + TypeScript, `tsx` | `/tools/*` for the agent, `/agent/ask` for the browser, serves the built app |
 | Agents | `agent/` — Azure AI Foundry prompt agents | `diabite-triage` (routes), `diabite-meal` (tools), `diabite-advisor` (no tools, no numbers, has memory + knowledge base) |
-| Data | `data/`, `src/data/`, Supabase | 351 ingredients, ~85 everyday foods, 1,623 recipes, 4,618 USDA foods; pgvector index in Supabase, embedded fallback |
+| Data | `data/`, `src/data/`, Supabase | 351 ingredients, ~85 everyday foods, 1,733 recipes, 4,618 USDA foods; pgvector index in Supabase, embedded fallback |
 | Evals | `eval/` | `npm run eval` (engine), `npm run eval:agent` (deployed agent), Foundry runs via `eval/run-foundry.ts` |
 | Hosting | Azure Container App `diabite-engine`, image built by GitHub Actions | One image serves engine and app at one address |
 
