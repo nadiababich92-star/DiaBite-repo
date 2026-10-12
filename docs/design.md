@@ -218,6 +218,8 @@ was costed at (its numbers were computed then). Removing a food, or adding one, 
 line under the figures that says so and can take it back for ten seconds. Foods logged before
 are offered as chips ("Again, to dinner") and add themselves in one tap.
 
+The week card opens with one plain line ("4 of 7 days in range this week") and names thin days (fewer than 3 meals) and carbs-only days in words; below the seven day bars a four-week strip shows one row per week of seven 12 px marks (filled `--low` = in range, outlined `--text-faint` = logged but not in range, dotted `--border` = not logged). No praise, streak, ring or score.
+
 ### The week, on the Menu
 Seven day keys (the day's name and its planned glycemic load), today pre-selected, and one
 day open as a card: a bar, then each meal with its glycemic load, its foods at their weights,

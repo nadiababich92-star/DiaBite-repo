@@ -34,7 +34,7 @@ import { sanitizeProfile } from '../src/lib/storage'
 import { looksLikeMeal, templatedAnswer, withHangRetry } from '../server/agent'
 import { diffEntries, exportShape, fromRow, mergeById, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
-import { weekSummary } from '../src/lib/history'
+import { weekSummary, weeksSummary } from '../src/lib/history'
 import { generateWeek, menuHidden, regenerateSlot, replayWeek, setRecipes, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
 import { toDishes } from '../src/lib/recipes'
 import { ALLERGEN_PATTERNS, PATTERN_PATTERNS } from '../src/lib/dietary'
@@ -480,13 +480,48 @@ const accountMisses: string[] = []
     exportShape({ exportedAt: '', email: '', consent: { at: null, version: null }, profile: null, diary: [] }) === 'consent,diary,email,exportedAt,profile')
   {
     const day = (n: number) => `2026-10-${String(n).padStart(2, '0')}`
-    const egg = (id: string, date: string, grams = 110) => ({ id, date, meal: 'lunch' as const, foodId: 'egg', grams })
-    const rice = (id: string, date: string) => ({ id, date, meal: 'dinner' as const, foodId: 'rice-white', grams: 400 })
+    type Meal = 'breakfast' | 'lunch' | 'dinner' | 'snack'
+    const egg = (id: string, date: string, meal: Meal = 'lunch', grams = 110) => ({ id, date, meal, foodId: 'egg', grams })
+    const rice = (id: string, date: string, meal: Meal = 'dinner') => ({ id, date, meal, foodId: 'rice-white', grams: 400 })
+    const snap = (id: string, date: string, meal: Meal, over: Record<string, unknown>) => ({ id, date, meal, foodId: 'branded:1', grams: 30,
+      snapshot: { name: 'Item', kcal: 100, carbs: 20, fiber: 1, protein: 2, fat: 3, availableCarbs: 19, gi: 50, gl: 4, loadAvailable: true, ...over } })
+    const three = (date: string, tag = '') => [egg(`b${tag}`, date, 'breakfast'), egg(`l${tag}`, date, 'lunch'), egg(`d${tag}`, date, 'dinner')]
+    const dayOf = (entries: ReturnType<typeof egg>[], i = 6) => weekSummary(entries, 20, day(10)).days[i]
+    // The old checks, with the PRD's definition: an in-range day needs three distinct meal slots.
     const w = weekSummary([egg('a', day(10)), egg('b', day(10)), rice('c', day(8)), rice('d', day(8)), rice('e', day(8))], 20, day(10))
     ok('the week is seven days ending today, oldest first', w.days.length === 7 && w.days[6].date === day(10) && w.days[0].date === day(4))
-    ok('a day with nothing logged is not logged, never "within"', !w.days[0].logged && !w.days[0].within && w.loggedDays === 2)
-    ok('a day over the budget is logged and not within; a light day is within', w.days[4].logged && !w.days[4].within && w.days[6].within && w.withinDays === 1)
-    const carbsOnly = weekSummary([{ id: 'x', date: day(10), meal: 'snack' as const, foodId: 'branded:1', grams: 30, snapshot: { name: 'Bar', kcal: 100, carbs: 20, fiber: 1, protein: 2, fat: 3, availableCarbs: 19, gi: null, gl: 0, loadAvailable: false } }], 20, day(10))
+    ok('a day with nothing logged is not logged, never in range', !w.days[0].logged && !w.days[0].inRange && w.days[0].status === 'none' && w.loggedDays === 2)
+    ok('a day over the budget is logged and not in range', w.days[4].logged && w.days[4].status === 'over' && !w.days[4].inRange)
+    // The PRD's definition of an in-range day.
+    const one = weekSummary([egg('x', day(10))], 20, day(10))
+    ok('one apple is not a day: one meal slot is thin and not counted', one.days[6].status === 'thin' && !one.days[6].inRange && one.inRangeDays === 0 && one.days[6].slots === 1)
+    const t3 = weekSummary(three(day(10)), 20, day(10))
+    ok('three meal slots under budget is a day in range', t3.days[6].status === 'in_range' && t3.days[6].inRange && t3.days[6].slots === 3 && t3.inRangeDays === 1)
+    ok('slots are counted, not entries: three entries at lunch are thin', dayOf([egg('1', day(10)), egg('2', day(10)), egg('3', day(10))]).status === 'thin' && dayOf([egg('1', day(10)), egg('2', day(10)), egg('3', day(10))]).slots === 1)
+    ok('four slots under budget is in range', dayOf([...three(day(10)), egg('s', day(10), 'snack')]).status === 'in_range' && dayOf([...three(day(10)), egg('s', day(10), 'snack')]).slots === 4)
+    ok('over budget with four slots is over, not in range', dayOf([...three(day(10)), rice('r', day(10)), egg('s', day(10), 'snack')]).status === 'over')
+    const pkg = dayOf([...three(day(10)), snap('p', day(10), 'snack', { loadAvailable: false, gl: 0, gi: null })])
+    ok('a packaged food stops the count: carbs only, partial, not in range', pkg.status === 'carbs_only' && pkg.partial && !pkg.inRange)
+    ok('a load already over budget is not rescued by a packaged food', dayOf([...three(day(10)), rice('r', day(10)), snap('p', day(10), 'snack', { loadAvailable: false, gl: 0, gi: null })]).status === 'over')
+    const est = dayOf([egg('b', day(10), 'breakfast'), egg('l', day(10), 'lunch'), snap('d', day(10), 'dinner', { assumed: true, gl: 2 })])
+    ok('an estimate still counts, and the day says so', est.status === 'in_range' && est.estimate && !dayOf(three(day(10))).estimate)
+    const two = dayOf([egg('b', day(10), 'breakfast'), egg('d', day(10), 'dinner')])
+    ok('two slots is thin even when light', two.status === 'thin' && weekSummary([egg('b', day(10), 'breakfast'), egg('d', day(10), 'dinner')], 20, day(10)).thinDays === 1)
+    const mixed = weekSummary([
+      ...three(day(4), 'a'), ...three(day(5), 'b'), rice('o', day(6)), egg('t', day(7)),
+      snap('c1', day(8), 'breakfast', { loadAvailable: false, gl: 0, gi: null }),
+    ], 20, day(10))
+    ok('a mixed week counts each kind once', mixed.inRangeDays === 2 && mixed.loggedDays === 5 && mixed.thinDays === 1 && mixed.carbsOnlyDays === 1
+      && mixed.inRangeDays === mixed.days.filter((d) => d.inRange).length)
+    const blocks = weeksSummary([], 20, day(10))
+    const all = blocks.flatMap((b) => b.days.map((d) => d.date))
+    ok('four blocks tile 28 consecutive days, block 0 ends today and is the week', blocks.length === 4 && all.length === 28 && new Set(all).size === 28
+      && blocks.every((b, k) => b.days[6].date === addDays(day(10), -7 * k)) && JSON.stringify(blocks[0].days) === JSON.stringify(weekSummary([], 20, day(10)).days))
+    const crossing = weeksSummary([], 20, '2026-11-02').flatMap((b) => b.days.map((d) => d.date)).sort()
+    ok('the blocks cross a month boundary', crossing[0] === '2026-10-06' && crossing[27] === '2026-11-02' && new Set(crossing).size === 28)
+    const wk = weeksSummary([...three(day(10), 'n'), ...three(day(3), 'o')], 20, day(10))
+    ok('a day belongs to the block that holds it', wk[0].inRangeDays === 1 && wk[1].inRangeDays === 1 && wk[2].inRangeDays === 0)
+    const carbsOnly = weekSummary([snap('x', day(10), 'snack', { loadAvailable: false, gl: 0, gi: null })], 20, day(10))
     ok('a day with a packaged food says its load is only what could be counted', carbsOnly.days[6].partial && carbsOnly.days[6].logged)
     ok('the week crosses a month boundary', weekSummary([], 20, '2026-11-02').days[0].date === '2026-10-27')
     // The diary's own small helpers.
@@ -501,6 +536,7 @@ const accountMisses: string[] = []
     // The day is a calendar day, not 24 hours: across a clock change, in three zones, the week is still seven
     // different consecutive dates ending today, and the labels follow the calendar.
     const savedTz = process.env.TZ
+    const prevDay = (d: string) => { const [y, m, dd] = d.split('-').map(Number); return new Date(Date.UTC(y, m - 1, dd - 1)).toISOString().slice(0, 10) }
     const nextDay = (d: string) => { const [y, m, dd] = d.split('-').map(Number); const n = new Date(Date.UTC(y, m - 1, dd + 1)); return n.toISOString().slice(0, 10) }
     const zoneProblems: string[] = []
     for (const tz of ['America/Los_Angeles', 'Europe/Warsaw', 'Pacific/Auckland']) {
@@ -509,6 +545,12 @@ const accountMisses: string[] = []
         const ds = weekSummary([], 20, today).days.map((x) => x.date)
         const consecutive = ds.every((d, i) => i === 0 || d === nextDay(ds[i - 1]))
         if (ds.length !== 7 || ds[6] !== today || !consecutive || new Set(ds).size !== 7) zoneProblems.push(`${tz} ${today}: ${ds.join(',')}`)
+        const blocks = weeksSummary([], 20, today)
+        const oldest = blocks.flatMap((b) => [...b.days].map((d) => d.date)).sort()
+        let end = today
+        const endsRight = blocks.every((b) => { const ok = b.days[6].date === end; for (let i = 0; i < 7; i++) end = prevDay(end); return ok })
+        const run = oldest.every((d, i) => i === 0 || d === nextDay(oldest[i - 1]))
+        if (blocks.length !== 4 || oldest.length !== 28 || new Set(oldest).size !== 28 || !run || !endsRight) zoneProblems.push(`${tz} ${today}: blocks`)
       }
     }
     if (savedTz === undefined) delete process.env.TZ; else process.env.TZ = savedTz

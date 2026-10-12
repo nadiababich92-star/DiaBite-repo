@@ -5,6 +5,7 @@
  *   npm run screens                      # the live app, files in /tmp/diabite-screens
  *   OUT=some/dir APP=http://localhost:5173 npm run screens
  *   QUESTION="A slice of grandma's cholent" npm run screens   # look at the estimate card
+ *   SEED=full|thin|empty npm run screens                       # give the account a diary history to look at the week
  *
  * Like the rehearsal it creates a throwaway account with the service key (read from the Container App
  * secret, never printed), walks onboarding, asks one question, logs the meal, and deletes the account.
@@ -30,6 +31,27 @@ const created = await (await admin('/auth/v1/admin/users', { method: 'POST', bod
 const uid = created.id
 const session = await (await fetch(`${SB}/auth/v1/token?grant_type=password`, { method: 'POST', headers: { apikey: PUB, 'content-type': 'application/json' }, body: JSON.stringify({ email, password }) })).json()
 const stored = JSON.stringify({ ...session, expires_at: Math.floor(Date.now() / 1000) + session.expires_in })
+
+
+// A diary history for the throwaway account, so the week and the four-week strip have something to show.
+// Rows are shaped like the app's own (src/lib/syncCore.ts toRow) and go away with the account.
+const SEED = process.env.SEED
+if (SEED === 'full' || SEED === 'thin') {
+  const dayAgo = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
+  const rows = []
+  const add = (n, meal, food_id, grams, snapshot = null) => rows.push({ user_id: uid, id: `seed-${n}-${meal}-${food_id}`, day: dayAgo(n), meal, food_id, grams, snapshot, updated_at: new Date().toISOString() })
+  const threeMeals = (n) => { add(n, 'breakfast', 'egg', 110); add(n, 'lunch', 'egg', 110); add(n, 'dinner', 'egg', 110) }
+  if (SEED === 'full') {
+    for (const n of [1, 2, 3, 4, 8, 9, 10, 22]) threeMeals(n)       // in range: four this week, three last week, one three weeks ago
+    threeMeals(5); add(5, 'dinner', 'rice-white', 400)               // over the budget
+    add(6, 'lunch', 'egg', 110)                                      // thin: one meal
+    add(23, 'snack', 'branded:seed', 30, { name: 'Granola bar', kcal: 120, carbs: 20, fiber: 1, protein: 2, fat: 4, availableCarbs: 19, gi: null, gl: 0, loadAvailable: false })
+  } else {
+    for (const n of [1, 3, 5]) add(n, 'lunch', 'egg', 110)           // three days with one meal each
+  }
+  const r = await admin('/rest/v1/diary_entries', { method: 'POST', body: JSON.stringify(rows), headers: { prefer: 'return=minimal' } })
+  console.log(`seeded ${rows.length} diary rows (${SEED}):`, r.status)
+}
 
 const SIZES = [{ name: 'laptop', width: 1366, height: 768, dpr: 1 }, { name: 'phone', width: 390, height: 844, dpr: 2 }]
 let port = 9801

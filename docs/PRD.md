@@ -322,6 +322,8 @@ A day counts as *in-range* when both conditions hold:
 
 > **Target: median 4.5 of 7 in-range days by a user's eighth week.**
 
+The Diary computes it with `weekSummary` in `src/lib/history.ts` (three distinct meal slots, every entry carrying a glycemic load, load at or under the budget); the weekly report of the roadmap uses the same function.
+
 This metric was chosen because it only moves when *both* things we care about
 happen: the user keeps engaging, **and** what they actually eat changes. A pure
 engagement metric would reward a product that people use while their health

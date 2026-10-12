@@ -3,7 +3,7 @@ import { CATEGORY_LABELS, FOODS, getFood } from '../data/foods'
 import { availableCarbs, glycemicLoad, sumNutrients } from '../lib/glycemic'
 import { MEAL_LABELS, MEAL_ORDER } from '../lib/menu'
 import { addDays, dayLabel, mealForNow, nudgeGrams, recentEntries, viewEntry } from '../lib/diary'
-import { weekSummary } from '../lib/history'
+import { weeksSummary, type DayPoint } from '../lib/history'
 import { useToday } from '../lib/useToday'
 import type { DiaryEntry, MealType, Targets } from '../types'
 import { GIPill, GLPill } from './Pills'
@@ -49,7 +49,8 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
     return { ...sumNutrients(views.map((v) => v.nutrients)), gl, xe }
   }, [dayEntries])
 
-  const week = useMemo(() => weekSummary(diary, targets.glBudget, today), [diary, targets.glBudget, today])
+  const weeks = useMemo(() => weeksSummary(diary, targets.glBudget, today), [diary, targets.glBudget, today])
+  const week = weeks[0]
   const recent = useMemo(() => recentEntries(diary, 6), [diary])
 
   const matches =
@@ -292,26 +293,60 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
 
       <section className="card">
         <h2>The last seven days</h2>
+        <p className="week-sum">
+          {week.loggedDays === 0 ? (
+            'Log what you eat and the week fills in here.'
+          ) : (
+            <>
+              <strong>{week.inRangeDays} of 7 days in range</strong> this week.
+              {(week.thinDays > 0 || week.carbsOnlyDays > 0) && ` ${weekNotes(week.thinDays, week.carbsOnlyDays)}.`}
+            </>
+          )}
+        </p>
         <ol className="week" aria-label="Glycemic load used each of the last seven days, against your daily budget">
           {week.days.map((d) => (
-            <li key={d.date} className={d.logged ? (d.within ? 'ok' : 'over') : 'none'}>
+            <li key={d.date} className={dayClass(d)}>
               <span className="wk-day">{d.label}</span>
               <span className="wk-bar" aria-hidden="true"><i style={{ width: `${d.logged ? Math.min(100, (d.used / Math.max(1, targets.glBudget)) * 100) : 0}%` }} /></span>
               <span className="wk-num">
                 {d.logged ? `${d.used.toFixed(0)} of ${targets.glBudget}` : 'not logged'}
-                {d.logged && d.partial && <em> + carbs only</em>}
+                {d.status === 'thin' && <em> · {d.slots} meal{d.slots === 1 ? '' : 's'}</em>}
+                {d.partial && d.status !== 'none' && <em> · carbs only</em>}
+                {d.estimate && <em> · estimate</em>}
               </span>
             </li>
           ))}
         </ol>
-        <p className="muted">
-          {week.loggedDays === 0
-            ? 'Log what you eat and the week fills in here.'
-            : `${week.withinDays} of the ${week.loggedDays} ${week.loggedDays === 1 ? 'day' : 'days'} you logged stayed within your glycemic-load budget.`}
-        </p>
+        <h3 className="week-sub">Four weeks</h3>
+        <ol className="weeks">
+          {weeks.map((w) => {
+            const name = WEEK_NAMES[w.ago] ?? `${w.ago} weeks ago`
+            return (
+              <li key={w.ago} aria-label={w.loggedDays === 0 ? `${name}: nothing logged` : `${name}: ${w.inRangeDays} of 7 days in range`}>
+                <span className="wks-name">{name}</span>
+                <span className="wks-marks" aria-hidden="true">
+                  {w.days.map((d) => <i key={d.date} className={d.inRange ? 'in' : d.logged ? 'on' : 'off'} />)}
+                </span>
+                <span className="wks-num" aria-hidden="true">{w.loggedDays === 0 ? 'not logged' : `${w.inRangeDays} of 7`}</span>
+              </li>
+            )
+          })}
+        </ol>
       </section>
     </>
   )
+}
+
+const WEEK_NAMES = ['This week', 'Last week', '2 weeks ago', '3 weeks ago']
+
+const dayClass = (d: DayPoint) => d.status === 'in_range' ? 'ok' : d.status === 'over' ? 'over' : d.status === 'thin' ? 'thin' : d.status === 'carbs_only' ? 'carbs' : 'none'
+
+/** "2 days were logged with fewer than 3 meals; 1 has carbs only" */
+function weekNotes(thin: number, carbs: number): string {
+  const parts: string[] = []
+  if (thin > 0) parts.push(`${thin} ${thin === 1 ? 'day was' : 'days were'} logged with fewer than 3 meals`)
+  if (carbs > 0) parts.push(`${carbs} ${carbs === 1 ? 'has' : 'have'} carbs only`)
+  return parts.join('; ')
 }
 
 /** A figure that is not the main one: a label, a thin bar, and plain numbers. */

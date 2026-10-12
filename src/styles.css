@@ -647,11 +647,23 @@ button.danger:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* The week: a thin bar per day, plain numbers, no colour but the verdict's (green within, red over). */
 .week { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.week li { display: grid; grid-template-columns: 44px minmax(0, 1fr) 118px; align-items: center; gap: 10px; font-size: 14px; }
+.week li { display: grid; grid-template-columns: 44px minmax(0, 1fr) minmax(118px, auto); align-items: center; gap: 10px; font-size: 14px; }
 .wk-day { color: var(--text-dim); }
 .wk-bar { height: 3px; border-radius: 99px; background: var(--border); overflow: hidden; display: block; }
 .wk-bar i { display: block; height: 100%; border-radius: 99px; background: var(--low); }
 .week li.over .wk-bar i { background: var(--high); }
+.week li.thin .wk-bar i, .week li.carbs .wk-bar i { background: var(--text-faint); }
+.week-sum { margin: 0 0 12px; font-size: 15px; line-height: 1.5; color: var(--text); }
+.week-sub { margin: 16px 0 8px; padding-top: 12px; border-top: 1px dashed var(--border); font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); }
+.weeks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.weeks li { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; align-items: center; gap: 10px; font-size: 14px; }
+.wks-name { color: var(--text-dim); }
+.wks-marks { display: flex; gap: 4px; }
+.wks-marks i { width: 12px; height: 12px; border-radius: 50%; box-sizing: border-box; display: block; }
+.wks-marks i.in { background: var(--low); }
+.wks-marks i.on { border: 1px solid var(--text-faint); }
+.wks-marks i.off { border: 1px dotted var(--border); }
+.wks-num { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 13px; text-align: right; color: var(--text); }
 .wk-num { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 13px; text-align: right; color: var(--text); }
 .week li.none .wk-num { color: var(--text-faint); font-family: var(--font); }
 .wk-num em { font-style: normal; color: var(--text-faint); font-family: var(--font); }
