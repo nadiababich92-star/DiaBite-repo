@@ -188,7 +188,21 @@ try {
   await b.ev(`window.scrollTo(0,0)`)
   end = say('s3a'); await b.ev(`document.querySelector('.ask-form')?.scrollIntoView({block:'center'})`)
   await typeIn('Cholent with beef, barley, kidney beans and potatoes')
-  await clickOn({ text: 'Check this meal' }); await awaitAnswer('section.answer'); await holdTo(end)
+  const CHOLENT = 'Cholent with beef, barley, kidney beans and potatoes'
+  await clickOn({ text: 'Check this meal' }); await awaitAnswer('section.answer')
+  // A model sometimes asks a question instead of counting the dish. The attempts that do are cut out; what stays is one that counted.
+  const costed = () => b.ev(`[...document.querySelectorAll('button')].some(x => x.innerText.trim().startsWith('Edit the recipe'))`)
+  for (let k = 0; k < 4 && !(await costed()); k++) {
+    cutStart()
+    await b.ev(`[...document.querySelectorAll('button')].find(x => x.innerText.trim().startsWith('Ask something else'))?.click()`); await sleep(500)
+    await b.ev(`(()=>{const i=document.querySelector('input[type=text]'); i.focus(); i.select()})()`)
+    await b.send('Input.insertText', { text: CHOLENT }); await sleep(300)
+    await b.ev(`[...document.querySelectorAll('button')].find(x => x.innerText.trim().startsWith('Check this meal'))?.click()`); await sleep(1500)
+    for (let i = 0; i < 240; i++) { const busy = await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`); if (!busy && (await b.ev(`!!document.querySelector('section.answer')`))) break; await sleep(250) }
+    await sleep(500); cutEnd()
+  }
+  if (!(await costed())) throw new Error('the dish was not counted in four attempts')
+  await holdTo(end)
   await b.ev(`window.scrollTo(0, 0)`)
   end = say('s3b'); await holdTo(end)
   end = say('s3c'); await clickOn({ text: 'Edit the recipe' }); await sleep(1800)

@@ -219,3 +219,17 @@ The cohort form asks for a three-minute demo. Same beats, with the waiting edite
 and any brand name.
 
 **If a take goes wrong** (an answer over twenty seconds, or a card in a different shape): stop, wait a minute, take it again.
+
+## Re-making the recording
+
+`docs/demo-3min.mp4` (2 min 17 s, the voice is the AI voice Emma) was made from the live app on 15 October by three scripts in
+`scripts/demo-video/`, with no ffmpeg:
+
+1. `node scripts/demo-video/tts.mjs` writes each narration segment (`narration.json`) with Azure Speech, using the signed-in Azure CLI.
+2. `node scripts/demo-video/record.mjs` creates a throwaway demo person (service key from the Container App secret, never printed),
+   onboards them off camera, seeds a diary history, then opens a **second clean browser at `/?demo`** and records every beat from the real app,
+   cutting out the time a model spends thinking. If the dish is not counted on the first try it asks again inside a cut. The account is deleted at the end.
+3. `node scripts/demo-video/assemble.mjs` puts the kept frames and the narration on one clock and writes `/tmp/dv/demo-3min.mp4`.
+
+Change the words in `narration.json`, or a beat in `record.mjs`, and run the three again (about ten minutes). The file is not in git
+(46 MB); keep it in the course folder.
