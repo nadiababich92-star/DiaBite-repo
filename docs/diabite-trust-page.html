@@ -1,0 +1,243 @@
+<title>DiaBite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap" rel="stylesheet">
+<style>
+/* Layout concept: one narrow reading column; the receipt and the architecture are the two wide moments.
+   Colour and type come from DiaBite's own design file (Paper and Night); the lime marker appears once. */
+:root {
+  --bg: #f1ece0; --surface: #fffcf5; --surface-2: #efe9da; --border: #dcd3bf; --dot: #cfc6ae;
+  --text: #14201a; --text-dim: #4f5a53; --text-faint: #5e6861;
+  --accent: #0e5a3c; --accent-soft: #e3f0e7; --on-accent: #fffcf5;
+  --marker: #dcf26b; --marker-ink: #14201a;
+  --low: #1b6b45; --low-bg: #ddf0e4; --high: #9e3025;
+  --serif: 'Literata', Georgia, 'Times New Roman', serif;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1812; --surface: #14281f; --surface-2: #1d332a; --border: #2a4235; --dot: #2f4a3b;
+    --text: #eef3e8; --text-dim: #a9bbaf; --text-faint: #84998c;
+    --accent: #9fe0b6; --accent-soft: #1c3a2b; --on-accent: #0a1812;
+    --marker-ink: #0c1b15; --low: #63b98c; --low-bg: #15291f; --high: #d97b70; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1812; --surface: #14281f; --surface-2: #1d332a; --border: #2a4235; --dot: #2f4a3b;
+  --text: #eef3e8; --text-dim: #a9bbaf; --text-faint: #84998c;
+  --accent: #9fe0b6; --accent-soft: #1c3a2b; --on-accent: #0a1812;
+  --marker-ink: #0c1b15; --low: #63b98c; --low-bg: #15291f; --high: #d97b70; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font: 400 15px/1.55 var(--sans); padding-inline: 16px; padding-block: 28px 56px; }
+main { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; letter-spacing: -0.015em; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(27px, 6vw, 38px); line-height: 1.12; letter-spacing: -0.025em; }
+h2 { font-size: 22px; line-height: 1.2; }
+h3 { font-size: 17px; }
+p { margin: 0; max-width: 62ch; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+.eyebrow { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-faint); }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.dim { color: var(--text-dim); }
+section { display: flex; flex-direction: column; gap: 16px; }
+
+.top { display: flex; flex-direction: column; gap: 14px; }
+.wordmark { font-family: var(--serif); font-weight: 600; font-size: 24px; letter-spacing: -0.02em; }
+.wordmark b { background: var(--marker); color: var(--marker-ink); padding: 0 4px; border-radius: 3px; font-weight: 600; }
+.lede { font-size: 17px; max-width: 56ch; color: var(--text-dim); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 6px; }
+.key { display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: 12px; border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent); font: 600 15px var(--sans); text-decoration: none; cursor: pointer; }
+.ghost { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: 600 15px var(--sans); cursor: pointer; }
+.note { font-size: 14px; color: var(--text-dim); }
+
+/* The receipt: a real answer from the running service. */
+.slip { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.slip .q { font-size: 14px; color: var(--text-dim); }
+.verdict { font-family: var(--serif); font-weight: 600; font-size: 24px; letter-spacing: -0.02em; line-height: 1.2; }
+.lines { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; display: flex; flex-direction: column; gap: 6px; overflow-x: auto; }
+.lines .row { display: grid; grid-template-columns: minmax(150px, 1fr) 62px 62px 52px 52px; gap: 8px; min-width: 430px; align-items: baseline; }
+.lines .head { color: var(--text-faint); border-bottom: 1px dashed var(--dot); padding-bottom: 6px; }
+.lines .num { text-align: right; }
+.lines .total { border-top: 1px dashed var(--dot); padding-top: 8px; font-weight: 500; }
+.figs { display: flex; flex-wrap: wrap; gap: 8px 28px; }
+.fig { display: flex; flex-direction: column; }
+.fig .k { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; color: var(--text-faint); }
+.fig .v { font-family: var(--mono); font-size: 19px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.fig .v.mk { background: var(--marker); color: var(--marker-ink); padding: 0 8px; border-radius: 4px; transform: rotate(-1.2deg); display: inline-block; }
+.pill { display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 99px; background: var(--low-bg); color: var(--low); font-size: 13px; font-weight: 600; }
+
+/* Architecture: three lanes, numbered because the order is the point. */
+.lanes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.lane { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.lane h3 { font-family: var(--sans); font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-faint); }
+.node { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; font-size: 14px; line-height: 1.45; }
+.node b { display: block; font-weight: 600; }
+.node .mono { font-size: 12.5px; color: var(--text-dim); }
+.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; display: flex; flex-direction: column; gap: 10px; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: start; }
+.steps li::before { content: counter(s); font-family: var(--mono); font-size: 13px; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--accent); color: var(--accent); display: grid; place-items: center; }
+.steps b { font-weight: 600; }
+@media (max-width: 680px) { .lanes { grid-template-columns: minmax(0, 1fr); } }
+
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.card p { font-size: 14px; color: var(--text-dim); }
+@media (max-width: 560px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+
+.table { overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 14px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px dashed var(--dot); vertical-align: top; }
+th { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-faint); font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.limits { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; max-width: 64ch; }
+.invite { background: var(--accent-soft); border: 1px solid var(--border); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+.mail { font-family: var(--mono); font-size: 15px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; user-select: all; overflow-wrap: anywhere; }
+.mailrow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+footer { font-size: 13px; color: var(--text-faint); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<main>
+  <header class="top">
+    <span class="wordmark">Dia<b>Bite</b></span>
+    <h1>Can I eat this? Answered from one sentence, with the arithmetic shown.</h1>
+    <p class="lede">For adults in the US with type 2 diabetes, prediabetes or insulin resistance. Describe a meal in your own words. DiaBite says whether it fits what is left of your day and shows how it got there. Every number is computed, never made up.</p>
+    <div class="actions">
+      <a class="key" href="https://diabite-engine.greenglacier-ab5551c6.swedencentral.azurecontainerapps.io" rel="noopener">Try DiaBite</a>
+      <span class="note">Free. You sign in with your email; a code is sent, no password.</span>
+    </div>
+  </header>
+
+  <section aria-labelledby="receipt-h">
+    <span class="eyebrow">A real answer</span>
+    <h2 id="receipt-h">The receipt behind every verdict</h2>
+    <p class="dim">Asked of the running service with a daily budget of 45 glycemic load. The three foods and their numbers come from the database; the engine adds them up; a check confirms each number in the answer appears in what the engine returned.</p>
+    <div class="slip">
+      <div class="q">“Two eggs, a slice of rye bread and half an avocado”</div>
+      <span class="pill">Fits</span>
+      <div class="verdict">This fits your day.</div>
+      <div class="figs">
+        <div class="fig"><span class="k">This meal</span><span class="v mk">7.3</span></div>
+        <div class="fig"><span class="k">Before</span><span class="v">45</span></div>
+        <div class="fig"><span class="k">Left after</span><span class="v">37.7</span></div>
+      </div>
+      <div class="lines" role="table" aria-label="Foods in the meal">
+        <div class="row head" role="row"><span role="columnheader">food</span><span class="num" role="columnheader">grams</span><span class="num" role="columnheader">carbs g</span><span class="num" role="columnheader">GI</span><span class="num" role="columnheader">GL</span></div>
+        <div class="row" role="row"><span>Egg</span><span class="num">110</span><span class="num">0.8</span><span class="num">–</span><span class="num">0</span></div>
+        <div class="row" role="row"><span>Pumpernickel / whole rye bread</span><span class="num">35</span><span class="num">14.2</span><span class="num">50</span><span class="num">7.1</span></div>
+        <div class="row" role="row"><span>Avocado</span><span class="num">70</span><span class="num">1.6</span><span class="num">15</span><span class="num">0.2</span></div>
+        <div class="row total" role="row"><span>Meal load</span><span></span><span></span><span></span><span class="num">7.3</span></div>
+      </div>
+      <p class="note">Weights for eggs and avocado were the defaults because none were given, and the answer says so. A dash means the database holds no glycemic index for that food.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="arch-h">
+    <span class="eyebrow">Architecture</span>
+    <h2 id="arch-h">A model reads the sentence. It never does the sums.</h2>
+    <p class="dim">The promise of the product, enforced by the structure: a language model decides what to look up, a deterministic engine does the arithmetic, and a verifier refuses any answer whose numbers did not come from the engine.</p>
+    <div class="lanes">
+      <div class="lane">
+        <h3>The app</h3>
+        <div class="node"><b>React and TypeScript</b>Ask, Diary, Menu, You. Signed in, the diary and profile follow you across devices.</div>
+        <div class="node"><b>Safety rules first</b>Dosing, red-flag symptoms, fasting and referral questions are caught by plain rules before any model runs, and before any rate limit.</div>
+        <div class="node"><b>Limits</b>Per person, per address and a daily ceiling on model turns.</div>
+      </div>
+      <div class="lane">
+        <h3>Azure AI Foundry · agents</h3>
+        <div class="node"><b>Router</b>A small model that sends the question to the right agent.</div>
+        <div class="node"><b>Meal agent</b>Calls tools. Reads the foods, picks the tool, writes the answer in plain words.</div>
+        <div class="node"><b>Advisor</b>No tools and no numbers. Answers “is keto sensible?” from our own documents and remembers food preferences.</div>
+      </div>
+      <div class="lane">
+        <h3>Engine · Azure Container App</h3>
+        <div class="node"><b>Tools</b><span class="mono">resolve_foods · compute_meal · cost_dish · get_day_state · find_alternatives</span></div>
+        <div class="node"><b>Foods, in Supabase</b>8,633 records and 2,000 recipes, searched by meaning (pgvector) and by name.</div>
+        <div class="node"><b>Verifier</b>Every number in the answer must appear in a tool result, or the answer is not shown.</div>
+      </div>
+    </div>
+    <ol class="steps">
+      <li><span><b>You describe a meal.</b> The safety rules read it first; most refusals never reach a model.</span></li>
+      <li><span><b>The router</b> picks the meal agent or the advisor.</span></li>
+      <li><span><b>The meal agent resolves each food</b> against the database. A match it is unsure of becomes a question, never a guess.</span></li>
+      <li><span><b>The engine computes</b> carbohydrate, glycemic index, glycemic load and what is left of your day.</span></li>
+      <li><span><b>The verifier checks the answer</b> against those results. If a number is not there, the model is asked once more, and then a plain template from the tool results is shown instead.</span></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="now-h">
+    <span class="eyebrow">What it does now</span>
+    <h2 id="now-h">More than the pitch showed</h2>
+    <div class="grid2">
+      <div class="card"><h3>Ask in your own words</h3><p>A verdict, three figures, a one-line reason and one next step, with the receipt one tap away.</p></div>
+      <div class="card"><h3>Dishes it does not have</h3><p>A family recipe or a restaurant plate is counted from typical ingredients and labelled an estimate. Change a gram or take an ingredient out and the engine counts it again.</p></div>
+      <div class="card"><h3>Foods with no glycemic index</h3><p>Packaged and survey foods, such as pizza or candy, show carbohydrate, fibre and calories. Their load is not invented, and the answer says so.</p></div>
+      <div class="card"><h3>A diary that stays</h3><p>Sign in and your profile and diary are there on any device. The Diary shows your week: how many of the last seven days stayed in range, and four weeks as a strip.</p></div>
+      <div class="card"><h3>A weekly menu and shopping list</h3><p>Seven days within your targets, drawn from 2,000 recipes, with single-meal swaps. Built and not yet reviewed by a clinician.</p></div>
+      <div class="card"><h3>Your data, yours to delete</h3><p>Delete your account in the app and the profile and diary go with it. Nothing about you is sent to a model beyond the meal and the budget.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="eval-h">
+    <span class="eyebrow">Evaluation</span>
+    <h2 id="eval-h">Checked by tests, and by a second model</h2>
+    <p class="dim">The agents are tested against the deployed service. A separate model, not the one that answers, scores the same runs in Azure AI Foundry. The judge disagrees with our policy of asking when a match is unsure, so a few of its marks are disagreements, and I read each one.</p>
+    <div class="table">
+      <table>
+        <thead><tr><th>Check</th><th>Result</th><th>What it means</th></tr></thead>
+        <tbody>
+          <tr><td>Agent cases, mechanical</td><td class="n">204 of 204</td><td>Tools called, numbers verified, no verdict where one is not allowed, refusals where required.</td></tr>
+          <tr><td>Engine cases</td><td class="n">184 of 184</td><td>Resolving everyday foods and recipes, portions, budgets and the week’s arithmetic.</td></tr>
+          <tr><td>Groundedness</td><td class="n">74 of 75</td><td>Foundry judge: the answer says only what the tools returned. The one miss was a real data fault (a candy portion), now fixed.</td></tr>
+          <tr><td>Intent resolution</td><td class="n">86 of 86</td><td>Foundry judge: the answer addresses what was asked.</td></tr>
+          <tr><td>Task adherence</td><td class="n">96 of 102</td><td>Foundry judge: follows the product’s rules. Most misses are the judge preferring to guess where we ask.</td></tr>
+          <tr><td>Speed and cost</td><td class="n">p90 under 9 s</td><td>A turn takes about 4 seconds in the middle. Measured cost is about €0.003 a question.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="limits-h">
+    <span class="eyebrow">What it is not</span>
+    <h2 id="limits-h">Limits, stated plainly</h2>
+    <ul class="limits">
+      <li>DiaBite is a reference tool, not medical advice. It does not suggest insulin or medicine doses, and a question about them gets a fixed refusal.</li>
+      <li>No clinician has signed it off yet. The reasoning behind each decision is written down for review.</li>
+      <li>The glycemic index is a published average for a food, not a measurement of your body. A day counted “in range” is based on what you log.</li>
+      <li>It is being prepared for its first user sessions. It is not launched, and some things will be wrong.</li>
+    </ul>
+  </section>
+
+  <section class="invite" aria-labelledby="invite-h">
+    <span class="eyebrow">Help me build it</span>
+    <h2 id="invite-h">Try it for half an hour and tell me where it breaks</h2>
+    <p>I am looking for people who live with type 2 diabetes, prediabetes or insulin resistance, or friends and relatives who do. No preparation, nothing you say can be wrong, and I will not ask for medical records. What you type, in your own words, is the most useful thing you can give me.</p>
+    <div class="actions">
+      <a class="key" href="https://diabite-engine.greenglacier-ab5551c6.swedencentral.azurecontainerapps.io" rel="noopener">Try DiaBite</a>
+    </div>
+    <div class="mailrow">
+      <span class="mail" id="addr">nadia.babich92@gmail.com</span>
+      <button class="ghost" id="copy" type="button">Copy address</button>
+      <span class="note" id="copied" role="status"></span>
+    </div>
+  </section>
+
+  <footer>DiaBite · built by Nadia Babich · updated 15 October 2026</footer>
+</main>
+
+<script>
+(function () {
+  var btn = document.getElementById('copy'), out = document.getElementById('copied'), addr = document.getElementById('addr');
+  btn.addEventListener('click', function () {
+    var text = addr.textContent;
+    function select() { var r = document.createRange(); r.selectNodeContents(addr); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); out.textContent = 'Selected: copy it with your keyboard.'; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { out.textContent = 'Copied.'; }, select);
+    } else { select(); }
+  });
+})();
+</script>
