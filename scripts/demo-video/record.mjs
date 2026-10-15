@@ -17,6 +17,7 @@ import { dirname, join } from 'node:path'
 import { execSync } from 'node:child_process'
 import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs'
 import { launch } from '../../eval/lib/cdp.mjs'
+import { titleCard, problemCard, endCard } from './cards.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(here, '..', '..')
@@ -155,85 +156,105 @@ try {
   await b.send('Page.startScreencast', { format: 'jpeg', quality: 82, everyNthFrame: 1 })
   await sleep(1200)
   t0 = now()
-  await inject()
 
-  // 0. The empty screen and the first tip
+  const dataUrl = (html) => `data:text/html;charset=utf-8,${encodeURIComponent(html)}`
+  const showCard = async (html) => { await b.send('Page.navigate', { url: dataUrl(html) }); await sleep(1300) }
+  const trustPage = `file://${ROOT}/docs/diabite-trust-page.html`
+  // Dana is a made-up person, and the corner of the screen says so.
+  const setChip = (label) => b.ev(`(()=>{ let c = document.getElementById('__chip'); if (!c) { c = document.createElement('div'); c.id = '__chip';
+    c.style.cssText = 'position:fixed;left:18px;bottom:18px;z-index:99997;background:#fffcf5;border:1px solid #dcd3bf;border-radius:14px;padding:10px 14px;font:600 14px/1.35 IBM Plex Sans,system-ui,sans-serif;color:#14201a;box-shadow:0 6px 18px rgba(0,0,0,.14);max-width:270px'; document.body.append(c) }
+    c.innerHTML = '<div>Dana <span style="font-weight:400;color:#4f5a53">· 52 · type 2 · metformin</span></div><div style="font-weight:400;color:#4f5a53;font-size:13px">' + ${JSON.stringify(label)} + ' · a made-up person</div>' })()`)
+  const openApp = async (label) => { await b.send('Page.navigate', { url: `${APP}/?demo` }); await sleep(3800); await inject(); await setChip(label) }
+  const answered = () => b.ev(`!!document.querySelector('section.answer')`)
+  // Ask in the box. If the answer is not the one the story needs, ask again inside a cut; what stays on screen is one that is.
+  const askUntil = async (text, ok, { tries = 4, typed = true } = {}) => {
+    if (typed) await typeIn(text)
+    await clickOn({ text: 'Check this meal' }); await awaitAnswer('section.answer')
+    for (let k = 0; k < tries && !(await ok()); k++) {
+      cutStart()
+      await b.ev(`[...document.querySelectorAll('button')].find(x => x.innerText.trim().startsWith('Ask something else'))?.click()`); await sleep(500)
+      await b.ev(`(()=>{const i=document.querySelector('input[type=text]'); i.focus(); i.select()})()`)
+      await b.send('Input.insertText', { text }); await sleep(300)
+      await b.ev(`[...document.querySelectorAll('button')].find(x => x.innerText.trim().startsWith('Check this meal'))?.click()`); await sleep(1500)
+      for (let i = 0; i < 240; i++) { const busy = await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`); if (!busy && (await answered())) break; await sleep(250) }
+      await sleep(500); cutEnd()
+    }
+    if (!(await ok())) throw new Error(`not the answer the story needs: ${text}`)
+  }
+  let end
+
+  // ── The story: a title, Dana and her problem, the promise ──────────────────
+  await showCard(titleCard()); end = say('t0'); await holdTo(end + 0.6)
+  await showCard(problemCard()); const s1 = vt(); end = say('t1')
+  const lit = [0.20, 0.34, 0.52, 0.70, 0.86]
+  for (let i = 0; i < lit.length; i++) { await holdTo(s1 + lit[i] * dur.t1); await b.ev(`window.reveal(${i})`) }
+  await holdTo(end + 0.4)
+  await b.send('Page.navigate', { url: trustPage }); await sleep(2500)
+  await b.ev(`document.getElementById('arch-h')?.scrollIntoView({block:'start'}); window.scrollBy(0,-24)`); await sleep(500)
+  end = say('t2'); await sleep(3500); await smoothScroll(await b.ev(`Math.round(window.scrollY + 300)`), 8000); await holdTo(end + 0.3)
+
+  // ── Thursday morning: the first time, with the tips ───────────────────────
+  await openApp('Thursday, 7:40 am')
   await b.ev(`window.scrollTo(0,0)`)
-  let end = say('s0'); await sleep(2500)
+  end = say('b0'); await sleep(2200)
   if (!(await b.ev(`!!document.querySelector('.tour-tip')`))) throw new Error('the first tip is not showing: this browser has seen the tips')
-  await holdTo(end - 1.2)
-  await clickOn({ sel: '.tour-tip button.primary' })
-
-  // 1. A meal in your own words
-  end = say('s1a'); await typeIn('Two eggs, a slice of rye bread and half an avocado')
-  await clickOn({ text: 'Check this meal' }); await awaitAnswer('.tour-tip')
-  await holdTo(end)
+  await holdTo(end); await clickOn({ sel: '.tour-tip button.primary' })
+  end = say('b1a'); await typeIn('Two eggs, a slice of rye bread and half an avocado')
+  await clickOn({ text: 'Check this meal' }); await awaitAnswer('.tour-tip'); await holdTo(end)
   await b.ev(`window.scrollTo(0, 0)`)
-  end = say('s1b'); await holdTo(end)
-  end = say('s1c'); await holdTo(end); await clickOn({ sel: '.tour-tip button.primary' })
+  end = say('b1b'); await holdTo(end)
+  end = say('b1c'); await holdTo(end); await clickOn({ sel: '.tour-tip button.primary' })
   await sleep(500)
   await clickOn({ text: 'Show calculation' })
-  end = say('s1d'); await sleep(1500); await smoothScroll(520, 5000); await holdTo(end)
+  end = say('b1d'); await sleep(1500); await smoothScroll(520, 5500); await holdTo(end)
   await clickOn({ sel: '.tour-tip button.primary' })
-  end = say('s1e'); await clickOn({ text: 'Log it' }); await sleep(500)
+  end = say('b1e'); await clickOn({ text: 'Log' }); await sleep(500)
   await clickOn({ sel: '.tour-tip button.primary' }); await holdTo(end)
 
-  // 2. The diary and the week
-  end = say('s2'); await clickOn({ text: 'Diary', scope: '[role=tab]' }); await sleep(1500)
-  await b.ev(`document.querySelector('.week-sum')?.scrollIntoView({block:'start'}); window.scrollBy(0,-80)`); await sleep(1500)
-  await holdTo(end)
-
-  // 3. A dish it does not have
-  await clickOn({ text: 'Ask', scope: '[role=tab]' }); await sleep(1200)
-  await b.ev(`window.scrollTo(0,0)`)
-  end = say('s3a'); await b.ev(`document.querySelector('.ask-form')?.scrollIntoView({block:'center'})`)
-  await typeIn('Cholent with beef, barley, kidney beans and potatoes')
-  const CHOLENT = 'Cholent with beef, barley, kidney beans and potatoes'
-  await clickOn({ text: 'Check this meal' }); await awaitAnswer('section.answer')
-  // A model sometimes asks a question instead of counting the dish. The attempts that do are cut out; what stays is one that counted.
-  const costed = () => b.ev(`[...document.querySelectorAll('button')].some(x => x.innerText.trim().startsWith('Edit the recipe'))`)
-  for (let k = 0; k < 4 && !(await costed()); k++) {
-    cutStart()
-    await b.ev(`[...document.querySelectorAll('button')].find(x => x.innerText.trim().startsWith('Ask something else'))?.click()`); await sleep(500)
-    await b.ev(`(()=>{const i=document.querySelector('input[type=text]'); i.focus(); i.select()})()`)
-    await b.send('Input.insertText', { text: CHOLENT }); await sleep(300)
-    await b.ev(`[...document.querySelectorAll('button')].find(x => x.innerText.trim().startsWith('Check this meal'))?.click()`); await sleep(1500)
-    for (let i = 0; i < 240; i++) { const busy = await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`); if (!busy && (await b.ev(`!!document.querySelector('section.answer')`))) break; await sleep(250) }
-    await sleep(500); cutEnd()
-  }
-  if (!(await costed())) throw new Error('the dish was not counted in four attempts')
-  await holdTo(end)
+  // ── Thursday evening: it does not fit, and the app names a swap ───────────
+  await setChip('Thursday, 6:45 pm')
   await b.ev(`window.scrollTo(0, 0)`)
-  end = say('s3b'); await holdTo(end)
-  end = say('s3c'); await clickOn({ text: 'Edit the recipe' }); await sleep(1800)
+  end = say('d0')
+  const DINNER = 'Spaghetti with tomato sauce, garlic bread and a glass of orange juice'
+  await askUntil(DINNER, async () => (await b.ev(`!!document.querySelector('.tone-bad')`)) && (await b.ev(`/wap/.test(document.body.innerText)`)))
+  await holdTo(end); await b.ev(`window.scrollTo(0, 0)`)
+  end = say('d1'); await holdTo(end)
+
+  // ── Thursday night: the question it will not answer ───────────────────────
+  await setChip('Thursday, 10:30 pm')
+  end = say('i0'); await typeIn('How many units of insulin should I take before pasta?')
+  await clickOn({ text: 'Check this meal' }); await sleep(900); await holdTo(end)
+  end = say('i1'); await b.ev(`window.scrollTo(0, 0)`); await holdTo(end)
+
+  // ── Sunday at her grandmother's: a dish the database does not have ────────
+  await setChip('Sunday, 1:00 pm')
+  await b.ev(`window.scrollTo(0, 0)`)
+  end = say('l0')
+  const dishCounted = () => b.ev(`[...document.querySelectorAll('button')].some(x => x.innerText.trim().startsWith('Edit the recipe'))`)
+  await askUntil('Cholent with beef, barley, kidney beans and potatoes', dishCounted)
+  await holdTo(end); await b.ev(`window.scrollTo(0, 0)`)
+  end = say('l1'); await holdTo(end)
+  end = say('l2'); await clickOn({ text: 'Edit the recipe' }); await sleep(1800)
   await clickOn({ sel: '.remove-step' })
   cutStart()
   for (let i = 0; i < 40; i++) { if (await b.ev(`!!document.querySelector('.stale')`)) break; await sleep(250) }
   await sleep(400); cutEnd()
   await b.ev(`window.scrollTo(0, 0)`); await holdTo(end)
 
-  // 4. Safety
-  await b.ev(`window.scrollTo(0,0)`)
-  end = say('s4a'); await typeIn('How many units of insulin should I take before pasta?')
-  await clickOn({ text: 'Check this meal' }); await sleep(900); await holdTo(end)
-  end = say('s4b'); await b.ev(`window.scrollTo(0, 0)`); await holdTo(end)
+  // ── Her week ───────────────────────────────────────────────────────────────
+  await setChip('A demo week')
+  end = say('w0'); await clickOn({ text: 'Diary', scope: '[role=tab]' }); await sleep(1500)
+  await b.ev(`document.querySelector('.week-sum')?.scrollIntoView({block:'start'}); window.scrollBy(0,-80)`); await sleep(1200)
+  await holdTo(end)
 
-  // 5. How it is built
-  await b.send('Page.navigate', { url: `file://${ROOT}/docs/diabite-trust-page.html` }); await sleep(2500)
-  await b.ev(`document.querySelector('.eyebrow')?.scrollIntoView(); document.getElementById('arch-h')?.scrollIntoView({block:'start'}); window.scrollBy(0,-24)`); await sleep(600)
-  end = say('s5'); await sleep(4000)
-  await smoothScroll(await b.ev(`Math.round(window.scrollY + 380)`), 9000); await holdTo(end)
+  // ── How we know it works ───────────────────────────────────────────────────
+  await b.send('Page.navigate', { url: trustPage }); await sleep(2500)
+  await b.ev(`document.getElementById('eval-h')?.scrollIntoView({block:'start'}); window.scrollBy(0,-24)`); await sleep(500)
+  end = say('e0'); await sleep(3000); await smoothScroll(await b.ev(`Math.round(window.scrollY + 260)`), 9000); await holdTo(end + 0.3)
 
-  // 6. The ask
-  await b.send('Page.navigate', { url: 'about:blank' }); await sleep(300)
-  await b.send('Page.navigate', { url: `data:text/html;charset=utf-8,${encodeURIComponent(`<!doctype html><meta charset=utf-8><style>
-    html,body{margin:0;height:100%;background:#f1ece0;color:#14201a;font-family:'IBM Plex Sans',system-ui,sans-serif}
-    main{height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:22px;text-align:center;padding:0 64px}
-    h1{font:600 76px/1.1 Georgia,serif;margin:0;letter-spacing:-.02em} h1 b{background:#dcf26b;padding:0 12px;border-radius:6px}
-    p{margin:0;font-size:30px;color:#4f5a53;max-width:900px;line-height:1.4} code{font:500 30px 'IBM Plex Mono',ui-monospace,monospace;color:#0e5a3c;background:#fffcf5;border:1px solid #dcd3bf;border-radius:10px;padding:12px 20px}
-  </style><main><h1>Dia<b>Bite</b></h1><p>Free to try. It asks for your email, and sends you a code.</p><code>diabite-engine.greenglacier-ab5551c6.swedencentral.azurecontainerapps.io</code><p>If you have type 2 diabetes, prediabetes or insulin resistance, I would like to hear where it breaks.</p></main>`)}` })
-  await sleep(1200)
-  end = say('s6'); await holdTo(end + 1.5)
+  // ── The ask ────────────────────────────────────────────────────────────────
+  await showCard(endCard('diabite-engine.greenglacier-ab5551c6.swedencentral.azurecontainerapps.io'))
+  end = say('c0'); await holdTo(end + 1.5)
 
   await b.send('Page.stopScreencast')
   const tEnd = now()

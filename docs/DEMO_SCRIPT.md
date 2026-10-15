@@ -1,15 +1,16 @@
 # DiaBite — demo script
 
-Three minutes, one arc: **a new person opens the app, is shown where to start, asks about a meal in their own
-words, and every number they get back can be traced to something that is not the model.**
+A story, not a feature tour: **Dana, a made-up woman of fifty-two with type 2 diabetes, asks her one question at breakfast, at dinner,
+at her grandmother's table. Every number she gets back can be traced to something that is not the model.**
 
-Rebuilt on 15 October 2026 after the first-run tips shipped. Every beat below was run against the deployed agent that
-day, and the figures quoted are the ones that came back. If a beat stops working, this file is wrong and should be
-re-run, not trusted. The earlier five-beat script (8 October) is in git history.
+Rebuilt on 15 October 2026 after the first-run tips shipped and the cohort leader's feedback (he found the app a pain: it tells you
+no and you stop). The recording has no time limit; it runs about three and a half minutes. Every beat was run against the deployed
+agent that day. If a beat stops working, this file is wrong and should be re-run, not trusted. The earlier five-beat script
+(8 October) is in git history.
 
-What changed since the first demo, and so what this one shows: sign-in by email and a diary that follows you across
-devices; first-run tips; a week view with in-range days; a dish the database lacks is counted from typical ingredients
-and labelled an estimate; 8,633 foods and 2,000 recipes; a weekly menu and shopping list.
+What changed since the first demo, and so what this one shows: sign-in by email and a diary that follows you across devices;
+first-run tips; a week view with in-range days; a dish the database lacks is counted from typical ingredients and labelled an
+estimate; 8,633 foods and 2,000 recipes; a weekly menu and shopping list.
 
 ---
 
@@ -38,94 +39,28 @@ and labelled an estimate; 8,633 foods and 2,000 recipes; a weekly menu and shopp
 
 ---
 
-## The beats
+## The story, scene by scene
 
-### 0. The empty screen  ·  0:00 – 0:20
+Dana is **invented and says so**: a chip in the corner of every app scene reads "a made-up person". Her profile in the app is the demo
+person's (age 52, type 2, metformin, a budget of 45 glycemic load). The words are in `scripts/demo-video/narration.json`; the order is below.
 
-On screen: the Ask screen, the budget bar, the first tip pointing at the box ("Say what you ate").
+| Scene | On screen | What happens | Why it is there |
+|---|---|---|---|
+| Title | "Can I eat this?" | the promise in one line | the question |
+| Dana's problem | a card, five lines lit in turn | the list of allowed and forbidden foods; the real question; five to seven times a day; a calorie app costs minutes; real life is a burrito bowl | the problem, in the words of the first pitch |
+| The promise | the architecture, from the trust page | a model reads, an engine counts, a verifier blocks any number no tool returned | the architecture the cohort leader asked for |
+| Thursday 7:40 | the first tip, then eggs, rye bread, avocado | fits, load 7.2, 37.2 left; the verdict tip; Show calculation; the receipt; Log | the first minute of a new person |
+| Thursday 6:45 pm | spaghetti, garlic bread, orange juice | **"Not today", over by about 9**, and the app names a swap (whole wheat pasta) | **the softened no**: it says no and shows the way |
+| Thursday 10:30 pm | the insulin question | refused at once, no spinner | safety |
+| Sunday | cholent with its ingredients | **Estimate**, "if yours is like this"; Edit the recipe, remove one, still an estimate | a dish the database lacks |
+| Her week | the Diary | "4 of 7 days in range", four weeks as a strip | why she comes back |
+| How we know | the evaluation table | 204 of 204 checks, a second model's marks, and the one real fault found and fixed | trust |
+| The ask | the address | free, asks for your email | the invitation |
 
-> "People with type 2 diabetes ask one question five to seven times a day: can I eat this? DiaBite answers it from a
-> sentence. The first time you open it, it tells you where to start."
-
-Press **Got it**.
-
-### 1. A meal in your own words  ·  0:20 – 1:15
-
-Type exactly:
-
-> Two eggs, a slice of rye bread and half an avocado
-
-About 5 to 8 seconds. While it thinks:
-
-> "This is how people really talk about food. Not 110 grams of egg."
-
-What comes back (the same on every run today): **fits**, a meal load of **7.2**, **37.2** left, the rye bread named as
-the driver, and "no change needed". The tip on the verdict appears: let it be read, press **Next**.
-
-> "The engine made that comparison, not the AI's opinion."
-
-The next tip points at **Show calculation**. Press it and **stop talking for two seconds**. The receipt is the pitch:
-
-> "Every line, the weight, the carbohydrate, the glycemic index, the load, came from a database and a formula. The
-> model chose none of these numbers. It read the sentence and wrote the words around them."
-
-Point at the pill: *Verified, N numbers traced to tools*. Then the last tip, **Keep it in your Diary**: press **Log it**.
-
-### 2. The diary and the week  ·  1:15 – 1:40
-
-Open **Diary**. The day is there, with the meal you just logged. Scroll to **The last seven days**.
-
-> "Your week builds here. Four of seven days in range means three meals logged and under budget, counted by the same
-> rule everywhere. A day with one apple is not a day, and it says so."
-
-If the week is seeded, say it is a demo person's week.
-
-### 3. A dish it does not have  ·  1:40 – 2:15
-
-Back to **Ask**. Type:
-
-> Cholent with beef, barley, kidney beans and potatoes
-
-About 6 to 8 seconds. The card is an **Estimate**, never a plain "Fits": "If it's like this, it fits your day."
-
-> "It doesn't have my grandmother's cholent. It could have picked a bean stew and given a confident number. Instead it
-> counts what I told it, each ingredient from the database, and labels the answer an estimate. I can change a gram or
-> take an ingredient out, and the engine counts again."
-
-Press **Edit the recipe**, remove one ingredient: the badge stays **Estimate**. **Do not read a number aloud on this
-beat**: the weights are assumptions the agent makes each time, and the same sentence came back at a load of 20 and
-of 12.8 on two runs.
-
-**Do not type "A slice of grandma's cholent" on its own for the demo.** Without the ingredients the agent invents a
-list, and one of its guesses (flour, a gravy) may not be in the database, so the answer is "I can't judge the day on
-this" with a question. That is honest, and a poor beat.
-
-### 4. Safety  ·  2:15 – 2:30
-
-Type:
-
-> How many units of insulin should I take before pasta?
-
-The refusal is **immediate**, no spinner.
-
-> "That never reached a model. Dosing questions are caught by rules before anything generative sees them, because a
-> refusal that depends on a model behaving is not a refusal."
-
-### 5. How it is built  ·  2:30 – 2:50
-
-Show the **architecture** (the trust page's three lanes, or the slide): the app, the agents on Azure AI Foundry, the
-engine.
-
-> "Three agents: one routes, one costs meals with tools, one gives advice with no tools and no numbers. A
-> deterministic engine does the arithmetic from eight thousand foods. A verifier checks every number in the answer
-> against what the engine returned, and if one isn't there, the answer isn't shown."
-
-### 6. The ask  ·  2:50 – 3:00
-
-> "It's being prepared for its first users. If you or someone you know has type 2 diabetes, prediabetes or insulin
-> resistance and would try it for half an hour, the address is on screen. It's free, and it asks for your email."
-
----
+**Do not read a number aloud on the Sunday scene**: the weights are assumptions the agent makes each time, and the same sentence came back at a load
+of 20 and of 12.8 on two runs. The evening meal ("Spaghetti with tomato sauce, garlic bread and a glass of orange juice") was chosen because it
+did not fit on three runs out of three and each time named a swap; the dish is not "A slice of grandma's cholent" on its own, which makes the agent
+invent a list and sometimes leaves a food out.
 
 ## If time allows, or a question asks for it
 
@@ -196,40 +131,24 @@ before a model sees the question. No clinician has signed it off yet.
 
 ---
 
-## The three-minute recording
-
-The cohort form asks for a three-minute demo. Same beats, with the waiting edited out.
+## The recording
 
 1. A **guest window**, signed in, nothing asked yet (see "Before you start"). Zoom 100%, no other tabs or notifications.
-2. **Do one full silent rehearsal first.** The model writes slightly different words each time and the estimate's
-   number changes between runs: never read a figure aloud on beat 3.
+2. **Do one full silent rehearsal first.** The model writes slightly different words each time and the estimate's number changes between runs.
 3. Record at 1080p, microphone check first, a second take.
 
-| Time | On screen | Say |
-|---|---|---|
-| 0:00 – 0:20 | The empty Ask screen and the first tip | The opening line of beat 0 |
-| 0:20 – 1:15 | Eggs, rye bread, avocado; the verdict tip; Show calculation; the log tip | Beat 1 |
-| 1:15 – 1:40 | Diary and the week | Beat 2 |
-| 1:40 – 2:15 | The cholent with its ingredients; Edit the recipe | Beat 3 |
-| 2:15 – 2:30 | The insulin question, answered at once | Beat 4 |
-| 2:30 – 2:50 | The architecture | Beat 5 |
-| 2:50 – 3:00 | The address and the invitation | Beat 6 |
-
-**Leave out:** brown against white rice (it needs time to explain the second agent), baked potato, french fries, pizza,
-and any brand name.
-
-**If a take goes wrong** (an answer over twenty seconds, or a card in a different shape): stop, wait a minute, take it again.
+The finished recording is made by the scripts below, not by hand: it needs no rehearsal and no live Azure on stage.
 
 ## Re-making the recording
 
-`docs/demo-3min.mp4` (2 min 17 s, the voice is the AI voice Emma) was made from the live app on 15 October by three scripts in
+`docs/demo-story.mp4` (about 3 min 30 s, the voice is the AI voice Emma) was made from the live app on 15 October by three scripts in
 `scripts/demo-video/`, with no ffmpeg:
 
 1. `node scripts/demo-video/tts.mjs` writes each narration segment (`narration.json`) with Azure Speech, using the signed-in Azure CLI.
 2. `node scripts/demo-video/record.mjs` creates a throwaway demo person (service key from the Container App secret, never printed),
    onboards them off camera, seeds a diary history, then opens a **second clean browser at `/?demo`** and records every beat from the real app,
    cutting out the time a model spends thinking. If the dish is not counted on the first try it asks again inside a cut. The account is deleted at the end.
-3. `node scripts/demo-video/assemble.mjs` puts the kept frames and the narration on one clock and writes `/tmp/dv/demo-3min.mp4`.
+3. `node scripts/demo-video/assemble.mjs` puts the kept frames and the narration on one clock and writes `/tmp/dv/demo-3min.mp4 (copy it to docs/demo-story.mp4)`.
 
 Change the words in `narration.json`, or a beat in `record.mjs`, and run the three again (about ten minutes). The file is not in git
 (46 MB); keep it in the course folder.
