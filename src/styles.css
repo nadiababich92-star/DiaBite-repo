@@ -814,7 +814,7 @@ button.step-day:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; 
 .recipe-steps { margin: 0 0 8px; padding-left: 22px; font-size: 14px; color: var(--text-dim); display: flex; flex-direction: column; gap: 6px; }
 
 /* First-run tips: a card that points at the real screen. Tokens only, no animation. */
-.tour-tip { position: fixed; z-index: 30; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--fx-raised); padding: 16px; display: flex; flex-direction: column; gap: 10px; width: min(340px, calc(100vw - 32px)); }
+.tour-tip { position: fixed; z-index: 30; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--fx-raised); padding: 16px; display: flex; flex-direction: column; gap: 10px; width: min(300px, calc(100vw - 32px)); }
 .tour-tip h2 { margin: 0; }
 .tour-tip p { margin: 0; font-size: 14px; color: var(--text-dim); line-height: 1.5; }
 .tour-tip .row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }

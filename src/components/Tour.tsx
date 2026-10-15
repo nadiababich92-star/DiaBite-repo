@@ -7,6 +7,9 @@ interface Props {
   ctx: TourContext
 }
 
+/** The tip's width on a laptop; a phone pins it edge to edge. */
+const TIP_W = 300
+
 const anchorOf = (step: TourStep) => document.querySelector<HTMLElement>(`[data-tour="${step}"]`)
 
 /**
@@ -32,21 +35,25 @@ export default function Tour({ seen, onSeen, ctx }: Props) {
     if (!step) return
     const a = anchorOf(step)
     if (!a) return
-    // A phone: pinned above the tab bar, so it never covers the box, the answer's buttons or the keyboard.
+    const set = (next: NonNullable<typeof place>) => setPlace((prev) => (prev && JSON.stringify(prev) === JSON.stringify(next) ? prev : next))
+    // A phone: pinned above the tab bar, so it never covers the box or the keyboard.
     if (window.innerWidth <= 560) {
       const bar = document.querySelector<HTMLElement>('nav.tabs')
-      setPlace({ bottom: bar ? window.innerHeight - bar.getBoundingClientRect().top + 12 : 16 })
+      set({ bottom: bar ? Math.round(window.innerHeight - bar.getBoundingClientRect().top + 12) : 16 })
       return
     }
     const r = a.getBoundingClientRect()
-    const width = Math.min(340, window.innerWidth - 32)
-    const left = Math.max(16, Math.min(r.left, window.innerWidth - width - 16))
-    const below = r.bottom + 12
-    // No room below: above the anchor (the height is read from the tip once it has rendered).
     const tip = document.querySelector<HTMLElement>('.tour-tip')
-    const height = tip?.offsetHeight ?? 160
-    const top = below + height > window.innerHeight - 8 ? Math.max(8, r.top - height - 12) : below
-    setPlace({ top, left })
+    const height = tip?.offsetHeight ?? 170
+    // Beside the column when there is room, so it never sits on top of the answer it is explaining.
+    const colRight = document.querySelector('main')?.getBoundingClientRect().right ?? 0
+    if (window.innerWidth - colRight >= TIP_W + 32) {
+      set({ top: Math.round(Math.max(8, Math.min(r.top, window.innerHeight - height - 8))), left: Math.round(colRight + 16) })
+      return
+    }
+    const left = Math.max(16, Math.min(r.left, window.innerWidth - TIP_W - 16))
+    const below = r.bottom + 12
+    set({ top: Math.round(below + height > window.innerHeight - 8 ? Math.max(8, r.top - height - 12) : below), left: Math.round(left) })
   }, [step])
 
   // Ring on the anchor, and scroll to it when it is out of view (never for the input).
@@ -55,7 +62,7 @@ export default function Tour({ seen, onSeen, ctx }: Props) {
     const a = anchorOf(step)
     if (!a) return
     a.classList.add('tour-ring')
-    if (step !== 'input') {
+    if (step !== 'input' && window.innerWidth > 560) {
       const r = a.getBoundingClientRect()
       if (r.top < 0 || r.bottom > window.innerHeight) {
         const calm = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
@@ -75,6 +82,19 @@ export default function Tour({ seen, onSeen, ctx }: Props) {
     ro?.observe(document.body)
     return () => { window.removeEventListener('resize', again); window.removeEventListener('scroll', again, true); ro?.disconnect() }
   }, [step, present, measure])
+
+  // A phone: the tip is pinned at the bottom, so scroll until the anchor sits clear above it.
+  useLayoutEffect(() => {
+    if (!step || !present || !place || !('bottom' in place) || step === 'input') return
+    const a = anchorOf(step)
+    const tip = document.querySelector<HTMLElement>('.tour-tip')
+    if (!a || !tip) return
+    const ar = a.getBoundingClientRect()
+    const limit = tip.getBoundingClientRect().top - 12
+    const calm = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    if (ar.bottom > limit) window.scrollBy({ top: ar.bottom - limit, behavior: calm ? 'auto' : 'smooth' })
+    else if (ar.top < 8) window.scrollBy({ top: ar.top - 8, behavior: calm ? 'auto' : 'smooth' })
+  }, [step, present, place])
 
   // Escape is "Skip tips", wherever focus is.
   useEffect(() => {

@@ -152,7 +152,7 @@ During the session, only these — analysis comes later:
 |---|---|
 | **Phrases typed** | Verbatim, all of them, marked ✗ if unresolved |
 | **Stuck points** | Where they paused over five seconds, and what they were looking at |
-| **Receipt** | Opened unprompted / opened when asked / never |
+| **Receipt** | Opened after the tip / opened again on a later answer / never |
 | **Device** | Phone or laptop |
 | **Quotes** | Anything they said that made you wince. Those are the useful ones |
 
