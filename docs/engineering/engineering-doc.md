@@ -1,124 +1,112 @@
-# Engineering document — first-run tips and a "How it works" sheet
+# Engineering document — log a meal on any day, and plan the days ahead
 
-*Produced by `/engineering-planner` on 15 October 2026. The previous document (the week in the Diary) is archived as `docs/engineering/diary-week.md`. **Not yet approved.***
+*Produced by `/engineering-planner` on 15 October 2026. The previous document (first-run tips) is archived as `docs/engineering/first-run-tips.md`. **Not yet approved.***
 
 ## 1. Summary
 
-**The feature.** A short, interactive first-run guide that points at the real screen, as many apps do on first launch. Decided by the owner on 15 October:
-- **Form: a hybrid.** One tip on the empty Ask screen before the first question. Three more tips appear after the first **real** answer that carries a receipt: the verdict, "Show calculation", "Log what was counted". Menu and You are explained by a button, not by tips.
-- **Who sees it:** everyone on first launch, plus a **"How it works"** button in You.
-- **Memory:** in this browser (`localStorage`); nothing is written to the server.
-- **The five moderated sessions: the tour stays on.** Stated consequence, below.
+**The feature.** Three changes that belong together, decided by the owner on 15 October:
+1. **Log it on any day.** After an Ask answer the person can choose the day: today by default, back to **14 days ago**.
+2. **Plan ahead.** A meal can be put on any day from today to **14 days ahead**. A planned meal sits in the Diary, marked **planned**, and **does not count** (not in the day's budget, not in the "in range" days) **until the person presses "Ate it"**. The Diary can show future days.
+3. **A shopping list that follows the plan.** The list is built from the days the person has planned (today onward, not yet eaten); when nothing is planned it is built from the generated week, as today.
 
-**Why hybrid and not a tour of the empty screens.** A tour before the first question cannot point at a verdict or a receipt: there is no answer yet. Showing a sample answer would put numbers on screen that the engine did not compute, which the one promise forbids. Tips that hang on the first real answer show real numbers and cost nothing.
+**Why.** Today "Log it" and "Add to today" always mean today, the Diary cannot go forward, and the weekly menu has a shopping list but no way to put a meal on a day. A person who ate dinner yesterday cannot log it from an answer, and a menu nobody can plan from is a list of ideas. The owner wants the feature in the five sessions.
 
-**The user problem.** PRD "How will you know that the problem is solved?": time to log a meal under 20 seconds and week-4 retention of 30%. People who do not understand the receipt do not trust the verdict, and those who do not know to open it never learn why the number is what it is. The cohort leader's feedback on 15 October (`docs/FEEDBACK-demo-day.md`) also asks for an easier start.
+**The product's central metric stays honest.** `docs/PRD.md` defines an in-range day as three meal slots logged and under budget. A planned meal is a promise, not a log: counting it would let a person "plan" a perfect week. Backdating is capped for the same reason.
 
-**Success.** (1) A first-time person sees one tip before the first question and three after the first answer, never twice, and never a number the engine did not compute. (2) The tips never block typing, tapping or the tab bar. (3) "How it works" opens at any time and says what Ask, Diary, Menu and You are for.
+**Success.** (1) Logging yesterday's dinner from an answer takes two taps. (2) A meal planned for Friday shows on Friday as planned and moves nothing until "Ate it". (3) The shopping list shows what to buy for the days planned. (4) No count in the app (budget bar, Diary totals, week, four weeks) changes because of a planned meal.
 
 ## 2. Scope
 
-**In:** a pure step logic with its own tests; a tip component anchored to existing elements; a "How it works" sheet; the button in You; styles from the existing tokens; the screens and rehearsal scripts made aware of the tour; the sessions protocol reworded.
+**In:** a `planned` flag on a diary entry (one migration); a day picker for Ask and the Menu; the Diary forward to +14 and back; "Ate it" and remove on a planned entry; counts that ignore planned entries everywhere; the shopping list from planned days; the same 14-day backdating rule for manual adds; engine cases and a rehearsal check; the sessions protocol gains one task.
 
-**Out:** analytics of the tour (nothing is collected), a tour of Menu, You or the onboarding form, a sample answer with fixed numbers, any new table, endpoint or agent.
+**Out:** reminders or notifications, a calendar view, recurring meals, sharing a plan, a plan that adapts to what was eaten, the agent knowing about the plan, changes to the weekly menu generator.
 
-**Later (the owner asked for it, after the tour ships):** rebuild the demo: a new `docs/DEMO_SCRIPT.md`, a new clip (recorded in a clean profile, so the tour appears as a first-time person sees it), and a refreshed deck. That is a separate change.
+**Later:** the agent suggesting a swap for a planned meal that now exceeds the day; a "plan this week for me" button that fills the dates from the generated week in one go.
 
 ## 3. User flows
 
 ```
-First launch, signed in, onboarding done → Ask tab, empty
-   → Tour sees: nothing seen, no receipt   → tip 1 on the input ("Say what you ate")
-Types a meal, gets a costed answer (a receipt exists)
-   → Tour sees: tip 1 seen, receipt present → tip 2 on the verdict, then 3 on "Show calculation", then 4 on the log button
-Taps "Got it" / "Next"    → the next step; "Skip tips" → every step is marked seen
-You → "How it works"      → a sheet (no spotlight): one line each for Ask, Diary, Menu, You, and where the receipt is
-Returns on the same browser → nothing shown (steps are in localStorage)
-New device or cleared storage → the tips are shown again, by design (one device, one time)
+Ask answer → "Log it" with a Day chip (Today · Yesterday · pick a date, 14 days back)
+   → a diary entry on that date, eaten            → counts for that day at once
+Ask answer → pick a future date → the button reads "Plan it"
+   → a diary entry on that date with planned=true → shown dimmed with "planned", counts nowhere
+Menu card → "Plan it…" (a day, today to +14)      → planned entry; "I ate this" keeps today's quick log
+Diary, a future day → planned entries + "Ate it" / ✕
+   "Ate it" → planned=false, the entry counts from that moment on that day
+Menu → Shopping list → built from planned entries today onward; none planned → from the generated week
 ```
-
-An advice answer, a clarifying question or a refusal has no receipt, so **no tip hangs on it**. A dish counted from an assumed recipe has a receipt and tone "Estimate": tip 2 then says so (copy in section 5).
 
 ## 4. The promise check
 
-The tour shows **no number computed by anything**. Its copy contains no figure: the example phrase is words ("two eggs and a slice of rye toast"). The tips explain where numbers come from and point at numbers the engine returned for this person's own question; they do not display one. Nothing here passes through the model or the verifier. If a later step ever needed a figure, it would have to read it from the answer on screen, never from a constant in the tour.
+No new number is produced. The nutrition numbers on a planned entry are the ones already stored with it (the engine's snapshot for an answer or a recipe, the local table for a plain food). The new sums the screen shows ("planned: GL x" under a day) add those stored numbers in the browser, as the Diary already does for the day. The shopping quantities are sums of grams of computed items, the same arithmetic as the current list. Nothing passes through a model and no verifier is involved.
 
 ## 5. Frontend
 
-**New files:** `src/lib/tour.ts` (pure logic), `src/components/Tour.tsx` (the tip), `src/components/HowItWorks.tsx` (the sheet).
-**Changed files:** `src/components/AskPage.tsx` (anchors and mount), `src/components/ProfilePage.tsx` (the button), `src/styles.css`, `docs/design.md`.
+**New:** `src/components/DayPicker.tsx` (chips Today / Yesterday / Tomorrow and a native date input with `min` and `max`). **Changed:** `src/components/AskPage.tsx` (the Day chip, "Plan it"), `src/components/MenuPage.tsx` ("Plan it…", "I ate this", the list source), `src/components/DiaryPage.tsx` (forward navigation, planned rows, "Ate it", planned total, the 14-day rule on manual adds), `src/lib/diary.ts`, `src/lib/history.ts`, `src/lib/menu.ts`, `src/lib/storage.ts`, `src/lib/syncCore.ts`, `src/types.ts`, `src/styles.css`, `docs/design.md`.
 
-**Anchors.** Four existing elements get a `data-tour` attribute: `input` (the ask box), `verdict` (the answer's badge and headline block), `calc` (the "Show calculation" button), `log` (the log button). The tip finds its anchor with `querySelector`; if the anchor is not on screen, the step waits and is not marked seen.
+**One rule in one place** (`src/lib/diary.ts`): `MAX_BACKDATE_DAYS = 14`, `MAX_AHEAD_DAYS = 14`, `dateAllowed(date, today)`, `isPlanned(e)`, `eaten(entries)` (the entries that count). Every sum in the app reads `eaten(diary)`, never `diary`: the budget bar and "left today" on Ask, the Diary day totals, `weekSummary`, `weeksSummary`, and the `entries` sent to the agent as the day so far.
 
-**The tips (exact copy, for the owner's approval).**
+**Planned in the Diary:** a row is dimmed and carries the pill **planned**; its buttons are "Ate it" and ✕. A planned entry on a past day is a plan that did not happen: the row says "planned, not eaten" and keeps both buttons. A day with planned entries shows one quiet line under the totals: "Planned: GL 14, not counted yet." (stored numbers added up in the browser).
 
-| # | Anchor | Title | Body |
-|---|---|---|---|
-| 1 | `input` | Say what you ate | Type a meal the way you would say it, for example “two eggs and a slice of rye toast”. Give a portion if you know it; if you do not, DiaBite tells you which one it used. |
-| 2 | `verdict` | Here is the verdict | It compares this meal with what is left of your day. The engine makes that comparison, not the AI's opinion. |
-| 2 (estimate) | `verdict` | This one is an estimate | The dish is not in our database, so it was counted from typical ingredients. Change anything that is not yours. |
-| 3 | `calc` | Check the arithmetic | Tap Show calculation to see every food, its weight and its load. Each number comes from the database. |
-| 4 | `log` | Keep it in your Diary | Log what was counted adds this meal to today, and your week builds up in the Diary. |
+**States:** empty plan, partial plan, future day with nothing, a day that is both eaten and planned, a date outside the range (the picker will not offer it; a typed date out of range snaps to the nearest allowed one and says so). **Phone:** the chips wrap, targets 44 px, the date input is native. **Accessibility:** the planned state is a word, not a colour; the date input has a visible label; focus returns to the button that opened the picker.
 
-Buttons: "Next" on 2 and 3, "Got it" on 1 and 4, "Skip tips" always. Sentence-case, no exclamation marks, no emoji (design file).
-
-**The sheet "How it works"** (a plain card opened from a button in You, closable, no spotlight): four lines: *Ask* (describe a meal, get a verdict and the receipt), *Diary* (what you logged, and your week), *Menu* (a week of meals and a shopping list, not yet reviewed by a clinician), *You* (your profile, your data, delete your account); then "Every number is computed by the engine from a food database, never written by the AI. Open Show calculation on any answer to see it." No figures.
-
-**Behaviour and accessibility.**
-- A tip is a small card with a ring on its anchor (the accent token), placed below the anchor on a laptop and, on a phone, as a card pinned above the tab bar so it never covers the input or the keyboard. It is **non-modal**: the page behind stays usable; typing, tapping and the tab bar all work.
-- `role="dialog"`, `aria-labelledby`, focus moves to its primary button on show and returns to the anchor on close; Escape means "Skip tips"; targets are at least 44 px; text at least 13 px; it respects `prefers-reduced-motion` (no animation at all is needed).
-- It never appears while onboarding, the feedback form or the import prompt is open.
-- Phone at 375 px: one column, the card never wider than the screen minus the 16 px gutter. Light and dark use existing tokens only; **no new colour, no new size**.
-
-**States:** empty (tip 1), answered (tips 2 to 4), skipped (nothing), storage unavailable (the tips show once per visit, and nothing breaks), anchor missing (the step waits).
+**Copy (for the owner):** "Day" (label), "Today", "Yesterday", "Tomorrow", "Pick a date", "Log it" (a day up to today), "Plan it" (a future day), "Ate it", "planned", "planned, not eaten", "Planned: GL 14, not counted yet.", "I ate this" (Menu, today). The limits are said when reached: "You can go back 14 days." and "You can plan 14 days ahead."
 
 ## 6. Engine and API
 
-None. No endpoint, no tool, no environment variable.
+None. The agent route receives the same `entries`, now without planned ones. No new endpoint, tool or environment variable.
 
 ## 7. Agents
 
-None. Prompts, the router and the tool spec are unchanged, so `npm run eval:agent` is not required.
+None. Prompts, router and tool spec are unchanged, so `npm run eval:agent` is not part of this change. (The agent does not know about the plan: out of scope.)
 
 ## 8. Data
 
-No table, no migration. **Nothing is stored about a person on a server.** One `localStorage` key, `diabite.tour.v1`, holds a list of step ids already shown (for example `["input","verdict"]`), read through the same guarded reader as the profile (storage unavailable or malformed means "nothing seen this visit"). It is not part of the account export and is removed with the browser's data, not by "Delete account" (it holds no personal data).
+**One column**, one migration `supabase/migrations/<timestamp>_diary_planned.sql`:
+`alter table public.diary_entries add column if not exists planned boolean not null default false;`
+Existing rows become `false` (eaten). Row-level security is unchanged: the policies are on rows, not columns, so the proof in `docs/security/security-plan.md` still holds, and the migration is safe to apply twice. The Supabase Data API change of 30 October 2026 applies to new tables only.
 
-**Returning people.** A person who used the app before this release has no key. To avoid showing a first-run guide to someone who has used it for days, steps 1 to 4 are marked seen silently when the browser already holds an onboarded profile or any diary entry at the moment the key is first looked for. They still have the button.
+**What is stored about a person that is new:** whether a meal is planned, and meals dated up to 14 days ahead: what someone *intends* to eat. It lives in their diary, goes in their export and is deleted with their account (the same foreign key). The consent card ("What you log in your diary") is extended with "and meals you plan".
+
+**No database rule on the date.** A check on `day` would break a diary imported from an older device (rows from before the 14-day rule are legitimate). The 14-day limits are client rules; a person writing their own rows by hand can only change their own diary.
+
+`syncCore.ts` `toRow`/`fromRow` and `DiaryRow` gain `planned`; `storage.ts` `usableEntry` keeps it (a non-boolean is read as false); `exportShape` keys are unchanged (it lists the top-level keys of the export, not the entries').
+
+**The shopping list** gets a second source: `shoppingFromEntries(entries, today, recipes)` in `src/lib/menu.ts` takes the planned entries from today to +14, expands a recipe entry (`rec:`) into its ingredients at its serving scale, keeps a plain food at its grams and an answer-logged food at its name and grams, and aggregates by food with the same rule as the current list (nothing under 5 g across the whole span is shopping). "Ticked" lines are remembered per list as today, keyed by the sorted ids of the planned entries, so a changed plan starts a fresh list.
 
 ## 9. Safety and responsible AI
 
-- The copy makes no claim about health. The sentence that the engine, not the AI's opinion, makes the comparison is true (`afterMeal.fits`) and does not call the verdict advice.
-- The estimate variant (tip 2) says plainly that the answer is counted from typical ingredients.
-- The sheet repeats that Menu is not yet reviewed by a clinician.
-- No clinician review is needed: no number, threshold or advice changes.
+- The weekly menu has not been reviewed by a clinician. Planning from it makes that more visible, so the Menu keeps its existing "not reviewed" line and the planning button does not hide it.
+- A plan never produces a verdict. "Planned" shows numbers and nothing about whether the day will fit; the verdict is given when the person asks about a meal or marks it eaten.
+- The cap on backdating and the exclusion of planned meals keep the north-star metric about what people ate.
+- No dosing, red flag or refusal path is touched.
 
 ## 10. Evaluation plan — in the same change
 
-**Engine cases** (`eval/run-engine.ts`, a `tour` block; prints `tour ok` or `WRONG` and exits non-zero on a miss). They read the pure logic in `src/lib/tour.ts`, never rendered text:
-1. Nothing seen, no receipt, Ask tab empty: next step is `input`.
-2. `input` seen, no receipt: no step (nothing hangs on an advice answer or a question).
-3. `input` seen, receipt present: `verdict`, then `calc`, then `log` in that order, one at a time as each is marked seen.
-4. A receipt with `assumed`: the verdict step uses the estimate copy id.
-5. All seen: no step. "Skip tips" marks all four seen.
-6. Malformed or missing storage: treated as nothing seen; no exception.
-7. A returning person (onboarded profile or any diary entry when the key is first absent) has all four marked seen.
-8. No step text contains a digit (the copy table is checked: the tour never carries a figure).
-9. No step is offered while onboarding, the feedback form or the import prompt is open.
+**Engine cases** (`eval/run-engine.ts`, a `plan` block; prints `plan ok` or `WRONG`, exits non-zero on a miss):
+1. `eaten([...])` drops planned entries and keeps the rest; an entry with no flag counts.
+2. A planned entry changes nothing in `weekSummary`, `weeksSummary`, the day's GL total or the entries sent to the agent; marking it eaten (the flag off) makes it count exactly once.
+3. `dateAllowed`: today, 14 days back and 14 ahead are allowed; 15 back and 15 ahead are not; across a month boundary and the clock change in three time zones.
+4. `toRow`/`fromRow` round-trip `planned` true and false; a row with `planned` missing reads as eaten; `usableEntry` treats a non-boolean as false.
+5. `shoppingFromEntries`: planned entries only, from today forward; an eaten entry and a planned entry on a past day are not in the list; a recipe expands to its ingredients scaled by servings; a food under 5 g in total is dropped; the same food on two days is summed.
+6. With no planned entries the list is the generated week's (the old behaviour, unchanged).
 
-**Agent cases:** none. **Screens:** `npm run screens` and `npm run rehearsal` set the tour as seen by default (otherwise the tip overlaps what they click); `TOUR=1 npm run screens` shows it. Look at the tips at 390 and 1366 px, light and dark: tip 1 on the empty Ask screen, tips 2 to 4 after an answer, and the sheet in You.
+**Rehearsal** (`eval/rehearsal.mjs`): `W17` plan a meal on a future day on device A, see it as planned on device B, mark it eaten on B, see it eaten on A.
+
+**Screens:** `npm run screens` with the Day chip open, a planned row, a future day, and the shopping list from planned days, at 390 and 1366 px.
 
 ## 11. Rollout
 
-1. Implement on `main`: `tour.ts`, `Tour.tsx`, `HowItWorks.tsx`, `AskPage.tsx`, `ProfilePage.tsx`, `styles.css`, `docs/design.md`, `eval/run-engine.ts`, `eval/screens.mjs`, `eval/rehearsal.mjs`, `docs/USER_SESSIONS.md`.
-2. `tsc`, `npm run build`, `npm run eval`, `npm run rehearsal`.
-3. `npm run deploy`; **ask the running service**: the served bundle contains the tip copy; open the app in a clean browser profile and walk the four tips.
-4. **Rollback:** revert the commit and redeploy, or reactivate the previous revision. No data to undo.
+1. Implement on `main` as one change: migration, `diary.ts` rule and `eaten`, `syncCore`/`storage`, the screens, `shoppingFromEntries`, cases, rehearsal, docs.
+2. Apply the migration to the live project before the build that reads the column (the old build ignores an extra column, so the order is safe).
+3. `tsc`, `npm run build`, `npm run eval`, `npm run rehearsal`; `npm run deploy`; **ask the running service**: log an entry for yesterday, plan one for tomorrow and see it dimmed, mark it eaten, check the budget bar moved only then.
+4. **Rollback:** revert the commit and redeploy; the column stays and does no harm.
 
 ## 12. Open questions — the owner's
 
-Decided on 15 October: hybrid form; everyone at first launch plus a button in You; the tour is **not** turned off for the sessions; the memory lives in the browser.
+Decided on 15 October: planned entries live in the Diary and count only after "Ate it"; 14 days ahead; the shopping list follows planned days and falls back to the week; 14 days of backdating.
 
-1. **The copy of the four tips and the sheet** (section 5). The words are the owner's.
-2. **What the sessions now measure.** With the tour on, "do they find the receipt unprompted?" (`docs/USER_SESSIONS.md`, goal 1 and step 4) can no longer be answered: tip 3 tells them. The protocol is reworded instead: goal 1 becomes *"Do they open the receipt again, on a later meal, without the tip, and what do they make of it?"*; step 4 asks what the tip told them and whether they believe the number, and watches whether they return to "Show calculation" on a second answer. Confirm, or turn the tour off for sessions after all (a `?tour=off` link would do it with no stored data).
-3. **A returning person sees no tour** (section 8). Confirm, or show it to them once.
+1. **The words** in section 5: the owner's to approve or change.
+2. **Menu button:** "Plan it…" and "I ate this" instead of the single "Add to today". The proposal keeps today's quick log. Confirm.
+3. **The sessions:** this feature is on for the five sessions. The protocol gets one task, *"Log what you ate yesterday"*, after step 2, and the consent card says "and meals you plan". Confirm.
+4. **Manual adds in the Diary** also follow the 14-day rule (today they can go back without limit). Older entries stay. Confirm.
