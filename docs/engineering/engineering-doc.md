@@ -1,114 +1,124 @@
-# Engineering document — the week in the Diary: in-range days and four weeks of trend
+# Engineering document — first-run tips and a "How it works" sheet
 
-*Produced by `/engineering-planner` on 12 October 2026 for roadmap item 1.6. The previous document (`cost_dish`) is archived as `docs/engineering/cost-dish.md`. **Not yet approved.***
+*Produced by `/engineering-planner` on 15 October 2026. The previous document (the week in the Diary) is archived as `docs/engineering/diary-week.md`. **Not yet approved.***
 
 ## 1. Summary
 
-**The feature.** Make the Diary's week the home of the product's north-star metric. Three changes to what already exists:
-1. **"N of 7 days in range"**, counted by the PRD's definition (below), as the first line of the week card.
-2. **Four weeks as a thin strip**: for each of the last four seven-day blocks, how many days were in range.
-3. A day that was logged too little, or whose load is not fully known, is **named for what it is**, not scored.
+**The feature.** A short, interactive first-run guide that points at the real screen, as many apps do on first launch. Decided by the owner on 15 October:
+- **Form: a hybrid.** One tip on the empty Ask screen before the first question. Three more tips appear after the first **real** answer that carries a receipt: the verdict, "Show calculation", "Log what was counted". Menu and You are explained by a button, not by tips.
+- **Who sees it:** everyone on first launch, plus a **"How it works"** button in You.
+- **Memory:** in this browser (`localStorage`); nothing is written to the server.
+- **The five moderated sessions: the tour stays on.** Stated consequence, below.
 
-**What already exists, and why this is smaller than the roadmap says.** Roadmap 1.6 asked for "a 7-day view of glycemic load against the budget and the count of in-range days". The 7-day view is **built and tested**: `src/lib/history.ts` (`weekSummary`), the card "The last seven days" in `src/components/DiaryPage.tsx`, `.week` styles, and engine checks in `eval/run-engine.ts` (seven consecutive dates in three time zones, month boundary, carbs-only days, over and within). What it does **not** do is count in-range days the way the PRD defines them. Today a day is "within" when *anything* is logged and the load is at or under budget: one apple makes a "within" day.
+**Why hybrid and not a tour of the empty screens.** A tour before the first question cannot point at a verdict or a receipt: there is no answer yet. Showing a sample answer would put numbers on screen that the engine did not compute, which the one promise forbids. Tips that hang on the first real answer show real numbers and cost nothing.
 
-**The user problem.** PRD "How will you know that the problem is solved?": the North Star is **in-range days per active user per week**; a day is in range when (1) the person recorded **at least 3 eating occasions** and (2) the day's computed glycemic load is **at or below the personalised budget**. Target: median 4.5 of 7 by the eighth week. The product cannot show an investor the metric the PRD names until the Diary counts it the same way.
+**The user problem.** PRD "How will you know that the problem is solved?": time to log a meal under 20 seconds and week-4 retention of 30%. People who do not understand the receipt do not trust the verdict, and those who do not know to open it never learn why the number is what it is. The cohort leader's feedback on 15 October (`docs/FEEDBACK-demo-day.md`) also asks for an easier start.
 
-**Success.** (1) A person who logged for a week sees "N of 7 days in range" and the same N that a one-page weekly report (roadmap 2.5) will compute from the same rows. (2) A day with one logged apple is **not** counted. (3) Nothing on the screen scores, praises or builds a streak (`docs/design.md`, rule 6).
+**Success.** (1) A first-time person sees one tip before the first question and three after the first answer, never twice, and never a number the engine did not compute. (2) The tips never block typing, tapping or the tab bar. (3) "How it works" opens at any time and says what Ask, Diary, Menu and You are for.
 
 ## 2. Scope
 
-**In:** the in-range definition in one pure function; the summary line; the four-week strip; partial and thin days named; the eval cases; the PRD sentence that points to the one definition.
+**In:** a pure step logic with its own tests; a tip component anchored to existing elements; a "How it works" sheet; the button in You; styles from the existing tokens; the screens and rehearsal scripts made aware of the tour; the sessions protocol reworded.
 
-**Out:** the weekly report from Supabase (2.5, a separate script); logging completeness shown to the person (owner decided: **no**, team-side only, in 2.5); week navigation by arrows (owner chose the strip); any new table, endpoint, agent or prompt; charts with axes, rings, streaks, scores (design rule 6).
+**Out:** analytics of the tour (nothing is collected), a tour of Menu, You or the onboarding form, a sample answer with fixed numbers, any new table, endpoint or agent.
 
-**Later:** calories logged against the requirement, shown to the team in 2.5, not here; a longer history if the sessions ask for it; "my usual" foods from history (`docs/PLAN.md`).
+**Later (the owner asked for it, after the tour ships):** rebuild the demo: a new `docs/DEMO_SCRIPT.md`, a new clip (recorded in a clean profile, so the tour appears as a first-time person sees it), and a refreshed deck. That is a separate change.
 
 ## 3. User flows
 
 ```
-Opens Diary → DiaryPage reads `diary` (already in state, from localStorage or Supabase) → weekSummary(diary, glBudget, today)
-            → week card: line "N of 7 days in range", seven day bars, four-week strip
-Logs or deletes an entry → `diary` changes → the card recomputes in the same render (no request)
-Signed out / offline → same: the diary is local first; the summary is computed in the browser
+First launch, signed in, onboarding done → Ask tab, empty
+   → Tour sees: nothing seen, no receipt   → tip 1 on the input ("Say what you ate")
+Types a meal, gets a costed answer (a receipt exists)
+   → Tour sees: tip 1 seen, receipt present → tip 2 on the verdict, then 3 on "Show calculation", then 4 on the log button
+Taps "Got it" / "Next"    → the next step; "Skip tips" → every step is marked seen
+You → "How it works"      → a sheet (no spotlight): one line each for Ask, Diary, Menu, You, and where the receipt is
+Returns on the same browser → nothing shown (steps are in localStorage)
+New device or cleared storage → the tips are shown again, by design (one device, one time)
 ```
 
-No engine, agent or network call is involved.
+An advice answer, a clarifying question or a refusal has no receipt, so **no tip hangs on it**. A dish counted from an assumed recipe has a receipt and tone "Estimate": tip 2 then says so (copy in section 5).
 
 ## 4. The promise check
 
-Every number on the card is **computed from the diary's own entries by `viewEntry`**, which reads each entry's stored snapshot (what the engine returned when it was logged) or the food table. Nothing here comes from a model, and there is nothing for the verifier to check: no answer text carries these numbers. The count of days is arithmetic over those entries. **If a day contains a food with no glycemic load** (packaged, or `unrated`: rule 4), its load is *understated*, so the day is **not counted as in range** and is labelled "carbs only", exactly as a meal containing one is never "fits". That keeps the one promise at the level of the week.
+The tour shows **no number computed by anything**. Its copy contains no figure: the example phrase is words ("two eggs and a slice of rye toast"). The tips explain where numbers come from and point at numbers the engine returned for this person's own question; they do not display one. Nothing here passes through the model or the verifier. If a later step ever needed a figure, it would have to read it from the answer on screen, never from a constant in the tour.
 
 ## 5. Frontend
 
-**Files:** `src/lib/history.ts`, `src/components/DiaryPage.tsx`, `src/styles.css`.
+**New files:** `src/lib/tour.ts` (pure logic), `src/components/Tour.tsx` (the tip), `src/components/HowItWorks.tsx` (the sheet).
+**Changed files:** `src/components/AskPage.tsx` (anchors and mount), `src/components/ProfilePage.tsx` (the button), `src/styles.css`, `docs/design.md`.
 
-**A day's states** (new `status` on `DayPoint`; today it has `logged`, `partial`, `within`):
+**Anchors.** Four existing elements get a `data-tour` attribute: `input` (the ask box), `verdict` (the answer's badge and headline block), `calc` (the "Show calculation" button), `log` (the log button). The tip finds its anchor with `querySelector`; if the anchor is not on screen, the step waits and is not marked seen.
 
-| status | When | Shown as |
-|---|---|---|
-| `in_range` | ≥ 3 distinct meal slots logged, no entry without a load, load ≤ budget | green bar, "26 of 45" |
-| `over` | load > budget (logged any amount) | red bar, "52 of 45" |
-| `thin` | 1–2 distinct meal slots, load ≤ budget | neutral bar, number, and the words "2 of 4 meals" |
-| `carbs_only` | any entry has `loadAvailable: false`, and the load counted is ≤ budget | neutral bar, number, "+ carbs only" (exists today) |
-| `none` | nothing logged | "not logged" |
+**The tips (exact copy, for the owner's approval).**
 
-A day that is `over` is over whatever else is true: a load already above budget cannot be rescued by an unknown. Colour keeps its meaning (green fits, red is over); `thin` and `carbs_only` are neutral, with words, never colour alone (design rule 3).
+| # | Anchor | Title | Body |
+|---|---|---|---|
+| 1 | `input` | Say what you ate | Type a meal the way you would say it, for example “two eggs and a slice of rye toast”. Give a portion if you know it; if you do not, DiaBite tells you which one it used. |
+| 2 | `verdict` | Here is the verdict | It compares this meal with what is left of your day. The engine makes that comparison, not the AI's opinion. |
+| 2 (estimate) | `verdict` | This one is an estimate | The dish is not in our database, so it was counted from typical ingredients. Change anything that is not yours. |
+| 3 | `calc` | Check the arithmetic | Tap Show calculation to see every food, its weight and its load. Each number comes from the database. |
+| 4 | `log` | Keep it in your Diary | Log what was counted adds this meal to today, and your week builds up in the Diary. |
 
-**The summary line**, above the bars, plain: "**4 of 7 days in range** this week. 2 days were logged with fewer than 3 meals, 1 has carbs only." Where nothing is logged: the existing "Log what you eat and the week fills in here." No praise, no streak, no percentage.
+Buttons: "Next" on 2 and 3, "Got it" on 1 and 4, "Skip tips" always. Sentence-case, no exclamation marks, no emoji (design file).
 
-**The four-week strip:** four small rows, "This week · 4 of 7", "Last week · 3 of 7", "2 weeks ago · 5 of 7", "3 weeks ago · not logged", each a row of seven small marks (filled = in range, outlined = logged not in range, empty = not logged), with the words beside them. Marks are 12 px dots within the existing spacing scale; **no new colour, no new size** outside `docs/design.md`; if one is needed it is added there first, with its dark counterpart (design skill rule 2).
+**The sheet "How it works"** (a plain card opened from a button in You, closable, no spotlight): four lines: *Ask* (describe a meal, get a verdict and the receipt), *Diary* (what you logged, and your week), *Menu* (a week of meals and a shopping list, not yet reviewed by a clinician), *You* (your profile, your data, delete your account); then "Every number is computed by the engine from a food database, never written by the AI. Open Show calculation on any answer to see it." No figures.
 
-**States:** empty (no history), loading (diary is synchronous: none), partial, error (none possible). **Phone:** one column at 375 px, targets unchanged (the strip is not interactive), text at least 13 px. **Accessibility:** the existing `aria-label` on the list is kept and extended; the strip is a list whose items read "Last week, 3 of 7 days in range".
+**Behaviour and accessibility.**
+- A tip is a small card with a ring on its anchor (the accent token), placed below the anchor on a laptop and, on a phone, as a card pinned above the tab bar so it never covers the input or the keyboard. It is **non-modal**: the page behind stays usable; typing, tapping and the tab bar all work.
+- `role="dialog"`, `aria-labelledby`, focus moves to its primary button on show and returns to the anchor on close; Escape means "Skip tips"; targets are at least 44 px; text at least 13 px; it respects `prefers-reduced-motion` (no animation at all is needed).
+- It never appears while onboarding, the feedback form or the import prompt is open.
+- Phone at 375 px: one column, the card never wider than the screen minus the 16 px gutter. Light and dark use existing tokens only; **no new colour, no new size**.
+
+**States:** empty (tip 1), answered (tips 2 to 4), skipped (nothing), storage unavailable (the tips show once per visit, and nothing breaks), anchor missing (the step waits).
 
 ## 6. Engine and API
 
-None. No endpoint, no tool, no environment variable. The week is computed in the browser by a pure function, as it is today.
+None. No endpoint, no tool, no environment variable.
 
 ## 7. Agents
 
-None. The agents do not read the Diary's week and are not changed. (The advisor's memory is separate.)
+None. Prompts, the router and the tool spec are unchanged, so `npm run eval:agent` is not required.
 
 ## 8. Data
 
-No table, column, index or migration. **Nothing new is stored about a person**: the summary is derived from `diary_entries` rows that already exist. The four weeks reach back 28 days; entries older than that still exist and are simply not shown here.
+No table, no migration. **Nothing is stored about a person on a server.** One `localStorage` key, `diabite.tour.v1`, holds a list of step ids already shown (for example `["input","verdict"]`), read through the same guarded reader as the profile (storage unavailable or malformed means "nothing seen this visit"). It is not part of the account export and is removed with the browser's data, not by "Delete account" (it holds no personal data).
+
+**Returning people.** A person who used the app before this release has no key. To avoid showing a first-run guide to someone who has used it for days, steps 1 to 4 are marked seen silently when the browser already holds an onboarded profile or any diary entry at the moment the key is first looked for. They still have the button.
 
 ## 9. Safety and responsible AI
 
-- A count of days "in range" is a **self-reported, gameable** figure (the PRD says so). On screen it is a description of what was logged, never an assessment of health: the card never says "well done", "on track" or "improving".
-- `thin` days are named, not hidden: one apple does not become a good day.
-- A glycemic load is shown only where it exists; a day holding a no-GI food is never "in range" (rule 4).
-- **No clinician review** is needed: no threshold, advice or number from a model changes. The budget the load is compared with is the person's existing target. The "3 meals" threshold is the PRD's, not a medical one.
+- The copy makes no claim about health. The sentence that the engine, not the AI's opinion, makes the comparison is true (`afterMeal.fits`) and does not call the verdict advice.
+- The estimate variant (tip 2) says plainly that the answer is counted from typical ingredients.
+- The sheet repeats that Menu is not yet reviewed by a clinician.
+- No clinician review is needed: no number, threshold or advice changes.
 
 ## 10. Evaluation plan — in the same change
 
-**Engine cases** (`eval/run-engine.ts`, beside the existing week block; they print `week ok` or `WRONG` and exit non-zero on a miss). They read `weekSummary`'s fields, never text:
-1. One logged apple under budget: `status: 'thin'`, **not** counted in `inRange`.
-2. Three distinct meal slots (breakfast, lunch, dinner) under budget: `in_range`.
-3. Three entries all at lunch: `thin` (distinct slots, not entries).
-4. Over budget with four slots: `over`, not counted.
-5. Three slots under budget but one packaged food (`loadAvailable: false`): `carbs_only`, not counted.
-6. Three slots, over budget **and** a packaged food: `over` (a load already above budget is not rescued).
-7. `inRange` for a mixed week equals the count of `in_range` days, and equals the figure the 2.5 report will use (the function is exported for it).
-8. The four weekly blocks: block 0 ends today, block 1 ends 7 days earlier, no day belongs to two blocks, across a month boundary and across a clock change in the three zones the existing test uses.
-9. The old checks (seven consecutive dates in three zones, month boundary) still pass.
+**Engine cases** (`eval/run-engine.ts`, a `tour` block; prints `tour ok` or `WRONG` and exits non-zero on a miss). They read the pure logic in `src/lib/tour.ts`, never rendered text:
+1. Nothing seen, no receipt, Ask tab empty: next step is `input`.
+2. `input` seen, no receipt: no step (nothing hangs on an advice answer or a question).
+3. `input` seen, receipt present: `verdict`, then `calc`, then `log` in that order, one at a time as each is marked seen.
+4. A receipt with `assumed`: the verdict step uses the estimate copy id.
+5. All seen: no step. "Skip tips" marks all four seen.
+6. Malformed or missing storage: treated as nothing seen; no exception.
+7. A returning person (onboarded profile or any diary entry when the key is first absent) has all four marked seen.
+8. No step text contains a digit (the copy table is checked: the tour never carries a figure).
+9. No step is offered while onboarding, the feedback form or the import prompt is open.
 
-**Agent cases:** none; no agent behaviour changes. `npm run eval:agent` is **not** required for this change, and `npm run eval` is.
-
-**Screen:** `npm run screens` and look at the Diary at 390 and 1366 px with a seeded week: a full week, a thin week, an empty one. The rehearsal account has no history, so the screens script gets a flag to seed seven days of entries into the throwaway account before the shot.
+**Agent cases:** none. **Screens:** `npm run screens` and `npm run rehearsal` set the tour as seen by default (otherwise the tip overlaps what they click); `TOUR=1 npm run screens` shows it. Look at the tips at 390 and 1366 px, light and dark: tip 1 on the empty Ask screen, tips 2 to 4 after an answer, and the sheet in You.
 
 ## 11. Rollout
 
-1. Implement on `main`: `history.ts`, `DiaryPage.tsx`, `styles.css`, `eval/run-engine.ts`, `eval/screens.mjs` (seed flag).
-2. `tsc`, `npm run build`, `npm run eval`.
-3. `npm run deploy`; **ask the running service**: open the app, log three meals in one day under budget, and check the card says 1 of 7; log one apple on another day and check it does not count.
+1. Implement on `main`: `tour.ts`, `Tour.tsx`, `HowItWorks.tsx`, `AskPage.tsx`, `ProfilePage.tsx`, `styles.css`, `docs/design.md`, `eval/run-engine.ts`, `eval/screens.mjs`, `eval/rehearsal.mjs`, `docs/USER_SESSIONS.md`.
+2. `tsc`, `npm run build`, `npm run eval`, `npm run rehearsal`.
+3. `npm run deploy`; **ask the running service**: the served bundle contains the tip copy; open the app in a clean browser profile and walk the four tips.
 4. **Rollback:** revert the commit and redeploy, or reactivate the previous revision. No data to undo.
 
 ## 12. Open questions — the owner's
 
-Decided by the owner on 12 October: the PRD definition (3 distinct meal slots and within budget); the line plus a four-week strip; completeness shown to the team only.
+Decided on 15 October: hybrid form; everyone at first launch plus a button in You; the tour is **not** turned off for the sessions; the memory lives in the browser.
 
-1. **A day that contains an estimate** (a dish counted from an assumed recipe through `cost_dish`; its entries carry `assumed: true`). Proposal: it **counts** as a day in range if the rest holds, and the day shows "includes an estimate". The alternative is to treat it like `carbs_only` and never count it. The estimate is computed from real ingredients, so I recommend counting it, but whether a guess may move the north-star number is the owner's call.
-2. **A day of carbohydrate only is never in range** (the proposal in section 4, which follows rule 4). Confirm.
-3. **"Thin" means fewer than 3 distinct meal slots** (breakfast, lunch, dinner, snack), the PRD's "eating occasions". A person who eats two meals a day can then never have an in-range day. That is the PRD's rule and the owner's choice; it is worth watching in the sessions, and it is the first thing to relax (2 slots) if people say it feels punishing.
-
-*Files that change:* `src/lib/history.ts`, `src/components/DiaryPage.tsx`, `src/styles.css`, `eval/run-engine.ts`, `eval/screens.mjs`, `docs/PRD.md` (one sentence pointing to the single definition), `docs/ROADMAP-to-investors.md` (1.6 restated).
+1. **The copy of the four tips and the sheet** (section 5). The words are the owner's.
+2. **What the sessions now measure.** With the tour on, "do they find the receipt unprompted?" (`docs/USER_SESSIONS.md`, goal 1 and step 4) can no longer be answered: tip 3 tells them. The protocol is reworded instead: goal 1 becomes *"Do they open the receipt again, on a later meal, without the tip, and what do they make of it?"*; step 4 asks what the tip told them and whether they believe the number, and watches whether they return to "Show calculation" on a second answer. Confirm, or turn the tour off for sessions after all (a `?tour=off` link would do it with no stored data).
+3. **A returning person sees no tour** (section 8). Confirm, or show it to them once.
