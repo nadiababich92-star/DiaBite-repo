@@ -1,0 +1,57 @@
+/**
+ * Turn the recording into the finished video: drop the frames inside the cuts, put the rest on a 30 fps clock, mix the
+ * narration segments onto that same clock, and mux both with scripts/demo-video/mux.swift.
+ *
+ *   node scripts/demo-video/assemble.mjs [outDir=/tmp/dv]      →  /tmp/dv/demo-3min.mp4
+ */
+import { readFileSync, writeFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
+
+const here = dirname(fileURLToPath(import.meta.url))
+const OUT = process.argv[2] ?? '/tmp/dv'
+const REC = join(OUT, 'rec')
+const m = JSON.parse(readFileSync(join(REC, 'manifest.json'), 'utf8'))
+const FPS = 30, W = 1920, H = 1080, RATE = 24000
+
+// 1. Frames on the video's clock; anything inside a cut, or before the start, is dropped.
+const cutBefore = (t) => m.cuts.reduce((s, c) => s + Math.max(0, Math.min(c.to, t) - c.from), 0)
+const inCut = (t) => m.cuts.some((c) => t >= c.from && t < c.to)
+const kept = m.frames.filter((f) => f.t >= m.t0 && !inCut(f.t)).map((f) => ({ name: f.name, v: f.t - m.t0 - cutBefore(f.t) })).sort((a, b) => a.v - b.v)
+const total = m.total + 0.2
+const n = Math.ceil(total * FPS)
+const segments = []
+let j = 0
+for (let k = 0; k < n; k++) {
+  const time = k / FPS
+  while (j + 1 < kept.length && kept[j + 1].v <= time) j++
+  const name = kept[j].name
+  const last = segments[segments.length - 1]
+  if (last && last.file === name) last.count++
+  else segments.push({ file: name, start: k, count: 1 })
+}
+writeFileSync(join(OUT, 'plan.json'), JSON.stringify({ width: W, height: H, fps: FPS, dir: REC, segments }))
+
+// 2. One WAV with every narration segment placed where its words belong.
+const wavData = (buf) => { let p = 12; while (p < buf.length) { const id = buf.toString('ascii', p, p + 4), size = buf.readUInt32LE(p + 4); if (id === 'data') return buf.subarray(p + 8, p + 8 + size); p += 8 + size } throw new Error('no data chunk') }
+const samples = Math.ceil((total + 0.5) * RATE)
+const mix = new Int16Array(samples)
+for (const a of m.audio) {
+  const pcm = wavData(readFileSync(join(OUT, `${a.id}.wav`)))
+  const off = Math.round(a.start * RATE)
+  for (let i = 0; i < pcm.length / 2 && off + i < samples; i++) mix[off + i] = Math.max(-32768, Math.min(32767, mix[off + i] + pcm.readInt16LE(i * 2)))
+}
+const header = Buffer.alloc(44)
+header.write('RIFF', 0); header.writeUInt32LE(36 + samples * 2, 4); header.write('WAVEfmt ', 8); header.writeUInt32LE(16, 16)
+header.writeUInt16LE(1, 20); header.writeUInt16LE(1, 22); header.writeUInt32LE(RATE, 24); header.writeUInt32LE(RATE * 2, 28); header.writeUInt16LE(2, 32); header.writeUInt16LE(16, 34)
+header.write('data', 36); header.writeUInt32LE(samples * 2, 40)
+writeFileSync(join(OUT, 'mix.wav'), Buffer.concat([header, Buffer.from(mix.buffer)]))
+
+// 3. Build (arguments as an array: the project path has spaces).
+const run = (cmd, ...args) => execFileSync(cmd, args, { stdio: 'inherit' })
+run('swiftc', '-O', '-o', `${OUT}/mux`, join(here, 'mux.swift'))
+run(`${OUT}/mux`, 'video', `${OUT}/plan.json`, `${OUT}/video.mp4`)
+run('afconvert', '-f', 'm4af', '-d', 'aac@44100', '-b', '96000', `${OUT}/mix.wav`, `${OUT}/mix.m4a`)
+run(`${OUT}/mux`, 'merge', `${OUT}/video.mp4`, `${OUT}/mix.m4a`, `${OUT}/demo-3min.mp4`)
+console.log(`${OUT}/demo-3min.mp4  ${total.toFixed(1)} s, ${segments.length} distinct frames`)

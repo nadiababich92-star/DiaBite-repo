@@ -461,7 +461,7 @@ tr:last-child td { border-bottom: none; }
 .receipt-sources .pill { flex: none; }
 
 .trace { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.trace li { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: baseline; font-size: 13.5px; color: var(--text-dim); }
+.trace li { display: grid; grid-template-columns: minmax(150px, max-content) minmax(0, 1fr); gap: 12px; align-items: baseline; font-size: 13.5px; color: var(--text-dim); }
 .trace li code { font-family: var(--mono); font-size: 13px; color: var(--text); background: var(--surface-2); padding: 3px 8px; border-radius: 6px; }
 .trace li.ok code { color: var(--low); background: var(--low-bg); }
 .trace li.over code { color: var(--high); background: var(--high-bg); }
