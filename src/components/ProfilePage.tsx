@@ -18,9 +18,11 @@ interface Props {
   onRedoOnboarding: () => void
   /** Opens the feedback form. It lives here, not in the navigation bar. */
   onFeedback: () => void
+  /** Opens the "How it works" sheet. */
+  onHowItWorks: () => void
 }
 
-export default function ProfilePage({ profile, targets, onChange, onRedoOnboarding, onFeedback }: Props) {
+export default function ProfilePage({ profile, targets, onChange, onRedoOnboarding, onFeedback, onHowItWorks }: Props) {
   const [query, setQuery] = useState('')
   const [theme, setTheme] = useState<ThemeChoice>(loadTheme)
   const choose = (c: ThemeChoice) => { setTheme(c); saveTheme(c) }
@@ -251,7 +253,10 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
       <section className="card">
         <h2>Help</h2>
         <p className="muted">Tell us what was wrong, unclear or missing. It goes to the people building DiaBite.</p>
-        <button className="ghost" onClick={onFeedback}>Send feedback</button>
+        <div className="row">
+          <button className="ghost" onClick={onHowItWorks}>How it works</button>
+          <button className="ghost" onClick={onFeedback}>Send feedback</button>
+        </div>
       </section>
     </>
   )

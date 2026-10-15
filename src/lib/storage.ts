@@ -66,6 +66,12 @@ export const loadDiary = (): DiaryEntry[] => {
 }
 export const saveDiary = (entries: DiaryEntry[]): void => write(DIARY_KEY, entries)
 
+// Which first-run tips were shown, in this browser. Not synced, not exported, no personal data.
+const TOUR_KEY = 'diabite.tour.v1'
+/** null when nothing is stored (or storage is unavailable): the key is absent. */
+export const loadTour = (): unknown | null => read<unknown | null>(TOUR_KEY, null)
+export const saveTour = (seen: string[]): void => write(TOUR_KEY, seen)
+
 /**
  * The person's own calendar day. `toISOString()` is UTC, which for a user in
  * Los Angeles turns to tomorrow at 17:00 — the day's budget would silently

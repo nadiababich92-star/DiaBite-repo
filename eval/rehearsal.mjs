@@ -34,12 +34,13 @@ check('W0', 'a throwaway account exists and signs in', !!uid && !!session.access
 const stored = JSON.stringify({ ...session, expires_at: Math.floor(Date.now() / 1000) + session.expires_in })
 const rows = async (table) => (await (await admin(`/rest/v1/${table}?user_id=eq.${uid}&select=*`)).json())
 
-async function device(port, label) {
+async function device(port, label, { tour = false } = {}) {
   const b = await launch({ port, width: 390, height: 844, dpr: 1 })
   const errs = []
   b.on('Runtime.exceptionThrown', (p) => errs.push(p.exceptionDetails?.exception?.description?.slice(0, 160) ?? 'exception'))
   await b.send('Page.navigate', { url: APP }); await sleep(2500)
-  await b.ev(`localStorage.clear(); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`)
+  // The first-run tips are marked seen so they never sit over what this script clicks; device A leaves them on once, to check them (W16).
+  await b.ev(`localStorage.clear(); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); ${tour ? '' : "localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log']));"}`)
   await b.send('Page.reload'); await sleep(3500)
   const text = () => b.ev('document.body.innerText')
   const click = (t) => b.ev(`(()=>{const e=[...document.querySelectorAll('button')].find(x=>x.innerText.trim().startsWith(${JSON.stringify(t)})); if(!e) return 'NO '+${JSON.stringify(t)}; e.click(); return 'ok'})()`)
@@ -47,7 +48,7 @@ async function device(port, label) {
 }
 
 // ── device A: first sign-in, onboarding with consent, one meal logged ───────
-const A = await device(9701, 'A')
+const A = await device(9701, 'A', { tour: true })
 let t = await A.text()
 check('W1', 'device A: a signed-in person with no profile is taken to onboarding, with the consent card', /What DiaBite keeps/.test(t) && /First, the numbers/.test(t), t.slice(0, 160))
 await A.b.ev(`window.__setNum = (labelText, v) => { const el = [...document.querySelectorAll('label.field')].find(l => l.innerText.trim().startsWith(labelText))?.querySelector('input'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set; set.call(el,String(v)); el.dispatchEvent(new Event('input',{bubbles:true})) }; window.__check = (aria) => document.querySelector('input[aria-label="'+aria+'"]').click()`)
@@ -58,6 +59,11 @@ await A.click('Continue'); await sleep(300); await A.click('Continue'); await sl
 await A.b.ev(`__check('I understand this is not medical advice')`); await A.click('Start using DiaBite'); await sleep(2500)
 t = await A.text()
 check('W2', 'device A: onboarding completes and the ask screen opens', /What are you\s+about to eat/i.test(t), t.slice(0, 120))
+// W16: a brand-new person sees exactly one tip on the empty Ask screen (and none once they skip).
+await sleep(1200)
+const tips = await A.b.ev(`[...document.querySelectorAll('[aria-label="Tip"]')].map(e => e.innerText.trim().slice(0, 40))`)
+check('W16', 'device A: the first Ask screen after onboarding shows exactly one tip, "Say what you ate"', Array.isArray(tips) && tips.length === 1 && /^Say what you ate/.test(tips[0]), JSON.stringify(tips))
+await A.click('Skip tips'); await sleep(500)
 await sleep(2500)
 const prof = await rows('profiles')
 check('W3', 'the profile and the consent are stored on the server, for this person only', prof.length === 1 && !!prof[0].consent_at, JSON.stringify(prof.map((r) => Object.keys(r))))

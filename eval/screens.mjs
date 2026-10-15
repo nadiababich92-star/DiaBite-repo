@@ -5,6 +5,7 @@
  *   npm run screens                      # the live app, files in /tmp/diabite-screens
  *   OUT=some/dir APP=http://localhost:5173 npm run screens
  *   QUESTION="A slice of grandma's cholent" npm run screens   # look at the estimate card
+ *   TOUR=1 npm run screens                                      # leave the first-run tips on and photograph them
  *   SEED=full|thin|empty npm run screens                       # give the account a diary history to look at the week
  *
  * Like the rehearsal it creates a throwaway account with the service key (read from the Container App
@@ -69,7 +70,8 @@ try {
     const click = (t) => b.ev(`(()=>{const e=[...document.querySelectorAll('button')].find(x=>x.innerText.trim().startsWith(${JSON.stringify(t)})); if(!e) return 'NO '+${JSON.stringify(t)}; e.click(); return 'ok'})()`)
     console.log(size.name)
     await b.send('Page.navigate', { url: APP }); await sleep(2500)
-    await b.ev(`localStorage.clear(); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`)
+    // The first-run tips are marked seen unless TOUR=1, so they never sit over what this script clicks.
+    await b.ev(`localStorage.clear(); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); ${process.env.TOUR === '1' ? '' : "localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log']));"}`)
     await b.send('Page.reload'); await sleep(3500)
 
     if (idx === 0) {
@@ -88,12 +90,21 @@ try {
       }
     }
     await shot('ask-empty')
+    if (process.env.TOUR === '1') await shot('tour-1')
     await b.ev(`(()=>{const i=document.querySelector('input[type=text]'); i.focus()})()`)
     await b.send('Input.insertText', { text: process.env.QUESTION ?? 'Two eggs, a slice of rye bread and half an avocado' })
     await click('Check this meal')
     for (let i = 0; i < 90; i++) { await sleep(500); if (!(await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break }
     await sleep(1000)
     await shot('ask-answer')
+    if (process.env.TOUR === '1') {
+      // tips 2, 3 and 4 hang on the answer: photograph each, then press its button
+      for (const n of [2, 3, 4]) {
+        await sleep(900)
+        await shot(`tour-${n}`)
+        await b.ev(`document.querySelector('.tour-tip button.primary')?.click()`)
+      }
+    }
     // An estimate card (a dish counted from an assumed recipe) also gets its composition editor.
     if (await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Edit the recipe'))`)) {
       await click('Edit the recipe'); await sleep(800)
@@ -110,6 +121,7 @@ try {
     for (let i = 0; i < 40 && !(await b.ev(`!!document.querySelector('.menu-meal')`)); i++) await sleep(300)
     await shot('menu')
     await tab('You'); await shot('you')
+    if (process.env.TOUR === '1') { await click('How it works'); await sleep(700); await shot('how-it-works'); await click('Close') }
     if (errs.length) console.log('  script errors:', errs.slice(0, 2))
     await b.close()
   }

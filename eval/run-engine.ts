@@ -35,6 +35,7 @@ import { looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers } from '.
 import { diffEntries, exportShape, fromRow, mergeById, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
+import { allCopy, allSteps, copyFor, initialSeen, markSeen, nextStep, sanitizeSeen, STEP_ORDER, type TourContext } from '../src/lib/tour'
 import { generateWeek, menuHidden, regenerateSlot, replayWeek, setRecipes, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
 import { toDishes } from '../src/lib/recipes'
 import { ALLERGEN_PATTERNS, PATTERN_PATTERNS } from '../src/lib/dietary'
@@ -281,6 +282,40 @@ const dishMisses: string[] = []
   if (!/can't judge/.test(templatedAnswer(trace10b) ?? '')) dishMisses.push('    the last-resort answer for a partial estimate does not say it cannot judge')
 }
 console.log(`\ncost-dish ${dishMisses.length === 0 ? 'ok' : 'WRONG'}`)
+// First-run tips: which one to show, in what order, and that the copy never holds a figure.
+{
+  const bits: string[] = []
+  const ctx = (over: Partial<TourContext> = {}): TourContext => ({ hasReply: false, hasReceipt: false, assumed: false, busy: false, suspended: false, ...over })
+  const meal = ctx({ hasReply: true, hasReceipt: true })
+  if (nextStep([], ctx()) !== 'input') bits.push('the empty screen does not offer the input tip')
+  if (nextStep([], ctx({ busy: true })) !== null || nextStep([], ctx({ suspended: true })) !== null) bits.push('a tip was offered while busy or while another dialog was open')
+  if (nextStep(['input'], ctx({ hasReply: true })) !== null || nextStep([], ctx({ hasReply: true })) !== null) bits.push('a tip hung on an answer with no receipt, or the input tip came late')
+  let seen: ReturnType<typeof sanitizeSeen> = []
+  const order: (string | null)[] = []
+  for (let i = 0; i < 4; i++) { const st = nextStep(seen, meal); order.push(st); if (st) seen = markSeen(seen, st) }
+  if (order.join() !== 'verdict,calc,log,') bits.push(`the sequence on a receipt was ${order.join()}`)
+  if (nextStep(['input', 'calc'], meal) !== 'verdict' || nextStep(['input', 'verdict'], meal) !== 'calc' || nextStep(['input', 'verdict', 'calc'], meal) !== 'log') bits.push('a step was offered out of order')
+  if (copyFor('verdict', { assumed: true }).title !== 'This one is an estimate' || copyFor('verdict', { assumed: false }).title !== 'Here is the verdict') bits.push('the estimate copy was not chosen by `assumed`')
+  if (copyFor('calc', { assumed: true }).title !== copyFor('calc', { assumed: false }).title) bits.push('another step changed with `assumed`')
+  if (JSON.stringify(allSteps()) !== JSON.stringify(STEP_ORDER)) bits.push('Skip tips is not every step')
+  for (const hasReply of [false, true]) for (const hasReceipt of [false, true]) for (const busy of [false, true]) for (const suspended of [false, true]) {
+    if (nextStep(allSteps(), ctx({ hasReply, hasReceipt, busy, suspended })) !== null) bits.push('a tip was offered after Skip tips')
+  }
+  if (sanitizeSeen(null).length || sanitizeSeen('x').length || sanitizeSeen({}).length || sanitizeSeen([1, 'nope']).length) bits.push('malformed storage was not read as nothing seen')
+  if (sanitizeSeen(['input', 'bogus', 'log']).join() !== 'input,log') bits.push('unknown ids were kept')
+  if (markSeen(['input'], 'input').join() !== 'input' || markSeen(['log'], 'input').join() !== 'input,log') bits.push('a step was duplicated or the order was lost')
+  const all = allSteps().join()
+  if (initialSeen(null, { onboardedAtStart: true, diaryAtStart: 0 }).join() !== all || initialSeen(null, { onboardedAtStart: false, diaryAtStart: 3 }).join() !== all) bits.push('a returning person was shown the guide')
+  if (initialSeen(null, { onboardedAtStart: false, diaryAtStart: 0 }).length !== 0) bits.push('a new person was marked as having seen it')
+  if (initialSeen(['input'], { onboardedAtStart: true, diaryAtStart: 5 }).join() !== 'input' || initialSeen(['input'], { onboardedAtStart: false, diaryAtStart: 0 }).join() !== 'input') bits.push('a stored list was overridden')
+  for (const c of allCopy()) {
+    if (/\d/.test(c.title + c.body)) bits.push(`the copy holds a digit: ${c.title}`)
+    if (c.button !== 'Next' && c.button !== 'Got it') bits.push(`unexpected button: ${c.button}`)
+  }
+  console.log(`\ntour      ${bits.length === 0 ? 'ok' : 'WRONG'}`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) { console.log('the first-run tips misbehave: see tour above'); process.exit(1) }
+}
 // An advisory answer that still holds a figure after two attempts: the sentences with a digit go, the rest stays.
 {
   const advice = 'Keto is not usually the first thing to try without your care team. It often means eating under 50 g of carbohydrate a day. Many people find it hard to keep up, and it can interact with some medicines. Talk it through with your doctor first.'

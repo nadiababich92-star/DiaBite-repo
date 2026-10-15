@@ -3,6 +3,8 @@ import GlInfo from './GlInfo'
 import { isLabelled, parseMeal } from '../lib/answer'
 import { sessionId } from '../lib/session'
 import { accessToken } from '../lib/auth'
+import Tour from './Tour'
+import type { TourStep } from '../lib/tour'
 import { askAgent, avoidOf, budgetOf, engineId, lastMealCall, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
 import { mealForNow, viewEntry } from '../lib/diary'
 import { useToday } from '../lib/useToday'
@@ -17,6 +19,10 @@ interface Props {
   onLog: (entries: DiaryEntry[]) => void
   /** The engine said the sign-in is no longer good (it expired, or sign-in became required). */
   onSessionEnded?: () => void
+  /** First-run tips: which were shown, how to record one, and whether another dialog is open. */
+  tourSeen: readonly TourStep[]
+  onTourSeen: (seen: TourStep[]) => void
+  tourSuspended: boolean
 }
 
 const SAMPLES = [
@@ -347,7 +353,7 @@ function summarize(step: TraceStep): string {
   }
 }
 
-export default function AskPage({ profile, targets, diary, onLog, onSessionEnded }: Props) {
+export default function AskPage({ profile, targets, diary, onLog, onSessionEnded, tourSeen, onTourSeen, tourSuspended }: Props) {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -511,6 +517,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
         <p className="muted">Say it the way you'd say it to a friend. The agent does the counting — and shows its arithmetic.</p>
         <form className="ask-form" onSubmit={(e) => { e.preventDefault(); ask(text) }}>
           <input
+            data-tour="input"
             type="text" value={text} onChange={(e) => setText(e.target.value)}
             placeholder="e.g. two slices of pepperoni pizza" disabled={busy} maxLength={MAX_QUESTION} aria-label="What are you about to eat?"
           />
@@ -565,7 +572,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
           {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setRecalc(null) }} onGl={() => setGlOpen(true)} />}
           {recalc && <p className="muted asked">Original answer, before you changed a portion</p>}
           <section className={`card answer tone-${tone}${recalc ? ' stale' : ''}`} role="status" aria-live="polite">
-            <div className="eyebrow-line">
+            <div className="eyebrow-line" data-tour="verdict">
               <StatusDot tone={tone} />
               {reply.blocked ? 'Not something I\'ll answer' :
                tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Not today' :
@@ -595,8 +602,8 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
 
           {receipt && (
             <div className="row" style={{ marginBottom: 12 }}>
-              <button className="primary" onClick={logIt} disabled={logged}>{logged ? 'Logged' : active?.partial || active?.unscored ? 'Log what was counted' : 'Log it'}</button>
-              <button className="ghost" onClick={() => setShowReceipt((v) => !v)}>{showReceipt ? 'Hide calculation' : 'Show calculation'}</button>
+              <button className="primary" data-tour="log" onClick={logIt} disabled={logged}>{logged ? 'Logged' : active?.partial || active?.unscored ? 'Log what was counted' : 'Log it'}</button>
+              <button className="ghost" data-tour="calc" onClick={() => setShowReceipt((v) => !v)}>{showReceipt ? 'Hide calculation' : 'Show calculation'}</button>
               {!receipt.carbsOnly && <button className="ghost" aria-expanded={editing} onClick={() => setEditing((v) => !v)}>{editing ? 'Done' : receipt.assumed ? 'Edit the recipe' : 'Change a portion'}</button>}
             </div>
           )}
@@ -637,6 +644,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
       )}
       </div>
       {glOpen && <GlInfo budget={targets.glBudget} onClose={() => setGlOpen(false)} />}
+      <Tour seen={tourSeen} onSeen={onTourSeen} ctx={{ hasReply: !!reply, hasReceipt: !!receipt, assumed: !!receipt?.assumed, busy, suspended: tourSuspended || glOpen }} />
     </div>
   )
 }

@@ -220,6 +220,12 @@ are offered as chips ("Again, to dinner") and add themselves in one tap.
 
 The week card opens with one plain line ("4 of 7 days in range this week") and names thin days (fewer than 3 meals) and carbs-only days in words; below the seven day bars a four-week strip shows one row per week of seven 12 px marks (filled `--low` = in range, outlined `--text-faint` = logged but not in range, dotted `--border` = not logged). No praise, streak, ring or score.
 
+### Tips, on the Ask screen
+
+A **tip** is a small card that points at the real screen: before the first question it points at the input, and after the first answer, one at a time, at the verdict, at Show calculation and at the log button. A ring in `--accent` marks what it points at. It uses the card tokens (`--surface`, `--border`, `--radius`, `--fx-raised`), the card-heading type and 14 px body text, and carries a "Next" or "Got it" key and a "Skip tips" link. It is **non-modal and never takes focus**; on a phone it is pinned above the tab bar. It carries **no figure**: tips explain where numbers come from and never display one.
+
+"How it works" (a button under Help in You) opens a plain dialog, one line for each tab.
+
 ### The week, on the Menu
 Seven day keys (the day's name and its planned glycemic load), today pre-selected, and one
 day open as a card: a bar, then each meal with its glycemic load, its foods at their weights,

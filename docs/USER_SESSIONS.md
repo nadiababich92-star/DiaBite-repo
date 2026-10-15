@@ -13,9 +13,10 @@ urge is why this document exists.
 
 Not "do they like it". Five things we currently guess at:
 
-1. **Do people open the receipt?** We treat "every number traces to a tool" as
-   the product's whole argument. If nobody expands the calculation unprompted,
-   the argument is real and invisible, and that changes what we build.
+1. **Do people open the receipt again?** The first-run tips tell a new person where "Show calculation" is, so
+   whether they find it is no longer a question. What we can still learn: on a later answer, without the tip,
+   do they open it again, and what do they make of it? If nobody does, the argument "every number traces to a
+   tool" is real and still invisible, and that changes what we build.
 2. **What do they actually type?** Our 87 eval cases are phrases *we* invented,
    and the 18% unknown-food rate is measured against our own list. Real
    phrasing is the thing we cannot make up.
@@ -61,6 +62,8 @@ you more than a friend who says it's lovely.
   written up notes."* If they say no, take notes and carry on.
 - Have this document open, and a blank list titled **"phrases they typed"**.
   That list is the single most valuable artefact of the session.
+- The app shows four first-run tips to a new browser. Do not mention them and do not turn them off: they are
+  part of what the person sees.
 - Do not demo anything. The first time they see the app should be with their
   hands on it.
 
@@ -102,7 +105,7 @@ into the eval set the same week, which is how the test set stops being our
 imagination.
 
 **Watch for:** Do they type or tap an example? Do they give a portion? Do they
-read past the verdict line? Do they open "Show calculation" — *unprompted*?
+read past the verdict line? Do they open "Show calculation" after the tip, and do they open it again on a later answer?
 What do they do while it thinks for eight seconds?
 
 **Do not** tell them what to type. Do not tell them the number is right.
@@ -123,9 +126,9 @@ answer?"* — and then say nothing.
 
 > "Suppose you didn't believe that number. What would you do?"
 
-**Watch for:** whether they find the receipt on their own. If they don't, open
-it for them at the end of the task and ask what they make of it — but only
-after they've had their own go.
+**Watch for:** on their second or third answer, whether they open the calculation without being told. Ask,
+after they have tried: *"The tip said you can see the arithmetic. What did you make of it?"*, then say
+nothing. Note whether they believe the number once they have seen it.
 
 ### 5 · Debrief (5 min)
 

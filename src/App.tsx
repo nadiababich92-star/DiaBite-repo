@@ -6,13 +6,15 @@ import FeedbackModal from './components/FeedbackModal'
 import ImportPrompt from './components/ImportPrompt'
 import Logo, { Wordmark } from './components/Logo'
 import SignIn from './components/SignIn'
+import HowItWorks from './components/HowItWorks'
 import Onboarding from './components/Onboarding'
 import MenuPage from './components/MenuPage'
 import ProfilePage from './components/ProfilePage'
 import { calculateTargets } from './lib/profile'
 import { signOutAndClear, useAuth, useSignInRequired } from './lib/auth'
 import { supabaseConfigured } from './lib/supabase'
-import { loadDiary, loadProfile, saveDiary, saveProfile } from './lib/storage'
+import { loadDiary, loadProfile, loadTour, saveDiary, saveProfile, saveTour } from './lib/storage'
+import { initialSeen, type TourStep } from './lib/tour'
 import { CONSENT_VERSION, LEGACY_DIARY_KEY, PENDING_KEY, loadAccount, mergeById, useAccountSync } from './lib/sync'
 import type { DiaryEntry, Profile } from './types'
 
@@ -40,6 +42,14 @@ export default function App() {
   const [onboarding, setOnboarding] = useState(false)
   const [profile, setProfile] = useState<Profile>(loadProfile)
   const [diary, setDiary] = useState<DiaryEntry[]>(loadDiary)
+  // First-run tips: which were shown, in this browser. The start-up snapshot comes from storage alone, before
+  // onboarding can finish in this visit; a person who used the app before this release is recorded as seen.
+  const [tourSeen, setTourSeen] = useState<TourStep[]>(() => {
+    const seen = initialSeen(loadTour(), { onboardedAtStart: loadProfile().onboarded, diaryAtStart: loadDiary().length })
+    saveTour(seen)
+    return seen
+  })
+  const [howOpen, setHowOpen] = useState(false)
 
   // The account: loaded once per sign-in, then kept in step by useAccountSync.
   const [account, setAccount] = useState<AccountState>('none')
@@ -178,7 +188,10 @@ export default function App() {
 
       <main role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
       {tab === 'ask' && (
-        <AskPage profile={profile} targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} onSessionEnded={sessionEnded} />
+        <AskPage
+          profile={profile} targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} onSessionEnded={sessionEnded}
+          tourSeen={tourSeen} onTourSeen={(s) => { setTourSeen(s); saveTour(s) }} tourSuspended={feedbackOpen || waiting > 0 || howOpen}
+        />
       )}
       {tab === 'diary' && (
         <DiaryPage targets={targets} diary={diary} onChange={setDiary} onAsk={() => setTab('ask')} showBreadUnits={profile.showBreadUnits} />
@@ -198,6 +211,7 @@ export default function App() {
           onChange={setProfile}
           onRedoOnboarding={() => setOnboarding(true)}
           onFeedback={() => setFeedbackOpen(true)}
+          onHowItWorks={() => setHowOpen(true)}
         />
       )}
       {tab === 'profile' && auth.status === 'signedIn' && auth.userId && <AccountBlock userId={auth.userId} email={auth.email} />}
@@ -227,6 +241,7 @@ export default function App() {
       </nav>
 
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
+      {howOpen && <HowItWorks onClose={() => setHowOpen(false)} />}
       {waiting > 0 && !feedbackOpen && <ImportPrompt count={waiting} onMove={moveLegacyDiary} onLater={() => setWaiting(0)} />}
     </div>
   )
