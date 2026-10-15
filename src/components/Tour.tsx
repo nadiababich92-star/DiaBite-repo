@@ -8,7 +8,7 @@ interface Props {
 }
 
 /** The tip's width on a laptop; a phone pins it edge to edge. */
-const TIP_W = 300
+const TIP_W = 280
 
 const anchorOf = (step: TourStep) => document.querySelector<HTMLElement>(`[data-tour="${step}"]`)
 
@@ -47,7 +47,7 @@ export default function Tour({ seen, onSeen, ctx }: Props) {
     const height = tip?.offsetHeight ?? 170
     // Beside the column when there is room, so it never sits on top of the answer it is explaining.
     const colRight = document.querySelector('main')?.getBoundingClientRect().right ?? 0
-    if (window.innerWidth - colRight >= TIP_W + 32) {
+    if (window.innerWidth - colRight >= TIP_W + 24) {
       set({ top: Math.round(Math.max(8, Math.min(r.top, window.innerHeight - height - 8))), left: Math.round(colRight + 16) })
       return
     }
