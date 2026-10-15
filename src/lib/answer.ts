@@ -19,7 +19,9 @@ const SEP = '[:—–-]'
 
 /** What follows a label, to the end of its line: "**Why** — x", "Why: x", "Why - x". */
 function part(text: string, label: string): string | undefined {
-  return text.match(new RegExp(`(?:^|\\n)\\s*\\*{0,2}${label}\\*{0,2}\\s*${SEP}\\s*([^\\n]+)`, 'i'))?.[1]?.trim()
+  // "**Verdict:** text" puts the colon inside the bold, so what follows the separator can begin with the closing
+  // asterisks: they are not part of the value.
+  return text.match(new RegExp(`(?:^|\\n)\\s*\\*{0,2}${label}\\*{0,2}\\s*${SEP}\\s*(?:\\*{1,2}\\s*)?([^\\n]+)`, 'i'))?.[1]?.trim()
 }
 
 /** True for a line that opens with one of the four labels. */
@@ -72,4 +74,14 @@ export function parseMeal(text: string, opts: { costed?: boolean } = {}): (MealP
   // Printed large and alone, a lowercase first letter looks like a mistake.
   verdict = verdict.charAt(0).toUpperCase() + verdict.slice(1)
   return { verdict, numbers, why, next, used }
+}
+
+/**
+ * A line split into plain and **bold** pieces. Only a complete pair of asterisks makes bold; anything else stays
+ * as written. (A piece that merely started with "**" used to be cut by two characters at each end, which turned
+ * "This one does not fit today." into "This one does not fit toda".)
+ */
+export function boldSegments(line: string): { text: string; strong: boolean }[] {
+  return line.split(/(\*\*[^*]+\*\*)/g).filter((seg) => seg !== '').map((seg) =>
+    /^\*\*[^*]+\*\*$/.test(seg) ? { text: seg.slice(2, -2), strong: true } : { text: seg, strong: false })
 }

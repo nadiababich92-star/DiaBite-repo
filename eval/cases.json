@@ -2846,6 +2846,19 @@
         "verdict": "This fits your day.",
         "next": "swap the rye bread for sprouted grain bread.",
         "why": "110 g"
+      },
+      {
+        "id": "colon-inside-bold",
+        "text": "**Verdict:** This one does not fit today.\n**Numbers:** Meal glycemic load 46.5. Day before this meal 37.8, after this meal -8.7.\n**Why:** Durum wheat pasta, al dente is driving the load.\n**Next action:** Swap the spaghetti for whole wheat pasta.",
+        "verdict": "This one does not fit today.",
+        "next": "Swap the spaghetti for whole wheat pasta.",
+        "why": "driving the load."
+      },
+      {
+        "id": "colon-inside-bold-fits",
+        "text": "**Verdict:** This fits your day.\n**Numbers:** Meal load 26.2.\n**Why:** White rice drove the load.\n**Next action:** Swap the white rice for basmati rice.",
+        "verdict": "This fits your day.",
+        "next": "Swap the white rice for basmati rice."
       }
     ],
     "portion": [

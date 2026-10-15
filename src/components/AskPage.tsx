@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import GlInfo from './GlInfo'
-import { isLabelled, parseMeal } from '../lib/answer'
+import { boldSegments, isLabelled, parseMeal } from '../lib/answer'
 import { sessionId } from '../lib/session'
 import { accessToken } from '../lib/auth'
 import Tour from './Tour'
@@ -58,9 +58,7 @@ function StatusDot({ tone }: { tone: string | null }) {
 }
 
 const bold = (line: string, key: string) =>
-  line.split(/(\*\*[^*]+\*\*)/g).map((seg, j) =>
-    seg.startsWith('**') ? <strong key={key + j}>{seg.slice(2, -2)}</strong> : <span key={key + j}>{seg}</span>,
-  )
+  boldSegments(line).map((seg, j) => (seg.strong ? <strong key={key + j}>{seg.text}</strong> : <span key={key + j}>{seg.text}</span>))
 
 /**
  * The three figures a verdict rests on, taken from the tool result rather than

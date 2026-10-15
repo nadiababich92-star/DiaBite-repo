@@ -50,3 +50,54 @@ export const endCard = (address) => `<!doctype html>${BASE}<style>
   p { margin: 0; font-size: 30px; color: var(--dim); max-width: 900px; line-height: 1.4; }
   code { font: 500 30px 'IBM Plex Mono', ui-monospace, monospace; color: var(--accent); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 20px; }
 </style><main><h1 class="mark">Dia<b>Bite</b></h1><p>Free to try. It asks for your email, and sends you a code.</p><code>${address}</code><p>If you have type 2 diabetes, prediabetes or insulin resistance, I would like to hear where it breaks.</p></main>`
+
+// A slide is one screen that fills in step by step as it is spoken about: no scrolling a page.
+const SLIDE = `<style>
+  main { height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 34px; padding: 0 120px; }
+  .eyebrow { font: 600 22px 'IBM Plex Sans', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #5e6861; }
+  h1 { font: 600 62px/1.1 'Literata', Georgia, serif; letter-spacing: -.02em; margin: 0; max-width: 1500px; }
+  .step { opacity: 0; transform: translateY(14px); transition: opacity .7s, transform .7s; }
+  .step.on { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .step { transition: none; } }
+</style>`
+
+export const archSlide = () => `<!doctype html>${BASE}${SLIDE}<style>
+  .flow { display: grid; grid-template-columns: 1fr 64px 1fr 64px 1fr 64px 1fr; align-items: stretch; gap: 0; }
+  .box { background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 26px 26px 28px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 10px 24px -14px rgba(70,50,20,.4); }
+  .box b { font: 600 34px/1.1 'Literata', Georgia, serif; } .box span { font-size: 22px; line-height: 1.4; color: var(--dim); }
+  .box .tag { font: 600 17px 'IBM Plex Sans'; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .arrow { display: grid; place-items: center; font: 400 44px 'IBM Plex Sans'; color: #5e6861; }
+  .promise { font: 600 36px/1.25 'Literata', Georgia, serif; background: var(--marker); display: inline-block; padding: 10px 22px; border-radius: 12px; align-self: flex-start; }
+</style><main>
+  <div class="eyebrow step" data-s="0">How it is built</div>
+  <h1 class="step" data-s="0">A model reads. An engine counts. A verifier checks.</h1>
+  <div class="flow">
+    <div class="box step" data-s="1"><span class="tag">1 · The sentence</span><b>Safety rules first</b><span>Dosing, red flags and fasting are caught by plain rules before any model runs.</span></div>
+    <div class="arrow step" data-s="2">→</div>
+    <div class="box step" data-s="2"><span class="tag">2 · Azure AI Foundry</span><b>Three agents</b><span>One routes. One costs meals with tools. One advises, with no tools and no numbers.</span></div>
+    <div class="arrow step" data-s="3">→</div>
+    <div class="box step" data-s="3"><span class="tag">3 · The engine</span><b>Does the arithmetic</b><span>From eight thousand foods and two thousand recipes. Every number is computed here.</span></div>
+    <div class="arrow step" data-s="4">→</div>
+    <div class="box step" data-s="4"><span class="tag">4 · The verifier</span><b>Checks every number</b><span>A number no tool returned is never shown.</span></div>
+  </div>
+  <div class="promise step" data-s="5">The model never produces a nutrition number.</div>
+</main><script>window.reveal = (n) => document.querySelectorAll('.step').forEach((e) => e.classList.toggle('on', +e.dataset.s <= n))</script>`
+
+export const evalSlide = () => `<!doctype html>${BASE}${SLIDE}<style>
+  .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .big { background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 28px 30px 30px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 10px 24px -14px rgba(70,50,20,.4); }
+  .big .n { font: 500 84px/1 'IBM Plex Mono', ui-monospace, monospace; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .big .l { font: 600 26px/1.25 'Literata', Georgia, serif; } .big .d { font-size: 21px; color: var(--dim); line-height: 1.4; }
+  .fault { background: var(--surface); border-left: 8px solid #9e3025; border-radius: 6px 22px 22px 6px; padding: 24px 30px; display: flex; flex-direction: column; gap: 8px; }
+  .fault b { font: 600 30px 'Literata', Georgia, serif; } .fault span { font-size: 24px; line-height: 1.45; color: var(--dim); }
+  .fault em { font-style: normal; background: var(--marker); padding: 0 .2em; border-radius: 4px; color: var(--text); }
+</style><main>
+  <div class="eyebrow step" data-s="0">How we know it works</div>
+  <h1 class="step" data-s="0">Tested on every change. Scored by a second model.</h1>
+  <div class="row">
+    <div class="big step" data-s="1"><div class="n">204 / 204</div><div class="l">Behavioural checks</div><div class="d">Run against the deployed agent: tools called, numbers verified, refusals where required.</div></div>
+    <div class="big step" data-s="2"><div class="n">74 / 75</div><div class="l">Groundedness</div><div class="d">A second model in Azure AI Foundry: the answer says only what the tools returned.</div></div>
+    <div class="big step" data-s="2"><div class="n">86 / 86</div><div class="l">Intent resolution</div><div class="d">The answer addresses what was asked.</div></div>
+  </div>
+  <div class="fault step" data-s="3"><b>The one miss was a real fault</b><span>Two hard candies were counted as <em>320 g</em>. We fixed the portion and added a test, so it cannot come back.</span></div>
+</main><script>window.reveal = (n) => document.querySelectorAll('.step').forEach((e) => e.classList.toggle('on', +e.dataset.s <= n))</script>`

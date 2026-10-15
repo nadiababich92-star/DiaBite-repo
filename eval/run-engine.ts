@@ -35,6 +35,7 @@ import { looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers } from '.
 import { diffEntries, exportShape, fromRow, mergeById, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
+import { boldSegments } from '../src/lib/answer'
 import { allCopy, allSteps, copyFor, initialSeen, markSeen, nextStep, sanitizeSeen, STEP_ORDER, type TourContext } from '../src/lib/tour'
 import { generateWeek, menuHidden, regenerateSlot, replayWeek, setRecipes, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
 import { toDishes } from '../src/lib/recipes'
@@ -679,6 +680,20 @@ for (const c of cases.engine.answer) {
   const got = parseMeal(c.text, { costed: c.costed })
   const ok = c.verdict === null ? got === null : got?.verdict === c.verdict && (c.next === undefined || got?.next === c.next) && (c.why === undefined || !!got?.why?.includes(c.why))
   if (!ok) answerMisses.push(`    ${c.id.padEnd(24)} want ${JSON.stringify(c.verdict)} got ${JSON.stringify(got?.verdict ?? null)}`)
+}
+// What is drawn from a line: bold only for a complete pair, and no character lost at either end.
+{
+  const joined = (line: string) => boldSegments(line).map((x) => x.text).join('')
+  const want: [string, string, number][] = [
+    ['** This one does not fit today.', '** This one does not fit today.', 0],
+    ['This one goes over today.', 'This one goes over today.', 0],
+    ['Swap the **rye bread** for sprouted grain bread.', 'Swap the rye bread for sprouted grain bread.', 1],
+    ['A **half** and a **whole**.', 'A half and a whole.', 2],
+  ]
+  for (const [line, text, strongCount] of want) {
+    const segs = boldSegments(line)
+    if (joined(line) !== text || segs.filter((x) => x.strong).length !== strongCount) answerMisses.push(`    bold: ${JSON.stringify(line)} drew ${JSON.stringify(joined(line))} with ${segs.filter((x) => x.strong).length} bold`)
+  }
 }
 console.log(`\nanswer    ${cases.engine.answer.length - answerMisses.length}/${cases.engine.answer.length}`)
 if (answerMisses.length) { console.log('  parsed wrong:'); answerMisses.forEach((m) => console.log(m)) }

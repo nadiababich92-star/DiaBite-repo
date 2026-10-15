@@ -16,7 +16,9 @@
     "b1d": "And the receipt. Every line, the weight, the carbohydrate, the glycemic index, the load, came from a database and a formula. The model chose none of these numbers, and every number in the answer is traced to a tool.",
     "b1e": "She logs it.",
     "d0": "Thursday evening. Spaghetti with garlic bread and a glass of orange juice.",
-    "d1": "It does not fit today, and it says so plainly. Then it does the useful part: it names a swap, counted by the engine like everything else.",
+    "d1": "It does not fit today. But it does not just say no: it names a swap, counted by the engine like everything else.",
+    "d2": "Dana tries it: whole wheat pasta, and water instead of the juice.",
+    "d3": "Now it fits. A no that shows the way.",
     "i0": "Late that night she wonders about her insulin.",
     "i1": "The refusal is instant. It never reached a model. Dosing questions are caught by rules before anything generative sees them, because a refusal that depends on a model behaving is not a refusal.",
     "l0": "Sunday, at her grandmother's: cholent, which no database has.",
@@ -24,6 +26,6 @@
     "l2": "If her grandmother's recipe is different, Dana changes a gram or takes an ingredient out, and the engine counts again.",
     "w0": "Her week builds in the Diary. Four of seven days in range means three meals logged and under budget. A day with a single meal is not a day, and it says so. This is a demo week.",
     "c0": "DiaBite is being prepared for its first users. If you or someone you know has type 2 diabetes, prediabetes or insulin resistance, the address is on screen. It's free, and it asks for your email.",
-    "e0": "How do we know it works? Every change runs more than two hundred behavioural checks against the deployed agent, and a second model in Azure AI Foundry scores the answers. Groundedness: seventy-four of seventy-five. The one miss was a real fault: two hard candies counted as three hundred and twenty grams. We fixed it, and added a test so it cannot come back."
+    "e0": "How do we know it works? Every change runs more than two hundred behavioural checks against the deployed agent, and all of them pass. A second model in Azure AI Foundry scores the answers too: groundedness seventy-four of seventy-five. The one miss was a real fault: two hard candies counted as three hundred and twenty grams. We fixed it, and added a test so it cannot come back."
   }
 }

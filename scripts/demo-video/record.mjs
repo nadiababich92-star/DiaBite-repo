@@ -17,7 +17,7 @@ import { dirname, join } from 'node:path'
 import { execSync } from 'node:child_process'
 import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs'
 import { launch } from '../../eval/lib/cdp.mjs'
-import { titleCard, problemCard, endCard } from './cards.mjs'
+import { titleCard, problemCard, endCard, archSlide, evalSlide } from './cards.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(here, '..', '..')
@@ -171,6 +171,7 @@ try {
   await sleep(1200)
   t0 = now()
 
+  const has = (sel) => () => b.ev(`!!document.querySelector(${JSON.stringify(sel)})`)
   const dataUrl = (html) => `data:text/html;charset=utf-8,${encodeURIComponent(html)}`
   const showCard = async (html) => { await b.send('Page.navigate', { url: dataUrl(html) }); await sleep(1300) }
   const trustPage = `file://${ROOT}/docs/diabite-trust-page.html`
@@ -205,11 +206,12 @@ try {
     const lit = [0.20, 0.34, 0.52, 0.70, 0.86]
     for (let i = 0; i < lit.length; i++) { await holdTo(s1 + lit[i] * dur.t1); await b.ev(`window.reveal(${i})`) }
     await holdTo(end + 0.4)
-    zone(0.03)
-    await b.send('Page.navigate', { url: trustPage }); await sleep(2500)
-    await b.ev(`document.getElementById('arch-h')?.scrollIntoView({block:'start'}); window.scrollBy(0,-24)`); await sleep(500)
-    end = say('t2'); await driftScroll(end + 0.3, 420)
+    // The promise, as a slide that fills in while it is spoken about.
+    await showCard(archSlide()); const s2 = vt(); end = say('t2')
+    for (const [i, f] of [[0, 0.0], [1, 0.20], [2, 0.38], [3, 0.56], [4, 0.74], [5, 0.90]]) { await holdTo(s2 + f * dur.t2); await b.ev(`window.reveal(${i})`) }
+    await holdTo(end + 0.5)
   }
+  zone(0.03)
 
   // ── Thursday morning: the setup, on camera ────────────────────────────────
   await openApp('Thursday, 7:40 am')
@@ -256,7 +258,17 @@ try {
   const DINNER = 'Spaghetti with tomato sauce, garlic bread and a glass of orange juice'
   await askUntil(DINNER, async () => (await b.ev(`!!document.querySelector('.tone-bad')`)) && (await b.ev(`/wap/.test(document.body.innerText)`)))
   await holdTo(end); await b.ev(`window.scrollTo(0, 0)`)
-  end = say('d1'); await wander(['.eyebrow-line', '.fig-lead', '.answer-text'], end)
+  end = say('d1')
+  await wander(['.eyebrow-line', '.fig-lead'], vt() + (end - vt()) * 0.5)
+  // the swap it names is the point of this scene: bring it into view and ring it
+  await b.ev(`(()=>{ const n = document.querySelector('.a-next'); n?.scrollIntoView({ block: 'center', behavior: 'smooth' }); n?.classList.add('tour-ring') })()`)
+  await sleep(900); await wander(['.a-next'], end)
+  await b.ev(`document.querySelector('.a-next')?.classList.remove('tour-ring')`)
+  end = say('d2'); await b.ev(`window.scrollTo(0, 0)`)
+  // "Fits" and "Fits with a change" both mean it fits; the second carries a further swap in its Next line.
+  await askUntil('Whole wheat spaghetti with tomato sauce, garlic bread and a glass of water', async () => (await has('.tone-good')()) || (await has('.tone-change')()))
+  await holdTo(end); await b.ev(`window.scrollTo(0, 0)`)
+  end = say('d3'); await wander(['.eyebrow-line', '.fig-lead'], end)
 
   // ── Thursday night: the question it will not answer ───────────────────────
   await setChip('Thursday, 10:30 pm')
@@ -286,10 +298,10 @@ try {
   await wander(['.week-sum', '.week li:nth-child(3)', '.week li:nth-child(6)', '.weeks li:nth-child(1)', '.weeks li:nth-child(2)'], end)
 
   // ── How we know it works ───────────────────────────────────────────────────
-  zone(0.03)
-  await b.send('Page.navigate', { url: trustPage }); await sleep(2500)
-  await b.ev(`document.getElementById('eval-h')?.scrollIntoView({block:'start'}); window.scrollBy(0,-24)`); await sleep(500)
-  end = say('e0'); await driftScroll(end + 0.3, 300)
+  zone(0.07)
+  await showCard(evalSlide()); const s3 = vt(); end = say('e0')
+  for (const [i, f] of [[0, 0.0], [1, 0.22], [2, 0.48], [3, 0.70]]) { await holdTo(s3 + f * dur.e0); await b.ev(`window.reveal(${i})`) }
+  await holdTo(end + 0.6)
 
   // ── The ask ────────────────────────────────────────────────────────────────
   zone(0.07)
