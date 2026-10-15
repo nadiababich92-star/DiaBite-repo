@@ -47,14 +47,14 @@ person's (age 52, type 2, metformin, a budget of 45 glycemic load). The words ar
 |---|---|---|---|
 | Title | "Can I eat this?" | the promise in one line | the question |
 | Dana's problem | a card, five lines lit in turn | the list of allowed and forbidden foods; the real question; five to seven times a day; a calorie app costs minutes; real life is a burrito bowl | the problem, in the words of the first pitch |
-| The promise | the architecture, from the trust page | a model reads, an engine counts, a verifier blocks any number no tool returned | the architecture the cohort leader asked for |
+| The promise | a slide that fills in step by step: safety rules, three agents, the engine, the verifier | a model reads, an engine counts, a verifier blocks any number no tool returned | the architecture the cohort leader asked for |
 | Thursday 7:40, the setup | the app's own onboarding: what it keeps, her diagnosis, her medicines, her day | Dana agrees, types her age, picks type 2 and metformin; a budget of 45 appears, with the formula shown | **everything is personal**: diagnosis, medicines, age, weight, activity, kidneys, allergies and how she eats all change her numbers. The video does **not** say a doctor approved it: no clinician has signed it off |
 | Thursday 7:40, breakfast | the first tip, then eggs, rye bread, avocado | fits, load 7.2, 37.8 left; the verdict tip; Show calculation; the receipt; Log | the first minute of a new person |
-| Thursday 6:45 pm | spaghetti, garlic bread, orange juice | **"Not today", over by about 9**, and the app names a swap (whole wheat pasta) | **the softened no**: it says no and shows the way |
+| Thursday 6:45 pm | spaghetti, garlic bread, orange juice | **"Not today", over by about 9**, the swap it names is ringed on screen (whole wheat pasta); Dana tries it and changes the juice to water too, and it **fits** | **the softened no**: it does not only forbid, it names a way and the engine counts the way. The swap alone is not enough (40.6 against 37.7 left): the video says Dana changes the juice as well |
 | Thursday 10:30 pm | the insulin question | refused at once, no spinner | safety |
 | Sunday | cholent with its ingredients | **Estimate**, "if yours is like this"; Edit the recipe, remove one, still an estimate | a dish the database lacks |
 | Her week | the Diary | "4 of 7 days in range", four weeks as a strip | why she comes back |
-| How we know | the evaluation table | 204 of 204 checks, a second model's marks, and the one real fault found and fixed | trust |
+| How we know | a slide of three big numbers (204 of 204, 74 of 75, 86 of 86) and the one real fault found and fixed | 204 of 204 checks, a second model's marks, and the one real fault found and fixed | trust |
 | The ask | the address | free, asks for your email | the invitation |
 
 **Do not read a number aloud on the Sunday scene**: the weights are assumptions the agent makes each time, and the same sentence came back at a load

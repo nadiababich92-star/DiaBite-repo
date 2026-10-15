@@ -86,7 +86,7 @@ export const archSlide = () => `<!doctype html>${BASE}${SLIDE}<style>
 export const evalSlide = () => `<!doctype html>${BASE}${SLIDE}<style>
   .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
   .big { background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 28px 30px 30px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 10px 24px -14px rgba(70,50,20,.4); }
-  .big .n { font: 500 84px/1 'IBM Plex Mono', ui-monospace, monospace; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .big .n { white-space: nowrap; font: 500 66px/1 'IBM Plex Mono', ui-monospace, monospace; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
   .big .l { font: 600 26px/1.25 'Literata', Georgia, serif; } .big .d { font-size: 21px; color: var(--dim); line-height: 1.4; }
   .fault { background: var(--surface); border-left: 8px solid #9e3025; border-radius: 6px 22px 22px 6px; padding: 24px 30px; display: flex; flex-direction: column; gap: 8px; }
   .fault b { font: 600 30px 'Literata', Georgia, serif; } .fault span { font-size: 24px; line-height: 1.45; color: var(--dim); }
