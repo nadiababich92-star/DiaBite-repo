@@ -11,6 +11,7 @@ export type FoodCategory =
   | 'fats'        // oils and fats
   | 'sweets'      // sweets
   | 'drinks'      // drinks
+  | 'other'       // a food a planned meal names that the local table does not hold (shopping list only)
 
 export interface Nutrients {
   /** kcal per 100 g */

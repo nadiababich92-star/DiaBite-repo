@@ -10,7 +10,7 @@
  * Pure and tested (npm run eval). It describes; it does not score. A day with nothing logged is not
  * "good" or "bad", it is not logged; and a day too thin to judge is named, not counted.
  */
-import { addDays, viewEntry } from './diary'
+import { addDays, eaten, viewEntry } from './diary'
 import type { DiaryEntry } from '../types'
 
 /** The PRD's "eating occasions": distinct meal slots, not entries. */
@@ -79,9 +79,10 @@ function summarize(byDate: Map<string, DiaryEntry[]>, glBudget: number, today: s
   return { days, loggedDays: days.filter((x) => x.logged).length, inRangeDays: count('in_range'), thinDays: count('thin'), carbsOnlyDays: count('carbs_only') }
 }
 
+// Only what was eaten counts: a planned meal is a promise, not a log.
 const group = (diary: DiaryEntry[]) => {
   const byDate = new Map<string, DiaryEntry[]>()
-  for (const e of diary) {
+  for (const e of eaten(diary)) {
     const list = byDate.get(e.date)
     if (list) list.push(e); else byDate.set(e.date, [e])
   }

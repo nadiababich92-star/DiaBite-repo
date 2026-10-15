@@ -125,6 +125,57 @@ await tabA('Diary')
 const profRow = (await rows('profiles'))[0]
 check('W15', 'switching bread units on shows them, and the choice is kept with the profile', /Bread units/.test(await A.text()) && profRow?.data?.showBreadUnits === true, JSON.stringify(profRow?.data?.showBreadUnits))
 
+// ── planning: a meal planned on one device is planned on the other and counts nowhere until it is eaten ─────
+{
+  const d = new Date(), pad = (n) => String(n).padStart(2, '0')
+  const iso = (off) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate() + off); return `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}` }
+  const exact = (dev, label) => dev.b.ev(`(()=>{const e=[...document.querySelectorAll('button')].find(x=>x.innerText.trim()===${JSON.stringify(label)}); if(!e) return 'NO'; e.click(); return 'ok'})()`)
+  const askOn = async (dev, q) => {
+    await dev.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('Ask'))?.click()`); await sleep(600)
+    await dev.b.ev(`(()=>{const i=document.querySelector('input[type=text]'); i.focus()})()`)
+    await dev.b.send('Input.insertText', { text: q })
+    await dev.click('Check this meal')
+    for (let i = 0; i < 90; i++) { await sleep(500); if (!(await dev.b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break }
+    await sleep(800)
+  }
+  const diaryRows = async () => rows('diary_entries')
+  // A: ask, choose Tomorrow, "Plan it".
+  await tabA('Ask')
+  await askOn(A, 'A cup of plain greek yogurt')
+  await exact(A, 'Tomorrow'); await sleep(300)
+  const planLabel = await A.b.ev(`[...document.querySelectorAll('button.primary')].map(x=>x.innerText.trim()).join('|')`)
+  await exact(A, 'Plan it'); await sleep(4500)
+  const plannedRows = (await diaryRows()).filter((r) => r.planned === true && r.day === iso(1))
+  check('W17', 'device A: choosing Tomorrow turns the log button into "Plan it" and writes a planned entry for tomorrow', /Plan it/.test(planLabel) && plannedRows.length >= 1, `${planLabel} / ${JSON.stringify(plannedRows.map((r) => [r.day, r.planned]))}`)
+  // B: tomorrow in the Diary shows it as planned, and nothing is counted.
+  await B.b.send('Page.reload'); await sleep(4000)
+  await B.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('Diary'))?.click()`); await sleep(1000)
+  await B.b.ev(`document.querySelector('button[aria-label="The day after"]')?.click()`); await sleep(1200)
+  const bt = await B.text()
+  check('W17c', 'device B: the Diary on tomorrow shows the meal as planned, "not counted yet", and nothing eaten', /planned/.test(bt) && /not counted yet/.test(bt) && /Nothing eaten for this day yet/.test(bt), bt.replace(/\n+/g, ' | ').slice(0, 300))
+  // A: the Menu plans a meal for today; B marks it eaten and A sees it eaten.
+  await tabA('Menu')
+  for (let i = 0; i < 40 && !(await A.b.ev(`!!document.querySelector('.menu-meal')`)); i++) await sleep(300)
+  await A.b.ev(`document.querySelector('.menu-meal button[aria-expanded]')?.click()`); await sleep(500)
+  await exact(A, 'Today'); await sleep(300)
+  await exact(A, 'Plan it'); await sleep(4500)
+  const todayPlanned = (await diaryRows()).filter((r) => r.planned === true && r.day === iso(0))
+  check('W17d', 'device A: "Plan it…" on the Menu with Today writes a planned entry for today', todayPlanned.length >= 1, JSON.stringify(todayPlanned.map((r) => [r.day, r.planned])))
+  await B.b.send('Page.reload'); await sleep(4000)
+  await B.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('Diary'))?.click()`); await sleep(1000)
+  const before = (await diaryRows()).filter((r) => r.planned === true && r.day === iso(0)).length
+  await B.b.ev(`document.querySelector('.entry.planned button[aria-label^="Ate it"]')?.click()`); await sleep(4500)
+  const after = (await diaryRows()).filter((r) => r.planned === true && r.day === iso(0)).length
+  check('W17e', 'device B: "Ate it" turns a planned entry into an eaten one on the server', before >= 1 && after === before - 1, `${before} -> ${after}`)
+  // Logging for yesterday from an answer: an eaten entry on yesterday.
+  await tabA('Ask')
+  await askOn(A, 'Two eggs and a slice of rye bread')
+  await exact(A, 'Yesterday'); await sleep(300)
+  await exact(A, 'Log it'); await sleep(4500)
+  const yest = (await diaryRows()).filter((r) => r.day === iso(-1) && r.planned !== true)
+  check('W17f', 'device A: logging an answer for Yesterday writes an eaten entry on yesterday', yest.length >= 1, JSON.stringify(yest.map((r) => [r.day, r.planned])))
+}
+
 // ── the feedback card: asked once after the third meal, never again after "Not now"; a rating reaches the table ─────
 {
   const d = new Date(), pad = (n) => String(n).padStart(2, '0'), todayLocal = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`

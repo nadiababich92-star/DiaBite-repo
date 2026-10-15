@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CATEGORY_LABELS, getFood } from '../data/foods'
-import { MEAL_LABELS, recipeCount, regenerateSlot, replayWeek, shoppingList, shoppingText, menuHidden } from '../lib/menu'
+import { MEAL_LABELS, recipeCount, regenerateSlot, replayWeek, shoppingFromEntries, shoppingList, shoppingText, menuHidden } from '../lib/menu'
+import { addDays, dayLabel, plannedOnly } from '../lib/diary'
+import DayPicker from './DayPicker'
 import { loadMenuRecipes } from '../lib/recipes'
 import type { PlannedDay, PlannedMeal, WeekState } from '../lib/menu'
 import { loadWeekState, newWeekState, saveWeekState } from '../lib/menuStore'
@@ -11,6 +13,8 @@ import { DayGLPill, GIPill, GLPill } from './Pills'
 interface Props {
   profile: Profile
   targets: Targets
+  /** The diary, for the shopping list that follows what the person has planned. */
+  diary: DiaryEntry[]
   /** Switch to the Ask tab, for the profiles that are not shown a plan. */
   onAsk?: () => void
   /** Put what was planned into the diary, and take it out again. */
@@ -22,20 +26,20 @@ interface Props {
 const CHECKED_KEY = 'diabite.shopping.v1'
 
 /** Ticked shopping lines, remembered only while the plan they belong to is the one on screen. */
-function loadChecked(seed: number): Set<string> {
+function loadChecked(key: string): Set<string> {
   try {
-    const raw = JSON.parse(localStorage.getItem(CHECKED_KEY) ?? 'null') as { seed?: number; checked?: string[] } | null
-    return raw && raw.seed === seed && Array.isArray(raw.checked) ? new Set(raw.checked.filter((x) => typeof x === 'string')) : new Set()
+    const raw = JSON.parse(localStorage.getItem(CHECKED_KEY) ?? 'null') as { seed?: number | string; checked?: string[] } | null
+    return raw && String(raw.seed) === key && Array.isArray(raw.checked) ? new Set(raw.checked.filter((x) => typeof x === 'string')) : new Set()
   } catch { return new Set() }
 }
-function saveChecked(seed: number, checked: Set<string>) {
-  try { localStorage.setItem(CHECKED_KEY, JSON.stringify({ seed, checked: [...checked] })) } catch { /* storage unavailable */ }
+function saveChecked(key: string, checked: Set<string>) {
+  try { localStorage.setItem(CHECKED_KEY, JSON.stringify({ seed: key, checked: [...checked] })) } catch { /* storage unavailable */ }
 }
 
 /** Monday is 0, as the plan counts its days. */
 const todayIndex = () => (new Date().getDay() + 6) % 7
 
-export default function MenuPage({ profile, targets, onAsk, onAdd, onRemove, onOpenDiary }: Props) {
+export default function MenuPage({ profile, targets, diary, onAsk, onAdd, onRemove, onOpenDiary }: Props) {
   const hidden = menuHidden(profile)
   const today = useToday()
   // The week stays the week until the person asks for another: it is kept on this device.
@@ -44,9 +48,13 @@ export default function MenuPage({ profile, targets, onAsk, onAdd, onRemove, onO
   const [showList, setShowList] = useState(false)
   const [note, setNote] = useState('')
   const [copied, setCopied] = useState(false)
-  const [checked, setChecked] = useState<Set<string>>(() => loadChecked(week.seed))
+  const [checked, setChecked] = useState<Set<string>>(() => loadChecked(String(week.seed)))
   // What was put into the diary from this screen: by meal, so it can be taken out again.
-  const [added, setAdded] = useState<Record<string, string[]>>({})
+  const [added, setAdded] = useState<Record<string, { ids: string[]; text: string }>>({})
+  // Which meal has the "Plan it…" picker open, and the day chosen in it.
+  const [planning, setPlanning] = useState<{ key: string; date: string } | null>(null)
+  // The shopping list follows what is planned; the generated week is the fallback, or a choice.
+  const [useWeek, setUseWeek] = useState(false)
 
   useEffect(() => saveWeekState(week), [week])
 
@@ -64,7 +72,20 @@ export default function MenuPage({ profile, targets, onAsk, onAdd, onRemove, onO
   // Not computed at all for a profile that is not shown a plan.
   const built = useMemo(() => (hidden || !ready ? null : replayWeek(profile, targets, week)), [hidden, ready, profile, targets, week])
   const plan = built?.plan ?? null
-  const list = useMemo(() => (plan ? shoppingList(plan) : []), [plan])
+  const weekList = useMemo(() => (plan ? shoppingList(plan) : []), [plan])
+  const planned = useMemo(() => plannedOnly(diary), [diary])
+  const plannedList = useMemo(() => shoppingFromEntries(diary, today), [diary, today])
+  const fromPlan = plannedList.length > 0 && !useWeek
+  const list = fromPlan ? plannedList : weekList
+  // Ticks belong to one list: a changed plan starts a fresh one, because a wrong tick that hides something to buy is worse than a lost tick.
+  const tickKey = fromPlan ? `plan:${planned.filter((e) => e.date >= today).map((e) => e.id).sort().join(',')}` : String(week.seed)
+  useEffect(() => { setChecked(loadChecked(tickKey)) }, [tickKey])
+  // The span the list covers, from the planned entries it was built from.
+  const span = useMemo(() => {
+    const dates = planned.filter((e) => e.date >= today && e.date <= addDays(today, 14)).map((e) => e.date).sort()
+    return dates.length ? [dates[0], dates[dates.length - 1]] : null
+  }, [planned, today])
+  const shortDate = (d: string) => dayLabel(d, today) === d ? d : new Date(Number(d.slice(0, 4)), Number(d.slice(5, 7)) - 1, Number(d.slice(8, 10))).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
   if (!hidden && !ready) {
     return <section className="card" role="status"><p className="muted" style={{ margin: 0 }}>Getting the recipes…</p></section>
@@ -88,7 +109,7 @@ export default function MenuPage({ profile, targets, onAsk, onAdd, onRemove, onO
 
   const regenerate = () => {
     const next = newWeekState()
-    setWeek(next); setNote(''); setAdded({}); setChecked(new Set()); saveChecked(next.seed, new Set())
+    setWeek(next); setNote(''); setAdded({}); setChecked(new Set()); saveChecked(String(next.seed), new Set())
   }
   const replace = (dayIndex: number, meal: MealType) => {
     const seed = Math.floor(Math.random() * 1e9)
@@ -101,7 +122,7 @@ export default function MenuPage({ profile, targets, onAsk, onAdd, onRemove, onO
   const toggle = (name: string) => {
     const next = new Set(checked)
     if (next.has(name)) next.delete(name); else next.add(name)
-    setChecked(next); saveChecked(week.seed, next)
+    setChecked(next); saveChecked(tickKey, next)
   }
   const copyList = async () => {
     try {
@@ -111,27 +132,34 @@ export default function MenuPage({ profile, targets, onAsk, onAdd, onRemove, onO
   }
 
   const slotKey = (d: number, m: PlannedMeal) => `${week.seed}:${d}:${m.meal}:${m.dish.id}`
-  // The meal goes into today's diary at the weight the plan chose, food by food.
-  const addToToday = (d: number, m: PlannedMeal) => {
+  // The meal goes into the diary at the weight the plan chose, food by food: eaten on today ("I ate this"),
+  // or planned for a day ("Plan it…"). A plan counts nowhere until the person marks it eaten in the Diary.
+  const putInDiary = (d: number, m: PlannedMeal, date: string, planned: boolean) => {
     const stamp = Date.now()
+    const flag = planned ? { planned: true as const } : {}
     // A recipe goes in as one entry carrying the numbers it was planned with, like a meal logged from an answer.
     const s = m.dish.serving
     const entries: DiaryEntry[] = s && m.dish.recipeId ? [{
-      id: `${stamp}-0-${Math.random().toString(36).slice(2, 6)}`, date: today, meal: m.meal,
-      foodId: `rec:${m.dish.recipeId}`, grams: m.scale,
+      id: `${stamp}-0-${Math.random().toString(36).slice(2, 6)}`, date, meal: m.meal,
+      foodId: `rec:${m.dish.recipeId}`, grams: m.scale, ...flag,
       snapshot: {
         name: m.dish.name, kcal: s.kcal * m.scale, carbs: s.carbs * m.scale, fiber: s.fiber * m.scale, protein: s.protein * m.scale, fat: s.fat * m.scale,
         availableCarbs: Math.max(0, s.carbs - s.fiber) * m.scale, gi: s.gi, gl: s.gl * m.scale, loadAvailable: true, servings: m.scale,
       },
     }] : m.dish.items.map((it, i) => ({
-      id: `${stamp}-${i}-${Math.random().toString(36).slice(2, 6)}`, date: today, meal: m.meal,
-      foodId: it.foodId, grams: Math.max(1, Math.round(it.grams * m.scale)),
+      id: `${stamp}-${i}-${Math.random().toString(36).slice(2, 6)}`, date, meal: m.meal,
+      foodId: it.foodId, grams: Math.max(1, Math.round(it.grams * m.scale)), ...flag,
     }))
     onAdd(entries)
-    setAdded((a) => ({ ...a, [slotKey(d, m)]: entries.map((e) => e.id) }))
+    const text = planned
+      ? `Planned for ${dayLabel(date, today)}.`
+      : `Added to today's ${MEAL_LABELS[m.meal].toLowerCase()}.`
+    setAdded((a) => ({ ...a, [slotKey(d, m)]: { ids: entries.map((e) => e.id), text } }))
+    setPlanning(null)
   }
+  const addToToday = (d: number, m: PlannedMeal) => putInDiary(d, m, today, false)
   const undoAdd = (d: number, m: PlannedMeal) => {
-    const ids = added[slotKey(d, m)] ?? []
+    const ids = added[slotKey(d, m)]?.ids ?? []
     onRemove(ids)
     setAdded((a) => { const n = { ...a }; delete n[slotKey(d, m)]; return n })
   }
@@ -173,9 +201,15 @@ export default function MenuPage({ profile, targets, onAsk, onAdd, onRemove, onO
       {showList && (
         <section className="card">
           <div className="row" style={{ justifyContent: 'space-between' }}>
-            <h2 style={{ margin: 0 }}>Shopping list for the week</h2>
+            <h2 style={{ margin: 0 }}>{fromPlan ? 'Shopping list for what you planned' : 'Shopping list for the week'}</h2>
             <button className="ghost" onClick={copyList}>{copied ? 'Copied' : 'Copy list'}</button>
           </div>
+          {fromPlan && span && <p className="muted" style={{ margin: '4px 0 0' }}>From {shortDate(span[0])} to {shortDate(span[1])}.</p>}
+          {plannedList.length > 0 && weekList.length > 0 && (
+            <p style={{ margin: '4px 0 0' }}>
+              <button type="button" className="link" onClick={() => setUseWeek((v) => !v)}>{fromPlan ? 'Use the generated week instead' : 'Use what I planned'}</button>
+            </p>
+          )}
           <div className="table-scroll">
             <table>
               <thead>
@@ -222,17 +256,19 @@ export default function MenuPage({ profile, targets, onAsk, onAdd, onRemove, onO
 
       <DayCard
         day={current} dayIndex={day} budget={targets.glBudget}
-        added={added} slotKey={slotKey}
-        onReplace={replace} onAdd={addToToday} onUndo={undoAdd} onOpenDiary={onOpenDiary}
+        added={added} slotKey={slotKey} today={today} planning={planning} onPlanning={setPlanning}
+        onReplace={replace} onAdd={addToToday} onPlan={putInDiary} onUndo={undoAdd} onOpenDiary={onOpenDiary}
       />
     </>
   )
 }
 
-function DayCard({ day, dayIndex, budget, added, slotKey, onReplace, onAdd, onUndo, onOpenDiary }: {
+function DayCard({ day, dayIndex, budget, added, slotKey, today, planning, onPlanning, onReplace, onAdd, onPlan, onUndo, onOpenDiary }: {
   day: PlannedDay; dayIndex: number; budget: number
-  added: Record<string, string[]>; slotKey: (d: number, m: PlannedMeal) => string
-  onReplace: (d: number, m: MealType) => void; onAdd: (d: number, m: PlannedMeal) => void; onUndo: (d: number, m: PlannedMeal) => void
+  added: Record<string, { ids: string[]; text: string }>; slotKey: (d: number, m: PlannedMeal) => string
+  today: string; planning: { key: string; date: string } | null; onPlanning: (p: { key: string; date: string } | null) => void
+  onReplace: (d: number, m: MealType) => void; onAdd: (d: number, m: PlannedMeal) => void
+  onPlan: (d: number, m: PlannedMeal, date: string, planned: boolean) => void; onUndo: (d: number, m: PlannedMeal) => void
   onOpenDiary: () => void
 }) {
   return (
@@ -274,15 +310,27 @@ function DayCard({ day, dayIndex, budget, added, slotKey, onReplace, onAdd, onUn
             </details>
             {done ? (
               <p className="menu-added" role="status">
-                Added to today's {MEAL_LABELS[m.meal].toLowerCase()}.{' '}
+                {done.text}{' '}
                 <button className="link" onClick={() => onUndo(dayIndex, m)}>Undo</button>{' '}
-                <button className="link" onClick={onOpenDiary}>See today</button>
+                <button className="link" onClick={onOpenDiary}>{done.text.startsWith('Planned') ? 'See the Diary' : 'See today'}</button>
               </p>
             ) : (
-              <div className="row menu-actions">
-                <button className="ghost" onClick={() => onAdd(dayIndex, m)} aria-label={`Add ${m.dish.name} to today`}>Add to today</button>
-                <button className="ghost" onClick={() => onReplace(dayIndex, m.meal)} aria-label={`Replace ${m.dish.name} on ${day.weekday}`}>Replace</button>
-              </div>
+              <>
+                <div className="row menu-actions">
+                  <button className="ghost" onClick={() => onAdd(dayIndex, m)} aria-label={`I ate ${m.dish.name}`}>I ate this</button>
+                  <button className="ghost" id={`plan-btn-${key}`} aria-expanded={planning?.key === key} onClick={() => onPlanning(planning?.key === key ? null : { key, date: addDays(today, 1) })} aria-label={`Plan ${m.dish.name} for another day`}>Plan it…</button>
+                  <button className="ghost" onClick={() => onReplace(dayIndex, m.meal)} aria-label={`Replace ${m.dish.name} on ${day.weekday}`}>Replace</button>
+                </div>
+                {planning?.key === key && (
+                  <div className="plan-inline">
+                    <DayPicker value={planning.date} today={today} min={today} chips={['today', 'tomorrow']} onChange={(date) => onPlanning({ key, date })} />
+                    <div className="row">
+                      <button className="primary" onClick={() => onPlan(dayIndex, m, planning.date, true)}>Plan it</button>
+                      <button className="ghost" onClick={() => { onPlanning(null); setTimeout(() => document.getElementById(`plan-btn-${key}`)?.focus(), 0) }}>Cancel</button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )

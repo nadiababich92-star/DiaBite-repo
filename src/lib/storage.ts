@@ -62,7 +62,14 @@ export const saveProfile = (p: Profile): void => write(PROFILE_KEY, p)
 
 export const loadDiary = (): DiaryEntry[] => {
   const stored = read<unknown>(DIARY_KEY, [])
-  return Array.isArray(stored) ? stored.filter(usableEntry) : []
+  // `planned` is true only when it is exactly true: a string "false" or a stray value reads as eaten.
+  return Array.isArray(stored) ? stored.filter(usableEntry).map(normalisePlanned) : []
+}
+const normalisePlanned = (e: DiaryEntry): DiaryEntry => {
+  if (e.planned === true) return e
+  if (!('planned' in e)) return e
+  const { planned: _p, ...rest } = e
+  return rest
 }
 export const saveDiary = (entries: DiaryEntry[]): void => write(DIARY_KEY, entries)
 

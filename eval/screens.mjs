@@ -6,6 +6,8 @@
  *   OUT=some/dir APP=http://localhost:5173 npm run screens
  *   QUESTION="A slice of grandma's cholent" npm run screens   # look at the estimate card
  *   TOUR=1 npm run screens                                      # leave the first-run tips on and photograph them
+ *   PLAN=1 npm run screens                                      # plan the meal for tomorrow and photograph the day picker, a planned row and the Menu's planner
+ *   DARK=1 npm run screens                                      # the same screens in the dark theme
  *   SEED=full|thin|empty npm run screens                       # give the account a diary history to look at the week
  *
  * Like the rehearsal it creates a throwaway account with the service key (read from the Container App
@@ -69,6 +71,7 @@ try {
     const tab = async (n) => { await b.ev(`(()=>{[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes(${JSON.stringify(n)}))?.click()})()`); await sleep(1200) }
     const click = (t) => b.ev(`(()=>{const e=[...document.querySelectorAll('button')].find(x=>x.innerText.trim().startsWith(${JSON.stringify(t)})); if(!e) return 'NO '+${JSON.stringify(t)}; e.click(); return 'ok'})()`)
     console.log(size.name)
+    if (process.env.DARK === '1') await b.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'dark' }] })
     await b.send('Page.navigate', { url: APP }); await sleep(2500)
     // The first-run tips are marked seen unless TOUR=1, so they never sit over what this script clicks.
     await b.ev(`localStorage.clear(); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); ${process.env.TOUR === '1' ? '' : "localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log']));"}`)
@@ -97,6 +100,11 @@ try {
     for (let i = 0; i < 90; i++) { await sleep(500); if (!(await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break }
     await sleep(1000)
     await shot('ask-answer')
+    if (process.env.PLAN === '1') {
+      await b.ev(`(()=>{const e=[...document.querySelectorAll('.day-picker button')].find(x=>x.innerText.trim()==='Tomorrow'); e?.click()})()`); await sleep(500)
+      await b.ev(`document.querySelector('.log-day')?.scrollIntoView({block:'center'})`); await sleep(400)
+      await shot('ask-plan')
+    }
     if (process.env.TOUR === '1') {
       // tips 2, 3 and 4 hang on the answer: photograph each, then press its button
       for (const n of [2, 3, 4]) {
@@ -111,7 +119,13 @@ try {
       await b.ev(`document.querySelector('.remove-step')?.click()`); await sleep(3500)
       await shot('ask-estimate-edited')
     }
-    if (idx === 0) { await click(await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Log what was counted'))`) ? 'Log what was counted' : 'Log it'); await sleep(4000) }
+    if (process.env.PLAN === '1') {
+      await click('Plan it'); await sleep(3500)
+      await tab('Diary')
+      await b.ev(`document.querySelector('button[aria-label="The day after"]')?.click()`); await sleep(1000)
+      await shot('diary-planned')
+      await b.ev(`document.querySelector('button[aria-label="The day before"]')?.click()`); await sleep(500)
+    } else if (idx === 0) { await click(await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Log what was counted'))`) ? 'Log what was counted' : 'Log it'); await sleep(4000) }
     await tab('Diary'); await shot('diary')
     if (await b.ev(`!!document.querySelector('.week-sum')`)) {
       await b.ev(`document.querySelector('.week-sum').scrollIntoView({block:'start'}); window.scrollBy(0,-90)`); await sleep(600)
@@ -120,6 +134,11 @@ try {
     await tab('Menu')
     for (let i = 0; i < 40 && !(await b.ev(`!!document.querySelector('.menu-meal')`)); i++) await sleep(300)
     await shot('menu')
+    if (process.env.PLAN === '1') {
+      await b.ev(`document.querySelector('.menu-meal button[aria-expanded]')?.click()`); await sleep(600)
+      await b.ev(`document.querySelector('.plan-inline')?.scrollIntoView({block:'center'})`); await sleep(400)
+      await shot('menu-plan')
+    }
     await tab('You'); await shot('you')
     if (process.env.TOUR === '1') { await click('How it works'); await sleep(700); await shot('how-it-works'); await click('Close') }
     if (errs.length) console.log('  script errors:', errs.slice(0, 2))

@@ -8,7 +8,8 @@ import FeedbackNudge from './FeedbackNudge'
 import { nextStep, type TourStep } from '../lib/tour'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type Milestone } from '../lib/nudge'
 import { askAgent, avoidOf, budgetOf, engineId, lastMealCall, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
-import { eaten, mealForNow, viewEntry } from '../lib/diary'
+import { dayLabel, eaten, mealForNow, viewEntry } from '../lib/diary'
+import DayPicker from './DayPicker'
 import { loadNudge, saveNudge } from '../lib/storage'
 import { useToday } from '../lib/useToday'
 import { isDemo } from '../lib/demo'
@@ -20,6 +21,8 @@ interface Props {
   targets: Targets
   diary: DiaryEntry[]
   onLog: (entries: DiaryEntry[]) => void
+  /** Take the person to the Diary, from the note that says where a meal went. */
+  onOpenDiary?: () => void
   /** The engine said the sign-in is no longer good (it expired, or sign-in became required). */
   onSessionEnded?: () => void
   /** First-run tips: which were shown, how to record one, and whether another dialog is open. */
@@ -358,7 +361,7 @@ function summarize(step: TraceStep): string {
   }
 }
 
-export default function AskPage({ profile, targets, diary, onLog, onSessionEnded, tourSeen, onTourSeen, tourSuspended }: Props) {
+export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, onSessionEnded, tourSeen, onTourSeen, tourSuspended }: Props) {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -369,6 +372,9 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
   const [asked, setAsked] = useState('')
   const [showReceipt, setShowReceipt] = useState(false)
   const [logged, setLogged] = useState(false)
+  // Which day "Log it" puts the meal on: today until the person picks another. Reset with each question.
+  const [logDay, setLogDay] = useState<string | null>(null)
+  const [logNote, setLogNote] = useState('')
   // Changing a portion: which session the answer was made in, what the person changed, and what the engine said back.
   const [turn, setTurn] = useState('')
   const [editing, setEditing] = useState(false)
@@ -461,7 +467,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
     if (!q || busy) return
     abort.current?.abort()
     abort.current = new AbortController()
-    setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(false); setLogged(false); setAsked(q)
+    setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(false); setLogged(false); setLogDay(null); setLogNote(''); setAsked(q)
     setEditing(false); setGrams({}); setRemoved([]); setRecalc(null); setRecalcError('')
     const sid = fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId()
     setTurn(sid)
@@ -493,8 +499,10 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
     if (!active) return
     const meal = mealForNow()
     const stamp = Date.now()
+    const date = logDay ?? today
+    const planned = date > today
     onLog(active.lines.map((l, i) => ({
-      id: `${stamp}-${i}`, date: today, meal, foodId: l.foodId, grams: l.grams,
+      id: `${stamp}-${i}`, date, meal, foodId: l.foodId, grams: l.grams, ...(planned ? { planned: true } : {}),
       snapshot: {
         name: l.name, kcal: l.kcal, carbs: l.carbs, fiber: l.fiber, protein: l.protein, fat: l.fat,
         availableCarbs: l.availableCarbs, gi: l.gi, gl: l.gl ?? 0, loadAvailable: l.gl !== null, servings: l.servings,
@@ -502,6 +510,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
       },
     })))
     setLogged(true)
+    setLogNote(planned ? `Planned for ${dayLabel(date, today)}. It counts once you mark it eaten.` : date === today ? '' : `Logged for ${dayLabel(date, today)}.`)
   }
 
   // On a narrow screen the answer opens below the question; bring it into view so nobody has to hunt for it.
@@ -624,12 +633,19 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
           </section>
 
           {receipt && (
+            <div className="log-day">
+              <DayPicker value={logDay ?? today} today={today} onChange={(d) => { setLogDay(d === today ? null : d); setLogged(false); setLogNote('') }} />
+            </div>
+          )}
+          {receipt && (
             <div className="row" style={{ marginBottom: 12 }}>
-              <button className="primary" data-tour="log" onClick={logIt} disabled={logged}>{logged ? 'Logged' : active?.partial || active?.unscored ? 'Log what was counted' : 'Log it'}</button>
+              <button className="primary" data-tour="log" onClick={logIt} disabled={logged}>{logged ? (logDay && logDay > today ? 'Planned' : 'Logged') : logDay && logDay > today ? 'Plan it' : active?.partial || active?.unscored ? 'Log what was counted' : 'Log it'}</button>
               <button className="ghost" data-tour="calc" onClick={() => setShowReceipt((v) => !v)}>{showReceipt ? 'Hide calculation' : 'Show calculation'}</button>
               {!receipt.carbsOnly && <button className="ghost" aria-expanded={editing} onClick={() => setEditing((v) => !v)}>{editing ? 'Done' : receipt.assumed ? 'Edit the recipe' : 'Change a portion'}</button>}
             </div>
           )}
+
+          {logNote && <p className="muted" role="status" aria-live="polite" style={{ margin: '-4px 0 12px' }}>{logNote}{onOpenDiary && <>{' '}<button type="button" className="link" onClick={onOpenDiary}>Open Diary</button></>}</p>}
 
           {editing && receipt && !receipt.carbsOnly && (
             <PortionEditor lines={receipt.lines} grams={grams} busy={recalcBusy} error={recalcError} onNudge={nudge} assumed={receipt.assumed} removed={removed} onRemove={toggleRemoved} onReset={resetRecipe} />

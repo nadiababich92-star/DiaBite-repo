@@ -1,7 +1,8 @@
 import { DISHES } from '../data/dishes'
 import { dietaryReason } from './dietary'
-import { getFood } from '../data/foods'
-import type { Dish, FoodCategory, MealType, Nutrients, Profile, Targets } from '../types'
+import { FOODS, getFood } from '../data/foods'
+import { addDays, isPlanned, MAX_AHEAD_DAYS } from './diary'
+import type { DiaryEntry, Dish, FoodCategory, MealType, Nutrients, Profile, Targets } from '../types'
 import { glycemicLoad, nutrientsFor, sumNutrients, weightedGI } from './glycemic'
 
 /** Share of the daily allowance assigned to each meal. */
@@ -261,31 +262,70 @@ export function generateWeek(profile: Profile, targets: Targets, seed = Date.now
   return { days, seed, pool }
 }
 
-/** Aggregated weekly shopping list: food -> total grams. */
-export function shoppingList(plan: WeekPlan): { name: string; grams: number; category: FoodCategory }[] {
-  // One line per food, whichever dish it comes from: "Olive oil" in a curated dish and in a recipe is one line.
-  const totals = new Map<string, { name: string; grams: number; category: FoodCategory }>()
-  const add = (name: string, grams: number, category: FoodCategory) => {
-    const key = name.trim().toLowerCase()
-    const prev = totals.get(key)
-    totals.set(key, { name: prev?.name ?? name, grams: (prev?.grams ?? 0) + grams, category: prev?.category ?? category })
+export type ShoppingLine = { name: string; grams: number; category: FoodCategory }
+
+/** One line per food, whichever dish it comes from: "Olive oil" in a curated dish and in a recipe is one line. */
+function tally() {
+  const totals = new Map<string, ShoppingLine>()
+  return {
+    add(name: string, grams: number, category: FoodCategory) {
+      const key = name.trim().toLowerCase()
+      const prev = totals.get(key)
+      totals.set(key, { name: prev?.name ?? name, grams: (prev?.grams ?? 0) + grams, category: prev?.category ?? category })
+    },
+    // To the nearest 5 g: a list of "412 g" claims a precision the plan never had. A pinch of spice is
+    // not shopping: under 5 g across the whole span it stays in the recipe.
+    lines: (): ShoppingLine[] => [...totals.values()]
+      .filter((x) => x.grams >= 5)
+      .map((x) => ({ name: x.name, grams: Math.max(5, Math.round(x.grams / 5) * 5), category: x.category }))
+      .sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name)),
   }
+}
+
+/** Aggregated weekly shopping list: food -> total grams. */
+export function shoppingList(plan: WeekPlan): ShoppingLine[] {
+  const t = tally()
   for (const day of plan.days) {
     for (const m of day.meals) {
-      for (const item of m.dish.items) { const f = getFood(item.foodId); add(f.name, item.grams * m.scale, f.category) }
-      for (const ing of m.dish.ingredients ?? []) add(ing.name, ing.grams * m.scale, ing.category)
+      for (const item of m.dish.items) { const f = getFood(item.foodId); t.add(f.name, item.grams * m.scale, f.category) }
+      for (const ing of m.dish.ingredients ?? []) t.add(ing.name, ing.grams * m.scale, ing.category)
     }
   }
-  // To the nearest 5 g: a list of "412 g" claims a precision the plan never had. A pinch of spice is
-  // not shopping: under 5 g across the whole week it stays in the recipe.
-  return [...totals.values()]
-    .filter((x) => x.grams >= 5)
-    .map((x) => ({ name: x.name, grams: Math.max(5, Math.round(x.grams / 5) * 5), category: x.category }))
-    .sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name))
+  return t.lines()
+}
+
+/** A recipe by the id a diary entry carries (`rec:DB-0001`), from the library once it is loaded. */
+export const recipeForEntry = (foodId: string): Dish | undefined => {
+  const id = foodId.startsWith('rec:') ? foodId.slice(4) : undefined
+  return id ? RECIPES.find((r) => r.recipeId === id) : undefined
+}
+
+/**
+ * The shopping list for what the person has planned: planned entries from `today` to the planning limit.
+ * An eaten entry, or a plan on a day already gone, is not shopping. A recipe (`rec:`) is expanded into its
+ * ingredients at the servings it was planned with; any other entry is the food at its weight, under the
+ * category the local table gives it, or "Other" for a food only the engine knows. Grams are the ones already
+ * stored or already in the recipe: nothing is estimated here.
+ */
+export function shoppingFromEntries(entries: DiaryEntry[], today: string, recipes: (foodId: string) => Dish | undefined = recipeForEntry): ShoppingLine[] {
+  const last = addDays(today, MAX_AHEAD_DAYS)
+  const t = tally()
+  for (const e of entries) {
+    if (!isPlanned(e) || e.date < today || e.date > last) continue
+    const recipe = recipes(e.foodId)
+    if (recipe?.ingredients) {
+      const servings = e.snapshot?.servings ?? 1
+      for (const ing of recipe.ingredients) t.add(ing.name, ing.grams * servings, ing.category)
+      continue
+    }
+    const local = FOODS.find((f) => f.id === e.foodId)
+    t.add(e.snapshot?.name ?? local?.name ?? e.foodId, e.grams, local?.category ?? 'other')
+  }
+  return t.lines()
 }
 
 /** The list as plain text, grouped by category, for pasting into a notes app. */
-export function shoppingText(list: { name: string; grams: number; category: FoodCategory }[], labels: Record<FoodCategory, string>): string {
+export function shoppingText(list: ShoppingLine[], labels: Record<FoodCategory, string>): string {
   const out: string[] = []
   let last = ''
   for (const item of list) {

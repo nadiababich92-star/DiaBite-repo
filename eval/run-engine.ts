@@ -42,12 +42,17 @@ import { toDishes } from '../src/lib/recipes'
 import { ALLERGEN_PATTERNS, PATTERN_PATTERNS } from '../src/lib/dietary'
 import { loadWeekState } from '../src/lib/menuStore'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type NudgeContext } from '../src/lib/nudge'
+import { clampDate, dateAllowed, eaten, isPlanned, markEaten, pickerState, plannedOnly } from '../src/lib/diary'
+import { shoppingFromEntries } from '../src/lib/menu'
+import { loadDiary } from '../src/lib/storage'
+import { execFileSync } from 'node:child_process'
+import type { DiaryEntry, Dish } from '../src/types'
 import { RATING_ONLY } from '../src/lib/feedbackCopy'
 import { buildReport, reportMarkdown, type AccountInput, type ReportInput } from '../src/lib/report'
 import { CONSENT_VERSION } from '../src/lib/syncCore'
 import { addDays, dayLabel, gramStep, mealForNow, nudgeGrams, recentEntries } from '../src/lib/diary'
 import { calculateTargets, DEFAULT_PROFILE } from '../src/lib/profile'
-import { CATEGORY_LABELS } from '../src/data/foods'
+import { CATEGORY_LABELS, getFood } from '../src/data/foods'
 import { getSession, noteResolution, putSession } from '../server/sessions'
 import { validateDish } from '../server/guard'
 import type { VerifyRequest } from '../server/contract'
@@ -380,6 +385,111 @@ console.log(`\ncost-dish ${dishMisses.length === 0 ? 'ok' : 'WRONG'}`)
   console.log(`\nmonitor   ${bits.length === 0 ? 'ok' : 'WRONG'}`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) { console.log('the feedback card rules or the weekly report misbehave: see monitor above'); process.exit(1) }
+}
+// Logging on any day and planning ahead: a planned meal is a promise, not a log, and counts nowhere until it is eaten.
+{
+  const bits: string[] = []
+  let k = 0
+  const snap = (gl: number, name = 'Test food', servings?: number) => ({ name, kcal: 100, carbs: 20, fiber: 2, protein: 5, fat: 3, availableCarbs: 18, gi: 50, gl, ...(servings ? { servings } : {}) })
+  const ent = (date: string, meal: DiaryEntry['meal'], over: Partial<DiaryEntry> = {}): DiaryEntry =>
+    ({ id: `p${k++}`, date, meal, foodId: 'seed:test', grams: 100, snapshot: snap(5), ...over })
+  const today = '2026-10-20'
+
+  // 1. eaten / planned
+  const mixed = [ent(today, 'lunch'), ent(today, 'dinner', { planned: true }), ent(today, 'snack', { planned: false })]
+  if (eaten(mixed).length !== 2 || plannedOnly(mixed).length !== 1 || !isPlanned(mixed[1]) || isPlanned(mixed[0])) bits.push('eaten/planned split is wrong')
+
+  // 2. the counts ignore a plan; marking it eaten counts it exactly once
+  const two = [ent(today, 'breakfast'), ent(today, 'lunch')]
+  const withPlan = [...two, ent(today, 'dinner', { planned: true })]
+  const dayOf = (d: DiaryEntry[]) => weekSummary(d, 45, today).days[6]
+  if (dayOf(withPlan).status !== 'thin' || dayOf(withPlan).slots !== 2 || dayOf(withPlan).used !== dayOf(two).used) bits.push('a planned meal changed the day')
+  if (JSON.stringify(weeksSummary(withPlan, 45, today)) !== JSON.stringify(weeksSummary(two, 45, today))) bits.push('a planned meal changed the four weeks')
+  if (dayOf([ent(today, 'dinner', { planned: true })]).status !== 'none') bits.push('a day with only a plan was logged')
+  const ate = withPlan.map((e) => (isPlanned(e) ? markEaten(e) : e))
+  if (dayOf(ate).status !== 'in_range' || dayOf(ate).used !== 15 || 'planned' in ate[2]) bits.push('marking a plan eaten did not count it once')
+  if (markEaten(withPlan[2]).id !== withPlan[2].id) bits.push('marking a plan eaten changed its id')
+
+  // 3. the range, in three time zones across a clock change
+  if (!dateAllowed('2026-10-20', today) || !dateAllowed('2026-10-06', today) || !dateAllowed('2026-11-03', today)) bits.push('an allowed day was refused')
+  if (dateAllowed('2026-10-05', today) || dateAllowed('2026-11-04', today) || dateAllowed('2026-10-1', today) || dateAllowed('', today)) bits.push('a day outside the range was allowed')
+  const lo = clampDate('2026-09-01', today), hi = clampDate('2027-01-01', today), ok = clampDate('2026-10-25', today)
+  if (lo.moved !== 'back' || lo.date !== '2026-10-06' || hi.moved !== 'ahead' || hi.date !== '2026-11-03' || ok.moved !== null || ok.date !== '2026-10-25') bits.push('clampDate misplaced a date')
+  const probe = `import { dateAllowed } from './src/lib/diary'; const t = (d, today) => dateAllowed(d, today);
+    console.log(JSON.stringify([t('2026-03-15','2026-03-29'), t('2026-03-15','2026-03-30'), t('2026-04-12','2026-03-29'), t('2026-04-13','2026-03-29'),
+      t('2026-10-12','2026-10-26'), t('2026-10-11','2026-10-26'), t('2026-11-09','2026-10-26'), t('2026-11-10','2026-10-26'), t('2028-02-29','2028-02-15'), t('2028-02-28','2028-03-13'), t('2028-02-27','2028-03-13')]))`
+  const tsx = join(dirname(fileURLToPath(import.meta.url)), '../node_modules/.bin/tsx')
+  for (const tz of ['America/Los_Angeles', 'Europe/Berlin', 'Pacific/Auckland']) {
+    const got = execFileSync(tsx, ['-e', probe], { env: { ...process.env, TZ: tz }, cwd: join(dirname(fileURLToPath(import.meta.url)), '..') }).toString().trim()
+    if (got !== JSON.stringify([true, false, true, false, true, false, true, false, true, true, false])) bits.push(`the range is wrong across a clock change in ${tz}: ${got}`)
+  }
+
+  // 4. persistence
+  const plannedEntry = ent('2026-10-22', 'dinner', { planned: true, foodId: 'egg', snapshot: undefined })
+  const back = fromRow(toRow('u', plannedEntry))
+  if (!back || back.planned !== true || toRow('u', ent(today, 'lunch')).planned !== false || 'planned' in (fromRow(toRow('u', ent(today, 'lunch'))) ?? {})) bits.push('planned did not round-trip through a row')
+  const bare = fromRow({ id: 'x', day: today, meal: 'lunch', food_id: 'egg', grams: 100 })
+  if (!bare || 'planned' in bare) bits.push('a row without the column was not read as eaten')
+  if (fromRow({ id: 'x', day: today, meal: 'lunch', food_id: 'egg', grams: 100, planned: 'false' as unknown as boolean }) && 'planned' in (fromRow({ id: 'x', day: today, meal: 'lunch', food_id: 'egg', grams: 100, planned: 'false' as unknown as boolean }) ?? {})) bits.push('a stray planned value was read as planned')
+  const stored = JSON.stringify([
+    { id: 'a', date: today, meal: 'lunch', foodId: 'egg', grams: 100, planned: 'false' },
+    { id: 'b', date: today, meal: 'lunch', foodId: 'egg', grams: 100, planned: true },
+    { id: 'c', date: '2026-09-01', meal: 'lunch', foodId: 'egg', grams: 100 },
+  ])
+  ;(globalThis as { localStorage?: unknown }).localStorage = { getItem: () => stored, setItem: () => {}, removeItem: () => {} }
+  const loaded = loadDiary()
+  delete (globalThis as { localStorage?: unknown }).localStorage
+  if (loaded.length !== 3 || 'planned' in loaded[0] || loaded[1].planned !== true || loaded[2].id !== 'c') bits.push('stored entries were not normalised (a string is not a plan; an old entry stays)')
+
+  // 5. the shopping list that follows the plan
+  const rice: Dish = { id: 'r-1', recipeId: 'DB-1', name: 'Rice bowl', meals: ['dinner'], items: [], recipe: '',
+    ingredients: [{ name: 'Brown rice', grams: 100, category: 'grains' }, { name: 'Pinch of salt', grams: 1, category: 'fats' }] }
+  const lookup = (id: string) => (id === 'rec:DB-1' ? rice : undefined)
+  const entries: DiaryEntry[] = [
+    ent('2026-10-21', 'dinner', { foodId: 'rec:DB-1', grams: 2, planned: true, snapshot: snap(10, 'Rice bowl', 2) }),
+    ent('2026-10-23', 'dinner', { foodId: 'rec:DB-1', grams: 1, planned: true, snapshot: snap(5, 'Rice bowl', 1) }),
+    ent('2026-10-22', 'lunch', { foodId: 'egg', grams: 110, planned: true, snapshot: undefined }),
+    ent('2026-10-22', 'snack', { foodId: 'egg', grams: 2, planned: true, snapshot: undefined }),
+    ent('2026-10-19', 'lunch', { foodId: 'egg', grams: 500, planned: true, snapshot: undefined }),   // a plan on a day already gone
+    ent('2026-10-21', 'lunch', { foodId: 'egg', grams: 700, snapshot: undefined }),                  // eaten
+    ent('2026-12-01', 'lunch', { foodId: 'egg', grams: 900, planned: true, snapshot: undefined }),   // beyond the planning limit
+    ent('2026-10-24', 'dinner', { foodId: 'ing:unknown', grams: 80, planned: true, snapshot: snap(3, 'Mystery stew') }),
+  ]
+  const shop = shoppingFromEntries(entries, today, lookup)
+  const line = (name: string) => shop.find((l) => l.name === name)
+  if (line('Brown rice')?.grams !== 300) bits.push(`a recipe was not expanded and summed over two days: ${line('Brown rice')?.grams}`)
+  if (line('Pinch of salt')) bits.push('a pinch under 5 g across the span is shopping')
+  if (line('Egg')?.grams !== 110 && line('Egg')?.grams !== 115) bits.push(`the eggs: ${JSON.stringify(line('Egg'))} (planned 110 g and 2 g, nothing else)`)
+  if (line('Mystery stew')?.category !== 'other' || line('Mystery stew')?.grams !== 80) bits.push('a food only the engine knows was dropped or mislabelled')
+  if (shop.some((l) => l.grams % 5 !== 0)) bits.push('the planned list is not rounded to 5 g')
+  if (shop.length !== 3) bits.push(`the planned list has ${shop.length} lines, expected 3: ${shop.map((l) => l.name).join(', ')}`)
+
+  // 6. nothing planned: no planned list, and the week's list is what it always was
+  if (shoppingFromEntries([ent(today, 'lunch', { foodId: 'egg', snapshot: undefined })], today).length !== 0) bits.push('an eaten entry became shopping')
+  {
+    const profile = { ...DEFAULT_PROFILE, onboarded: true }
+    const week = generateWeek(profile, calculateTargets(profile), 11)
+    const old = new Map<string, { name: string; grams: number; category: string }>()
+    for (const day of week.days) for (const m of day.meals) {
+      for (const item of m.dish.items) { const f = getFood(item.foodId); const key = f.name.trim().toLowerCase(); const p = old.get(key); old.set(key, { name: p?.name ?? f.name, grams: (p?.grams ?? 0) + item.grams * m.scale, category: p?.category ?? f.category }) }
+      for (const ing of m.dish.ingredients ?? []) { const key = ing.name.trim().toLowerCase(); const p = old.get(key); old.set(key, { name: p?.name ?? ing.name, grams: (p?.grams ?? 0) + ing.grams * m.scale, category: p?.category ?? ing.category }) }
+    }
+    const legacy = [...old.values()].filter((x) => x.grams >= 5).map((x) => ({ name: x.name, grams: Math.max(5, Math.round(x.grams / 5) * 5), category: x.category }))
+      .sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name))
+    if (JSON.stringify(shoppingList(week)) !== JSON.stringify(legacy)) bits.push('the generated week\'s shopping list changed')
+  }
+
+  // 7. a day older than the limit stays readable and a manual add there is refused
+  if (dateAllowed('2026-09-20', today)) bits.push('a manual add 30 days back was allowed')
+
+  // 9. the picker
+  const ps = (v: string) => pickerState(v, today)
+  if (ps(today).planned || ps('2026-10-19').planned || !ps('2026-10-21').planned || ps('2026-10-19').chip !== 'yesterday' || ps('2026-10-21').chip !== 'tomorrow' || ps('2026-10-25').chip !== 'date') bits.push('the picker state is wrong')
+  if (dayLabel('2026-10-21', today) !== 'Tomorrow') bits.push('tomorrow is not named')
+
+  console.log(`\nplan      ${bits.length === 0 ? 'ok' : 'WRONG'}`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) { console.log('logging on any day or planning ahead misbehaves: see plan above'); process.exit(1) }
 }
 // An advisory answer that still holds a figure after two attempts: the sentences with a digit go, the rest stays.
 {

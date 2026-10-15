@@ -45,7 +45,7 @@ export function recentEntries(diary: DiaryEntry[], n = 6): DiaryEntry[] {
   const seen = new Set<string>()
   const out: DiaryEntry[] = []
   // Newest day first; within a day the later entry is the more recent.
-  const newestFirst = diary.map((e, i) => ({ e, i })).sort((a, b) => (a.e.date === b.e.date ? b.i - a.i : a.e.date < b.e.date ? 1 : -1))
+  const newestFirst = eaten(diary).map((e, i) => ({ e, i })).sort((a, b) => (a.e.date === b.e.date ? b.i - a.i : a.e.date < b.e.date ? 1 : -1))
   for (const { e } of newestFirst) {
     const key = `${e.foodId}|${e.grams}|${e.snapshot?.name ?? ''}`
     if (seen.has(key)) continue
@@ -77,6 +77,7 @@ export function addDays(isoDate: string, n: number): string {
 export function dayLabel(isoDate: string, today: string): string {
   if (isoDate === today) return 'Today'
   if (isoDate === addDays(today, -1)) return 'Yesterday'
+  if (isoDate === addDays(today, 1)) return 'Tomorrow'
   const [y, m, d] = isoDate.split('-').map(Number)
   return new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 }
@@ -121,4 +122,10 @@ export function clampDate(date: string, today: string): { date: string; moved: '
 export function markEaten(e: DiaryEntry): DiaryEntry {
   const { planned: _planned, ...rest } = e
   return rest
+}
+
+/** What the Day picker shows for a date: which chip it is, and whether choosing it makes a plan (a day after today). */
+export function pickerState(value: string, today: string): { chip: 'today' | 'yesterday' | 'tomorrow' | 'date'; planned: boolean } {
+  const chip = value === today ? 'today' : value === addDays(today, -1) ? 'yesterday' : value === addDays(today, 1) ? 'tomorrow' : 'date'
+  return { chip, planned: value > today }
 }

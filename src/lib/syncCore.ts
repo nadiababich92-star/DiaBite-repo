@@ -14,11 +14,13 @@ export const LEGACY_DIARY_KEY = 'diabite.legacy.diary.v1'
 export interface DiaryRow {
   user_id: string; id: string; day: string; meal: string; food_id: string; grams: number
   snapshot: DiaryEntry['snapshot'] | null; updated_at: string
+  /** A meal planned and not yet eaten. A row from before the column existed has none, and reads as eaten. */
+  planned?: boolean
 }
 
 export const toRow = (userId: string, e: DiaryEntry, now = new Date().toISOString()): DiaryRow => ({
   user_id: userId, id: e.id, day: e.date, meal: e.meal, food_id: e.foodId, grams: e.grams,
-  snapshot: e.snapshot ?? null, updated_at: now,
+  snapshot: e.snapshot ?? null, updated_at: now, planned: e.planned === true,
 })
 
 const MEALS: MealType[] = ['breakfast', 'lunch', 'dinner', 'snack']
@@ -28,7 +30,7 @@ export function fromRow(r: Partial<DiaryRow>): DiaryEntry | null {
   if (typeof r.id !== 'string' || typeof r.day !== 'string' || typeof r.food_id !== 'string') return null
   const grams = Number(r.grams)
   if (!Number.isFinite(grams) || grams <= 0 || !MEALS.includes(r.meal as MealType)) return null
-  return { id: r.id, date: r.day, meal: r.meal as MealType, foodId: r.food_id, grams, ...(r.snapshot ? { snapshot: r.snapshot } : {}) }
+  return { id: r.id, date: r.day, meal: r.meal as MealType, foodId: r.food_id, grams, ...(r.planned === true ? { planned: true } : {}), ...(r.snapshot ? { snapshot: r.snapshot } : {}) }
 }
 
 /** What changed since the last time the server agreed: new or edited entries, and removed ids. */

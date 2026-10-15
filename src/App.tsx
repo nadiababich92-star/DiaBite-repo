@@ -189,7 +189,7 @@ export default function App() {
       <main role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
       {tab === 'ask' && (
         <AskPage
-          profile={profile} targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} onSessionEnded={sessionEnded}
+          profile={profile} targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} onOpenDiary={() => setTab('diary')} onSessionEnded={sessionEnded}
           tourSeen={tourSeen} onTourSeen={(s) => { setTourSeen(s); saveTour(s) }} tourSuspended={feedbackOpen || waiting > 0 || howOpen}
         />
       )}
@@ -198,7 +198,7 @@ export default function App() {
       )}
       {tab === 'menu' && (
         <MenuPage
-          profile={profile} targets={targets} onAsk={() => setTab('ask')}
+          profile={profile} targets={targets} diary={diary} onAsk={() => setTab('ask')}
           onAdd={(added) => setDiary((d) => [...d, ...added])}
           onRemove={(ids) => setDiary((d) => d.filter((e) => !ids.includes(e.id)))}
           onOpenDiary={() => setTab('diary')}

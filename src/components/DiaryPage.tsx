@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { CATEGORY_LABELS, FOODS, getFood } from '../data/foods'
 import { availableCarbs, glycemicLoad, sumNutrients } from '../lib/glycemic'
 import { MEAL_LABELS, MEAL_ORDER } from '../lib/menu'
-import { addDays, dayLabel, mealForNow, nudgeGrams, recentEntries, viewEntry } from '../lib/diary'
+import { addDays, dateAllowed, dateRange, dayLabel, eaten, markEaten, mealForNow, nudgeGrams, plannedOnly, recentEntries, viewEntry } from '../lib/diary'
 import { weeksSummary, type DayPoint } from '../lib/history'
 import { useToday } from '../lib/useToday'
 import type { DiaryEntry, MealType, Targets } from '../types'
@@ -40,7 +40,21 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
     return () => clearTimeout(t)
   }, [notice])
 
-  const dayEntries = useMemo(() => diary.filter((e) => e.date === date), [diary, date])
+  // Eaten and planned are kept apart: only what was eaten counts anywhere on this screen.
+  const onDay = useMemo(() => diary.filter((e) => e.date === date), [diary, date])
+  const dayEntries = useMemo(() => eaten(onDay), [onDay])
+  const plannedEntries = useMemo(() => plannedOnly(onDay), [onDay])
+  const isFuture = date > today
+  const canAdd = dateAllowed(date, today)
+  const { max: lastDay } = dateRange(today)
+  const plannedGL = useMemo(() => plannedEntries.reduce((s, e) => s + viewEntry(e).gl, 0), [plannedEntries])
+  const plannedPartial = plannedEntries.some((e) => !viewEntry(e).loadAvailable)
+
+  /** An entry as it goes onto the day on show: planned when that day is after today, eaten otherwise. */
+  const onShownDay = (e: DiaryEntry, over: Partial<DiaryEntry> = {}): DiaryEntry => {
+    const { planned: _p, ...rest } = e
+    return { ...rest, ...over, id: newId(), date, ...(isFuture ? { planned: true } : {}) }
+  }
 
   const totals = useMemo(() => {
     const views = dayEntries.map(viewEntry)
@@ -62,30 +76,30 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
   const pct = (value: number, target: number) => Math.min(100, (value / Math.max(1, target)) * 100)
 
   function add() {
-    if (!selected || !grams || grams <= 0) return
-    const entry: DiaryEntry = { id: newId(), date, meal, foodId: selected.id, grams: Number(grams) }
+    if (!selected || !grams || grams <= 0 || !canAdd) return
+    const entry: DiaryEntry = { id: newId(), date, meal, foodId: selected.id, grams: Number(grams), ...(isFuture ? { planned: true } : {}) }
     onChange([...diary, entry])
-    setNotice({ text: `Added ${selected.name} to ${MEAL_LABELS[meal].toLowerCase()}.`, undo: () => onChange(latest.current.filter((e) => e.id !== entry.id)) })
+    setNotice({ text: `${isFuture ? 'Planned' : 'Added'} ${selected.name} ${isFuture ? 'for' : 'to'} ${MEAL_LABELS[meal].toLowerCase()}.`, undo: () => onChange(latest.current.filter((e) => e.id !== entry.id)) })
     setSelectedId(null); setQuery(''); setGrams('')
   }
 
   // One tap: the same food at the same weight, again, on the day and meal on show.
   function again(e: DiaryEntry) {
-    const copy: DiaryEntry = { ...e, id: newId(), date, meal }
+    const copy = onShownDay(e, { meal })
     onChange([...diary, copy])
     setNotice({ text: `Added ${viewEntry(e).name} to ${MEAL_LABELS[meal].toLowerCase()}.`, undo: () => onChange(latest.current.filter((x) => x.id !== copy.id)) })
   }
 
   // The day before the one on show: what was eaten there can be put here, a meal at a time or all of it.
   const sourceDate = addDays(date, -1)
-  const sourceEntries = useMemo(() => diary.filter((e) => e.date === sourceDate), [diary, sourceDate])
+  const sourceEntries = useMemo(() => eaten(diary).filter((e) => e.date === sourceDate), [diary, sourceDate])
   const sourceMeals = MEAL_ORDER.filter((m) => sourceEntries.some((e) => e.meal === m))
   const sourceName = sourceDate === addDays(today, -1) ? 'yesterday' : dayLabel(sourceDate, today)
 
   function copyFrom(meals: MealType[]) {
     const chosen = sourceEntries.filter((e) => meals.includes(e.meal))
     if (chosen.length === 0) return
-    const copies = chosen.map((e) => ({ ...e, id: newId(), date }))
+    const copies = chosen.map((e) => onShownDay(e))
     const ids = new Set(copies.map((c) => c.id))
     onChange([...diary, ...copies])
     setNotice({
@@ -103,6 +117,12 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
     onChange(diary.map((x) => (x.id === e.id ? { ...x, grams: nudgeGrams(x.grams, dir) } : x)))
   }
 
+  // "Ate it": the plan becomes a log, and counts from this moment on its day.
+  function ateIt(e: DiaryEntry) {
+    onChange(diary.map((x) => (x.id === e.id ? markEaten(x) : x)))
+    setNotice({ text: `Marked ${viewEntry(e).name} eaten.`, undo: () => onChange(latest.current.map((x) => (x.id === e.id ? e : x))) })
+  }
+
   const left = Math.round((targets.glBudget - totals.gl) * 10) / 10
   const over = left < 0
 
@@ -112,7 +132,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
         <div className="day-nav">
           <button className="ghost step-day" aria-label="The day before" onClick={() => setPicked(addDays(date, -1))}>‹</button>
           <h2 style={{ margin: 0 }} aria-live="polite">{dayLabel(date, today)}</h2>
-          <button className="ghost step-day" aria-label="The day after" disabled={isToday} onClick={() => setPicked(addDays(date, 1) >= today ? null : addDays(date, 1))}>›</button>
+          <button className="ghost step-day" aria-label="The day after" disabled={date >= lastDay} onClick={() => setPicked(addDays(date, 1) === today ? null : addDays(date, 1))}>›</button>
         </div>
         {!isToday && <button className="link back-today" onClick={() => setPicked(null)}>Back to today</button>}
 
@@ -122,6 +142,11 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
           <span className="fig-v">{isToday ? Math.abs(left) : totals.gl.toFixed(1)}</span>
         </div>
         <p className="muted" style={{ margin: '0 0 6px' }}>{totals.gl.toFixed(1)} used of {targets.glBudget}</p>
+        {plannedEntries.length > 0 && (
+          <p className="muted planned-line">
+            Planned: GL {plannedGL.toFixed(0)}{plannedPartial ? ' and carbohydrate only for some' : ''}, not counted yet.
+          </p>
+        )}
         <div className="bar" role="img" aria-label={`${totals.gl.toFixed(0)} of ${targets.glBudget} glycemic load used`}>
           <i className={over ? 'over' : ''} style={{ width: `${pct(totals.gl, targets.glBudget)}%` }} />
         </div>
@@ -141,10 +166,12 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
 
       {dayEntries.length === 0 && (
         <div className="empty">
-          <p style={{ margin: '0 0 10px' }}>Nothing logged for {isToday ? 'today' : 'this day'} yet.</p>
+          <p style={{ margin: '0 0 10px' }}>
+            {plannedEntries.length > 0 ? 'Nothing eaten for this day yet.' : isFuture ? 'Nothing planned for this day yet.' : `Nothing logged for ${isToday ? 'today' : 'this day'} yet.`}
+          </p>
           <div className="row" style={{ justifyContent: 'center' }}>
             {onAsk && isToday && <button className="primary" onClick={onAsk}>Ask about a meal</button>}
-            {sourceMeals.length > 0 && <button className="ghost" onClick={() => copyFrom(sourceMeals)}>Copy {sourceName}</button>}
+            {sourceMeals.length > 0 && canAdd && <button className="ghost" onClick={() => copyFrom(sourceMeals)}>{isFuture ? 'Plan' : 'Copy'} {sourceName}</button>}
           </div>
         </div>
       )}
@@ -193,8 +220,35 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
         )
       })}
 
+      {plannedEntries.length > 0 && (
+        <section className="card" aria-label="Planned">
+          <h2 className="diary-subhead" style={{ marginTop: 0 }}>Planned</h2>
+          <ul className="entries">
+            {plannedEntries.map((e) => {
+              const v = viewEntry(e)
+              return (
+                <li className="entry planned" key={e.id}>
+                  <div className="entry-main">
+                    <span className="entry-name">{v.name}</span>
+                    <span className="muted entry-sub">
+                      <span className="pill planned">{date < today ? 'planned, not eaten' : 'planned'}</span>{' '}
+                      {MEAL_LABELS[e.meal]} · {v.portion} · {v.availableCarbs.toFixed(1)} g carbs · GL {v.loadAvailable ? v.gl.toFixed(1) : '—'}
+                    </span>
+                  </div>
+                  <div className="entry-side">
+                    {date <= today && <button className="ghost ate-it" aria-label={`Ate it: ${v.name}, ${v.portion}`} onClick={() => ateIt(e)}>Ate it</button>}
+                    <button className="link entry-x" aria-label={`Remove ${v.name}, ${v.portion}`} onClick={() => remove(e)}>✕</button>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      )}
+
       <section className="card">
         <h2>Add a food</h2>
+        {!canAdd && <p className="muted" role="status">{date < today ? 'You can go back 14 days.' : 'You can plan 14 days ahead.'}</p>}
 
         {sourceMeals.length > 0 && (
           <div className="recent">
@@ -254,8 +308,8 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
             />
           </label>
           <div className="field" style={{ justifyContent: 'flex-end' }}>
-            <button className="primary" onClick={add} disabled={!selected || !grams}>
-              Add
+            <button className="primary" onClick={add} disabled={!selected || !grams || !canAdd}>
+              {isFuture ? 'Plan it' : 'Add'}
             </button>
           </div>
         </div>

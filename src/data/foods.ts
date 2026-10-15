@@ -138,4 +138,5 @@ export const CATEGORY_LABELS: Record<Food['category'], string> = {
   fats: 'Fats',
   sweets: 'Sweets',
   drinks: 'Drinks',
+  other: 'Other',
 }
