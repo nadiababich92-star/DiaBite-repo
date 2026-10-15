@@ -846,13 +846,14 @@ button.step-day:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; 
 .day-picker .label { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
 .day-picker .chips { margin-top: 0; }
 .date-pick { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.date-pick-label { white-space: nowrap; }
 .date-pick input { font: inherit; font-size: 14px; color: inherit; background: transparent; border: none; padding: 0; min-height: 0; }
 .date-pick.on input { font-weight: 600; }
 .day-note { min-height: 18px; margin: 0; }
 
 /* A planned meal: dimmed, with a word that says so. */
 .entry.planned .entry-name, .entry.planned .entry-sub { color: var(--text-dim); }
-.entry.planned .pill.planned { background: var(--surface-2); color: var(--text-dim); border: 1px dashed var(--text-faint); }
+.entry.planned .pill.planned { display: block; width: fit-content; margin-bottom: 4px; background: var(--surface-2); color: var(--text-dim); border: 1px dashed var(--text-faint); }
 .entry-side .ate-it { white-space: nowrap; }
 .planned-line { margin: 4px 0 0; }
 .diary-subhead { margin: 18px 0 6px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }

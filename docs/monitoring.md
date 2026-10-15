@@ -151,6 +151,7 @@ not in git. People are numbered by sign-up order: no email, name or id is in the
 - **Back in 2 / 7 days** counts an eaten meal after the first-meal day and within 2 (or 7) days of it. Someone whose first meal is
   too recent is "not yet" and is left out of both sides of the fraction.
 - **Throwaway accounts** (`@example.com`: the rehearsal, screens and the demo video) are dropped.
+- **The agent numbers include the builder's own evaluation runs** (`npm run eval:agent` and the Foundry runs go through the same route), so on a quiet week "blocked by a rule" and the unknown-food list are mostly ours. Read them as a feed for the eval set, not as a count of testers.
 - **The turn log is optional.** If Azure cannot be read, the report says so and the rest still prints.
 - **Typed questions with a food we do not have** come from the turn log, deduplicated and not tied to a person: the log holds the
   browser's random session id and never an account. The consent card promises exactly that, and that they are kept for 30 days
