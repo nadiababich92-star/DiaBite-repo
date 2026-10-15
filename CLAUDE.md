@@ -32,7 +32,8 @@ change that. If a change would let it, stop and say so.
 | Evals | `eval/` | `npm run eval` (engine), `npm run eval:agent` (deployed agent), Foundry runs via `eval/run-foundry.ts` |
 | Hosting | Azure Container App `diabite-engine`, image built by GitHub Actions | One image serves engine and app at one address |
 
-Permanent address: `https://diabite-engine.greenglacier-ab5551c6.swedencentral.azurecontainerapps.io`
+Public address: **`https://diabite.pro`** (bought 15 October 2026 at Hostinger, DNS there; a managed certificate on the Container App; `www.diabite.pro` too).
+Technical address, which the agents still call and which still works: `https://diabite-engine.greenglacier-ab5551c6.swedencentral.azurecontainerapps.io`
 
 ---
 

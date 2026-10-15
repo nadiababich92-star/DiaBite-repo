@@ -20,7 +20,7 @@ estimate; 8,633 foods and 2,000 recipes; a weekly menu and shopping list.
 
 1. Run `bash scripts/demo-limits.sh on` the morning of a live room (one Wi-Fi would use up 30 asks in 10 minutes),
    and `off` afterwards. Skip it for a recording.
-2. `https://diabite-engine.greenglacier-ab5551c6.swedencentral.azurecontainerapps.io/health` must say
+2. `https://diabite.pro/health` must say
    `"records":8633`. A smaller number means the database did not load and answers will be wrong in a way that
    looks right.
 3. **Use a clean browser profile (a guest window), signed in as the demo person, and stop at the first screen of the setup.**

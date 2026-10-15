@@ -14,7 +14,7 @@
 | **Video Link (3 Mins Demo / Setup Walkthrough)*** | *Yours: the pitch video (2:47) is on your computer and in the course folder you uploaded it to; the form wants a link or the Cohort 10 - Pitch Day upload.* |
 | **Headshot Photo*** | *Yours: a photo or an avatar, file named `NadiaBabich_DiaBite`.* |
 | **Your Flow File Link*** | There is no n8n file: the agents moved to Azure AI Foundry. The equivalent is open in the repository: the three agent prompts and the publishing script, https://github.com/nadiababich92-star/DiaBite-repo/tree/main/agent (meal agent: https://github.com/nadiababich92-star/DiaBite-repo/blob/main/agent/prompts/meal.md), and the tool specification, https://github.com/nadiababich92-star/DiaBite-repo/blob/main/server/openapi.ts. Links checked: all four answer 200. |
-| **Deployed Link** | https://diabite-engine.greenglacier-ab5551c6.swedencentral.azurecontainerapps.io (free; sign in with your email, a code is sent) |
+| **Deployed Link** | https://diabite.pro (free; sign in with your email, a code is sent) |
 | **Any Comments*** | DiaBite is being prepared for its first user sessions, not launched. It is a wellness reference tool, not medical advice: no dosing, red flags are caught by rules before any model runs, and no clinician has signed it off yet. I am looking for people with type 2 diabetes, prediabetes or insulin resistance (or friends and relatives who have it) to try it for about 30 minutes and tell me where it breaks; write to me on LinkedIn or at nadia.babich92@gmail.com. Evaluation: 102 agent cases (204 mechanical safety and tool checks) and a Foundry evaluation with an independent judge; every answer is verified against tool results. |
 
 ## Things only the owner can supply

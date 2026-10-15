@@ -305,7 +305,7 @@ try {
 
   // ── The ask ────────────────────────────────────────────────────────────────
   zone(0.07)
-  await showCard(endCard('diabite-engine.greenglacier-ab5551c6.swedencentral.azurecontainerapps.io'))
+  await showCard(endCard('diabite.pro'))
   end = say('c0'); await holdTo(end + 1.5)
 
   await b.send('Page.stopScreencast')
