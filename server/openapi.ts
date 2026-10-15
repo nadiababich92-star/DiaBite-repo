@@ -108,6 +108,8 @@ export function openApiSpec() {
             'counts the ones it finds; the others come back in `unresolved` and must be named to the person. ' +
             'You supply words and portion weights only: never a nutrition value, which the engine computes. ' +
             'Set `gramsStated: true` on an ingredient only when the person gave that amount. ' +
+            'If the person ate other foods with the dish (a salad, a banana, a glass of juice), put those in the SAME ingredients ' +
+            'list with their own weights, so one call counts the whole plate and nothing they named is left out. ' +
             'The result always has `assumed: true`: it is an estimate from a typical recipe, not a record of the meal.',
           requestBody: {
             required: true,
@@ -121,6 +123,7 @@ export function openApiSpec() {
                     dish: { type: 'string', description: 'The dish as the person named it, the same text you sent to resolve_foods.' },
                     ingredients: {
                       type: 'array',
+                      description: 'The ingredients of the dish, and also every other food the person ate with it, each with its own weight for one portion.',
                       minItems: 1,
                       maxItems: 20,
                       items: {
