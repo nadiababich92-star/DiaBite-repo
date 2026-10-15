@@ -133,6 +133,32 @@ phrases that is systematic rather than incidental — a whole cuisine, a whole
 food category. The second query is how you see that: one-off misses scatter,
 a systematic gap repeats.
 
+## The weekly report: how to read it
+
+```bash
+npm run report                                   # the last 7 days, to the terminal and docs/reports/<today>.md
+npm run report -- --exclude a@x.com,b@y.com      # leave these accounts out (your own, say)
+```
+
+It reads the accounts, profiles, diaries and feedback in Supabase with the service key (from the Container App secret, never
+printed) and the turn log from Log Analytics. The arithmetic is in `src/lib/report.ts`; `npm run eval` tests it. `docs/reports/` is
+not in git. People are numbered by sign-up order: no email, name or id is in the output.
+
+- **Only eaten meals count.** A planned meal is a promise, not a log.
+- **Active** is a person with an eaten meal in the last 7 days. **Meal slots** are distinct (day, meal) pairs, not entries.
+- **Days in range** is the Diary's own function (`weekSummary`): three meal slots, none without a load, load at or under the
+  budget. The number here and the one on the person's screen are the same by construction.
+- **Back in 2 / 7 days** counts an eaten meal after the first-meal day and within 2 (or 7) days of it. Someone whose first meal is
+  too recent is "not yet" and is left out of both sides of the fraction.
+- **Throwaway accounts** (`@example.com`: the rehearsal, screens and the demo video) are dropped.
+- **The turn log is optional.** If Azure cannot be read, the report says so and the rest still prints.
+- **Typed questions with a food we do not have** come from the turn log, deduplicated and not tied to a person: the log holds the
+  browser's random session id and never an account. The consent card promises exactly that, and that they are kept for 30 days
+  (the workspaces' retention is 30 days). `logTurn` in `server/agent.ts` must never gain a user id, email or IP.
+
+The feedback card ("How is it going?") asks once after the third eaten meal and once on a later day; answers land in the
+`feedback` table with a `context` (`form`, `after_3_meals`, `day_2`). A rating without words is stored as "(rating only)".
+
 ## What this is not
 
 A product database. Nothing here syncs a diary, survives 30 days, or belongs

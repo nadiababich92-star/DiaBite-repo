@@ -64,6 +64,7 @@ you more than a friend who says it's lovely.
   That list is the single most valuable artefact of the session.
 - The app shows four first-run tips to a new browser. Do not mention them and do not turn them off: they are
   part of what the person sees.
+- The app may ask once "How is it going?" after the third meal. Do not mention it and do not turn it off.
 - Do not demo anything. The first time they see the app should be with their
   hands on it.
 

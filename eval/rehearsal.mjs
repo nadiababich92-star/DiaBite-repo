@@ -125,6 +125,34 @@ await tabA('Diary')
 const profRow = (await rows('profiles'))[0]
 check('W15', 'switching bread units on shows them, and the choice is kept with the profile', /Bread units/.test(await A.text()) && profRow?.data?.showBreadUnits === true, JSON.stringify(profRow?.data?.showBreadUnits))
 
+// ── the feedback card: asked once after the third meal, never again after "Not now"; a rating reaches the table ─────
+{
+  const d = new Date(), pad = (n) => String(n).padStart(2, '0'), todayLocal = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  const seed = ['breakfast', 'lunch', 'dinner'].map((meal) => ({ user_id: uid, id: `w18-${meal}`, day: todayLocal, meal, food_id: 'egg', grams: 110, snapshot: null, updated_at: new Date().toISOString() }))
+  await admin('/rest/v1/diary_entries', { method: 'POST', body: JSON.stringify(seed), headers: { prefer: 'return=minimal,resolution=merge-duplicates' } })
+  const cards = () => A.b.ev(`[...document.querySelectorAll('[aria-label="Feedback"]')].map(e => e.innerText.trim().slice(0, 20))`)
+  await A.b.send('Page.reload'); await sleep(4500)
+  await tabA('Ask'); await sleep(1500)
+  const first = await cards()
+  check('W18', 'device A: after three meals the Ask screen shows exactly one "How is it going?" card', Array.isArray(first) && first.length === 1 && /^How is it going\?/.test(first[0]), JSON.stringify(first))
+  await A.click('Not now'); await sleep(500)
+  await A.b.send('Page.reload'); await sleep(4500)
+  await tabA('Ask'); await sleep(1500)
+  check('W18b', '"Not now" removes the card and it does not come back after a reload', (await cards()).length === 0, JSON.stringify(await cards()))
+  // Ask again on purpose: forget that it was asked, rate it, and read the row back from the table.
+  const tag = `rehearsal-${Date.now()}`
+  await A.b.ev(`localStorage.removeItem('diabite.nudge.v1')`)
+  await A.b.send('Page.reload'); await sleep(4500)
+  await tabA('Ask'); await sleep(1500)
+  await A.b.ev(`document.querySelector('[aria-label="Feedback"] button[aria-label^="4 "]')?.click()`); await sleep(300)
+  await A.b.ev(`document.querySelector('[aria-label="Feedback"] textarea')?.focus()`)
+  await A.b.send('Input.insertText', { text: tag })
+  await A.click('Send'); await sleep(3500)
+  const sent = await (await admin(`/rest/v1/feedback?feedback=eq.${tag}&select=rating,context,feedback`)).json()
+  check('W19', 'a rating sent from the card writes one feedback row with context after_3_meals', Array.isArray(sent) && sent.length === 1 && sent[0].rating === 4 && sent[0].context === 'after_3_meals', JSON.stringify(sent))
+  await admin(`/rest/v1/feedback?feedback=eq.${tag}`, { method: 'DELETE' })
+}
+
 // ── the account can be removed, and takes everything with it ────────────────
 await A.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('You'))?.click()`); await sleep(800)
 const del = await fetch(`${APP}/account`, { method: 'DELETE', headers: { authorization: `Bearer ${session.access_token}` } })

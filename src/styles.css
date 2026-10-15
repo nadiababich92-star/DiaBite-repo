@@ -608,7 +608,7 @@ tr:last-child td { border-bottom: none; }
    zoom back. Only touch devices pay for the larger text. */
 @media (hover: none) and (pointer: coarse) {
   input, select, textarea,
-  .ask-form input, .feedback-form textarea { font-size: 16px; }
+  .ask-form input, .feedback-form textarea, .nudge textarea { font-size: 16px; }
 }
 
 /* A visible focus ring on every control, as docs/design.md promises; inputs and
@@ -827,3 +827,16 @@ button.step-day:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; 
 .how-list dt { font-weight: 600; }
 .how-list dd { margin: 0; color: var(--text-dim); }
 .how p { margin: 12px 0; }
+
+/* The feedback card on Ask: once per moment, never takes focus. */
+.nudge { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+.nudge h2 { margin: 0; }
+.nudge textarea {
+  font: inherit; color: var(--text); background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+  width: 100%; resize: vertical; line-height: 1.5;
+}
+.nudge textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.nudge :disabled { opacity: 0.6; cursor: not-allowed; }
+.nudge-thanks { margin: 0; }
+.nudge-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }

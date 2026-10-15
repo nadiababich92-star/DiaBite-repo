@@ -80,3 +80,45 @@ export function dayLabel(isoDate: string, today: string): string {
   const [y, m, d] = isoDate.split('-').map(Number)
   return new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 }
+
+// ── Planned and eaten ─────────────────────────────────────────────────────
+
+/** How far a new meal may be put back, and ahead. These limit new entries only: older ones stay and stay editable. */
+export const MAX_BACKDATE_DAYS = 14
+export const MAX_AHEAD_DAYS = 14
+
+export const isPlanned = (e: DiaryEntry): boolean => e.planned === true
+
+/** The entries that count. Every sum in the app (budget, day totals, the week) reads this, never the raw diary. */
+export const eaten = (entries: DiaryEntry[]): DiaryEntry[] => entries.filter((e) => !isPlanned(e))
+
+/** The entries a person has planned and not yet eaten. */
+export const plannedOnly = (entries: DiaryEntry[]): DiaryEntry[] => entries.filter(isPlanned)
+
+/** The earliest and latest day a meal may be put on, from the person's own today. */
+export const dateRange = (today: string): { min: string; max: string } =>
+  ({ min: addDays(today, -MAX_BACKDATE_DAYS), max: addDays(today, MAX_AHEAD_DAYS) })
+
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/
+
+/** ISO dates sort as strings, so the range is compared as strings. A malformed date is not allowed. */
+export function dateAllowed(date: string, today: string): boolean {
+  if (!ISO_DAY.test(date)) return false
+  const { min, max } = dateRange(today)
+  return date >= min && date <= max
+}
+
+/** A date moved into the allowed range, and which way it had to move, so the picker can say why. */
+export function clampDate(date: string, today: string): { date: string; moved: 'back' | 'ahead' | null } {
+  const { min, max } = dateRange(today)
+  if (!ISO_DAY.test(date)) return { date: today, moved: null }
+  if (date < min) return { date: min, moved: 'back' }
+  if (date > max) return { date: max, moved: 'ahead' }
+  return { date, moved: null }
+}
+
+/** "Ate it": the same entry, no longer planned. The id is kept, so other devices see an update and not a copy. */
+export function markEaten(e: DiaryEntry): DiaryEntry {
+  const { planned: _planned, ...rest } = e
+  return rest
+}

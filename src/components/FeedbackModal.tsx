@@ -1,18 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { COMMENT_MAX, submitFeedback, validate, type FeedbackErrors } from '../lib/feedback'
+import { COMMENT_MAX, RATING_LABELS, submitFeedback, validate, type FeedbackErrors } from '../lib/feedback'
 
 interface Props {
   onClose: () => void
 }
 
 const RATINGS = [1, 2, 3, 4, 5]
-const RATING_LABELS: Record<number, string> = {
-  1: 'Not useful',
-  2: 'Barely useful',
-  3: 'Somewhat useful',
-  4: 'Useful',
-  5: 'Very useful',
-}
 
 type Status = 'editing' | 'sending' | 'sent' | 'failed'
 
@@ -87,6 +80,7 @@ export default function FeedbackModal({ onClose }: Props) {
       await submitFeedback({
         rating: rating as number,
         comment: comment.trim(),
+        context: 'form',
         name: name.trim() || undefined,
         email: email.trim() || undefined,
       })

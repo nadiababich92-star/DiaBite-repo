@@ -4,9 +4,12 @@ import { boldSegments, isLabelled, parseMeal } from '../lib/answer'
 import { sessionId } from '../lib/session'
 import { accessToken } from '../lib/auth'
 import Tour from './Tour'
-import type { TourStep } from '../lib/tour'
+import FeedbackNudge from './FeedbackNudge'
+import { nextStep, type TourStep } from '../lib/tour'
+import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type Milestone } from '../lib/nudge'
 import { askAgent, avoidOf, budgetOf, engineId, lastMealCall, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
-import { mealForNow, viewEntry } from '../lib/diary'
+import { eaten, mealForNow, viewEntry } from '../lib/diary'
+import { loadNudge, saveNudge } from '../lib/storage'
 import { useToday } from '../lib/useToday'
 import { isDemo } from '../lib/demo'
 import { downloadResponses, saveResponse, savedCount } from '../lib/responses'
@@ -30,6 +33,10 @@ const SAMPLES = [
   'How many units of insulin should I take before pasta?',
   "A slice of grandma's cholent",
 ]
+
+/** The feedback card shown since the page loaded, if it is still on screen: one card per visit, kept across tab switches. */
+let visitCard: Milestone | null = null
+let visitCardShown = false
 
 /** Lab 3.2: with fresh context every question gets its own session and an empty diary, so saved responses don't depend on each other. */
 const FRESH_KEY = 'diabite.freshContext'
@@ -382,11 +389,28 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
   const abort = useRef<AbortController | null>(null)
 
   const today = useToday()
-  const todayEntries = useMemo(() => diary.filter((e) => e.date === today), [diary, today])
+  // Only what was eaten counts: a planned meal is a promise, not a log.
+  const counted = useMemo(() => eaten(diary), [diary])
+  const todayEntries = useMemo(() => counted.filter((e) => e.date === today), [counted, today])
   const usedGL = useMemo(() => todayEntries.reduce((s, e) => s + viewEntry(e).gl, 0), [todayEntries])
   const left = Math.max(0, Math.round((targets.glBudget - usedGL) * 10) / 10)
 
   const receipt = useMemo(() => receiptFrom(reply?.trace), [reply])
+
+  // "How is it going?": after the third meal and on a later day, once each, and only when nothing else is going on.
+  const [card, setCard] = useState<Milestone | null>(visitCard)
+  const facts = useMemo(() => nudgeFacts(diary), [diary])
+  const tipShowing = nextStep(tourSeen, { hasReply: !!reply, hasReceipt: !!receipt, assumed: !!receipt?.assumed, busy, suspended: tourSuspended || glOpen }) !== null
+  useEffect(() => {
+    if (card) return
+    const due = nextNudge({
+      ...facts, today, asked: sanitizeAsked(loadNudge()),
+      busy: busy || !!recalcBusy, suspended: tourSuspended || glOpen || tipShowing, shownThisVisit: visitCardShown,
+    })
+    if (due) { visitCard = due; visitCardShown = true; setCard(due) }
+  }, [card, facts, today, busy, recalcBusy, tourSuspended, glOpen, tipShowing])
+  const cardAsked = (m: Milestone) => saveNudge(markAsked(sanitizeAsked(loadNudge()), m))
+  const cardClosed = () => { visitCard = null; setCard(null) }
   // What is logged and shown as the calculation: the portions the person chose, once they have chosen.
   const active = recalc?.receipt ?? receipt
 
@@ -492,6 +516,7 @@ export default function AskPage({ profile, targets, diary, onLog, onSessionEnded
 
   return (
     <div>
+      {card && <FeedbackNudge milestone={card} onAsked={cardAsked} onClose={cardClosed} />}
       <section className={`card ask-hero${reply || busy ? ' compact' : ''}`}>
         <div className="ask-budget">
           <span className="label">glycemic load left today</span>

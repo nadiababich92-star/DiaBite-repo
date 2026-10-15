@@ -420,6 +420,10 @@ function traceOf(output: unknown[] | undefined): ToolCallTrace[] {
  * unmatched count, share of unknown resolutions, share of clarifying
  * questions, latency p90. It goes to stdout, which on Container Apps means
  * Log Analytics — no extra service, and nothing here is worth a database yet.
+ *
+ * The consent card tells people that what they type into Ask is kept for 30 days and "not tied to your
+ * name or email". That is true only while this line carries the browser's random session id and nothing
+ * that names an account: never add a user id, email or IP here.
  */
 function logTurn(req: AskRequest, res: AskResponse, ms: number): void {
   const resolve = res.trace.find((t) => t.tool.endsWith('resolve_foods'))?.result as

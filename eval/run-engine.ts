@@ -41,6 +41,10 @@ import { generateWeek, menuHidden, regenerateSlot, replayWeek, setRecipes, shopp
 import { toDishes } from '../src/lib/recipes'
 import { ALLERGEN_PATTERNS, PATTERN_PATTERNS } from '../src/lib/dietary'
 import { loadWeekState } from '../src/lib/menuStore'
+import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type NudgeContext } from '../src/lib/nudge'
+import { RATING_ONLY } from '../src/lib/feedbackCopy'
+import { buildReport, reportMarkdown, type AccountInput, type ReportInput } from '../src/lib/report'
+import { CONSENT_VERSION } from '../src/lib/syncCore'
 import { addDays, dayLabel, gramStep, mealForNow, nudgeGrams, recentEntries } from '../src/lib/diary'
 import { calculateTargets, DEFAULT_PROFILE } from '../src/lib/profile'
 import { CATEGORY_LABELS } from '../src/data/foods'
@@ -316,6 +320,66 @@ console.log(`\ncost-dish ${dishMisses.length === 0 ? 'ok' : 'WRONG'}`)
   console.log(`\ntour      ${bits.length === 0 ? 'ok' : 'WRONG'}`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) { console.log('the first-run tips misbehave: see tour above'); process.exit(1) }
+}
+// Watching the test users and hearing from them: when the feedback card is asked, and what the weekly report counts.
+{
+  const bits: string[] = []
+  const ctx = (over: Partial<NudgeContext> = {}): NudgeContext => ({ eatenSlots: 0, firstMealDate: null, today: '2026-10-20', asked: [], busy: false, suspended: false, shownThisVisit: false, ...over })
+  if (nextNudge(ctx({ eatenSlots: 2, firstMealDate: '2026-10-20' })) !== null) bits.push('asked after two meals')
+  if (nextNudge(ctx({ eatenSlots: 3, firstMealDate: '2026-10-20' })) !== 'after_3_meals') bits.push('not asked after the third meal')
+  if (nextNudge(ctx({ eatenSlots: 3, firstMealDate: '2026-10-20', asked: ['after_3_meals'] })) !== null) bits.push('the same day counted as a later day')
+  if (nextNudge(ctx({ eatenSlots: 3, firstMealDate: '2026-10-19', asked: ['after_3_meals'] })) !== 'day_2') bits.push('not asked on a later day')
+  if (nextNudge(ctx({ eatenSlots: 3, firstMealDate: '2026-10-19', asked: ['after_3_meals', 'day_2'] })) !== null) bits.push('asked a moment twice')
+  for (const over of [{ busy: true }, { suspended: true }, { shownThisVisit: true }]) {
+    if (nextNudge(ctx({ eatenSlots: 5, firstMealDate: '2026-10-01', ...over })) !== null) bits.push(`asked while ${Object.keys(over)[0]}`)
+  }
+  if (nextNudge(ctx({ eatenSlots: 5, firstMealDate: '2026-10-01' })) !== 'after_3_meals') bits.push('day_2 was offered before after_3_meals')
+  if (sanitizeAsked(null).length || sanitizeAsked('x').length || sanitizeAsked({}).length || sanitizeAsked([1, 'nope']).length) bits.push('malformed storage was not read as nothing asked')
+  if (sanitizeAsked(['day_2', 'bogus']).join() !== 'day_2') bits.push('an unknown moment was kept')
+  if (markAsked(['day_2'], 'day_2').length !== 1) bits.push('a moment was duplicated')
+  const facts = nudgeFacts([
+    { date: '2026-10-19', meal: 'lunch' }, { date: '2026-10-19', meal: 'lunch' }, { date: '2026-10-20', meal: 'dinner' },
+    { date: '2026-10-01', meal: 'dinner', planned: true },
+  ])
+  if (facts.eatenSlots !== 2 || facts.firstMealDate !== '2026-10-19') bits.push('a planned meal counted as eaten, or a slot twice')
+
+  const snap = (gl: number) => ({ name: 'Test food', kcal: 100, carbs: 20, fiber: 2, protein: 5, fat: 3, availableCarbs: 18, gi: 50, gl })
+  let n = 0
+  const e = (date: string, meal: 'breakfast' | 'lunch' | 'dinner' | 'snack', planned = false) =>
+    ({ id: `e${n++}`, date, meal, foodId: 'seed:test', grams: 100, snapshot: snap(5), ...(planned ? { planned: true } : {}) })
+  const acct = (createdAt: string, onboarded: boolean, diary: ReturnType<typeof e>[]): AccountInput => ({ createdAt, onboarded, glBudget: 45, diary })
+  const input = (withPlanned: boolean): ReportInput => ({
+    today: '2026-10-20',
+    accounts: [
+      acct('2026-10-10T08:00:00Z', false, []),
+      acct('2026-10-11T08:00:00Z', true, [e('2026-10-20', 'lunch')]),
+      acct('2026-10-12T08:00:00Z', true, [e('2026-10-17', 'breakfast'), e('2026-10-19', 'breakfast'), e('2026-10-19', 'lunch'), e('2026-10-19', 'dinner')]),
+      acct('2026-10-09T08:00:00Z', true, [e('2026-10-10', 'dinner')]),
+      acct('2026-10-13T08:00:00Z', true, withPlanned ? [e('2026-10-19', 'lunch', true), e('2026-10-21', 'dinner', true)] : []),
+    ],
+    feedback: [
+      { createdAt: '2026-10-18T10:00:00Z', rating: 4, context: null, text: 'older, from the form' },
+      { createdAt: '2026-10-19T10:00:00Z', rating: 2, context: 'after_3_meals', text: '(rating only)' },
+    ],
+    turns: null,
+  })
+  const r = buildReport(input(true))
+  if (r.signedUp !== 5 || r.onboarded !== 4 || r.firstMeal !== 3) bits.push(`counts: ${r.signedUp}/${r.onboarded}/${r.firstMeal}`)
+  if (r.retention.within2.eligible !== 2 || r.retention.within2.returned !== 1) bits.push(`2-day return ${JSON.stringify(r.retention.within2)}`)
+  if (r.retention.within7.eligible !== 1 || r.retention.within7.returned !== 0) bits.push(`7-day return ${JSON.stringify(r.retention.within7)}`)
+  const third = r.people.find((p) => p.firstMealDate === '2026-10-17')
+  if (!third || third.inRangeDays7 !== 1 || third.mealSlots7 !== 4 || third.loggedDays7 !== 2) bits.push('a day with three meals under budget was not in range')
+  if (JSON.stringify(r) !== JSON.stringify(buildReport(input(false)))) bits.push('a planned meal changed the report')
+  if (r.people.map((p) => p.n).join() !== '1,2,3,4,5' || r.people[0].firstMealDate !== '2026-10-10') bits.push('people are not numbered by sign-up order')
+  if (/@/.test(JSON.stringify(r)) || /@/.test(reportMarkdown(r))) bits.push('the report holds an @')
+  if (r.feedback.average !== 3 || r.feedback.byContext.form !== 1 || r.feedback.byContext.after_3_meals !== 1 || r.feedback.comments[0].rating !== 2) bits.push('feedback counts or order')
+  const source = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../src/components/Onboarding.tsx'), 'utf8')
+  if (!source.includes('What you type into Ask, kept for 30 days to improve DiaBite, and not tied to your name or email.')) bits.push('the consent card lacks the line about typed questions')
+  if (RATING_ONLY !== '(rating only)') bits.push('a rating without words is not sent as "(rating only)"')
+  if (CONSENT_VERSION !== '2026-10-b') bits.push(`consent version ${CONSENT_VERSION}`)
+  console.log(`\nmonitor   ${bits.length === 0 ? 'ok' : 'WRONG'}`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) { console.log('the feedback card rules or the weekly report misbehave: see monitor above'); process.exit(1) }
 }
 // An advisory answer that still holds a figure after two attempts: the sentences with a digit go, the rest stays.
 {

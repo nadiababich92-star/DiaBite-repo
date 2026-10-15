@@ -5,7 +5,7 @@
  */
 import type { DiaryEntry, MealType, Profile } from '../types'
 
-export const CONSENT_VERSION = '2026-10-draft'
+export const CONSENT_VERSION = '2026-10-b'
 export const PENDING_KEY = 'diabite.pending.v1'
 export const LEGACY_DIARY_KEY = 'diabite.legacy.diary.v1'
 

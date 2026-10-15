@@ -72,6 +72,11 @@ const TOUR_KEY = 'diabite.tour.v1'
 export const loadTour = (): unknown | null => read<unknown | null>(TOUR_KEY, null)
 export const saveTour = (seen: string[]): void => write(TOUR_KEY, seen)
 
+// Which feedback moments were asked, in this browser. Not synced, not exported, no personal data.
+const NUDGE_KEY = 'diabite.nudge.v1'
+export const loadNudge = (): unknown | null => read<unknown | null>(NUDGE_KEY, null)
+export const saveNudge = (asked: string[]): void => write(NUDGE_KEY, asked)
+
 /**
  * The person's own calendar day. `toISOString()` is UTC, which for a user in
  * Los Angeles turns to tomorrow at 17:00 — the day's budget would silently

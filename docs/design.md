@@ -226,6 +226,10 @@ A **tip** is a small card that points at the real screen: before the first quest
 
 "How it works" (a button under Help in You) opens a plain dialog, one line for each tab.
 
+### Feedback card, on the Ask screen
+
+"How is it going?": a card at the top of Ask with the five rating keys (the labels the feedback form uses), one optional line and **Send** / **Not now**. It asks once after the third eaten meal and once on a later day, at most once per visit, and never while a question is being answered or a tip, the feedback form or a dialog is open. It is announced politely and **never takes focus**. After Send it becomes one plain line ("Thank you. This goes to the person building DiaBite.") with a Close link. No confetti, no praise. Card tokens, the rating keys' own styles, 44 px targets on touch.
+
 ### The week, on the Menu
 Seven day keys (the day's name and its planned glycemic load), today pre-selected, and one
 day open as a card: a bar, then each meal with its glycemic load, its foods at their weights,

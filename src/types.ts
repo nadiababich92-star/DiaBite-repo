@@ -77,6 +77,8 @@ export interface DiaryEntry {
   /** Local seed id for hand-logged foods; the engine's own id (`ing:`/`rec:`/`seed:`) for agent-logged ones. */
   foodId: string
   grams: number
+  /** True for a meal planned for the day and not yet eaten. Absent or false means eaten, and only eaten entries count. */
+  planned?: boolean
   /**
    * Present when the entry was logged from an agent answer: the engine's
    * numbers, stored as computed. The diary shows these instead of recomputing,

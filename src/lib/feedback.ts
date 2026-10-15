@@ -12,12 +12,18 @@
 import { supabase, supabaseConfigured } from './supabase'
 
 const KEY = 'diabite.feedback.v1'
+
+export { RATING_LABELS, RATING_ONLY } from './feedbackCopy'
 /** Typing this as the comment forces the error state, for testing the flow. */
 const FAIL_PHRASE = 'trigger error'
+
+/** Which moment asked: the form in You, a prompt after the third meal, or a prompt on a later day. */
+export type FeedbackContext = 'form' | 'after_3_meals' | 'day_2'
 
 export interface Feedback {
   rating: number
   comment: string
+  context?: FeedbackContext
   name?: string
   email?: string
 }
@@ -70,6 +76,7 @@ export async function submitFeedback(input: Feedback): Promise<SavedFeedback> {
   const { error } = await supabase.from('feedback').insert({
     rating: input.rating,
     feedback: input.comment,
+    context: input.context ?? 'form',
     name: input.name ?? null,
     email: input.email ?? null,
   })
