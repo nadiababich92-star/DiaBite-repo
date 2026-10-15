@@ -25,8 +25,12 @@ export const problemCard = () => `<!doctype html>${BASE}<style>
   li { font: 400 38px/1.25 'Literata', Georgia, serif; letter-spacing: -.01em; opacity: 0; transform: translateY(10px); transition: opacity .6s, transform .6s, color .6s; max-width: 1400px; }
   li.on { opacity: 1; transform: none; }
   li.past { opacity: .42; }
-  li em { font-style: normal; background: var(--marker); padding: 0 .15em; border-radius: 5px; }
-  @media (prefers-reduced-motion: reduce) { li { transition: none; } }
+  li em { font-style: normal; padding: 0 .15em; border-radius: 5px; background: linear-gradient(var(--marker), var(--marker)) no-repeat left / 0% 100%; }
+  li.on em { animation: sweep 1.6s ease forwards .4s; } li.past em { background-size: 100% 100%; }
+  @keyframes sweep { to { background-size: 100% 100%; } }
+  .avatar { animation: pulse 3.2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(14,90,60,.35) } 50% { box-shadow: 0 0 0 16px rgba(14,90,60,0) } }
+  @media (prefers-reduced-motion: reduce) { li { transition: none; } li.on em { animation: none; background-size: 100% 100%; } .avatar { animation: none; } }
 </style><main>
   <div class="dana"><div class="avatar">D</div><div class="who"><b>Dana, 52</b><span>teaches middle school in Columbus · type 2 diabetes since July · takes metformin · a made-up person</span></div></div>
   <ol>

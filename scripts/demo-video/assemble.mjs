@@ -31,7 +31,25 @@ for (let k = 0; k < n; k++) {
   if (last && last.file === name) last.count++
   else segments.push({ file: name, start: k, count: 1 })
 }
-writeFileSync(join(OUT, 'plan.json'), JSON.stringify({ width: W, height: H, fps: FPS, dir: REC, segments }))
+// The camera: a slow drift so a screen that is holding still never looks frozen. Its strength follows the scenes
+// (a card takes more than the app, whose edges carry tips and the persona chip), eased over a second between them.
+// The app's edges carry the tips and the persona chip, so its zones are kept gentle whatever the recording asked for.
+const zones = ((m.zones ?? []).length ? m.zones : [{ at: 0, amp: 0.02 }]).map((z) => ({ ...z, amp: z.amp < 0.05 ? 0.02 : z.amp }))
+const ampAt = (t) => {
+  let a = zones[0].amp
+  for (let i = 0; i < zones.length; i++) {
+    if (t >= zones[i].at) { const prev = i ? zones[i - 1].amp : zones[0].amp; const k = Math.min(1, (t - zones[i].at) / 1.0); a = prev + (zones[i].amp - prev) * k }
+  }
+  return a
+}
+const cam = Array.from({ length: n }, (_, k) => {
+  const t = k / FPS
+  const s = 1 + ampAt(t) * (0.5 - 0.5 * Math.cos((2 * Math.PI * t) / 15))
+  const fx = 0.5 + 0.1 * Math.sin((2 * Math.PI * t) / 27)
+  const fy = 0.4 + 0.08 * Math.sin((2 * Math.PI * t) / 21 + 1)
+  return [Math.round(s * 10000) / 10000, Math.round(fx * 1000) / 1000, Math.round(fy * 1000) / 1000]
+})
+writeFileSync(join(OUT, 'plan.json'), JSON.stringify({ width: W, height: H, fps: FPS, dir: REC, segments, cam }))
 
 // 2. One WAV with every narration segment placed where its words belong.
 const wavData = (buf) => { let p = 12; while (p < buf.length) { const id = buf.toString('ascii', p, p + 4), size = buf.readUInt32LE(p + 4); if (id === 'data') return buf.subarray(p + 8, p + 8 + size); p += 8 + size } throw new Error('no data chunk') }

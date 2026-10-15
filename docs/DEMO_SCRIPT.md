@@ -4,7 +4,7 @@ A story, not a feature tour: **Dana, a made-up woman of fifty-two with type 2 di
 at her grandmother's table. Every number she gets back can be traced to something that is not the model.**
 
 Rebuilt on 15 October 2026 after the first-run tips shipped and the cohort leader's feedback (he found the app a pain: it tells you
-no and you stop). The recording has no time limit; it runs about three and a half minutes. Every beat was run against the deployed
+no and you stop). The recording has no time limit; it runs about four minutes. Every beat was run against the deployed
 agent that day. If a beat stops working, this file is wrong and should be re-run, not trusted. The earlier five-beat script
 (8 October) is in git history.
 
@@ -23,11 +23,10 @@ estimate; 8,633 foods and 2,000 recipes; a weekly menu and shopping list.
 2. `https://diabite-engine.greenglacier-ab5551c6.swedencentral.azurecontainerapps.io/health` must say
    `"records":8633`. A smaller number means the database did not load and answers will be wrong in a way that
    looks right.
-3. **Use a clean browser profile (a guest window), signed in as the demo person, and stop before asking anything.**
+3. **Use a clean browser profile (a guest window), signed in as the demo person, and stop at the first screen of the setup.**
    The tips are remembered in the browser, so a profile that has already seen them will not show them, and a
-   profile where onboarding has already been done on this device skips them as a returning person. A guest window
-   that signs in to an account whose onboarding is done on the server shows tip 1 on the first Ask screen: that is
-   the opening shot.
+   profile where onboarding has already been done on this device skips them as a returning person. The recording does the setup on camera, so for a live demo use an account whose setup is done on the server: a guest window that signs in to it
+   shows tip 1 on the first Ask screen.
 4. **The demo person** (an invented person, never yours): type 2 diabetes, metformin, no insulin, age 52, a daily
    budget of **45 glycemic load**. Log **150 g of Greek yogurt** for breakfast so the day has something in it (the
    beats were timed with **44.4 left**; a day at zero looks like a fresh install).
@@ -49,7 +48,8 @@ person's (age 52, type 2, metformin, a budget of 45 glycemic load). The words ar
 | Title | "Can I eat this?" | the promise in one line | the question |
 | Dana's problem | a card, five lines lit in turn | the list of allowed and forbidden foods; the real question; five to seven times a day; a calorie app costs minutes; real life is a burrito bowl | the problem, in the words of the first pitch |
 | The promise | the architecture, from the trust page | a model reads, an engine counts, a verifier blocks any number no tool returned | the architecture the cohort leader asked for |
-| Thursday 7:40 | the first tip, then eggs, rye bread, avocado | fits, load 7.2, 37.2 left; the verdict tip; Show calculation; the receipt; Log | the first minute of a new person |
+| Thursday 7:40, the setup | the app's own onboarding: what it keeps, her diagnosis, her medicines, her day | Dana agrees, types her age, picks type 2 and metformin; a budget of 45 appears, with the formula shown | **everything is personal**: diagnosis, medicines, age, weight, activity, kidneys, allergies and how she eats all change her numbers. The video does **not** say a doctor approved it: no clinician has signed it off |
+| Thursday 7:40, breakfast | the first tip, then eggs, rye bread, avocado | fits, load 7.2, 37.8 left; the verdict tip; Show calculation; the receipt; Log | the first minute of a new person |
 | Thursday 6:45 pm | spaghetti, garlic bread, orange juice | **"Not today", over by about 9**, and the app names a swap (whole wheat pasta) | **the softened no**: it says no and shows the way |
 | Thursday 10:30 pm | the insulin question | refused at once, no spinner | safety |
 | Sunday | cholent with its ingredients | **Estimate**, "if yours is like this"; Edit the recipe, remove one, still an estimate | a dish the database lacks |
@@ -141,7 +141,7 @@ The finished recording is made by the scripts below, not by hand: it needs no re
 
 ## Re-making the recording
 
-`docs/demo-story.mp4` (about 3 min 30 s, the voice is the AI voice Emma) was made from the live app on 15 October by three scripts in
+`docs/demo-story.mp4` (about 4 min 10 s, the voice is the AI voice Emma) was made from the live app on 15 October by three scripts in
 `scripts/demo-video/`, with no ffmpeg:
 
 1. `node scripts/demo-video/tts.mjs` writes each narration segment (`narration.json`) with Azure Speech, using the signed-in Azure CLI.

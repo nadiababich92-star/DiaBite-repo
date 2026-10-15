@@ -42,25 +42,8 @@ const stored = JSON.stringify({ ...session, expires_at: Math.floor(Date.now() / 
 const FRESH = `localStorage.clear(); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`
 
 try {
-  // ── 1. Off camera: the demo person's profile, on the server ───────────────
-  const setup = await launch({ port: 9810, width: 390, height: 844, dpr: 1 })
-  const click = (b, t) => b.ev(`(()=>{const e=[...document.querySelectorAll('button')].find(x=>x.innerText.trim().startsWith(${JSON.stringify(t)})); if(!e) return 'NO'; e.click(); return 'ok'})()`)
-  await setup.send('Page.navigate', { url: APP }); await sleep(2500)
-  await setup.ev(FRESH); await setup.send('Page.reload'); await sleep(3500)
-  await setup.ev(`window.__setNum = (labelText, v) => { const el = [...document.querySelectorAll('label.field')].find(l => l.innerText.trim().startsWith(labelText))?.querySelector('input'); if (!el) return; const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(el, String(v)); el.dispatchEvent(new Event('input', { bubbles: true })) }; window.__check = (txt) => { const c = document.querySelector('input[aria-label="' + txt + '"]') ?? [...document.querySelectorAll('label')].find(l => l.innerText.includes(txt))?.querySelector('input'); if (c && !c.checked) c.click() }`)
-  await setup.ev(`__check('I agree that DiaBite keeps this about me')`)
-  await setup.ev(`__setNum('Age', 52)`); await click(setup, 'Continue'); await sleep(700)
-  await click(setup, 'Type 2 diabetes'); await click(setup, 'Continue'); await sleep(700)
-  await click(setup, 'Continue'); await sleep(700); await click(setup, 'Continue'); await sleep(700)
-  for (let i = 0; i < 8; i++) {
-    await setup.ev(`__check('I understand this is not medical advice')`); await sleep(300)
-    await click(setup, 'Start using DiaBite'); await sleep(1800)
-    if (await setup.ev(`!!document.querySelector('.ask-form')`)) break
-  }
-  await sleep(1500)
-  await setup.close()
-
-  // A demo person's diary: a few weeks of days, so the week and the four-week strip have something to show.
+  // ── 1. Off camera: only the diary history (onboarding is on camera) ────────
+  // A demo person's diary: a few weeks of days before today, so the week and the four-week strip have something to show. Today is empty: breakfast is the first meal.
   const dayAgo = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
   const rows = []
   const add = (n, meal, food_id, grams) => rows.push({ user_id: uid, id: `demo-${n}-${meal}-${food_id}`, day: dayAgo(n), meal, food_id, grams, snapshot: null, updated_at: new Date().toISOString() })
@@ -69,7 +52,6 @@ try {
   for (const n of [1, 2, 3, 5, 8, 9, 10, 12, 15, 16, 18, 22, 23, 25]) goodDay(n)
   for (const n of [4, 11]) overDay(n)
   for (const n of [6, 17]) add(n, 'lunch', 'lentils', 150)
-  add(0, 'breakfast', 'greekyogurt', 150)   // today, so the day has something in it
   const seeded = await admin('/rest/v1/diary_entries', { method: 'POST', body: JSON.stringify(rows), headers: { prefer: 'return=minimal' } })
   console.log(`seeded ${rows.length} diary rows:`, seeded.status)
 
@@ -120,16 +102,48 @@ try {
   const target = (spec) => `(()=>{
     const spec = ${JSON.stringify(spec)};
     const e = spec.sel ? document.querySelector(spec.sel) : [...document.querySelectorAll(spec.scope ?? 'button')].find(x => x.innerText.trim().startsWith(spec.text));
-    if (!e) return null; e.scrollIntoView({ block: 'center', behavior: 'instant' }); const r = e.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) } })()`
+    if (!e) return null; if (!spec.noScroll) e.scrollIntoView({ block: 'center', behavior: 'instant' }); const r = e.getBoundingClientRect(); if (spec.noScroll && (r.bottom < 0 || r.top > window.innerHeight)) return null; return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + Math.min(r.height / 2, 40)) } })()`
   const clickOn = async (spec, { wait = 8000 } = {}) => {
     let p = null
     for (let i = 0; i < wait / 200 && !p; i++) { p = await b.ev(target(spec)); if (!p) await sleep(200) }
-    if (!p) throw new Error(`nothing to click: ${JSON.stringify(spec)}`)
+    if (!p) throw new Error(`nothing to click: ${JSON.stringify(spec)}; the page says: ${(await b.ev('document.body.innerText')).slice(0, 300).replace(/\n+/g, ' | ')}`)
     await pointAt(p.x, p.y); await ripple(p.x, p.y); await sleep(180)
     await b.ev(`(()=>{const spec=${JSON.stringify(spec)}; const e = spec.sel ? document.querySelector(spec.sel) : [...document.querySelectorAll(spec.scope ?? 'button')].find(x => x.innerText.trim().startsWith(spec.text)); e.click()})()`)
     // Park the pointer beside the button so it does not sit on its label.
     await b.ev(`(()=>{const c=document.getElementById('__cur'); if(c){c.style.transition='left .5s ease,top .5s ease'; c.style.left=(${p.x}+95)+'px'; c.style.top=(${p.y}+45)+'px'}})()`)
     await sleep(350)
+  }
+  // The camera: a gentle drift whose strength can change by scene (cards can take more than the app).
+  const zones = []
+  const zone = (amp) => zones.push({ at: vt(), amp })
+  // The pointer visits what is being spoken about, one place at a time, until the segment ends.
+  const wander = async (sels, end) => {
+    const left = Math.max(0, end - vt()); if (left < 1) return
+    const step = left / sels.length
+    for (const sel of sels) {
+      const until = vt() + step
+      const p = await b.ev(target({ sel, noScroll: true }))
+      if (p) await pointAt(p.x, p.y)
+      await holdTo(until)
+    }
+  }
+  const typeAge = async (value) => {
+    const spec = { sel: 'label.field input' }
+    const p = await b.ev(`(()=>{const el=[...document.querySelectorAll('label.field')].find(l=>l.innerText.trim().startsWith('Age'))?.querySelector('input'); if(!el) return null; el.scrollIntoView({block:'center',behavior:'instant'}); const r=el.getBoundingClientRect(); return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()`)
+    await pointAt(p.x, p.y); await ripple(p.x, p.y)
+    await b.ev(`(()=>{const el=[...document.querySelectorAll('label.field')].find(l=>l.innerText.trim().startsWith('Age'))?.querySelector('input'); el.focus(); el.select()})()`)
+    // One piece, not a digit at a time: a lone "5" is read as a five-year-old and the app stops with its "for adults" screen.
+    await b.send('Input.insertText', { text: String(value) })
+    await sleep(300)
+  }
+  // Scroll steadily for the whole of a narration segment, so the screen is never still while it speaks.
+  const driftScroll = async (end, px) => {
+    const from = await b.ev(`window.scrollY`), t1 = vt(), len = Math.max(1, end - t1)
+    while (vt() < end) {
+      const k = Math.min(1, (vt() - t1) / len)
+      await b.ev(`window.scrollTo(0, ${from} + ${px} * ${k})`)
+      await sleep(70)
+    }
   }
   const typeIn = async (text) => {
     const p = await b.ev(target({ sel: 'input[type=text]' }))
@@ -162,7 +176,7 @@ try {
   const trustPage = `file://${ROOT}/docs/diabite-trust-page.html`
   // Dana is a made-up person, and the corner of the screen says so.
   const setChip = (label) => b.ev(`(()=>{ let c = document.getElementById('__chip'); if (!c) { c = document.createElement('div'); c.id = '__chip';
-    c.style.cssText = 'position:fixed;left:18px;bottom:18px;z-index:99997;background:#fffcf5;border:1px solid #dcd3bf;border-radius:14px;padding:10px 14px;font:600 14px/1.35 IBM Plex Sans,system-ui,sans-serif;color:#14201a;box-shadow:0 6px 18px rgba(0,0,0,.14);max-width:270px'; document.body.append(c) }
+    c.style.cssText = 'position:fixed;left:44px;bottom:44px;z-index:99997;background:#fffcf5;border:1px solid #dcd3bf;border-radius:14px;padding:10px 14px;font:600 14px/1.35 IBM Plex Sans,system-ui,sans-serif;color:#14201a;box-shadow:0 6px 18px rgba(0,0,0,.14);max-width:270px'; document.body.append(c) }
     c.innerHTML = '<div>Dana <span style="font-weight:400;color:#4f5a53">· 52 · type 2 · metformin</span></div><div style="font-weight:400;color:#4f5a53;font-size:13px">' + ${JSON.stringify(label)} + ' · a made-up person</div>' })()`)
   const openApp = async (label) => { await b.send('Page.navigate', { url: `${APP}/?demo` }); await sleep(3800); await inject(); await setChip(label) }
   const answered = () => b.ev(`!!document.querySelector('section.answer')`)
@@ -184,29 +198,53 @@ try {
   let end
 
   // ── The story: a title, Dana and her problem, the promise ──────────────────
+  zone(0.07)
+  if (!process.env.SKIP_CARDS) {
   await showCard(titleCard()); end = say('t0'); await holdTo(end + 0.6)
-  await showCard(problemCard()); const s1 = vt(); end = say('t1')
-  const lit = [0.20, 0.34, 0.52, 0.70, 0.86]
-  for (let i = 0; i < lit.length; i++) { await holdTo(s1 + lit[i] * dur.t1); await b.ev(`window.reveal(${i})`) }
-  await holdTo(end + 0.4)
-  await b.send('Page.navigate', { url: trustPage }); await sleep(2500)
-  await b.ev(`document.getElementById('arch-h')?.scrollIntoView({block:'start'}); window.scrollBy(0,-24)`); await sleep(500)
-  end = say('t2'); await sleep(3500); await smoothScroll(await b.ev(`Math.round(window.scrollY + 300)`), 8000); await holdTo(end + 0.3)
+    await showCard(problemCard()); const s1 = vt(); end = say('t1')
+    const lit = [0.20, 0.34, 0.52, 0.70, 0.86]
+    for (let i = 0; i < lit.length; i++) { await holdTo(s1 + lit[i] * dur.t1); await b.ev(`window.reveal(${i})`) }
+    await holdTo(end + 0.4)
+    zone(0.03)
+    await b.send('Page.navigate', { url: trustPage }); await sleep(2500)
+    await b.ev(`document.getElementById('arch-h')?.scrollIntoView({block:'start'}); window.scrollBy(0,-24)`); await sleep(500)
+    end = say('t2'); await driftScroll(end + 0.3, 420)
+  }
 
-  // ── Thursday morning: the first time, with the tips ───────────────────────
+  // ── Thursday morning: the setup, on camera ────────────────────────────────
   await openApp('Thursday, 7:40 am')
   await b.ev(`window.scrollTo(0,0)`)
-  end = say('b0'); await sleep(2200)
+  end = say('o0'); await wander(['.masthead', '.onb-progress', 'h2'], end)
+  end = say('o1')
+  await clickOn({ text: 'I agree that DiaBite keeps this', scope: 'label' }); await sleep(400)
+  await typeAge(52)
+  await wander(['h2', 'ul'], end)
+  await clickOn({ text: 'Continue' }); await sleep(900)
+  end = say('o2')
+  await clickOn({ text: 'Type 2 diabetes' }); await sleep(500)
+  await clickOn({ text: 'Continue' }); await sleep(900)
+  await clickOn({ text: 'Metformin', scope: 'label' }); await sleep(500)
+  await wander(['h2', 'label:has(input:checked)'], end)
+  await clickOn({ text: 'Continue' }); await sleep(900)
+  await clickOn({ text: 'Continue' }); await sleep(900)
+  end = say('o3'); await sleep(1500)
+  await driftScroll(end - 2.2, 330)
+  await clickOn({ text: 'I understand', scope: 'label' }); await sleep(600)
+  await clickOn({ text: 'Start using DiaBite' }); await sleep(2200)
+
+  // ── then the first tip, and breakfast ─────────────────────────────────────
+  await b.ev(`window.scrollTo(0,0)`)
+  end = say('b0'); await sleep(1500)
   if (!(await b.ev(`!!document.querySelector('.tour-tip')`))) throw new Error('the first tip is not showing: this browser has seen the tips')
   await holdTo(end); await clickOn({ sel: '.tour-tip button.primary' })
   end = say('b1a'); await typeIn('Two eggs, a slice of rye bread and half an avocado')
   await clickOn({ text: 'Check this meal' }); await awaitAnswer('.tour-tip'); await holdTo(end)
   await b.ev(`window.scrollTo(0, 0)`)
-  end = say('b1b'); await holdTo(end)
-  end = say('b1c'); await holdTo(end); await clickOn({ sel: '.tour-tip button.primary' })
+  end = say('b1b'); await wander(['.eyebrow-line', '.fig-lead', '.verify-row'], end)
+  end = say('b1c'); await wander(['.tour-tip h2', '.tour-tip p'], end); await clickOn({ sel: '.tour-tip button.primary' })
   await sleep(500)
   await clickOn({ text: 'Show calculation' })
-  end = say('b1d'); await sleep(1500); await smoothScroll(520, 5500); await holdTo(end)
+  end = say('b1d'); await sleep(1200); await driftScroll(end - 0.5, 420)
   await clickOn({ sel: '.tour-tip button.primary' })
   end = say('b1e'); await clickOn({ text: 'Log' }); await sleep(500)
   await clickOn({ sel: '.tour-tip button.primary' }); await holdTo(end)
@@ -218,13 +256,13 @@ try {
   const DINNER = 'Spaghetti with tomato sauce, garlic bread and a glass of orange juice'
   await askUntil(DINNER, async () => (await b.ev(`!!document.querySelector('.tone-bad')`)) && (await b.ev(`/wap/.test(document.body.innerText)`)))
   await holdTo(end); await b.ev(`window.scrollTo(0, 0)`)
-  end = say('d1'); await holdTo(end)
+  end = say('d1'); await wander(['.eyebrow-line', '.fig-lead', '.answer-text'], end)
 
   // ── Thursday night: the question it will not answer ───────────────────────
   await setChip('Thursday, 10:30 pm')
   end = say('i0'); await typeIn('How many units of insulin should I take before pasta?')
   await clickOn({ text: 'Check this meal' }); await sleep(900); await holdTo(end)
-  end = say('i1'); await b.ev(`window.scrollTo(0, 0)`); await holdTo(end)
+  end = say('i1'); await b.ev(`window.scrollTo(0, 0)`); await wander(['.eyebrow-line', '.answer-text'], end)
 
   // ── Sunday at her grandmother's: a dish the database does not have ────────
   await setChip('Sunday, 1:00 pm')
@@ -233,33 +271,35 @@ try {
   const dishCounted = () => b.ev(`[...document.querySelectorAll('button')].some(x => x.innerText.trim().startsWith('Edit the recipe'))`)
   await askUntil('Cholent with beef, barley, kidney beans and potatoes', dishCounted)
   await holdTo(end); await b.ev(`window.scrollTo(0, 0)`)
-  end = say('l1'); await holdTo(end)
+  end = say('l1'); await wander(['.eyebrow-line', '.answer-text'], end)
   end = say('l2'); await clickOn({ text: 'Edit the recipe' }); await sleep(1800)
   await clickOn({ sel: '.remove-step' })
   cutStart()
   for (let i = 0; i < 40; i++) { if (await b.ev(`!!document.querySelector('.stale')`)) break; await sleep(250) }
   await sleep(400); cutEnd()
-  await b.ev(`window.scrollTo(0, 0)`); await holdTo(end)
+  await b.ev(`window.scrollTo(0, 0)`); await wander(['.eyebrow-line', '.fig-lead'], end)
 
   // ── Her week ───────────────────────────────────────────────────────────────
   await setChip('A demo week')
   end = say('w0'); await clickOn({ text: 'Diary', scope: '[role=tab]' }); await sleep(1500)
-  await b.ev(`document.querySelector('.week-sum')?.scrollIntoView({block:'start'}); window.scrollBy(0,-80)`); await sleep(1200)
-  await holdTo(end)
+  await b.ev(`document.querySelector('.week-sum')?.scrollIntoView({block:'start'}); window.scrollBy(0,-80)`); await sleep(800)
+  await wander(['.week-sum', '.week li:nth-child(3)', '.week li:nth-child(6)', '.weeks li:nth-child(1)', '.weeks li:nth-child(2)'], end)
 
   // ── How we know it works ───────────────────────────────────────────────────
+  zone(0.03)
   await b.send('Page.navigate', { url: trustPage }); await sleep(2500)
   await b.ev(`document.getElementById('eval-h')?.scrollIntoView({block:'start'}); window.scrollBy(0,-24)`); await sleep(500)
-  end = say('e0'); await sleep(3000); await smoothScroll(await b.ev(`Math.round(window.scrollY + 260)`), 9000); await holdTo(end + 0.3)
+  end = say('e0'); await driftScroll(end + 0.3, 300)
 
   // ── The ask ────────────────────────────────────────────────────────────────
+  zone(0.07)
   await showCard(endCard('diabite-engine.greenglacier-ab5551c6.swedencentral.azurecontainerapps.io'))
   end = say('c0'); await holdTo(end + 1.5)
 
   await b.send('Page.stopScreencast')
   const tEnd = now()
   const total = vt()
-  writeFileSync(join(REC, 'manifest.json'), JSON.stringify({ t0, tEnd, total, frames, cuts, audio, size: { w: 1366, h: 768, dpr: 1.405 } }, null, 1))
+  writeFileSync(join(REC, 'manifest.json'), JSON.stringify({ t0, tEnd, total, frames, cuts, audio, zones, size: { w: 1366, h: 768, dpr: 1.405 } }, null, 1))
   console.log(`recorded ${frames.length} frames, ${cuts.length} cuts, ${total.toFixed(1)} s of video; script errors: ${errs.length ? errs.slice(0, 2) : 'none'}`)
   await b.close()
 } finally {

@@ -5,7 +5,7 @@ import AVFoundation
 import AppKit
 
 struct Seg: Decodable { let file: String; let start: Int; let count: Int }
-struct Plan: Decodable { let width: Int; let height: Int; let fps: Int; let dir: String; let segments: [Seg] }
+struct Plan: Decodable { let width: Int; let height: Int; let fps: Int; let dir: String; let segments: [Seg]; let cam: [[Double]]? }
 
 func fail(_ m: String) -> Never { FileHandle.standardError.write((m + "\n").data(using: .utf8)!); exit(1) }
 
@@ -15,7 +15,7 @@ func renderVideo(planPath: String, out: String) {
     guard let writer = try? AVAssetWriter(outputURL: URL(fileURLWithPath: out), fileType: .mp4) else { fail("no writer") }
     let settings: [String: Any] = [
         AVVideoCodecKey: AVVideoCodecType.h264, AVVideoWidthKey: plan.width, AVVideoHeightKey: plan.height,
-        AVVideoCompressionPropertiesKey: [AVVideoAverageBitRateKey: 6_000_000, AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel],
+        AVVideoCompressionPropertiesKey: [AVVideoAverageBitRateKey: 2_800_000, AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel],
     ]
     let input = AVAssetWriterInput(mediaType: .video, outputSettings: settings)
     input.expectsMediaDataInRealTime = false
@@ -28,19 +28,24 @@ func renderVideo(planPath: String, out: String) {
     let space = CGColorSpaceCreateDeviceRGB()
     for seg in plan.segments {
         guard let img = NSImage(contentsOfFile: plan.dir + "/" + seg.file), let cg = img.cgImage(forProposedRect: nil, context: nil, hints: nil) else { fail("cannot read \(seg.file)") }
-        var pbOpt: CVPixelBuffer?
-        CVPixelBufferCreate(nil, plan.width, plan.height, kCVPixelFormatType_32BGRA, nil, &pbOpt)
-        guard let pb = pbOpt else { fail("no pixel buffer") }
-        CVPixelBufferLockBaseAddress(pb, [])
-        if let ctx = CGContext(data: CVPixelBufferGetBaseAddress(pb), width: plan.width, height: plan.height, bitsPerComponent: 8, bytesPerRow: CVPixelBufferGetBytesPerRow(pb), space: space,
-                               bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue) {
-            ctx.interpolationQuality = .high
-            ctx.draw(cg, in: CGRect(x: 0, y: 0, width: plan.width, height: plan.height))
-        }
-        CVPixelBufferUnlockBaseAddress(pb, [])
         for i in 0..<seg.count {
+            let idx = seg.start + i
+            let c = (plan.cam != nil && idx < plan.cam!.count) ? plan.cam![idx] : [1.0, 0.5, 0.4]
+            let scale = c[0], fx = c[1], fy = c[2]
+            var pbOpt: CVPixelBuffer?
+            CVPixelBufferCreate(nil, plan.width, plan.height, kCVPixelFormatType_32BGRA, nil, &pbOpt)
+            guard let pb = pbOpt else { fail("no pixel buffer") }
+            CVPixelBufferLockBaseAddress(pb, [])
+            if let ctx = CGContext(data: CVPixelBufferGetBaseAddress(pb), width: plan.width, height: plan.height, bitsPerComponent: 8, bytesPerRow: CVPixelBufferGetBytesPerRow(pb), space: space,
+                                   bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue) {
+                ctx.interpolationQuality = .high
+                let w = Double(plan.width), h = Double(plan.height)
+                // CoreGraphics' origin is bottom-left: a focus 0.4 down from the top is 0.6 up from the bottom.
+                ctx.draw(cg, in: CGRect(x: -(scale - 1) * w * fx, y: -(scale - 1) * h * (1 - fy), width: w * scale, height: h * scale))
+            }
+            CVPixelBufferUnlockBaseAddress(pb, [])
             while !input.isReadyForMoreMediaData { usleep(2000) }
-            if !adaptor.append(pb, withPresentationTime: CMTime(value: Int64(seg.start + i), timescale: Int32(plan.fps))) { fail("append failed: \(String(describing: writer.error))") }
+            if !adaptor.append(pb, withPresentationTime: CMTime(value: Int64(idx), timescale: Int32(plan.fps))) { fail("append failed: \(String(describing: writer.error))") }
         }
     }
     input.markAsFinished()
