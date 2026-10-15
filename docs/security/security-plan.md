@@ -139,6 +139,10 @@ A new public route (no tool key, because a browser cannot hold one): it costs th
 ### Added 10 October: the email secret
 The sign-in emails go through Azure Communication Services using a client secret held only in Supabase. It expires; the expiry date is in Entra (App registrations, `diabite-smtp`, Certificates and secrets). A reminder a month before is the owner's, and the first thing to check if emails stop. It is never written in the repository, the chat or `.env.example`.
 
+### Added 15 October: planned meals and typed questions
+
+Two things are new about a person. **Planned meals:** a meal can be put on a day up to 14 days ahead and is stored with a `planned` flag on the same `diary_entries` row (migration `20261015130000_diary_planned.sql`). Row-level security is on rows, not columns, so the proof below still holds and no policy changes; the meal is what someone *intends* to eat, lives in their diary, goes in their export and is deleted with their account through the same foreign key. **Typed questions:** the turn log keeps what a person types into Ask for 30 days (the Log Analytics retention of both workspaces, checked 15 October), carries a random per-browser session id and never an account, email or IP; the consent card says so, and `logTurn` in `server/agent.ts` carries a comment that it must not gain one. Feedback rows gain a `context` column (migration `20261015120000_feedback_context.sql`), a short word for which moment asked.
+
 ### Added 10 October: the accounts tables and their row-level security proof
 Migration `20261010130000_accounts.sql` applied to the project (`profiles`, `diary_entries`, `feedback.user_id`). The proof ran as one block that raises at the end, so nothing was kept; afterwards both tables held 0 rows and no proof user remained.
 

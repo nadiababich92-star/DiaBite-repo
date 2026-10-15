@@ -322,7 +322,7 @@ A day counts as *in-range* when both conditions hold:
 
 > **Target: median 4.5 of 7 in-range days by a user's eighth week.**
 
-The Diary computes it with `weekSummary` in `src/lib/history.ts` (three distinct meal slots, every entry carrying a glycemic load, load at or under the budget); the weekly report of the roadmap uses the same function.
+The Diary computes it with `weekSummary` in `src/lib/history.ts` (three distinct meal slots, every entry carrying a glycemic load, load at or under the budget); the weekly report of the roadmap uses the same function. **Only eaten meals count** (added 15 October): a meal can be planned for a day up to 14 days ahead and logged on a day up to 14 days back, and a planned meal moves no figure, no budget and no in-range day until the person marks it eaten ("Ate it"). A plan is a promise, not a log; counting it would let a person plan a perfect week.
 
 This metric was chosen because it only moves when *both* things we care about
 happen: the user keeps engaging, **and** what they actually eat changes. A pure

@@ -111,6 +111,9 @@ What do they do while it thinks for eight seconds?
 
 **Do not** tell them what to type. Do not tell them the number is right.
 
+**Then, if it has not come up:** *"Log what you ate yesterday."* Watch whether they find the day control above the log
+button without help, and whether "Plan it" for tomorrow makes sense to them. Write down the words they use for it.
+
 ### 3 · Something it probably doesn't know (5 min)
 
 > "Now ask it about something you'd eat that it might not have — a brand, a

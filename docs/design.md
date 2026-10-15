@@ -230,10 +230,16 @@ A **tip** is a small card that points at the real screen: before the first quest
 
 "How is it going?": a card at the top of Ask with the five rating keys (the labels the feedback form uses), one optional line and **Send** / **Not now**. It asks once after the third eaten meal and once on a later day, at most once per visit, and never while a question is being answered or a tip, the feedback form or a dialog is open. It is announced politely and **never takes focus**. After Send it becomes one plain line ("Thank you. This goes to the person building DiaBite.") with a Close link. No confetti, no praise. Card tokens, the rating keys' own styles, 44 px targets on touch.
 
+### Day picker, and planned rows
+
+The **Day picker** is a label ("Day"), three chips (Today, Yesterday, Tomorrow; the Menu offers Today and Tomorrow) and a native date field ("Pick a date") built from the existing chip toggle. The chosen chip is pressed (`aria-pressed`); a date out of range snaps to the nearest allowed one and says so in one line ("You can go back 14 days." / "You can plan 14 days ahead."). It never takes focus. On Ask it sits above the log button; the button reads **Log it** up to today and **Plan it** after. On the Menu each meal has **I ate this** and **Plan it…**, which opens the picker under the card.
+
+A **planned row** in the Diary is in the muted text colour with a dashed **planned** pill (a past day: **planned, not eaten**), with **Ate it** (shown only for today and earlier) and ✕. A day with plans carries one quiet line under the figures: "Planned: GL 14, not counted yet." Nothing planned is counted in any figure, bar or week mark, and the state is a word, not a colour.
+
 ### The week, on the Menu
 Seven day keys (the day's name and its planned glycemic load), today pre-selected, and one
 day open as a card: a bar, then each meal with its glycemic load, its foods at their weights,
-the recipe behind a disclosure, **Add to today** and **Replace**. The week stays on this
+the recipe behind a disclosure, **I ate this**, **Plan it…** and **Replace**. The week stays on this
 device until **Generate again** is pressed.
 
 ### Portions
