@@ -93,6 +93,7 @@ try {
       }
     }
     await shot('ask-empty')
+    if (await b.ev(`!!document.querySelector('.nudge')`)) { await b.ev(`document.querySelector('.nudge').scrollIntoView({block:'center'})`); await sleep(500); await shot('feedback-card') }
     if (process.env.TOUR === '1') await shot('tour-1')
     await b.ev(`(()=>{const i=document.querySelector('input[type=text]'); i.focus()})()`)
     await b.send('Input.insertText', { text: process.env.QUESTION ?? 'Two eggs, a slice of rye bread and half an avocado' })
@@ -145,6 +146,7 @@ try {
     await b.close()
   }
 } finally {
-  await fetch(`${APP}/account`, { method: 'DELETE', headers: { authorization: `Bearer ${session.access_token}` } }).catch(() => {})
+  // With the service key, not the app's /account route: a local dev server has no such route and the throwaway account would stay.
+  await admin(`/auth/v1/admin/users/${uid}`, { method: 'DELETE' }).catch(() => {})
   console.log('throwaway account removed')
 }

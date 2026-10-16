@@ -31,6 +31,9 @@ const created = await (await admin('/auth/v1/admin/users', { method: 'POST', bod
 const uid = created.id
 const session = await (await fetch(`${SB}/auth/v1/token?grant_type=password`, { method: 'POST', headers: { apikey: PUB, 'content-type': 'application/json' }, body: JSON.stringify({ email, password }) })).json()
 check('W0', 'a throwaway account exists and signs in', !!uid && !!session.access_token)
+// The throwaway account must not outlive a failed run (W9 tests the app's own delete; this is the net under it, and a 404 is fine).
+const cleanup = () => admin(`/auth/v1/admin/users/${uid}`, { method: 'DELETE' }).catch(() => {})
+process.on('unhandledRejection', async (e) => { console.error(e); await cleanup(); process.exit(1) })
 const stored = JSON.stringify({ ...session, expires_at: Math.floor(Date.now() / 1000) + session.expires_in })
 const rows = async (table) => (await (await admin(`/rest/v1/${table}?user_id=eq.${uid}&select=*`)).json())
 
@@ -214,5 +217,6 @@ const gone = await admin(`/auth/v1/admin/users/${uid}`)
 check('W10', 'the auth user is gone', gone.status === 404, String(gone.status))
 check('W11', 'no script error on either device', A.errs.length === 0 && B.errs.length === 0, JSON.stringify([A.errs.slice(0, 2), B.errs.slice(0, 2)]))
 await A.b.close(); await B.b.close()
+await cleanup()
 console.log(results.every(Boolean) ? '\nrehearsal passed' : '\nrehearsal FAILED')
 process.exit(results.every(Boolean) ? 0 : 1)

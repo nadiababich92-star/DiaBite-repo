@@ -228,7 +228,7 @@ A **tip** is a small card that points at the real screen: before the first quest
 
 ### Feedback card, on the Ask screen
 
-"How is it going?": a card at the top of Ask with the five rating keys (the labels the feedback form uses), one optional line and **Send** / **Not now**. It asks once after the third eaten meal and once on a later day, at most once per visit, and never while a question is being answered or a tip, the feedback form or a dialog is open. It is announced politely and **never takes focus**. After Send it becomes one plain line ("Thank you. This goes to the person building DiaBite.") with a Close link. No confetti, no praise. Card tokens, the rating keys' own styles, 44 px targets on touch.
+"How is it going?": a card at the end of the Ask page (after the answer, so the question box stays first on the screen) with the five rating keys (the labels the feedback form uses), one optional line and **Send** / **Not now**. It asks once after the third eaten meal and once on a later day, at most once per visit, and never while a question is being answered or a tip, the feedback form or a dialog is open. It is announced politely and **never takes focus**. After Send it becomes one plain line ("Thank you. This goes to the person building DiaBite.") with a Close link. No confetti, no praise. Card tokens, the rating keys' own styles, 44 px targets on touch.
 
 ### Day picker, and planned rows
 

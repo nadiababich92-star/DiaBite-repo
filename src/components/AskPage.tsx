@@ -525,7 +525,6 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, o
 
   return (
     <div>
-      {card && <FeedbackNudge milestone={card} onAsked={cardAsked} onClose={cardClosed} />}
       <section className={`card ask-hero${reply || busy ? ' compact' : ''}`}>
         <div className="ask-budget">
           <span className="label">glycemic load left today</span>
@@ -682,6 +681,8 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, o
         </>
       )}
       </div>
+      {/* After everything else: the question box stays first on the screen, and the card is met on the way down, never in front of an answer. */}
+      {card && <FeedbackNudge milestone={card} onAsked={cardAsked} onClose={cardClosed} />}
       {glOpen && <GlInfo budget={targets.glBudget} onClose={() => setGlOpen(false)} />}
       <Tour seen={tourSeen} onSeen={onTourSeen} ctx={{ hasReply: !!reply, hasReceipt: !!receipt, assumed: !!receipt?.assumed, busy, suspended: tourSuspended || glOpen }} />
     </div>

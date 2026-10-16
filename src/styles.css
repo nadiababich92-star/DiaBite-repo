@@ -829,7 +829,7 @@ button.step-day:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; 
 .how p { margin: 12px 0; }
 
 /* The feedback card on Ask: once per moment, never takes focus. */
-.nudge { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+.nudge { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
 .nudge h2 { margin: 0; }
 .nudge textarea {
   font: inherit; color: var(--text); background: var(--surface-2);

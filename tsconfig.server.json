@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "compilerOptions": { "lib": ["ES2020"], "types": ["node"], "jsx": "preserve" },
+  "compilerOptions": { "lib": ["ES2022", "DOM"], "types": ["node", "vite/client"], "jsx": "preserve" },
   "include": ["server", "src/lib", "src/data", "src/types.ts"]
 }

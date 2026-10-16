@@ -34,7 +34,7 @@ export function sanitizeAsked(stored: unknown): Milestone[]        // only known
 
 ## The card (`src/components/FeedbackNudge.tsx`, new)
 
-Props `{ milestone: Milestone; onDone: (milestone: Milestone) => void }`. Rendered at the top of the Ask panel (before the budget card), only when `nextNudge(...)` is not null; `onDone` runs `saveNudge(markAsked(...))` and sets `shownThisVisit`.
+Props `{ milestone: Milestone; onDone: (milestone: Milestone) => void }`. Rendered at the end of the Ask page, after the answer (changed 16 October: at the top it pushed the question box down the first screen), only when `nextNudge(...)` is not null; `onDone` runs `saveNudge(markAsked(...))` and sets `shownThisVisit`.
 
 | Element | Spec |
 |---|---|

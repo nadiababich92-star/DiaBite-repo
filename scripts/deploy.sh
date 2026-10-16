@@ -78,8 +78,13 @@ done
 # The ingress answers 404 "Container App is stopped or does not exist" for a few seconds while the old
 # revision is deactivated and the new one takes the traffic. That, not the app, is why the first smoke
 # failed after four deploys in a row. Wait until /health answers with JSON before checking anything.
-for i in $(seq 1 45); do
-  if curl -s -m 10 "https://$FQDN/health" | grep -q '"ok":true'; then break; fi
+# One good answer is not enough: the ingress flaps between the old and the new revision for a while, and
+# three smoke checks failed on exactly that after every deploy. Require six good answers in a row, from
+# /health and from the page itself, four seconds apart.
+GOOD=0
+for i in $(seq 1 60); do
+  if curl -s -m 10 "https://$FQDN/health" | grep -q '"ok":true' && curl -s -m 10 -o /dev/null -w '%{http_code}' "https://$FQDN/" | grep -q '^200$'; then GOOD=$((GOOD+1)); else GOOD=0; fi
+  [ "$GOOD" -ge 6 ] && break
   sleep 4
 done
 echo "live: $(curl -s -m 15 "https://$FQDN/health")"
