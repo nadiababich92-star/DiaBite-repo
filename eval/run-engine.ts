@@ -477,6 +477,9 @@ console.log(`\ncost-dish ${dishMisses.length === 0 ? 'ok' : 'WRONG'}`)
   if (shop.some((l) => l.grams % 5 !== 0)) bits.push('the planned list is not rounded to 5 g')
   if (shop.length !== 3) bits.push(`the planned list has ${shop.length} lines, expected 3: ${shop.map((l) => l.name).join(', ')}`)
 
+  const seeded = shoppingFromEntries([ent('2026-10-21', 'dinner', { foodId: 'seed:pasta-whole', grams: 180, planned: true, snapshot: snap(5, 'Whole wheat pasta') })], today, lookup)
+  if (seeded.length !== 1 || seeded[0].category === 'other') bits.push(`a curated food the engine calls seed:pasta-whole has category ${seeded[0]?.category}`)
+
   // 6. nothing planned: no planned list, and the week's list is what it always was
   if (shoppingFromEntries([ent(today, 'lunch', { foodId: 'egg', snapshot: undefined })], today).length !== 0) bits.push('an eaten entry became shopping')
   {

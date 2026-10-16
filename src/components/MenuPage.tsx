@@ -74,7 +74,8 @@ export default function MenuPage({ profile, targets, diary, onAsk, onAdd, onRemo
   const plan = built?.plan ?? null
   const weekList = useMemo(() => (plan ? shoppingList(plan) : []), [plan])
   const planned = useMemo(() => plannedOnly(diary), [diary])
-  const plannedList = useMemo(() => shoppingFromEntries(diary, today), [diary, today])
+  // `ready` is a dependency: a planned recipe is expanded into its ingredients only once the recipe file has loaded.
+  const plannedList = useMemo(() => shoppingFromEntries(diary, today), [diary, today, ready])
   const fromPlan = plannedList.length > 0 && !useWeek
   const list = fromPlan ? plannedList : weekList
   // Ticks belong to one list: a changed plan starts a fresh one, because a wrong tick that hides something to buy is worse than a lost tick.

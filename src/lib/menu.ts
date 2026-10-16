@@ -318,7 +318,8 @@ export function shoppingFromEntries(entries: DiaryEntry[], today: string, recipe
       for (const ing of recipe.ingredients) t.add(ing.name, ing.grams * servings, ing.category)
       continue
     }
-    const local = FOODS.find((f) => f.id === e.foodId)
+    // The engine names a curated food `seed:rice-white`; the local table knows it as `rice-white`.
+    const local = FOODS.find((f) => f.id === e.foodId.replace(/^seed:/, ''))
     t.add(e.snapshot?.name ?? local?.name ?? e.foodId, e.grams, local?.category ?? 'other')
   }
   return t.lines()
