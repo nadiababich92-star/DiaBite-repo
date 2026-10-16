@@ -480,6 +480,9 @@ console.log(`\ncost-dish ${dishMisses.length === 0 ? 'ok' : 'WRONG'}`)
   const seeded = shoppingFromEntries([ent('2026-10-21', 'dinner', { foodId: 'seed:pasta-whole', grams: 180, planned: true, snapshot: snap(5, 'Whole wheat pasta') })], today, lookup)
   if (seeded.length !== 1 || seeded[0].category === 'other') bits.push(`a curated food the engine calls seed:pasta-whole has category ${seeded[0]?.category}`)
 
+  const unknownRecipe = shoppingFromEntries([ent('2026-10-21', 'dinner', { foodId: 'rec:DB-NOPE', grams: 1, planned: true, snapshot: snap(5, 'Garlic Bread', 1) })], today, () => undefined)
+  if (unknownRecipe.length !== 1 || unknownRecipe[0].name !== 'Garlic Bread' || unknownRecipe[0].servings !== 1 || unknownRecipe[0].grams !== 0) bits.push('a planned recipe the library does not hold was dropped from the list instead of counted in servings')
+
   // 6. nothing planned: no planned list, and the week's list is what it always was
   if (shoppingFromEntries([ent(today, 'lunch', { foodId: 'egg', snapshot: undefined })], today).length !== 0) bits.push('an eaten entry became shopping')
   {

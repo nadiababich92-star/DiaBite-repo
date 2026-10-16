@@ -94,7 +94,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
   const sourceDate = addDays(date, -1)
   const sourceEntries = useMemo(() => eaten(diary).filter((e) => e.date === sourceDate), [diary, sourceDate])
   const sourceMeals = MEAL_ORDER.filter((m) => sourceEntries.some((e) => e.meal === m))
-  const sourceName = sourceDate === addDays(today, -1) ? 'yesterday' : dayLabel(sourceDate, today)
+  const sourceName = sourceDate === addDays(today, -1) ? 'yesterday' : sourceDate === today ? 'today' : dayLabel(sourceDate, today)
 
   function copyFrom(meals: MealType[]) {
     const chosen = sourceEntries.filter((e) => meals.includes(e.meal))
@@ -171,7 +171,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
           </p>
           <div className="row" style={{ justifyContent: 'center' }}>
             {onAsk && isToday && <button className="primary" onClick={onAsk}>Ask about a meal</button>}
-            {sourceMeals.length > 0 && canAdd && <button className="ghost" onClick={() => copyFrom(sourceMeals)}>{isFuture ? 'Plan' : 'Copy'} {sourceName}</button>}
+            {sourceMeals.length > 0 && canAdd && <button className="ghost" onClick={() => copyFrom(sourceMeals)}>{isFuture ? `Plan the same as ${sourceName}` : `Copy ${sourceName}`}</button>}
           </div>
         </div>
       )}

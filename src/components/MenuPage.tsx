@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CATEGORY_LABELS, getFood } from '../data/foods'
-import { MEAL_LABELS, recipeCount, regenerateSlot, replayWeek, shoppingFromEntries, shoppingList, shoppingText, menuHidden } from '../lib/menu'
+import { MEAL_LABELS, recipeCount, regenerateSlot, replayWeek, amountText, shoppingFromEntries, shoppingList, shoppingText, menuHidden } from '../lib/menu'
 import { addDays, dayLabel, plannedOnly } from '../lib/diary'
 import DayPicker from './DayPicker'
 import { loadMenuRecipes } from '../lib/recipes'
@@ -233,9 +233,7 @@ export default function MenuPage({ profile, targets, diary, onAsk, onAdd, onRemo
                       {CATEGORY_LABELS[item.category]}
                     </td>
                     <td className="num">
-                      {item.grams >= 1000
-                        ? `${(item.grams / 1000).toFixed(2)} kg`
-                        : `${item.grams} g`}
+                      {amountText(item)}
                     </td>
                   </tr>
                 ))}

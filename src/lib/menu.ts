@@ -262,22 +262,28 @@ export function generateWeek(profile: Profile, targets: Targets, seed = Date.now
   return { days, seed, pool }
 }
 
-export type ShoppingLine = { name: string; grams: number; category: FoodCategory }
+/** `servings` is set only for a recipe the library does not hold: it can be bought, but not weighed, so it is counted in servings. */
+export type ShoppingLine = { name: string; grams: number; category: FoodCategory; servings?: number }
 
 /** One line per food, whichever dish it comes from: "Olive oil" in a curated dish and in a recipe is one line. */
 function tally() {
   const totals = new Map<string, ShoppingLine>()
   return {
-    add(name: string, grams: number, category: FoodCategory) {
+    add(name: string, grams: number, category: FoodCategory, servings = 0) {
       const key = name.trim().toLowerCase()
       const prev = totals.get(key)
-      totals.set(key, { name: prev?.name ?? name, grams: (prev?.grams ?? 0) + grams, category: prev?.category ?? category })
+      totals.set(key, { name: prev?.name ?? name, grams: (prev?.grams ?? 0) + grams, category: prev?.category ?? category, servings: (prev?.servings ?? 0) + servings })
     },
     // To the nearest 5 g: a list of "412 g" claims a precision the plan never had. A pinch of spice is
     // not shopping: under 5 g across the whole span it stays in the recipe.
     lines: (): ShoppingLine[] => [...totals.values()]
-      .filter((x) => x.grams >= 5)
-      .map((x) => ({ name: x.name, grams: Math.max(5, Math.round(x.grams / 5) * 5), category: x.category }))
+      .filter((x) => x.grams >= 5 || (x.servings ?? 0) > 0)
+      .map((x) => ({
+        name: x.name,
+        grams: x.grams >= 5 ? Math.max(5, Math.round(x.grams / 5) * 5) : 0,
+        category: x.category,
+        ...((x.servings ?? 0) > 0 ? { servings: Math.round((x.servings ?? 0) * 100) / 100 } : {}),
+      }))
       .sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name)),
   }
 }
@@ -320,9 +326,19 @@ export function shoppingFromEntries(entries: DiaryEntry[], today: string, recipe
     }
     // The engine names a curated food `seed:rice-white`; the local table knows it as `rice-white`.
     const local = FOODS.find((f) => f.id === e.foodId.replace(/^seed:/, ''))
-    t.add(e.snapshot?.name ?? local?.name ?? e.foodId, e.grams, local?.category ?? 'other')
+    // A recipe the library does not hold has no weight (its entry's weight is its servings): count it in servings.
+    if (e.foodId.startsWith('rec:')) t.add(e.snapshot?.name ?? e.foodId, 0, 'other', e.snapshot?.servings ?? e.grams)
+    else t.add(e.snapshot?.name ?? local?.name ?? e.foodId, e.grams, local?.category ?? 'other')
   }
   return t.lines()
+}
+
+/** "180 g", "1.25 kg" or, for a recipe that cannot be weighed, "1 serving". */
+export function amountText(item: ShoppingLine): string {
+  if (item.grams >= 1000) return `${(item.grams / 1000).toFixed(2)} kg`
+  if (item.grams > 0) return `${item.grams} g`
+  const n = item.servings ?? 0
+  return `${n} serving${n === 1 ? '' : 's'}`
 }
 
 /** The list as plain text, grouped by category, for pasting into a notes app. */
@@ -331,8 +347,7 @@ export function shoppingText(list: ShoppingLine[], labels: Record<FoodCategory, 
   let last = ''
   for (const item of list) {
     if (item.category !== last) { if (out.length) out.push(''); out.push(labels[item.category]); last = item.category }
-    const amount = item.grams >= 1000 ? `${(item.grams / 1000).toFixed(2)} kg` : `${item.grams} g`
-    out.push(`${item.name}, ${amount}`)
+    out.push(`${item.name}, ${amountText(item)}`)
   }
   return out.join('\n')
 }
