@@ -143,7 +143,7 @@ The finished recording is made by the scripts below, not by hand: it needs no re
 
 ## Re-making the recording
 
-`docs/demo-story.mp4` (about 4 min 10 s, the voice is the AI voice Emma) was made from the live app on 15 October by three scripts in
+`docs/demo-story.mp4` (4 min 15 s, the AI voice Emma at +18%) was remade from the live app on 16 October, with the planning scene, by three scripts in
 `scripts/demo-video/`, with no ffmpeg:
 
 1. `node scripts/demo-video/tts.mjs` writes each narration segment (`narration.json`) with Azure Speech, using the signed-in Azure CLI.
@@ -152,5 +152,5 @@ The finished recording is made by the scripts below, not by hand: it needs no re
    cutting out the time a model spends thinking. If the dish is not counted on the first try it asks again inside a cut. The account is deleted at the end.
 3. `node scripts/demo-video/assemble.mjs` puts the kept frames and the narration on one clock and writes `/tmp/dv/demo-3min.mp4 (copy it to docs/demo-story.mp4)`.
 
-Change the words in `narration.json`, or a beat in `record.mjs`, and run the three again (about ten minutes). The file is not in git
+Change the words in `narration.json`, or a beat in `record.mjs`, and run the three again (about ten minutes). `DECK=1 node scripts/demo-video/assemble.mjs` writes `/tmp/dv/demo-deck.mp4`, a 960x540 copy of about 14 MB, because the deck accepts at most 15 MB a file; that is the copy inside the pitch deck. The file is not in git
 (46 MB); keep it in the course folder.
