@@ -120,10 +120,14 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
     check('M10', 'a meal with an unknown food is never called "fits"; it shows what is left so far, or asks what the food is',
       !/FITS\b/i.test(partial.text.split('\n').slice(0, 40).join(' ').replace(/\bdoes not fit\b/gi, '')) && /LEFT SO FAR|ONE QUESTION FIRST/i.test(partial.text), partial.text.replace(/\s+/g, ' ').slice(-500))
 
-    await b.send('Page.navigate', { url: `${URL_}/?demo` })
+    await b.send('Page.navigate', { url: `${URL_}/` })
     await until(b, `/What are you\\s+about to eat/i.test(document.body.innerText)`)
-    const demo = await text()
-    check('M11', 'the demo link hides the builder-only row', !/Download Responses|Fresh context/.test(demo), demo.slice(0, 160))
+    const plain = await text()
+    await b.send('Page.navigate', { url: `${URL_}/?lab` })
+    await until(b, `/What are you\\s+about to eat/i.test(document.body.innerText)`)
+    const lab = await text()
+    check('M11', 'the plain address hides the builder-only row, and ?lab shows it', !/Download Responses|Fresh context/.test(plain) && /Fresh context/.test(lab), plain.slice(0, 160))
+    await b.send('Page.navigate', { url: `${URL_}/?demo` })
 
     // The menu and the diary, as a person uses them together.
     const tab = async (name) => { await b.ev(`(()=>{[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes(${JSON.stringify(name)}))?.click()})()`); await sleep(500) }

@@ -58,7 +58,7 @@ the problem or the central claim:
    profile and diary kept so they survive closing the tab, per-person limits,
    a consent step and account deletion. The owner decided that a real sign-in
    is wanted so that every user is a known person who can be asked what
-   happened. Required sign-in is scheduled to switch on 11 October. This
+   happened. Required sign-in is scheduled to switch on 11 October (it is on; see the 16 October revision). This
    replaces the "no account" position in E1 and in the sensitive-data
    paragraph below. The data lives in an EU region, so GDPR applies; the
    consent text is a draft and no counsel has reviewed it.
@@ -90,6 +90,55 @@ the problem or the central claim:
    of B1's "the user can correct any match before saving", by weight. The
    disclaimer shows its first sentence and the rest on a tap, and "What is GL?"
    explains the unit; both wordings wait for a clinician (questions 26 and 27).
+
+**Revised 16 October 2026.** Since the third revision, and none of it changing
+the problem or the central claim. The sources are the commits and the documents
+named; where a number appears it is the one measured on that date.
+
+1. **Sign-in is required** and the live service reports it (`/health` answers
+   `"signIn": true`). The address people are given is **diabite.pro** (bought
+   15 October); the long Azure address still works and is what the agents call.
+   Azure moved off the free trial to pay-as-you-go with a budget alert
+   (`docs/AZURE-continuity.md`), and a script turns the per-address limit up for a
+   live room (`scripts/demo-limits.sh`).
+2. **A dish the database lacks can be counted from its ingredients** (12
+   October, `cost_dish`): every ingredient is found in the database, the weights
+   are assumptions and are shown as such, and the answer is an **estimate** that
+   is never a plain "fits" (C7). A dish and a single food are told apart: a
+   single food it lacks is named and left out, never costed under a
+   neighbour's name.
+3. **The north-star metric is on the screen it belongs to** (12 October): the
+   Diary shows "n of 7 days in range" and a four-week strip, from the same
+   function the weekly report uses.
+4. **A person can log a meal on any of the last 14 days and plan up to 14 days
+   ahead** (16 October, B9 and B10). A planned meal is a promise, not a log: it
+   counts in no budget, week or in-range day until the person marks it eaten.
+   The shopping list follows what is planned and falls back to the generated
+   week (D2).
+5. **First-run tips** (15 October): four small cards that point at the real
+   screen, never take focus and carry no figure (A6); a returning person is not
+   shown them.
+6. **Watching the people who test it, and hearing from them** (16 October,
+   E5): a weekly report (`npm run report`) of sign-ups, activation, return on
+   day 2 and day 7 and in-range days, with no third-party analytics; a
+   "How is it going?" card after the third meal and on a later day; and one honest
+   line on the consent card about what is kept (below).
+7. **The builders' tools are off by default** (16 October): the course lab's
+   "Download Responses" row and the tool-call panel appear only on a link ending
+   in `?lab`, so a tester sees the product and not the lab.
+8. **The evaluations were run again and a model-graded layer was added.** On
+   15 October the deployed agent answered 204 of 204 mechanical checks, with
+   a median of 4 to 5 seconds and a p90 of 7 to 9. On 12 October Azure AI
+   Foundry's judges, with a different model as the judge, scored intent resolution
+   86 of 86, groundedness 74 of 75, task adherence 96 of 102 and tool-call
+   accuracy 64 of 75. The judge disagrees with our policy of asking when a food
+   match is unsure, so most of its misses are that disagreement; the one real
+   fault it found (two hard candies counted as 320 g) was fixed. Source:
+   `docs/DEMO_SCRIPT.md`, `docs/FEEDBACK-demo-day.md`.
+9. **The first outside feedback** (Demo Day, `docs/FEEDBACK-demo-day.md`): a
+   "no" pushes people away, so the agent names a way and the engine counts the
+   way (C3); the architecture should be shown; and users should be invited.
+   The demo was rebuilt as a story around an invented person.
 
 > Figures marked **[verify]** are from memory of published sources and must be
 > re-checked against the primary source before this document is submitted or
@@ -464,6 +513,14 @@ indicator. At day end the agent produces a short, non-judgmental summary and
 **one** concrete suggestion for tomorrow. Deliberately one: a list of five
 corrections is how adherence products lose users.
 
+*Added 16 October.* The day a meal goes on is the person's choice: after an
+answer a Day control offers Today, Yesterday, Tomorrow or a date, from 14 days back
+to 14 days ahead. A meal put on a day after today is **planned**: it is shown in
+the Diary, dimmed and marked "planned", and counts nowhere until the person
+presses "Ate it". This keeps the metric about what people ate: counting a plan would
+let someone "plan" a perfect week, and the 14-day limit on backdating is for the
+same reason.
+
 #### Flow 4 — Weekly menu and shopping list
 
 ```
@@ -554,6 +611,7 @@ don't matter.
 | A2 | As a user, I want to see *why* a target is what it is | Every target exposes its formula and inputs in one tap | V0 |
 | A3 | As a user with allergies or dislikes, I want to exclude foods permanently | Excluded foods never appear in any suggestion or generated menu | V0 |
 | A4 | As a user, I must be told this is not medical advice | Non-dismissible disclaimer at onboarding, requiring explicit acknowledgement; persistent link thereafter | V0 |
+| A6 | As a new user, I want to be shown where things are | Four tips on the Ask screen, one at a time, pointing at the real input, verdict, calculation and log button; non-modal, never take focus, no figure in their copy; skippable; a returning person is not shown them; "How it works" in You reopens a one-line guide per tab | V1 — built, 15 October |
 | A5 | As a T1D user, I must be told this product is not for me | If a user indicates intensive insulin therapy, the app states the limitation clearly and does not offer dosing-adjacent features | V0 |
 
 #### Epic B — Meal logging
@@ -568,6 +626,8 @@ don't matter.
 | B6 | As a user, I want to log by photo | Photo → candidate dishes → user confirms; portion estimate adjustable | Later |
 | B7 | As a user, I want to log by voice | Voice → transcript → same path as B1 | Later |
 | B8 | As a user trained in bread units, I want to see them | Bread units available as an opt-in display setting, off by default | Later |
+| B9 | As a user who ate earlier, I want to log it on the day it happened | After an answer, and in the Diary, a meal can be put on any day from 14 days back to today; older days stay readable and their entries editable, but new entries are not accepted there | V1 — built, 16 October |
+| B10 | As a user, I want to plan what I will eat | A meal can be planned for any day up to 14 days ahead, from an answer or from the Menu ("Plan it…"); it shows as **planned**, is excluded from the day's budget, the week and the in-range days, and counts only once marked eaten ("Ate it", offered for today and earlier) | V1 — built, 16 October |
 
 #### Epic C — The agentic recommendation loop
 
@@ -588,7 +648,7 @@ don't matter.
 | ID | User story | Acceptance criteria | Scope |
 |---|---|---|---|
 | D1 | As a user, I want a week of meals that fits my targets | 7 days × 4 meals within ±10% of energy target and at or under the glycemic-load budget | V0 |
-| D2 | As a user, I want a shopping list | Aggregated quantities per ingredient for the week | V0 |
+| D2 | As a user, I want a shopping list | Aggregated quantities per ingredient. Since 16 October the list is built from the meals the person has **planned** (today to 14 days ahead, not yet eaten) and falls back to the generated week when nothing is planned; the person can switch between the two. Ticked lines belong to one list: a changed plan starts a fresh one | V0 — extended |
 | D3 | As a user, I want to reject a dish and get another | Single-slot regeneration preserving all other constraints | V1 — built |
 | D4 | As a user, I don't want to eat the same thing constantly | No dish repeats within 3 days; at most 2 occurrences per week | V1 — the 3-day gap is built; the weekly cap is not enforced |
 | D5 | As a user, I want menus that fit my time and budget | Cooking-time and cost constraints respected | Later |
@@ -598,10 +658,11 @@ don't matter.
 
 | ID | User story | Acceptance criteria | Scope |
 |---|---|---|---|
-| E1 | As a user, I want my health data private | V0 as built: stored locally, no account. **Since 10 October:** sign-in is required (scheduled for 11 October); the profile and diary are stored in an EU region, readable only by their owner; meal sentences are not logged | V0, superseded |
+| E1 | As a user, I want my health data private | V0 as built: stored locally, no account. **Since 10 October:** sign-in is required; the profile and diary (planned meals included) are stored in an EU region, readable only by their owner. **Corrected 16 October:** the sentences typed into Ask are kept in the engine's log for 30 days, under a random per-browser session id and never an account, email or address, and the consent card says so. An earlier version of this row said meal sentences were not logged; they were, and this is the correction | V0, superseded |
 | E2 | As the team, we need to know when the agent is wrong | Every agent turn logs its tool calls, verifier result, and user correction, for evaluation | V0 |
 | E3 | As the team, we need the food data to be defensible | Every food record carries a source and a last-verified date; unverified records are flagged in-app | V0 |
 | E4 | As a user, I want to export or delete everything | One-tap full export and full deletion | V1 — built, in the account screen |
+| E5 | As the team, we need to see how the people testing it use it, and hear from them, without paid tools or a tracking script | `npm run report` prints sign-ups, finished setup, first meal, meals per person, return on day 2 and day 7, in-range days, feedback and the agent's own numbers, from the rows already held; people are numbered and no email, name or id is in the output. A "How is it going?" card asks once after the third eaten meal and once on a later day, stored with the moment that asked; a rating without words is kept as "(rating only)" | V1 — built, 16 October |
 
 ### Non-functional requirements
 
@@ -1478,8 +1539,11 @@ to become required on 11 October, so the product now holds an email address, the
 whole profile (age, sex as chosen, height, weight, activity, diagnosis, medicine
 classes, kidney status, other conditions, allergies) and the diary, in a
 Supabase project in the EU (Ireland), readable and writable only by the person
-they belong to, and removed by one account-deletion call. Meal sentences are
-not logged for accounts. The controller is established in the EU, so GDPR
+they belong to, and removed by one account-deletion call. The sentences
+typed into Ask are kept in the engine's log for 30 days with a random session id
+and no account, email or address (an earlier version of this paragraph said
+they were not logged for accounts; that was wrong, and the consent card now
+says what is kept). The controller is established in the EU, so GDPR
 applies to every user wherever they live, and these are health data. The
 consent text is a draft; no counsel has reviewed it, and no clinician has read
 the sign-in emergency line. HIPAA still does not apply. The honest summary for

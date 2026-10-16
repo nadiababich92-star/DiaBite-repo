@@ -18,6 +18,7 @@ estimate; 8,633 foods and 2,000 recipes; a weekly menu and shopping list.
 
 **Fifteen minutes before, not five.**
 
+0. The plain address hides the builders' tools (the lab row and the tool-call panel) since 16 October; add `?lab` to the address to see them. `?demo` still works and still hides them.
 1. Run `bash scripts/demo-limits.sh on` the morning of a live room (one Wi-Fi would use up 30 asks in 10 minutes),
    and `off` afterwards. Skip it for a recording.
 2. `https://diabite.pro/health` must say

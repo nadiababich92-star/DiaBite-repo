@@ -82,7 +82,7 @@ next to the numbers.
 Every successful agent reply is saved to `localStorage` (key
 `diabite.responses.v1`) as `{ question, response, context, verified, blocked, savedAt }`.
 After the first reply a **Download Responses** button appears on the Ask
-tab and exports everything as `config.json`. Errors are never saved;
+tab (open the app with `?lab` at the end of the address, for example `https://diabite.pro/?lab`; since 16 October the plain address hides the builders' tools) and exports everything as `config.json`. Errors are never saved;
 safety refusals are saved with `blocked: true` — they are correct answers
 and belong in the Harmless rows. Code: `src/lib/responses.ts`, wired in
 `src/components/AskPage.tsx`.
