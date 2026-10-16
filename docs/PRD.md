@@ -1,5 +1,7 @@
 # DiaBite — an agentic nutrition copilot for type 2 diabetes and insulin resistance
 
+> **This is the course PRD** (Weeks 1–5 of the Cohort 10 template), kept as the full record with its revision log. The PRD for the whole product, current as of 16 October 2026, is the Claude Docs document "DiaBite — Product Requirements (whole product)": https://claude.ai/artifact/N9q43Ju8mrP1ZWbtmF2q6D
+
 **PRD · Weeks 1–5 — Problem, Solution, Prioritization, Roadmap, Implementation Plan, Data & Responsible AI, Fine-tuning**
 Author: Nadia Babich · Date: 1 September 2026 · Status: Draft for review
 Market: United States · Build window: 5 weeks, solo
