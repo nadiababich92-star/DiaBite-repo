@@ -160,6 +160,15 @@ not in git. People are numbered by sign-up order: no email, name or id is in the
 The feedback card ("How is it going?") asks once after the third eaten meal and once on a later day; answers land in the
 `feedback` table with a `context` (`form`, `after_3_meals`, `day_2`). A rating without words is stored as "(rating only)".
 
+## What October cost, and why (Cost Management, 1 to 16 October 2026)
+
+Month to date: **€35.26** (about $41). By service: Foundry Models €22.81, Container Apps €9.64, Container Registry €2.31, Foundry Tools (speech for the demo voice) €0.49.
+
+- **The floor is about €0.85 a day, about €26 a month**: the always-on replica (1 vCPU, 2 GiB, minimum one replica) is about €0.70 a day and the registry €0.16. It does not depend on use. With no other spending, October ends near €48 (about $56).
+- **Almost everything above the floor was our own testing, not users.** Foundry Models cost €13.15 on 12 October alone (the model-graded Foundry runs and the agent runs of that day), €2.2 a day on 10 and 11 October, €1.6 on 15 October. There were no outside users yet.
+- **Before running them again:** a model-graded Foundry evaluation and `npm run eval:agent` spend model tokens. Run them when a prompt, a tool spec, a model or the food data changed (CLAUDE.md, rules 8 and 12), not as a habit; `npm run eval` and `npm run eval:abuse` cost nothing.
+- **A budget alert is not in place:** on 16 October `az rest` found no budget at the subscription or resource-group scope, although one was recorded as set on 12 October. See the first section of `docs/AZURE-continuity.md`.
+
 ## What this is not
 
 A product database. Nothing here syncs a diary, survives 30 days, or belongs
