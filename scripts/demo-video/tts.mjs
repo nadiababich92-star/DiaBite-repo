@@ -12,7 +12,8 @@ import { dirname, join } from 'node:path'
 const here = dirname(fileURLToPath(import.meta.url))
 const out = process.argv[2] ?? '/tmp/dv'
 mkdirSync(out, { recursive: true })
-const n = JSON.parse(readFileSync(join(here, 'narration.json'), 'utf8'))
+// NARRATION=narration-clip.json makes the short clip for the pitch deck instead of the full demo.
+const n = JSON.parse(readFileSync(join(here, process.env.NARRATION ?? 'narration.json'), 'utf8'))
 const token = execSync('az account get-access-token --resource https://cognitiveservices.azure.com --query accessToken -o tsv', { env: { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` } }).toString().trim()
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 const durations = {}

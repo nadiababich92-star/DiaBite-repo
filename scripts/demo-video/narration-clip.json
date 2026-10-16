@@ -1,0 +1,11 @@
+{
+  "voice": "en-US-Emma:DragonHDLatestNeural",
+  "rate": "+18%",
+  "segments": {
+    "k0": "This is DiaBite. You type a meal the way you would say it.",
+    "k1": "The engine finds each food and does the arithmetic. It fits, and the receipt shows every number.",
+    "k2": "An evening meal that does not fit does not just get a no. It names a swap, and the engine counts it. Now it fits.",
+    "k3": "A meal can also be planned for another day. A plan counts nowhere until it is eaten.",
+    "k4": "And a dose question is refused at once, before any model sees it."
+  }
+}

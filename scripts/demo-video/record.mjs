@@ -33,13 +33,15 @@ const az = (cmd) => execSync(cmd, { env: { ...process.env, PATH: `/opt/homebrew/
 const SVC = az(`az containerapp secret show -g rg-nadia.babich92-5702 -n diabite-engine --secret-name supabase-service-key --query value -o tsv`)
 const admin = (path, init = {}) => fetch(SB + path, { ...init, headers: { apikey: SVC, authorization: `Bearer ${SVC}`, 'content-type': 'application/json', ...(init.headers ?? {}) } })
 
+// CLIP=1 records the short how-it-works clip for the pitch deck (OUT=/tmp/dvc, narration-clip.json) instead of the full demo story.
+const CLIP = process.env.CLIP === '1'
 mkdirSync(OUT, { recursive: true })
 const email = `demo-${Date.now()}@example.com`, password = 'Dm-' + Math.random().toString(36).slice(2) + 'Aa1'
 const created = await (await admin('/auth/v1/admin/users', { method: 'POST', body: JSON.stringify({ email, password, email_confirm: true }) })).json()
 const uid = created.id
 const session = await (await fetch(`${SB}/auth/v1/token?grant_type=password`, { method: 'POST', headers: { apikey: PUB, 'content-type': 'application/json' }, body: JSON.stringify({ email, password }) })).json()
 const stored = JSON.stringify({ ...session, expires_at: Math.floor(Date.now() / 1000) + session.expires_in })
-const FRESH = `localStorage.clear(); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2']))`
+const FRESH = `localStorage.clear(); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2']))${CLIP ? "; localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log']))" : ''}`
 
 try {
   // ── 1. Off camera: only the diary history (onboarding is on camera) ────────
@@ -52,6 +54,12 @@ try {
   for (const n of [1, 2, 3, 5, 8, 9, 10, 12, 15, 16, 18, 22, 23, 25]) goodDay(n)
   for (const n of [4, 11]) overDay(n)
   for (const n of [6, 17]) add(n, 'lunch', 'lentils', 150)
+  // The clip has no setup scene: the profile is stored off camera, the same one the setup scene would have made.
+  if (CLIP) {
+    const profile = { sex: 'female', age: 52, heightCm: 168, weightKg: 70, activity: 'light', condition: 't2', goal: 'lose', carbApproach: 'low', excludedFoodIds: [], insulin: 'none', meds: ['metformin'], pregnantOrBreastfeeding: false, kidney: 'none', comorbidities: [], allergens: [], pattern: 'none', units: 'imperial', showBreadUnits: false, onboarded: true }
+    const p = await admin('/rest/v1/profiles', { method: 'POST', body: JSON.stringify({ user_id: uid, data: profile, consent_at: new Date().toISOString(), consent_version: '2026-10-b', updated_at: new Date().toISOString() }), headers: { prefer: 'return=minimal' } })
+    console.log('stored the profile:', p.status)
+  }
   const seeded = await admin('/rest/v1/diary_entries', { method: 'POST', body: JSON.stringify(rows), headers: { prefer: 'return=minimal' } })
   console.log(`seeded ${rows.length} diary rows:`, seeded.status)
 
@@ -213,6 +221,34 @@ try {
   }
   zone(0.03)
 
+  if (CLIP) {
+    // ── the short clip: breakfast, a no with a swap, a plan, a refused dose question ─────────────
+    await openApp('Thursday')
+    await b.ev(`window.scrollTo(0, 0)`)
+    end = say('k0'); await typeIn('Two eggs, a slice of rye bread and half an avocado')
+    await clickOn({ text: 'Check this meal' }); await awaitAnswer('section.answer'); await holdTo(end)
+    end = say('k1'); await b.ev(`window.scrollTo(0, 0)`)
+    await wander(['.eyebrow-line', '.fig-lead'], vt() + (end - vt()) * 0.4)
+    await clickOn({ text: 'Show calculation' }); await sleep(900); await driftScroll(end - 0.6, 380)
+    await b.ev(`window.scrollTo(0, 0)`); await clickOn({ text: 'Log' }); await sleep(700)
+    end = say('k2'); await b.ev(`window.scrollTo(0, 0)`)
+    await askUntil('Spaghetti with tomato sauce, garlic bread and a glass of orange juice', async () => (await b.ev(`!!document.querySelector('.tone-bad')`)) && (await b.ev(`/wap/.test(document.body.innerText)`)))
+    await b.ev(`(()=>{ const n = document.querySelector('.a-next'); n?.scrollIntoView({ block: 'center', behavior: 'smooth' }); n?.classList.add('tour-ring') })()`)
+    await sleep(900); await wander(['.a-next'], vt() + 2.2)
+    await b.ev(`document.querySelector('.a-next')?.classList.remove('tour-ring')`); await b.ev(`window.scrollTo(0, 0)`)
+    await askUntil('Whole wheat spaghetti with tomato sauce, garlic bread and a glass of water', async () => (await has('.tone-good')()) || (await has('.tone-change')()))
+    await holdTo(end); await b.ev(`window.scrollTo(0, 0)`)
+    end = say('k3')
+    await clickOn({ text: 'Tomorrow', scope: '.day-picker button' }); await sleep(500)
+    await clickOn({ text: 'Plan it' }); await sleep(800)
+    await clickOn({ text: 'Diary', scope: '[role=tab]' }); await sleep(1100)
+    await clickOn({ sel: 'button[aria-label="The day after"]' }); await sleep(900)
+    await b.ev(`window.scrollTo(0, 0)`); await wander(['.planned-line', '.entry.planned'], end)
+    await clickOn({ text: 'Ask', scope: '[role=tab]' }); await sleep(800)
+    await typeIn('How many units of insulin should I take before pasta?')
+    await clickOn({ text: 'Check this meal' }); await sleep(900); await b.ev(`window.scrollTo(0, 0)`)
+    end = say('k4'); await wander(['.eyebrow-line', '.answer-text'], end); await holdTo(end + 1.0)
+  } else {
   // ── Thursday morning: the setup, on camera ────────────────────────────────
   await openApp('Thursday, 7:40 am')
   await b.ev(`window.scrollTo(0,0)`)
@@ -327,6 +363,7 @@ try {
   await showCard(endCard('diabite.pro'))
   end = say('c0'); await holdTo(end + 1.5)
 
+  }
   await b.send('Page.stopScreencast')
   const tEnd = now()
   const total = vt()

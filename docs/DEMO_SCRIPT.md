@@ -152,5 +152,15 @@ The finished recording is made by the scripts below, not by hand: it needs no re
    cutting out the time a model spends thinking. If the dish is not counted on the first try it asks again inside a cut. The account is deleted at the end.
 3. `node scripts/demo-video/assemble.mjs` puts the kept frames and the narration on one clock and writes `/tmp/dv/demo-3min.mp4 (copy it to docs/demo-story.mp4)`.
 
-Change the words in `narration.json`, or a beat in `record.mjs`, and run the three again (about ten minutes). `DECK=1 node scripts/demo-video/assemble.mjs` writes `/tmp/dv/demo-deck.mp4`, a 960x540 copy of about 14 MB, because the deck accepts at most 15 MB a file; that is the copy inside the pitch deck. The file is not in git
+Change the words in `narration.json`, or a beat in `record.mjs`, and run the three again (about ten minutes).
+
+**Two videos, two jobs (owner, 16 October).** The **demo** is the full story above (4 min 15 s, `docs/demo-story.mp4`). The **pitch deck** carries a separate **clip of about a minute** that shows how the app works: a meal becoming a receipt, a no with a swap, a plan for tomorrow, a refused dose question. Make the clip with:
+
+```bash
+NARRATION=narration-clip.json node scripts/demo-video/tts.mjs /tmp/dvc
+CLIP=1 SKIP_CARDS=1 OUT=/tmp/dvc APP=https://diabite.pro node scripts/demo-video/record.mjs
+W=1280 H=720 BITRATE=900000 node scripts/demo-video/assemble.mjs /tmp/dvc      # /tmp/dvc/demo-3min.mp4, about 6.7 MB
+```
+
+The deck accepts at most 15 MB a file. The clip stores the demo person's profile off camera (no setup scene), so the first-run tips are marked seen. The file is not in git
 (46 MB); keep it in the course folder.
