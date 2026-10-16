@@ -63,7 +63,13 @@ export const saveProfile = (p: Profile): void => write(PROFILE_KEY, p)
 export const loadDiary = (): DiaryEntry[] => {
   const stored = read<unknown>(DIARY_KEY, [])
   // `planned` is true only when it is exactly true: a string "false" or a stray value reads as eaten.
-  return Array.isArray(stored) ? stored.filter(usableEntry).map(normalisePlanned) : []
+  return Array.isArray(stored) ? stored.map(repairServings).filter(usableEntry).map(normalisePlanned) : []
+}
+/** An entry logged from a recipe counted by servings once carried a weight of 0 (which the server refuses): its servings stand in for the weight. */
+const repairServings = (e: unknown): unknown => {
+  if (!isObj(e) || typeof e.grams !== 'number' || e.grams > 0 || !isObj(e.snapshot)) return e
+  const servings = e.snapshot.servings
+  return typeof servings === 'number' && servings > 0 ? { ...e, grams: servings } : e
 }
 const normalisePlanned = (e: DiaryEntry): DiaryEntry => {
   if (e.planned === true) return e

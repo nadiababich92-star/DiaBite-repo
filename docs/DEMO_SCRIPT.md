@@ -4,7 +4,7 @@ A story, not a feature tour: **Dana, a made-up woman of fifty-two with type 2 di
 at her grandmother's table. Every number she gets back can be traced to something that is not the model.**
 
 Rebuilt on 15 October 2026 after the first-run tips shipped and the cohort leader's feedback (he found the app a pain: it tells you
-no and you stop). The recording has no time limit; it runs about four minutes. Every beat was run against the deployed
+no and you stop). The recording is kept to 4 to 4.5 minutes (attention drops after that, the owner's rule of 16 October); the voice runs at +18%. Every beat was run against the deployed
 agent that day. If a beat stops working, this file is wrong and should be re-run, not trusted. The earlier five-beat script
 (8 October) is in git history.
 
@@ -52,6 +52,7 @@ person's (age 52, type 2, metformin, a budget of 45 glycemic load). The words ar
 | Thursday 7:40, the setup | the app's own onboarding: what it keeps, her diagnosis, her medicines, her day | Dana agrees, types her age, picks type 2 and metformin; a budget of 45 appears, with the formula shown | **everything is personal**: diagnosis, medicines, age, weight, activity, kidneys, allergies and how she eats all change her numbers. The video does **not** say a doctor approved it: no clinician has signed it off |
 | Thursday 7:40, breakfast | the first tip, then eggs, rye bread, avocado | fits, load 7.2, 37.8 left; the verdict tip; Show calculation; the receipt; Log | the first minute of a new person |
 | Thursday 6:45 pm | spaghetti, garlic bread, orange juice | **"Not today", over by about 9**, the swap it names is ringed on screen (whole wheat pasta); Dana tries it and changes the juice to water too, and it **fits** | **the softened no**: it does not only forbid, it names a way and the engine counts the way. The swap alone is not enough (40.6 against 37.7 left): the video says Dana changes the juice as well |
+| Thursday 6:55 pm | the swap that fits, then Tomorrow and **Plan it**; the Diary on Friday; the Menu's shopping list | the swap becomes a **plan for Friday**: dimmed in the Diary, marked planned, "Planned: GL … not counted yet", and nothing in the budget or the week moves; the shopping list is built from what she planned | planning, and that a plan is a promise and not a log (16 October) |
 | Thursday 10:30 pm | the insulin question | refused at once, no spinner | safety |
 | Sunday | cholent with its ingredients | **Estimate**, "if yours is like this"; Edit the recipe, remove one, still an estimate | a dish the database lacks |
 | Her week | the Diary | "4 of 7 days in range", four weeks as a strip | why she comes back |

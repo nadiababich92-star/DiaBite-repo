@@ -13,7 +13,11 @@ const here = dirname(fileURLToPath(import.meta.url))
 const OUT = process.argv[2] ?? '/tmp/dv'
 const REC = join(OUT, 'rec')
 const m = JSON.parse(readFileSync(join(REC, 'manifest.json'), 'utf8'))
-const FPS = 30, W = 1920, H = 1080, RATE = 24000
+// W, H and BITRATE (bits a second) can be set for a smaller copy: DECK=1 makes the 960x540, 380 kbit/s one the deck's clip needs.
+const DECK = process.env.DECK === '1'
+const FPS = 30, W = Number(process.env.W ?? (DECK ? 960 : 1920)), H = Number(process.env.H ?? (DECK ? 540 : 1080)), RATE = 24000
+const BITRATE = Number(process.env.BITRATE ?? (DECK ? 380_000 : 2_800_000))
+const NAME = DECK ? 'demo-deck.mp4' : 'demo-3min.mp4'
 
 // 1. Frames on the video's clock; anything inside a cut, or before the start, is dropped.
 const cutBefore = (t) => m.cuts.reduce((s, c) => s + Math.max(0, Math.min(c.to, t) - c.from), 0)
@@ -49,7 +53,7 @@ const cam = Array.from({ length: n }, (_, k) => {
   const fy = 0.4 + 0.08 * Math.sin((2 * Math.PI * t) / 21 + 1)
   return [Math.round(s * 10000) / 10000, Math.round(fx * 1000) / 1000, Math.round(fy * 1000) / 1000]
 })
-writeFileSync(join(OUT, 'plan.json'), JSON.stringify({ width: W, height: H, fps: FPS, dir: REC, segments, cam }))
+writeFileSync(join(OUT, 'plan.json'), JSON.stringify({ width: W, height: H, fps: FPS, dir: REC, segments, cam, bitrate: BITRATE }))
 
 // 2. One WAV with every narration segment placed where its words belong.
 const wavData = (buf) => { let p = 12; while (p < buf.length) { const id = buf.toString('ascii', p, p + 4), size = buf.readUInt32LE(p + 4); if (id === 'data') return buf.subarray(p + 8, p + 8 + size); p += 8 + size } throw new Error('no data chunk') }
@@ -70,6 +74,6 @@ writeFileSync(join(OUT, 'mix.wav'), Buffer.concat([header, Buffer.from(mix.buffe
 const run = (cmd, ...args) => execFileSync(cmd, args, { stdio: 'inherit' })
 run('swiftc', '-O', '-o', `${OUT}/mux`, join(here, 'mux.swift'))
 run(`${OUT}/mux`, 'video', `${OUT}/plan.json`, `${OUT}/video.mp4`)
-run('afconvert', '-f', 'm4af', '-d', 'aac@44100', '-b', '96000', `${OUT}/mix.wav`, `${OUT}/mix.m4a`)
-run(`${OUT}/mux`, 'merge', `${OUT}/video.mp4`, `${OUT}/mix.m4a`, `${OUT}/demo-3min.mp4`)
-console.log(`${OUT}/demo-3min.mp4  ${total.toFixed(1)} s, ${segments.length} distinct frames`)
+run('afconvert', '-f', 'm4af', '-d', 'aac@44100', '-b', DECK ? '64000' : '96000', `${OUT}/mix.wav`, `${OUT}/mix.m4a`)
+run(`${OUT}/mux`, 'merge', `${OUT}/video.mp4`, `${OUT}/mix.m4a`, `${OUT}/${NAME}`)
+console.log(`${OUT}/${NAME}  ${total.toFixed(1)} s, ${segments.length} distinct frames`)

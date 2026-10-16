@@ -39,7 +39,7 @@ const created = await (await admin('/auth/v1/admin/users', { method: 'POST', bod
 const uid = created.id
 const session = await (await fetch(`${SB}/auth/v1/token?grant_type=password`, { method: 'POST', headers: { apikey: PUB, 'content-type': 'application/json' }, body: JSON.stringify({ email, password }) })).json()
 const stored = JSON.stringify({ ...session, expires_at: Math.floor(Date.now() / 1000) + session.expires_in })
-const FRESH = `localStorage.clear(); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`
+const FRESH = `localStorage.clear(); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2']))`
 
 try {
   // ── 1. Off camera: only the diary history (onboarding is on camera) ────────
@@ -270,6 +270,25 @@ try {
   await holdTo(end); await b.ev(`window.scrollTo(0, 0)`)
   end = say('d3'); await wander(['.eyebrow-line', '.fig-lead'], end)
 
+  // ── The same evening: the swap becomes a plan for Friday ──────────────────
+  await setChip('Thursday, 6:55 pm')
+  await b.ev(`window.scrollTo(0, 0)`)
+  end = say('p0')
+  await clickOn({ text: 'Tomorrow', scope: '.day-picker button' }); await sleep(600)
+  await clickOn({ text: 'Plan it' }); await sleep(900); await holdTo(end)
+  end = say('p1')
+  await clickOn({ text: 'Diary', scope: '[role=tab]' }); await sleep(1300)
+  await clickOn({ sel: 'button[aria-label="The day after"]' }); await sleep(1100)
+  await b.ev(`window.scrollTo(0, 0)`)
+  await wander(['.planned-line', '.entry.planned', '.entry.planned:nth-child(2)'], end)
+  end = say('p2')
+  await clickOn({ text: 'Menu', scope: '[role=tab]' })
+  for (let i = 0; i < 60 && !(await has('.menu-meal')()); i++) await sleep(300)
+  await clickOn({ text: 'Shopping list' }); await sleep(900)
+  await b.ev(`document.querySelector('.menu-head')?.scrollIntoView({block:'start'}); window.scrollBy(0, 120)`); await sleep(600)
+  await wander(['table', 'table tbody tr:nth-child(1)', 'table tbody tr:nth-child(3)'], end)
+  await clickOn({ text: 'Ask', scope: '[role=tab]' }); await sleep(900)
+
   // ── Thursday night: the question it will not answer ───────────────────────
   await setChip('Thursday, 10:30 pm')
   end = say('i0'); await typeIn('How many units of insulin should I take before pasta?')
@@ -315,6 +334,6 @@ try {
   console.log(`recorded ${frames.length} frames, ${cuts.length} cuts, ${total.toFixed(1)} s of video; script errors: ${errs.length ? errs.slice(0, 2) : 'none'}`)
   await b.close()
 } finally {
-  await fetch(`${APP}/account`, { method: 'DELETE', headers: { authorization: `Bearer ${session.access_token}` } }).catch(() => {})
+  await admin(`/auth/v1/admin/users/${uid}`, { method: 'DELETE' }).catch(() => {})
   console.log('demo account removed')
 }

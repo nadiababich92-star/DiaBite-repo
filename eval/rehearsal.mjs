@@ -205,6 +205,13 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
   await exact(A, 'Log it'); await sleep(4500)
   const yest = (await diaryRows()).filter((r) => r.day === iso(-1) && r.planned !== true)
   check('W17f', 'device A: logging an answer for Yesterday writes an eaten entry on yesterday', yest.length >= 1, JSON.stringify(yest.map((r) => [r.day, r.planned])))
+  // A recipe counted by servings (garlic bread) has a weight of 0 in the answer; the diary table refuses 0 and the whole save with it.
+  await tabA('Ask')
+  await askOn(A, 'Whole wheat spaghetti with tomato sauce, garlic bread and a glass of water')
+  await exact(A, 'Log it'); await sleep(5000)
+  const recipeRows = (await diaryRows()).filter((r) => String(r.food_id).startsWith('rec:'))
+  const banner = /haven't been saved/.test(await A.text())
+  check('W17g', 'device A: a meal with a recipe counted by servings is saved (its weight is the servings, not 0), and no "not saved" banner shows', recipeRows.length >= 1 && recipeRows.every((r) => Number(r.grams) > 0) && !banner, JSON.stringify([recipeRows.map((r) => [r.food_id, r.grams]), banner]))
 }
 
 // ── the account can be removed, and takes everything with it ────────────────

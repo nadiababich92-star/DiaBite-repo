@@ -5,7 +5,7 @@ import AVFoundation
 import AppKit
 
 struct Seg: Decodable { let file: String; let start: Int; let count: Int }
-struct Plan: Decodable { let width: Int; let height: Int; let fps: Int; let dir: String; let segments: [Seg]; let cam: [[Double]]? }
+struct Plan: Decodable { let width: Int; let height: Int; let fps: Int; let dir: String; let segments: [Seg]; let cam: [[Double]]?; let bitrate: Int? }
 
 func fail(_ m: String) -> Never { FileHandle.standardError.write((m + "\n").data(using: .utf8)!); exit(1) }
 
@@ -15,7 +15,7 @@ func renderVideo(planPath: String, out: String) {
     guard let writer = try? AVAssetWriter(outputURL: URL(fileURLWithPath: out), fileType: .mp4) else { fail("no writer") }
     let settings: [String: Any] = [
         AVVideoCodecKey: AVVideoCodecType.h264, AVVideoWidthKey: plan.width, AVVideoHeightKey: plan.height,
-        AVVideoCompressionPropertiesKey: [AVVideoAverageBitRateKey: 2_800_000, AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel],
+        AVVideoCompressionPropertiesKey: [AVVideoAverageBitRateKey: plan.bitrate ?? 2_800_000, AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel],
     ]
     let input = AVAssetWriterInput(mediaType: .video, outputSettings: settings)
     input.expectsMediaDataInRealTime = false

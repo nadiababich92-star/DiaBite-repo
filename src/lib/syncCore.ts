@@ -33,11 +33,15 @@ export function fromRow(r: Partial<DiaryRow>): DiaryEntry | null {
   return { id: r.id, date: r.day, meal: r.meal as MealType, foodId: r.food_id, grams, ...(r.planned === true ? { planned: true } : {}), ...(r.snapshot ? { snapshot: r.snapshot } : {}) }
 }
 
+/** What the diary table will accept (its own checks): a weight above 0 and up to 5,000, and ids of a sane length. A row outside it can never be saved, and one such row used to make the whole batch fail for ever. */
+export const storable = (e: DiaryEntry): boolean =>
+  Number.isFinite(e.grams) && e.grams > 0 && e.grams <= 5000 && e.id.length >= 1 && e.id.length <= 64 && e.foodId.length >= 1 && e.foodId.length <= 80
+
 /** What changed since the last time the server agreed: new or edited entries, and removed ids. */
 export function diffEntries(synced: Map<string, string>, entries: DiaryEntry[]): { upsert: DiaryEntry[]; remove: string[] } {
   const ids = new Set(entries.map((e) => e.id))
   return {
-    upsert: entries.filter((e) => synced.get(e.id) !== JSON.stringify(e)),
+    upsert: entries.filter((e) => storable(e) && synced.get(e.id) !== JSON.stringify(e)),
     remove: [...synced.keys()].filter((id) => !ids.has(id)),
   }
 }

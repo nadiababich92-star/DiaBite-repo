@@ -502,7 +502,9 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, o
     const date = logDay ?? today
     const planned = date > today
     onLog(active.lines.map((l, i) => ({
-      id: `${stamp}-${i}`, date, meal, foodId: l.foodId, grams: l.grams, ...(planned ? { planned: true } : {}),
+      id: `${stamp}-${i}`, date, meal, foodId: l.foodId,
+      // A recipe the engine counted by servings has no weight (grams 0); the diary table refuses a weight of 0 and the whole save with it, so such a line keeps its servings in that place, as the Menu's recipes do.
+      grams: l.grams > 0 ? l.grams : (l.servings ?? 1), ...(planned ? { planned: true } : {}),
       snapshot: {
         name: l.name, kcal: l.kcal, carbs: l.carbs, fiber: l.fiber, protein: l.protein, fat: l.fat,
         availableCarbs: l.availableCarbs, gi: l.gi, gl: l.gl ?? 0, loadAvailable: l.gl !== null, servings: l.servings,

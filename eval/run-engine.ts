@@ -32,7 +32,7 @@ import { parseMeal } from '../src/lib/answer'
 import { afterMealFor, computeItem, computeMeal, driverOf, planDish, uninvertPhrase } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
 import { looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers } from '../server/agent'
-import { diffEntries, exportShape, fromRow, mergeById, toRow } from '../src/lib/syncCore'
+import { diffEntries, exportShape, fromRow, mergeById, storable, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
 import { boldSegments } from '../src/lib/answer'
@@ -440,6 +440,19 @@ console.log(`\ncost-dish ${dishMisses.length === 0 ? 'ok' : 'WRONG'}`)
   const loaded = loadDiary()
   delete (globalThis as { localStorage?: unknown }).localStorage
   if (loaded.length !== 3 || 'planned' in loaded[0] || loaded[1].planned !== true || loaded[2].id !== 'c') bits.push('stored entries were not normalised (a string is not a plan; an old entry stays)')
+
+  // 4b. a row the table refuses must not stop the others from saving (a recipe counted by servings once logged a weight of 0)
+  {
+    const bad = ent(today, 'dinner', { foodId: 'rec:DB-1188', grams: 0, snapshot: snap(5, 'Garlic Bread', 1) })
+    const good = ent(today, 'dinner', { foodId: 'egg', snapshot: undefined })
+    const up = diffEntries(new Map(), [bad, good]).upsert.map((e) => e.id)
+    if (up.length !== 1 || up[0] !== good.id) bits.push('an entry with a weight of 0 was sent to the diary table (it refuses it, and the whole batch with it)')
+    if (storable({ ...good, grams: 5001 }) || storable({ ...good, grams: -1 }) || !storable({ ...good, grams: 5000 })) bits.push('storable() disagrees with the table\'s weight check')
+    ;(globalThis as { localStorage?: unknown }).localStorage = { getItem: () => JSON.stringify([bad]), setItem: () => {}, removeItem: () => {} }
+    const repaired = loadDiary()
+    delete (globalThis as { localStorage?: unknown }).localStorage
+    if (repaired.length !== 1 || repaired[0].grams !== 1) bits.push('a stored entry with a weight of 0 and servings was dropped instead of repaired')
+  }
 
   // 5. the shopping list that follows the plan
   const rice: Dish = { id: 'r-1', recipeId: 'DB-1', name: 'Rice bowl', meals: ['dinner'], items: [], recipe: '',
