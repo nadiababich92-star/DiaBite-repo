@@ -4,7 +4,7 @@
 
 Thank you again for the time you have already given. This is **not** a second review. Nothing here needs you to reread the pack. Six things have changed in how the product treats a person since you saw it, and I would like your view on the questions that came out of them. About fifteen minutes, and you can stop after the first few; a single line against a question number is worth more to me than silence.
 
-The questions are numbered **Q21 to Q31**, continuing the pack's Q1 to Q20. Three lines in the pack itself are out of date, and this page corrects them: the pack counts 6,054 records (there are now 8,633: 364 ingredients, 86 everyday foods, 2,000 recipes, about 4,600 USDA survey foods, 754 packaged and 813 "unrated" foods); it says a pepperoni pizza "comes back as I do not have that food" (it is now answered with carbohydrate only, see 2 and 5 below); and it calls Q17 open (it was decided as proposed, carbohydrate without a load, and I would still like your view on it).
+The questions are numbered **Q21 to Q32**, continuing the pack's Q1 to Q20. Three lines in the pack itself are out of date, and this page corrects them: the pack counts 6,054 records (there are now 8,633: 364 ingredients, 86 everyday foods, 2,000 recipes, about 4,600 USDA survey foods, 754 packaged and 813 "unrated" foods); it says a pepperoni pizza "comes back as I do not have that food" (it is now answered with carbohydrate only, see 2 and 5 below); and it calls Q17 open (it was decided as proposed, carbohydrate without a load, and I would still like your view on it).
 
 ## What changed
 
