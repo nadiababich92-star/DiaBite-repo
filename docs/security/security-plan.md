@@ -161,6 +161,24 @@ Run with `/security-foundation` against the live service (revision 126 at `diabi
 
 `npm run eval:abuse` still passes (all checks, including sign-in and the per-person limits). No open item remains from this audit. (S31 first read "no cap" and was corrected the same day: the cap is 20,000 rows a person.)
 
+### Free security pass, 19 October 2026 (roadmap 3.3): self-assessed, not independently tested
+
+Run by the builder against the live service at `https://diabite.pro` (revision 128 onward). It is a floor, not a penetration test: a paid outside test is on the use-of-funds list. Nothing secret was printed; throwaway accounts were deleted.
+
+| Check | Result |
+|---|---|
+| **Dependencies** (`npm audit`) | 4 findings before: `sharp` (high, a librsvg advisory, a runtime dependency of the local embedder, which never opens an image or an SVG), `source-map-js` (high, build time), `vite` (high) and `esbuild` (moderate), the last two for the **development server only**. `npm audit fix` updated `sharp` and `source-map-js` without a breaking change; embeddings were re-checked (a 384-dimension vector comes back) and the engine suite and the build pass. **Two remain, both dev-server only** (`vite`, `esbuild`): the fix is Vite 8, a major upgrade, deferred. Nothing in the shipped image runs the Vite dev server |
+| **Mozilla HTTP Observatory** | **A+, 110 of 100, 12 of 12 tests passed**, scanned 19 October |
+| **TLS** | TLS 1.0 and 1.1 refused (protocol-version alert); TLS 1.2 and 1.3 accepted; managed certificate for `diabite.pro`, valid 15 October 2026 to 15 April 2027 |
+| **Headers** | Content-Security-Policy (`default-src 'self'`, scripts from self only, framing denied), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy` (camera, microphone, geolocation off), `Strict-Transport-Security` (one year); `http://` answers 301 |
+| **Row-level security** | Re-run on 19 October with two accounts and the public key: B cannot read, change, delete or create A's rows (`[]`, `[]`, `[]`, 403); `anon` cannot read the diary (401) or read, change or delete `feedback` (401); oversized or malformed values are refused (`context` 41 characters 400, a 100,000-character comment 401, `planned = "maybe"` 400) |
+| **The abuse suite** (`npm run eval:abuse`) | All checks pass (size caps, per-address, per-conversation and daily limits, own-origin CORS, bounded memory, sign-in and the per-person limits) |
+| **Secrets** | No key-shaped string in any tracked file (`git grep`); the service-role key (41 characters) appears neither in the live page and its bundles nor in a local build; the Container App holds three secrets, `engine-api-key`, `project-api-key`, `supabase-service-key`; `.env.example` marks the server-only ones |
+| **OWASP ZAP baseline** | **Not run.** It needs Docker or the ZAP desktop app and neither is installed on the builder's machine. Not substituted by a claim: the checks above cover headers, TLS, row-level security and the public route, but not an automated crawl of the app. To do before the beta, or to buy as part of the outside test |
+| **SSL Labs** | Not used (its API wants a registered email address; the owner's address was not given to a third party). TLS was checked directly with `openssl` instead |
+
+**Open after this pass:** the two dev-server advisories (a major Vite upgrade); a ZAP baseline; the paid items already named (an outside penetration test, counsel on the consent text).
+
 ### Added 10 October: the accounts tables and their row-level security proof
 Migration `20261010130000_accounts.sql` applied to the project (`profiles`, `diary_entries`, `feedback.user_id`). The proof ran as one block that raises at the end, so nothing was kept; afterwards both tables held 0 rows and no proof user remained.
 

@@ -36,6 +36,32 @@ try {
   await admin('/rest/v1/diary_entries', { method: 'POST', body: JSON.stringify([row(0, 'breakfast', 'oats', 50), row(0, 'lunch', 'lentils', 150), row(-1, 'dinner', 'salmon', 150), row(1, 'dinner', 'salmon', 150, true)]), headers: { prefer: 'return=minimal' } })
 
   const axeRun = (b) => b.ev(`axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'] } }).then(r => r.violations.map(v => ({ id: v.id, impact: v.impact, help: v.help, nodes: v.nodes.length, first: (v.nodes[0]?.target ?? []).join(' ').slice(0, 120) })))`)
+  // axe-core's own colour-contrast rule reported "inapplicable" in this headless setup even on a page with planted faults, so the contrast
+  // of text is checked here directly: the computed text colour against the nearest opaque ancestor background (a gradient or an image
+  // is counted as "unknown", not as a pass). 4.5:1, or 3:1 for large text (24 px, or 18.66 px bold).
+  const CONTRAST = `(() => {
+    const parse = (c) => { const m = c.match(/rgba?\\(([^)]+)\\)/); if (!m) return null; const p = m[1].split(/[ ,/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 } }
+    const lum = ({ r, g, b }) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4) }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b) }
+    const over = (top, bottom) => ({ r: top.r * top.a + bottom.r * (1 - top.a), g: top.g * top.a + bottom.g * (1 - top.a), b: top.b * top.a + bottom.b * (1 - top.a), a: 1 })
+    const bgOf = (el) => { const layers = []; for (let e = el; e; e = e.parentElement) { const s = getComputedStyle(e); if (s.backgroundImage !== 'none') return { unknown: true }; const c = parse(s.backgroundColor); if (c && c.a > 0) { layers.push(c); if (c.a === 1) break } } let base = { r: 255, g: 255, b: 255, a: 1 }; for (let i = layers.length - 1; i >= 0; i--) base = over(layers[i], base); return base }
+    const bad = [], unknown = []; let checked = 0
+    for (const el of document.body.querySelectorAll('*')) {
+      const has = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 0)
+      if (!has) continue
+      const r = el.getBoundingClientRect(); const s = getComputedStyle(el)
+      if (r.width === 0 || r.height === 0 || s.visibility === 'hidden' || s.display === 'none' || parseFloat(s.opacity) === 0) continue
+      if (el.closest('[inert], [aria-hidden=true]')) continue
+      const fg = parse(s.color); const bg = bgOf(el)
+      if (!fg || bg.unknown) { unknown.push(el.tagName + '.' + String(el.className).slice(0, 30)); continue }
+      const f = over({ ...fg, a: fg.a * (parseFloat(s.opacity) || 1) }, bg)
+      const l1 = lum(f), l2 = lum(bg); const ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05)
+      const size = parseFloat(s.fontSize), bold = parseInt(s.fontWeight) >= 700
+      const need = size >= 24 || (size >= 18.66 && bold) ? 3 : 4.5
+      checked++
+      if (ratio < need) bad.push({ id: 'text-contrast', impact: 'serious', help: ratio.toFixed(2) + ':1 needs ' + need, nodes: 1, first: el.tagName + '.' + String(el.className).slice(0, 40) + ' "' + el.innerText.trim().slice(0, 30) + '"' })
+    }
+    return { bad, unknown: unknown.length, checked }
+  })()`
   const injectAxe = (b) => b.ev(AXE)
   let port = 9851
   for (const size of [{ name: 'phone', w: 390, h: 844, dpr: 2 }, { name: 'laptop', w: 1366, h: 768, dpr: 1 }]) {
@@ -48,6 +74,7 @@ try {
       const scan = async (screen) => {
         await injectAxe(b)
         const v = await axeRun(b)
+        const c = await b.ev(CONTRAST); v.push(...c.bad.slice(0, 8)); results.contrastChecked = (results.contrastChecked ?? 0) + c.checked; results.contrastUnknown = (results.contrastUnknown ?? 0) + c.unknown
         results.runs.push({ run: label, screen, violations: v })
         console.log(label.padEnd(12), screen.padEnd(22), v.length ? v.map((x) => `${x.id}(${x.nodes})`).join(' ') : 'no violations')
       }
