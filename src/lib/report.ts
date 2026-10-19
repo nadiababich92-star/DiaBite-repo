@@ -19,10 +19,22 @@ export interface AccountInput {
   diary: DiaryEntry[]
 }
 export interface FeedbackInput { createdAt: string; rating: number; context: string | null; text: string }
-export interface TurnStats {
+/** The agent's numbers for one kind of traffic. */
+export interface TurnGroup {
   turns: number; verifiedRate: number; p50ms: number; p90ms: number
   blocked: number; regenerated: number; unknownShare: number; clarifyShare: number
-  /** Typed questions that held a food we do not have, deduplicated, at most 50. */
+}
+/**
+ * Turns, split by who asked. A browser session id is a random UUID (src/lib/session.ts), so a session id of that
+ * shape is "browser": a person at the app. Every other id (`eval-…`, `smoke-…`, `lat6-…`, `sec-…`) is one of our
+ * own scripts and goes under "tests". A sample taken with a fresh UUID (CLAUDE.md rule 12) looks like a browser,
+ * so "browser" is an upper bound on real use. Our rehearsals, screenshots and demo recordings drive a real browser
+ * too, and the log carries no account to tell them apart: until outside people use it, "browser" is the owner and us.
+ */
+export interface TurnStats {
+  browser: TurnGroup
+  tests: TurnGroup
+  /** Typed questions from browser sessions that held a food we do not have, deduplicated, at most 50. */
   unknownQuestions: string[]
 }
 export interface ReportInput { today: string; accounts: AccountInput[]; feedback: FeedbackInput[]; turns: TurnStats | null }
@@ -137,13 +149,16 @@ export function reportMarkdown(r: Report): string {
   for (const c of r.feedback.comments) out.push(`- ${c.createdAt.slice(0, 10)}, ${c.rating}/5, ${c.context ?? 'form'}: ${c.text}`)
   out.push('', '## The agent', '')
   if (r.turns) {
-    const t = r.turns
-    out.push(`- Turns: ${t.turns}`, `- Verified: ${t.verifiedRate}%`, `- Median ${t.p50ms} ms, 90th percentile ${t.p90ms} ms`,
-      `- Blocked by a rule: ${t.blocked}`, `- Answer regenerated: ${t.regenerated}`,
-      `- Turns with a food we do not have: ${t.unknownShare}%`, `- Clarifying questions: ${t.clarifyShare}%`, '',
-      '## Typed questions with a food we do not have', '')
-    for (const q of t.unknownQuestions) out.push(`- ${q}`)
-    if (!t.unknownQuestions.length) out.push('- none')
+    const group = (title: string, g: TurnGroup) => out.push(`**${title}**`, '',
+      `- Turns: ${g.turns}`, ...(g.turns ? [`- Verified: ${g.verifiedRate}%`, `- Median ${g.p50ms} ms, 90th percentile ${g.p90ms} ms`,
+        `- Blocked by a rule: ${g.blocked}`, `- Answer regenerated: ${g.regenerated}`,
+        `- Turns with a food we do not have: ${g.unknownShare}%`, `- Clarifying questions: ${g.clarifyShare}%`] : []), '')
+    group('Browser sessions (a browser at the app: the owner, and our own rehearsals and recordings, which drive a real browser)', r.turns.browser)
+    group('Our own tests (evaluation runs, smoke checks, scripts)', r.turns.tests)
+    out.push('The tests ask for missing foods on purpose; only the browser group says anything about people.', '',
+      '## Typed questions with a food we do not have (browser sessions only)', '')
+    for (const q of r.turns.unknownQuestions) out.push(`- ${q}`)
+    if (!r.turns.unknownQuestions.length) out.push('- none')
   } else out.push('The turn log could not be read.')
   out.push('', 'Numbered by sign-up order. No email or name is in this file.')
   return out.join('\n') + '\n'

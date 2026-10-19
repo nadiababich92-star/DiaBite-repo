@@ -11,7 +11,7 @@
  */
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { buildReport, reportMarkdown, type AccountInput, type FeedbackInput, type TurnStats } from '../src/lib/report'
+import { buildReport, reportMarkdown, type AccountInput, type FeedbackInput, type TurnGroup, type TurnStats } from '../src/lib/report'
 import { fromRow } from '../src/lib/syncCore'
 import { calculateTargets, DEFAULT_PROFILE } from '../src/lib/profile'
 import { sanitizeProfile, todayISO } from '../src/lib/storage'
@@ -60,23 +60,24 @@ async function accounts(): Promise<{ id: string; createdAt: string }[]> {
 function turnStats(): TurnStats | null {
   try {
     const ws = az(['containerapp', 'env', 'show', '-g', RG, '-n', 'diabite-env', '--query', 'properties.appLogsConfiguration.logAnalyticsConfiguration.customerId', '-o', 'tsv'])
-    const base = `ContainerAppConsoleLogs_CL | where TimeGenerated > ago(7d) and ContainerName_s == "diabite-engine" and Log_s startswith '{"evt":"turn"' | extend t = parse_json(Log_s)`
+    // A browser's session id is a random UUID (or 32 hex characters when the browser has no randomUUID); our scripts use other shapes.
+    const base = `ContainerAppConsoleLogs_CL | where TimeGenerated > ago(7d) and ContainerName_s == "diabite-engine" and Log_s startswith '{"evt":"turn"' | extend t = parse_json(Log_s) | extend sid = tostring(t.session) | extend src = iff(sid matches regex "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" or sid matches regex "^[0-9a-f]{32}$", "browser", "tests")`
     const query = (q: string) => JSON.parse(az(['monitor', 'log-analytics', 'query', '-w', ws, '--analytics-query', q, '-o', 'json'])) as Record<string, unknown>[]
-    const [s] = query(`${base} | summarize turns = count(), verifiedRate = round(100.0 * countif(tobool(t.verified)) / count(), 1), p50ms = percentile(toint(t.ms), 50), p90ms = percentile(toint(t.ms), 90), blocked = countif(tobool(t.blocked)), regenerated = countif(toint(t.attempts) > 1), unknownShare = round(100.0 * countif(toint(t.unknownPhrases) > 0) / count(), 1), clarifyShare = round(100.0 * countif(toint(t.clarified) > 0) / count(), 1)`)
-    if (!s) return { turns: 0, verifiedRate: 0, p50ms: 0, p90ms: 0, blocked: 0, regenerated: 0, unknownShare: 0, clarifyShare: 0, unknownQuestions: [] }
-    const n = (k: string) => Number(s[k] ?? 0)
-    // Deduplicated case-insensitively, keeping the first spelling; at most 50.
+    const rows = query(`${base} | summarize turns = count(), verifiedRate = round(100.0 * countif(tobool(t.verified)) / count(), 1), p50ms = percentile(toint(t.ms), 50), p90ms = percentile(toint(t.ms), 90), blocked = countif(tobool(t.blocked)), regenerated = countif(toint(t.attempts) > 1), unknownShare = round(100.0 * countif(toint(t.unknownPhrases) > 0) / count(), 1), clarifyShare = round(100.0 * countif(toint(t.clarified) > 0) / count(), 1) by src`)
+    const group = (kind: string): TurnGroup => {
+      const s = rows.find((r) => r.src === kind)
+      const n = (k: string) => Number(s?.[k] ?? 0)
+      return { turns: n('turns'), verifiedRate: n('verifiedRate'), p50ms: n('p50ms'), p90ms: n('p90ms'), blocked: n('blocked'), regenerated: n('regenerated'), unknownShare: n('unknownShare'), clarifyShare: n('clarifyShare') }
+    }
+    // Deduplicated case-insensitively, keeping the first spelling; at most 50; browser sessions only.
     const byLower = new Map<string, string>()
-    for (const r of query(`${base} | where toint(t.unknownPhrases) > 0 | project q = tostring(t.question)`)) {
+    for (const r of query(`${base} | where src == "browser" and toint(t.unknownPhrases) > 0 | project q = tostring(t.question)`)) {
       const q = String(r.q ?? '').trim().slice(0, 200)
       if (q && !byLower.has(q.toLowerCase())) byLower.set(q.toLowerCase(), q)
       if (byLower.size >= 50) break
     }
-    return {
-      turns: n('turns'), verifiedRate: n('verifiedRate'), p50ms: n('p50ms'), p90ms: n('p90ms'), blocked: n('blocked'),
-      regenerated: n('regenerated'), unknownShare: n('unknownShare'), clarifyShare: n('clarifyShare'), unknownQuestions: [...byLower.values()],
-    }
-  } catch { return null }
+    return { browser: group('browser'), tests: group('tests'), unknownQuestions: [...byLower.values()] }
+  } catch (e) { console.error(`The turn log could not be read: ${String((e as Error).message).split('\n')[0].slice(0, 160)}`); return null }
 }
 
 try {
