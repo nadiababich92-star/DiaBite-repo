@@ -23,7 +23,8 @@ already cost us time.
 
 ## Inputs
 
-- `docs/PRD.md` — the source of truth; read the Week 1–5 sections the feature belongs to
+- `docs/PRD-product.md` — the source of truth for the whole product; read it first
+- `docs/PRD.md` — the course PRD, the full detail; read the Week 1–5 sections the feature belongs to
 - `CLAUDE.md` — the rules that already cost us time
 - `docs/PLAN.md` — what is deliberately not being built yet, and the owner's open decisions
 - `docs/design.md` — only if the feature has a screen

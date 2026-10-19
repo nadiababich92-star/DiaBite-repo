@@ -7,7 +7,7 @@ DiaBite is an agentic nutrition copilot for **adults with type 2 diabetes,
 prediabetes and insulin resistance in the US**. A person describes a meal in
 their own words; the app says whether it fits what is left of their day, and
 shows the arithmetic. Product and docs are in **English**; the owner chats in
-Russian. The source of truth for *what* we build is [`docs/PRD.md`](docs/PRD.md).
+Russian. The source of truth for *what* we build is the whole-product PRD, [`docs/PRD-product.md`](docs/PRD-product.md) (a copy of the Claude Docs document, which is the live version); [`docs/PRD.md`](docs/PRD.md) is the course PRD, kept as the full record.
 
 ---
 
@@ -142,7 +142,7 @@ DiaBite already exists, so these stages describe how a **new feature** is
 added, not how the app is created. Each stage ends with a stop.
 
 ### Stage 1 — Engineering plan
-**Skill:** `/engineering-planner` · **Input:** `docs/PRD.md` and the feature ask
+**Skill:** `/engineering-planner` · **Input:** `docs/PRD-product.md` (and `docs/PRD.md` for the detail) and the feature ask
 **Output:** `docs/engineering/engineering-doc.md`
 
 Architecture of the feature against the stack above: data, API, agent
@@ -207,7 +207,8 @@ tighten any instruction that produced something unexpected.
 
 | File | Purpose |
 |---|---|
-| `docs/PRD.md` | What we build and why — the source of truth |
+| `docs/PRD-product.md` | What we build and why for the whole product — the source of truth (a copy of the Claude Docs document) |
+| `docs/PRD.md` | The course PRD, Weeks 1 to 5, with its revision log: the full record |
 | `docs/design.md` | The visual contract |
 | `docs/PLAN.md` | What comes after the demo, and the decisions that are the owner's |
 | `docs/PRD-post-course.md` | All the work after the course: workstreams, sizes, decisions, people needed |
