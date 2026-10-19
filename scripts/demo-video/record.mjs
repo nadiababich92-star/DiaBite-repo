@@ -41,7 +41,7 @@ const created = await (await admin('/auth/v1/admin/users', { method: 'POST', bod
 const uid = created.id
 const session = await (await fetch(`${SB}/auth/v1/token?grant_type=password`, { method: 'POST', headers: { apikey: PUB, 'content-type': 'application/json' }, body: JSON.stringify({ email, password }) })).json()
 const stored = JSON.stringify({ ...session, expires_at: Math.floor(Date.now() / 1000) + session.expires_in })
-const FRESH = `localStorage.clear(); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2']))${CLIP ? "; localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log']))" : ''}`
+const FRESH = `localStorage.clear(); localStorage.setItem('diabite.session', 'test-demo-' + crypto.randomUUID()); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2']))${CLIP ? "; localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log']))" : ''}`
 
 try {
   // ── 1. Off camera: only the diary history (onboarding is on camera) ────────

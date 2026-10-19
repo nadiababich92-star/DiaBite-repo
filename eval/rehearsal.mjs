@@ -43,7 +43,8 @@ async function device(port, label, { tour = false } = {}) {
   b.on('Runtime.exceptionThrown', (p) => errs.push(p.exceptionDetails?.exception?.description?.slice(0, 160) ?? 'exception'))
   await b.send('Page.navigate', { url: APP }); await sleep(2500)
   // The first-run tips are marked seen so they never sit over what this script clicks; device A leaves them on once, to check them (W16).
-  await b.ev(`localStorage.clear(); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); ${tour ? '' : "localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log']));"}`)
+  // Our own sessions carry a `test-` id so the weekly report counts them as tests, not as a person at the app.
+  await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session', 'test-rehearsal-' + crypto.randomUUID()); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); ${tour ? '' : "localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log']));"}`)
   await b.send('Page.reload'); await sleep(3500)
   const text = () => b.ev('document.body.innerText')
   const click = (t) => b.ev(`(()=>{const e=[...document.querySelectorAll('button')].find(x=>x.innerText.trim().startsWith(${JSON.stringify(t)})); if(!e) return 'NO '+${JSON.stringify(t)}; e.click(); return 'ok'})()`)
@@ -166,8 +167,15 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
     await dev.b.ev(`(()=>{const i=document.querySelector('input[type=text]'); i.focus()})()`)
     await dev.b.send('Input.insertText', { text: q })
     await dev.click('Check this meal')
-    for (let i = 0; i < 90; i++) { await sleep(500); if (!(await dev.b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break }
-    await sleep(800)
+    const waitForAnswer = async () => { for (let i = 0; i < 90; i++) { await sleep(500); if (!(await dev.b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break } await sleep(800) }
+    await waitForAnswer()
+    // The agent sometimes asks a question first ("which yogurt?") and there is no receipt to log or plan: ask again, up to twice.
+    for (let k = 0; k < 2 && !(await dev.b.ev(`!!document.querySelector('.day-picker')`)); k++) {
+      await dev.b.ev(`[...document.querySelectorAll('button')].find(x => x.innerText.trim().startsWith('Ask something else'))?.click()`); await sleep(500)
+      await dev.b.ev(`(()=>{const i=document.querySelector('input[type=text]'); i.focus(); i.select()})()`)
+      await dev.b.send('Input.insertText', { text: q })
+      await dev.click('Check this meal'); await waitForAnswer()
+    }
   }
   const diaryRows = async () => rows('diary_entries')
   // A: ask, choose Tomorrow, "Plan it".

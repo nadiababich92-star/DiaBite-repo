@@ -61,6 +61,7 @@ b.on('Runtime.consoleAPICalled', (p) => { if (p.type === 'error') errors.push((p
 try {
   await b.send('Page.navigate', { url: URL_ })
   await until(b, `document.body && /Email me a link|First, the numbers|What are you/.test(document.body.innerText)`)
+  await b.ev(`localStorage.setItem('diabite.session', 'test-smoke-' + crypto.randomUUID())`)
   await b.ev(`
 window.__setNum = (labelText, v) => { const el = [...document.querySelectorAll('label.field')].find(l => l.innerText.trim().startsWith(labelText))?.querySelector('input'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set; set.call(el,String(v)); el.dispatchEvent(new Event('input',{bubbles:true})) }
 window.__click = (text) => { const el=[...document.querySelectorAll('button')].find(e=>e.innerText.trim().startsWith(text)); if(!el) throw new Error('no button '+text); el.click() }

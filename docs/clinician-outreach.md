@@ -106,3 +106,28 @@ seriously. Safer to offer a named acknowledgement and let them ask for more.
   itself is forbidden from promising outcomes, so the pitch shouldn't either.
 - A request for "just 5 minutes". It isn't five minutes, and saying so makes
   the rest less believable.
+
+---
+
+## Follow-up to Eugene Kaganovich, RN, BSN, CDE (draft, 19 October 2026)
+
+He answered the first message and was sent the review pack on 8 October (`docs/clinical-review-for-eugene.md`). This follows up with the demo.
+**Attach the one-minute clip** (`docs/demo-clip-how-it-works.mp4`, 6.7 MB, small enough to attach) and **link the full demo** (`docs/demo-story.mp4`, 4 min 15 s, 91 MB: too big to attach, put it where you control access). Nothing here is sent by anyone but you.
+
+> **Subject:** DiaBite: a one-minute look at what the review document describes
+>
+> Hi Eugene,
+>
+> A short follow-up to the review document I sent on 8 October. I know it is long, so instead of asking for more reading, here is a one-minute recording of the app (attached). A meal typed in plain words becomes a receipt. A meal that does not fit gets a swap, counted by the engine. A meal can be planned for another day. And a dose question is refused before any model sees it. The full four-minute version is here: [link].
+>
+> Since the document the app has moved from a demo to something people can sign up to: accounts, a diary, planning, and about 8,600 foods instead of 6,000. The safety rules in the document are still the ones in front of every answer.
+>
+> If you only have a minute, I would most like your eye on the end of the clip, the refusal, and whether it says what you would say to a patient. And the question I still cannot answer myself: what should the app say when someone reports a glucose reading under 70 (Q12 in the document)? Today it stops the food conversation and tells them to seek help.
+>
+> A single line back is worth more to me than silence. And if this is not something you do, no hard feelings at all.
+>
+> Thank you,
+> Nadia
+
+Choices for you: the language (this is English because the document is), whether to offer a consulting fee (there is no budget today; see the first decision above), and where the full video lives (an unlisted link you control).
+

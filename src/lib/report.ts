@@ -28,8 +28,9 @@ export interface TurnGroup {
  * Turns, split by who asked. A browser session id is a random UUID (src/lib/session.ts), so a session id of that
  * shape is "browser": a person at the app. Every other id (`eval-…`, `smoke-…`, `lat6-…`, `sec-…`) is one of our
  * own scripts and goes under "tests". A sample taken with a fresh UUID (CLAUDE.md rule 12) looks like a browser,
- * so "browser" is an upper bound on real use. Our rehearsals, screenshots and demo recordings drive a real browser
- * too, and the log carries no account to tell them apart: until outside people use it, "browser" is the owner and us.
+ * so "browser" is an upper bound on real use. Our rehearsals, screenshots, smoke checks and demo recordings drive a real
+ * browser too, but since 19 October they set a `test-…` session id and so land under "tests"; older log lines still count
+ * as browser. Until outside people use it, "browser" is the owner and us.
  */
 export interface TurnStats {
   browser: TurnGroup
@@ -153,7 +154,7 @@ export function reportMarkdown(r: Report): string {
       `- Turns: ${g.turns}`, ...(g.turns ? [`- Verified: ${g.verifiedRate}%`, `- Median ${g.p50ms} ms, 90th percentile ${g.p90ms} ms`,
         `- Blocked by a rule: ${g.blocked}`, `- Answer regenerated: ${g.regenerated}`,
         `- Turns with a food we do not have: ${g.unknownShare}%`, `- Clarifying questions: ${g.clarifyShare}%`] : []), '')
-    group('Browser sessions (a browser at the app: the owner, and our own rehearsals and recordings, which drive a real browser)', r.turns.browser)
+    group('Browser sessions (a person at the app: today the owner, and samples taken with a fresh UUID)', r.turns.browser)
     group('Our own tests (evaluation runs, smoke checks, scripts)', r.turns.tests)
     out.push('The tests ask for missing foods on purpose; only the browser group says anything about people.', '',
       '## Typed questions with a food we do not have (browser sessions only)', '')
