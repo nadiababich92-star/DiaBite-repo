@@ -112,7 +112,7 @@ seriously. Safer to offer a named acknowledgement and let them ask for more.
 ## Follow-up to Eugene Kaganovich, RN, BSN, CDE (draft, 19 October 2026)
 
 He answered the first message and was sent the review pack on 8 October (`docs/clinical-review-for-eugene.md`). This follows up with the demo.
-**Attach the one-minute clip** (`docs/demo-clip-how-it-works.mp4`, 6.7 MB, small enough to attach) and **link the full demo** (`docs/demo-story.mp4`, 4 min 15 s, 91 MB: too big to attach, put it where you control access). Nothing here is sent by anyone but you.
+**Attach the update page** (`docs/clinical-review-addendum.html`, updated 19 October: six things that changed since the pack, and questions Q21 to Q32; three lines in the 8 October pack are out of date and the page corrects them) **and the one-minute clip** (`docs/demo-clip-how-it-works.mp4`, 6.7 MB, small enough to attach) and **link the full demo** (`docs/demo-story.mp4`, 4 min 15 s, 91 MB: too big to attach, put it where you control access). Nothing here is sent by anyone but you.
 
 > **Subject:** DiaBite: a one-minute look at what the review document describes
 >
@@ -121,6 +121,8 @@ He answered the first message and was sent the review pack on 8 October (`docs/c
 > A short follow-up to the review document I sent on 8 October. I know it is long, so instead of asking for more reading, here is a one-minute recording of the app (attached). A meal typed in plain words becomes a receipt. A meal that does not fit gets a swap, counted by the engine. A meal can be planned for another day. And a dose question is refused before any model sees it. The full four-minute version is here: [link].
 >
 > Since the document the app has moved from a demo to something people can sign up to: accounts, a diary, planning, and about 8,600 foods instead of 6,000. The safety rules in the document are still the ones in front of every answer.
+>
+> I have also attached a one-page update. It lists what has changed in how the product treats a person since the document (including a dish the database lacks now being counted as an estimate), corrects three lines in the document that are out of date, and has a few new questions; you can stop after the first.
 >
 > If you only have a minute, I would most like your eye on the end of the clip, the refusal, and whether it says what you would say to a patient. And the question I still cannot answer myself: what should the app say when someone reports a glucose reading under 70 (Q12 in the document)? Today it stops the food conversation and tells them to seek help.
 >

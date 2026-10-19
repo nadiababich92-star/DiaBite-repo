@@ -1,10 +1,10 @@
 # DiaBite — what has changed since you read the review pack
 
-**For: the four clinicians who hold the pack** · Prepared by Nadia Babich · 10 October 2026 · *draft: not yet sent*
+**For: the four clinicians who hold the pack** · Prepared by Nadia Babich · 10 October 2026, updated 19 October 2026 · *draft: not yet sent*
 
-Thank you again for the time you have already given. This is **not** a second review. Nothing here needs you to reread the pack. Four things have changed in how the product treats a person since you saw it, and I would like your view on five questions that came out of them. About fifteen minutes; a single line against a question number is worth more to me than silence.
+Thank you again for the time you have already given. This is **not** a second review. Nothing here needs you to reread the pack. Six things have changed in how the product treats a person since you saw it, and I would like your view on the questions that came out of them. About fifteen minutes, and you can stop after the first few; a single line against a question number is worth more to me than silence.
 
-The questions are numbered **Q21 to Q25**, continuing the pack's Q1 to Q20.
+The questions are numbered **Q21 to Q31**, continuing the pack's Q1 to Q20. Three lines in the pack itself are out of date, and this page corrects them: the pack counts 6,054 records (there are now 8,633: 364 ingredients, 86 everyday foods, 2,000 recipes, about 4,600 USDA survey foods, 754 packaged and 813 "unrated" foods); it says a pepperoni pizza "comes back as I do not have that food" (it is now answered with carbohydrate only, see 2 and 5 below); and it calls Q17 open (it was decided as proposed, carbohydrate without a load, and I would still like your view on it).
 
 ## What changed
 
@@ -12,6 +12,8 @@ The questions are numbered **Q21 to Q25**, continuing the pack's Q1 to Q20.
 2. **Packaged and branded foods** (an Oreo, a KIND bar, a can of Red Bull) are now answered. We show the carbohydrate, fibre and calories printed on the label, and we say the glycemic load is not available, because no glycemic index is published for packaged products. We do **not** estimate one. A meal containing such a food is partial in the sense above.
 3. **The weekly menu is back** (it had been built and never shown to anyone). It is hidden, with a short explanation and no plan, for a person who reports a **history of disordered eating, chronic kidney disease, or dialysis**. Everyone else sees it with the line *"These meals have not been reviewed by a clinician yet."*
 4. **People sign in.** An emailed link, no password; the app holds their profile and diary in Ireland, with export and deletion. The first screen, before anything else, now carries the sentence in Q23.
+5. **Foods with no glycemic index at all** (pizza, ready-to-eat cereal, candy, puddings, sweet drinks: 813 USDA survey foods) are answered the way packaged foods are: carbohydrate, fibre and calories from the data, **never** a glycemic load, and a meal containing one is partial and never "fits". Before, these came back as "I do not have that food".
+6. **A dish the database lacks can be counted from its ingredients** (for example a grandmother's cholent), as an **estimate**: the app lists typical ingredients with assumed weights, finds each in the database, and says plainly it is an estimate and that the person can change any gram. The verdict on an estimate is conditional ("if yours is like this…"), never a plain "fits". Every number is still computed by the engine; only the weights are assumptions.
 
 ## Five questions
 
@@ -41,8 +43,19 @@ The banner used to show its whole text (reference tool, not medical advice, the 
 **Q28. Changing a portion after the answer.**
 After an answer the person can change any food's weight; the engine counts the meal again and a card above the original answer shows the new figures and a new verdict word taken from the same rule as before (fits, does not fit, or "I can't judge" when a food is missing). The explanation text written for the original portions stays below, marked as the original. Should the app also let someone *add* a food or *remove* one this way, or keep that to a new question? Is "Original answer, before you changed a portion" a clear enough label?
 
-**Q29. The menu now draws on 880 recipes.**
-The weekly menu used to choose from 30 hand-written dishes. It now also draws on 880 recipes from the recipe database (about 340 of them American, the rest Italian, Tex-Mex, Mediterranean and others): every recipe's nutrition, glycemic index and load were computed from its ingredient table, and nobody has read them as a dietitian would. Desserts, drinks and side dishes are left out. A week still shows "These meals have not been reviewed by a clinician yet". Is that line enough while they are unreviewed, or should a recipe carry a visible "unreviewed" mark until a dietitian has signed off, and is there a category you would take out of the menu altogether (for instance sandwiches and wraps, or soups with starchy thickeners)?
+**Q29. The menu now draws on 1,662 recipes.**
+The weekly menu used to choose from 30 hand-written dishes. It now also draws on 1,662 recipes from a database of 2,000 (American, Italian, Tex-Mex, Mediterranean, Asian, Middle Eastern and others): every recipe's nutrition, glycemic index and load were computed from its ingredient table, and nobody has read them as a dietitian would. A week still shows "These meals have not been reviewed by a clinician yet". Is that line enough while they are unreviewed, or should a recipe carry a visible "unreviewed" mark until a dietitian has signed off, and is there a category you would take out of the menu altogether (for instance sandwiches and wraps, or soups with starchy thickeners)?
+
+## Three more, added on 19 October
+
+**Q30. An estimate for a dish we do not have.**
+When the database lacks a dish, the app proposes typical ingredients with weights and counts them, and the card says *"Estimate: I counted this from typical ingredients, which may not be yours"* with an editor for the recipe. The verdict on it is conditional, never a plain fit. Is a number you can edit better for this audience than "I do not have it", or does an estimate with assumed weights invite false confidence? Would you want a range instead of a single figure?
+
+**Q31. Foods that get carbohydrate and no load.**
+Pizza, cereal, candy, packaged foods: the card gives carbohydrate, fibre and calories and says no glycemic index is available. This was Q17 in the pack and was decided as proposed. For a person with type 2 diabetes, is carbohydrate without a load more useful than silence, or does it risk reading as permission? (Q24 asks the same of packaged foods; one answer will do for both.)
+
+**Q32. A meal can be planned for another day, and counts only once it is eaten.**
+A person can put a meal on tomorrow, or on a day in the past. A planned meal is shown dimmed, marked "planned", and counts in no budget, no week and no "days in range" until it is marked eaten. Nothing else about the food advice changes. Is there any risk in a person planning a day of meals that the app has not judged as a whole day, and is "planned" clear enough as a word?
 
 ## How to answer
 
