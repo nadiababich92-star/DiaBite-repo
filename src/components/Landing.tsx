@@ -75,9 +75,9 @@ export default function Landing({ onEnter }: Props) {
 
         <section className="lp-clip-band" aria-labelledby="landing-clip">
           <div className="lp-in">
-            <h2 id="landing-clip">One minute, start to finish</h2>
+            <h2 id="landing-clip">Two minutes, start to finish</h2>
             <video className="lp-video" controls preload="none" playsInline poster="/clip-poster.jpg"
-                   aria-label="One-minute recording of DiaBite" width={1280} height={720}>
+                   aria-label="Two-minute recording of DiaBite" width={1280} height={720}>
               <source src="/clip-how-it-works.mp4" type="video/mp4" />
               <track kind="captions" src="/clip-how-it-works.vtt" srcLang="en" label="English" default />
               Your browser cannot play this clip. The transcript is below.

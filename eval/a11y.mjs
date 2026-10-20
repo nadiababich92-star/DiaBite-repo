@@ -144,7 +144,7 @@ try {
       const f = await b.ev(`(() => { const e = document.activeElement; if (!e || e === document.body) return null; const s = getComputedStyle(e); return { sig: e.tagName + ':' + (e.getAttribute('aria-label') || e.innerText || e.getAttribute('href') || '').trim().slice(0, 28), indicator: (s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) > 0) || s.boxShadow !== 'none' } })()`)
       if (f && !stops.includes(f.sig)) { stops.push(f.sig); if (!f.indicator) noIndicator.push(f.sig) }
     }
-    const want = ['Skip to the page', 'Sign in', 'Try DiaBite', 'One-minute recording', 'Read the transcript', 'LinkedIn', 'The safety case']
+    const want = ['Skip to the page', 'Sign in', 'Try DiaBite', 'Two-minute recording', 'Read the transcript', 'LinkedIn', 'The safety case']
     const missing = want.filter((w) => !stops.some((s) => s.includes(w)))
     results.keyboard.push({ screen: 'Landing (signed out)', stops: stops.length, missing, withoutIndicator: noIndicator })
     console.log('keyboard Landing  ', `${stops.length} stops`, missing.length ? `NOT REACHED: ${missing.join('; ')}` : 'all expected controls reached', noIndicator.length ? `no visible focus on: ${noIndicator.join('; ')}` : 'focus visible on all')
