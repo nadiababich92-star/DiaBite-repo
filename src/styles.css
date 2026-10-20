@@ -1,7 +1,62 @@
-/* Two sets of tokens, kept in step (docs/design.md). Paper is the default in
- * light mode and Night in dark mode; the user can choose either in You, which
- * sets data-theme on <html>. */
+/* Two looks, kept in step (docs/design.md). TAPE is the default: a dark page, and every slip the product prints
+ * (a card, an answer, a dialog) is cream. PAPER is the light look. src/lib/theme.ts sets data-theme to 'tape' or
+ * 'paper' on <html>; "Follow my phone" resolves to one of the two. */
 :root {
+  --radius: 16px;
+  --font: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --serif: 'Literata', Georgia, serif;
+  --mono: 'IBM Plex Mono', Menlo, monospace;
+  --bg: #0a1812;
+  --bg-top: #12291f;
+  --bg-bottom: #0a1812;
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .3 0 0 0 0 .22 0 0 0 0 .1 0 0 0 .6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/></svg>");
+  --surface: #14281f;
+  --surface-2: #1d332a;
+  --sheet-1: #10221a;
+  --sheet-2: #0d1c15;
+  --field: #0e1f17;
+  --field-border: #2a4235;
+  --border: #2a4235;
+  --dot: #2f4a3b;
+  --text: #eef3e8;
+  --text-dim: #a9bbaf;
+  --text-faint: #84998c;
+  --accent: #9fe0b6;
+  --accent-soft: #1c3a2b;
+  --on-accent: #0a1812;
+  --primary-1: #dcf26b;
+  --primary-2: #cde85a;
+  --primary-ink: #0c1b15;
+  --mark: #eef3e8;
+  --marker: #dcf26b;
+  --marker-ink: #0c1b15;
+  --marker-glow: 0 0 22px rgba(220, 242, 107, 0.3);
+  --low: #63b98c;
+  --medium: #e2ad4c;
+  --high: #d97b70;
+  --low-bg: #15291f;
+  --medium-bg: #2b2313;
+  --high-bg: #2c1c1a;
+  --scrim: rgba(0, 0, 0, 0.6);
+  --fx-slip: drop-shadow(0 16px 14px rgba(0, 0, 0, 0.55)) drop-shadow(0 1px 1px rgba(255, 255, 255, 0.05));
+  --fx-raised: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 10px 16px -8px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --fx-nav: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 14px 26px -8px rgba(0, 0, 0, 0.8);
+  --fx-key: 0 4px 0 #8fa23a, 0 12px 16px -8px rgba(0, 0, 0, 0.7);
+  --fx-key-soft: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 -3px 0 rgba(0, 0, 0, 0.35) inset, 0 6px 10px -5px rgba(0, 0, 0, 0.7);
+  --fx-stamp: 0 3px 0 #5c7366;
+  --fx-field: inset 0 3px 7px rgba(0, 0, 0, 0.6);
+  --fx-pressed: inset 0 3px 7px rgba(0, 0, 0, 0.5);
+  --groove: #0a1812;
+  --groove-fx: inset 0 1px 4px rgba(0, 0, 0, 0.7);
+  --bead: linear-gradient(#e6f98a, #dcf26b);
+  color-scheme: dark;
+}
+
+/* Paper's values, written once. They are the whole of the light look, and in Tape they are what a slip is made of:
+ * a cream card on the dark page redefines the tokens for everything inside it, so its text, fields, pills and
+ * keys are the Paper ones without a second set of rules. */
+:root[data-theme='paper'],
+:root[data-theme='tape'] :is(.card:not(.ask-hero), .answer, .day, .chips-col .chip-btn, .ask-form, .tour-tip, .modal) {
   --bg: #f1ece0;
   --bg-top: #f8f4e9;
   --bg-bottom: #eee8d8;
@@ -45,107 +100,12 @@
   --groove: #e3dbc6;
   --groove-fx: inset 0 1px 3px rgba(70, 50, 20, 0.3);
   --bead: linear-gradient(#1b7b53, #0e5a3c);
-  --radius: 16px;
-  --font: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --serif: 'Literata', Georgia, serif;
-  --mono: 'IBM Plex Mono', Menlo, monospace;
   color-scheme: light;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='paper']) {
-    --bg: #0a1812;
-    --bg-top: #12291f;
-    --bg-bottom: #0a1812;
-    --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .3 0 0 0 0 .22 0 0 0 0 .1 0 0 0 .6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/></svg>");
-    --surface: #14281f;
-    --surface-2: #1d332a;
-    --sheet-1: #10221a;
-    --sheet-2: #0d1c15;
-    --field: #0e1f17;
-    --field-border: #2a4235;
-    --border: #2a4235;
-    --dot: #2f4a3b;
-    --text: #eef3e8;
-    --text-dim: #a9bbaf;
-    --text-faint: #84998c;
-    --accent: #9fe0b6;
-    --accent-soft: #1c3a2b;
-    --on-accent: #0a1812;
-    --primary-1: #f7faf2;
-    --primary-2: #d9e3d2;
-    --primary-ink: #0a1812;
-    --mark: #eef3e8;
-    --marker: #dcf26b;
-    --marker-ink: #0c1b15;
-    --marker-glow: 0 0 22px rgba(220, 242, 107, 0.3);
-    --low: #63b98c;
-    --medium: #e2ad4c;
-    --high: #d97b70;
-    --low-bg: #15291f;
-    --medium-bg: #2b2313;
-    --high-bg: #2c1c1a;
-    --scrim: rgba(0, 0, 0, 0.6);
-    --fx-slip: drop-shadow(0 16px 14px rgba(0, 0, 0, 0.55)) drop-shadow(0 1px 1px rgba(255, 255, 255, 0.05));
-    --fx-raised: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 10px 16px -8px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.4);
-    --fx-nav: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 14px 26px -8px rgba(0, 0, 0, 0.8);
-    --fx-key: 0 1px 0 #fff inset, 0 -3px 0 rgba(0, 0, 0, 0.25) inset, 0 10px 16px -6px rgba(0, 0, 0, 0.75);
-    --fx-key-soft: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 -3px 0 rgba(0, 0, 0, 0.35) inset, 0 6px 10px -5px rgba(0, 0, 0, 0.7);
-    --fx-stamp: 0 3px 0 #5c7366;
-    --fx-field: inset 0 3px 7px rgba(0, 0, 0, 0.6);
-    --fx-pressed: inset 0 3px 7px rgba(0, 0, 0, 0.5);
-    --groove: #0a1812;
-    --groove-fx: inset 0 1px 4px rgba(0, 0, 0, 0.7);
-    --bead: linear-gradient(#9be8b8, #4db27e);
-    color-scheme: dark;
-  }
-}
-
-:root[data-theme='night'] {
-  --bg: #0a1812;
-  --bg-top: #12291f;
-  --bg-bottom: #0a1812;
-  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .3 0 0 0 0 .22 0 0 0 0 .1 0 0 0 .6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/></svg>");
-  --surface: #14281f;
-  --surface-2: #1d332a;
-  --sheet-1: #10221a;
-  --sheet-2: #0d1c15;
-  --field: #0e1f17;
-  --field-border: #2a4235;
-  --border: #2a4235;
-  --dot: #2f4a3b;
-  --text: #eef3e8;
-  --text-dim: #a9bbaf;
-  --text-faint: #84998c;
-  --accent: #9fe0b6;
-  --accent-soft: #1c3a2b;
-  --on-accent: #0a1812;
-  --primary-1: #f7faf2;
-  --primary-2: #d9e3d2;
-  --primary-ink: #0a1812;
-  --mark: #eef3e8;
-  --marker: #dcf26b;
-  --marker-ink: #0c1b15;
-  --marker-glow: 0 0 22px rgba(220, 242, 107, 0.3);
-  --low: #63b98c;
-  --medium: #e2ad4c;
-  --high: #d97b70;
-  --low-bg: #15291f;
-  --medium-bg: #2b2313;
-  --high-bg: #2c1c1a;
-  --scrim: rgba(0, 0, 0, 0.6);
-  --fx-slip: drop-shadow(0 16px 14px rgba(0, 0, 0, 0.55)) drop-shadow(0 1px 1px rgba(255, 255, 255, 0.05));
-  --fx-raised: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 10px 16px -8px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.4);
-  --fx-nav: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 14px 26px -8px rgba(0, 0, 0, 0.8);
-  --fx-key: 0 1px 0 #fff inset, 0 -3px 0 rgba(0, 0, 0, 0.25) inset, 0 10px 16px -6px rgba(0, 0, 0, 0.75);
-  --fx-key-soft: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 -3px 0 rgba(0, 0, 0, 0.35) inset, 0 6px 10px -5px rgba(0, 0, 0, 0.7);
-  --fx-stamp: 0 3px 0 #5c7366;
-  --fx-field: inset 0 3px 7px rgba(0, 0, 0, 0.6);
-  --fx-pressed: inset 0 3px 7px rgba(0, 0, 0, 0.5);
-  --groove: #0a1812;
-  --groove-fx: inset 0 1px 4px rgba(0, 0, 0, 0.7);
-  --bead: linear-gradient(#9be8b8, #4db27e);
-  color-scheme: dark;
+:root[data-theme='tape'] :is(.card:not(.ask-hero), .answer, .day, .chips-col .chip-btn, .ask-form, .tour-tip, .modal) {
+  color: var(--text);
+  --fx-slip: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.5));
+  --fx-raised: 0 14px 22px -12px rgba(0, 0, 0, 0.65);
 }
 
 * { box-sizing: border-box; }
@@ -956,3 +916,30 @@ body:has(.landing) { background: #0a1812; }
 .lp-key-dark:hover { background: var(--lp-green); }
 .lp-footer { padding-top: 28px; padding-bottom: 48px; font-size: 14px; line-height: 1.5; color: var(--lp-faint); }
 .lp-footer p { margin: 0 0 10px; max-width: 70ch; }
+
+/* ── Tape: what is more than a token swap (docs/design.md, "The tape") ──────────────────────────────────
+ * The slips are made by the token scope near the top of this file. What follows is the rest: the budget printed
+ * on the dark page, the question box as a slip of its own, the verdict as a stamp, and the marker on the key
+ * the person has chosen. Paper is untouched by anything below. */
+:root[data-theme='tape'] .card.ask-hero { background: none; border: 0; box-shadow: none; padding: 4px 0 2px; }
+:root[data-theme='tape'] .ask-budget .value { color: var(--text); font-size: 18px; }
+:root[data-theme='tape'] .ask-budget .value .num { font-size: 40px; font-weight: 500; letter-spacing: -0.04em; background: var(--marker); color: var(--marker-ink); padding: 0 8px; border-radius: 6px; margin-right: 4px; box-shadow: var(--marker-glow); }
+:root[data-theme='tape'] .ask-hero .ask-title { color: var(--text); }
+:root[data-theme='tape'] .ask-form { background: var(--surface); border-radius: var(--radius); padding: 14px; box-shadow: var(--fx-raised); margin: 14px 0 10px; }
+:root[data-theme='tape'] .ask-hero.compact .ask-form { margin: 0; }
+:root[data-theme='tape'] .chips-col .chip-btn { border: 0; box-shadow: 0 6px 0 -2px #cfc6ae; }
+:root[data-theme='tape'] .chip-btn.on { background: var(--marker); color: var(--marker-ink); border: 2px solid var(--marker); box-shadow: none; }
+:root[data-theme='tape'] .day-key[aria-pressed='true'] b { background: var(--marker-ink); color: var(--marker); }
+/* The verdict as a stamp in the corner of the slip. Its colour is the tone's, its word and mark say the same. */
+:root[data-theme='tape'] .answer .eyebrow-line {
+  position: absolute; top: 14px; right: 14px; margin: 0; background: none; border: 3px solid currentColor; border-radius: 10px;
+  padding: 4px 10px 4px 7px; font-family: var(--mono); font-weight: 500; transform: rotate(-7deg);
+}
+:root[data-theme='tape'] .answer .eyebrow-line .status-dot { background: none; color: currentColor; width: 16px; height: 16px; }
+:root[data-theme='tape'] .answer .eyebrow-line .status-dot svg { width: 14px; height: 14px; }
+:root[data-theme='tape'] .answer .answer-text .a-verdict { max-width: calc(100% - 124px); }
+
+:root[data-theme='tape'] .ask-budget { flex-direction: column; align-items: flex-start; gap: 4px; margin-bottom: 14px; }
+:root[data-theme='tape'] .ask-form button.primary { background: var(--marker); color: var(--marker-ink); box-shadow: 0 4px 0 #8fa23a; }
+:root[data-theme='tape'] .ask-form button.primary:disabled { opacity: 1; background: #e9f2b3; color: var(--text-dim); box-shadow: 0 4px 0 #cfd7a6; }
+:root[data-theme='tape'] .chip-toggle.on { background: var(--marker); border-color: var(--marker); color: var(--marker-ink); }

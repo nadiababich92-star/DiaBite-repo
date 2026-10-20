@@ -7,7 +7,7 @@
  *   QUESTION="A slice of grandma's cholent" npm run screens   # look at the estimate card
  *   TOUR=1 npm run screens                                      # leave the first-run tips on and photograph them
  *   PLAN=1 npm run screens                                      # plan the meal for tomorrow and photograph the day picker, a planned row and the Menu's planner
- *   DARK=1 npm run screens                                      # the same screens in the dark theme
+ *   PAPER=1 npm run screens                                     # the same screens in the light look (Paper); the default is Tape
  *   SEED=full|thin|empty npm run screens                       # give the account a diary history to look at the week
  *
  * Like the rehearsal it creates a throwaway account with the service key (read from the Container App
@@ -71,10 +71,9 @@ try {
     const tab = async (n) => { await b.ev(`(()=>{[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes(${JSON.stringify(n)}))?.click()})()`); await sleep(1200) }
     const click = (t) => b.ev(`(()=>{const e=[...document.querySelectorAll('button')].find(x=>x.innerText.trim().startsWith(${JSON.stringify(t)})); if(!e) return 'NO '+${JSON.stringify(t)}; e.click(); return 'ok'})()`)
     console.log(size.name)
-    if (process.env.DARK === '1') await b.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'dark' }] })
     await b.send('Page.navigate', { url: APP }); await sleep(2500)
     // The first-run tips are marked seen unless TOUR=1, so they never sit over what this script clicks.
-    await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session', 'test-screens-' + crypto.randomUUID()); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); ${process.env.TOUR === '1' ? '' : "localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log']));"}`)
+    await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session', 'test-screens-' + crypto.randomUUID()); ${process.env.PAPER === '1' ? "localStorage.setItem('diabite.theme', 'paper');" : ''} localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); ${process.env.TOUR === '1' ? '' : "localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log']));"}`)
     await b.send('Page.reload'); await sleep(3500)
 
     if (idx === 0) {

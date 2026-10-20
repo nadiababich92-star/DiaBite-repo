@@ -8,7 +8,7 @@ The direction was settled in the design canvas (`docs/design/`) and it is called
 **the receipt**. On 10 October 2026 it was given an identity and two themes
 (canvas: https://claude.ai/artifact/UyJycxASk9mmrdEhZCVegK): a receipt with a bite
 out of its corner, a marker on the one number that answers the question, and two
-looks the user chooses between, **Paper** (light) and **Night** (dark).
+looks the user chooses between, **Tape** (a dark page with cream slips, the default, from 20 October 2026) and **Paper** (light). The concept canvas for the app is https://claude.ai/artifact/56Sb7XQg8kA2EN4krZ76ub.
 
 ---
 
@@ -44,8 +44,18 @@ There is a full dark set; both are defined together and must stay in step.
 
 ### Tokens
 
-Two sets, defined together, and they must stay in step. `Paper` is the default in
-light mode, `Night` in dark mode, and the user can override either in **You**.
+Two looks, defined together, and they must stay in step. **Tape** is the default: the page is dark, and
+everything the product prints (a card, an answer, a dialog, the question box, the "Try one" chips) is a cream
+**slip**. **Paper** is the light look. `src/lib/theme.ts` sets `data-theme` to `tape` or `paper` on `<html>`; the
+user chooses Tape, Paper or Follow my phone (Paper by day, Tape after dark) in **You**. The old name for the dark
+look, Night, is Tape: a stored "night" choice is read as Tape.
+
+How the slips are made: the table's **Night** column below is the Tape *page* (background, bars, chips, text on the
+page). A slip redefines the tokens for everything inside it to the **Paper** column, so its text, fields, pills and
+keys are Paper's without a second set of rules (`src/styles.css`, the scope near the top). The keys on the page itself
+are the marker colour: `--primary-1/2` are `#dcf26b` / `#cde85a` with ink `#0c1b15` and a hard `#8fa23a` edge. A
+disabled key in the question box is pale (`#e9f2b3`, text `--text-dim`, edge `#cfd7a6`), not faded, so it stays at 4.5:1.
+The verdict on an answer is printed as a stamp in the slip's corner (`--low`, `--medium` or `--high`, a word and a mark).
 
 | Token | Paper | Night | Use |
 |---|---|---|---|
@@ -288,7 +298,7 @@ Almost none, and never for its own sake.
 4. Decorative icons are `aria-hidden`; the day bar has an `aria-label` stating
    used and total.
 5. Respect `prefers-color-scheme` and `prefers-reduced-motion`. **You** offers
-   Follow my phone (default), Paper and Night; the choice is kept on the device.
+   Tape (default), Paper and Follow my phone; the choice is kept on the device.
 
 ---
 

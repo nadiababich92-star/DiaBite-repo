@@ -70,7 +70,7 @@ try {
       await b.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: scheme }] })
       const tab = async (n) => { await b.ev(`(()=>{[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes(${JSON.stringify(n)}))?.click()})()`); await sleep(1300) }
       const click = (t, scope = 'button') => b.ev(`(()=>{const e=[...document.querySelectorAll(${JSON.stringify(scope)})].find(x=>x.innerText.trim().startsWith(${JSON.stringify(t)})); if(!e) return 'NO'; e.click(); return 'ok'})()`)
-      const label = `${size.name}-${scheme}`
+      const label = `${size.name}-${scheme === 'light' ? 'paper' : 'tape'}`   // the light run is Paper, the dark one is Tape (the default look)
       const scan = async (screen) => {
         await injectAxe(b)
         const v = await axeRun(b)
@@ -83,7 +83,7 @@ try {
       await scan('landing')
       await click('Try DiaBite'); await sleep(700); await scan('sign-in-screen')
       await b.send('Page.navigate', { url: APP }); await sleep(2500)
-      await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session','test-a11y-'+crypto.randomUUID()); localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log'])); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2'])); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`)
+      await b.ev(`localStorage.clear(); ${scheme === 'light' ? "localStorage.setItem('diabite.theme','paper');" : ''} localStorage.setItem('diabite.session','test-a11y-'+crypto.randomUUID()); localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log'])); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2'])); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`)
       await b.send('Page.reload'); await sleep(4500)
       await scan('ask-empty')
       // a real answer

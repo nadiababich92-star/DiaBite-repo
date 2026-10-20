@@ -36,6 +36,7 @@ import { diffEntries, exportShape, fromRow, mergeById, storable, toRow } from '.
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
 import { boldSegments } from '../src/lib/answer'
+import { lookOf } from '../src/lib/theme'
 import { LANDING } from '../src/data/landing'
 import { authInUrl, showLanding, skipLanding } from '../src/lib/landingRule'
 import { allCopy, allSteps, copyFor, initialSeen, markSeen, nextStep, sanitizeSeen, STEP_ORDER, type TourContext } from '../src/lib/tour'
@@ -913,6 +914,15 @@ console.log(`\nverify    ${cases.engine.verify.length - verifyMisses.length}/${c
 if (verifyMisses.length) { console.log('  wrong verdict:'); verifyMisses.forEach((m) => console.log(m)) }
 fail([], '')
 
+// The two looks: Tape is the default; Follow my phone is Paper by day and Tape after dark.
+{
+  const bits: string[] = []
+  const want: [Parameters<typeof lookOf>[0], boolean, string][] = [['tape', true, 'tape'], ['tape', false, 'tape'], ['paper', true, 'paper'], ['paper', false, 'paper'], ['system', true, 'paper'], ['system', false, 'tape']]
+  for (const [choice, light, look] of want) if (lookOf(choice, light) !== look) bits.push(`${choice} on a ${light ? 'light' : 'dark'} phone should be ${look}`)
+  console.log(`\ntheme     ${bits.length === 0 ? 'ok' : 'WRONG'}`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exit(1)
+}
 // The landing page: its receipt is a real answer, copied; it must still be what the engine returns. And the rule for when it shows.
 {
   const bits: string[] = []

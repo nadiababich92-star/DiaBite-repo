@@ -530,7 +530,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, o
       <section className={`card ask-hero${reply || busy ? ' compact' : ''}`}>
         <div className="ask-budget">
           <span className="label">glycemic load left today</span>
-          <span className="value">{left} <small>of {targets.glBudget}</small></span>
+          <span className="value"><b className="num">{left}</b> <small>of {targets.glBudget}</small></span>
         </div>
         {/* The day, at a glance. A bar rather than a ring: a ring is a score
             to close, and the design canvas ruled those out. */}

@@ -43,17 +43,17 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
       <section className="card">
         <h2>Appearance</h2>
         <div className="theme-options" role="group" aria-label="Appearance">
-          <button className="theme-option" aria-pressed={theme === 'system'} onClick={() => choose('system')}>
-            <span className="theme-swatch" aria-hidden="true"><i className="p" /><i className="n" /></span>Follow my phone
+          <button className="theme-option" aria-pressed={theme === 'tape'} onClick={() => choose('tape')}>
+            <span className="theme-swatch" aria-hidden="true"><i className="n" /></span>Tape
           </button>
           <button className="theme-option" aria-pressed={theme === 'paper'} onClick={() => choose('paper')}>
             <span className="theme-swatch" aria-hidden="true"><i className="p" /></span>Paper
           </button>
-          <button className="theme-option" aria-pressed={theme === 'night'} onClick={() => choose('night')}>
-            <span className="theme-swatch" aria-hidden="true"><i className="n" /></span>Night
+          <button className="theme-option" aria-pressed={theme === 'system'} onClick={() => choose('system')}>
+            <span className="theme-swatch" aria-hidden="true"><i className="p" /><i className="n" /></span>Follow my phone
           </button>
         </div>
-        <p className="muted theme-note">Follow my phone switches to Night after dark on its own.</p>
+        <p className="muted theme-note">Tape is the dark page. Follow my phone uses Paper in the daytime and Tape after dark.</p>
       </section>
 
       <section className="card">
