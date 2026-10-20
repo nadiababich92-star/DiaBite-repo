@@ -78,6 +78,10 @@ try {
         results.runs.push({ run: label, screen, violations: v })
         console.log(label.padEnd(12), screen.padEnd(22), v.length ? v.map((x) => `${x.id}(${x.nodes})`).join(' ') : 'no violations')
       }
+      await b.send('Page.navigate', { url: APP }); await sleep(3000)
+      // Signed out: the landing page a stranger meets, then the sign-in screen behind "Try DiaBite".
+      await scan('landing')
+      await click('Try DiaBite'); await sleep(700); await scan('sign-in-screen')
       await b.send('Page.navigate', { url: APP }); await sleep(2500)
       await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session','test-a11y-'+crypto.randomUUID()); localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log'])); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2'])); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`)
       await b.send('Page.reload'); await sleep(4500)
@@ -108,7 +112,13 @@ try {
   // Reflow (WCAG 1.4.10, 320 px) and 200% zoom (1.4.4: a 1280 px window shown at 640 px), light theme.
   for (const view of [{ name: '320 px wide', w: 320, h: 640 }, { name: '200% zoom (1280 px at 640 px)', w: 640, h: 600 }]) {
     const b = await launch({ port: port++, width: view.w, height: view.h, dpr: 2 })
-    await b.send('Page.navigate', { url: APP }); await sleep(2500)
+    await b.send('Page.navigate', { url: APP }); await sleep(3000)
+    {
+      const m = await b.ev(`({ scrollW: document.documentElement.scrollWidth, innerW: window.innerWidth, wide: [...document.querySelectorAll('body *')].filter(e => e.getBoundingClientRect().right > window.innerWidth + 1 && getComputedStyle(e).position !== 'fixed').slice(0, 3).map(e => e.tagName + '.' + (e.className || '').toString().slice(0, 30)) })`)
+      const ok = m.scrollW <= m.innerW + 1
+      results.reflow.push({ view: view.name, screen: 'Landing (signed out)', ok, ...m })
+      console.log(view.name.padEnd(30), 'Landing'.padEnd(8), ok ? 'no horizontal scroll' : `HORIZONTAL SCROLL ${m.scrollW} > ${m.innerW} ${m.wide.join(',')}`)
+    }
     await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session','test-a11y-'+crypto.randomUUID()); localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log'])); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2'])); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`)
     await b.send('Page.reload'); await sleep(4500)
     const tab = async (n) => { await b.ev(`(()=>{[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes(${JSON.stringify(n)}))?.click()})()`); await sleep(1300) }
@@ -120,6 +130,24 @@ try {
       results.reflow.push({ view: view.name, screen, ok, ...m })
       console.log(view.name.padEnd(30), screen.padEnd(8), ok ? 'no horizontal scroll' : `HORIZONTAL SCROLL ${m.scrollW} > ${m.innerW} ${m.wide.join(',')}`)
     }
+    await b.close()
+  }
+
+  // The keyboard on the landing page, signed out: skip link, Sign in, Try DiaBite, the video, the transcript, the links, the footer button.
+  {
+    const b = await launch({ port: port++, width: 1366, height: 768, dpr: 1 })
+    await b.send('Page.navigate', { url: APP }); await sleep(3000)
+    const stops = []; const noIndicator = []
+    for (let i = 0; i < 24; i++) {
+      await b.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 }); await b.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 })
+      await sleep(40)
+      const f = await b.ev(`(() => { const e = document.activeElement; if (!e || e === document.body) return null; const s = getComputedStyle(e); return { sig: e.tagName + ':' + (e.getAttribute('aria-label') || e.innerText || e.getAttribute('href') || '').trim().slice(0, 28), indicator: (s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) > 0) || s.boxShadow !== 'none' } })()`)
+      if (f && !stops.includes(f.sig)) { stops.push(f.sig); if (!f.indicator) noIndicator.push(f.sig) }
+    }
+    const want = ['Skip to the page', 'Sign in', 'Try DiaBite', 'One-minute recording', 'Read the transcript', 'LinkedIn', 'The safety case']
+    const missing = want.filter((w) => !stops.some((s) => s.includes(w)))
+    results.keyboard.push({ screen: 'Landing (signed out)', stops: stops.length, missing, withoutIndicator: noIndicator })
+    console.log('keyboard Landing  ', `${stops.length} stops`, missing.length ? `NOT REACHED: ${missing.join('; ')}` : 'all expected controls reached', noIndicator.length ? `no visible focus on: ${noIndicator.join('; ')}` : 'focus visible on all')
     await b.close()
   }
 

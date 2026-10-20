@@ -36,6 +36,8 @@ import { diffEntries, exportShape, fromRow, mergeById, storable, toRow } from '.
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
 import { boldSegments } from '../src/lib/answer'
+import { LANDING } from '../src/data/landing'
+import { authInUrl, showLanding, skipLanding } from '../src/lib/landingRule'
 import { allCopy, allSteps, copyFor, initialSeen, markSeen, nextStep, sanitizeSeen, STEP_ORDER, type TourContext } from '../src/lib/tour'
 import { generateWeek, menuHidden, regenerateSlot, replayWeek, setRecipes, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
 import { toDishes } from '../src/lib/recipes'
@@ -910,6 +912,46 @@ for (const c of cases.engine.verify) {
 console.log(`\nverify    ${cases.engine.verify.length - verifyMisses.length}/${cases.engine.verify.length}`)
 if (verifyMisses.length) { console.log('  wrong verdict:'); verifyMisses.forEach((m) => console.log(m)) }
 fail([], '')
+
+// The landing page: its receipt is a real answer, copied; it must still be what the engine returns. And the rule for when it shows.
+{
+  const bits: string[] = []
+  const r1 = (n: number) => Math.round(n * 10) / 10
+  const meal = computeMeal(LANDING.rows.map((r) => ({ foodId: r.foodId, grams: r.grams })))
+  if (meal.items.length !== LANDING.rows.length) bits.push('a food on the landing receipt no longer resolves')
+  LANDING.rows.forEach((row, i) => {
+    const it = meal.items[i]
+    if (!it) return
+    if (r1(it.availableCarbs ?? 0) !== row.availableCarbs) bits.push(`${row.name}: available carbs ${row.availableCarbs} on the page, ${r1(it.availableCarbs ?? 0)} from the engine`)
+    if ((it.gi ?? null) !== row.gi) bits.push(`${row.name}: GI ${row.gi} on the page, ${it.gi ?? null} from the engine`)
+    if (r1(it.gl ?? 0) !== row.gl) bits.push(`${row.name}: load ${row.gl} on the page, ${r1(it.gl ?? 0)} from the engine`)
+  })
+  if (r1(meal.totals.gl ?? 0) !== LANDING.totalGl) bits.push(`meal load ${LANDING.totalGl} on the page, ${r1(meal.totals.gl ?? 0)} from the engine`)
+  if (r1(LANDING.budgetGl - LANDING.totalGl) !== LANDING.leftAfterGl) bits.push('left after is not budget minus the meal load')
+  const html = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../index.html'), 'utf8')
+  if (!html.includes(`meal load of ${LANDING.totalGl.toFixed(1)} and ${LANDING.leftAfterGl.toFixed(1)} left`)) bits.push('the share image text in index.html does not carry the receipt figures')
+  // when the page shows
+  const at = (hash = '', search = '') => ({ hash, search })
+  const base = { signInRequired: true as boolean | null, signedOut: true, notice: '', entering: false, location: at() }
+  const cases: [string, boolean, Parameters<typeof showLanding>[0]][] = [
+    ['R1 a stranger sees it', true, base],
+    ['R2 after "Try DiaBite" it does not', false, { ...base, entering: true }],
+    ['R3 /?signin skips it', false, { ...base, location: at('', '?signin') }],
+    ['R4 an email link is never covered', false, { ...base, location: at('#access_token=x&type=magiclink') }],
+    ['R5 a failed link is never covered', false, { ...base, location: at('#error=access_denied&error_description=expired') }],
+    ['R6 a code in the query is never covered', false, { ...base, location: at('', '?code=abc') }],
+    ['R7 a session that just ended goes to sign-in', false, { ...base, notice: 'Your session ended. Sign in again.' }],
+    ['R8 no sign-in required: not shown', false, { ...base, signInRequired: false }],
+    ['R9 not yet known: not shown', false, { ...base, signInRequired: null }],
+    ['R10 signed in: not shown', false, { ...base, signedOut: false }],
+    ['R11 ?lab alone does not skip it', true, { ...base, location: at('', '?lab') }],
+  ]
+  for (const [name, want, input] of cases) if (showLanding(input) !== want) bits.push(`${name}: wanted ${want}`)
+  if (!authInUrl(at('#type=recovery')) || authInUrl(at('', '?utm=x')) || !skipLanding({ search: '?signin=1' })) bits.push('authInUrl or skipLanding is wrong')
+  console.log(`\nlanding   ${bits.length === 0 ? 'ok' : 'WRONG'}`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) { console.log('the landing receipt is stale, or the rule for showing it is wrong: see landing above'); process.exit(1) }
+}
 
 console.log(`\ndone in ${Date.now() - t0} ms`)
 if (resolvePct < TARGET) {

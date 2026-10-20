@@ -95,13 +95,19 @@ try {
   const focusInfo = (b) => b.ev(`(() => { const e = document.activeElement; if (!e || e === document.body) return { where: 'body' }; const d = e.closest('[role=dialog], dialog'); return { where: d ? 'dialog' : 'page', tag: e.tagName, label: (e.getAttribute('aria-label') || e.innerText || '').trim().slice(0, 40) } })()`)
   const key = async (b, k, code, vk) => { await b.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: k, code, windowsVirtualKeyCode: vk }); await b.send('Input.dispatchKeyEvent', { type: 'keyUp', key: k, code, windowsVirtualKeyCode: vk }) }
 
-  // Signed out: the first thing a stranger meets.
+  // Signed out: the first thing a stranger meets is the landing page, then the sign-in screen behind "Try DiaBite".
   {
     const b = await launch({ port: 9871, width: 390, height: 844, dpr: 2 })
     await b.send('Page.navigate', { url: APP }); await sleep(3500)
-    const meta = await b.ev(`({ lang: document.documentElement.lang, title: document.title })`)
-    const list = await readTree(b); const r = check(list, 'sign-in (signed out)'); if (!meta.lang) r.problems.push('<html> has no lang'); if (!meta.title) r.problems.push('page has no title')
-    results.screens.push({ ...r, meta }); dump('sign-in (signed out)', list); await b.close()
+    const meta = await b.ev(`({ lang: document.documentElement.lang, title: document.title, video: !!document.querySelector('video'), captions: !!document.querySelector('video track[kind=captions]'), h1: document.querySelectorAll('h1').length })`)
+    const landing = await readTree(b); const lr = check(landing, 'landing (signed out)')
+    if (!meta.lang) lr.problems.push('<html> has no lang'); if (!meta.title) lr.problems.push('page has no title')
+    if (meta.h1 !== 1) lr.problems.push(`${meta.h1} h1 elements (want exactly one)`)
+    if (!meta.video) lr.problems.push('no video element on the landing page'); else if (!meta.captions) lr.problems.push('the clip has no captions track')
+    results.screens.push({ ...lr, meta }); dump('landing (signed out)', landing)
+    await b.ev(`[...document.querySelectorAll('button')].find(x => x.innerText.trim() === 'Try DiaBite')?.click()`); await sleep(900)
+    const list = await readTree(b); const r = check(list, 'sign-in (signed out)')
+    results.screens.push(r); dump('sign-in (signed out)', list); await b.close()
   }
 
   // Signed in, with the first-run tips left ON: do they announce themselves and leave focus alone?

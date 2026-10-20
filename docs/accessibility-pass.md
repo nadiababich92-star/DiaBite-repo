@@ -37,3 +37,7 @@ Not a screen-reader session. The script reads Chrome's **accessibility tree** on
 **What passed:** both dialogs ("What is GL?", "How it works") are named, move focus in and return it to the button that opened them on Escape; the answer is announced politely (`role=status`, `aria-live=polite`) and the first-run tip is a polite region that never takes focus; the day and rating controls expose their pressed and selected state. axe-core ran again on the local build after the change: 0 violations in 40 runs.
 
 **Still not done:** a person using VoiceOver or NVDA. The reading order of each screen is saved by the script; whether it makes sense by ear, whether the labels are clear, and how a real virtual cursor moves through the tables and the diary are only answered by that session, and the claim "WCAG compliant" is still not supported.
+
+## Addendum, 20 October 2026 (evening): the landing page
+
+The signed-out landing page was added to `eval/a11y.mjs` (axe-core, contrast, 320 px reflow, 200% zoom, a keyboard walk: skip link, Sign in, Try DiaBite, the video, the transcript, the links, the footer button) and to `eval/a11y-tree.mjs` (one `h1`, a `main` landmark, the clip with a captions track, every control named). The clip has English captions and a text transcript; it never autoplays. **Still not done:** a person listening to the page with VoiceOver or NVDA, and the captions listened to once against the sound.

@@ -29,6 +29,18 @@ const page = await fetch(`${URL_}/`)
 const csp = page.headers.get('content-security-policy') ?? ''
 check('M2', 'the page loads with its security headers', page.status === 200 && csp.includes("frame-ancestors 'none'") && !page.headers.get('x-powered-by'), `${page.status} ${csp.slice(0, 60)}`)
 
+// The link preview: a crawler reads the static head and never runs the app.
+{
+  const html = await (await fetch(`${URL_}/`)).text()
+  const tag = (re) => re.test(html)
+  const img = await fetch(`${URL_}/share.png`); const vtt = await fetch(`${URL_}/clip-how-it-works.vtt`)
+  const clip = await fetch(`${URL_}/clip-how-it-works.mp4`, { headers: { range: 'bytes=0-1023' } })
+  check('M15', 'the share tags are in the page a crawler reads, and the image, the captions and a ranged clip answer',
+    tag(/property="og:title"/) && tag(/property="og:description"/) && tag(/property="og:image" content="https:\/\/diabite\.pro\/share\.png"/) && tag(/name="twitter:card"/)
+      && img.status === 200 && /image\/png/.test(img.headers.get('content-type') ?? '') && vtt.status === 200 && clip.status === 206,
+    JSON.stringify([img.status, vtt.status, clip.status]))
+}
+
 const tools = await fetch(`${URL_}/tools/resolve_foods`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"phrases":["rice"]}' })
 check('M3', 'the engine\'s tools are closed to a caller with no key', tools.status === 401, String(tools.status))
 
@@ -60,7 +72,7 @@ b.on('Runtime.exceptionThrown', (p) => errors.push(p.exceptionDetails?.text ?? '
 b.on('Runtime.consoleAPICalled', (p) => { if (p.type === 'error') errors.push((p.args?.[0]?.value ?? '').toString().slice(0, 120)) })
 try {
   await b.send('Page.navigate', { url: URL_ })
-  await until(b, `document.body && /Email me a link|First, the numbers|What are you/.test(document.body.innerText)`)
+  await until(b, `document.body && /Try DiaBite|Email me a link|First, the numbers|What are you/.test(document.body.innerText)`)
   await b.ev(`localStorage.setItem('diabite.session', 'test-smoke-' + crypto.randomUUID())`)
   await b.ev(`
 window.__setNum = (labelText, v) => { const el = [...document.querySelectorAll('label.field')].find(l => l.innerText.trim().startsWith(labelText))?.querySelector('input'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set; set.call(el,String(v)); el.dispatchEvent(new Event('input',{bubbles:true})) }
@@ -70,9 +82,26 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
   const text = async () => b.ev('document.body.innerText')
 
   if (health.signIn === true) {
+    // The landing page (docs/specs/landing-checks.md): a stranger meets the page about the product, then the sign-in screen.
     const t = await text()
-    check('M7', 'sign-in is required: the first screen is the sign-in screen with the emergency line',
-      /Email me a link/.test(t) && /call emergency services/i.test(t) && !/Can I eat this\?/.test(t), t.slice(0, 120))
+    const EMERGENCY = /call emergency services/i
+    const FORBIDDEN = [/lower your/i, /\breverse\b/i, /\bcure\b/i, /AI-powered/i, /clinically proven/i, /WCAG compliant/i, /HIPAA/i, /FDA approved/i, /\bguarantee/i]
+    const hit = FORBIDDEN.filter((r) => r.test(t)).map(String)
+    check('M7a', 'the first screen is the landing page: the emergency line, Try DiaBite, what it is not, and no app, no sign-in form, no outcome promise',
+      EMERGENCY.test(t) && /Try DiaBite/.test(t) && /not medical advice/i.test(t) && /No clinician has signed it off yet/.test(t)
+        && !/Email me a link/.test(t) && !/What are you\s+about to eat/i.test(t) && hit.length === 0, hit.join(' ') || t.slice(0, 120))
+    await b.ev(`[...document.querySelectorAll('button')].find(e => e.innerText.trim() === 'Try DiaBite').click()`)
+    await until(b, `/Email me a link/.test(document.body.innerText)`, 5)
+    const t2 = await text()
+    check('M7b', 'Try DiaBite leads to the sign-in screen with the emergency line', /Email me a link/.test(t2) && EMERGENCY.test(t2), t2.slice(0, 120))
+    await b.send('Page.navigate', { url: `${URL_}/?signin` })
+    await until(b, `/Email me a link/.test(document.body.innerText)`, 8)
+    const t3 = await text()
+    check('M7c', '/?signin goes straight to the sign-in screen, with no way back to a page the person never saw', /Email me a link/.test(t3) && !/Can I eat this\?/.test(t3) && !/Not now/.test(t3), t3.slice(0, 120))
+    await b.send('Page.navigate', { url: `${URL_}/#access_token=stub&type=magiclink` })
+    await sleep(3000)
+    const t4 = await text()
+    check('M7d', 'an address that carries a sign-in result is never covered by the landing page', !/Try DiaBite/.test(t4), t4.slice(0, 120))
   } else {
     await until(b, `[...document.querySelectorAll('label.field')].some(l => l.innerText.trim().startsWith('Age'))`)
     await b.ev(`__setNum('Age', 52)`); await b.ev(`__click('Continue')`); await sleep(250)

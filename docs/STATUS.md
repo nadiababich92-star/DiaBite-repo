@@ -8,6 +8,7 @@
 - The engine: 8,633 records, every number computed and checked; a dish the database lacks is counted from its ingredients as an estimate; the safety rules run before any model. Evidence: `docs/safety-case.md`, `docs/data-sources.md`.
 - Evidence of checking: 204 of 204 behavioural checks on the live agent (15 October); a free security pass (Mozilla Observatory A+, row-level security tested with two accounts) in `docs/security/security-plan.md`; a free accessibility pass in `docs/accessibility-pass.md`.
 - Watching it: `npm run report` splits our own tests from browser sessions; the throwaway accounts of our scripts carry a `test-` session id.
+- A landing page at https://diabite.pro for anyone not signed in (20 October): the question, a one-minute clip with captions, a real receipt kept true by `npm run eval`, the promise, what it is not, who built it, a short section for clinicians. An email link and `https://diabite.pro/?signin` go straight to sign-in. **To refresh when the agent evaluation is rerun:** `LANDING.checks` in `src/data/landing.ts`, and the share image (`node eval/share-image.mjs`) if the receipt changes.
 - Two videos: the full demo (`docs/demo-story.mp4`, 4 min 15 s) and a one-minute how-it-works clip in the deck.
 
 ## Only the owner can do these
