@@ -49,6 +49,7 @@
   --groove: #0a1812;
   --groove-fx: inset 0 1px 4px rgba(0, 0, 0, 0.7);
   --bead: linear-gradient(#e6f98a, #dcf26b);
+  --logo-tick: #dcf26b;
   color-scheme: dark;
 }
 
@@ -100,6 +101,7 @@
   --groove: #e3dbc6;
   --groove-fx: inset 0 1px 3px rgba(70, 50, 20, 0.3);
   --bead: linear-gradient(#1b7b53, #0e5a3c);
+  --logo-tick: #0e5a3c;
   color-scheme: light;
 }
 :root[data-theme='tape'] :is(.card:not(.ask-hero), .answer, .day, .chips-col .chip-btn, .ask-form, .tour-tip, .modal) {
@@ -133,8 +135,8 @@ header.masthead h1, header.masthead span.wordmark { margin: 0; font-size: 21px; 
   border-radius: 5px 8px 6px 9px; padding: 0 5px 1px 3px; margin-left: -1px;
   transform: rotate(-1.5deg); display: inline-block; box-shadow: var(--marker-glow);
 }
-.logo-slip { fill: var(--mark); }
-.logo-hl { fill: var(--marker); }
+.logo-ring { stroke: var(--text); }
+.logo-tick { stroke: var(--logo-tick); }
 
 .disclaimer {
   background: var(--surface);
@@ -837,7 +839,8 @@ body:has(.landing) { background: #0a1812; }
 .lp-emergency { margin: 0; background: var(--lp-note); color: var(--lp-text); font-size: 14px; line-height: 1.5; padding: 12px 20px; text-align: center; }
 .lp-top { display: flex; align-items: center; gap: 10px; padding-top: 20px; padding-bottom: 20px; }
 .lp-top .logo { width: 30px; height: 30px; flex: none; }
-.lp-top .logo-slip { fill: var(--lp-text); }
+.lp-top .logo-ring { stroke: var(--lp-text); }
+.lp-top .logo-tick { stroke: var(--lp-marker); }
 .lp-top .wordmark { font-family: var(--serif); font-weight: 600; font-size: 25px; letter-spacing: -0.02em; display: flex; align-items: baseline; }
 .lp-signin { margin-left: auto; background: none; border: 0; color: var(--lp-marker); font: inherit; font-weight: 600; min-height: 44px; padding: 0 4px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
 .lp-signin:hover { color: #fff; }
