@@ -45,6 +45,7 @@ async function account(who) {
 }
 
 const manifest = {}
+const marks = {}   // per scene: when the typing ended, when the button was pressed, when the answer was on screen
 let port = 9921
 async function film(who, acct, run) {
   const b = await launch({ port: port++, width: 360, height: 660, dpr: 2 })
@@ -54,19 +55,22 @@ async function film(who, acct, run) {
   await b.send('Page.reload'); await sleep(4500)
   let scene = null, t0 = 0, n = 0
   const T = {
-    begin(name) { scene = name; manifest[name] = []; t0 = Date.now(); n = 0; mkdirSync(join(OUT, name), { recursive: true }) },
+    begin(name) { scene = name; manifest[name] = []; marks[name] = {}; t0 = Date.now(); n = 0; mkdirSync(join(OUT, name), { recursive: true }) },
     async shot() { const r = await b.send('Page.captureScreenshot', { format: 'jpeg', quality: 86 }); const file = `${scene}/${String(n++).padStart(3, '0')}.jpg`; writeFileSync(join(OUT, file), Buffer.from(r.data, 'base64')); manifest[scene].push({ file, t: (Date.now() - t0) / 1000 }) },
     async hold(frames = 3, gap = 250) { for (let i = 0; i < frames; i++) { await T.shot(); await sleep(gap) } },
     async type(text, cps = 14) { await ev(`(() => { const i = document.querySelector('.ask-form input'); i.focus(); i.select() })()`); await b.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'Backspace', code: 'Backspace', windowsVirtualKeyCode: 8 }); await b.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Backspace', code: 'Backspace', windowsVirtualKeyCode: 8 }); await T.shot()
-      for (let i = 0; i < text.length; i++) { await b.send('Input.insertText', { text: text[i] }); await sleep(1000 / cps); if (i % 2 === 1 || i === text.length - 1) await T.shot() } },
+      for (let i = 0; i < text.length; i++) { await b.send('Input.insertText', { text: text[i] }); await sleep(1000 / cps); if (i % 2 === 1 || i === text.length - 1) await T.shot() }
+      marks[scene].typed = (Date.now() - t0) / 1000 },
     click: (t, scope = 'button') => ev(`(() => { const e = [...document.querySelectorAll(${JSON.stringify(scope)})].find(x => x.innerText.trim().startsWith(${JSON.stringify(t)})); if (!e) return 'NO'; e.click(); return 'ok' })()`),
     async tab(name) { await T.click(name, '[role=tab]'); await sleep(1300) },
     async answer(maxWait = 90) {
+      marks[scene].click = (Date.now() - t0) / 1000
       await T.click('Check this meal')
       for (let i = 0; i < maxWait * 3; i++) { await sleep(330); const busy = await ev(`[...document.querySelectorAll('button')].some(x => x.innerText.includes('Thinking'))`); if (i % 3 === 0) await T.shot(); if (!busy && i > 3) break }
       await sleep(600)
       await ev(`(document.querySelector('.answer, .tone-blocked, .tone-ask') || document.body).scrollIntoView({block:'start'}); window.scrollBy(0,-10)`)
       await sleep(500)
+      marks[scene].answer = (Date.now() - t0) / 1000
     },
     sleep, ev,
   }
@@ -102,8 +106,8 @@ try {
   await film('daniel', daniel, async (T) => {
     T.begin('daniel-cholent'); await T.hold(2); await T.type("grandma's cholent"); await T.answer(); await T.hold(4)
   })
-  writeFileSync(join(OUT, 'manifest.json'), JSON.stringify(manifest, null, 1))
-  console.log(Object.entries(manifest).map(([k, v]) => `${k}: ${v.length} frames, ${v.at(-1)?.t.toFixed(1)} s`).join('\n'))
+  writeFileSync(join(OUT, 'manifest.json'), JSON.stringify({ scenes: manifest, marks }, null, 1))
+  console.log(Object.entries(manifest).map(([k, v]) => `${k}: ${v.length} frames, ${v.at(-1)?.t.toFixed(1)} s, marks ${JSON.stringify(marks[k])}`).join('\n'))
 } finally {
   for (const uid of made) await admin(`/auth/v1/admin/users/${uid}`, { method: 'DELETE' }).catch(() => {})
   console.log('the two demo accounts are removed')

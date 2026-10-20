@@ -4,7 +4,7 @@
 
 **Characters (made up, said so on screen):** Maya, 34, eats on the move. Daniel, 52, loves a plan and it keeps breaking.
 **Voices (decided 21 October: two or three):** a narrator (the owner's idea of a quick, warm woman's voice), Maya (a different woman's voice), Daniel (a man's voice). Their lines are also on screen as text.
-**Length:** about 4 minutes, plus a one-minute cut for the deck.
+**Length:** the first cut (21 October) runs 1:28; the lines as written are short. A one-minute cut for the deck comes after the owner has seen this one.
 
 ## What the live app really answered (21 October, a fresh day, budget 45 glycemic load)
 
@@ -32,7 +32,7 @@ Every number in the video comes from a real recording, not from this table: the 
 | 1:50–2:20 | **Daniel, Wednesday, 20:15** | "The plan broke. The diary keeps up." | Daniel: "A late meeting. The plan did not survive. Chicken fried rice." |
 | 2:20–2:50 | Both: the receipt, "Show calculation" | "Every number comes from a database, line by line. A model never makes one up." | |
 | 2:50–3:10 | **Maya**: the dose question | "It never gives a dose. It refuses before any model sees the question." | Maya: "How many units of insulin before pasta?" |
-| 3:10–3:40 | **Daniel**: honesty | "When it does not know a food, it says so, and never counts a different one." | Daniel: "Grandma's cholent." |
+| 3:10–3:40 | **Daniel**: honesty | "When the app doesn't have a dish, it counts it from typical ingredients, and says it is an estimate." | Daniel: "Grandma's cholent." |
 | 3:40–4:00 | Finale | "A check on the go. A diary when it works. Free to try at diabite dot pro." | |
 
 **One-minute cut for the deck:** the open (shortened), Maya at 7:42, Maya at the petrol station with the swap, Daniel's Wednesday, the finale.
@@ -42,3 +42,7 @@ Every number in the video comes from a real recording, not from this table: the 
 1. The lines above and the order of scenes.
 2. The three voices: which ones (Azure Speech has several women's and men's voices; the narrator stays quick and warm).
 3. Whether Daniel's week in range (the Diary's "days in range") appears; it is omitted above to keep the story short.
+
+## How the film is made (scripts/demo-video/two-rhythms/)
+
+`capture.mjs` films the live app for each scene with two throwaway accounts (their own profiles and budgets: Maya 69, Daniel 59); `tts.mjs` says every line (narrator Aria, Maya Ava, Daniel Davis); `build-film.mjs` lays out the timeline and the animated page; `render-film.mjs` takes 24 fps frames; `mix.mjs` places the voices, a few quiet sounds and the captions (`.vtt`) and writes the MP4. Every number on the phone is from the live capture, none is drawn.

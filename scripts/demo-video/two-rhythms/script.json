@@ -1,0 +1,41 @@
+{
+  "voices": {
+    "narrator": { "name": "en-US-Aria:DragonHDLatestNeural", "rate": "+12%" },
+    "maya": { "name": "en-US-Ava:DragonHDLatestNeural", "rate": "+8%" },
+    "daniel": { "name": "en-US-Davis:DragonHDLatestNeural", "rate": "+0%" }
+  },
+  "scenes": [
+    { "id": "open", "art": "open", "clock": null,
+      "lines": [ { "id": "open-1", "who": "narrator", "text": "Many people with diabetes can't plan every meal. No time, no energy, a life that doesn't wait. That is what DiaBite is for." } ] },
+    { "id": "maya-morning", "art": "car", "clock": ["7:42", "7:43"], "who": "maya",
+      "phone": [ { "cap": "maya-morning" } ],
+      "lines": [ { "id": "mm-1", "who": "maya", "text": "Seven forty-two, already late. Coffee with milk and a banana.", "during": "typing" },
+                 { "id": "mm-2", "who": "narrator", "text": "A few seconds. The engine counts every gram.", "during": "answer" } ] },
+    { "id": "daniel-week", "art": "kitchen", "clock": ["SUN 17:30", "SUN 17:31"], "who": "daniel",
+      "phone": [ { "cap": "daniel-week" } ],
+      "lines": [ { "id": "dw-1", "who": "daniel", "text": "Sunday evening. I like a plan.", "during": "start" },
+                 { "id": "dw-2", "who": "narrator", "text": "He plans the whole week. A plan counts nowhere until it is eaten.", "during": "after" } ] },
+    { "id": "maya-petrol", "art": "station", "clock": ["13:10", "13:11"], "who": "maya",
+      "phone": [ { "cap": "maya-petrol" }, { "cap": "maya-petrol-swap" } ],
+      "lines": [ { "id": "mp-1", "who": "maya", "text": "Grilled chicken sandwich and an apple.", "during": "typing" },
+                 { "id": "mp-2", "who": "narrator", "text": "It fits, but it names a lighter swap, and counts it again.", "during": "answer" },
+                 { "id": "mp-3", "who": "maya", "text": "Chicken salad instead. Fine.", "during": "typing2" } ] },
+    { "id": "daniel-wed", "art": "kitchen-night", "clock": ["WED 20:15", "WED 20:16"], "who": "daniel",
+      "phone": [ { "cap": "daniel-diary-planned", "hold": 2.2 }, { "cap": "daniel-rice" }, { "cap": "daniel-diary-logged", "hold": 2.6 } ],
+      "lines": [ { "id": "dd-1", "who": "daniel", "text": "A late meeting. The plan did not survive. Chicken fried rice.", "during": "typing" },
+                 { "id": "dd-2", "who": "narrator", "text": "The plan broke. The diary keeps up.", "during": "diary" } ] },
+    { "id": "receipt", "art": "both", "clock": null, "who": "maya",
+      "phone": [ { "cap": "maya-receipt", "hold": 5.5 } ],
+      "lines": [ { "id": "rc-1", "who": "narrator", "text": "Every number comes from a database, line by line. A model never makes one up.", "during": "start" } ] },
+    { "id": "maya-dose", "art": "station", "clock": ["13:12", "13:13"], "who": "maya",
+      "phone": [ { "cap": "maya-dose" } ],
+      "lines": [ { "id": "ds-1", "who": "maya", "text": "How many units of insulin before pasta?", "during": "typing" },
+                 { "id": "ds-2", "who": "narrator", "text": "It never gives a dose. It refuses before any model sees the question.", "during": "answer" } ] },
+    { "id": "daniel-cholent", "art": "kitchen", "clock": ["SUN 13:00", "SUN 13:01"], "who": "daniel",
+      "phone": [ { "cap": "daniel-cholent" } ],
+      "lines": [ { "id": "ch-1", "who": "daniel", "text": "Grandma's cholent.", "during": "typing" },
+                 { "id": "ch-2", "who": "narrator", "text": "When the app doesn't have a dish, it counts it from typical ingredients, and says it is an estimate.", "during": "answer" } ] },
+    { "id": "finale", "art": "finale", "clock": null,
+      "lines": [ { "id": "fn-1", "who": "narrator", "text": "A check on the go. A diary when it works. Free to try at diabite dot pro." } ] }
+  ]
+}
