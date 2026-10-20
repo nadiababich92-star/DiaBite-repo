@@ -2,6 +2,9 @@
 
 *Spec for `docs/engineering/engineering-doc.md`, section 5. Read `docs/design.md` first; every value below is a token or a component from it, and a value it lacks is added there in the same change (and its dark counterpart). The copy is in `landing-copy.md`; when the page shows is in `landing-routing.md`.*
 
+> **Revised 20 October 2026 (evening): concept 1, "the tape", chosen by the owner.** What changed against the text below: the page is always dark (see `docs/design.md`, "Landing page: the tape"); the hero receipt shows each food with its load (the carbohydrate and GI columns are in the cell's accessible name, not on screen); sections S5 and S3 are merged into three cream slips and one large promise line; **S7 "Built by" is no longer a section: it is one line in the footer, "Built by Nadia Babich, an AI product manager who wants to make our lives easier", with the LinkedIn and mail links, and the sentence about insulin resistance and PCOS is not on the page**; the closing band says "Print your first receipt."; the share image is the tape on the dark page. The build is `src/components/Landing.tsx`; where this note and the text below differ, the component and this note win.
+
+
 ## 1. Files
 
 - New: `src/components/Landing.tsx`.
