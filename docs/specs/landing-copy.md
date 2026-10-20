@@ -25,10 +25,10 @@ export const LANDING = {
   rows: [
     { foodId: 'seed:egg',       name: 'Egg',                            grams: 110, availableCarbs: 0.8,  gi: null, gl: 0   },
     { foodId: 'ing:rye_bread',  name: 'Pumpernickel / whole rye bread', grams: 35,  availableCarbs: 14.2, gi: 50,   gl: 7.1 },
-    { foodId: 'ing:avocado',    name: 'Avocado',                        grams: 70,  availableCarbs: 1.3,  gi: 15,   gl: 0.2 },
+    { foodId: 'ing:avocado',    name: 'Avocado',                        grams: 50,  availableCarbs: 0.9,  gi: 15,   gl: 0.1 },
   ] satisfies LandingRow[],
-  totalGl: 7.3,
-  leftAfterGl: 37.7,        // budgetGl - totalGl, to one decimal
+  totalGl: 7.2,
+  leftAfterGl: 37.8,        // budgetGl - totalGl, to one decimal
   records: 8633,            // the size of the catalogue, as in docs/STATUS.md; shown in S5
   /** A dated claim from docs/STATUS.md. Refresh when `npm run eval:agent` is rerun, and say so in STATUS.md. */
   checks: { passed: 204, of: 204, on: '2026-10-15' },
@@ -48,7 +48,7 @@ export const LANDING = {
 } as const
 ```
 
-The figures were read from the running engine on 20 October 2026 (`compute_meal` for the three rows above: totals `gl` 7.3, per-row `availableCarbs` 0.8, 14.2, 1.3). They must be read again, not retyped from this spec, if the file is touched. Check **L1** (see `landing-checks.md`) keeps them true. **Open item for the owner:** confirm that the LinkedIn address above is hers before the page ships; it was copied from the deck.
+The figures were read from the running engine on 20 October 2026 (`compute_meal` for the three rows above: totals `gl` 7.2, per-row `availableCarbs` 0.8, 14.2, 0.9; the same sentence asked of the signed-in agent returned eggs 110 g, rye bread 35 g and half an avocado at 50 g, GL 7.2 and 37.8 left, which is why the avocado is 50 g and not 70). They must be read again, not retyped from this spec, if the file is touched. Check **L1** (see `landing-checks.md`) keeps them true. **Open item for the owner:** confirm that the LinkedIn address above is hers before the page ships; it was copied from the deck.
 
 ## 2. The copy, section by section
 
@@ -73,7 +73,7 @@ The figures were read from the running engine on 20 October 2026 (`compute_meal`
 **S4 · A real answer**
 - `h2`: `A real answer, with the receipt`
 - Intro: `Asked of the running service on 20 October 2026, with a daily budget of 45 glycemic load. The numbers come from the database, the engine adds them up, and a check confirms every number in the answer appears in what the engine returned.` (The date and the 45 are built from `receiptAsOf` and `budgetGl`, formatted as `20 October 2026`.)
-- The slip: the question in quotes; pill `Fits`; the verdict; three figures `This meal` **7.3**, `Before` **45**, `Left after` **37.7**; the table `food · grams · carbs g · GI · load` with the three rows (a dash for a null GI) and the total line `Meal load 7.3`.
+- The slip: the question in quotes; pill `Fits`; the verdict; three figures `This meal` **7.2**, `Before` **45**, `Left after` **37.8**; the table `food · grams · carbs g · GI · load` with the three rows (a dash for a null GI) and the total line `Meal load 7.2`.
 - Note: `Weights for the eggs and the avocado were the defaults because none were given, and the answer says so. A dash means the database holds no glycemic index for that food.`
 
 **S5 · The promise**

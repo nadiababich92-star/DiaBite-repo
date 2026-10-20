@@ -167,7 +167,7 @@ body {
 
 header.masthead { padding: 8px 0 14px; display: flex; align-items: center; gap: 8px; }
 header.masthead .logo { width: 28px; height: 28px; flex: none; }
-header.masthead h1 { margin: 0; font-size: 21px; letter-spacing: -0.02em; font-family: var(--serif); font-weight: 600; display: flex; align-items: baseline; }
+header.masthead h1, header.masthead span.wordmark { margin: 0; font-size: 21px; letter-spacing: -0.02em; font-family: var(--serif); font-weight: 600; display: flex; align-items: baseline; }
 .wordmark b {
   font-weight: 600; background: var(--marker); color: var(--marker-ink);
   border-radius: 5px 8px 6px 9px; padding: 0 5px 1px 3px; margin-left: -1px;
@@ -858,3 +858,38 @@ button.step-day:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; 
 .planned-line { margin: 4px 0 0; }
 .diary-subhead { margin: 18px 0 6px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
 .plan-inline { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
+
+/* ── Landing page (docs/specs/landing-screen.md) ──────────────────────────────
+ * What a signed-out visitor meets first. One column, the same tokens as the app; the receipt reuses the answer
+ * slip and the receipt rules above, so it looks exactly as it does after a question. */
+.app.landing { padding-bottom: 56px; }
+@media (min-width: 760px) { .app.landing { display: block; max-width: 680px; } }
+.skip { position: absolute; left: 8px; top: -48px; z-index: 10; background: var(--primary-1); color: var(--primary-ink); padding: 10px 14px; border-radius: 10px; font-weight: 600; text-decoration: none; }
+.skip:focus { top: 8px; }
+.landing-emergency { margin-bottom: 4px; }
+.landing-signin { margin-left: auto; }
+.landing-hero { padding: 18px 0 8px; display: flex; flex-direction: column; gap: 10px; }
+.landing-hero .label { margin: 0; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 600; }
+.landing-title { margin: 0; font-family: var(--serif); font-weight: 600; font-size: 34px; line-height: 1.12; letter-spacing: -0.03em; text-wrap: balance; }
+.landing-lede { margin: 0; font-size: 17px; line-height: 1.5; color: var(--text-dim); max-width: 52ch; }
+.landing-hero .muted, .landing-footer .muted { margin: 0; }
+.landing-cta { width: 100%; min-height: 46px; margin-top: 6px; }
+@media (min-width: 560px) { .landing-cta { width: auto; min-width: 200px; align-self: flex-start; } .landing-title { font-size: 42px; } }
+.landing-section { margin: 34px 0 0; }
+.landing-section > h2 { margin: 0 0 12px; font-family: var(--serif); font-size: 21px; font-weight: 600; letter-spacing: -0.02em; }
+.landing-prose { padding-top: 22px; border-top: 1px solid var(--border); }
+.landing-prose p, .landing-prose li { font-size: 15.5px; line-height: 1.55; max-width: 60ch; }
+.landing-prose p { margin: 0 0 10px; }
+.landing-prose ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.landing-prose strong { font-weight: 600; }
+.landing-links { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.landing-prose a { color: var(--accent); font-weight: 600; text-underline-offset: 3px; }
+.landing-links a { min-height: 44px; display: inline-flex; align-items: center; }
+.landing-video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface-2); }
+.landing-transcript { margin-top: 10px; }
+.landing-transcript summary { cursor: pointer; color: var(--accent); font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+.landing-transcript p { margin: 0 0 8px; font-size: 15px; line-height: 1.5; color: var(--text-dim); max-width: 60ch; }
+.landing-intro { margin: 0 0 16px; max-width: 60ch; font-size: 14px; }
+.landing-question { margin: 0 0 12px; font-family: var(--serif); font-size: 17px; line-height: 1.4; }
+.landing-slip { margin-bottom: 44px; }
+.landing-footer { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }

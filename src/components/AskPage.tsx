@@ -52,7 +52,7 @@ function readFresh(): boolean {
 
 /** The agent answers in light markdown: **bold** and line breaks. Nothing else is rendered. */
 /** The verdict, as a mark you can read before you read anything. */
-function StatusDot({ tone }: { tone: string | null }) {
+export function StatusDot({ tone }: { tone: string | null }) {
   const path =
     tone === 'good' ? 'M20 6L9 17l-5-5' :
     tone === 'change' ? 'M12 5v14M5 12h14' :

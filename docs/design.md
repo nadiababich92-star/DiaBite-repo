@@ -257,6 +257,9 @@ dialog, drawn into `.app` so the rest of the page can go inert behind it.
 Five bars (cut-in grooves, the filled ones beaded) and one line, *"Step name, N of 5"*.
 On a phone the button that moves you on stays at the bottom while the form scrolls.
 
+### Landing page
+Shown to a signed-out visitor when sign-in is required. One column. The emergency line first, then the wordmark, then the hero (the question, one sentence, the primary key and "Free to try"), the one-minute clip with captions and a transcript, a real receipt (the answer slip and receipt rules of the app, static, kept true by `npm run eval`), the promise, what it is not, who built it, and a short section for clinicians. One primary key above the fold, repeated once in the footer. No photo, no testimonial, no number that is not on the receipt or dated, no promise of a result. The headline is the page's only `h1`; the wordmark beside the logo is plain text hidden from a screen reader (the logo already says "DiaBite").
+
 ### Logo and wordmark
 The mark is a receipt with a bite out of its top-right corner, a torn bottom edge
 and one highlighted line. The wordmark is **Dia** and a marker-highlighted **Bite**

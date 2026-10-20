@@ -6,6 +6,7 @@ import FeedbackModal from './components/FeedbackModal'
 import ImportPrompt from './components/ImportPrompt'
 import Logo, { Wordmark } from './components/Logo'
 import SignIn from './components/SignIn'
+import Landing from './components/Landing'
 import HowItWorks from './components/HowItWorks'
 import Onboarding from './components/Onboarding'
 import MenuPage from './components/MenuPage'
@@ -15,6 +16,7 @@ import { signOutAndClear, useAuth, useSignInRequired } from './lib/auth'
 import { supabaseConfigured } from './lib/supabase'
 import { loadDiary, loadProfile, loadTour, saveDiary, saveProfile, saveTour } from './lib/storage'
 import { initialSeen, type TourStep } from './lib/tour'
+import { showLanding } from './lib/landingRule'
 import { CONSENT_VERSION, LEGACY_DIARY_KEY, PENDING_KEY, loadAccount, mergeById, useAccountSync } from './lib/sync'
 import type { DiaryEntry, Profile } from './types'
 
@@ -58,6 +60,8 @@ export default function App() {
   const [waiting, setWaiting] = useState(0) // entries from before sign-in, held aside
   const [notice, setNotice] = useState('')
   const [signingIn, setSigningIn] = useState(false)
+  // Set by "Try DiaBite" on the landing page: the sign-in screen is shown instead, with a way back.
+  const [entering, setEntering] = useState(false)
   const sync = useAccountSync({ userId: auth.userId, ready: account === 'ready', profile, diary, consent })
   const prime = sync.prime
   const wasSignedIn = useRef(false)
@@ -121,7 +125,13 @@ export default function App() {
   if (signInRequired === null || auth.status === 'loading' || (auth.status === 'signedIn' && account !== 'ready' && account !== 'failed')) {
     return <div className="app"><p className="muted" role="status">Opening DiaBite…</p></div>
   }
-  if (signInRequired && auth.status === 'signedOut') return <SignIn notice={notice} />
+  if (signInRequired && auth.status === 'signedOut') {
+    // A stranger sees the page about the product first. Never over an email link, a session that just ended, or /?signin.
+    if (showLanding({ signInRequired, signedOut: true, notice, entering, location: window.location })) {
+      return <Landing onEnter={() => setEntering(true)} />
+    }
+    return <SignIn notice={notice} onCancel={entering ? () => setEntering(false) : undefined} />
+  }
   // Not required, but wanted: someone signing in from the Profile tab to keep their diary across devices.
   if (!signInRequired && auth.status === 'signedOut' && signingIn) return <SignIn notice={notice} onCancel={() => setSigningIn(false)} />
   if (auth.status === 'signedIn' && account === 'failed') {

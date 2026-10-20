@@ -13,6 +13,11 @@ export default function Logo({ size = 28 }: { size?: number }) {
 }
 
 /** "Dia" and a marker-highlighted "Bite", in the serif. */
-export function Wordmark() {
-  return <h1 className="wordmark" aria-label="DiaBite">Dia<b>Bite</b></h1>
+export function Wordmark({ as = 'h1' }: { as?: 'h1' | 'span' } = {}) {
+  // The landing page has its own h1, so there the wordmark is plain text with the same look.
+  const Tag = as
+  // As a span it sits beside the logo, which already says "DiaBite": hidden from a screen reader so the name is not read twice.
+  return as === 'span'
+    ? <span className="wordmark" aria-hidden="true">Dia<b>Bite</b></span>
+    : <Tag className="wordmark" aria-label="DiaBite">Dia<b>Bite</b></Tag>
 }

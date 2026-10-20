@@ -53,7 +53,7 @@ In `index.html`, in `<head>` (static, because a crawler for LinkedIn or Slack do
 <meta property="og:image" content="https://diabite.pro/share.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="A DiaBite receipt: two eggs, a slice of rye bread and half an avocado fit the day, with a meal load of 7.3 and 37.7 left." />
+<meta property="og:image:alt" content="A DiaBite receipt: two eggs, a slice of rye bread and half an avocado fit the day, with a meal load of 7.2 and 37.8 left." />
 <meta name="twitter:card" content="summary_large_image" />
 ```
 
