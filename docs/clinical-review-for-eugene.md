@@ -1,6 +1,6 @@
 # DiaBite — clinical review
 
-**For: Eugene Kaganovich, RN, BSN, CDE** · Prepared by Nadia Babich · 8 October 2026
+**For: Eugene Kaganovich, RN, BSN, CDE** · Prepared by Nadia Babich · first sent 8 October 2026, rewritten for the current product on 20 October 2026
 
 Thank you for writing back, and for being direct about the market. I am taking
 it seriously: your point that registered dietitians are both the way people find
@@ -10,11 +10,13 @@ about a person, written down so that someone who does this work every day can
 tell me where it is wrong. **Read as much or as little as you have time for, and
 a single line back is worth more to me than silence.**
 
+This is the current version. The product has moved a good deal since I first shared it on 8 October, so I have rewritten the whole document rather than add pages: if you have not opened the first one, you have lost nothing, and if you have, section I lists what changed.
+
 I may have described the idea badly in my first message. DiaBite does not scan
 or track anything. You type what you are about to eat, in your own words, and
 it says whether that fits what is left of your day, and shows the arithmetic.
 It is for adults with type 2 diabetes, prediabetes or insulin resistance in the
-US. The app matches the foods against a database of 6,054 records, computes
+US. The app matches the foods against a database of 8,633 records, computes
 carbohydrate, fibre, glycemic index and glycemic load with a deterministic
 engine, and never lets a language model produce a number. It never gives a dose
 and never diagnoses.
@@ -35,8 +37,7 @@ dietitian to answer:
   lean mass or bone. What should a nutrition tool say, if anything, to someone
   losing weight quickly on these drugs?
 
-The rest — seventeen more questions about targets, blocks and safety rules — is
-there if you want it, and ignorable if you don't.
+The rest — twenty-nine more questions about targets, blocks, safety rules and what the app says when it does not know — is there if you want it, and ignorable if you don't. A short clip of the app (one minute) comes with this document, and a longer one (four minutes) if you want to see it work.
 
 **How to comment:** select any text and use the comment button, or reply to me
 with question numbers. Partial answers are welcome.
@@ -67,7 +68,7 @@ they are Q18 to Q20 at the end.
 
 DiaBite answers one question — *can I eat this?* — for adults with type 2
 diabetes, prediabetes or insulin resistance in the US. A person describes a
-meal in their own words; the app resolves the foods against a database of 6,054
+meal in their own words; the app resolves the foods against a database of 8,633
 records, computes carbohydrate, fibre, glycemic index and glycemic load with a
 deterministic engine, and says whether the meal fits what is left of their day.
 
@@ -234,7 +235,7 @@ It may compare foods **in direction without quantity** — that white rice raise
 glucose faster than pearl barley, that fibre and fat slow a rise, that a food
 eaten after protein lands differently.
 
-Four sample answers are attached separately for your read: brown vs white rice,
+Four sample answers are in Appendix A at the end: brown vs white rice,
 why morning glucose runs high, whether to stop eating fruit, and whether keto
 is sensible in type 2 diabetes.
 
@@ -253,17 +254,19 @@ is sensible in type 2 diabetes.
 | Available carbohydrate | total carbohydrate − fibre |
 | Glycemic load | GI × available carbohydrate ÷ 100 |
 | A recipe's GI | carbohydrate-weighted mean of its ingredients (Wolever & Jenkins) |
-| Coverage | 6,054 records, in three layers: 351 ingredients and ~85 everyday foods curated by hand, 1,000 recipes composed from them, and 4,618 USDA Survey (FNDDS) foods — "foods as eaten" — added on 1 October. **13% of the food phrases in our test set still resolve to nothing**, almost all of them branded: Oreos, a KIND bar, a Starbucks frappuccino |
-| A food we cannot cost | A record with no published GI and real carbohydrate in it is **kept out of the database entirely**, because our arithmetic would otherwise report its glycemic load as zero. That is why a pepperoni pizza comes back as "I do not have that food" rather than as a number — see Q17 |
+| Coverage | 8,633 records: 364 ingredients and 86 everyday foods curated by hand, 2,000 recipes composed from them, about 4,600 USDA Survey (FNDDS) foods — "foods as eaten" — 754 packaged foods (USDA Branded Foods) and 813 survey foods that have no published glycemic index (pizza, cereal, candy). A food we do not have is named as missing and never costed under a neighbour's name |
+| A food with carbohydrate and no published GI | Packaged foods and the 813 "unrated" survey foods are answered with **carbohydrate, fibre and calories** from the data and **never a glycemic load**; a meal containing one is partial and is never called a fit. (An earlier draft kept these out of the database, so a pepperoni pizza came back as "I do not have that food"; that was changed on 9 to 11 October. See Q17 and Q31) |
 
 Records a human has checked are labelled **checked** with a date in the app;
 the rest are labelled **unverified**, visibly, on every answer.
 
 > **Q16.** Is the carbohydrate-weighted mean an acceptable way to give a mixed
 > dish a GI, given that fat, protein and cooking all move it?
-> **Q17.** For branded foods with no published GI, is it better to give
-> carbohydrate alone and say the glycemic load cannot be computed, or to say
-> nothing at all? This decision is open and your answer would settle it.
+> **Q17.** For packaged foods and other foods with no published GI we now give
+> carbohydrate alone and say the glycemic load cannot be computed, rather than
+> say nothing at all. That was my decision, made as proposed in the first draft;
+> your view could still change it. (Q24 and Q31 ask the same thing from the
+> point of view of the person reading the card.)
 
 ---
 
@@ -286,13 +289,66 @@ are the largest.
 > population with a switch. Would that change the numbers, or only the
 > wording?
 
+## I. How it behaves when it does not know
+
+A person asks about foods in their own words, so some of them are not in the database. This is the part that has changed most since the first draft.
+
+- **A meal with a food we do not have is never called "fits".** The app costs the rest, says the total is partial, names what is missing, and says *"this already does not fit"* if the part it could cost is over the day's budget. This is decided by the calculation, not by the model.
+- **Packaged and "unrated" foods** (an Oreo, a KIND bar, pizza, cereal) get carbohydrate, fibre and calories from the data and no glycemic load, because none is published and we do not estimate one.
+- **A dish the database lacks** (a grandmother's cholent, say) can be counted from its own ingredients as an **estimate**: the app lists typical ingredients with assumed weights, finds each in the database, says plainly it is an estimate, and lets the person change any gram. The verdict on an estimate is conditional (*"if yours is like this…"*), never a plain "fits". Every number is still computed by the engine; only the weights are assumptions.
+
+> **Q24. "Carbohydrate, load not available."**
+> For a packaged food the card says, in substance: *"I can give you the carbohydrate, not the load. It has no published glycemic index, so DiaBite does not estimate one."* with the label's carbohydrate, fibre and calories for one serving. Can a person with type 2 diabetes use that safely? Does it risk being read as permission to eat the food? Is there something it should add (the serving size on the label, "check the label for your portion"), or leave out?
+
+> **Q25. Partial meals: "I can't judge the day".**
+> When part of a meal cannot be scored, the app declines to say it fits and asks about the missing food, or says it already does not fit. Would you rather it showed a *range* (the load of the part it could cost, up to a stated ceiling), or is declining the safer thing for this audience?
+
+> **Q30. An estimate for a dish we do not have.**
+> When the database lacks a dish, the app proposes typical ingredients with weights and counts them, and the card says *"Estimate: I counted this from typical ingredients, which may not be yours"* with an editor for the recipe. The verdict on it is conditional, never a plain fit. Is a number you can edit better for this audience than "I do not have it", or does an estimate with assumed weights invite false confidence? Would you want a range instead of a single figure?
+
+> **Q31. Foods that get carbohydrate and no load.**
+> Pizza, cereal, candy, packaged foods: the card gives carbohydrate, fibre and calories and says no glycemic index is available (the decision behind Q17). For a person with type 2 diabetes, is carbohydrate without a load more useful than silence, or does it risk reading as permission? (Q24 asks the same of packaged foods; one answer will do for both.)
+
+---
+
+## J. What else a person sees
+
+- **A weekly menu**, with a shopping list. It is hidden, with a short explanation and no plan, for a person who reports a history of disordered eating, chronic kidney disease or dialysis; everyone else sees it with the line *"These meals have not been reviewed by a clinician yet."* It draws on 1,662 recipes whose nutrition and glycemic index were computed from their ingredients, and nobody has read them as a dietitian would.
+- **Sign-in.** An emailed link, no password. The profile and diary are held in Ireland, with export and deletion. The first screen carries *"If you have symptoms such as chest pain, confusion, vomiting or fainting, call emergency services. DiaBite does not give insulin or medication doses."*
+- **Planning.** A meal can be put on another day, past or future; a planned meal is shown dimmed and marked "planned", and counts in no budget until it is marked eaten.
+- **A short explanation of the unit** ("What is GL?"), **a one-sentence disclaimer banner** with the rest one tap away, and **changing a portion** after an answer.
+
+> **Q21. The menu: who should not be shown a plan?**
+> I hide it for a history of disordered eating, CKD and dialysis, and show it to everyone else. That is a first guess, not a researched rule. For each of these, should the menu be hidden, shown with a warning, or shown as it is: *"my doctor has mentioned my kidneys"* (not diagnosed), gout, gastroparesis, brittle (unpredictable) diabetes, a GLP-1 user (protein), anyone over 65, anyone on a sulfonylurea? And is there anything else that belongs on the hidden list?
+
+> **Q22. A calorie target for someone with a history of disordered eating.**
+> Today onboarding still computes and shows a daily calorie and carbohydrate target to a person who reports a history of disordered eating, with a message to speak to their clinician. Should the app show *any* daily numerical target to that person, or none?
+
+> **Q23. The first thing a signed-out person reads.**
+> Because sign-in comes before the first question, someone with an emergency has to get past it. There is one safeguard in the screen and one underneath it. The sign-in screen itself carries, above everything, *"If you have symptoms such as chest pain, confusion, vomiting or fainting, call emergency services. DiaBite does not give insulin or medication doses."* And underneath, the engine answers a message that describes a red flag or asks for a dose with the usual refusal or escalation even when no one is signed in; but the app does not let a signed-out person type, so in practice that second one only protects anything that talks to the engine directly. Is the sentence right? Is a sign-in wall in front of a tool like this acceptable at all, or would you want the first screen to allow a question about a red flag without signing in?
+
+> **Q26. "What is GL?" in two sentences.**
+> Next to the main figure there is a link, "What is GL?", that opens: *"Glycemic load puts two things into one number: how fast a food raises blood sugar, and how much carbohydrate is in your portion. Your day has a budget of N. Each meal spends some of it, and the number you see is what is left."* Is that accurate and safe for a person with type 2 diabetes who has never heard the term? Is "how fast a food raises blood sugar" a fair gloss of the glycemic index, and is there a sentence you would add or strike?
+
+> **Q27. A one-sentence disclaimer banner.**
+> A banner shows only its first sentence, *"This is a reference tool, not medical advice."*, with the rest one tap away under "Read more" (the numbers are published averages, not for insulin dosing, discuss changes with your clinician). The whole text is also agreed to at the end of onboarding. Is a one-sentence banner with the rest on a tap enough, or must the dosing sentence always be visible?
+> **Q28. Changing a portion after the answer.**
+> After an answer the person can change any food's weight; the engine counts the meal again and a card above the original answer shows the new figures and a new verdict word taken from the same rule as before (fits, does not fit, or "I can't judge" when a food is missing). The explanation text written for the original portions stays below, marked as the original. Should the app also let someone *add* a food or *remove* one this way, or keep that to a new question? Is "Original answer, before you changed a portion" a clear enough label?
+
+> **Q29. The menu draws on 1,662 recipes.**
+> The weekly menu chooses from 30 hand-written dishes and 1,662 recipes (American, Italian, Tex-Mex, Mediterranean, Asian, Middle Eastern and others): every recipe's nutrition, glycemic index and load were computed from its ingredient table, and nobody has read them as a dietitian would. A week still shows "These meals have not been reviewed by a clinician yet". Is that line enough while they are unreviewed, or should a recipe carry a visible "unreviewed" mark until a dietitian has signed off, and is there a category you would take out of the menu altogether (for instance sandwiches and wraps, or soups with starchy thickeners)?
+> **Q32. A meal can be planned for another day, and counts only once it is eaten.**
+> A person can put a meal on tomorrow, or on a day in the past. A planned meal is shown dimmed, marked "planned", and counts in no budget, no week and no "days in range" until it is marked eaten. Nothing else about the food advice changes. Is there any risk in a person planning a day of meals that the app has not judged as a whole day, and is "planned" clear enough as a word?
+
+---
+
 ## What we will do with your answers
 
 Anything you flag becomes a change in the code, a test case in the evaluation
 suite, or a documented decision with your objection recorded next to it. The
 targets, the blocks and the safety rules are constants in one file; changing
 them is minutes of work, and every change is re-tested automatically against
-its automated checks (198 on the engine, 87 live-agent cases).
+its automated checks: 191 food-resolution cases and 72 safety phrasings run with no model on every change, and 204 behavioural checks run against the live agent.
 
 If there is one thing on this list you would fix first, that is the thing we
 would most like to know.

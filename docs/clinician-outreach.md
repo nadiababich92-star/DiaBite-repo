@@ -109,27 +109,28 @@ seriously. Safer to offer a named acknowledgement and let them ask for more.
 
 ---
 
-## Follow-up to Eugene Kaganovich, RN, BSN, CDE (draft, 19 October 2026)
+## Follow-up to Eugene Kaganovich, RN, BSN, CDE (draft, 20 October 2026)
 
-He answered the first message and was sent the review pack on 8 October (`docs/clinical-review-for-eugene.md`). This follows up with the demo.
-**Attach the update page** (`docs/clinical-review-addendum.html`, updated 19 October: six things that changed since the pack, and questions Q21 to Q32; three lines in the 8 October pack are out of date and the page corrects them) **and the one-minute clip** (`docs/demo-clip-how-it-works.mp4`, 6.7 MB, small enough to attach) and **link the full demo** (`docs/demo-story.mp4`, 4 min 15 s, 91 MB: too big to attach, put it where you control access). Nothing here is sent by anyone but you.
+On LinkedIn on 8 October he answered at length (the market, dietitians as gatekeepers), was sent the review document, and wrote: *"I need time to review. Next time, email me at my personal email."* He has most likely not read it, and the product has changed since, so the document was **rewritten whole** (`docs/clinical-review-for-eugene.md`, with `docs/clinical-review-for-eugene.html` for pasting into the shared Google Doc). Nothing here is sent by anyone but you.
 
-> **Subject:** DiaBite: a one-minute look at what the review document describes
+**Attach:** the one-minute clip (`docs/demo-clip-how-it-works.mp4`, 6.7 MB). **Link:** the shared Google Doc (once its text is replaced by the new version) and, if you want, the four-minute demo (`docs/demo-story.mp4`, 91 MB: too big to attach; put it where you control access).
+
+> **To:** onenote1@gmail.com
+> **Subject:** DiaBite: the updated review document, and a one-minute look at the app
 >
 > Hi Eugene,
 >
-> A short follow-up to the review document I sent on 8 October. I know it is long, so instead of asking for more reading, here is a one-minute recording of the app (attached). A meal typed in plain words becomes a receipt. A meal that does not fit gets a swap, counted by the engine. A meal can be planned for another day. And a dose question is refused before any model sees it. The full four-minute version is here: [link].
+> You asked me to write to this address next time, so here I am, and thank you again for the time and for the straight picture of the market on 8 October.
 >
-> Since the document the app has moved from a demo to something people can sign up to: accounts, a diary, planning, and about 8,600 foods instead of 6,000. The safety rules in the document are still the ones in front of every answer.
+> You said you needed time to review. In the days since, the product has changed enough that I rewrote the whole document instead of leaving you the old one. It is the same link, now current: [link to the Google Doc]. If you have not opened it yet, nothing is lost. If you have, section I lists what changed.
 >
-> I have also attached a one-page update. It lists what has changed in how the product treats a person since the document (including a dish the database lacks now being counted as an estimate), corrects three lines in the document that are out of date, and has a few new questions; you can stop after the first.
+> If you only have a few minutes, two things. Appendix A: four answers the app gave, as it gave them. Is anything in them something you would not say to a patient? And Q12: when someone reports a glucose reading under 70, the app stops the food conversation and says to seek help; it does not tell them to take fast-acting carbohydrate. Is that right, or too little? Everything else is optional, and one line back is worth more to me than silence.
 >
-> If you only have a minute, I would most like your eye on the end of the clip, the refusal, and whether it says what you would say to a patient. And the question I still cannot answer myself: what should the app say when someone reports a glucose reading under 70 (Q12 in the document)? Today it stops the food conversation and tells them to seek help.
+> I have also attached a one-minute recording of the app: a meal typed in plain words becomes a receipt, a meal that does not fit gets a swap, a meal can be planned for another day, and a dose question is refused before any model sees it. A longer version (four minutes) is here if you want it: [link].
 >
-> A single line back is worth more to me than silence. And if this is not something you do, no hard feelings at all.
+> And if this is not something you do, no hard feelings at all.
 >
 > Thank you,
 > Nadia
 
-Choices for you: the language (this is English because the document is), whether to offer a consulting fee (there is no budget today; see the first decision above), and where the full video lives (an unlisted link you control).
-
+Choices for you: whether to offer a consulting fee (there is no budget today), where the four-minute video lives (an unlisted link you control), and the Google Doc itself: its text is still the 8 October version until you paste the new one in.
