@@ -21,21 +21,24 @@ Every number in the video comes from a real recording, not from this table: the 
 | how many units of insulin should I take before pasta? | Refused by a rule, no model involved | safety |
 | a chicken wrap and a bag of chips, two slices of pepperoni pizza, a bowl of ramen | The app first asks which one: a quick clarifying question | not used (they stall the story) |
 
-## The script
+## The script, version 2 (22 October, for approval): why DiaBite, in about three minutes
+
+*Why two people:* one is the problem seen from each side. Maya has no time, so she guesses. Daniel has the time, plans every week, and the plan breaks, so he feels he failed. Both are failed by tools that ask for a life with spare time. DiaBite is the same answer for both. Version 1 showed the features but never said what was wrong.
 
 | Time | Scene | Narrator | The characters |
 |---|---|---|---|
-| 0:00–0:20 | Open: the two of them, then the landing page | "Many people with diabetes can't plan every meal. No time, no energy, a life that doesn't wait. That is what DiaBite is for." | |
-| 0:20–0:50 | **Maya, 7:42, in the car** | "A few seconds. The engine counts every gram." | Maya: "Seven forty-two, already late. Coffee with milk and a banana." |
-| 0:50–1:20 | **Daniel, Sunday, 17:30** | "He plans the whole week. A plan counts nowhere until it is eaten." | Daniel: "Sunday evening. I like a plan." |
-| 1:20–1:50 | **Maya, 13:10, petrol station** | "It fits, but it names a lighter swap, and counts it again." | Maya: "Grilled chicken sandwich and an apple." then "Chicken salad instead. Fine." |
-| 1:50–2:20 | **Daniel, Wednesday, 20:15** | "The plan broke. The diary keeps up." | Daniel: "A late meeting. The plan did not survive. Chicken fried rice." |
-| 2:20–2:50 | Both: the receipt, "Show calculation" | "Every number comes from a database, line by line. A model never makes one up." | |
-| 2:50–3:10 | **Maya**: the dose question | "It never gives a dose. It refuses before any model sees the question." | Maya: "How many units of insulin before pasta?" |
-| 3:10–3:40 | **Daniel**: honesty | "When the app doesn't have a dish, it counts it from typical ingredients, and says it is an estimate." | Daniel: "Grandma's cholent." |
-| 3:40–4:00 | Finale | "A check on the go. A diary when it works. Free to try at diabite dot pro." | |
+| 0:00–0:15 | **The question.** A counter turns to 1,095 (3 meals × 365). Both faces, a "?" over each | "Three meals a day. That is more than a thousand decisions a year. And for a person with diabetes, every one hides the same question: does this fit my day?" | |
+| 0:15–0:28 | **Meet them.** Split: NO TIME / A PLAN THAT BREAKS | "Meet Maya and Daniel. They are made up, but you probably know them. They live in very different ways, and they run into the same wall." | |
+| 0:28–0:55 | **Maya, the problem.** Petrol station, a wrap and chips, a thought bubble; then a long "log your food" form on her phone | "Maya has no time to plan. Her day is a car, a desk and a petrol station. So she guesses, or skips the meal, and worries all afternoon. Most tools ask for a life with spare time." | Maya: "Wrap and chips. Is that okay? I honestly don't know." |
+| 0:55–1:20 | **Daniel, the problem.** Sunday plan, then Wednesday night, plan crossed out, pizza box | "Daniel is the opposite. He plans every meal for the week. Then life happens. A plan that breaks feels like failing, and some people stop trying." | Daniel: "Sunday. The whole week, planned." / "Wednesday. A late meeting. Pizza." |
+| 1:20–1:30 | **The gap** | "Two people. Two rhythms. What is missing is an answer that fits a real day." | |
+| 1:30–2:05 | **Maya with DiaBite.** Morning, then the petrol station and the swap | "She types it the way she would say it. A few seconds later: it fits, and here is what is left of today. Not quite? It names a lighter swap, and counts that too." | Maya: "Coffee with milk and a banana." / "Grilled chicken sandwich and an apple." / "Chicken salad instead. Fine." |
+| 2:05–2:20 | **The receipt** | "Every number comes from a database, line by line. Open the receipt and check it yourself. A language model never makes one up." | |
+| 2:20–2:45 | **Daniel with DiaBite.** The diary: planned (dashed), then eaten | "Daniel logs what really happened. The plan stays on the page, dashed. The diary counts only what was eaten. A plan that broke is not a failure. It is just Wednesday." | Daniel: "Chicken fried rice." |
+| 2:45–3:05 | **Honesty.** The dose refusal, the cholent estimate | "Some questions it will never answer. Doses belong to your care team, and it refuses before any model sees the question. And when it does not know a dish, it says so, and calls the count an estimate." | Maya: "How many units of insulin before pasta?" / Daniel: "Grandma's cholent." |
+| 3:05–3:20 | **Finale** | "A quick check on the go. A diary for the days a plan does not survive. One tool for both. Free to try at diabite.pro. A reference tool, not medical advice." | |
 
-**One-minute cut for the deck:** the open (shortened), Maya at 7:42, Maya at the petrol station with the swap, Daniel's Wednesday, the finale.
+**Also changed in the making:** the characters' mouths move with their voices, the phone cross-fades between screens, a quiet music bed sits under the voices (it dips when anyone speaks).
 
 ## Open decisions (the owner's)
 
