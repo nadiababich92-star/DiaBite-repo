@@ -14,5 +14,5 @@ export default function Logo({ size = 28 }: { size?: number }) {
 
 /** "Dia" and a marker-highlighted "Bite", in the serif. */
 export function Wordmark() {
-  return <h1 className="wordmark">Dia<b>Bite</b></h1>
+  return <h1 className="wordmark" aria-label="DiaBite">Dia<b>Bite</b></h1>
 }

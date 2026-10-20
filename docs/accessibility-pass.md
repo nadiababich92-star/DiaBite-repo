@@ -15,7 +15,7 @@ The screens scanned: the empty Ask screen; an answer; the open receipt; the "Wha
 
 ## What was not run, and what that means
 
-- **A screen reader.** No VoiceOver or NVDA walk-through was done. The structure is built for one (labelled regions, `aria-live` on notices, `aria-pressed` and `aria-checked` on the day and rating controls, the feedback card and the first-run tips announced politely and never taking focus), but that is the intention, not a test.
+- **A screen reader.** No VoiceOver or NVDA walk-through was done (the accessibility tree was read by machine on 20 October: see the addendum). The structure is built for one (labelled regions, `aria-live` on notices, `aria-pressed` and `aria-checked` on the day and rating controls, the feedback card and the first-run tips announced politely and never taking focus), but that is the intention, not a test.
 - **Lighthouse.** Not run; it uses axe for its accessibility score, so it would repeat the above.
 - **Screens not scanned:** the sign-in and onboarding screens, the feedback form dialog, the first-run tips (they were switched off for the run so they would not sit over what the script clicks), and the Diary's add-a-food form in use.
 - **Touch targets** (44 px) are set in `src/styles.css` for touch devices and were not measured here.
@@ -24,3 +24,16 @@ The screens scanned: the empty Ask screen; an answer; the open receipt; the "Wha
 ## What this supports saying
 
 "We ran axe-core on every main screen in both themes at phone and laptop size with no violations, checked contrast and 320 px reflow and 200% zoom, and walked the keyboard path; a screen-reader audit is still to do." It does **not** support "WCAG compliant": that is a claim for an audit.
+
+## Addendum, 20 October 2026: what a screen reader is given (`node eval/a11y-tree.mjs`)
+
+Not a screen-reader session. The script reads Chrome's **accessibility tree** on each screen, which is what VoiceOver and NVDA announce, and checks what a machine can check: every control has a name, headings do not skip a level, there is a `main` landmark, a modal dialog has a name, takes focus when it opens and gives it back when it closes, and notices are in a live region and never take focus. It also writes each screen's reading order so a person can read it.
+
+**It found three things, all fixed the same day:**
+1. **No `main` landmark on any screen.** `<main role="tabpanel">` replaced the landmark with a tab panel, so a reader could not jump to the content. `<main>` now wraps a `tabpanel`; the sign-in and onboarding screens had no `main` at all and now have one.
+2. **The budget bar was announced as "8.600000000000001 of 45 glycemic load used today"**, a float that was never rounded. It is rounded to one decimal, and the script now flags any accessible name with a long decimal.
+3. **The product name was announced as "Dia Bite"** (the marked-up "Bite"); the heading now carries the label "DiaBite".
+
+**What passed:** both dialogs ("What is GL?", "How it works") are named, move focus in and return it to the button that opened them on Escape; the answer is announced politely (`role=status`, `aria-live=polite`) and the first-run tip is a polite region that never takes focus; the day and rating controls expose their pressed and selected state. axe-core ran again on the local build after the change: 0 violations in 40 runs.
+
+**Still not done:** a person using VoiceOver or NVDA. The reading order of each screen is saved by the script; whether it makes sense by ear, whether the labels are clear, and how a real virtual cursor moves through the tables and the diary are only answered by that session, and the claim "WCAG compliant" is still not supported.

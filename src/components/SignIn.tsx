@@ -57,6 +57,7 @@ export default function SignIn({ notice, onCancel }: { notice?: string; onCancel
         <Wordmark />
       </header>
 
+      <main>
       <section className="card signin">
         <p className="signin-emergency">
           If you have symptoms such as chest pain, confusion, vomiting or fainting, call emergency services.
@@ -103,6 +104,7 @@ export default function SignIn({ notice, onCancel }: { notice?: string; onCancel
         )}
         {onCancel && <button className="link" type="button" onClick={onCancel}>Not now</button>}
       </section>
+      </main>
     </div>
   )
 }

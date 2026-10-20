@@ -535,7 +535,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, o
         {/* The day, at a glance. A bar rather than a ring: a ring is a score
             to close, and the design canvas ruled those out. */}
         <div className="budget-bar" role="img"
-             aria-label={`${Math.max(0, targets.glBudget - left)} of ${targets.glBudget} glycemic load used today`}>
+             aria-label={`${Math.round(Math.max(0, targets.glBudget - left) * 10) / 10} of ${targets.glBudget} glycemic load used today`}>
           <span style={{ width: `${Math.min(100, Math.max(0, ((targets.glBudget - left) / Math.max(1, targets.glBudget)) * 100))}%` }} />
         </div>
         <h2 className="ask-title">What are you about to eat?</h2>

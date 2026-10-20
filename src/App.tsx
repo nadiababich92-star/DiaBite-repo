@@ -146,6 +146,7 @@ export default function App() {
           <Logo />
           <Wordmark />
         </header>
+        <main>
         <Onboarding
           initial={profile}
           askConsent={auth.status === 'signedIn' && !serverHasProfile}
@@ -155,6 +156,7 @@ export default function App() {
           }}
           onCancel={profile.onboarded ? () => setOnboarding(false) : undefined}
         />
+        </main>
       </div>
     )
   }
@@ -186,7 +188,8 @@ export default function App() {
         </section>
       )}
 
-      <main role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
+      <main>
+      <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
       {tab === 'ask' && (
         <AskPage
           profile={profile} targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} onOpenDiary={() => setTab('diary')} onSessionEnded={sessionEnded}
@@ -222,6 +225,7 @@ export default function App() {
           <button className="primary" onClick={() => setSigningIn(true)}>Sign in</button>
         </section>
       )}
+      </div>
       </main>
 
       <nav className="tabs" role="tablist" aria-label="Main">
