@@ -1,6 +1,6 @@
 # DiaBite — where things stand
 
-*19 October 2026. A short list, kept current. The plan it follows is `docs/ROADMAP-to-investors.md`; the product is `docs/PRD-product.md`.*
+*20 October 2026. A short list, kept current. The plan it follows is `docs/ROADMAP-to-investors.md`; the product is `docs/PRD-product.md`.*
 
 ## Built and live at https://diabite.pro
 
@@ -24,7 +24,7 @@
 ## The builder can do these now
 
 - Fix what the accessibility pass found (see `docs/accessibility-pass.md`).
-- An OWASP ZAP baseline once Docker or the ZAP app is available; the Vite 8 upgrade (two dev-server advisories).
+- Skipped on purpose (20 October): an OWASP ZAP baseline. It needs a JDK and ZAP installed (about 450 MB), and it would repeat what is already checked (headers A+ on Mozilla Observatory, TLS 1.2/1.3, row-level security tested with two accounts, `eval:abuse`, `npm audit` at 0); an outside penetration test is the real next step and is on the use-of-funds list. Done 20 October: the Vite 8 upgrade (the two dev-server advisories are closed) and a screen-reader-oriented pass over the accessibility tree (`docs/accessibility-pass.md`, addendum).
 - Confirm the licence of the International Tables' supplementary tables and the Sydney permission (`docs/data-sources.md`), which are the owner's letters to write.
 
 ## Waits for people
