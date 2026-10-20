@@ -1,33 +1,31 @@
 {
   "voices": {
-    "narrator": { "name": "en-US-Aria:DragonHDLatestNeural", "rate": "+12%" },
-    "maya": { "name": "en-US-Ava:DragonHDLatestNeural", "rate": "+8%" },
-    "daniel": { "name": "en-US-Davis:DragonHDLatestNeural", "rate": "+0%" }
+    "narrator": { "name": "en-US-Aria:DragonHDLatestNeural", "rate": "+18%" },
+    "maya": { "name": "en-US-Ava:DragonHDLatestNeural", "rate": "+10%" },
+    "daniel": { "name": "en-US-Davis:DragonHDLatestNeural", "rate": "+5%" }
   },
+  "source": "CDC, National Diabetes Statistics Report, 2023 data: 40.1 million people with diabetes (12.0% of the US population); 115.2 million US adults with prediabetes. https://www.cdc.gov/diabetes/php/data-research/index.html",
   "lines": [
-    { "id": "q-1", "who": "narrator", "text": "Three meals a day. That is more than a thousand decisions a year. And for a person with diabetes, every one hides the same question: does this fit my day?" },
-    { "id": "mt-1", "who": "narrator", "text": "Meet Maya and Daniel. They are made up, but you probably know them. They live in very different ways, and they run into the same wall." },
+    { "id": "q-1", "who": "narrator", "text": "Forty million Americans live with diabetes. A hundred and fifteen million adults have prediabetes. And for all of them, every meal is the same question: does this fit my day?" },
+    { "id": "mt-1", "who": "narrator", "text": "Meet Maya, who has insulin resistance, and Daniel, who has type 2 diabetes. Made up, but you know them. She has no time. He has a plan that keeps breaking." },
     { "id": "pm-1", "who": "maya", "text": "Wrap and chips. Is that okay? I honestly don't know." },
-    { "id": "pm-2", "who": "narrator", "text": "Maya has no time to plan. Her day is a car, a desk and a petrol station. So she guesses, or skips the meal, and worries all afternoon." },
-    { "id": "pm-3", "who": "narrator", "text": "Most tools ask for a life with spare time." },
+    { "id": "pm-2", "who": "narrator", "text": "Maya has no time to plan, so she guesses. Most tools ask for a life with spare time." },
     { "id": "dp-1", "who": "daniel", "text": "Sunday. The whole week, planned." },
-    { "id": "dp-2", "who": "narrator", "text": "Daniel is the opposite. He plans every meal for the week." },
+    { "id": "dp-2", "who": "narrator", "text": "Daniel plans every meal." },
     { "id": "db-1", "who": "daniel", "text": "Wednesday. A late meeting. Pizza." },
-    { "id": "db-2", "who": "narrator", "text": "Then life happens. A plan that breaks feels like failing, and some people stop trying." },
-    { "id": "gp-1", "who": "narrator", "text": "Two people. Two rhythms. What is missing is an answer that fits a real day." },
-    { "id": "mm-1", "who": "maya", "text": "Coffee with milk and a banana." },
-    { "id": "mm-2", "who": "narrator", "text": "She types it the way she would say it. A few seconds later: it fits, and here is what is left of today." },
+    { "id": "db-2", "who": "narrator", "text": "Then life happens, and a broken plan feels like failing." },
+    { "id": "gp-1", "who": "narrator", "text": "That is why DiaBite exists. Say what you are about to eat. It tells you if it fits what is left of your day, and shows the arithmetic." },
     { "id": "mp-1", "who": "maya", "text": "Grilled chicken sandwich and an apple." },
-    { "id": "mp-2", "who": "narrator", "text": "Not quite? It names a lighter swap, and counts that too." },
+    { "id": "mp-2", "who": "narrator", "text": "A few seconds. It fits, but it names a lighter swap, and counts that too." },
     { "id": "mp-3", "who": "maya", "text": "Chicken salad instead. Fine." },
-    { "id": "rc-1", "who": "narrator", "text": "Every number comes from a database, line by line. Open the receipt and check it yourself. A language model never makes one up." },
-    { "id": "dd-0", "who": "narrator", "text": "In the diary, his plan stays on the page, dashed. Only what he really eats is counted." },
+    { "id": "rc-1", "who": "narrator", "text": "Every number comes from a database. Open the receipt and check it yourself." },
+    { "id": "dd-0", "who": "narrator", "text": "In the diary, his plan stays, dashed. Only what he really eats counts." },
     { "id": "dd-1", "who": "daniel", "text": "Chicken fried rice." },
     { "id": "dd-2", "who": "narrator", "text": "A plan that broke is not a failure. It is just Wednesday." },
     { "id": "ds-1", "who": "maya", "text": "How many units of insulin before pasta?" },
-    { "id": "ds-2", "who": "narrator", "text": "Some questions it will never answer. Doses belong to your care team, and it refuses before any model sees the question." },
+    { "id": "ds-2", "who": "narrator", "text": "Some questions it never answers. Doses belong to your care team." },
     { "id": "ch-1", "who": "daniel", "text": "Grandma's cholent." },
-    { "id": "ch-2", "who": "narrator", "text": "And when it does not know a dish, it says so, and calls the count an estimate." },
-    { "id": "fn-1", "who": "narrator", "text": "A quick check on the go. A diary for the days a plan does not survive. One tool for both. Free to try at diabite.pro. A reference tool, not medical advice." }
+    { "id": "ch-2", "who": "narrator", "text": "And when it does not know a dish, it says so, and calls it an estimate." },
+    { "id": "fn-1", "who": "narrator", "text": "A quick check on the go. A diary for the days a plan breaks. Free to try at diabite.pro. A reference tool, not medical advice." }
   ]
 }
