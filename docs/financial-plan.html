@@ -298,6 +298,7 @@ tr.hi td { background: var(--accent-soft); }
 
 <div class="note">
   <p><strong>Provenance.</strong> Every figure is marked. <span class="chip meas">measured</span> comes from Azure Cost Management and production traces over 1,941 live agent questions. <span class="chip scoped">scoped</span> is a size in working days from the engineering plan. <span class="chip est">assumed</span> has no measurement behind it yet.</p>
+  <p><strong>The model behind this document is <code>DiaBite-financial-model.xlsx</code></strong> — editable assumptions, all three scenarios live. Where the two disagree, the workbook is right.</p>
   <p><strong>There are no users, so every growth figure is assumed</strong> — §13 lists them with the evidence that will replace each one. Market figures carry <span class="chip ver">to verify</span> until re-checked against the primary source.</p>
 </div>
 
@@ -333,14 +334,14 @@ tr.hi td { background: var(--accent-soft); }
     <div class="kpi"><p class="k">LTV / CAC</p><p class="v">3.4<span style="font-size:20px">×</span></p><p class="s">paid channel, Y2</p></div>
     <div class="kpi"><p class="k">Year 3 exit ARR</p><p class="v">$11.5M</p><p class="s">58,900 subscribers</p></div>
     <div class="kpi"><p class="k">EBITDA-positive</p><p class="v up">M30</p><p class="s">base case</p></div>
-    <div class="kpi"><p class="k">Peak cash</p><p class="v">$2.65M</p><p class="s">cumulative</p></div>
+    <div class="kpi"><p class="k">Peak cash</p><p class="v">$2.66M</p><p class="s">cumulative</p></div>
     <div class="kpi"><p class="k">Year 5 ARR</p><p class="v">$40.6M</p><p class="s">0.36% of market</p></div>
   </div>
 
   <h3>Three things make the economics unusual for consumer health</h3>
   <ol class="body">
     <li><strong>91.5% gross margin, measured not modelled.</strong> The model never produces a nutrition number, so it is never asked to reason its way to one. Inference costs <strong>$0.0028 a question in production</strong>. At 2.3% of revenue, inference pricing is not a line item that can threaten this business.</li>
-    <li><strong>US revenue on an EU cost base.</strong> Engineering, clinical and operations sit in the EU at roughly 60% of US loaded cost, against US consumer pricing. The plan reaches $11.5M ARR with 26 people and $2.65M of cumulative cash.</li>
+    <li><strong>US revenue on an EU cost base.</strong> Engineering, clinical and operations sit in the EU at roughly 60% of US loaded cost, against US consumer pricing. The plan reaches $11.5M ARR with 26 people and $2.66M of cumulative cash.</li>
     <li><strong>The product exists.</strong> 6,054 foods, three agents in production, 285 evaluation cases, a verified rate of 100% across the most recent live run, p90 latency of 8.2 seconds. The seed buys distribution and clinical validation, not a first version.</li>
   </ol>
 
@@ -413,9 +414,9 @@ tr.hi td { background: var(--accent-soft); }
     <table>
       <thead><tr><th>&nbsp;</th><th class="num">Year 3 subscribers</th><th class="num">Share of the 59M</th></tr></thead>
       <tbody>
-        <tr><td>Conservative</td><td class="num">33,700</td><td class="num">0.057%</td></tr>
+        <tr><td>Conservative</td><td class="num">29,149</td><td class="num">0.049%</td></tr>
         <tr class="hi"><td><strong>Base</strong></td><td class="num"><strong>58,900</strong></td><td class="num"><strong>0.100%</strong></td></tr>
-        <tr><td>Upside</td><td class="num">120,700</td><td class="num">0.205%</td></tr>
+        <tr><td>Upside</td><td class="num">136,842</td><td class="num">0.232%</td></tr>
         <tr class="total"><td>One percent of the serviceable market</td><td class="num">590,000</td><td class="num">$117M ARR</td></tr>
       </tbody>
     </table>
@@ -548,8 +549,8 @@ tr.hi td { background: var(--accent-soft); }
     <table>
       <thead><tr><th>&nbsp;</th><th class="num">Year 1</th><th class="num">Year 2</th><th class="num">Year 3</th></tr></thead>
       <tbody>
-        <tr><td>Marketing spend</td><td class="num">$746k</td><td class="num">$1.32M</td><td class="num">$3.90M</td></tr>
-        <tr><td>Registered signups</td><td class="num">23,300</td><td class="num">216,000</td><td class="num">553,000</td></tr>
+        <tr><td>Marketing spend</td><td class="num">$186k</td><td class="num">$1.11M</td><td class="num">$3.90M</td></tr>
+        <tr><td>Registered signups</td><td class="num">30,315</td><td class="num">203,409</td><td class="num">571,778</td></tr>
         <tr><td>Free → paid conversion <span class="chip est">assumed</span></td><td class="num">6.0%</td><td class="num">7.0%</td><td class="num">7.5%</td></tr>
         <tr class="total"><td>Paying subscribers, exit</td><td class="num">2,007</td><td class="num">16,748</td><td class="num">58,909</td></tr>
       </tbody>
@@ -606,7 +607,7 @@ tr.hi td { background: var(--accent-soft); }
 <line x1="580.0" y1="28" x2="580.0" y2="236" class="marker"/>
 <text x="586.0" y="42" class="anno">Seed $3.0M</text>
 <circle cx="774.4" cy="222.0" r="3.4" class="dot"/>
-<text x="766.4" y="207.0" class="anno" text-anchor="end">M19 · $1.07M left</text>
+<text x="766.4" y="207.0" class="anno" text-anchor="end">M19 · $1.05M left</text>
 <line x1="785.2" y1="28" x2="785.2" y2="65.6" class="marker"/>
 <text x="791.2" y="42" class="anno" text-anchor="end">Series A $12M</text>
         <text x="580.0" y="252" class="ax" text-anchor="middle">1</text>
@@ -619,7 +620,7 @@ tr.hi td { background: var(--accent-soft); }
 <text x="769" y="268" class="ax" text-anchor="middle">month · cash on hand</text>
       </svg>
     </div>
-    <figcaption>Left: the <b>spread between the three cases is almost entirely conversion and churn</b> — the two things no amount of engineering can settle before launch, which is why §10 gates spend on them rather than forecasting them. Right: the seed is sized so that <b>even the conservative case reaches month 19 with cash in hand</b> ($0.77M) rather than raising the Series A from a position of weakness.</figcaption>
+    <figcaption>Left: the <b>spread between the three cases is almost entirely conversion and churn</b> — the two things no amount of engineering can settle before launch, which is why §10 gates spend on them rather than forecasting them. Right: the seed is sized so that <b>even the conservative case reaches month 19 with cash in hand</b> ($0.71M) rather than raising the Series A from a position of weakness.</figcaption>
   </figure>
 
   <div class="tw">
@@ -631,14 +632,14 @@ tr.hi td { background: var(--accent-soft); }
         <tr><td>Free users, exit</td><td class="num">22,093</td><td class="num">119,331</td><td class="num">344,824</td></tr>
         <tr class="hi"><td><strong>Exit ARR</strong></td><td class="num"><strong>$395k</strong></td><td class="num"><strong>$3.27M</strong></td><td class="num"><strong>$11.46M</strong></td></tr>
         <tr><td>Revenue</td><td class="num">$107k</td><td class="num">$1.78M</td><td class="num">$7.29M</td></tr>
-        <tr><td class="lbl-sub">Cost of goods</td><td class="num">$12k</td><td class="num">$190k</td><td class="num">$748k</td></tr>
+        <tr><td class="lbl-sub">Cost of goods</td><td class="num">$12k</td><td class="num">$188k</td><td class="num">$740k</td></tr>
         <tr><td><strong>Gross profit</strong></td><td class="num"><strong>$95k</strong></td><td class="num"><strong>$1.59M</strong></td><td class="num"><strong>$6.54M</strong></td></tr>
-        <tr><td class="lbl-sub">Gross margin</td><td class="num pos">88.4%</td><td class="num pos">89.3%</td><td class="num pos">89.7%</td></tr>
-        <tr><td>Personnel</td><td class="num">$608k</td><td class="num">$1.33M</td><td class="num">$2.15M</td></tr>
-        <tr><td>Sales and marketing</td><td class="num">$746k</td><td class="num">$1.32M</td><td class="num">$3.90M</td></tr>
-        <tr><td>G&amp;A, legal, compliance, data</td><td class="num">$130k</td><td class="num">$90k</td><td class="num">$406k</td></tr>
-        <tr><td><strong>Operating expense</strong></td><td class="num"><strong>$1.15M</strong></td><td class="num"><strong>$2.74M</strong></td><td class="num"><strong>$6.46M</strong></td></tr>
-        <tr class="total"><td>EBITDA</td><td class="num neg">($1.05M)</td><td class="num neg">($1.15M)</td><td class="num pos">$86k</td></tr>
+        <tr><td class="lbl-sub">Gross margin</td><td class="num pos">88.5%</td><td class="num pos">89.4%</td><td class="num pos">89.9%</td></tr>
+        <tr><td>Personnel</td><td class="num">$721k</td><td class="num">$1.35M</td><td class="num">$2.19M</td></tr>
+        <tr><td>Sales and marketing</td><td class="num">$186k</td><td class="num">$1.11M</td><td class="num">$3.90M</td></tr>
+        <tr><td>G&amp;A, legal, compliance, data</td><td class="num">$249k</td><td class="num">$262k</td><td class="num">$312k</td></tr>
+        <tr><td><strong>Operating expense</strong></td><td class="num"><strong>$1.16M</strong></td><td class="num"><strong>$2.74M</strong></td><td class="num"><strong>$6.46M</strong></td></tr>
+        <tr class="total"><td>EBITDA</td><td class="num neg">($1.07M)</td><td class="num neg">($1.15M)</td><td class="num pos">$94k</td></tr>
         <tr><td>Headcount, exit</td><td class="num">12</td><td class="num">17</td><td class="num">26</td></tr>
       </tbody>
     </table>
@@ -651,7 +652,7 @@ tr.hi td { background: var(--accent-soft); }
       <caption>Quarterly</caption>
       <thead><tr><th>Quarter</th><th class="num">Revenue</th><th class="num">EBITDA</th><th class="num">Exit subscribers</th><th class="num">Exit ARR</th><th class="num">Headcount</th></tr></thead>
       <tbody>
-        <tr><td>Q1 · M1–3</td><td class="num">—</td><td class="num neg">($168k)</td><td class="num">—</td><td class="num">—</td><td class="num">6</td></tr>
+        <tr><td>Q1 · M1–3</td><td class="num">—</td><td class="num neg">($183k)</td><td class="num">—</td><td class="num">—</td><td class="num">6</td></tr>
         <tr><td><strong>Q2 · M4–6 launch</strong></td><td class="num">$3k</td><td class="num neg">($253k)</td><td class="num">173</td><td class="num">$35k</td><td class="num">8</td></tr>
         <tr><td>Q3 · M7–9</td><td class="num">$27k</td><td class="num neg">($287k)</td><td class="num">722</td><td class="num">$143k</td><td class="num">10</td></tr>
         <tr><td>Q4 · M10–12</td><td class="num">$78k</td><td class="num neg">($343k)</td><td class="num">2,007</td><td class="num">$395k</td><td class="num">12</td></tr>
@@ -674,29 +675,29 @@ tr.hi td { background: var(--accent-soft); }
       <caption>Year 1, month by month</caption>
       <thead><tr><th class="num">Month</th><th class="num">Signups</th><th class="num">Free</th><th class="num">Paying</th><th class="num">MRR</th><th class="num">Gross profit</th><th class="num">Opex</th><th class="num">EBITDA</th><th class="num">Cumulative</th></tr></thead>
       <tbody>
-        <tr><td class="num">1</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$39k</td><td class="num neg">($39k)</td><td class="num neg">($39k)</td></tr>
-        <tr><td class="num">2</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$73k</td><td class="num neg">($73k)</td><td class="num neg">($112k)</td></tr>
-        <tr><td class="num">3</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$55k</td><td class="num neg">($55k)</td><td class="num neg">($168k)</td></tr>
-        <tr><td class="num">4</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$81k</td><td class="num neg">($81k)</td><td class="num neg">($249k)</td></tr>
-        <tr><td class="num">5</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$73k</td><td class="num neg">($73k)</td><td class="num neg">($321k)</td></tr>
-        <tr class="hi"><td class="num"><strong>6 · launch</strong></td><td class="num">2,643</td><td class="num">2,469</td><td class="num">173</td><td class="num">$2.9k</td><td class="num">$2.5k</td><td class="num">$102k</td><td class="num neg">($99k)</td><td class="num neg">($421k)</td></tr>
-        <tr><td class="num">7</td><td class="num">2,688</td><td class="num">4,696</td><td class="num">353</td><td class="num">$5.8k</td><td class="num">$5.1k</td><td class="num">$98k</td><td class="num neg">($93k)</td><td class="num neg">($514k)</td></tr>
-        <tr><td class="num">8</td><td class="num">2,737</td><td class="num">6,712</td><td class="num">536</td><td class="num">$8.8k</td><td class="num">$7.8k</td><td class="num">$102k</td><td class="num neg">($94k)</td><td class="num neg">($608k)</td></tr>
-        <tr><td class="num">9</td><td class="num">2,790</td><td class="num">8,545</td><td class="num">722</td><td class="num">$11.9k</td><td class="num">$10.5k</td><td class="num">$111k</td><td class="num neg">($100k)</td><td class="num neg">($708k)</td></tr>
-        <tr><td class="num">10</td><td class="num">6,420</td><td class="num">13,558</td><td class="num">1,146</td><td class="num">$18.9k</td><td class="num">$16.7k</td><td class="num">$130k</td><td class="num neg">($113k)</td><td class="num neg">($821k)</td></tr>
-        <tr><td class="num">11</td><td class="num">6,484</td><td class="num">18,052</td><td class="num">1,575</td><td class="num">$25.9k</td><td class="num">$22.9k</td><td class="num">$138k</td><td class="num neg">($115k)</td><td class="num neg">($936k)</td></tr>
-        <tr class="total"><td class="num">12</td><td class="num">6,553</td><td class="num">22,093</td><td class="num">2,007</td><td class="num">$32.9k</td><td class="num">$29.2k</td><td class="num">$144k</td><td class="num neg">($115k)</td><td class="num neg">($1.05M)</td></tr>
+        <tr><td class="num">1</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$45.4k</td><td class="num neg">($45.4k)</td><td class="num neg">($45.4k)</td></tr>
+        <tr><td class="num">2</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$78.9k</td><td class="num neg">($78.9k)</td><td class="num neg">($124.3k)</td></tr>
+        <tr><td class="num">3</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$58.9k</td><td class="num neg">($58.9k)</td><td class="num neg">($183.2k)</td></tr>
+        <tr><td class="num">4</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$80.9k</td><td class="num neg">($80.9k)</td><td class="num neg">($264.1k)</td></tr>
+        <tr><td class="num">5</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$72.8k</td><td class="num neg">($72.8k)</td><td class="num neg">($336.9k)</td></tr>
+        <tr class="hi"><td class="num"><strong>6 · launch</strong></td><td class="num">2,643</td><td class="num">2,469</td><td class="num">173</td><td class="num">$2.9k</td><td class="num">$2.5k</td><td class="num">$102.0k</td><td class="num neg">($99.5k)</td><td class="num neg">($436.4k)</td></tr>
+        <tr><td class="num">7</td><td class="num">2,688</td><td class="num">4,696</td><td class="num">353</td><td class="num">$5.8k</td><td class="num">$5.1k</td><td class="num">$98.0k</td><td class="num neg">($92.9k)</td><td class="num neg">($529.2k)</td></tr>
+        <tr><td class="num">8</td><td class="num">2,737</td><td class="num">6,712</td><td class="num">536</td><td class="num">$8.8k</td><td class="num">$7.8k</td><td class="num">$101.8k</td><td class="num neg">($94.0k)</td><td class="num neg">($623.2k)</td></tr>
+        <tr><td class="num">9</td><td class="num">2,790</td><td class="num">8,545</td><td class="num">722</td><td class="num">$11.9k</td><td class="num">$10.5k</td><td class="num">$110.8k</td><td class="num neg">($100.3k)</td><td class="num neg">($723.5k)</td></tr>
+        <tr><td class="num">10</td><td class="num">6,420</td><td class="num">13,558</td><td class="num">1,146</td><td class="num">$18.9k</td><td class="num">$16.7k</td><td class="num">$129.7k</td><td class="num neg">($113.0k)</td><td class="num neg">($836.5k)</td></tr>
+        <tr><td class="num">11</td><td class="num">6,484</td><td class="num">18,052</td><td class="num">1,575</td><td class="num">$25.9k</td><td class="num">$22.9k</td><td class="num">$138.3k</td><td class="num neg">($115.4k)</td><td class="num neg">($951.8k)</td></tr>
+        <tr class="total"><td class="num">12</td><td class="num">6,553</td><td class="num">22,093</td><td class="num">2,007</td><td class="num">$32.9k</td><td class="num">$29.2k</td><td class="num">$144.1k</td><td class="num neg">($114.9k)</td><td class="num neg">($1.07M)</td></tr>
       </tbody>
     </table>
   </div>
 
-  <p>Peak cumulative cash consumption is <strong>$2.65M at month 32</strong>; the first EBITDA-positive month is <strong>30</strong>.</p>
+  <p>Peak cumulative cash consumption is <strong>$2.66M at month 32</strong>; the first EBITDA-positive month is <strong>30</strong>.</p>
 </section>
 
 <section id="team">
   <p class="eyebrow">Section eight</p>
   <h2 class="sec">Team and the EU cost base</h2>
-  <p>Fully loaded cost — salary, employer contributions, equipment, tooling. The team is EU-based, which is the structural reason this plan reaches $11.5M ARR on $2.65M of cash.</p>
+  <p>Fully loaded cost — salary, employer contributions, equipment, tooling. The team is EU-based, which is the structural reason this plan reaches $11.5M ARR on $2.66M of cash.</p>
 
   <div class="tw">
     <table>
@@ -755,12 +756,12 @@ tr.hi td { background: var(--accent-soft); }
       <dl>
         <dt>Conversion</dt><dd>4.2 → 5.3%</dd>
         <dt>Monthly churn</dt><dd>10.0 → 7.3%</dd>
-        <dt>Y3 revenue</dt><dd>$4.13M</dd>
-        <dt>Y3 exit ARR</dt><dd>$6.49M</dd>
-        <dt>Y3 subscribers</dt><dd>33,697</dd>
-        <dt>Y3 EBITDA</dt><dd>($2.78M)</dd>
+        <dt>Y3 revenue</dt><dd>$3.61M</dd>
+        <dt>Y3 exit ARR</dt><dd>$5.64M</dd>
+        <dt>Y3 subscribers</dt><dd>29,149</dd>
+        <dt>Y3 EBITDA</dt><dd>($3.25M)</dd>
         <dt>EBITDA-positive</dt><dd>beyond M36</dd>
-        <dt>Peak cash</dt><dd>$5.73M</dd>
+        <dt>Peak cash</dt><dd>$6.32M</dd>
       </dl>
     </div>
     <div class="base">
@@ -771,9 +772,9 @@ tr.hi td { background: var(--accent-soft); }
         <dt>Y3 revenue</dt><dd>$7.29M</dd>
         <dt>Y3 exit ARR</dt><dd>$11.46M</dd>
         <dt>Y3 subscribers</dt><dd>58,909</dd>
-        <dt>Y3 EBITDA</dt><dd>$86k</dd>
+        <dt>Y3 EBITDA</dt><dd>$94k</dd>
         <dt>EBITDA-positive</dt><dd>M30</dd>
-        <dt>Peak cash</dt><dd>$2.65M</dd>
+        <dt>Peak cash</dt><dd>$2.66M</dd>
       </dl>
     </div>
     <div>
@@ -781,17 +782,17 @@ tr.hi td { background: var(--accent-soft); }
       <dl>
         <dt>Conversion</dt><dd>7.5 → 9.4%</dd>
         <dt>Monthly churn</dt><dd>6.6 → 4.8%</dd>
-        <dt>Y3 revenue</dt><dd>$15.04M</dd>
-        <dt>Y3 exit ARR</dt><dd>$23.66M</dd>
-        <dt>Y3 subscribers</dt><dd>120,655</dd>
-        <dt>Y3 EBITDA</dt><dd>$5.34M</dd>
-        <dt>EBITDA-positive</dt><dd>M20</dd>
-        <dt>Peak cash</dt><dd>$1.56M</dd>
+        <dt>Y3 revenue</dt><dd>$16.91M</dd>
+        <dt>Y3 exit ARR</dt><dd>$26.72M</dd>
+        <dt>Y3 subscribers</dt><dd>136,842</dd>
+        <dt>Y3 EBITDA</dt><dd>$7.06M</dd>
+        <dt>EBITDA-positive</dt><dd>M19</dd>
+        <dt>Peak cash</dt><dd>$1.47M</dd>
       </dl>
     </div>
   </div>
 
-  <p><strong>The conservative case is still a venture outcome</strong> — $6.5M of ARR growing, at 89% margin — but it needs a larger Series A and reaches profitability in year four. It is the case the round is sized against.</p>
+  <p><strong>The conservative case is still a venture outcome</strong> — $5.6M of ARR growing, at 89% margin — but it needs a larger Series A and reaches profitability in year four. It is the case the round is sized against.</p>
 
   <blockquote><p>The case this plan is not built to survive is different in kind: retention that never flattens. A product whose month-three cohort curve goes to zero cannot be fixed with marketing.</p></blockquote>
 
@@ -800,13 +801,16 @@ tr.hi td { background: var(--accent-soft); }
   <div class="tw">
     <table>
       <caption>What moves the outcome</caption>
-      <thead><tr><th>Lever</th><th class="num">Effect on Year 3 ARR</th></tr></thead>
+      <thead><tr><th>Lever moved on its own</th><th class="num">Year 3 exit ARR</th><th class="num">Change</th></tr></thead>
       <tbody>
-        <tr><td>Conversion 6.0% → 4.2%</td><td class="num neg">−43%</td></tr>
-        <tr><td>Conversion 6.0% → 7.5%</td><td class="num pos">+33%</td></tr>
-        <tr><td>Monthly churn 8% → 10%</td><td class="num neg">−28%</td></tr>
-        <tr><td>Cost per signup $7.00 → $9.10</td><td class="num neg">−31%</td></tr>
-        <tr class="hi"><td><strong>Inference price doubling</strong></td><td class="num"><strong>−1.1 points of gross margin; no change to ARR</strong></td></tr>
+        <tr class="total"><td><strong>Base</strong></td><td class="num"><strong>$11.46M</strong></td><td class="num">—</td></tr>
+        <tr><td>Cost per signup +30%</td><td class="num">$9.06M</td><td class="num neg">−21%</td></tr>
+        <tr><td>Conversion 6.0% → 4.2%</td><td class="num">$9.13M</td><td class="num neg">−20%</td></tr>
+        <tr><td>Upgrade from the free base 0.6% → 0.3%</td><td class="num">$9.85M</td><td class="num neg">−14%</td></tr>
+        <tr><td>Conversion 6.0% → 7.5%</td><td class="num">$13.48M</td><td class="num pos">+18%</td></tr>
+        <tr><td>Monthly churn 8% → 10%</td><td class="num">$10.85M</td><td class="num neg">−5%</td></tr>
+        <tr><td>Organic 500 → 300 at launch</td><td class="num">$11.04M</td><td class="num neg">−4%</td></tr>
+        <tr class="hi"><td><strong>Inference price doubling</strong></td><td class="num"><strong>$11.46M</strong></td><td class="num"><strong>0% — 1.1 points of gross margin and nothing else</strong></td></tr>
       </tbody>
     </table>
   </div>
@@ -820,7 +824,7 @@ tr.hi td { background: var(--accent-soft); }
     <table>
       <thead><tr><th>Round</th><th class="num">Timing</th><th class="num">Amount</th><th>Runway</th></tr></thead>
       <tbody>
-        <tr><td><strong>Seed</strong></td><td class="num">now</td><td class="num"><strong>$3.0M</strong></td><td>19 months to the Series A, with $1.07M of cushion at the trough in the base case and <strong>$0.77M in the conservative case</strong></td></tr>
+        <tr><td><strong>Seed</strong></td><td class="num">now</td><td class="num"><strong>$3.0M</strong></td><td>19 months to the Series A, with $1.05M of cushion at the trough in the base case and <strong>$0.71M in the conservative case</strong></td></tr>
         <tr><td>Series A</td><td class="num">month 20</td><td class="num">$12.0M</td><td>At $2.18M ARR growing ~3× year on year</td></tr>
       </tbody>
     </table>
@@ -831,11 +835,12 @@ tr.hi td { background: var(--accent-soft); }
       <caption>Use of the seed — $3.0M over 19 months</caption>
       <thead><tr><th>&nbsp;</th><th class="num">Amount</th><th class="num">Share</th></tr></thead>
       <tbody>
-        <tr><td>Team — 4 people at month 1 to 15 at month 19</td><td class="num">$1.43M</td><td class="num">54%</td></tr>
+        <tr><td>Team — 4 people at month 1 to 15 at month 19</td><td class="num">$1.43M</td><td class="num">53%</td></tr>
         <tr><td>Sales and marketing — gated in four steps</td><td class="num">$746k</td><td class="num">28%</td></tr>
-        <tr><td>Counsel, clinical validation, compliance, food data</td><td class="num">$403k</td><td class="num">15%</td></tr>
-        <tr><td>Cost of goods</td><td class="num">$83k</td><td class="num">3%</td></tr>
-        <tr class="total"><td>Total spend</td><td class="num">$2.67M</td><td class="num">—</td></tr>
+        <tr><td>Counsel, clinical validation, compliance, food data</td><td class="num">$419k</td><td class="num">16%</td></tr>
+        <tr><td>Cost of goods</td><td class="num">$82k</td><td class="num">3%</td></tr>
+        <tr><td>Infrastructure</td><td class="num">$18k</td><td class="num">1%</td></tr>
+        <tr class="total"><td>Total spend</td><td class="num">$2.70M</td><td class="num">—</td></tr>
         <tr><td>Revenue earned over the period</td><td class="num">$751k</td><td class="num">—</td></tr>
       </tbody>
     </table>
@@ -952,6 +957,7 @@ tr.hi td { background: var(--accent-soft); }
         <tr class="flag"><td><strong>Free → paid conversion</strong></td><td class="num"><strong>6.0 → 7.5%</strong></td><td>The first two cohorts. <strong>Worth 43% of Year 3 ARR</strong></td></tr>
         <tr class="flag"><td><strong>Monthly churn / annual renewal</strong></td><td class="num"><strong>8.0% / 55%</strong></td><td>Month-three cohort curve, twelve weeks after launch</td></tr>
         <tr><td>Annual plan mix</td><td class="num">45%</td><td>Checkout data from week one</td></tr>
+        <tr><td>Upgrade from the existing free base</td><td class="num">0.6% / mo</td><td>Cohort data. <strong>Worth 14% of Year 3 ARR</strong> — free users who convert later, not at signup</td></tr>
         <tr><td>Cost per registered signup</td><td class="num">$7.00 → $6.00</td><td>A live channel test before the month-10 step</td></tr>
         <tr><td>Price</td><td class="num">$19.99 / $149</td><td>Five moderated sessions and the beta, before paid acquisition opens</td></tr>
         <tr><td>Build calendar to launch</td><td class="num">5 months</td><td>83–106 scoped days against the hiring plan</td></tr>

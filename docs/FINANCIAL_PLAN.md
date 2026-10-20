@@ -5,6 +5,9 @@ Nadia Babich · 8 October 2026 · Confidential
 
 **Currency:** US dollars. Revenue is earned in the US; the cost base is in euros
 (the team and infrastructure are EU-based), converted at $1.093 to the euro.
+**The model:** `docs/DiaBite-financial-model.xlsx` — every figure in this document is
+computed there, with editable assumptions and all three scenarios live. Where the two
+disagree, the workbook is right.
 **Companion documents:** `docs/PRD.md` (product), `docs/PRD-post-course.md`
 (scope of work), `docs/COST-post-course.md` and `docs/monitoring.md` (measured
 costs), `docs/CLINICAL_REVIEW.md` (clinical validation).
@@ -43,7 +46,7 @@ this plan from a forecast: the cost of goods below is not an estimate.
 | Year 2 exit ARR | $3.27M |
 | **Year 3 exit ARR** | **$11.46M** · 58,900 paying subscribers |
 | First EBITDA-positive month | **Month 30** |
-| Peak cumulative cash | **$2.65M** |
+| Peak cumulative cash | **$2.66M** |
 | **The raise** | **$3.0M seed now · $12M Series A at month 20** |
 
 **Three things make the economics unusual for consumer health.**
@@ -54,7 +57,7 @@ this plan from a forecast: the cost of goods below is not an estimate.
    is not a line item that can threaten this business.
 2. **US revenue on an EU cost base.** Engineering, clinical and operations sit
    in the EU at roughly 60% of US loaded cost, against US consumer pricing. The
-   plan reaches $11.5M ARR with 26 people and $2.65M of cumulative cash.
+   plan reaches $11.5M ARR with 26 people and $2.66M of cumulative cash.
 3. **The product exists.** 6,054 foods, three agents in production, 285
    evaluation cases, a verified rate of 100% across the most recent live run, p90
    latency of 8.2 seconds. The seed buys distribution and clinical validation,
@@ -109,9 +112,9 @@ not scale, and the software that does scale was built for calorie counting.
 
 | | Y3 subscribers | Share of the 59M |
 |---|---|---|
-| Conservative | 33,700 | 0.057% |
+| Conservative | 29,149 | 0.049% |
 | **Base** | **58,900** | **0.100%** |
-| Upside | 120,700 | 0.205% |
+| Upside | 136,842 | 0.232% |
 
 One percent of the serviceable market is 590,000 subscribers and $117M of ARR.
 The base case needs one tenth of one percent.
@@ -246,8 +249,8 @@ of $7.00 improving to $6.00 **[assumed]**.
 
 | | Year 1 | Year 2 | Year 3 |
 |---|---|---|---|
-| Marketing spend | $746k | $1.32M | $3.90M |
-| Registered signups | 23,300 | 216,000 | 553,000 |
+| Marketing spend | $186k | $1.11M | $3.90M |
+| Registered signups | 30,315 | 203,409 | 571,778 |
 | Free → paid conversion **[assumed]** | 6.0% | 7.0% | 7.5% |
 | Paying subscribers, exit | 2,007 | 16,748 | 58,909 |
 
@@ -266,14 +269,14 @@ and each step is released by a metric, not a date (§10).
 | Free users, exit | 22,093 | 119,331 | 344,824 |
 | **Exit ARR** | **$395k** | **$3.27M** | **$11.46M** |
 | Revenue | $107k | $1.78M | $7.29M |
-| Cost of goods | $12k | $190k | $748k |
+| Cost of goods | $12k | $188k | $740k |
 | **Gross profit** | **$95k** | **$1.59M** | **$6.54M** |
-| Gross margin | 88.4% | 89.3% | 89.7% |
-| Personnel | $608k | $1.33M | $2.15M |
-| Sales and marketing | $746k | $1.32M | $3.90M |
-| G&A, legal, compliance, data | $130k | $90k | $406k |
-| **Operating expense** | **$1.15M** | **$2.74M** | **$6.46M** |
-| **EBITDA** | **($1.05M)** | **($1.15M)** | **$86k** |
+| Gross margin | 88.5% | 89.4% | 89.9% |
+| Personnel | $721k | $1.35M | $2.19M |
+| Sales and marketing | $186k | $1.11M | $3.90M |
+| G&A, legal, compliance, data | $249k | $262k | $312k |
+| **Operating expense** | **$1.16M** | **$2.74M** | **$6.46M** |
+| **EBITDA** | **($1.07M)** | **($1.15M)** | **$94k** |
 | Headcount, exit | 12 | 17 | 26 |
 
 Reported gross margin runs 88–90% rather than the 91.5% marginal figure because
@@ -284,7 +287,7 @@ it converges upward as the base grows.
 
 | Quarter | Revenue | EBITDA | Exit subscribers | Exit ARR | Headcount |
 |---|---|---|---|---|---|
-| Q1 · M1–3 | — | ($168k) | — | — | 6 |
+| Q1 · M1–3 | — | ($183k) | — | — | 6 |
 | Q2 · M4–6 **launch** | $3k | ($253k) | 173 | $35k | 8 |
 | Q3 · M7–9 | $27k | ($287k) | 722 | $143k | 10 |
 | Q4 · M10–12 | $78k | ($343k) | 2,007 | $395k | 12 |
@@ -304,20 +307,20 @@ deliberate purchase of a cohort that pays back in five to eight months.
 
 | Month | Signups | Free | Paying | MRR | Gross profit | Opex | EBITDA | Cumulative |
 |---|---|---|---|---|---|---|---|---|
-| 1 | — | — | — | — | — | $39k | ($39k) | ($39k) |
-| 2 | — | — | — | — | — | $73k | ($73k) | ($112k) |
-| 3 | — | — | — | — | — | $55k | ($55k) | ($168k) |
-| 4 | — | — | — | — | — | $81k | ($81k) | ($249k) |
-| 5 | — | — | — | — | — | $73k | ($73k) | ($321k) |
-| **6 · launch** | 2,643 | 2,469 | 173 | $2.9k | $2.5k | $102k | ($99k) | ($421k) |
-| 7 | 2,688 | 4,696 | 353 | $5.8k | $5.1k | $98k | ($93k) | ($514k) |
-| 8 | 2,737 | 6,712 | 536 | $8.8k | $7.8k | $102k | ($94k) | ($608k) |
-| 9 | 2,790 | 8,545 | 722 | $11.9k | $10.5k | $111k | ($100k) | ($708k) |
-| 10 | 6,420 | 13,558 | 1,146 | $18.9k | $16.7k | $130k | ($113k) | ($821k) |
-| 11 | 6,484 | 18,052 | 1,575 | $25.9k | $22.9k | $138k | ($115k) | ($936k) |
-| 12 | 6,553 | 22,093 | 2,007 | $32.9k | $29.2k | $144k | ($115k) | ($1.05M) |
+| 1 | — | — | — | — | — | $45.4k | ($45.4k) | ($45.4k) |
+| 2 | — | — | — | — | — | $78.9k | ($78.9k) | ($124.3k) |
+| 3 | — | — | — | — | — | $58.9k | ($58.9k) | ($183.2k) |
+| 4 | — | — | — | — | — | $80.9k | ($80.9k) | ($264.1k) |
+| 5 | — | — | — | — | — | $72.8k | ($72.8k) | ($336.9k) |
+| **6 · launch** | 2,643 | 2,469 | 173 | $2.9k | $2.5k | $102.0k | ($99.5k) | ($436.4k) |
+| 7 | 2,688 | 4,696 | 353 | $5.8k | $5.1k | $98.0k | ($92.9k) | ($529.2k) |
+| 8 | 2,737 | 6,712 | 536 | $8.8k | $7.8k | $101.8k | ($94.0k) | ($623.2k) |
+| 9 | 2,790 | 8,545 | 722 | $11.9k | $10.5k | $110.8k | ($100.3k) | ($723.5k) |
+| 10 | 6,420 | 13,558 | 1,146 | $18.9k | $16.7k | $129.7k | ($113.0k) | ($836.5k) |
+| 11 | 6,484 | 18,052 | 1,575 | $25.9k | $22.9k | $138.3k | ($115.4k) | ($951.8k) |
+| 12 | 6,553 | 22,093 | 2,007 | $32.9k | $29.2k | $144.1k | ($114.9k) | ($1.07M) |
 
-Peak cumulative cash consumption is **$2.65M at month 32**; the first
+Peak cumulative cash consumption is **$2.66M at month 32**; the first
 EBITDA-positive month is **30**.
 
 ---
@@ -326,7 +329,7 @@ EBITDA-positive month is **30**.
 
 Fully loaded cost — salary, employer contributions, equipment, tooling. The team
 is EU-based, which is the structural reason this plan reaches $11.5M ARR on
-$2.65M of cash.
+$2.66M of cash.
 
 | Role | Starts | Loaded / month |
 |---|---|---|
@@ -381,17 +384,17 @@ being one.
 | Monthly churn | 10.0% → 7.3% | 8.0% → 5.8% | 6.6% → 4.8% |
 | Cost per signup vs. base | 1.30× | 1.00× | 0.85× |
 | Organic reach vs. base | 0.60× | 1.00× | 1.50× |
-| Year 1 revenue | $59k | $107k | $218k |
-| Year 2 revenue | $1.00M | $1.78M | $3.66M |
-| Year 3 revenue | $4.13M | $7.29M | $15.04M |
-| **Year 3 exit ARR** | **$6.49M** | **$11.46M** | **$23.66M** |
-| Year 3 exit subscribers | 33,697 | 58,909 | 120,655 |
-| Year 3 EBITDA | ($2.78M) | $86k | $5.34M |
-| First EBITDA-positive month | beyond M36 | M30 | M20 |
-| **Peak cumulative cash** | **$5.73M** | **$2.65M** | **$1.56M** |
-| Gross margin, Year 3 | 89.1% | 89.7% | 90.1% |
+| Year 1 revenue | $54k | $107k | $235k |
+| Year 2 revenue | $891k | $1.78M | $4.06M |
+| Year 3 revenue | $3.61M | $7.29M | $16.91M |
+| **Year 3 exit ARR** | **$5.64M** | **$11.46M** | **$26.72M** |
+| Year 3 exit subscribers | 29,149 | 58,909 | 136,842 |
+| Year 3 EBITDA | ($3.25M) | $94k | $7.06M |
+| First EBITDA-positive month | beyond M36 | M30 | M19 |
+| **Peak cumulative cash** | **$6.32M** | **$2.66M** | **$1.47M** |
+| Gross margin, Year 3 | 88.9% | 89.9% | 90.3% |
 
-**The conservative case is still a venture outcome** — $6.5M of ARR growing, at
+**The conservative case is still a venture outcome** — $5.6M of ARR growing, at
 89% margin — but it needs a larger Series A and reaches profitability in year
 four. It is the case the round is sized against.
 
@@ -403,13 +406,16 @@ rather than two years.
 
 ### What moves the outcome
 
-| Lever | Effect on Year 3 ARR |
-|---|---|
-| Conversion 6.0% → 4.2% | −43% |
-| Conversion 6.0% → 7.5% | +33% |
-| Monthly churn 8% → 10% | −28% |
-| Cost per signup $7.00 → $9.10 | −31% |
-| **Inference price doubling** | **−1.1 points of gross margin; no change to ARR** |
+| Lever moved on its own | Year 3 exit ARR | Change |
+|---|---|---|
+| **Base** | **$11.46M** | — |
+| Cost per signup +30% | $9.06M | −21% |
+| Conversion 6.0% → 4.2% | $9.13M | −20% |
+| Upgrade from the free base 0.6% → 0.3% | $9.85M | −14% |
+| Conversion 6.0% → 7.5% | $13.48M | +18% |
+| Monthly churn 8% → 10% | $10.85M | −5% |
+| Organic 500 → 300 at launch | $11.04M | −4% |
+| **Inference price doubling** | **$11.46M** | **0% — it costs 1.1 points of gross margin and nothing else** |
 
 ---
 
@@ -417,18 +423,19 @@ rather than two years.
 
 | Round | Timing | Amount | Post-round runway |
 |---|---|---|---|
-| **Seed** | now | **$3.0M** | 19 months to the Series A, with $1.07M of cushion at the trough in the base case and $0.77M in the conservative case |
+| **Seed** | now | **$3.0M** | 19 months to the Series A, with $1.05M of cushion at the trough in the base case and $0.71M in the conservative case |
 | Series A | month 20 | $12.0M | At $2.18M ARR growing ~3× year on year |
 
 ### Use of the seed — $3.0M over 19 months
 
 | | | Share |
 |---|---|---|
-| Team — 4 people at month 1 to 15 at month 19 | $1.43M | 54% |
+| Team — 4 people at month 1 to 15 at month 19 | $1.43M | 53% |
 | Sales and marketing — gated in four steps | $746k | 28% |
-| Counsel, clinical validation, compliance, food data | $403k | 15% |
-| Cost of goods | $83k | 3% |
-| **Total spend** | **$2.67M** | |
+| Counsel, clinical validation, compliance, food data | $419k | 16% |
+| Cost of goods | $82k | 3% |
+| Infrastructure | $18k | 1% |
+| **Total spend** | **$2.70M** | |
 | Revenue earned over the period | $751k | |
 
 ### What the Series A is raised on
@@ -561,6 +568,7 @@ of this plan's own sources.
 | Free → paid conversion | 6.0% → 7.5% | The first two cohorts. **Worth 43% of Year 3 ARR** |
 | Monthly churn / annual renewal | 8.0% / 55% | Month-three cohort curve, twelve weeks after launch |
 | Annual plan mix | 45% | Checkout data from week one |
+| Upgrade from the existing free base | 0.6% / month | Cohort data. **Worth 14% of Year 3 ARR** — free users who convert later, not at signup |
 | Cost per registered signup | $7.00 → $6.00 | A live channel test before the month-10 step |
 | Price | $19.99 / $149 | Five moderated sessions and the beta, before paid acquisition opens |
 | Build calendar to launch | 5 months | 83–106 scoped days against the hiring plan |

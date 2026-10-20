@@ -12,9 +12,9 @@ const S = JSON.parse(readFileSync(join(here, 'script.json'), 'utf8'))
 const token = execSync('az account get-access-token --resource https://cognitiveservices.azure.com --query accessToken -o tsv', { env: { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` } }).toString().trim()
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 const durations = {}
-for (const sc of S.scenes) for (const l of sc.lines) {
+for (const l of S.lines) {
   const v = S.voices[l.who]
-  const ssml = `<speak version="1.0" xml:lang="en-US"><voice name="${v.name}"><prosody rate="${v.rate}">${esc(l.text)}</prosody></voice></speak>`
+  const ssml = `<speak version="1.0" xml:lang="en-US"><voice name="${v.name}"><prosody rate="${v.rate}">${esc(l.text.replace('diabite.pro', 'diabite dot pro'))}</prosody></voice></speak>`
   const res = await fetch('https://diabite-resource.cognitiveservices.azure.com/tts/cognitiveservices/v1', { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/ssml+xml', 'X-Microsoft-OutputFormat': 'riff-24khz-16bit-mono-pcm' }, body: ssml })
   if (!res.ok) throw new Error(`${l.id}: ${res.status} ${await res.text()}`)
   const buf = Buffer.from(await res.arrayBuffer())

@@ -1,8 +1,9 @@
 /**
  * "Two rhythms", step 3: the film as one HTML page you can scrub (window.setTime(t)), plus its timeline.
  *   node scripts/demo-video/two-rhythms/build-film.mjs [dir=/tmp/dv2] [storyboard=<dir of the .dc.html art>]
- * Art: the six storyboard frames (inline SVG). The phone on the right plays the frames captured from the live app,
+ * Art: the storyboard frames (inline SVG). The phone on the right plays the frames captured from the live app,
  * time-mapped to the spoken lines: typing is stretched or squeezed to the line, thinking is cut short, the answer holds.
+ * Mouths follow the loudness of each character's voice.
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -14,6 +15,12 @@ if (!board) throw new Error('pass the storyboard folder (the .dc.html files) as 
 const S = JSON.parse(readFileSync(join(here, 'script.json'), 'utf8'))
 const D = JSON.parse(readFileSync(join(dir, 'audio/durations.json'), 'utf8'))
 const M = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8'))
+const TXT = Object.fromEntries(S.lines.map((l) => [l.id, l.text]))
+const WHO = Object.fromEntries(S.lines.map((l) => [l.id, l.who]))
+const sentStarts = (id, from = 0) => {   // when each sentence of a line begins, by its share of the characters
+  const parts = TXT[id].split(/(?<=[.?!])\s+/); const n = parts.reduce((a, p) => a + p.length, 0); let c = 0
+  return parts.map((p) => { const t = from + D[id] * (c / n); c += p.length; return t })
+}
 
 // ---------- art ----------
 const svgOf = (name) => readFileSync(join(board, `${name}.dc.html`), 'utf8').match(/<svg[\s\S]*<\/svg>/)[0]
@@ -26,13 +33,15 @@ function stripPhoneAndCaption(svg) {
   if (c >= 0) L.splice(c, 2)
   return L.join('\n')
 }
-function wrapChars(svg) {            // every character group gets a wrapper that the page can bob
+const MOUTH = { maya: 32, daniel: 35 }
+function wrapChars(svg) {            // every character group: a wrapper the page can bob, and a mouth it can open
   const L = lines(svg)
   for (let i = 0; i < L.length; i++) {
     if (!/^\s*<g transform="translate\(\d+,\d+\) scale\([\d.]+\)"><g>/.test(L[i])) continue
     let e = i + 1; while (!/^\s*<\/g><\/g><\/g>\s*$/.test(L[e])) e++
     const who = L.slice(i, e).join('').includes('#msk') ? 'maya' : 'daniel'
-    L[i] = `<g class="bob" data-who="${who}">` + L[i]; L[e] = L[e] + '</g>'
+    L[i] = `<g class="bob" data-who="${who}">` + L[i]
+    L[e] = `<g class="mouth"><ellipse cx="0" cy="${MOUTH[who]}" rx="6" ry="0.01" fill="#4a1612"/></g>` + L[e] + '</g>'
     i = e
   }
   return L.join('\n')
@@ -52,17 +61,27 @@ function bothArt() {
   <text x="300" y="104" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="500" font-size="20" letter-spacing="3" fill="#dcf26b">SHOW CALCULATION</text>
   <text x="300" y="140" text-anchor="middle" font-family="Literata, Georgia, serif" font-weight="600" font-size="26" fill="#fffcf5">Line by line, from the database</text>
   ${wrapChars(maya)}\n${wrapChars(dan)}
-  <text x="60" y="394" font-family="IBM Plex Mono, monospace" font-size="13" letter-spacing="1.5" fill="#a9bbaf">MAYA AND DANIEL · MADE UP</text></svg>`
+  <text x="60" y="394" font-family="IBM Plex Mono, monospace" font-size="13" letter-spacing="1.5" fill="#a9bbaf">MAYA AND DANIEL</text></svg>`
+}
+// the title frame, three ways: the question, the introduction, the gap
+function mainArt({ title, sub, band, bandAt, labels = ['EATS ON THE MOVE', 'LOVES A PLAN'], counter = false, marks = null }) {
+  let s = wrapChars(svgOf('Main'))
+  s = s.replace(/(<text x="480" y="84"[^>]*>)[^<]*(<\/text>)/, counter ? '<text x="480" y="112" text-anchor="middle" font-family="Literata, Georgia, serif" font-weight="600" font-size="84" letter-spacing="-2" fill="#dcf26b" class="counter">0</text>' : `$1${title}$2`)
+  s = s.replace(/(<text x="480" y="120"[^>]*>)[^<]*(<\/text>)/, counter ? `<text x="480" y="146" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" letter-spacing="2" fill="#a9bbaf">${sub}</text>` : `$1${sub}$2`)
+  s = s.replace(/<rect x="318" y="146"[^>]*\/>/, counter ? '<rect x="260" y="164" width="440" height="50" rx="10" fill="#dcf26b" transform="rotate(-1.5 480 189)"/>' : '<rect x="260" y="146" width="440" height="50" rx="10" fill="#dcf26b" transform="rotate(-1.5 480 171)"/>')
+  s = s.replace(/(<text x="480" y="181"[^>]*>)[^<]*(<\/text>)/, counter ? `<text x="480" y="199" text-anchor="middle" font-family="Literata, Georgia, serif" font-weight="600" font-size="28" fill="#0c1b15">${band}</text>` : `$1${band}$2`)
+  s = s.replace('EATS ON THE MOVE', labels[0]).replace('LOVES A PLAN', labels[1])
+  // the original band rect (if still there) is replaced above; reveal the pieces
+  s = rev(s, counter ? /<text[^>]*class="counter">0<\/text>\s*<text x="480" y="146"[^>]*>[^<]*<\/text>/ : /<text x="480" y="84"[^>]*>[^<]*<\/text>\s*<text x="480" y="120"[^>]*>[^<]*<\/text>/, 0.5)
+  s = rev(s, counter ? /<rect x="260" y="164"[^>]*\/>\s*<text[^>]*>[^<]*<\/text>/ : /<rect x="260" y="146"[^>]*\/>\s*<text[^>]*>[^<]*<\/text>/, bandAt)
+  s = rev(s, /<text x="250" y="470"[\s\S]*?MADE-UP PEOPLE<\/text>/, 1.0)
+  if (marks) s = s.replace('</svg>', `<g class="rev" data-at="${marks}"><text x="175" y="262" font-family="Literata, Georgia, serif" font-weight="600" font-size="80" fill="#dcf26b">?</text><text x="772" y="262" font-family="Literata, Georgia, serif" font-weight="600" font-size="80" fill="#dcf26b">?</text></g></svg>`)
+  return s
 }
 const art = {
-  open: () => {
-    let s = svgOf('Main'); s = wrapChars(s)
-    s = rev(s, /<text x="480" y="84"[^>]*>[^<]*<\/text>\s*<text x="480" y="120"[^>]*>[^<]*<\/text>/, 0.5)
-    s = s.replace('<rect x="318" y="146" width="324"', '<rect x="290" y="146" width="380"')
-    s = rev(s, /<rect x="290" y="146"[^>]*\/>\s*<text[^>]*>That is what DiaBite is for\.<\/text>/, 0.5 + 6.3 * D['open-1'] / 8.58)
-    s = rev(s, /<text x="250" y="470"[\s\S]*?MADE-UP PEOPLE<\/text>/, 1.2)
-    return s
-  },
+  counter: () => mainArt({ counter: true, sub: 'MEALS A YEAR · 3 A DAY × 365 DAYS', band: 'Does this fit my day?', bandAt: sentStarts('q-1', 0.5)[2], marks: sentStarts('q-1', 0.5)[2] }),
+  meet: () => mainArt({ title: 'Meet Maya and Daniel.', sub: 'MADE UP · BUT YOU PROBABLY KNOW THEM', band: 'They hit the same wall.', bandAt: sentStarts('mt-1', 0.5)[2], labels: ['NO TIME', 'A PLAN THAT BREAKS'] }),
+  gap: () => mainArt({ title: 'Two people. Two rhythms.', sub: 'ONE THING IS MISSING', band: 'An answer for a real day.', bandAt: sentStarts('gp-1', 0.5)[2], labels: ['NO TIME', 'A PLAN THAT BREAKS'] }),
   car: () => clock(wrapChars(stripPhoneAndCaption(svgOf('Maya1'))), '7:42'),
   kitchen: () => clock(wrapChars(stripPhoneAndCaption(svgOf('Daniel1'))), 'SUN 17:30'),
   station: () => clock(wrapChars(stripPhoneAndCaption(svgOf('Maya2'))), '13:10'),
@@ -70,13 +89,13 @@ const art = {
   both: bothArt,
   finale: () => {
     let s = wrapChars(svgOf('Finale'))
-    const T = D['fn-1']
-    s = rev(s, /<text x="480" y="130"[^>]*>A check on the go\.<\/text>/, 0.6)
+    const st = sentStarts('fn-1', 0.6)
+    s = rev(s, /<text x="480" y="130"[^>]*>A check on the go\.<\/text>/, st[0])
     s = s.replace('<rect x="304" y="156" width="352"', '<rect x="250" y="156" width="460"')
-    s = rev(s, /<rect x="250" y="156"[^>]*\/>\s*<text[^>]*>A diary when it works\.<\/text>/, 0.6 + 0.30 * T)
-    s = rev(s, /<text x="480" y="276"[^>]*>[^<]*<\/text>/, 0.6 + 0.30 * T + 0.5)
+    s = rev(s, /<rect x="250" y="156"[^>]*\/>\s*<text[^>]*>A diary when it works\.<\/text>/, st[1])
+    s = rev(s, /<text x="480" y="276"[^>]*>[^<]*<\/text>/, st[2])
     s = s.replace(/(<defs><mask id="fb">[\s\S]*?<text x="582"[^>]*>Bite<\/text>)/, '<g transform="translate(-40,0)">$1</g>')
-    s = rev(s, /<defs><mask id="fb">[\s\S]*?Free to try\. You sign in with your email\.<\/text>/, 0.6 + 0.62 * T)
+    s = rev(s, /<defs><mask id="fb">[\s\S]*?Free to try\. You sign in with your email\.<\/text>/, st[3])
     return s
   },
 }
@@ -88,7 +107,7 @@ const bubbleAt = {   // 1280×720 px: where a character's line sits, and which w
 }
 
 // ---------- timeline ----------
-const LEAD = 0.5, TAIL = 0.45
+const LEAD = 0.8, TAIL = 0.9
 const frames = (cap) => M.scenes[cap]
 const total = (cap) => frames(cap).at(-1).t
 function typedCap(cap, t0, type, think, hold) {   // typing → squeezed thinking → the answer plays at real speed, then holds
@@ -100,73 +119,97 @@ function typedCap(cap, t0, type, think, hold) {   // typing → squeezed thinkin
   }
 }
 const uniform = (cap, t0, t1) => ({ cap, t0, t1, s0: frames(cap)[0].t, s1: total(cap) })
+const line = (id, at, style) => ({ id, who: WHO[id], text: TXT[id], t0: at, t1: at + D[id], style })
 
 const scenes = []
 const add = (o) => { scenes.push(o) }
-const line = (id, who, text, at, dur) => ({ id, who, text, t0: at, t1: at + dur })
-
-{ // open
-  const dur = LEAD + D['open-1'] + 1.2
-  add({ id: 'open', art: 'open', dur, clock: null, phone: [], lines: [line('open-1', 'narrator', S.scenes[0].lines[0].text, LEAD, D['open-1'])] })
+{ // 1 · the question
+  add({ id: 'counter', art: 'counter', dur: LEAD + D['q-1'] + 1.6, clock: null, phone: [], counter: [sentStarts('q-1', LEAD)[1], sentStarts('q-1', LEAD)[2] - 0.2, 1095], lines: [line('q-1', LEAD)] })
 }
-{ // Maya, morning
-  const a = typedCap('maya-morning', LEAD, D['mm-1'], 1.0, 0)
-  const hold = D['mm-2'] + 0.7; const p = typedCap('maya-morning', LEAD, D['mm-1'], 1.0, hold)
+{ // 2 · meet them
+  add({ id: 'meet', art: 'meet', dur: LEAD + D['mt-1'] + 1.6, clock: null, phone: [], lines: [line('mt-1', LEAD)] })
+}
+{ // 3 · Maya's problem
+  const a = LEAD + D['pm-1'] + 0.45, b = a + D['pm-2'] + 0.45, end = b + D['pm-3'] + 1.8
+  add({ id: 'maya-problem', art: 'station', dur: end + TAIL, clock: ['13:10', '13:10', 99], phone: [{ cap: 'form', t0: b, t1: end, s0: 0, s1: 1 }],
+        lines: [line('pm-1', LEAD, 'think'), line('pm-2', a), line('pm-3', b)] })
+}
+{ // 4 · Daniel plans
+  const t1 = LEAD + D['dp-1'] + 0.45, end = t1 + D['dp-2'] + 1.4
+  add({ id: 'daniel-plan', art: 'kitchen', dur: end + TAIL, clock: ['SUN 17:30', 'SUN 17:31', end], phone: [uniform('daniel-week', LEAD, end)], lines: [line('dp-1', LEAD), line('dp-2', t1)] })
+}
+{ // 5 · the plan breaks
+  const t1 = LEAD + D['db-1'] + 0.45, end = t1 + D['db-2'] + 1.6
+  add({ id: 'daniel-broke', art: 'kitchen-night', dur: end + TAIL, clock: ['WED 20:15', 'WED 20:15', 99], phone: [], lines: [line('db-1', LEAD), line('db-2', t1)] })
+}
+{ // 6 · the gap
+  add({ id: 'gap', art: 'gap', dur: LEAD + D['gp-1'] + 1.6, clock: null, phone: [], lines: [line('gp-1', LEAD)] })
+}
+{ // 7 · Maya, morning
+  const p = typedCap('maya-morning', LEAD, D['mm-1'] + 0.4, 1.0, D['mm-2'] + 1.6)
   add({ id: 'maya-morning', art: 'car', dur: p.end + TAIL, clock: ['7:42', '7:43', p.answerAt], phone: p.pieces, typing: [p.typing], answerAt: [p.answerAt],
-        lines: [line('mm-1', 'maya', S.scenes[1].lines[0].text, LEAD, D['mm-1']), line('mm-2', 'narrator', S.scenes[1].lines[1].text, p.answerAt + 0.3, D['mm-2'])] })
+        lines: [line('mm-1', LEAD), line('mm-2', p.answerAt + 0.3)] })
 }
-{ // Daniel, Sunday plan
-  const t1 = LEAD + D['dw-1'] + 0.3, end = t1 + D['dw-2'] + 0.8
-  add({ id: 'daniel-week', art: 'kitchen', dur: end + TAIL, clock: ['SUN 17:30', 'SUN 17:31', end], phone: [uniform('daniel-week', LEAD, end)],
-        lines: [line('dw-1', 'daniel', S.scenes[2].lines[0].text, LEAD, D['dw-1']), line('dw-2', 'narrator', S.scenes[2].lines[1].text, t1, D['dw-2'])] })
-}
-{ // Maya, petrol station
-  const A = typedCap('maya-petrol', LEAD, 2.4, 0.9, D['mp-2'] + 0.8)
-  const B0 = A.end + 0.25
-  const B = typedCap('maya-petrol-swap', B0, 2.0, 0.8, 3.2)
+{ // 8 · Maya, petrol station and the swap
+  const A = typedCap('maya-petrol', LEAD, D['mp-1'] + 0.4, 0.9, D['mp-2'] + 1.4)
+  const B0 = A.end + 0.1
+  const B = typedCap('maya-petrol-swap', B0, D['mp-3'] + 0.35, 0.8, 3.8)
   add({ id: 'maya-petrol', art: 'station', dur: B.end + TAIL, clock: ['13:10', '13:11', B0], phone: [...A.pieces, ...B.pieces], typing: [A.typing, B.typing], answerAt: [A.answerAt, B.answerAt],
-        lines: [line('mp-1', 'maya', S.scenes[3].lines[0].text, LEAD, D['mp-1']), line('mp-2', 'narrator', S.scenes[3].lines[1].text, A.answerAt + 0.2, D['mp-2']), line('mp-3', 'maya', S.scenes[3].lines[2].text, B0 + 0.1, D['mp-3'])] })
+        lines: [line('mp-1', LEAD), line('mp-2', A.answerAt + 0.2), line('mp-3', B0 + 0.1)] })
 }
-{ // Daniel, Wednesday
-  const pl = { cap: 'daniel-diary-planned', t0: 0.4, t1: 3.6, s0: frames('daniel-diary-planned')[0].t, s1: total('daniel-diary-planned') }
-  const R = typedCap('daniel-rice', 3.7, 2.4, 0.9, 3.0)
-  const lg = { cap: 'daniel-diary-logged', t0: R.end + 0.1, t1: R.end + 2.9, s0: frames('daniel-diary-logged')[0].t, s1: total('daniel-diary-logged') }
-  add({ id: 'daniel-wed', art: 'kitchen-night', dur: lg.t1 + 0.5 + TAIL, clock: ['WED 20:15', 'WED 20:16', 3.7], phone: [pl, ...R.pieces, lg], typing: [R.typing], answerAt: [R.answerAt],
-        lines: [line('dd-1', 'daniel', S.scenes[4].lines[0].text, LEAD, D['dd-1']), line('dd-2', 'narrator', S.scenes[4].lines[1].text, R.end + 0.2, D['dd-2'])] })
+{ // 9 · the receipt
+  const end = LEAD + D['rc-1'] + 1.5
+  add({ id: 'receipt', art: 'both', dur: end + TAIL, clock: null, phone: [uniform('maya-receipt', LEAD, end)], lines: [line('rc-1', LEAD)] })
 }
-{ // the receipt
-  const end = LEAD + D['rc-1'] + 1.0
-  add({ id: 'receipt', art: 'both', dur: end + TAIL, clock: null, phone: [uniform('maya-receipt', LEAD, end)], lines: [line('rc-1', 'narrator', S.scenes[5].lines[0].text, LEAD, D['rc-1'])] })
+{ // 10 · Daniel logs what happened
+  const pl = { cap: 'daniel-diary-planned', t0: LEAD - 0.1, t1: LEAD + D['dd-0'] + 0.4, s0: frames('daniel-diary-planned')[0].t, s1: total('daniel-diary-planned') }
+  const R0 = pl.t1 + 0.1
+  const R = typedCap('daniel-rice', R0, D['dd-1'] + 0.5, 0.9, 3.8)
+  const lg = { cap: 'daniel-diary-logged', t0: R.end + 0.1, t1: R.end + 0.1 + D['dd-2'] + 1.8, s0: frames('daniel-diary-logged')[0].t, s1: total('daniel-diary-logged') }
+  add({ id: 'daniel-wed', art: 'kitchen-night', dur: lg.t1 + TAIL, clock: ['WED 20:15', 'WED 20:16', R0], phone: [pl, ...R.pieces, lg], typing: [R.typing], answerAt: [R.answerAt],
+        lines: [line('dd-0', LEAD), line('dd-1', R0 + 0.05), line('dd-2', lg.t0 + 0.2)] })
 }
-{ // the dose question
-  const p = typedCap('maya-dose', LEAD, 2.6, 0.7, D['ds-2'] + 0.7)
+{ // 11 · the dose question
+  const p = typedCap('maya-dose', LEAD, D['ds-1'] + 0.5, 0.7, D['ds-2'] + 1.4)
   add({ id: 'maya-dose', art: 'station', dur: p.end + TAIL, clock: ['13:12', '13:13', p.answerAt], phone: p.pieces, typing: [p.typing], answerAt: [p.answerAt],
-        lines: [line('ds-1', 'maya', S.scenes[6].lines[0].text, LEAD, D['ds-1']), line('ds-2', 'narrator', S.scenes[6].lines[1].text, p.answerAt + 0.2, D['ds-2'])] })
+        lines: [line('ds-1', LEAD), line('ds-2', p.answerAt + 0.2)] })
 }
-{ // the cholent
-  const p = typedCap('daniel-cholent', LEAD, 1.6, 0.8, D['ch-2'] + 0.7)
+{ // 12 · the cholent
+  const p = typedCap('daniel-cholent', LEAD, D['ch-1'] + 0.5, 0.8, D['ch-2'] + 1.6)
   add({ id: 'daniel-cholent', art: 'kitchen', dur: p.end + TAIL, clock: ['SUN 13:00', 'SUN 13:01', p.answerAt], phone: p.pieces, typing: [p.typing], answerAt: [p.answerAt],
-        lines: [line('ch-1', 'daniel', S.scenes[7].lines[0].text, LEAD, D['ch-1']), line('ch-2', 'narrator', S.scenes[7].lines[1].text, p.answerAt + 0.2, D['ch-2'])] })
+        lines: [line('ch-1', LEAD), line('ch-2', p.answerAt + 0.2)] })
 }
-{ // finale
-  add({ id: 'finale', art: 'finale', dur: 0.6 + D['fn-1'] + 2.0, clock: null, phone: [], lines: [line('fn-1', 'narrator', S.scenes[8].lines[0].text.replace('diabite dot pro', 'diabite.pro'), 0.6, D['fn-1'])] })
+{ // 13 · finale
+  add({ id: 'finale', art: 'finale', dur: 0.6 + D['fn-1'] + 3.0, clock: null, phone: [], lines: [line('fn-1', 0.6)] })
 }
 let at = 0; for (const s of scenes) { s.start = Math.round(at * 1000) / 1000; at += s.dur }
-const timeline = { fps: 24, total: Math.round(at * 100) / 100, scenes }
-writeFileSync(join(dir, 'timeline.json'), JSON.stringify(timeline, null, 1))
+
+// the loudness of each voice, 24 times a second, for the mouths
+const env = {}
+for (const s of scenes) for (const l of s.lines) {
+  if (l.who === 'narrator') continue
+  const b = readFileSync(join(dir, 'audio', l.id + '.wav')), n = (b.length - 44) / 2, w = 1000
+  const raw = []; for (let i = 0; i < n; i += w) { let q = 0, c = 0; for (let j = i; j < Math.min(n, i + w); j++) { const v = b.readInt16LE(44 + j * 2) / 32768; q += v * v; c++ } raw.push(Math.sqrt(q / c)) }
+  const sorted = [...raw].sort((a, c) => a - c), top = sorted[Math.floor(sorted.length * 0.9)] || 1
+  env[l.id] = raw.map((v, i) => Math.round(Math.min(1, ((v + (raw[i - 1] ?? v)) / 2) / top) ** 0.7 * 100) / 100)
+}
+const timeline = { fps: 24, total: Math.round(at * 100) / 100, scenes, env }
+writeFileSync(join(dir, 'timeline.json'), JSON.stringify(timeline))
 
 // ---------- page ----------
+const formRows = ['Food name *', 'Brand', 'Serving size', 'Number of servings', 'Weight (g)', 'Meal type', 'Time eaten', 'Calories', 'Carbohydrate (g)', 'Fibre (g)', 'Sugars (g)', 'Notes']
+const formMock = `<div class="formmock"><div class="fm-in"><div class="fm-h">Log food</div>${formRows.map((r) => `<div class="fm-r"><span>${r}</span><b></b></div>`).join('')}<div class="fm-b">Save entry</div></div></div>`
 const phoneHtml = (s) => {
   if (!s.phone.length) return ''
   const caps = [...new Set(s.phone.map((p) => p.cap))]
-  const imgs = caps.map((c) => frames(c).map((f, i) => `<img class="f" data-cap="${c}" data-i="${i}" src="${f.file}" alt="">`).join('')).join('')
-  return `<div class="phone"><div class="screen">${imgs}</div></div>`
+  const imgs = caps.filter((c) => c !== 'form').map((c) => frames(c).map((f, i) => `<img class="f" data-cap="${c}" data-i="${i}" src="${f.file}" alt="">`).join('')).join('')
+  return `<div class="phone"><div class="screen">${imgs}${caps.includes('form') ? formMock : ''}</div></div>`
 }
 const bubbles = (s) => s.lines.filter((l) => l.who !== 'narrator').map((l) => {
   const b = bubbleAt[s.art]; const nm = l.who === 'maya' ? 'MAYA' : 'DANIEL'
-  return `<div class="bubble ${b.tail} ${l.who}" style="left:${b.left}px;top:${b.top}px;width:${b.w}px;${b.tx ? `--tx:${b.tx}px` : ''}" data-t0="${l.t0}" data-t1="${l.t1}"><i>${nm}</i>${l.text}</div>`
+  return `<div class="bubble ${b.tail} ${l.who} ${l.style ?? ''}" style="left:${b.left}px;top:${b.top}px;width:${b.w}px;${b.tx ? `--tx:${b.tx}px` : ''}" data-t0="${l.t0}" data-t1="${l.t1}"><i>${nm}</i>${l.text}</div>`
 }).join('')
-const subs = (s) => s.art === 'open' || s.art === 'finale' ? '' : s.lines.filter((l) => l.who === 'narrator').map((l) => `<div class="sub" data-t0="${l.t0}" data-t1="${l.t1}"><i>NARRATOR</i>${l.text}</div>`).join('')
+const subs = (s) => s.art === 'finale' || s.art === 'counter' || s.art === 'meet' || s.art === 'gap' ? '' : s.lines.filter((l) => l.who === 'narrator').map((l) => `<div class="sub" data-t0="${l.t0}" data-t1="${l.t1}"><i>NARRATOR</i>${l.text}</div>`).join('')
 const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Two rhythms</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -174,13 +217,18 @@ html,body{margin:0;background:#0a1812;overflow:hidden}
 #stage{position:relative;width:1280px;height:720px;overflow:hidden;background:#0a1812;font-family:'IBM Plex Sans',sans-serif}
 .scene{position:absolute;inset:0;opacity:0;pointer-events:none}
 .scene>svg{position:absolute;inset:0;width:1280px;height:720px;transform-origin:30% 50%}
-.phone{position:absolute;left:868px;top:30px;width:372px;height:660px;border-radius:50px;background:#14281f;border:4px solid #2a4235;box-sizing:border-box;box-shadow:0 24px 60px #0007;padding:14px}
+.phone{position:absolute;left:868px;top:30px;width:372px;height:660px;border-radius:50px;background:#14281f;border:4px solid #2a4235;box-sizing:border-box;box-shadow:0 24px 60px #0007;padding:14px;opacity:0}
 .screen{position:relative;width:100%;height:100%;border-radius:36px;overflow:hidden;background:#0a1812}
 .screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;visibility:hidden}
+.formmock{position:absolute;inset:0;background:#f1f1f1;color:#333;font:14px 'IBM Plex Sans',sans-serif;visibility:hidden;overflow:hidden}
+.fm-h{background:#4b5563;color:#fff;padding:20px 16px 14px;font-weight:600;font-size:18px}
+.fm-r{padding:12px 16px 4px}.fm-r span{display:block;font-size:12px;color:#666;margin-bottom:4px}.fm-r b{display:block;height:34px;border:1px solid #bbb;border-radius:4px;background:#fff}
+.fm-b{margin:18px 16px 40px;background:#9aa3ad;color:#fff;text-align:center;padding:12px;border-radius:4px;font-weight:600}
 .bubble{position:absolute;box-sizing:border-box;background:#fffcf5;color:#14201a;border-radius:22px;padding:26px 22px 18px;font:600 25px/1.3 Literata,Georgia,serif;opacity:0;box-shadow:0 8px 24px #0006}
 .bubble i,.sub i{position:absolute;top:8px;left:22px;font:500 11px 'IBM Plex Mono',monospace;letter-spacing:1.6px;color:#5e6861;font-style:normal}
 .bubble.maya{border:4px solid #dcf26b}.bubble.daniel{border:4px solid #f2c879}
-.bubble.down::after{content:'';position:absolute;bottom:-26px;left:var(--tx,60px);border:14px solid transparent;border-top:14px solid #fffcf5;border-bottom:0;margin-left:-14px;height:0;border-top-width:22px}
+.bubble.think{border-style:dashed}
+.bubble.down::after{content:'';position:absolute;bottom:-26px;left:var(--tx,60px);border:14px solid transparent;border-top:22px solid #fffcf5;border-bottom:0;margin-left:-14px;height:0}
 .bubble.left::after{content:'';position:absolute;left:-26px;top:70px;border:14px solid transparent;border-right:22px solid #fffcf5;border-left:0}
 .sub{position:absolute;left:53px;bottom:26px;width:700px;box-sizing:border-box;background:#14281f;border-radius:16px;padding:28px 22px 14px;color:#fffcf5;font:600 22px/1.32 Literata,Georgia,serif;opacity:0}
 .sub i{color:#a9bbaf}
@@ -195,8 +243,9 @@ ${scenes.map((s) => `<div class="scene" id="sc-${s.id}">${art[s.art]().replace('
 const TL = ${JSON.stringify(timeline)}, FR = ${JSON.stringify(M.scenes)}
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x)), ease = (x) => 1 - Math.pow(1 - clamp(x), 3)
 const els = Object.fromEntries(TL.scenes.map((s) => [s.id, document.getElementById('sc-' + s.id)]))
+const imgs = Object.fromEntries(TL.scenes.map((s) => [s.id, [...els[s.id].querySelectorAll('.f')]]))
 function frameIndex(cap, st) { const f = FR[cap]; let k = 0; for (let i = 0; i < f.length; i++) if (f[i].t <= st + 1e-6) k = i; return k }
-let shown = {}
+const srcT = (q, L) => q.s0 + (q.s1 - q.s0) * clamp((L - q.t0) / (q.t1 - q.t0))
 window.setTime = (T) => {
   for (const s of TL.scenes) {
     const el = els[s.id], L = T - s.start, on = L >= 0 && L < s.dur
@@ -205,26 +254,32 @@ window.setTime = (T) => {
     el.querySelector(':scope>svg').style.transform = 'scale(' + (1 + 0.03 * L / s.dur) + ')'
     const ph = el.querySelector('.phone')
     if (ph) {
-      const p = ease(L / 0.55); ph.style.opacity = p; ph.style.transform = 'translateY(' + (50 * (1 - p)) + 'px)'
-      let piece = s.phone[0]; for (const q of s.phone) if (q.t0 <= L) piece = q
-      const st = piece.s0 + (piece.s1 - piece.s0) * clamp((L - piece.t0) / (piece.t1 - piece.t0))
-      const key = piece.cap + ':' + frameIndex(piece.cap, st)
-      if (shown[s.id] !== key) {
-        el.querySelectorAll('.f').forEach((i) => { i.style.visibility = 'hidden' })
-        el.querySelector('.f[data-cap="' + piece.cap + '"][data-i="' + frameIndex(piece.cap, st) + '"]').style.visibility = 'visible'; shown[s.id] = key
+      const p = ease((L - (s.phone[0].t0 - 0.35)) / 0.55); ph.style.opacity = p; ph.style.transform = 'translateY(' + (50 * (1 - p)) + 'px)'
+      let k = 0; s.phone.forEach((q, i) => { if (q.t0 <= L) k = i })
+      const q = s.phone[k], prev = k > 0 && s.phone[k - 1].cap !== q.cap ? s.phone[k - 1] : null
+      const fade = prev ? clamp((L - q.t0) / 0.3) : 1
+      const show = (cap, st, o) => {
+        if (cap === 'form') { const f = el.querySelector('.formmock'); f.style.visibility = 'visible'; f.style.opacity = o; f.querySelector('.fm-in').style.marginTop = (-380 * clamp((L - q.t0) / (q.t1 - q.t0))) + 'px'; return }
+        const m = imgs[s.id].find((i) => i.dataset.cap === cap && +i.dataset.i === frameIndex(cap, st)); m.style.visibility = 'visible'; m.style.opacity = o
       }
+      imgs[s.id].forEach((i) => { i.style.visibility = 'hidden'; i.style.opacity = 1 }); const fm = el.querySelector('.formmock'); if (fm) fm.style.visibility = 'hidden'
+      if (prev && fade < 1) show(prev.cap, prev.s1, 1)
+      show(q.cap, srcT(q, L), fade)
     }
     el.querySelectorAll('.bubble').forEach((b) => { const a = +b.dataset.t0, z = +b.dataset.t1 + 0.3; const v = L >= a && L < z; b.style.opacity = v ? clamp((L - a) / 0.12) * (1 - clamp((L - z + 0.15) / 0.15)) : 0; b.style.transform = 'scale(' + (0.92 + 0.08 * ease((L - a) / 0.18)) + ')'; b.style.transformOrigin = '0 60%' })
     el.querySelectorAll('.sub').forEach((b) => { const a = +b.dataset.t0, z = +b.dataset.t1 + 0.3; b.style.opacity = L >= a - 0.05 && L < z ? clamp((L - a + 0.05) / 0.12) * (1 - clamp((L - z + 0.15) / 0.15)) : 0 })
     el.querySelectorAll('.rev').forEach((r) => { const q = ease((L - +r.dataset.at) / 0.35); r.style.opacity = q; r.style.transform = 'translateY(' + (12 * (1 - q)) + 'px)' })
-    const talking = (who) => s.lines.some((l) => l.who === who && L >= l.t0 && L < l.t1)
+    const cn = el.querySelector('.counter'); if (cn && s.counter) cn.textContent = Math.round(s.counter[2] * ease((L - s.counter[0]) / (s.counter[1] - s.counter[0]))).toLocaleString('en-US')
     el.querySelectorAll('.bob').forEach((b, n) => {
-      const sp = talking(b.dataset.who); const y = sp ? Math.sin(T * 14 + n) * 2.2 - 1.5 : Math.sin(T * 2.4 + n * 2) * 1.2
+      const who = b.dataset.who, l = s.lines.find((x) => x.who === who && L >= x.t0 && L < x.t1), sp = !!l
+      const y = sp ? Math.sin(T * 14 + n) * 1.6 - 1.0 : Math.sin(T * 2.4 + n * 2) * 1.2
       b.style.transform = 'translateY(' + y.toFixed(2) + 'px)'
+      const v = l ? (TL.env[l.id][Math.floor((L - l.t0) * TL.fps)] ?? 0) : 0
+      b.querySelector('.mouth ellipse').setAttribute('ry', (0.01 + 4 * v).toFixed(2))
     })
     const ck = el.querySelector('.clock'); if (ck && s.clock) ck.textContent = L >= s.clock[2] ? s.clock[1] : s.clock[0]
   }
-  const sc0 = TL.scenes.find((s) => T >= s.start && T < s.start + s.dur); document.getElementById('made').style.opacity = sc0 && !['open', 'finale'].includes(sc0.id) ? 1 : 0
+  const sc0 = TL.scenes.find((s) => T >= s.start && T < s.start + s.dur); document.getElementById('made').style.opacity = sc0 && !['meet', 'finale'].includes(sc0.id) ? 1 : 0
   let wx = -101; for (const s of TL.scenes.slice(1)) { const b = s.start, d = T - b; if (d > -0.22 && d < 0.22) wx = d < 0 ? -101 + 101 * ease((d + 0.22) / 0.22) : 101 * clamp(d / 0.22) }
   document.getElementById('wipe').style.transform = 'translateX(' + wx + '%)'
 }

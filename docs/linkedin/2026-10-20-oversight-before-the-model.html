@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0}
+body{width:1200px;height:1200px;background:linear-gradient(#12291f,#0a1812);font-family:'IBM Plex Sans',-apple-system,Helvetica,Arial,sans-serif;color:#eef3e8;padding:84px 88px;display:flex;flex-direction:column}
+.label{font-size:26px;letter-spacing:.14em;text-transform:uppercase;color:#84998c;font-weight:600}
+.big{font-size:300px;line-height:1;font-weight:700;color:#dcf26b;margin-top:44px;letter-spacing:-.03em}
+.big span{font-size:120px;color:#eef3e8;font-weight:500;letter-spacing:0}
+.sub{font-size:50px;line-height:1.25;font-weight:500;margin-top:26px;max-width:960px}
+.pills{display:flex;flex-wrap:wrap;gap:14px;margin-top:40px}
+.pill{background:#1d332a;border:2px solid #2a4235;border-radius:999px;padding:12px 26px;font-size:28px;color:#a9bbaf}
+.flow{display:flex;align-items:stretch;gap:12px;margin-top:auto}
+.step{flex:1;background:#14281f;border:2px solid #2a4235;border-radius:20px;padding:22px 20px;font-size:27px;line-height:1.25;color:#a9bbaf}
+.step b{display:block;font-size:31px;color:#eef3e8;margin-bottom:6px}
+.step.first{background:#1c3a2b;border-color:#9fe0b6}
+.step.first b{color:#9fe0b6}
+.arrow{align-self:center;color:#84998c;font-size:34px}
+.foot{display:flex;justify-content:space-between;align-items:baseline;margin-top:34px;font-size:34px}
+.foot em{font-style:normal;color:#9fe0b6;font-weight:600}
+.brand{font-size:30px;color:#84998c;font-weight:600}
+</style></head><body>
+<div class="label">Security audit · October 2026</div>
+<div class="big">9 <span>of</span> 21</div>
+<div class="sub">dangerous phrasings slipped past my safety rules.</div>
+<div class="pills"><div class="pill">insulin by brand name</div><div class="pill">numbers spelled out</div><div class="pill">mmol/L readings</div><div class="pill">symptoms, no keyword</div></div>
+<div class="flow" style="margin-top:56px">
+<div class="step first"><b>1 · Rules</b>plain pattern matching, no model</div><div class="arrow">→</div>
+<div class="step"><b>2 · Model</b>reads the sentence</div><div class="arrow">→</div>
+<div class="step"><b>3 · Engine</b>does the arithmetic</div><div class="arrow">→</div>
+<div class="step"><b>4 · Verifier</b>blocks untraced numbers</div>
+</div>
+<div class="foot"><div>Now <em>72 of 72</em> pass. Every miss became a test.</div><div class="brand">DiaBite</div></div>
+</body></html>

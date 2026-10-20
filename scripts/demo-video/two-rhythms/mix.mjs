@@ -28,6 +28,30 @@ for (const [k, s] of TL.scenes.entries()) {
   for (const t of s.answerAt ?? []) put(thump(), s.start + t, 0.22)
   if (k > 0) put(whoosh(), s.start - 0.25, 0.10)
 }
+// a quiet bed under it all: slow chords, a soft pluck on every half beat, ducked while anyone speaks
+{
+  const bpm = 84, beat = 60 / bpm
+  const chords = [{ pad: [130.81, 164.81, 196, 261.63], arp: [329.63, 392, 523.25, 392] }, { pad: [110, 164.81, 220, 261.63], arp: [329.63, 440, 523.25, 440] },
+                  { pad: [87.31, 130.81, 174.61, 220], arp: [349.23, 440, 523.25, 440] }, { pad: [98, 146.83, 196, 246.94], arp: [293.66, 392, 493.88, 392] }]
+  const bed = new Float32Array(N), len = 8 * beat
+  const tri = (ph) => 2 * Math.abs(2 * (ph - Math.floor(ph + 0.5))) - 1
+  for (let c = 0; c * len < TL.total + 2; c++) {
+    const ch = chords[c % 4], t0 = c * len, a = Math.round((t0 - 0.6) * SR), n = Math.round((len + 1.6) * SR)
+    for (let i = Math.max(0, -a); i < n && a + i < N; i++) {
+      const t = i / SR, env = Math.min(1, t / 1.2) * Math.min(1, (len + 1.6 - t) / 1.2)
+      let v = 0; for (const f of ch.pad) for (const d of [-0.003, 0.003]) v += tri((a + i) / SR * f * (1 + d))
+      bed[a + i] += v * env * 0.018
+    }
+    for (let k = 0; k < 16; k++) {
+      const t = t0 + k * beat / 2, f = ch.arp[k % 4] * (k % 8 === 7 ? 2 : 1), o = Math.round(t * SR), n2 = Math.round(0.6 * SR)
+      for (let i = 0; i < n2 && o + i < N; i++) { const e = Math.exp(-i / (0.16 * SR)); bed[o + i] += (Math.sin(2 * Math.PI * f * i / SR) + 0.3 * Math.sin(4 * Math.PI * f * i / SR)) * e * 0.022 * (k % 2 ? 0.7 : 1) }
+    }
+  }
+  let lp = 0; for (let i = 0; i < N; i++) { lp += 0.12 * (bed[i] - lp); bed[i] = lp }
+  const talk = new Float32Array(N); for (const s of TL.scenes) for (const l of s.lines) { const a = Math.round((s.start + l.t0 - 0.15) * SR), b = Math.round((s.start + l.t1 + 0.25) * SR); for (let i = Math.max(0, a); i < Math.min(N, b); i++) talk[i] = 1 }
+  let duck = 1; const sec = TL.total
+  for (let i = 0; i < N; i++) { const target = talk[i] ? 0.35 : 1; duck += (target - duck) * (target < duck ? 0.0006 : 0.00012); const t = i / SR; const fade = Math.min(1, t / 1.5) * Math.min(1, Math.max(0, (sec - t) / 4)); mix[i] += bed[i] * duck * fade * 1.0 }
+}
 let peak = 0; for (const v of mix) peak = Math.max(peak, Math.abs(v)); const g = peak > 0.92 ? 0.92 / peak : 1
 const pcm = Buffer.alloc(44 + N * 2); pcm.write('RIFF', 0); pcm.writeUInt32LE(36 + N * 2, 4); pcm.write('WAVEfmt ', 8); pcm.writeUInt32LE(16, 16); pcm.writeUInt16LE(1, 20); pcm.writeUInt16LE(1, 22)
 pcm.writeUInt32LE(SR, 24); pcm.writeUInt32LE(SR * 2, 28); pcm.writeUInt16LE(2, 32); pcm.writeUInt16LE(16, 34); pcm.write('data', 36); pcm.writeUInt32LE(N * 2, 40)
