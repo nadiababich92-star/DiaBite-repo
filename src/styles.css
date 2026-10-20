@@ -933,14 +933,18 @@ body:has(.landing) { background: #0a1812; }
 :root[data-theme='tape'] .chips-col .chip-btn { border: 0; box-shadow: 0 6px 0 -2px #cfc6ae; }
 :root[data-theme='tape'] .chip-btn.on { background: var(--marker); color: var(--marker-ink); border: 2px solid var(--marker); box-shadow: none; }
 :root[data-theme='tape'] .day-key[aria-pressed='true'] b { background: var(--marker-ink); color: var(--marker); }
-/* The verdict as a stamp in the corner of the slip. Its colour is the tone's, its word and mark say the same. */
+/* The verdict as a stamp on the slip. A short word (Fits, Estimate) sits in the corner beside the verdict; a long one
+ * ("Fits with a change", "Not something I can answer") is printed above it, so it never lies across the text. */
 :root[data-theme='tape'] .answer .eyebrow-line {
-  position: absolute; top: 14px; right: 14px; margin: 0; background: none; border: 3px solid currentColor; border-radius: 10px;
-  padding: 4px 10px 4px 7px; font-family: var(--mono); font-weight: 500; transform: rotate(-7deg);
+  position: static; align-self: flex-start; margin: 0 0 12px; background: none; border: 3px solid currentColor; border-radius: 10px;
+  padding: 4px 10px 4px 7px; font-family: var(--mono); font-weight: 500; transform: rotate(-2deg);
 }
 :root[data-theme='tape'] .answer .eyebrow-line .status-dot { background: none; color: currentColor; width: 16px; height: 16px; }
 :root[data-theme='tape'] .answer .eyebrow-line .status-dot svg { width: 14px; height: 14px; }
-:root[data-theme='tape'] .answer .answer-text .a-verdict { max-width: calc(100% - 124px); }
+:root[data-theme='tape'] .answer.tone-good .eyebrow-line,
+:root[data-theme='tape'] .answer.tone-estimate .eyebrow-line { position: absolute; top: 14px; right: 14px; margin: 0; transform: rotate(-7deg); }
+:root[data-theme='tape'] .answer.tone-good .answer-text .a-verdict,
+:root[data-theme='tape'] .answer.tone-estimate .answer-text .a-verdict { max-width: calc(100% - 124px); }
 
 :root[data-theme='tape'] .ask-budget { flex-direction: column; align-items: flex-start; gap: 4px; margin-bottom: 14px; }
 :root[data-theme='tape'] .ask-form button.primary { background: var(--marker); color: var(--marker-ink); box-shadow: 0 4px 0 #8fa23a; }
