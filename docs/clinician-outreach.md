@@ -122,9 +122,17 @@ On LinkedIn on 8 October he answered at length (the market, dietitians as gateke
 >
 > You asked me to write to this address next time, so here I am, and thank you again for the time and for the straight picture of the market on 8 October.
 >
-> You said you needed time to review. In the days since, the product has changed enough that I rewrote the whole document instead of leaving you the old one. It is the same link, now current: [link to the Google Doc]. If you have not opened it yet, nothing is lost. If you have, section I lists what changed.
+> You said you needed time to review. Since then the product has changed enough that I rewrote the whole document instead of leaving you the old one. It is the same link, now current: [link to the Google Doc]. If you have not opened it yet, nothing is lost.
 >
-> If you only have a few minutes, two things. Appendix A: four answers the app gave, as it gave them. Is anything in them something you would not say to a patient? And Q12: when someone reports a glucose reading under 70, the app stops the food conversation and says to seek help; it does not tell them to take fast-acting carbohydrate. Is that right, or too little? Everything else is optional, and one line back is worth more to me than silence.
+> In case my first message described it badly: DiaBite does not scan or track anything. A person types what they are about to eat, in their own words, and the app says whether it fits what is left of their day and shows the arithmetic. It is for adults with type 2 diabetes, prediabetes or insulin resistance in the US. Every number is computed by a deterministic engine from a food database (USDA and the International GI Tables); a language model only reads the sentence and words the answer, never produces a number. It never gives a dose and never diagnoses. The document is not a pitch: it is every decision the app makes about a person, written down so that someone who does this work every day can tell me where it is wrong.
+>
+> If you only have a few minutes, three things, in this order:
+>
+> 1. Appendix A, two pages: four answers the app gave, as it gave them. Is anything in them something you would not say to a patient? (This is Q15.)
+> 2. Q12: when someone reports a glucose reading under 70, the app stops the food conversation and says to seek help; it does not tell them to take fast-acting carbohydrate. Is that right, or too little?
+> 3. Q19: on a GLP-1 the app raises the protein target and says nothing about lean mass or bone. What should a nutrition tool say, if anything, to someone losing weight quickly on these drugs?
+>
+> The other twenty-nine questions (targets, blocks, safety rules, what the app says when it does not know) are there if you want them and ignorable if you don't. Section I is the part that has changed most since 8 October. You can comment in the margins or just reply with question numbers; a single line back is worth more to me than silence.
 >
 > I have also attached a one-minute recording of the app: a meal typed in plain words becomes a receipt, a meal that does not fit gets a swap, a meal can be planned for another day, and a dose question is refused before any model sees it. A longer version (four minutes) is here if you want it: [link].
 >
@@ -133,4 +141,4 @@ On LinkedIn on 8 October he answered at length (the market, dietitians as gateke
 > Thank you,
 > Nadia
 
-Choices for you: whether to offer a consulting fee (there is no budget today), where the four-minute video lives (an unlisted link you control), and the Google Doc itself: its text is still the 8 October version until you paste the new one in.
+Choices for you: whether to offer a consulting fee (there is no budget today), where the four-minute video lives (an unlisted link you control), and the Google Doc: its text is now the 20 October version and its intro is deliberately short, because the covering email carries the explanation.

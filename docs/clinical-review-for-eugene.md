@@ -2,42 +2,7 @@
 
 **For: Eugene Kaganovich, RN, BSN, CDE** · Prepared by Nadia Babich · first sent 8 October 2026, rewritten for the current product on 20 October 2026
 
-Thank you for writing back, and for being direct about the market. I am taking
-it seriously: your point that registered dietitians are both the way people find
-tools like this and the people who decide which ones are safe is now written
-into my plan. This document is not a pitch. It is every decision DiaBite makes
-about a person, written down so that someone who does this work every day can
-tell me where it is wrong. **Read as much or as little as you have time for, and
-a single line back is worth more to me than silence.**
-
-This is the current version. The product has moved a good deal since I first shared it on 8 October, so I have rewritten the whole document rather than add pages: if you have not opened the first one, you have lost nothing, and if you have, section I lists what changed.
-
-I may have described the idea badly in my first message. DiaBite does not scan
-or track anything. You type what you are about to eat, in your own words, and
-it says whether that fits what is left of your day, and shows the arithmetic.
-It is for adults with type 2 diabetes, prediabetes or insulin resistance in the
-US. The app matches the foods against a database of 8,633 records, computes
-carbohydrate, fibre, glycemic index and glycemic load with a deterministic
-engine, and never lets a language model produce a number. It never gives a dose
-and never diagnoses.
-
-**If you read one thing, make it Appendix A** — four answers the product gave,
-captured from the running system rather than written for this document. That is
-the voice a patient actually reads. Two pages, five minutes. What I most want to
-know is whether anything in them is something you would not say to a patient.
-
-**If you have a few more minutes**, these are the three questions I most want a
-dietitian to answer:
-
-- **Q12** — what the app does when someone reports a low glucose reading. It
-  stops the food conversation and tells them to seek help; it does not tell
-  them to take fast-acting carbohydrate. Is that the right call, or too little?
-- **Q15** — in the four answers, is anything said that you would not say?
-- **Q19** — on a GLP-1, the app raises the protein target and says nothing about
-  lean mass or bone. What should a nutrition tool say, if anything, to someone
-  losing weight quickly on these drugs?
-
-The rest — twenty-nine more questions about targets, blocks, safety rules and what the app says when it does not know — is there if you want it, and ignorable if you don't. A short clip of the app (one minute) comes with this document, and a longer one (four minutes) if you want to see it work.
+This document is every decision DiaBite makes about a person, written down so that someone who does this work every day can tell me where it is wrong. It is not a pitch. Where to start, and what changed since 8 October, is in the covering email; read as much or as little as you have time for.
 
 **How to comment:** select any text and use the comment button, or reply to me
 with question numbers. Partial answers are welcome.

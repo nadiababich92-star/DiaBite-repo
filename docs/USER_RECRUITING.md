@@ -4,6 +4,8 @@ Where to find five adults in the US with type 2 diabetes, prediabetes or
 insulin resistance for the sessions in [`USER_SESSIONS.md`](USER_SESSIONS.md),
 and what to send them. Recruit **seven** to run five: two will not show.
 
+> **Updated 20 October 2026 — no incentives.** The owner confirmed on 11 October (`ROADMAP-to-investors.md`, ground rule 2) that nothing is bought until money arrives, so **the sessions are unpaid** and say so up front. Wherever this file mentions a $60 gift card, a paid panel (Tier 2) or a budget, read it as "not now": it is what a funded round would add. Free channels first; the order and the texts to send are in [`RECRUITING-TEXTS.md`](RECRUITING-TEXTS.md).
+
 Rule of thumb: the fastest channel costs money, the cheapest costs a week of
 waiting, and warm introductions beat both. Run two channels at once — a paid
 one and a warm one — and stop when seven have booked.
@@ -133,7 +135,7 @@ The base message is in [`USER_SESSIONS.md`](USER_SESSIONS.md). Variants:
 
 **Forum / Reddit post (after moderator approval)**
 
-> **Looking for 5 people with type 2 or prediabetes to break my app (30 min, $60)**
+> **Looking for 5 people with type 2, prediabetes or insulin resistance to try my app (30 min, unpaid)**
 >
 > I'm building a tool that answers "can I eat this?" — you describe a meal in
 > your own words and it tells you whether it fits what's left of your day, and
@@ -141,7 +143,7 @@ The base message is in [`USER_SESSIONS.md`](USER_SESSIONS.md). Variants:
 > it while I watch and stay quiet.
 >
 > 30 minutes on a video call, your own phone or laptop, nothing to prepare.
-> $60 gift card. I won't ask for medical records, and it isn't medical advice.
+> It is unpaid, and I'd rather say that now. I won't ask for medical records, and it isn't medical advice.
 > I'm not selling anything — the app is free and there's nothing to sign up
 > for afterwards.
 >
@@ -150,24 +152,22 @@ The base message is in [`USER_SESSIONS.md`](USER_SESSIONS.md). Variants:
 **LinkedIn (asking for tags, not volunteers)**
 
 > I'm looking for five people in the US with type 2 diabetes or prediabetes to
-> spend 30 minutes breaking something I built. Paid, no records, no pitch.
+> spend 30 minutes breaking something I built. Unpaid, no records, no pitch.
 > Don't volunteer your friend — tag them and let them decide.
 
 **To a DPP coach or CDCES**
 
 > I build a nutrition tool for type 2 diabetes and prediabetes and I need five
 > people to try it for half an hour and tell me where it fails. Would you be
-> willing to mention it to your group, or put a card on the noticeboard? I
-> won't collect records, I pay $60, and I'll send you what the five sessions
+> willing to mention it to your group, or put a card on the noticeboard? It is
+> unpaid, I won't collect records, and I'll send you what the five sessions
 > found. Happy to send the logic first if you'd rather see it.
 
 ---
 
 ## Money, ethics, logistics
 
-- **Incentive: $60 gift card for 30 minutes.** Below $50 nobody comes; above
-  $100 you attract professional participants. Pay everyone who shows up,
-  including the person who quits after five minutes — *especially* them.
+- **Incentive: none, by decision (11 October).** Say "unpaid" in the first message. Without money, thank everyone in writing, send each person what their session changed, and never ask for more than the 30 minutes.
 - **Say three things before they agree**, every time: it is not medical
   advice, you will not ask for medical records, and the recording is deleted
   after the notes are written.
