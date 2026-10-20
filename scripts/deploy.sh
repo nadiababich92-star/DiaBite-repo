@@ -20,7 +20,7 @@ git diff --quiet || { echo "working tree is dirty — commit first"; exit 1; }
 # "nothing" for a fresh HEAD, the loop below concludes the image did not change, and the
 # previous commit's image goes live instead (it did, on 11 October: the recipes were
 # in the commit and the old catalogue was in the app).
-if git diff-tree --no-commit-id --name-only -r HEAD | grep -qE '^(Dockerfile|\.dockerignore|package(-lock)?\.json|server/|agent/|src/|data/foods-usda/foods_usda\.json|data/recipes-db/(ingredients|recipes_db)\.json|data/recipes-db/embeddings\.|index\.html|vite\.config\.ts|tsconfig\.json)'; then
+if git diff-tree --no-commit-id --name-only -r HEAD | grep -qE '^(Dockerfile|\.dockerignore|package(-lock)?\.json|server/|agent/|src/|data/foods-usda/foods_usda\.json|data/recipes-db/(ingredients|recipes_db)\.json|data/recipes-db/embeddings\.|index\.html|public/|vite\.config\.ts|tsconfig\.json)'; then
   for _ in $(seq 1 18); do
     gh run list --repo "$REPO" --workflow build-engine --commit "$(git rev-parse HEAD)" --limit 1 \
       --json status -q '.[0].status' 2>/dev/null | grep -q . && break

@@ -20,6 +20,7 @@ on:
       # to either rebuilds it. This used to be a careful list of the few
       # frontend files the engine shares; it is the whole app now.
       - 'src/**'
+      - 'public/**'
       - 'index.html'
       - 'vite.config.ts'
       - 'tsconfig.json'
