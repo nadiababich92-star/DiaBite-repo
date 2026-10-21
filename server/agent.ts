@@ -680,13 +680,16 @@ async function runAgent(role: Role, input: string, previous?: string, forceTools
 }
 
 /**
- * A turn takes 6 to 20 seconds. From inside the container the same call has
- * hung for minutes (`/diag/foundry` exists because of it), and the ingress
- * answered the browser with a 504 after four. Each attempt is bounded, and a
- * hang or a dropped connection gets one more try; anything else is the
- * caller's error and is not retried.
+ * A model call takes two to five seconds, a whole meal turn four to nine. From inside the container the same
+ * call has hung for minutes (`/diag/foundry` exists because of it), and the ingress answered the browser with a
+ * 504 after four. Each attempt is bounded, and a hang or a dropped connection gets one more try; anything else
+ * is the caller's error and is not retried.
+ *
+ * The bound was 30 s, and the turn log of 15 October shows what that cost: eight turns over 15 s, the slowest
+ * 41 s, each one a call that hung until the bound and then answered on the retry. At 12 s a hang costs 12 s and
+ * the retry about four more, and a call that is merely slow (never past nine seconds in the log) is not cut off.
  */
-const CALL_TIMEOUT_MS = Number(process.env.CALL_TIMEOUT_MS ?? 30_000)
+const CALL_TIMEOUT_MS = Number(process.env.CALL_TIMEOUT_MS ?? 12_000)
 /** One word out, about a second: a hang past this is not worth waiting for; the router falls back to the meal agent. */
 const TRIAGE_TIMEOUT_MS = Number(process.env.TRIAGE_TIMEOUT_MS ?? 8_000)
 export async function withHangRetry<T>(run: () => Promise<T>): Promise<T> {
