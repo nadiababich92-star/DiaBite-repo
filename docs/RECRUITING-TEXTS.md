@@ -16,6 +16,8 @@ Count: eight "yes" for five slots. Stop when eight have booked.
 
 ## A. LinkedIn post (under your name)
 
+> 40 million Americans live with diabetes. 115 million adults have prediabetes. For all of them, every meal is the same question: does this fit my day?
+>
 > I have insulin resistance with PCOS, and I take metformin. For [six] years every meal has come with homework: carbs, glycemic index, what a portion really does, what is left of my day.
 >
 > I work in AI, so I built the tool I wanted. DiaBite: you write what you are about to eat in your own words, and it says whether that fits what is left of your day and shows the arithmetic. The language model never produces a number. A calculator does, from a food database, and every number is checked before you see it. It is not medical advice, it never gives a dose, and no clinician has signed it off yet.
@@ -24,7 +26,7 @@ Count: eight "yes" for five slots. Stop when eight have booked.
 >
 > I won't ask you to volunteer a friend. If you know someone, tag them and let them decide. diabite.pro
 
-Why this shape: it says what it is, discloses that it is yours, makes no promise about results, and asks for tags, not volunteers, which is what `USER_SESSIONS.md` wants (strangers, not kind friends). Attach the one-minute clip.
+Why this shape: it says what it is, discloses that it is yours, makes no promise about results, and asks for tags, not volunteers, which is what `USER_SESSIONS.md` wants (strangers, not kind friends). Attach the two-minute film (`two-rhythms-v3.mp4`, invented people, said so in it). First comment: the CDC source (https://www.cdc.gov/diabetes/php/data-research/index.html, 2023 data). **Posting date: Tuesday 27 October 2026, morning US Eastern (decided 21 October).**
 
 ## B. A message to the second circle (a person you know, asking about someone they know)
 
