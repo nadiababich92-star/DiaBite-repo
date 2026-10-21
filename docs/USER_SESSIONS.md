@@ -30,6 +30,10 @@ Not "do they like it". Five things we currently guess at:
    "fits".
 5. **Past or future?** The app is built for "can I eat this". If people arrive
    wanting to log what they already ate, that is a different product.
+6. **Do they eat the same meals again and again?** Eugene Kaganovich (20 October) said people repeat
+   their meals, so typing them every time gets boring. If it is true for these five, the Ask screen should offer
+   their recent meals in one tap (a choice for later, with no new data stored: the diary already holds them).
+   If it is not, leave it. Decision rule: two of five who say they re-type the same few meals → build it.
 
 ---
 
@@ -136,13 +140,14 @@ nothing. Note whether they believe the number once they have seen it.
 
 ### 5 · Debrief (5 min)
 
-Five questions, in this order, and let silences run:
+Six questions, in this order, and let silences run:
 
 1. What would you use this for, if anything?
 2. Was there a moment you didn't believe it?
 3. What did you expect it to do that it didn't?
-4. Who else do you know who'd want this — and what would you tell them it is?
-5. If you could change one thing, what?
+4. How much of what you eat is the same few meals? When you are about to eat one of those, what would you want the app to do? *(Do not mention "recent meals" or "favourites": let them describe it.)*
+5. Who else do you know who'd want this — and what would you tell them it is?
+6. If you could change one thing, what?
 
 **Never** ask "would you pay for it". Everyone says yes and it means nothing.
 
@@ -157,6 +162,7 @@ During the session, only these — analysis comes later:
 | **Phrases typed** | Verbatim, all of them, marked ✗ if unresolved |
 | **Stuck points** | Where they paused over five seconds, and what they were looking at |
 | **Receipt** | Opened after the tip / opened again on a later answer / never |
+| **Repeat meals** | Their own words for how often they eat the same things, and whether they re-typed one during the session |
 | **Device** | Phone or laptop |
 | **Quotes** | Anything they said that made you wince. Those are the useful ones |
 
