@@ -6,10 +6,10 @@ Square brackets are the only things not yet known. Fill in only what is true, or
 
 ## The order
 
-1. **Start now, because it has the longest lead: Reddit warm-up** (step 3 below). Nadia's LinkedIn has few people in the US, so LinkedIn is a small channel for this ask, not the main one; the post (text A) goes out *next week* (decided 20 October) mostly for the second circle and for the record.
+1. ~~Reddit warm-up~~ **Dropped on 21 October (Nadia's decision): several people she asked say Reddit is a poor place to find people for this, and a warm-up takes three to four weeks for little.** Texts D and E below stay for the record only. Nadia's LinkedIn has few people in the US, so LinkedIn is a small channel for this ask; the post (text A) goes out *next week* mostly for the second circle and for the record.
 2. **This week, one email each:** the clinicians already read the logic. If Eugene answers, ask him for a forward (text in `USER_RECRUITING.md`, Tier 1, item 1). Do not ask before he has answered the first email.
-3. **This week, start the clock on Reddit:** open the account and *comment* in r/PCOS, r/insulinresistance and r/prediabetes for three to four weeks, answering questions from what you actually know. No link, no mention of the app. Posting before that is filtered as spam even with a moderator's yes. Send modmail (text D) only once there is a history, about 9 November.
-4. **From 9 November:** modmail, DPP and DSMES coaches (`USER_RECRUITING.md`, Tier 4) and the communities that say yes. One community at a time.
+3. **Instead, this week:** the clinicians as a channel (they see the patients): Paola Acevedo answered on 21 October and asked what is wanted from a provider; Melanie and Steven wait for a reaction. Ask each, once, for a reaction first and for patients only after that.
+4. **From 9 November:** DPP and DSMES coaches (`USER_RECRUITING.md`, Tier 4) and the communities that say yes. One community at a time.
 5. **Paid panels are out for now** (no incentives until money arrives).
 
 Count: eight "yes" for five slots. Stop when eight have booked.
