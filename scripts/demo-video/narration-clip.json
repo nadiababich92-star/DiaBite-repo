@@ -2,10 +2,14 @@
   "voice": "en-US-Emma:DragonHDLatestNeural",
   "rate": "+18%",
   "segments": {
-    "k0": "This is DiaBite. You type a meal the way you would say it.",
+    "k00": "DiaBite checks a meal against what is left of your day.",
+    "k0": "You type it the way you would say it: two eggs, a slice of rye bread, half an avocado.",
     "k1": "The engine finds each food and does the arithmetic. It fits, and the receipt shows every number.",
-    "k2": "An evening meal that does not fit does not just get a no. It names a swap, and the engine counts it. Now it fits.",
-    "k3": "A meal can also be planned for another day. A plan counts nowhere until it is eaten.",
+    "k2": "An evening meal that does not fit does not just get a no. Spaghetti, garlic bread and orange juice goes over today.",
+    "k2b": "It names a swap, and the engine counts it. Whole wheat pasta, water instead of juice. Same dinner, lighter load. Let's ask again with it.",
+    "k2c": "Now it fits, and every number is traced to a tool.",
+    "k3": "A meal can also be planned for another day.",
+    "k3b": "It sits in the diary, dashed, and counts nowhere until it is eaten.",
     "k4": "And a dose question is refused at once, before any model sees it."
   }
 }

@@ -8,6 +8,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
+import { makeBed } from './bed.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const OUT = process.argv[2] ?? '/tmp/dv'
@@ -63,6 +64,11 @@ for (const a of m.audio) {
   const pcm = wavData(readFileSync(join(OUT, `${a.id}.wav`)))
   const off = Math.round(a.start * RATE)
   for (let i = 0; i < pcm.length / 2 && off + i < samples; i++) mix[off + i] = Math.max(-32768, Math.min(32767, mix[off + i] + pcm.readInt16LE(i * 2)))
+}
+if (process.env.BED !== '0') {   // a quiet bed under the voice, lowered while it speaks
+  const dur = JSON.parse(readFileSync(join(OUT, 'durations.json'), 'utf8'))
+  const bed = makeBed(total + 0.5, RATE, m.audio.map((a) => [a.start, a.start + dur[a.id]]))
+  for (let i = 0; i < samples; i++) mix[i] = Math.max(-32768, Math.min(32767, mix[i] + Math.round(bed[i] * 32767)))
 }
 const header = Buffer.alloc(44)
 header.write('RIFF', 0); header.writeUInt32LE(36 + samples * 2, 4); header.write('WAVEfmt ', 8); header.writeUInt32LE(16, 16)

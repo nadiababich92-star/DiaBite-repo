@@ -223,7 +223,7 @@ try {
 
   if (CLIP) {
     // ── the short clip: breakfast, a no with a swap, a plan, a refused dose question ─────────────
-    await openApp('Thursday')
+    end = say('k00'); await openApp('Thursday')
     await b.ev(`window.scrollTo(0, 0)`)
     end = say('k0'); await typeIn('Two eggs, a slice of rye bread and half an avocado')
     await clickOn({ text: 'Check this meal' }); await awaitAnswer('section.answer'); await holdTo(end)
@@ -233,21 +233,23 @@ try {
     await b.ev(`window.scrollTo(0, 0)`); await clickOn({ text: 'Log' }); await sleep(700)
     end = say('k2'); await b.ev(`window.scrollTo(0, 0)`)
     await askUntil('Spaghetti with tomato sauce, garlic bread and a glass of orange juice', async () => (await b.ev(`!!document.querySelector('.tone-bad')`)) && (await b.ev(`/wap/.test(document.body.innerText)`)))
+    end = say('k2b')
     await b.ev(`(()=>{ const n = document.querySelector('.a-next'); n?.scrollIntoView({ block: 'center', behavior: 'smooth' }); n?.classList.add('tour-ring') })()`)
-    await sleep(900); await wander(['.a-next'], vt() + 2.2)
+    await sleep(900); await wander(['.a-next'], Math.max(vt() + 2.2, end - 1.5))
     await b.ev(`document.querySelector('.a-next')?.classList.remove('tour-ring')`); await b.ev(`window.scrollTo(0, 0)`)
     await askUntil('Whole wheat spaghetti with tomato sauce, garlic bread and a glass of water', async () => (await has('.tone-good')()) || (await has('.tone-change')()))
-    await holdTo(end); await b.ev(`window.scrollTo(0, 0)`)
+    end = say('k2c'); await holdTo(end); await b.ev(`window.scrollTo(0, 0)`)
     end = say('k3')
     await clickOn({ text: 'Tomorrow', scope: '.day-picker button' }); await sleep(500)
     await clickOn({ text: 'Plan it' }); await sleep(800)
+    end = say('k3b')
     await clickOn({ text: 'Diary', scope: '[role=tab]' }); await sleep(1100)
     await clickOn({ sel: 'button[aria-label="The day after"]' }); await sleep(900)
     await b.ev(`window.scrollTo(0, 0)`); await wander(['.planned-line', '.entry.planned'], end)
     await clickOn({ text: 'Ask', scope: '[role=tab]' }); await sleep(800)
-    await typeIn('How many units of insulin should I take before pasta?')
+    end = say('k4'); await typeIn('How many units of insulin should I take before pasta?')
     await clickOn({ text: 'Check this meal' }); await sleep(900); await b.ev(`window.scrollTo(0, 0)`)
-    end = say('k4'); await wander(['.eyebrow-line', '.answer-text'], end); await holdTo(end + 1.0)
+    await wander(['.eyebrow-line', '.answer-text'], end); await holdTo(end + 1.0)
   } else {
   // ── Thursday morning: the setup, on camera ────────────────────────────────
   await openApp('Thursday, 7:40 am')
