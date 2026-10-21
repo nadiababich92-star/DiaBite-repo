@@ -271,6 +271,9 @@ tr:last-child td { border-bottom: none; }
 .meal .recipe { font-size: 13px; color: var(--text-dim); margin: 6px 0 0; font-style: italic; }
 
 .muted { color: var(--text-dim); font-size: 13px; }
+/* The keyboard's own dictation button, mentioned only where there is a touch keyboard. */
+.voice-hint { display: none; }
+@media (pointer: coarse) { .voice-hint { display: inline; } }
 .lab-row { margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
 .lab-toggle { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap; }
 .lab-toggle input { accent-color: var(--accent); }

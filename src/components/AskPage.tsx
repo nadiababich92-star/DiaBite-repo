@@ -547,7 +547,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, o
             Fresh context per question
           </label>
         </div>}
-        <p className="muted">Say it the way you'd say it to a friend. The agent does the counting — and shows its arithmetic.</p>
+        <p className="muted">Say it the way you'd say it to a friend. The agent does the counting — and shows its arithmetic.<span className="voice-hint"> On a phone, tap the microphone on your keyboard to say it instead of typing.</span></p>
         <form className="ask-form" onSubmit={(e) => { e.preventDefault(); ask(text) }}>
           <input
             data-tour="input"
