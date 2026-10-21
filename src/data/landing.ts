@@ -30,7 +30,7 @@ export const LANDING = {
   leftAfterGl: 37.8,
   records: 8633,
   /** A dated claim from docs/STATUS.md. Refresh when `npm run eval:agent` is rerun, and say so in STATUS.md. */
-  checks: { passed: 204, of: 204, on: '2026-10-15' },
+  checks: { passed: 204, of: 204, on: '2026-10-21' },
   /** What is said in the clip, in order (scripts/demo-video/two-rhythms/script.json), also the captions. */
   transcript: [
     "Narrator: Forty million Americans live with diabetes. A hundred and fifteen million adults have prediabetes. And for all of them, every meal is the same question: does this fit my day?",
