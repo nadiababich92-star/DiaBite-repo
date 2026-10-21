@@ -11,7 +11,9 @@ RG=${RG:-rg-nadia.babich92-5702}
 APP=${APP:-diabite-engine}
 REGISTRY=${REGISTRY:-ca83d2041d5eacr.azurecr.io}
 REPO=${REPO:-nadiababich92-star/DiaBite-repo}
-git diff --quiet || { echo "working tree is dirty — commit first"; exit 1; }
+# Only what goes into the image has to be committed: a change in docs/ or eval/ cannot make the image differ from HEAD.
+IMAGE_INPUTS=(Dockerfile .dockerignore package.json package-lock.json server agent src public index.html vite.config.ts tsconfig.json data/foods-usda/foods_usda.json data/recipes-db)
+git diff --quiet HEAD -- "${IMAGE_INPUTS[@]}" || { echo "an input of the image is not committed — commit first"; git diff --stat HEAD -- "${IMAGE_INPUTS[@]}" | tail -5; exit 1; }
 
 # The workflow only builds when the image's inputs change, so a commit that
 # touches docs or .gitignore never produces a run. Deploy the image of the

@@ -85,6 +85,7 @@ export default function SignIn({ notice, onCancel }: { notice?: string; onCancel
             <p role="status">
               We sent a sign-in link to <b>{email.trim()}</b>. Open it on this device, or type the code from the email.
             </p>
+            <p className="muted">It can take a minute. If it does not arrive, look in your Spam or Junk folder.</p>
             <label className="field">
               <span>Code from the email</span>
               <input ref={codeRef} className="signin-code" type="text" inputMode="numeric" autoComplete="one-time-code"

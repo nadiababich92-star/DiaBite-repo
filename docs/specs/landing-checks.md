@@ -21,7 +21,7 @@ Replace M7 (today: the first screen is the sign-in screen with the emergency lin
 - **M7c** — navigate to `/?signin`: the first screen contains `Email me a link` and not `Can I eat this?`. (L4)
 - **M7d** — navigate to `/#access_token=stub&type=magiclink`: the page never shows the landing page: the text does not contain `Try DiaBite` after the page settles (it shows "Opening DiaBite…" or the sign-in screen). (L5) The stub token is not a credential and the Supabase client rejects it.
 - **M12** (existing, no script error or console error) now also runs on the landing page, including after the video element exists.
-- **M15** (no browser, a `fetch`) — the static HTML of `/` contains `og:title`, `og:description`, `og:image` with an `https://diabite.pro/` address, `twitter:card`, and `og:image:alt` that contains the same total load figure as `LANDING.totalGl`; `/share.png` answers 200 with `image/png`; `/clip-how-it-works.vtt` answers 200; a `Range: bytes=0-1023` request for `/clip-how-it-works.mp4` answers 206. (L9)
+- **M15** (no browser, a `fetch`) — the static HTML of `/` contains `og:title`, `og:description`, `og:image` with an `https://diabite.pro/` address, `twitter:card`, and `og:image:alt` that contains the same total load figure as `LANDING.totalGl`; `/share.png` answers 200 with `image/png`; `/clip-how-it-works-v3.vtt` answers 200; a `Range: bytes=0-1023` request for `/clip-how-it-works-v3.mp4` answers 206. (L9)
 
 When `health.signIn` is false (local development) the existing branch of M7 is unchanged.
 

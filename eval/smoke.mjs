@@ -33,8 +33,8 @@ check('M2', 'the page loads with its security headers', page.status === 200 && c
 {
   const html = await (await fetch(`${URL_}/`)).text()
   const tag = (re) => re.test(html)
-  const img = await fetch(`${URL_}/share.png`); const vtt = await fetch(`${URL_}/clip-how-it-works.vtt`)
-  const clip = await fetch(`${URL_}/clip-how-it-works.mp4`, { headers: { range: 'bytes=0-1023' } })
+  const img = await fetch(`${URL_}/share.png`); const vtt = await fetch(`${URL_}/clip-how-it-works-v3.vtt`)
+  const clip = await fetch(`${URL_}/clip-how-it-works-v3.mp4`, { headers: { range: 'bytes=0-1023' } })
   check('M15', 'the share tags are in the page a crawler reads, and the image, the captions and a ranged clip answer',
     tag(/property="og:title"/) && tag(/property="og:description"/) && tag(/property="og:image" content="https:\/\/diabite\.pro\/share\.png"/) && tag(/name="twitter:card"/)
       && img.status === 200 && /image\/png/.test(img.headers.get('content-type') ?? '') && vtt.status === 200 && clip.status === 206,

@@ -6,16 +6,16 @@
 
 | File | What | Notes |
 |---|---|---|
-| `public/clip-how-it-works.mp4` | The one-minute clip, 1280 × 720, H.264 and AAC, about 56 seconds, about 6.7 MB | Must be the web version with the `moov` atom first. The copy `~/Desktop/demo-clip-how-it-works-web.mp4` was made so on 20 October (`AVAssetExportSession`, `shouldOptimizeForNetworkUse`); check it again before copying (§5). |
-| `public/clip-how-it-works.vtt` | English captions, WebVTT | §2 |
-| `public/clip-poster.jpg` | The poster, 1280 × 720, under 150 KB | A frame of the clip that shows a receipt (the "fits" frame); `.jpg` quality about 80 |
+| `public/clip-how-it-works-v3.mp4` | The one-minute clip, 1280 × 720, H.264 and AAC, about 56 seconds, about 6.7 MB | Must be the web version with the `moov` atom first. The copy `~/Desktop/demo-clip-how-it-works-web.mp4` was made so on 20 October (`AVAssetExportSession`, `shouldOptimizeForNetworkUse`); check it again before copying (§5). |
+| `public/clip-how-it-works-v3.vtt` | English captions, WebVTT | §2 |
+| `public/clip-poster-v3.jpg` | The poster, 1280 × 720, under 150 KB | A frame of the clip that shows a receipt (the "fits" frame); `.jpg` quality about 80 |
 | `public/share.png` | The link-preview image, 1200 × 630, under 300 KB | §4 |
 
 None of these is secret; all four are public once deployed. They are ordinary blobs in git (not LFS). The clip adds about 7 MB to the repository and the image; the owner's loose end 1.9 (videos in git history) is noted in `docs/STATUS.md` and cleaned later, together.
 
 ## 2. The captions
 
-`clip-how-it-works.vtt` has five cues, one per narration line. The text is exactly `LANDING.transcript` in `src/data/landing.ts` (the same five lines as `scripts/demo-video/narration-clip.json`, segments `k0` to `k4`). Cue times are the start and end of each narration segment **as muxed into the clip**, not guessed:
+`clip-how-it-works-v3.vtt` has five cues, one per narration line. The text is exactly `LANDING.transcript` in `src/data/landing.ts` (the same five lines as `scripts/demo-video/narration-clip.json`, segments `k0` to `k4`). Cue times are the start and end of each narration segment **as muxed into the clip**, not guessed:
 
 - `scripts/demo-video/assemble.mjs` places each TTS segment at an offset on the clip's audio track. Add a `--print-offsets` flag (or write `clip-offsets.json` beside the output) that prints each segment's start and its duration in seconds, then build the cues from that. If a segment's audio was stretched to fit its scene, use the stretched duration.
 - A cue starts at the segment's start and ends at its end (the end, not the next start, so silences are not captioned).
@@ -26,10 +26,10 @@ None of these is secret; all four are public once deployed. They are ordinary bl
 ## 3. The markup (inside `Landing.tsx`, section S3)
 
 ```tsx
-<video controls preload="none" playsInline poster="/clip-poster.jpg"
+<video controls preload="none" playsInline poster="/clip-poster-v3.jpg"
        aria-label="One-minute recording of DiaBite" width={1280} height={720}>
-  <source src="/clip-how-it-works.mp4" type="video/mp4" />
-  <track kind="captions" src="/clip-how-it-works.vtt" srclang="en" label="English" default />
+  <source src="/clip-how-it-works-v3.mp4" type="video/mp4" />
+  <track kind="captions" src="/clip-how-it-works-v3.vtt" srclang="en" label="English" default />
   Your browser cannot play this clip. The transcript is below.
 </video>
 ```
@@ -74,6 +74,6 @@ The scratchpad script used on 20 October is `faststart.swift` (`AVAssetExportSes
 ## 6. Verify
 
 - `ls -l public/` shows the four files at the sizes above; `npm run build` copies them to `dist/`.
-- After deploy: `curl -sI https://diabite.pro/share.png` is 200 with `content-type: image/png`; `curl -s -r 0-1023 -o /dev/null -w "%{http_code}" https://diabite.pro/clip-how-it-works.mp4` is **206**; the captions file is 200 with `content-type: text/vtt`; the page source contains every meta tag of §4.
+- After deploy: `curl -sI https://diabite.pro/share.png` is 200 with `content-type: image/png`; `curl -s -r 0-1023 -o /dev/null -w "%{http_code}" https://diabite.pro/clip-how-it-works-v3.mp4` is **206**; the captions file is 200 with `content-type: text/vtt`; the page source contains every meta tag of §4.
 - The captions play: open the page, press play with captions on, read them against the sound.
 - A real link preview: paste `https://diabite.pro` into a LinkedIn or Slack message draft; the title, the sentence and the image appear. (LinkedIn caches previews: the Post Inspector can refresh one. This is the owner's check; no script can do it.)
