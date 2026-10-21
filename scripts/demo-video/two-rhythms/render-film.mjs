@@ -5,16 +5,16 @@
  */
 import { launch } from '../../../eval/lib/cdp.mjs'
 import { writeFileSync, mkdirSync, rmSync, readFileSync } from 'node:fs'
-const args = process.argv.slice(2)
+const args = process.argv.slice(2), SUF = process.env.SUF ?? ''
 const dir = args.find((a) => !a.startsWith('--')) ?? '/tmp/dv2'
 const at = args.find((a) => a.startsWith('--at='))?.slice(5).split(',').map(Number)
-const TL = JSON.parse(readFileSync(`${dir}/timeline.json`, 'utf8'))
+const TL = JSON.parse(readFileSync(`${dir}/timeline${SUF}.json`, 'utf8'))
 const b = await launch({ port: 9344, width: 1280, height: 720, dpr: 1 })
 try {
-  await b.send('Page.navigate', { url: `file://${dir}/film.html` })
+  await b.send('Page.navigate', { url: `file://${dir}/film${SUF}.html` })
   await new Promise((r) => setTimeout(r, 1500))
   await b.ev('window.ready')
-  const out = at ? `${dir}/stills` : `${dir}/out`
+  const out = at ? `${dir}/stills${SUF}` : `${dir}/out${SUF}`
   rmSync(out, { recursive: true, force: true }); mkdirSync(out, { recursive: true })
   const times = at ?? Array.from({ length: Math.ceil(TL.total * TL.fps) }, (_, i) => i / TL.fps)
   let n = 0

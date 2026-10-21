@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 const here = dirname(fileURLToPath(import.meta.url))
 const dir = process.argv[2] ?? '/tmp/dv2'
+const SUF = process.env.SUF ?? '', ONLY = process.env.ONLY?.split(',')   // ONLY=counter,meet,… SUF=-short: a cut of the film
 const board = process.argv[3] ?? process.env.STORYBOARD
 if (!board) throw new Error('pass the storyboard folder (the .dc.html files) as the second argument or STORYBOARD')
 const S = JSON.parse(readFileSync(join(here, 'script.json'), 'utf8'))
@@ -186,6 +187,7 @@ const tp = (id) => Math.min(D[id] + 0.15, 1.9)      // typing is quick: as long 
 { // 12 · finale
   add({ id: 'finale', art: 'finale', dur: 0.5 + D['fn-1'] + 2.0, clock: null, phone: [], lines: [line('fn-1', 0.5)] })
 }
+if (ONLY) scenes.splice(0, scenes.length, ...scenes.filter((x) => ONLY.includes(x.id)))
 let at = 0; for (const s of scenes) { s.start = Math.round(at * 1000) / 1000; at += s.dur }
 
 // the shape of each mouth, 24 times a second, read from the voice itself: closed in the gaps, a slit for hissing sounds,
@@ -211,7 +213,7 @@ for (const s of scenes) for (const l of s.lines) {
   vis[l.id] = shape.map((v, i) => { const p = shape[i - 1] ?? v; return [Math.round((v[0] * 0.65 + p[0] * 0.35) * 10) / 10, Math.round((v[1] * 0.65 + p[1] * 0.35) * 10) / 10] })
 }
 const timeline = { fps: 24, total: Math.round(at * 100) / 100, scenes, vis }
-writeFileSync(join(dir, 'timeline.json'), JSON.stringify(timeline))
+writeFileSync(join(dir, `timeline${SUF}.json`), JSON.stringify(timeline))
 
 // ---------- page ----------
 const formRows = ['Food name *', 'Brand', 'Serving size', 'Number of servings', 'Weight (g)', 'Meal type', 'Time eaten', 'Calories', 'Carbohydrate (g)', 'Fibre (g)', 'Sugars (g)', 'Notes']
@@ -304,5 +306,5 @@ window.setTime = (T) => {
 window.ready = Promise.all([document.fonts.ready, ...[...document.images].map((i) => i.decode().catch(() => 0))]).then(() => true)
 setTime(0)
 </script></body></html>`
-writeFileSync(join(dir, 'film.html'), html)
+writeFileSync(join(dir, `film${SUF}.html`), html)
 console.log('timeline', timeline.total, 's;', scenes.map((s) => `${s.id} ${s.start}+${s.dur.toFixed(1)}`).join(' | '))

@@ -7,8 +7,9 @@ import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 const here = dirname(fileURLToPath(import.meta.url))
+const SUF = process.env.SUF ?? ''
 const dir = process.argv[2] ?? '/tmp/dv2', outMp4 = process.argv[3] ?? join(dir, 'two-rhythms.mp4')
-const TL = JSON.parse(readFileSync(join(dir, 'timeline.json'), 'utf8'))
+const TL = JSON.parse(readFileSync(join(dir, `timeline${SUF}.json`), 'utf8'))
 const SR = 24000, N = Math.ceil((TL.total + 0.5) * SR), mix = new Float32Array(N)
 let seed = 7; const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296)
 const put = (arr, at, g = 1) => { const o = Math.round(at * SR); for (let i = 0; i < arr.length && o + i < N; i++) mix[o + i] += arr[i] * g }
@@ -63,13 +64,13 @@ let peak = 0; for (const v of mix) peak = Math.max(peak, Math.abs(v)); const g =
 const pcm = Buffer.alloc(44 + N * 2); pcm.write('RIFF', 0); pcm.writeUInt32LE(36 + N * 2, 4); pcm.write('WAVEfmt ', 8); pcm.writeUInt32LE(16, 16); pcm.writeUInt16LE(1, 20); pcm.writeUInt16LE(1, 22)
 pcm.writeUInt32LE(SR, 24); pcm.writeUInt32LE(SR * 2, 28); pcm.writeUInt16LE(2, 32); pcm.writeUInt16LE(16, 34); pcm.write('data', 36); pcm.writeUInt32LE(N * 2, 40)
 for (let i = 0; i < N; i++) pcm.writeInt16LE(Math.round(Math.max(-1, Math.min(1, mix[i] * g)) * 32767), 44 + i * 2)
-writeFileSync(join(dir, 'mix.wav'), pcm); writeFileSync(join(dir, 'two-rhythms.vtt'), vtt.join('\n'))
-execFileSync('afconvert', ['-f', 'm4af', '-d', 'aac', '-b', '64000', join(dir, 'mix.wav'), join(dir, 'mix.m4a')])
-const frames = readdirSync(join(dir, 'out')).filter((f) => f.endsWith('.jpg')).sort()
-writeFileSync(join(dir, 'plan.json'), JSON.stringify({ width: 1280, height: 720, fps: TL.fps, dir: join(dir, 'out'), bitrate: 2_600_000, segments: frames.map((file, i) => ({ file, start: i, count: 1 })) }))
+writeFileSync(join(dir, `mix${SUF}.wav`), pcm); writeFileSync(join(dir, `two-rhythms${SUF}.vtt`), vtt.join('\n'))
+execFileSync('afconvert', ['-f', 'm4af', '-d', 'aac', '-b', '64000', join(dir, `mix${SUF}.wav`), join(dir, `mix${SUF}.m4a`)])
+const frames = readdirSync(join(dir, `out${SUF}`)).filter((f) => f.endsWith('.jpg')).sort()
+writeFileSync(join(dir, `plan${SUF}.json`), JSON.stringify({ width: 1280, height: 720, fps: TL.fps, dir: join(dir, `out${SUF}`), bitrate: 2_600_000, segments: frames.map((file, i) => ({ file, start: i, count: 1 })) }))
 const mux = join(dir, 'mux'); execFileSync('swiftc', ['-O', '-o', mux, join(here, '../mux.swift')], { stdio: 'inherit' })
-execFileSync(mux, ['video', join(dir, 'plan.json'), join(dir, 'video.mp4')], { stdio: 'inherit' })
-execFileSync(mux, ['merge', join(dir, 'video.mp4'), join(dir, 'mix.m4a'), join(dir, 'merged.mp4')], { stdio: 'inherit' })
+execFileSync(mux, ['video', join(dir, `plan${SUF}.json`), join(dir, `video${SUF}.mp4`)], { stdio: 'inherit' })
+execFileSync(mux, ['merge', join(dir, `video${SUF}.mp4`), join(dir, `mix${SUF}.m4a`), join(dir, `merged${SUF}.mp4`)], { stdio: 'inherit' })
 execFileSync('swiftc', ['-O', '-o', join(dir, 'faststart'), join(here, '../faststart.swift')], { stdio: 'inherit' })
-execFileSync(join(dir, 'faststart'), [join(dir, 'merged.mp4'), outMp4], { stdio: 'inherit' })
+execFileSync(join(dir, 'faststart'), [join(dir, `merged${SUF}.mp4`), outMp4], { stdio: 'inherit' })
 console.log('peak', peak.toFixed(2), 'gain', g.toFixed(2), '→', outMp4)
