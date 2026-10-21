@@ -41,6 +41,14 @@ check('M2', 'the page loads with its security headers', page.status === 200 && c
     JSON.stringify([img.status, vtt.status, clip.status]))
 }
 
+{
+  const robots = await fetch(`${URL_}/robots.txt`); const map = await fetch(`${URL_}/sitemap.xml`)
+  const rt = await robots.text(), mt = await map.text()
+  check('M16', 'robots.txt and sitemap.xml are real files (not the app page), the page is allowed and the sitemap lists it',
+    /text\/plain/.test(robots.headers.get('content-type') ?? '') && /Allow: \//.test(rt) && /Sitemap: https:\/\/diabite\.pro\/sitemap\.xml/.test(rt) && !/Disallow: \/\s*$/m.test(rt)
+      && /xml/.test(map.headers.get('content-type') ?? '') && /<loc>https:\/\/diabite\.pro\/<\/loc>/.test(mt), `${robots.status} ${map.status}`)
+}
+
 const tools = await fetch(`${URL_}/tools/resolve_foods`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"phrases":["rice"]}' })
 check('M3', 'the engine\'s tools are closed to a caller with no key', tools.status === 401, String(tools.status))
 

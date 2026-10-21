@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /tools/
+Disallow: /agent/
+Disallow: /session
+Disallow: /account
+Disallow: /verify
+Disallow: /diag
+
+Sitemap: https://diabite.pro/sitemap.xml
