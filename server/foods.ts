@@ -269,6 +269,15 @@ const USDA_ALIASES: Record<string, string[]> = {
   'usda:2706071': ['buffalo wings', 'buffalo wing', 'hot wings'],            // Chicken wings with sauce, from fast food / restaurant
   'usda:2705848': ['pot roast'],                                          // Beef, pot roast
   'usda:2706979': ['blt', 'blt sandwich', 'bacon lettuce tomato sandwich'], // Bacon, lettuce, tomato sandwich on white
+  // Found by eval/coverage with community-phrases.txt (22 October 2026): the same food under the name people use.
+  // Dishes with no record at all (arroz con pollo, tostones, dosa, lumpia, pancit, sancocho, tzimmes...) stay holes on
+  // purpose: a neighbour's record under their name would be the substitution the engine never makes; the agent
+  // costs those from their ingredients, as an estimate.
+  'usda:2707124': ['pho', 'beef pho', 'pho soup'],                         // Soup, pho, with meat
+  'usda:2709704': ['candied yams', 'candied sweet potatoes'],            // Sweet potato, candied
+  'usda:2705843': ['oxtail', 'oxtails'],                                  // Beef, oxtails
+  'usda:2708346': ['idli', 'idlis', 'idly'],                             // Idli
+  'usda:2709559': ['fried plantain', 'fried plantains'],                  // Plantain, cooked with oil
 }
 
 /**

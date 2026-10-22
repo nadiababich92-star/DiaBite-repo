@@ -1,0 +1,115 @@
+# Foods people eat in the communities the owner is reaching (22 October 2026): Southern and soul food, Latin American,
+# South Asian, East and Southeast Asian, Middle Eastern, Jewish and Mediterranean. Written the way a person types it.
+# Run: npx tsx eval/coverage/run.ts --file=community-phrases.txt --holes
+
+# Southern and soul food
+collard greens with smoked turkey
+black-eyed peas
+cornbread
+fried catfish
+grits with butter
+okra and tomatoes
+candied yams
+macaroni and cheese
+smothered pork chops
+red beans and rice
+sweet potato pie
+biscuits and gravy
+fried okra
+turnip greens
+ham hocks and beans
+peach cobbler
+hush puppies
+gumbo
+jambalaya
+shrimp and grits
+banana pudding
+pinto beans and cornbread
+fried chicken thigh
+sweet tea
+chitterlings
+oxtails with rice
+cabbage and sausage
+potato salad
+coleslaw
+pound cake
+# Latin American
+chicken tamales
+pupusas
+arroz con pollo
+rice and black beans
+tacos al pastor
+carne asada tacos
+cheese enchiladas
+pozole
+tostones
+beef empanadas
+black beans and fried plantains
+chilaquiles
+huevos rancheros
+horchata
+elote
+ceviche
+arepas
+sancocho
+flan
+refried beans
+tortilla chips and guacamole
+tres leches cake
+# South Asian
+dal and rice
+chicken tikka masala with naan
+roti
+chana masala
+palak paneer
+chicken biryani
+samosa
+idli and sambar
+masala dosa
+aloo gobi
+raita
+masala chai with sugar
+paratha
+rajma chawal
+# East and Southeast Asian
+pho
+pad thai
+sushi roll
+bibimbap
+kimchi fried rice
+ramen
+pork dumplings
+fried rice with egg
+pork bao
+miso soup
+congee
+banh mi
+lumpia
+chicken adobo
+pancit
+bulgogi with rice
+tofu stir fry
+# Middle Eastern, Jewish and Mediterranean
+hummus with pita
+falafel wrap
+chicken shawarma plate
+tabbouleh
+baba ganoush
+matzo ball soup
+challah
+lox and bagel
+shakshuka
+kebab with rice
+lentil soup
+stuffed grape leaves
+baklava
+tzimmes
+# Everyday American
+oatmeal with raisins
+egg and cheese sandwich
+peanut butter and jelly sandwich
+cereal with milk
+pancakes with syrup
+turkey sandwich
+caesar salad with chicken
+chicken noodle soup

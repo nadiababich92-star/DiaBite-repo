@@ -9,6 +9,7 @@
  *
  *   npx tsx eval/coverage/run.ts            # full table
  *   npx tsx eval/coverage/run.ts --holes    # only what needs work
+ *   npx tsx eval/coverage/run.ts --file=community-phrases.txt --holes   # another list of phrases
  */
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -18,7 +19,8 @@ import { openStore } from '../../server/embeddings'
 import { resolvePhrases, sameFood } from '../../server/resolve'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const phrases = readFileSync(join(here, 'phrases.txt'), 'utf8').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'))
+const fileArg = process.argv.find((a) => a.startsWith('--file='))?.slice(7) ?? 'phrases.txt'
+const phrases = readFileSync(join(here, fileArg), 'utf8').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'))
 const { records } = loadFoods()
 const store = await openStore(records, () => {})
 const out = await resolvePhrases(store, phrases, 3)
