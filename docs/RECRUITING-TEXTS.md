@@ -55,3 +55,23 @@ Answer the question that was asked, from what you know. Say "this is my experien
 ## What happens when someone says yes
 
 Send the screener (the five questions in `USER_RECRUITING.md`; ask for nothing about health beyond them), then book a 45-minute slot for the 30-minute session, send the app address only at the start of the call, and remind them 24 hours and one hour before. The recording words are in `USER_SESSIONS.md`.
+
+## A (final, 22 October): the post scheduled for Tuesday 27 October, aimed at dietitians
+
+*Decided with the owner: the goal is to learn whether DiaBite would help dietitians' patients and whether they would point people to it (not a clinical review); the angle is that planning every meal is exhausting and people give it up, so this is a pocket helper, not another tracker; no mention of a 30-minute chat or of pay. The text was scheduled by the owner in another session; first comment: "Try it: diabite.pro. Free, and you sign in with just an email. It never gives doses and isn't medical advice."*
+
+> Planning every meal when you live with diabetes is exhausting. A diabetes educator told me many of his patients give it up after a couple of months. I get it.
+>
+> I live with insulin resistance, and I've done the same sum in my head before almost every meal: what is this, how much, what is left of my day. Nobody does that forever.
+>
+> So I built a pocket helper instead of another tracker. DiaBite: you write what you're about to eat, the way you'd say it, and it tells you in a few seconds whether it fits the rest of your day, and shows the arithmetic. No planning ahead, no logging every gram. A calculator does the numbers, never the AI, and it never gives a dose.
+>
+> I want AI to be useful in people's ordinary days, not only in demos.
+>
+> Here's what I'd love to learn from dietitians and diabetes educators: would this actually help your patients? What would make you comfortable pointing someone to it, and what would stop you?
+>
+> If you'd like to shape it with me, send me a message. It's free for you and your clients.
+>
+> It's a reference tool, not medical advice, and no clinician has signed it off yet.
+
+*In every reply to someone who answers, say up front that no payment is involved on either side.* *Record each conversation in the tracker: would it help their patients, would they recommend it, what would stop them.*
