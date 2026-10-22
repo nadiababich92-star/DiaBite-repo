@@ -14,7 +14,7 @@
 ## Only the owner can do these
 
 1. **Recruit people and run the five sessions** (roadmap 2.1, 2.2). The one blocker for the beta, the investor folder and every real number. The protocol and the "how to try" page are ready.
-2. **An Azure budget alert.** None exists (checked 16 October). October is heading for about €48 (about $56). Postponed by the owner.
+2. ~~An Azure budget alert.~~ **Created 22 October 2026** (the owner said yes): `diabite-monthly`, 50 a month in the billing currency, emails to the owner at 50% and 80% actual and 100% forecast. Check the emails arrive; the amount can be changed in the portal under Cost Management > Budgets.
 3. **The meeting with the UX designer**: the brief is ready (a private page, shared by the owner).
 4. **Loose ends (1.9):** the old Entra secret, videos in git history, the photo on the Team slide (the file carries a Gemini mark).
 5. **Founders Hub:** undecided.
