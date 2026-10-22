@@ -596,6 +596,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, o
         <section className="card tone-blocked">
           <div className="eyebrow-line">Couldn't reach the agent</div>
           <p style={{ margin: 0 }}>{error}</p>
+          {asked && <div className="row"><button className="ghost" type="button" onClick={() => ask(asked)} disabled={busy}>Try again</button></div>}
         </section>
       )}
 

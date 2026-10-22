@@ -121,6 +121,7 @@ async function askOnce(req: AgentRequest, signal: AbortSignal, token?: string | 
     const wait = Number(body.retryAfterSec ?? res.headers.get('retry-after')) || 60
     throw new RateLimitedError(body.scope ?? 'ip', wait)
   }
+  if (res.status >= 500) throw new Error('Something slowed down on our side, and nothing was counted. Your question is still here. Please try again.')
   if (!res.ok) throw new Error(`Agent error ${res.status}`)
   const data = (await res.json()) as AgentResponse
   if (typeof data.answer !== 'string') throw new Error('Unexpected reply from the agent')

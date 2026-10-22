@@ -1,0 +1,14 @@
+{
+  "name": "DiaBite",
+  "short_name": "DiaBite",
+  "description": "Describe a meal in your own words. DiaBite says whether it fits what is left of your day, and shows the arithmetic. A reference tool, not medical advice.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a1812",
+  "theme_color": "#0a1812",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

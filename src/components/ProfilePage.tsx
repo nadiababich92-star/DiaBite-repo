@@ -258,6 +258,11 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
           <button className="ghost" onClick={onFeedback}>Send feedback</button>
         </div>
       </section>
+
+      <section className="card touch-only">
+        <h2>Keep it in your pocket</h2>
+        <p className="muted">Put DiaBite on your home screen so it opens in one tap. On an iPhone, tap Share in Safari, then Add to Home Screen. On Android, tap the three dots in Chrome, then Add to Home screen.</p>
+      </section>
     </>
   )
 }
