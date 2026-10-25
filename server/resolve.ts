@@ -425,6 +425,17 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
     const unknown = confidence === 'low'
     const asked = tokens(phrase).length === 1 ? CATEGORY_QUESTION[tokens(phrase)[0]] : undefined
     if (confidence === 'medium' && !clarify && asked) clarify = asked
+    // An everyday name that several records answer to ("breakfast sausage":
+    // chicken, turkey and pork) is offered whole. Offering two of three leaves
+    // out the one a person who avoids the other two meant.
+    if (confidence === 'medium' && !clarify) {
+      const q = norm(phrase)
+      const named = loadFoods().records.filter((r) => r.aliases?.includes(q))
+      if (named.length >= 3) {
+        const names = [...new Set(named.map((r) => r.name))].slice(0, 4)
+        clarify = `Did you mean ${names.slice(0, -1).join(', ')} or ${names[names.length - 1]}?`
+      }
+    }
     if (confidence === 'medium' && !clarify) {
       const rival = cands.slice(1).find((c) => !sameFood(c.name, cands[0].name))
       clarify = rival ? `Did you mean ${cands[0].name} or ${rival.name}?` : undefined

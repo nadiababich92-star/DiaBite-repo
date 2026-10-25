@@ -1714,6 +1714,12 @@
     ],
     "clarify": [
       {
+        "phrase": "breakfast sausage",
+        "band": "medium",
+        "why": "chicken, turkey and pork all answer to it; the question must offer all three, because someone who eats no pork meant one of the others",
+        "offers": ["Chicken sausage", "Turkey sausage", "Pork sausage"]
+      },
+      {
         "phrase": "chicken",
         "band": "medium",
         "why": "breast vs ground vs rotisserie differ"

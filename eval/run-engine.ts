@@ -64,7 +64,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const TARGET = Number(process.env.RESOLVE_TARGET ?? 90)
 
 interface ResolveCase { phrase: string; expect: string[]; tags: string[] }
-interface ClarifyCase { phrase: string; band: string; why: string }
+interface ClarifyCase { phrase: string; band: string; why: string; offers?: string[] }
 interface AnswerCase { id: string; text: string; verdict: string | null; next?: string; why?: string; costed?: boolean }
 interface PartialCase { id: string; remainingGl?: number; mealGl?: number; unknown?: string[]; unscored?: string[]; fits?: boolean | null; flow?: boolean; fitsAfterRetry?: boolean }
 interface GateCase { phrase: string; rule: string | null }
@@ -124,6 +124,8 @@ const bandMisses: string[] = []
 cases.engine.clarify.forEach((c, i) => {
   const got = clarified[i].confidence
   if (got !== c.band) bandMisses.push(`    ${c.phrase.padEnd(28)} want ${c.band.padEnd(8)} got ${got.padEnd(8)} (${c.why})`)
+  const missing = (c.offers ?? []).filter((o) => !(clarified[i].clarify ?? '').includes(o))
+  if (missing.length) bandMisses.push(`    ${c.phrase.padEnd(28)} the question leaves out ${missing.join(', ')}: ${clarified[i].clarify ?? '(none)'}`)
 })
 console.log(`\nclarify   ${cases.engine.clarify.length - bandMisses.length}/${cases.engine.clarify.length}`)
 if (bandMisses.length) { console.log('  wrong band:'); bandMisses.forEach((m) => console.log(m)) }
