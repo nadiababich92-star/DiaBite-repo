@@ -12,7 +12,7 @@
  * consulted before the gate has had its say.
  */
 import { createHash } from 'node:crypto'
-import { ALLERGEN_PATTERNS, PATTERN_PATTERNS } from '../src/lib/dietary'
+import { ALLERGEN_PATTERNS, AVOIDED_PATTERNS, PATTERN_PATTERNS } from '../src/lib/dietary'
 
 const num = (name: string, fallback: number): number => {
   const v = Number(process.env[name])
@@ -80,6 +80,7 @@ function validAvoid(v: unknown): boolean {
   const known = (x: unknown, ok: (s: string) => boolean, max: number) =>
     x === undefined || (Array.isArray(x) && x.length <= max && x.every((s) => typeof s === 'string' && s.length <= 64 && ok(s)))
   return known(a.allergens, (s) => Object.hasOwn(ALLERGEN_PATTERNS, s), 20)
+    && known(a.avoided, (s) => Object.hasOwn(AVOIDED_PATTERNS, s), 4)
     && known(a.foodIds, () => true, MAX_ENTRIES)
     && (a.pattern === undefined || a.pattern === 'none' || (typeof a.pattern === 'string' && Object.hasOwn(PATTERN_PATTERNS, a.pattern)))
 }

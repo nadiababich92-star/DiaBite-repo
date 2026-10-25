@@ -81,7 +81,7 @@ const bold = (line: string, key: string) =>
  */
 function Figures({ reply, onGl }: { reply: AgentResponse; onGl?: () => void }) {
   const meal = lastMealCall(reply.trace)?.result as
-    | { totals?: { gl?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean | null }; assumed?: boolean }
+    | { totals?: { gl?: number; carbs?: number; availableCarbs?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean | null }; assumed?: boolean }
     | undefined
   const mealGl = meal?.totals?.gl
   // A meal of branded products only: the three tiles are what the label gives —
@@ -115,6 +115,13 @@ function Figures({ reply, onGl }: { reply: AgentResponse; onGl?: () => void }) {
           <span className="fig-v">{fits ? after : Math.abs(after)}</span>
         </div>
       </div>
+      {typeof meal?.totals?.carbs === 'number' && (
+        <p className="muted meal-carbs">
+          {partial ? 'Carbohydrate so far: ' : meal?.assumed ? 'Carbohydrate, about: ' : 'Carbohydrate in this meal: '}
+          <b className="num">{meal.totals.carbs} g</b>
+          {typeof meal.totals.availableCarbs === 'number' && meal.totals.availableCarbs !== meal.totals.carbs && ` (${meal.totals.availableCarbs} g with the fibre taken out)`}
+        </p>
+      )}
       {onGl && <button className="link gl-link" onClick={onGl}>What is GL?</button>}
     </>
   )

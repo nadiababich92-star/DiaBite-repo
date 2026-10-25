@@ -23,7 +23,7 @@ export interface AgentRequest {
    * hand. Sent with the day state so the engine can filter suggestions itself —
    * an allergy is not something to leave to a prompt.
    */
-  avoid?: { allergens?: string[]; foodIds?: string[]; pattern?: string }
+  avoid?: { allergens?: string[]; foodIds?: string[]; pattern?: string; avoided?: string[] }
 }
 
 export interface TraceStep {
@@ -66,7 +66,8 @@ export function avoidOf(p: Profile): AgentRequest['avoid'] {
   const foodIds = (p.excludedFoodIds ?? []).map((id) => `seed:${id}`)
   if (p.comorbidities?.includes('celiac') && !allergens.includes('gluten')) allergens.push('gluten')
   const pattern = p.pattern && p.pattern !== 'none' ? p.pattern : undefined
-  return allergens.length || foodIds.length || pattern ? { allergens, foodIds, pattern } : undefined
+  const avoided = [...(p.avoided ?? [])]
+  return allergens.length || foodIds.length || pattern || avoided.length ? { allergens, foodIds, pattern, avoided } : undefined
 }
 
 /** The engine said "not now": over a limit, with how long to wait. Not an agent answer. */

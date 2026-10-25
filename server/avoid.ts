@@ -35,4 +35,4 @@ export const isAvoided = (rec: FoodRecord, avoid: AvoidList | undefined): boolea
 
 /** True when anything at all is being avoided — worth telling the model about. */
 export const hasAvoid = (a: AvoidList | undefined): boolean =>
-  !!a && ((a.allergens?.length ?? 0) > 0 || (a.foodIds?.length ?? 0) > 0 || (!!a.pattern && a.pattern !== 'none'))
+  !!a && ((a.allergens?.length ?? 0) > 0 || (a.foodIds?.length ?? 0) > 0 || (a.avoided?.length ?? 0) > 0 || (!!a.pattern && a.pattern !== 'none'))

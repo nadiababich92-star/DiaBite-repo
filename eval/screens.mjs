@@ -83,7 +83,7 @@ try {
       await b.ev(`__check('I agree that DiaBite keeps this about me')`)
       await b.ev(`__setNum('Age', 52)`); await click('Continue'); await sleep(700)
       await click('Type 2 diabetes'); await click('Continue'); await sleep(700)
-      await click('Continue'); await sleep(700); await click('Continue'); await sleep(700)
+      await click('Continue'); await sleep(700); await shot('onboarding-diet'); await click('Continue'); await sleep(700)
       // the last step needs its box ticked before the button works; try until the ask screen is open
       for (let i = 0; i < 8; i++) {
         await b.ev(`__check('I understand this is not medical advice')`); await sleep(300)

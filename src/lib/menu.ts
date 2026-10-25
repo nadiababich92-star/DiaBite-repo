@@ -174,7 +174,7 @@ function availableDishes(profile: Profile) {
   // not: onboarding has been collecting allergens and an eating pattern while
   // this filtered on the hand-picked exclusions alone, so a celiac could be
   // handed a week with pasta in it.
-  const avoid = { allergens: profile.allergens, pattern: profile.pattern }
+  const avoid = { allergens: profile.allergens, pattern: profile.pattern, avoided: profile.avoided }
   const forbidden = (d: Dish) => {
     if (d.ingredients) {
       // A recipe: its ingredients are names, so the hand-picked exclusions are looked for by word.

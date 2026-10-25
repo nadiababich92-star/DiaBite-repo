@@ -333,6 +333,7 @@ export const DEFAULT_PROFILE: Profile = {
   kidney: 'none',
   comorbidities: [],
   allergens: [],
+  avoided: [],
   pattern: 'none',
   units: 'imperial',
   showBreadUnits: false,

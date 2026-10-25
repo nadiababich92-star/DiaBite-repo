@@ -22,7 +22,10 @@ export type Allergen =
  * How someone eats. Mediterranean is deliberately absent: it is a style, not a
  * restriction, and a filter that removed food for it would be wrong.
  */
-export type Pattern = 'none' | 'vegetarian' | 'vegan' | 'halal' | 'kosher'
+export type Pattern = 'none' | 'vegetarian' | 'vegan' | 'pescatarian' | 'halal' | 'kosher'
+
+/** A meat the person does not eat, whatever else they eat: asked for by a first outside user (23 October 2026). */
+export type Avoided = 'pork' | 'beef'
 
 export const ALLERGEN_PATTERNS: Record<Allergen, RegExp> = {
   milk: /\b(milk|cream|butter|cheese|yog(h)?urt|kefir|ghee|whey|casein|custard|ricotta|mozzarella|parmesan|feta|paneer)\b/i,
@@ -46,9 +49,16 @@ const ANIMAL_NON_MEAT = new RegExp(`${ALLERGEN_PATTERNS.milk.source}|${ALLERGEN_
 /** What each pattern rules out. Kosher also rules out mixing meat and dairy, which a name cannot see. */
 export const PATTERN_PATTERNS: Record<Exclude<Pattern, 'none'>, RegExp> = {
   vegetarian: new RegExp(`${MEAT.source}|${SEAFOOD.source}`, 'i'),
+  pescatarian: MEAT,
   vegan: new RegExp(`${MEAT.source}|${SEAFOOD.source}|${ANIMAL_NON_MEAT.source}`, 'i'),
   halal: new RegExp(`${PORK.source}|\\b(wine|beer|rum|vodka|whiskey|liqueur)\\b`, 'i'),
   kosher: new RegExp(`${PORK.source}|${ALLERGEN_PATTERNS.shellfish.source}`, 'i'),
+}
+
+/** Names that say pork or beef. A false hit hides a food; a miss serves one the person does not eat, so the list is generous. */
+export const AVOIDED_PATTERNS: Record<Avoided, RegExp> = {
+  pork: new RegExp(`${PORK.source}|\\b(hot dogs?|bratwurst|kielbasa|spare ?ribs?|carnitas|pulled pork|pork)\\b`, 'i'),
+  beef: /\b(beef|steak|brisket|veal|pastrami|sirloin|ribeye|oxtails?|meatloaf|meat loaf|hamburger|corned beef|bulgogi|carne asada)\b/i,
 }
 
 export interface AvoidList {
@@ -56,6 +66,8 @@ export interface AvoidList {
   /** Record ids the person excluded by hand. */
   foodIds?: string[]
   pattern?: Pattern
+  /** Pork and beef, by choice of the person. */
+  avoided?: Avoided[]
 }
 
 /**
@@ -68,6 +80,7 @@ export interface AvoidList {
 export function dietaryReason(text: string, avoid: AvoidList | undefined): string | null {
   if (!avoid) return null
   for (const a of avoid.allergens ?? []) if (ALLERGEN_PATTERNS[a].test(text)) return a
+  for (const m of avoid.avoided ?? []) if (AVOIDED_PATTERNS[m]?.test(text)) return m
   const p = avoid.pattern
   if (p && p !== 'none' && PATTERN_PATTERNS[p].test(text)) return p
   return null
@@ -83,6 +96,9 @@ export const PATTERN_LABELS: Record<Pattern, string> = {
   none: 'No preference',
   vegetarian: 'Vegetarian',
   vegan: 'Vegan',
+  pescatarian: 'Pescatarian (fish, no meat)',
   halal: 'Halal',
   kosher: 'Kosher',
 }
+
+export const AVOIDED_LABELS: Record<Avoided, string> = { pork: 'Pork', beef: 'Beef' }

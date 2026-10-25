@@ -4,7 +4,7 @@ import {
   EXIT_COPY, GOAL_LABELS, INSULIN_LABELS, KIDNEY_LABELS, MED_LABELS,
   calculateTargets, carbApproachBlocked, cmToFtIn, exitReason, ftInToCm, kgToLb, lbToKg,
 } from '../lib/profile'
-import { PATTERN_LABELS } from '../lib/dietary'
+import { AVOIDED_LABELS, PATTERN_LABELS, type Avoided } from '../lib/dietary'
 import type {
   Activity, Allergen, CarbApproach, Comorbidity, Condition, Goal, Insulin, Kidney, Med, Pattern, Profile, Sex,
 } from '../types'
@@ -28,7 +28,8 @@ const KIDNEYS: Kidney[] = ['none', 'mentioned', 'ckd', 'dialysis']
 const COMORBIDITIES: Comorbidity[] = ['htn', 'ascvd', 'masld', 'gout', 'gastroparesis', 'celiac', 'pcos', 'brittle', 'eatingDisorder']
 const ALLERGENS: Allergen[] = ['milk', 'egg', 'fish', 'shellfish', 'treenuts', 'peanuts', 'wheat', 'soy', 'sesame', 'gluten', 'lactose']
 const APPROACHES: CarbApproach[] = ['moderate', 'low', 'verylow']
-const PATTERNS: Pattern[] = ['none', 'vegetarian', 'vegan', 'halal', 'kosher']
+const PATTERNS: Pattern[] = ['none', 'vegetarian', 'vegan', 'pescatarian', 'halal', 'kosher']
+const AVOIDED: Avoided[] = ['pork', 'beef']
 const GOALS: Goal[] = ['lose', 'maintain', 'gain']
 
 /** Toggle membership in a list-valued profile field. */
@@ -292,6 +293,7 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel }: Pr
                 </div>
 
                 <h3>How you eat</h3>
+                <p className="muted">Low carb is set on the next step, under carbohydrate approach. Gluten-free is under the foods to keep out, below.</p>
                 <div className="chips">
                   {PATTERNS.map((v) => (
                     <button key={v} className={`chip-toggle${p.pattern === v ? ' on' : ''}`}
@@ -301,7 +303,18 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel }: Pr
                   ))}
                 </div>
 
-                <h3>Foods to keep out of every suggestion</h3>
+                <h3>Meats you don't eat</h3>
+                <div className="chips">
+                  {AVOIDED.map((m) => (
+                    <button key={m} className={`chip-toggle${(p.avoided ?? []).includes(m) ? ' on' : ''}`}
+                      aria-pressed={(p.avoided ?? []).includes(m)}
+                      onClick={() => set('avoided', toggle(p.avoided ?? [], m))}>
+                      {AVOIDED_LABELS[m]}
+                    </button>
+                  ))}
+                </div>
+
+                <h3>Allergies, and foods to keep out of every suggestion (for example gluten, for gluten-free)</h3>
                 <div className="chips">
                   {ALLERGENS.map((a) => (
                     <button key={a} className={`chip-toggle${p.allergens.includes(a) ? ' on' : ''}`}

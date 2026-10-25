@@ -269,6 +269,7 @@ const USDA_ALIASES: Record<string, string[]> = {
   'usda:2706071': ['buffalo wings', 'buffalo wing', 'hot wings'],            // Chicken wings with sauce, from fast food / restaurant
   'usda:2705848': ['pot roast'],                                          // Beef, pot roast
   'usda:2706979': ['blt', 'blt sandwich', 'bacon lettuce tomato sandwich'], // Bacon, lettuce, tomato sandwich on white
+  'usda:2706191': ['breakfast sausage', 'sausage links', 'sausage patties'], // Pork sausage (the same phrase also names turkey and chicken sausage, so the engine asks which)
   // Found by eval/coverage with community-phrases.txt (22 October 2026): the same food under the name people use.
   // Dishes with no record at all (arroz con pollo, tostones, dosa, lumpia, pancit, sancocho, tzimmes...) stay holes on
   // purpose: a neighbour's record under their name would be the substitution the engine never makes; the agent
@@ -278,6 +279,16 @@ const USDA_ALIASES: Record<string, string[]> = {
   'usda:2705843': ['oxtail', 'oxtails'],                                  // Beef, oxtails
   'usda:2708346': ['idli', 'idlis', 'idly'],                             // Idli
   'usda:2709559': ['fried plantain', 'fried plantains'],                  // Plantain, cooked with oil
+}
+
+/**
+ * Names that more than one ingredient answers to. "Breakfast sausage" is pork, turkey or chicken, so all three carry
+ * it and the engine asks which, instead of picking a recipe that merely has the words in its title (a first outside
+ * user typed it and got "Breakfast Sausage Patties with Apple"). Keyed by the ingredient table's id.
+ */
+const INGREDIENT_ALIASES: Record<string, string[]> = {
+  turkey_sausage: ['breakfast sausage', 'sausage links', 'sausage patties'],
+  chicken_sausage: ['breakfast sausage', 'sausage links', 'sausage patties'],
 }
 
 /**
@@ -332,7 +343,7 @@ function usdaRecords(): FoodRecord[] {
       id: `usda:${r.fdc_id}`, kind: unrated ? 'unrated' : 'ingredient', name, gi, giLevel: giLevel(gi),
       aliases: USDA_ALIASES[`usda:${r.fdc_id}`],
       category: 'grains', unit: 'g', defaultPortion: householdPortion(r.portions, r.name),
-      searchText: `${name}. ${r.name}. ${r.category}.`,
+      searchText: `${name}. ${r.name}. ${r.category}.${USDA_ALIASES[`usda:${r.fdc_id}`] ? ` ${USDA_ALIASES[`usda:${r.fdc_id}`].join(', ')}.` : ''}`,
       per100: { kcal: r.per100.kcal, protein: r.per100.protein, fat: r.per100.fat, carbs: r.per100.carbs, fiber: r.per100.fiber },
       source: unrated
         ? 'USDA FoodData Central, Survey (FNDDS): nutrients only. No glycemic index is assigned to this food, so no glycemic load is computed.'
@@ -392,13 +403,13 @@ export function loadFoods() {
       // equalled 'grain'. The pool was smaller than it looked for every food.
       category: GROUP_TO_CATEGORY[r.group] ?? (r.group as FoodCategory),
       unit: 'g', defaultPortion: INGREDIENT_PORTION_G[r.id] ?? 100,
-      searchText: `${r.name}. ${r.group}. ${r.id.replace(/_/g, ' ')}`,
+      searchText: `${r.name}. ${r.group}. ${r.id.replace(/_/g, ' ')}${INGREDIENT_ALIASES[r.id] ? `. ${INGREDIENT_ALIASES[r.id].join(', ')}` : ''}`,
       // The id is the everyday word for the food and the name is the precise
       // one — "miso" for White miso paste, "black beans" for Black beans,
       // cooked. Treating it as an exact name is what keeps a curated record
       // from losing its own word to a coverage row that happens to be titled
       // with it.
-      aliases: [r.id.replace(/_/g, ' ')],
+      aliases: [r.id.replace(/_/g, ' '), ...(INGREDIENT_ALIASES[r.id] ?? [])],
       per100: r.per100,
     })
   }

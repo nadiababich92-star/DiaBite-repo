@@ -180,11 +180,12 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
         const entries = dayEntries.filter((e) => e.meal === m)
         if (entries.length === 0) return null
         const mealGL = entries.reduce((s, e) => s + viewEntry(e).gl, 0)
+        const mealCarbs = Math.round(entries.reduce((s, e) => s + viewEntry(e).nutrients.carbs, 0))
         return (
           <section className="card" key={m}>
             <div className="row" style={{ justifyContent: 'space-between', marginBottom: 6 }}>
               <h2 style={{ margin: 0 }}>{MEAL_LABELS[m]}</h2>
-              <GLPill gl={mealGL} />
+              <span className="row" style={{ gap: 10, alignItems: 'center' }}><span className="muted">{mealCarbs} g carbs</span><GLPill gl={mealGL} /></span>
             </div>
             <ul className="entries">
               {entries.map((e) => {

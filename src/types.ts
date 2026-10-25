@@ -115,7 +115,7 @@ export type Kidney = 'none' | 'mentioned' | 'ckd' | 'dialysis'
 export type Comorbidity =
   | 'htn' | 'ascvd' | 'masld' | 'gout' | 'gastroparesis' | 'celiac' | 'pcos' | 'eatingDisorder'
   | 'brittle'
-import type { Allergen, Pattern } from './lib/dietary'
+import type { Allergen, Avoided, Pattern } from './lib/dietary'
 export type { Allergen, Pattern }
 
 /** Why a target is not the formula's raw output. Shown to the user, never hidden. */
@@ -150,7 +150,9 @@ export interface Profile {
   kidney: Kidney
   comorbidities: Comorbidity[]
   allergens: Allergen[]
-  /** Vegetarian, vegan, halal, kosher — filtered out of every suggestion. */
+  /** Pork and beef, for people who do not eat them. Filtered out of every suggestion. */
+  avoided: Avoided[]
+  /** Vegetarian, vegan, pescatarian, halal, kosher — filtered out of every suggestion. */
   pattern: Pattern
   /** Inches and pounds on screen; the stored values stay metric. */
   units: 'imperial' | 'metric'
