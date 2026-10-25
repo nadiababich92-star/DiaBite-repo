@@ -25,7 +25,7 @@ export type Allergen =
 export type Pattern = 'none' | 'vegetarian' | 'vegan' | 'pescatarian' | 'halal' | 'kosher'
 
 /** A meat the person does not eat, whatever else they eat: asked for by a first outside user (23 October 2026). */
-export type Avoided = 'pork' | 'beef'
+export type Avoided = 'pork' | 'beef' | 'lamb' | 'chicken' | 'turkey' | 'duck' | 'game'
 
 export const ALLERGEN_PATTERNS: Record<Allergen, RegExp> = {
   milk: /\b(milk|cream|butter|cheese|yog(h)?urt|kefir|ghee|whey|casein|custard|ricotta|mozzarella|parmesan|feta|paneer)\b/i,
@@ -55,10 +55,15 @@ export const PATTERN_PATTERNS: Record<Exclude<Pattern, 'none'>, RegExp> = {
   kosher: new RegExp(`${PORK.source}|${ALLERGEN_PATTERNS.shellfish.source}`, 'i'),
 }
 
-/** Names that say pork or beef. A false hit hides a food; a miss serves one the person does not eat, so the list is generous. */
+/** Names that say one of the meats a person can rule out. A false hit hides a food; a miss serves one the person does not eat, so the list is generous. */
 export const AVOIDED_PATTERNS: Record<Avoided, RegExp> = {
   pork: new RegExp(`${PORK.source}|\\b(hot dogs?|bratwurst|kielbasa|spare ?ribs?|carnitas|pulled pork|pork)\\b`, 'i'),
   beef: /\b(beef|steak|brisket|veal|pastrami|sirloin|ribeye|oxtails?|meatloaf|meat loaf|hamburger|corned beef|bulgogi|carne asada)\b/i,
+  lamb: /\b(lamb|mutton|goat|rack of lamb|lamb chops?)\b/i,
+  chicken: /\b(chicken|hen|drumsticks?|chicken wings?|buffalo wings?|nuggets?|rotisserie|poultry)\b/i,
+  turkey: /\bturkey\b/i,
+  duck: /\b(duck|goose)\b/i,
+  game: /\b(venison|bison|rabbit|elk|boar|quail|pheasant|game meat)\b/i,
 }
 
 export interface AvoidList {
@@ -66,7 +71,7 @@ export interface AvoidList {
   /** Record ids the person excluded by hand. */
   foodIds?: string[]
   pattern?: Pattern
-  /** Pork and beef, by choice of the person. */
+  /** Meats the person does not eat, by their own choice. */
   avoided?: Avoided[]
 }
 
@@ -101,4 +106,6 @@ export const PATTERN_LABELS: Record<Pattern, string> = {
   kosher: 'Kosher',
 }
 
-export const AVOIDED_LABELS: Record<Avoided, string> = { pork: 'Pork', beef: 'Beef' }
+export const AVOIDED_LABELS: Record<Avoided, string> = {
+  pork: 'Pork', beef: 'Beef', lamb: 'Lamb and goat', chicken: 'Chicken', turkey: 'Turkey', duck: 'Duck and goose', game: 'Game (venison, bison, rabbit)',
+}

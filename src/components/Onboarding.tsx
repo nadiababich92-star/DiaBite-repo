@@ -29,7 +29,7 @@ const COMORBIDITIES: Comorbidity[] = ['htn', 'ascvd', 'masld', 'gout', 'gastropa
 const ALLERGENS: Allergen[] = ['milk', 'egg', 'fish', 'shellfish', 'treenuts', 'peanuts', 'wheat', 'soy', 'sesame', 'gluten', 'lactose']
 const APPROACHES: CarbApproach[] = ['moderate', 'low', 'verylow']
 const PATTERNS: Pattern[] = ['none', 'vegetarian', 'vegan', 'pescatarian', 'halal', 'kosher']
-const AVOIDED: Avoided[] = ['pork', 'beef']
+const AVOIDED: Avoided[] = ['pork', 'beef', 'lamb', 'chicken', 'turkey', 'duck', 'game']
 const GOALS: Goal[] = ['lose', 'maintain', 'gain']
 
 /** Toggle membership in a list-valued profile field. */

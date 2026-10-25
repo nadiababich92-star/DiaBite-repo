@@ -678,8 +678,9 @@ const menuMisses: string[] = []
     const nutFree = avoided({ allergens: ['peanuts', 'treenuts'] }, new RegExp(`${ALLERGEN_PATTERNS.peanuts.source}|${ALLERGEN_PATTERNS.treenuts.source}`, 'i'))
     const noEgg = avoided({ excludedFoodIds: ['egg'] }, /\begg/i)
     const pesco = avoided({ pattern: 'pescatarian' }, PATTERN_PATTERNS.pescatarian)
-    const noPorkBeef = avoided({ avoided: ['pork', 'beef'] }, new RegExp(`${AVOIDED_PATTERNS.pork.source}|${AVOIDED_PATTERNS.beef.source}`, 'i'))
-    if (pesco || noPorkBeef) menuMisses.push(`    a recipe offered what the person avoids (pescatarian ${pesco}, pork or beef ${noPorkBeef})`)
+    const noMeats = (['pork', 'beef', 'lamb', 'chicken', 'turkey', 'duck', 'game'] as const)
+    const noPorkBeef = avoided({ avoided: [...noMeats] }, new RegExp(noMeats.map((m) => AVOIDED_PATTERNS[m].source).join('|'), 'i'))
+    if (pesco || noPorkBeef) menuMisses.push(`    a recipe offered what the person avoids (pescatarian ${pesco}, meats ${noPorkBeef})`)
     if (celiac || vegan || nutFree || noEgg) menuMisses.push(`    a recipe offered what the person avoids (gluten ${celiac}, vegan ${vegan}, nuts ${nutFree}, egg ${noEgg})`)
     // the shopping list covers every ingredient above a pinch, and a recipe's name is one line however many times it is cooked
     const list = shoppingList(week)

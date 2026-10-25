@@ -150,7 +150,7 @@ export interface Profile {
   kidney: Kidney
   comorbidities: Comorbidity[]
   allergens: Allergen[]
-  /** Pork and beef, for people who do not eat them. Filtered out of every suggestion. */
+  /** Meats a person does not eat (pork, beef, lamb, chicken, turkey, duck, game). Filtered out of every suggestion. */
   avoided: Avoided[]
   /** Vegetarian, vegan, pescatarian, halal, kosher — filtered out of every suggestion. */
   pattern: Pattern
