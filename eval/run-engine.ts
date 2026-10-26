@@ -63,7 +63,7 @@ import type { VerifyRequest } from '../server/contract'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const TARGET = Number(process.env.RESOLVE_TARGET ?? 90)
 
-interface ResolveCase { phrase: string; expect: string[]; tags: string[] }
+interface ResolveCase { phrase: string; expect: string[]; tags: string[]; notBranded?: boolean }
 interface ClarifyCase { phrase: string; band: string; why: string; offers?: string[] }
 interface AnswerCase { id: string; text: string; verdict: string | null; next?: string; why?: string; costed?: boolean }
 interface PartialCase { id: string; remainingGl?: number; mealGl?: number; unknown?: string[]; unscored?: string[]; fits?: boolean | null; flow?: boolean; fitsAfterRetry?: boolean }
@@ -93,19 +93,22 @@ cases.engine.resolve.forEach((c, i) => {
   const r = resolved[i]
   // "unknown" is an answer, not an absence: the database has no verified match
   // and saying so is the correct behaviour.
-  const ok = c.expect.includes('unknown')
-    ? r.unknown === true
-    : c.expect.includes(r.candidates[0]?.id ?? '')
+  const top = r.candidates[0]?.id ?? ''
+  const ok = c.notBranded
+    ? !!top && !top.startsWith('branded:')
+    : c.expect.includes('unknown')
+      ? r.unknown === true
+      : c.expect.includes(top)
   for (const tag of c.tags) {
     const b = (byTag[tag] ??= { pass: 0, total: 0 })
     b.total++
     if (ok) b.pass++
   }
   if (!ok) {
-    const got = c.expect.includes('unknown')
+    const got = c.notBranded ? `a brand first: ${r.candidates[0]?.id}` : c.expect.includes('unknown')
       ? `${r.confidence}, top ${r.candidates[0]?.id} ${r.candidates[0]?.score.toFixed(2)}`
       : (r.candidates[0]?.id ?? 'none')
-    misses.push(`    ${c.phrase.padEnd(28)} want ${c.expect.join('|').padEnd(26)} got ${got}`)
+    misses.push(`    ${c.phrase.padEnd(28)} want ${(c.notBranded ? 'no brand first' : c.expect.join('|')).padEnd(26)} got ${got}`)
   }
 })
 

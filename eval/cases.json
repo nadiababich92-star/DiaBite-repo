@@ -4,6 +4,64 @@
   "engine": {
     "resolve": [
       {
+        "phrase": "pepperoni pizza",
+        "expect": [],
+        "tags": [
+          "no-brand-first"
+        ],
+        "notBranded": true
+      },
+      {
+        "phrase": "biscuits and gravy",
+        "expect": [],
+        "tags": [
+          "no-brand-first"
+        ],
+        "notBranded": true
+      },
+      {
+        "phrase": "rice cakes",
+        "expect": [],
+        "tags": [
+          "no-brand-first"
+        ],
+        "notBranded": true
+      },
+      {
+        "phrase": "protein bar",
+        "expect": [],
+        "tags": [
+          "no-brand-first"
+        ],
+        "notBranded": true
+      },
+      {
+        "phrase": "sweet tea",
+        "expect": [],
+        "tags": [
+          "no-brand-first"
+        ],
+        "notBranded": true
+      },
+      {
+        "phrase": "Tombstone Pepperoni Original Pizza",
+        "expect": [
+          "branded:2679824"
+        ],
+        "tags": [
+          "brand-named"
+        ]
+      },
+      {
+        "phrase": "oreos",
+        "expect": [
+          "branded:2529927"
+        ],
+        "tags": [
+          "brand-named"
+        ]
+      },
+      {
         "phrase": "white rice",
         "expect": [
           "ing:white_rice"
@@ -730,7 +788,7 @@
         ]
       },
       {
-        "phrase": "biscuits and gravy",
+        "phrase": "Mountain House Biscuits and Gravy",
         "expect": [
           "branded:476408"
         ],
@@ -1717,7 +1775,11 @@
         "phrase": "breakfast sausage",
         "band": "medium",
         "why": "chicken, turkey and pork all answer to it; the question must offer all three, because someone who eats no pork meant one of the others",
-        "offers": ["Chicken sausage", "Turkey sausage", "Pork sausage"]
+        "offers": [
+          "Chicken sausage",
+          "Turkey sausage",
+          "Pork sausage"
+        ]
       },
       {
         "phrase": "chicken",

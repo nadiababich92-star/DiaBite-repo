@@ -44,6 +44,17 @@ const SCHOOL_PENALTY = 0.10
  * reach the branded ones because their first word, the brand, is in the phrase.
  */
 const BRANDED_PENALTY = 0.05
+/**
+ * A brand nobody typed does not stand for the food.
+ *
+ * "pepperoni pizza" went to Tombstone because a pizza USDA gives no glycemic
+ * index to pays 0.32 and a brand pays 0.13, so the one brand outscored every
+ * plain pizza by a hair, and the agent takes the first candidate of a meal.
+ * Raising the brand's penalty fixed that and broke "orange soda", which then
+ * landed on orange juice. So the rule is narrower: when the phrase does not
+ * name the brand, a plain record within this distance of it goes first.
+ */
+const BRAND_YIELD = 0.05
 /** First words of a branded name that are a kind of food, not a brand: "Chips Ahoy" is not "chips". */
 const GENERIC_FIRST_WORD = new Set(['chip', 'cheese', 'cereal', 'bar', 'cookie', 'candy', 'soda', 'juice', 'water', 'milk', 'tea', 'coffee', 'sauce', 'bread', 'rice', 'pasta', 'soup', 'pizza', 'pie', 'cake', 'yogurt', 'butter'])
 /**
@@ -371,6 +382,17 @@ function closestBySpelling(phrase: string, records: FoodRecord[]): FoodRecord | 
   return null
 }
 
+/** Ranked candidates with a brand nobody typed moved behind the plain record that is nearly as good. */
+function brandYields<T extends { id: string; name: string; score: number }>(phrase: string, ranked: T[]): T[] {
+  const top = ranked[0]
+  if (!top || !top.id.startsWith('branded:')) return ranked
+  const bw = brandWord(top.name)
+  if (bw && tokens(phrase).map(stem).includes(bw)) return ranked
+  const i = ranked.findIndex((c) => !c.id.startsWith('branded:') && top.score - c.score <= BRAND_YIELD)
+  if (i <= 0) return ranked
+  return [ranked[i], ...ranked.slice(0, i), ...ranked.slice(i + 1)]
+}
+
 export async function resolvePhrases(store: VectorStore, phrases: string[], topK = 5): Promise<ResolvedPhrase[]> {
   const { byId } = loadFoods()
   const given = phrases.map((p) => p.trim()).filter(Boolean)
@@ -386,7 +408,7 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
     const named = aliasesOf().get(norm(phrase))
     if (named && !hits.some((h) => h.id === named)) hits.unshift({ id: named, score: ALIAS_SCORE })
 
-    const candidates: ResolveCandidate[] = hits
+    const ranked: ResolveCandidate[] = hits
       // A store can hold an id this build does not know: the vectors live in
       // Postgres and the records in the image, so a food added to the table
       // before a deploy would otherwise crash the tool — and a 500 from a tool
@@ -405,6 +427,7 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
         return { ...summary(rec), score }
       })
       .sort((a, b) => b.score - a.score)
+    const candidates: ResolveCandidate[] = brandYields(phrase, ranked)
       .slice(0, topK)
       .map((c) => ({ ...c, score: Math.round(c.score * 1000) / 1000 }))
 
