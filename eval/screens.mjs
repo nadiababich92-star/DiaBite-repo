@@ -56,7 +56,8 @@ if (SEED === 'full' || SEED === 'thin') {
   console.log(`seeded ${rows.length} diary rows (${SEED}):`, r.status)
 }
 
-const SIZES = [{ name: 'laptop', width: 1366, height: 768, dpr: 1 }, { name: 'phone', width: 390, height: 844, dpr: 2 }]
+// SIZE=phone (or laptop) shoots one size alone, onboarding included: the first size run always walks it.
+const SIZES = [{ name: 'laptop', width: 1366, height: 768, dpr: 1 }, { name: 'phone', width: 390, height: 844, dpr: 2 }].filter((s) => !process.env.SIZE || s.name === process.env.SIZE)
 let port = 9801
 try {
   for (const [idx, size] of SIZES.entries()) {
@@ -83,7 +84,7 @@ try {
       await b.ev(`__check('I agree that DiaBite keeps this about me')`)
       await b.ev(`__setNum('Age', 52)`); await click('Continue'); await sleep(700)
       await click('Type 2 diabetes'); await click('Continue'); await sleep(700)
-      await click('Continue'); await sleep(700); await shot('onboarding-diet'); await click('Continue'); await sleep(700)
+      await click('Continue'); await sleep(700); await shot('onboarding-diet'); await b.ev(`[...document.querySelectorAll('h3')].find(h=>h.innerText.startsWith('Meats'))?.scrollIntoView({block:'center'})`); await sleep(500); await shot('onboarding-diet-meats'); await click('Continue'); await sleep(700)
       // the last step needs its box ticked before the button works; try until the ask screen is open
       for (let i = 0; i < 8; i++) {
         await b.ev(`__check('I understand this is not medical advice')`); await sleep(300)
