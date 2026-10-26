@@ -287,7 +287,7 @@ const USDA_ALIASES: Record<string, string[]> = {
  * user typed it and got "Breakfast Sausage Patties with Apple"). Keyed by the ingredient table's id.
  */
 const INGREDIENT_ALIASES: Record<string, string[]> = {
-  turkey_sausage: ['breakfast sausage', 'sausage links', 'sausage patties'],
+  turkey_sausage: ['breakfast sausage', 'sausage links', 'sausage patties', 'turkey breakfast patties', 'turkey sausage patties', 'turkey breakfast sausage', 'turkey breakfast links'],
   chicken_sausage: ['breakfast sausage', 'sausage links', 'sausage patties'],
 }
 

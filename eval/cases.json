@@ -4,6 +4,15 @@
   "engine": {
     "resolve": [
       {
+        "phrase": "turkey breakfast patties",
+        "expect": [
+          "ing:turkey_sausage"
+        ],
+        "tags": [
+          "everyday"
+        ]
+      },
+      {
         "phrase": "pepperoni pizza",
         "expect": [],
         "tags": [
@@ -1771,6 +1780,11 @@
       }
     ],
     "clarify": [
+      {
+        "phrase": "mashed vegetables",
+        "band": "medium",
+        "why": "vegetables is a class; it was served as mashed potato, with high confidence, in a real turn"
+      },
       {
         "phrase": "breakfast sausage",
         "band": "medium",

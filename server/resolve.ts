@@ -91,6 +91,8 @@ const MISSING_TOKEN_PENALTY = Number(process.env.MISSING_TOKEN_PENALTY ?? 0.20)
  * written down rather than inferred. An exact name match to one of these
  * caps the confidence at medium, which is the agent's cue to ask.
  */
+/** Words for a whole class of food: whichever member the record is, it is not certain to be the one meant. */
+const VAGUE_WORDS = new Set(['vegetable', 'vegetables', 'veggies', 'veggie', 'fruit', 'fruits', 'meat', 'meats'])
 const CATEGORY_WORDS = new Set([
   'chicken', 'fish', 'beans', 'nuts', 'oatmeal', 'oats', 'tortilla',
   'cheese', 'yogurt', 'greens', 'berries', 'squash', 'seeds',
@@ -288,6 +290,10 @@ function band(phrase: string, cands: ResolveCandidate[]): Confidence {
     const n = norm(plainName(top.name))
     if (stated.some((t) => !n.includes(t))) return 'low'
   }
+  // "mashed vegetables" is not mashed potato: a word that names a whole class of
+  // food, which the record's own name does not carry, is a question.
+  const vague = tokens(phrase).filter((t) => VAGUE_WORDS.has(t))
+  if (vague.length && vague.some((t) => !norm(top.name).includes(stem(t)))) return 'medium'
   // A category word is never certain, however well it matched.
   if (tokens(phrase).every((t) => CATEGORY_WORDS.has(t))) return 'medium'
   if (isNamed(phrase, top.name)) return 'high'
