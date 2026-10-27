@@ -4353,6 +4353,39 @@
         },
         "entries": []
       }
+    },
+    {
+      "id": "P2",
+      "dimension": "honest",
+      "query": "An apple",
+      "ground_truth": "The day already holds a food with no glycemic load (pizza), so what is left of the day is understated: the apple's own numbers are given and the day is not called a fit.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [
+          {
+            "foodId": "usda:2708638",
+            "grams": 230
+          }
+        ]
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "dayUnscored": true,
+        "noFitsClaim": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "branded",
+        "day"
+      ]
     }
   ]
 }

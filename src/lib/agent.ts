@@ -9,6 +9,7 @@
  * thread, so this client sends no thread id of its own.
  */
 import type { DiaryEntry, Profile, Targets } from '../types'
+import { renewSession } from './session'
 
 /** Dev: proxied by Vite to the Container App (see vite.config.ts). Prod: set VITE_AGENT_URL. */
 export const AGENT_URL = import.meta.env.VITE_AGENT_URL ?? '/agent'
@@ -108,7 +109,7 @@ export async function askAgent(req: AgentRequest, signal?: AbortSignal, token?: 
   }
 }
 
-async function askOnce(req: AgentRequest, signal: AbortSignal, token?: string | null): Promise<AgentResponse> {
+async function askOnce(req: AgentRequest, signal: AbortSignal, token?: string | null, renewed = false): Promise<AgentResponse> {
   const res = await fetch(AGENT_URL, {
     method: 'POST',
     headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
@@ -116,6 +117,8 @@ async function askOnce(req: AgentRequest, signal: AbortSignal, token?: string | 
     signal,
   })
   if (res.status === 401) throw new SignInRequiredError()
+  // The id belongs to someone else, or was used before this person signed in: start a new session, once.
+  if (res.status === 403 && !renewed) return askOnce({ ...req, sessionId: renewSession() }, signal, token, true)
   if (res.status === 404) throw new Error('The agent is not reachable — is the engine deployed?')
   if (res.status === 429) {
     const body = await res.json().catch(() => ({})) as { scope?: 'ip' | 'session' | 'daily' | 'user'; retryAfterSec?: number }
@@ -302,6 +305,7 @@ export async function recomputeMeal(
     const body = await res.json().catch(() => ({})) as { retryAfterSec?: number }
     throw new RateLimitedError('ip', Number(body.retryAfterSec ?? res.headers.get('retry-after')) || 60)
   }
+  if (res.status === 403) throw new Error('This meal was calculated before you signed in. Ask about it again to change the portions.')
   if (!res.ok) throw new Error(`Recalculation failed (${res.status})`)
   const m = (await res.json()) as MealResult
   if (!m?.items || typeof m.totals?.gl !== 'number') throw new Error('Unexpected reply from the engine')

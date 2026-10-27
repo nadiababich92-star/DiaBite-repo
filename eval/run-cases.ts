@@ -337,6 +337,12 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
     const scoredWrongly = (res?.items ?? []).some((it) => it.loadAvailable === false && it.gl !== null)
     say('engine marks a branded item unscored, fits is not true', !!res?.afterMeal?.partial?.unscored?.length && res.afterMeal.fits !== true && !scoredWrongly, JSON.stringify(res?.afterMeal))
   }
+  // The same promise one level up: a day that already holds a food with no glycemic load is understated,
+  // so the engine says so and the verdict on the next food is not "fits".
+  if (e.dayUnscored === true) {
+    const res = callOf(r, 'compute_meal')?.result as { dayState?: { unscored?: string[] }; afterMeal?: { fits?: boolean | null; partial?: { unscored?: string[] } } } | undefined
+    say('engine marks the day partial, fits is not true', !!res?.dayState?.unscored?.length && !!res?.afterMeal?.partial?.unscored?.length && res.afterMeal.fits !== true, JSON.stringify(res?.afterMeal))
+  }
   if (e.noFitsClaim === true) {
     say('claims no fit', !/\b(it )?fits\b|within (your )?budget/i.test(answer.replace(/can'?t (?:say|tell|judge)[^.]*\./gi, ' ')))
   }

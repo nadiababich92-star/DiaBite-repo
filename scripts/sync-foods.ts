@@ -148,6 +148,7 @@ if (existsSync(CROSSCHECK)) {
   }
 }
 
+/** The default source line, by id prefix, for a record with none of its own. Never the last word: see the row builder. */
 function provenance(id: string): { source: string; verified_at: string | null } {
   if (id.startsWith('rec:')) {
     return {
@@ -180,7 +181,10 @@ const rows: Row[] = ids.map((id, i) => {
     search_text: r.searchText,
     per100: r.per100 ?? null,
     per_serving: r.perServing ?? null,
+    // A record that carries its own source line keeps it: a USDA food with no glycemic index says so, and
+    // a branded product says it is label data. `provenance` is only the default for records that carry none.
     ...provenance(id),
+    ...(r.source ? { source: r.source } : {}),
     embedding: literal(i),
   }
 })

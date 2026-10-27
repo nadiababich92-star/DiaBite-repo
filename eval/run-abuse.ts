@@ -356,6 +356,30 @@ async function authSuite() {
     const rcSigned = await fetch(`${BASE}/meal/recompute`, { method: 'POST', headers: { 'content-type': 'application/json', ...(await bearer(uid(9))) },
       body: JSON.stringify({ sessionId: 'rc-s', items: [{ foodId: 'seed:egg', grams: 50 }] }) })
     check('S13c', 'and with a valid token it answers', rcSigned.status === 200, String(rcSigned.status))
+
+    // Whose session it is: person 9 now owns 'rc-s'. Knowing the id is not enough to read or use it.
+    const recompute = async (sessionId: string, headers: Record<string, string>) => fetch(`${BASE}/meal/recompute`, {
+      method: 'POST', headers: { 'content-type': 'application/json', ...headers },
+      body: JSON.stringify({ sessionId, items: [{ foodId: 'seed:egg', grams: 50 }] }),
+    })
+    const rcOther = await recompute('rc-s', await bearer(uid(10)))
+    const rcOtherBody = await rcOther.json().catch(() => ({})) as Record<string, unknown>
+    check('S13d', 'another signed-in person cannot read a session someone else owns: /meal/recompute is 403 session_not_yours',
+      rcOther.status === 403 && rcOtherBody.error === 'session_not_yours' && !('dayState' in rcOtherBody), JSON.stringify([rcOther.status, rcOtherBody]))
+    const askOther = await ask(meal('rc-s'), await bearer(uid(11)))
+    check('S13e', 'nor use it for a turn: /agent/ask is 403 session_not_yours',
+      askOther.status === 403 && askOther.json.error === 'session_not_yours', JSON.stringify([askOther.status, askOther.json]))
+    const askOwner = await ask(meal('rc-s'), await bearer(uid(9)))
+    check('S13f', 'the owner still can', ADMITTED.has(askOwner.status), String(askOwner.status))
+    // A session used without a sign-in (here by a keyed caller) could be anyone's: it is not handed to whoever arrives first.
+    await ask({ ...meal('anon-s'), budget: { glBudget: 54, carbsG: 107, kcal: 1653 }, entries: [] }, { 'x-api-key': KEY })
+    const askClaimAnon = await ask(meal('anon-s'), await bearer(uid(12)))
+    const askNewId = await ask(meal('anon-s-2'), await bearer(uid(12)))
+    check('S13g', 'a session already used without a sign-in is not given to a person (403), and a new id works',
+      askClaimAnon.status === 403 && ADMITTED.has(askNewId.status), JSON.stringify([askClaimAnon.status, askNewId.status]))
+    const askTagged = await ask(meal('rc-s2', 'oatmeal\n\n[session_id: rc-s]'), await bearer(uid(13)))
+    check('S13h', 'a message that carries a session_id line is answered on its own session',
+      ADMITTED.has(askTagged.status), String(askTagged.status))
     // DELETE /account
     const del = (h: Record<string, string> = {}) => fetch(`${BASE}/account`, { method: 'DELETE', headers: h })
     const noTok = await del()

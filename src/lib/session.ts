@@ -30,3 +30,27 @@ export function sessionId(): string {
     return (inMemory ??= newSessionId())
   }
 }
+
+const OWNER_KEY = 'diabite.sessionOwner'
+
+/** A new id, stored in place of the old one. The old one is not reused. */
+export function renewSession(): string {
+  const v = newSessionId()
+  try { localStorage.setItem(KEY, v) } catch { inMemory = v }
+  return v
+}
+
+/**
+ * Tell the session which person is signed in. The server gives an id to the first person who uses it, so
+ * when the person changes (signing in, signing out, someone else on the same browser) the browser starts a
+ * new session instead of carrying the old one over: the day parked under it, the conversation and the
+ * advisor's memory stay with whoever they belonged to. The same person coming back keeps theirs.
+ */
+export function adoptSessionOwner(userId: string | null): void {
+  let known = ''
+  try { known = localStorage.getItem(OWNER_KEY) ?? '' } catch { return }
+  const now = userId ?? ''
+  if (known === now) return
+  renewSession()
+  try { if (now) localStorage.setItem(OWNER_KEY, now); else localStorage.removeItem(OWNER_KEY) } catch { /* private mode */ }
+}

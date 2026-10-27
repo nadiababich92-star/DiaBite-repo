@@ -229,6 +229,11 @@ export interface DayStateResponse {
   /** Consumed GL judged against the daily budget, not the portion scale. */
   dayLevel: Level
   entries: MealItemResult[]
+  /**
+   * Entries of the day that carry no glycemic load (branded or unrated foods). `remaining.gl` counts
+   * them as zero, so it is the room left after the scored part only, and a verdict built on it is partial.
+   */
+  unscored?: string[]
 }
 
 // ── find_alternatives ─────────────────────────────────────────────────────

@@ -29,11 +29,11 @@ import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
-import { afterMealFor, computeMeal, dayState, driverOf, findAlternatives, planDish } from './compute'
+import { afterMealFor, computeMeal, dayState, driverOf, findAlternatives, planDish, withDayUnscored } from './compute'
 import { verify } from './verify'
-import { getSession, noteResolution, putSession } from './sessions'
+import { claimSession, getSession, noteResolution, putSession } from './sessions'
 import { openApiSpec } from './openapi'
-import { ask, SignInRequired, type AskRequest } from './agent'
+import { ask, SessionNotYours, SignInRequired, type AskRequest } from './agent'
 import { personOf, signInRequired } from './auth'
 import { createHash, timingSafeEqual } from 'node:crypto'
 import { RateLimited, addressKey, chargeDelete, chargeRecompute, originAllowed, sourceTag, validSessionId, validateAsk, validateDish, validateRecompute } from './guard'
@@ -141,6 +141,7 @@ async function main() {
     try { res.json(await ask(body, { clientKey: trusted ? undefined : addressKey(req.ip), trusted, person, requireSignIn: signInRequired() })) }
     catch (e) {
       if (e instanceof SignInRequired) return res.status(401).json({ error: 'sign_in_required' })
+      if (e instanceof SessionNotYours) return res.status(403).json({ error: 'session_not_yours' })
       if (e instanceof RateLimited) {
         console.warn(JSON.stringify({ evt: 'rate_limited', scope: e.scope, source: sourceTag(addressKey(req.ip)), retryAfterSec: e.retryAfterSec }))
         res.set('Retry-After', String(e.retryAfterSec))
@@ -323,6 +324,8 @@ async function main() {
     if (!trusted) {
       const person = await personOf(req)
       if (signInRequired() && !person) return res.status(401).json({ error: 'sign_in_required' })
+      // The day parked under a session id is its owner's: another person, or no one, gets a refusal.
+      if (claimSession(body.sessionId, person?.sub) === 'denied') return res.status(403).json({ error: 'session_not_yours' })
       const key = addressKey(req.ip)
       const wait = key ? chargeRecompute(key) : 0
       if (wait) { res.set('Retry-After', String(wait)); return res.status(429).json({ error: 'rate_limited', scope: 'ip', retryAfterSec: wait }) }
@@ -336,7 +339,7 @@ async function main() {
         out.dayState = day
         const unknownFoods = getSession(body.sessionId)?.unknownFoods ?? []
         const unscored = meal.items.filter((it) => !it.loadAvailable).map((it) => it.name)
-        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, unscored)
+        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, withDayUnscored(unscored, day))
       }
       res.json(out)
     } catch (e) {
@@ -394,7 +397,7 @@ async function main() {
       if (day && !('unknown' in day)) {
         const unknownFoods = (body.sessionId ? getSession(body.sessionId)?.unknownFoods : undefined) ?? []
         const unscored = meal.items.filter((it) => !it.loadAvailable).map((it) => it.name)
-        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, unscored)
+        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, withDayUnscored(unscored, day))
       }
 
       const remaining = day && !('unknown' in day) ? day.remaining.gl : undefined
@@ -465,7 +468,7 @@ async function main() {
       if (day && !('unknown' in day)) {
         const unknownFoods = (body.sessionId ? getSession(body.sessionId)?.unknownFoods : undefined) ?? []
         const unscored = meal.items.filter((it) => !it.loadAvailable).map((it) => it.name)
-        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, unscored)
+        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, withDayUnscored(unscored, day))
       }
       res.json(out)
     } catch (e) {

@@ -85,8 +85,8 @@ export function getSession(id: string): SessionState | undefined {
   return store.get(id)
 }
 
-/** Sizes of the three maps, for the abuse suite. */
-export const _sizes = () => ({ store: store.size, lastResponse: lastResponse.size, conversations: conversations.size })
+/** Sizes of the maps, for the abuse suite. */
+export const _sizes = () => ({ store: store.size, lastResponse: lastResponse.size, conversations: conversations.size, owners: owners.size })
 
 export function sessionCount(): number {
   sweep()
@@ -134,4 +134,39 @@ export function conversationFor(sessionId: string): string | undefined {
 
 export function rememberConversation(sessionId: string, id: string): void {
   setBounded(conversations, sessionId, { id, storedAt: Date.now() })
+}
+
+// ── Whose session it is ──────────────────────────────────────────────────
+
+/**
+ * A session id is chosen by the browser, and the day parked under it, the conversation and the advisor's
+ * memory all hang from it. Without an owner, anyone who learns an id (it sits in `localStorage`, and the
+ * turn log has it) reads another person's day and preferences. So the first signed-in request to use an
+ * id becomes its owner, and from then on only that person may use it, signed in or not.
+ *
+ * An id that was already used without a sign-in is not handed to whoever arrives first: it could be
+ * anyone's. The browser starts a new session when someone signs in, so the honest case never meets this;
+ * the answer is `denied`, and the browser, told so, starts a new one and asks again.
+ *
+ * The owner outlives the state it protects (two hours against one), and a lost owner fails closed:
+ * state without an owner is refused to a person, never given to them.
+ */
+const OWNER_TTL_MS = 2 * TTL_MS
+const owners = new Map<string, { sub: string; storedAt: number }>()
+
+const hasState = (id: string) => store.has(id) || lastResponse.has(id) || conversations.has(id)
+
+export function claimSession(id: string, sub: string | null | undefined, now = Date.now()): 'ok' | 'denied' {
+  const o = owners.get(id)
+  if (o && now - o.storedAt > OWNER_TTL_MS) owners.delete(id)
+  const owner = owners.get(id)
+  if (owner) {
+    if (owner.sub !== sub) return 'denied'
+    setBounded(owners, id, { sub: owner.sub, storedAt: now })
+    return 'ok'
+  }
+  if (!sub) return 'ok'
+  if (hasState(id)) return 'denied'
+  setBounded(owners, id, { sub, storedAt: now })
+  return 'ok'
 }

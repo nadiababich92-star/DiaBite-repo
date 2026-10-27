@@ -9,6 +9,7 @@
 import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './supabase'
+import { adoptSessionOwner } from './session'
 import { AGENT_URL } from './agent'
 
 export type AuthStatus = 'loading' | 'signedOut' | 'signedIn'
@@ -22,8 +23,8 @@ export function useAuth(): AuthState {
   useEffect(() => {
     if (!supabase) return
     let live = true
-    supabase.auth.getSession().then(({ data }) => { if (live) setState(stateOf(data.session)) })
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => { if (live) setState(stateOf(session)) })
+    supabase.auth.getSession().then(({ data }) => { adoptSessionOwner(data.session?.user.id ?? null); if (live) setState(stateOf(data.session)) })
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => { adoptSessionOwner(session?.user.id ?? null); if (live) setState(stateOf(session)) })
     return () => { live = false; data.subscription.unsubscribe() }
   }, [])
   return state

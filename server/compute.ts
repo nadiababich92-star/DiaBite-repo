@@ -131,6 +131,7 @@ export async function planDish(store: VectorStore, req: CostDishRequest): Promis
 export function dayState(budget: DayBudget, entries: MealItemInput[]): DayStateResponse {
   const results = entries.map(computeItem)
   const consumed = totalsOf(results)
+  const unscored = [...new Set(results.filter((r) => !r.loadAvailable).map((r) => r.name))]
   return {
     consumed,
     remaining: {
@@ -140,7 +141,16 @@ export function dayState(budget: DayBudget, entries: MealItemInput[]): DayStateR
     },
     dayLevel: dayGlLevel(consumed.gl, budget.glBudget),
     entries: results,
+    ...(unscored.length ? { unscored } : {}),
   }
+}
+
+/**
+ * The meal's unscored items plus the day's. A lunch of pizza has no glycemic load, so the room left at
+ * four o'clock is understated, and an answer about an apple built on it is as partial as a meal missing a food.
+ */
+export function withDayUnscored(mealUnscored: string[], day: DayStateResponse): string[] {
+  return [...new Set([...mealUnscored, ...(day.unscored ?? [])])]
 }
 
 /** What an alternative "costs": at the requested grams for ingredients, per serving for recipes. */

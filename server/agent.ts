@@ -40,7 +40,7 @@ import { safetyGate } from './safety'
 import { chargeTurn } from './guard'
 import { verify } from './verify'
 import type { AvoidList } from './avoid'
-import { previousResponseFor, putSession, rememberResponse } from './sessions'
+import { claimSession, previousResponseFor, putSession, rememberResponse } from './sessions'
 import type { DayBudget, MealItemInput } from './contract'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -742,8 +742,22 @@ export class SignInRequired extends Error {
   constructor() { super('sign_in_required') }
 }
 
+/** The session id belongs to someone else, or was used before this person signed in. */
+export class SessionNotYours extends Error {
+  constructor() { super('session_not_yours') }
+}
+
+/**
+ * The model is told whose day to read by a `[session_id: …]` line the engine writes. A person's message that
+ * carries a line like it could steer the tool calls at another day, so such a line is taken out of the message
+ * before the model sees it. Nothing a person asks about food contains one.
+ */
+export const withoutSessionTag = (message: string): string =>
+  message.replace(/\[?\s*session[\s_-]*id\s*[:=][^\]\n]*\]?/gi, ' ').replace(/[ \t]{2,}/g, ' ').trim()
+
 export async function ask(req: AskRequest, ctx: AskContext = {}): Promise<AskResponse> {
   const started = Date.now()
+  req = { ...req, message: withoutSessionTag(req.message) || '?' }
   const res = await answer(req, ctx)
   logTurn(req, res, Date.now() - started)
   return res
@@ -819,6 +833,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   // withheld, and the router is itself a model call. Throws RateLimited.
   // The gate above needs no token; everything below spends a model turn and does.
   if (ctx.requireSignIn && !ctx.trusted && !ctx.person) throw new SignInRequired()
+  if (!ctx.trusted && claimSession(req.sessionId, ctx.person?.sub) === 'denied') throw new SessionNotYours()
   if (!ctx.trusted) chargeTurn(ctx.clientKey, req.sessionId, undefined, ctx.person?.sub)
 
   const clock = { t0: Date.now(), route: 0, park: 0, agent: [] as number[] }
