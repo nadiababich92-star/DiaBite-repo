@@ -81,3 +81,32 @@ export function verify(req: VerifyRequest): VerifyResponse {
   }
   return { ok: unmatched.length === 0, numbersInAnswer, matched, unmatched }
 }
+
+/**
+ * The verdict is the engine's, not the model's. The number check cannot see a wrong verdict, because no
+ * number is wrong in "it fits": a meal the engine could only partly score (an unknown food, a branded one,
+ * an assumed recipe, a day with unscored food) was once called "fits" in the model's own words. This reads
+ * the sentences the model wrote and returns the first that states a verdict the engine did not give.
+ *
+ * `fits` is the engine's `afterMeal.fits`; `estimate` is true for an assumed recipe (`cost_dish`), where a
+ * plain "fits" is never allowed even if the engine's comparison came out true. Conditional sentences ("if
+ * your dish is like this, it fits"), questions, swaps and "can't judge" are not claims about this meal.
+ */
+const FIT_CLAIM = /\bfits\b|within (your |the |today'?s )?(budget|limit)/i
+const NO_FIT_CLAIM = /\b(does not|doesn'?t|do not|won'?t|will not) fit\b|\bover (your |the |today'?s )?budget\b|\bover (your |the )?(limit|target)\b/i
+const NOT_ABOUT_THIS_MEAL = /\bif\b|\bwould\b|\bcould\b|\bswap|\binstead\b|\balternative|\bbetter\b|\bthan\b|\?|can'?t (?:say|tell|judge)|cannot (?:say|judge)|\bnot\b|n'?t\b/i
+const NOT_ABOUT_THIS_MEAL_NO_NEGATION = /\bif\b|\bwould\b|\bcould\b|\bswap|\binstead\b|\balternative|\bbetter\b|\bthan\b|\?/i
+
+export function verdictConflict(answer: string, fits: boolean | null | undefined, estimate = false): string | null {
+  const sentences = answer.split(/(?<=[.!?\n])/).map((s) => s.trim()).filter(Boolean)
+  if (fits !== true || estimate) {
+    // Anything but a plain, fully scored "fits": no sentence may say the meal fits.
+    const s = sentences.find((x) => FIT_CLAIM.test(x) && !NOT_ABOUT_THIS_MEAL.test(x))
+    if (s) return s
+  }
+  if (fits === true && !estimate) {
+    const s = sentences.find((x) => NO_FIT_CLAIM.test(x) && !NOT_ABOUT_THIS_MEAL_NO_NEGATION.test(x))
+    if (s) return s
+  }
+  return null
+}

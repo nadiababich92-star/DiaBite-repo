@@ -26,12 +26,12 @@ import { dirname, join } from 'node:path'
 import { carbsWithoutLoad, loadFoods } from '../server/foods'
 import { openStore } from '../server/embeddings'
 import { resolvePhrases } from '../server/resolve'
-import { verify } from '../server/verify'
+import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
 import { afterMealFor, computeItem, computeMeal, dayState, driverOf, planDish, uninvertPhrase, withDayUnscored } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
-import { looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
+import { engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { diffEntries, exportShape, fromRow, mergeById, storable, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
@@ -883,6 +883,46 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\nsession   ${tagMisses.length === 0 ? 'ok' : 'WRONG'}`)
   tagMisses.forEach((m) => console.log(m))
   if (tagMisses.length) process.exitCode = 1
+}
+
+// ── verdict ───────────────────────────────────────────────────────────────
+// The verifier checks numbers, and no number is wrong in "it fits". The wording of a verdict is held to the
+// engine's afterMeal.fits: a meal that could only be partly scored, or an assumed recipe, is never said to fit.
+{
+  const verdictMisses: string[] = []
+  const expectConflict = (label: string, text: string, fits: boolean | null, estimate: boolean, want: boolean) => {
+    const got = verdictConflict(text, fits, estimate) !== null
+    if (got !== want) verdictMisses.push(`    ${label}: ${JSON.stringify(text)} with fits=${fits} estimate=${estimate} -> ${got ? 'conflict' : 'no conflict'}`)
+  }
+  expectConflict('partial called fit', "Verdict: it fits what is left of today's budget.", null, false, true)
+  expectConflict('partial called within budget', 'This is within your budget.', null, false, true)
+  expectConflict('over called fit', 'The meal fits your day.', false, false, true)
+  expectConflict('estimate called fit', 'It fits what is left of today.', true, true, true)
+  expectConflict('fit called over', 'Verdict: it does not fit what is left of today.', true, false, true)
+  expectConflict('fit called over budget', 'You would be over budget after this.', true, false, false) // conditional wording is not a claim
+  expectConflict('fit called over budget, flat', 'This puts you over budget.', true, false, true)
+  expectConflict('cannot judge', "I can't judge the day on a partial total: pizza is not scored.", null, false, false)
+  expectConflict('conditional', 'If your dish is like this, it fits what is left of the day.', true, true, false)
+  expectConflict('a swap is not the meal', 'Oatmeal fits better than the cereal.', null, false, false)
+  expectConflict('smaller portion', 'A smaller portion would fit.', false, false, false)
+  expectConflict('plain fit stays', "It fits what is left of today's budget.", true, false, false)
+  expectConflict('plain over stays', 'It does not fit what is left of today.', false, false, false)
+  expectConflict('no verdict words', 'The glycemic load is 12 and the fibre helps.', null, false, false)
+  // The last-resort answer is the engine's own words: it never contradicts the verdict it came from.
+  for (const [fits, extra] of [[true, {}], [false, {}], [null, { partial: { unknownFoods: ['zzzqx'] } }], [false, { partial: { unscored: ['pizza'] } }], [null, { partial: { unscored: ['pizza'] } }]] as [boolean | null, object][]) {
+    for (const assumed of [false, true]) {
+      const trace = [{ tool: assumed ? 'cost_dish' : 'compute_meal', input: {}, result: { assumed, totals: { gl: 10 }, items: [{ loadAvailable: true }], afterMeal: { remaining: { gl: 5 }, fits, ...extra }, dayState: { remaining: { gl: 15 } } } }]
+      const v = engineVerdict(trace)
+      const text = templatedAnswer(trace) ?? ''
+      if (!v) { verdictMisses.push(`    no engine verdict for ${JSON.stringify(trace[0].result)}`); continue }
+      const c = verdictConflict(text, v.fits, v.estimate)
+      if (c) verdictMisses.push(`    the templated answer contradicts its own verdict (${fits}, assumed ${assumed}): ${c}`)
+    }
+  }
+  if (engineVerdict([]) !== null) verdictMisses.push('    an empty trace has a verdict')
+  console.log(`\nverdict   ${verdictMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  verdictMisses.forEach((m) => console.log(m))
+  if (verdictMisses.length) process.exitCode = 1
 }
 
 // ── partial ───────────────────────────────────────────────────────────────

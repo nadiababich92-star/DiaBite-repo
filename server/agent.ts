@@ -38,7 +38,7 @@ import OpenAI from 'openai'
 import { openApiSpec } from './openapi'
 import { safetyGate } from './safety'
 import { chargeTurn } from './guard'
-import { verify } from './verify'
+import { verify, verdictConflict } from './verify'
 import type { AvoidList } from './avoid'
 import { claimSession, previousResponseFor, putSession, rememberResponse } from './sessions'
 import type { DayBudget, MealItemInput } from './contract'
@@ -458,6 +458,19 @@ function lastCall(trace: ToolCallTrace[], operation: string): ToolCallTrace | un
 }
 
 /**
+ * The engine's verdict on the last meal or dish in the trace, for the check on the model's wording.
+ * `estimate` is a dish counted from an assumed recipe: never a plain "fits". Null when no meal was
+ * costed, so there is nothing for the words to contradict.
+ */
+export function engineVerdict(trace: ToolCallTrace[]): { fits: boolean | null; estimate: boolean } | null {
+  const lastIndex = (op: string) => trace.map((t) => t.tool === op || t.tool.endsWith(`_${op}`)).lastIndexOf(true)
+  const call = lastIndex('cost_dish') > lastIndex('compute_meal') ? lastCall(trace, 'cost_dish') : lastCall(trace, 'compute_meal')
+  const res = call?.result as { assumed?: boolean; afterMeal?: { fits?: boolean | null } } | undefined
+  if (!res?.afterMeal) return null
+  return { fits: res.afterMeal.fits ?? null, estimate: res.assumed === true }
+}
+
+/**
  * The answer of last resort, assembled from tool results alone.
  *
  * Reached when the model has twice written a number no tool returned. The
@@ -867,6 +880,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   let responseId: string | undefined
   let v = { ok: false, matched: [] as number[], unmatched: [] as number[] }
   let attempts = 0
+  let conflict: string | null = null
 
   // One regenerate, then the templated answer. Bounded on purpose: an
   // unbounded "try again" loop is how a wrong number becomes a long wait.
@@ -883,9 +897,19 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
     answer = stripCitations(res.output_text ?? '')
 
     v = verify({ answer, toolResults: trace.map((t) => t.result), userText: req.message })
-    if (v.ok) break
+    // The numbers can all be right and the verdict wrong ("it fits" on a meal the engine could only partly score).
+    const verdict = role === 'meal' ? engineVerdict(trace) : null
+    conflict = verdict ? verdictConflict(answer, verdict.fits, verdict.estimate) : null
+    if (v.ok && !conflict) break
 
-    console.warn(`verifier rejected attempt ${attempts}: ${JSON.stringify(v.unmatched)}`)
+    if (conflict) console.warn(`verdict rejected attempt ${attempts}: engine said ${JSON.stringify(verdict)}, answer said "${conflict.slice(0, 120)}"`)
+    else console.warn(`verifier rejected attempt ${attempts}: ${JSON.stringify(v.unmatched)}`)
+    if (conflict && v.ok) {
+      input = `The engine's verdict is not what your answer says. Say only what the tool result says about whether the meal fits: ` +
+        `${verdict!.estimate || verdict!.fits === null ? 'it could not be judged in full, so do not say it fits' : verdict!.fits ? 'it fits' : 'it does not fit'}. ` +
+        `Answer the same question again, and do not mention this correction.`
+      continue
+    }
     // The advisor has no tools, so "use the numbers from a tool result" asks for something it cannot do:
     // it is told to say it in words instead.
     input = role === 'advisor'
@@ -899,12 +923,15 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   }
 
   let templated = false
-  if (!v.ok) {
+  if (!v.ok || conflict) {
     const fallback = templatedAnswer(trace)
     if (fallback) {
       answer = fallback
       templated = true
       v = verify({ answer, toolResults: trace.map((t) => t.result), userText: req.message })
+    } else if (conflict) {
+      // Nothing to state the engine's verdict with, and the model's words contradict it: the prose is not shown.
+      v = { ok: false, matched: [], unmatched: [] }
     }
   }
 

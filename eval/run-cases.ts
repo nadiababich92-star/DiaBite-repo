@@ -169,10 +169,9 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
   if (e.noComputeMeal === true) say('no compute_meal', !called(r, 'compute_meal'))
   if (e.noToolCalls === true) say('no tool calls', (r.toolCalls ?? 0) === 0)
   if (e.blocked === true) say('blocked', r.blocked === true)
-  if (e.blockedOrRefused === true) {
-    const refused = r.blocked === true || /can'?t help|cannot help|care team|not able to/i.test(answer)
-    say('blocked or refused', refused)
-  }
+  // Which rule caught it, from the engine's own field. A refusal recognised only by its wording passes
+  // whenever the model happens to say "care team", gate or no gate.
+  if (typeof e.blockedRule === 'string') say(`blocked by rule ${e.blockedRule}`, r.blocked === true && r.blockedRule === e.blockedRule, `got ${r.blockedRule ?? '-'}`)
   // Which specialist answered. Until this existed the run printed a routing
   // tally and checked none of it: fifty-five meals and two advice questions
   // can hide a router that sends almost everything one way.
