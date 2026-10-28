@@ -94,7 +94,7 @@ function Figures({ reply, onGl }: { reply: AgentResponse; onGl?: () => void }) {
       <div className="figures">
         <div className="fig"><span className="fig-k">carbohydrate</span><span className="fig-v">{t.carbs} g</span></div>
         <div className="fig"><span className="fig-k">fibre</span><span className="fig-v">{t.fiber ?? 0} g</span></div>
-        <div className="fig"><span className="fig-k">calories</span><span className="fig-v">{t.kcal}</span></div>
+        <div className="fig"><span className="fig-k">calories</span><span className="fig-v">{t.kcal} kcal</span></div>
       </div>
     )
   }
@@ -107,6 +107,7 @@ function Figures({ reply, onGl }: { reply: AgentResponse; onGl?: () => void }) {
   const fits = meal?.afterMeal?.fits !== false
   return (
     <>
+      <p className="fig-title">Glycemic load (GL)</p>
       <div className="figures">
         <div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{mealGl}</span></div>
         <div className="fig"><span className="fig-k">before</span><span className="fig-v">{before}</span></div>
@@ -149,6 +150,7 @@ function RecalcCard({ rc, onBack, onGl }: { rc: Recalc; onBack: () => void; onGl
         <p className="a-verdict">{verdict}</p>
         {rc.before !== null && lead !== null ? (
           <>
+            <p className="fig-title">Glycemic load (GL)</p>
             <div className="figures">
               <div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{rc.mealGl}</span></div>
               <div className="fig"><span className="fig-k">before</span><span className="fig-v">{rc.before}</span></div>
@@ -160,7 +162,10 @@ function RecalcCard({ rc, onBack, onGl }: { rc: Recalc; onBack: () => void; onGl
             <button className="link gl-link" onClick={onGl}>What is GL?</button>
           </>
         ) : (
-          <div className="figures"><div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{rc.mealGl}</span></div></div>
+          <>
+            <p className="fig-title">Glycemic load (GL)</p>
+            <div className="figures"><div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{rc.mealGl}</span></div></div>
+          </>
         )}
         <p className="a-why">Recalculated with your portions. The explanation below was written for the original ones.</p>
       </div>
@@ -315,7 +320,7 @@ function ReceiptView({ r }: { r: Receipt }) {
   return (
     <div className="receipt">
       {r.assumed && <p className="receipt-note">Counted as a typical <strong>{r.assumed.dish}</strong>. Change anything that isn't yours.</p>}
-      <div className="receipt-head"><span>food · portion</span><span>avail carbs · GI · GL</span></div>
+      <div className="receipt-head"><span>food · portion</span><span>available carbs (g) · GI · GL</span></div>
       {r.lines.map((l) => (
         <div className="receipt-line" key={l.foodId + l.portion}>
           <span>{l.name} <em>{l.portion}</em>{r.assumed?.assumedFoodIds.includes(l.foodId) && <> <span className="pill none assumed">assumed</span></>}</span>
@@ -327,12 +332,12 @@ function ReceiptView({ r }: { r: Receipt }) {
       {r.partial && <div className="receipt-line muted"><span>Not counted: {r.partial.join(', ')}</span><span>not in the database</span></div>}
       {r.leftBefore !== null && (
         <>
-          <div className="receipt-line muted"><span>Left before this meal</span><span>{r.leftBefore.toFixed(1)}</span></div>
-          <div className={`receipt-line ${r.partial || r.unscored ? '' : (r.leftAfter ?? 0) < 0 ? 'over' : 'ok'}`}><span>{r.partial || r.unscored ? 'Left so far' : 'Left after'}</span><span>{r.leftAfter?.toFixed(1)}</span></div>
+          <div className="receipt-line muted"><span>GL left before this meal</span><span>{r.leftBefore.toFixed(1)}</span></div>
+          <div className={`receipt-line ${r.partial || r.unscored ? '' : (r.leftAfter ?? 0) < 0 ? 'over' : 'ok'}`}><span>{r.partial || r.unscored ? 'GL left so far' : 'GL left after'}</span><span>{r.leftAfter?.toFixed(1)}</span></div>
         </>
       )}
       <div className="receipt-foot">
-        GL = GI × available carbs ÷ 100. Available carbs = total − fibre.
+        GL (glycemic load) = GI (glycemic index) × available carbs ÷ 100. Available carbs = total − fibre, in grams. GL has no unit.
         {r.assumed && ' This dish is not in our database, so it is an estimate from typical ingredients, not a record of your meal.'}
         {r.unscored && ' Where our data has no glycemic index for a food, none is estimated: its carbohydrate, fibre and calories are counted and its load is not.'}
         {r.sources.length > 0 && (

@@ -207,6 +207,9 @@ i Advice.
 ### The three figures
 `this meal` · `before` · `left after`. The last carries the verdict colour and
 reads **over by** when negative. Values come from the tool result, in mono.
+Every number says what it is: the tiles sit under a small title, "Glycemic load (GL)"; grams are "g" and
+calories "kcal"; the receipt's columns are "available carbs (g) · GI · GL" and its footer spells GL and GI
+out. A glycemic load has **no unit, and none is invented for it**.
 
 ### Day bar
 A 3px bar under the budget line showing how much of the day is used. Never a ring.
