@@ -297,6 +297,20 @@ function verdictTone(answer: string, route?: string, reply?: AgentResponse): 'go
   return 'ask'
 }
 
+/**
+ * What to show in the answer box under a question: an example taken from the engine's own result, never from the
+ * sentence. A food it does not have asks what is in it; an ambiguous one has candidates to pick from.
+ */
+function answerHint(trace?: TraceStep[]): string {
+  const resolved = (trace ?? []).find((t) => t.tool === 'resolve_foods' || t.tool.endsWith('_resolve_foods'))?.result as
+    { results?: { unknown?: boolean; clarify?: string; candidates?: { name?: string }[] }[] } | undefined
+  const rows = resolved?.results ?? []
+  const pick = rows.find((r) => r.clarify && r.candidates?.[0]?.name)?.candidates?.[0]?.name
+  if (pick) return `e.g. ${pick}`
+  if (rows.some((r) => r.unknown)) return 'e.g. flour, sugar and cream'
+  return 'Type your answer here'
+}
+
 function ReceiptView({ r }: { r: Receipt }) {
   return (
     <div className="receipt">
@@ -377,6 +391,8 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, o
   const [limited, setLimited] = useState<{ scope: 'ip' | 'session' | 'daily' | 'user'; minutes: number } | null>(null)
   const [reply, setReply] = useState<AgentResponse | null>(null)
   const [asked, setAsked] = useState('')
+  // The answer to a question the agent asked, typed right under it rather than in the box above the screen.
+  const [replyText, setReplyText] = useState('')
   const [showReceipt, setShowReceipt] = useState(false)
   const [logged, setLogged] = useState(false)
   // Which day "Log it" puts the meal on: today until the person picks another. Reset with each question.
@@ -474,7 +490,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, o
     if (!q || busy) return
     abort.current?.abort()
     abort.current = new AbortController()
-    setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(false); setLogged(false); setLogDay(null); setLogNote(''); setAsked(q)
+    setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(false); setLogged(false); setLogDay(null); setLogNote(''); setAsked(q); setReplyText('')
     setEditing(false); setGrams({}); setRemoved([]); setRecalc(null); setRecalcError('')
     const sid = fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId()
     setTurn(sid)
@@ -640,6 +656,17 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, o
               </div>
             )}
           </section>
+
+          {tone === 'ask' && !reply.blocked && reply.route !== 'advisor' && (
+            <form className="reply-box" onSubmit={(e) => { e.preventDefault(); ask(replyText) }}>
+              <span className="label">Your answer</span>
+              <div className="ask-form">
+                <input type="text" value={replyText} onChange={(e) => setReplyText(e.target.value)} autoComplete="off"
+                  aria-label="Your answer" placeholder={answerHint(reply.trace)} disabled={busy} maxLength={MAX_QUESTION} />
+                <button className="ghost" type="submit" disabled={busy || !replyText.trim()}>{busy ? 'Thinking…' : 'Send answer'}</button>
+              </div>
+            </form>
+          )}
 
           {receipt && (
             <div className="log-day">

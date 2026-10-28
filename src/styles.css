@@ -340,6 +340,9 @@ tr:last-child td { border-bottom: none; }
 .chip-btn { text-align: left; font: inherit; font-size: 15px; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--fx-raised); padding: 12px 14px; cursor: pointer; line-height: 1.4; min-height: 44px; }
 .chip-btn:hover { border-color: var(--accent); }
 .asked { margin: 0 4px 10px; font-size: 14px; }
+.reply-box { margin: -2px 0 14px; }
+.reply-box .ask-form { margin: 0; }
+.reply-box .ask-form button { white-space: nowrap; }
 
 /* The answer is a slip torn from a pad: two sheets behind it, teeth along the
  * bottom edge, and a shadow that follows the teeth. Its verdict is carried by the

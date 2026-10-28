@@ -191,6 +191,14 @@ In this order: status disc + label → **verdict** → **three figures** → rea
 next action behind a dashed rule → verified pill. Advice, clarifying questions
 and refusals are plain prose; never dress them as a verdict.
 
+### The answer box, under a question
+When the answer is a clarifying question (badge "One question first"), a field sits directly under it:
+a small label "Your answer", the input in the same card as the question box above, and a **Ghost**
+button "Send answer" (the one primary action of the view is still "Check this meal"). Its placeholder is
+an example taken from the engine's own result (the first candidate it offered), never from the sentence;
+with no candidate it says what to type. It goes away when the next answer arrives, and focus is not moved
+into it, so a phone's keyboard does not open over the question.
+
 ### Status disc
 A 20px filled circle in the verdict colour with a white icon, beside an
 uppercase label: ✓ Fits, + Fits with a change, ✕ Not today, ! One question first,
