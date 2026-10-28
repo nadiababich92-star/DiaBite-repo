@@ -18,7 +18,7 @@ import { loadDiary, loadProfile, loadTour, saveDiary, saveProfile, saveTour, tha
 import { initialSeen, type TourStep } from './lib/tour'
 import { showLanding } from './lib/landingRule'
 import { CONSENT_VERSION, LEGACY_DIARY_KEY, PENDING_KEY, loadAccount, mergeById, reconcileAfterFailedPush, useAccountSync } from './lib/sync'
-import type { DiaryEntry, Profile } from './types'
+import type { DiaryEntry, MealType, Profile } from './types'
 
 type Tab = 'ask' | 'diary' | 'menu' | 'profile'
 
@@ -36,6 +36,9 @@ export default function App() {
   const auth = useAuth()
   const signInRequired = useSignInRequired()
   const [tab, setTab] = useState<Tab>('ask')
+  // The day and meal the Diary sent the person to Ask for. It lasts only while they stay on Ask.
+  const [logTarget, setLogTarget] = useState<{ date: string; meal: MealType } | null>(null)
+  useEffect(() => { if (tab !== 'ask') setLogTarget(null) }, [tab])
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   // The first sentence of the disclaimer is always shown; the rest opens on a tap.
   const [disclaimerOpen, setDisclaimerOpen] = useState(false)
@@ -208,11 +211,12 @@ export default function App() {
       {tab === 'ask' && (
         <AskPage
           profile={profile} targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} onOpenDiary={() => setTab('diary')} onSessionEnded={sessionEnded}
+          logTarget={logTarget} onClearTarget={() => setLogTarget(null)}
           tourSeen={tourSeen} onTourSeen={(s) => { setTourSeen(s); saveTour(s) }} tourSuspended={feedbackOpen || waiting > 0 || howOpen}
         />
       )}
       {tab === 'diary' && (
-        <DiaryPage targets={targets} diary={diary} onChange={setDiary} onAsk={() => setTab('ask')} showBreadUnits={profile.showBreadUnits} />
+        <DiaryPage targets={targets} diary={diary} onChange={setDiary} onAsk={(target) => { setLogTarget(target ?? null); setTab('ask') }} showBreadUnits={profile.showBreadUnits} />
       )}
       {tab === 'menu' && (
         <MenuPage

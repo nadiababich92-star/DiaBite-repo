@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { CATEGORY_LABELS, FOODS, getFood } from '../data/foods'
-import { availableCarbs, glycemicLoad, sumNutrients } from '../lib/glycemic'
+import { sumNutrients } from '../lib/glycemic'
 import { MEAL_LABELS, MEAL_ORDER } from '../lib/menu'
 import { addDays, dateAllowed, dateRange, dayLabel, eaten, markEaten, mealForNow, nudgeGrams, plannedOnly, recentEntries, viewEntry } from '../lib/diary'
 import { weeksSummary, type DayPoint } from '../lib/history'
@@ -12,8 +11,8 @@ interface Props {
   targets: Targets
   diary: DiaryEntry[]
   onChange: (entries: DiaryEntry[]) => void
-  /** Take the person to the Ask tab, from an empty day. */
-  onAsk?: () => void
+  /** Take the person to the Ask tab: from an empty day, or with the day and meal they are looking at. */
+  onAsk?: (target?: { date: string; meal: MealType }) => void
   /** Bread units are an opt-in display setting (You); off, they are not shown at all. */
   showBreadUnits?: boolean
 }
@@ -27,9 +26,6 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
   const date = picked ?? today
   const isToday = date === today
   const [meal, setMeal] = useState<MealType>(mealForNow)
-  const [query, setQuery] = useState('')
-  const [grams, setGrams] = useState<number | ''>('')
-  const [selectedId, setSelectedId] = useState<string | null>(null)
   // One line that says what just happened and can take it back. It goes by itself after ten seconds.
   const [notice, setNotice] = useState<{ text: string; undo: () => void } | null>(null)
   const latest = useRef(diary)
@@ -67,21 +63,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
   const week = weeks[0]
   const recent = useMemo(() => recentEntries(diary, 6), [diary])
 
-  const matches =
-    query.trim().length < 2
-      ? []
-      : FOODS.filter((f) => f.name.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 8)
-  const selected = selectedId ? getFood(selectedId) : null
-
   const pct = (value: number, target: number) => Math.min(100, (value / Math.max(1, target)) * 100)
-
-  function add() {
-    if (!selected || !grams || grams <= 0 || !canAdd) return
-    const entry: DiaryEntry = { id: newId(), date, meal, foodId: selected.id, grams: Number(grams), ...(isFuture ? { planned: true } : {}) }
-    onChange([...diary, entry])
-    setNotice({ text: `${isFuture ? 'Planned' : 'Added'} ${selected.name} ${isFuture ? 'for' : 'to'} ${MEAL_LABELS[meal].toLowerCase()}.`, undo: () => onChange(latest.current.filter((e) => e.id !== entry.id)) })
-    setSelectedId(null); setQuery(''); setGrams('')
-  }
 
   // One tap: the same food at the same weight, again, on the day and meal on show.
   function again(e: DiaryEntry) {
@@ -170,7 +152,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
             {plannedEntries.length > 0 ? 'Nothing eaten for this day yet.' : isFuture ? 'Nothing planned for this day yet.' : `Nothing logged for ${isToday ? 'today' : 'this day'} yet.`}
           </p>
           <div className="row" style={{ justifyContent: 'center' }}>
-            {onAsk && isToday && <button className="primary" onClick={onAsk}>Ask about a meal</button>}
+            {onAsk && isToday && <button className="primary" onClick={() => onAsk()}>Ask about a meal</button>}
             {sourceMeals.length > 0 && canAdd && <button className="ghost" onClick={() => copyFrom(sourceMeals)}>{isFuture ? `Plan the same as ${sourceName}` : `Copy ${sourceName}`}</button>}
           </div>
         </div>
@@ -248,7 +230,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
       )}
 
       <section className="card">
-        <h2>Add a food</h2>
+        <h2>Add food</h2>
         {!canAdd && <p className="muted" role="status">{date < today ? 'You can go back 14 days.' : 'You can plan 14 days ahead.'}</p>}
 
         {sourceMeals.length > 0 && (
@@ -278,7 +260,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
           </div>
         )}
 
-        <div className="grid" style={{ marginTop: recent.length > 0 ? 16 : 0 }}>
+        <div className="grid" style={{ marginTop: recent.length > 0 || sourceMeals.length > 0 ? 16 : 0 }}>
           <label className="field">
             <span>Meal</span>
             <select value={meal} onChange={(e) => setMeal(e.target.value as MealType)}>
@@ -287,63 +269,13 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
               ))}
             </select>
           </label>
-          <label className="field">
-            <span>Food</span>
-            <input
-              type="text"
-              placeholder="e.g. buckwheat"
-              value={selected ? selected.name : query}
-              onChange={(e) => {
-                setSelectedId(null)
-                setQuery(e.target.value)
-              }}
-            />
-          </label>
-          <label className="field">
-            <span>Weight, g</span>
-            <input
-              type="number" min={1} max={2000}
-              placeholder={selected ? String(selected.portion.grams) : '0'}
-              value={grams}
-              onChange={(e) => setGrams(e.target.value === '' ? '' : Number(e.target.value))}
-            />
-          </label>
           <div className="field" style={{ justifyContent: 'flex-end' }}>
-            <button className="primary" onClick={add} disabled={!selected || !grams || !canAdd}>
-              {isFuture ? 'Plan it' : 'Add'}
+            <button className="primary" onClick={() => onAsk?.({ date, meal })} disabled={!canAdd || !onAsk}>
+              {isFuture ? 'Plan food' : 'Add food'}
             </button>
           </div>
         </div>
-
-        {!selected && matches.length > 0 && (
-          <div className="search-results">
-            {matches.map((f) => (
-              <button
-                key={f.id}
-                onClick={() => {
-                  setSelectedId(f.id)
-                  setGrams(f.portion.grams)
-                  setQuery('')
-                }}
-              >
-                <span>{f.name}</span>
-                <span className="meta">
-                  {CATEGORY_LABELS[f.category]} · {f.gi === null ? 'no GI' : `GI ${f.gi}`}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {selected && (
-          <p className="muted" style={{ marginBottom: 0 }}>
-            <GIPill gi={selected.gi} />{' '}
-            <GLPill gl={glycemicLoad(selected, Number(grams) || selected.portion.grams)} />{' '}
-            Available carbs:{' '}
-            {availableCarbs(selected, Number(grams) || selected.portion.grams).toFixed(1)} g ·
-            typical portion — {selected.portion.label}, {selected.portion.grams} g
-          </p>
-        )}
+        <p className="muted" style={{ margin: '10px 0 0' }}>Describe it in your own words and DiaBite counts it.</p>
       </section>
 
       <section className="card">

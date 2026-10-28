@@ -70,7 +70,7 @@ Marking an entry eaten replaces it by id with `markEaten(e)`; from that moment i
 
 ## Manual adds (the Diary)
 
-`Add a food` on a day is limited to `dateAllowed(date, today)` (14 back, 14 ahead). On a future date it creates a **planned** entry (and the button reads "Plan it");
+`Add food` on a day is limited to `dateAllowed(date, today)` (14 back, 14 ahead). It opens Ask for that day and meal, and on a future date what Ask logs is a **planned** entry (the Diary button reads "Plan food", Ask's "Plan it");
 on today or a past date, an eaten one. Entries already older than 14 days stay and stay editable; the rule limits **new** entries only. Navigating the Diary
 back past 14 days is not blocked (the person may be reading old entries); the Add form on such a day says "You can go back 14 days." and is disabled.
 

@@ -9,12 +9,13 @@ import { nextStep, type TourStep } from '../lib/tour'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type Milestone } from '../lib/nudge'
 import { askAgent, avoidOf, budgetOf, engineId, lastMealCall, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
 import { dayLabel, eaten, mealForNow, viewEntry } from '../lib/diary'
+import { MEAL_LABELS } from '../lib/menu'
 import DayPicker from './DayPicker'
 import { loadNudge, saveNudge } from '../lib/storage'
 import { useToday } from '../lib/useToday'
 import { isDemo } from '../lib/demo'
 import { downloadResponses, saveResponse, savedCount } from '../lib/responses'
-import type { DiaryEntry, Profile, Targets } from '../types'
+import type { DiaryEntry, MealType, Profile, Targets } from '../types'
 
 interface Props {
   profile: Profile
@@ -23,6 +24,9 @@ interface Props {
   onLog: (entries: DiaryEntry[]) => void
   /** Take the person to the Diary, from the note that says where a meal went. */
   onOpenDiary?: () => void
+  /** Where the Diary sent the person: the day and meal their next "Log it" goes to, until they clear it or leave Ask. */
+  logTarget?: { date: string; meal: MealType } | null
+  onClearTarget?: () => void
   /** The engine said the sign-in is no longer good (it expired, or sign-in became required). */
   onSessionEnded?: () => void
   /** First-run tips: which were shown, how to record one, and whether another dialog is open. */
@@ -387,7 +391,7 @@ function summarize(step: TraceStep): string {
   }
 }
 
-export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, onSessionEnded, tourSeen, onTourSeen, tourSuspended }: Props) {
+export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, logTarget, onClearTarget, onSessionEnded, tourSeen, onTourSeen, tourSuspended }: Props) {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -423,6 +427,9 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, o
   const abort = useRef<AbortController | null>(null)
 
   const today = useToday()
+  // A day sent from the Diary is where each new answer starts; the person can still change it under the answer.
+  const targetDay = logTarget && logTarget.date !== today ? logTarget.date : null
+  useEffect(() => { setLogDay(targetDay); setLogged(false); setLogNote('') }, [targetDay])
   // Only what was eaten counts: a planned meal is a promise, not a log.
   const counted = useMemo(() => eaten(diary), [diary])
   const todayEntries = useMemo(() => counted.filter((e) => e.date === today), [counted, today])
@@ -495,7 +502,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, o
     if (!q || busy) return
     abort.current?.abort()
     abort.current = new AbortController()
-    setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(false); setLogged(false); setLogDay(null); setLogNote(''); setAsked(q); setReplyText('')
+    setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(false); setLogged(false); setLogDay(targetDay); setLogNote(''); setAsked(q); setReplyText('')
     setEditing(false); setGrams({}); setRemoved([]); setRecalc(null); setRecalcError('')
     const sid = fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId()
     setTurn(sid)
@@ -525,7 +532,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, o
 
   function logIt() {
     if (!active) return
-    const meal = mealForNow()
+    const meal = logTarget?.meal ?? mealForNow()
     const stamp = Date.now()
     const date = logDay ?? today
     const planned = date > today
@@ -540,7 +547,9 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, o
       },
     })))
     setLogged(true)
-    setLogNote(planned ? `Planned for ${dayLabel(date, today)}. It counts once you mark it eaten.` : date === today ? '' : `Logged for ${dayLabel(date, today)}.`)
+    // The meal is named only when the Diary chose it; otherwise it is the time of day and nothing needs saying.
+    const where = logTarget ? `${MEAL_LABELS[meal].toLowerCase()}, ${dayLabel(date, today)}` : dayLabel(date, today)
+    setLogNote(planned ? `Planned for ${where}. It counts once you mark it eaten.` : logTarget ? `Logged for ${where}.` : date === today ? '' : `Logged for ${where}.`)
   }
 
   // On a narrow screen the answer opens below the question; bring it into view so nobody has to hunt for it.
@@ -576,6 +585,12 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, o
           </label>
         </div>}
         <p className="muted">Say it the way you'd say it to a friend. The agent does the counting — and shows its arithmetic.<span className="voice-hint"> On a phone, tap the microphone on your keyboard to say it instead of typing.</span></p>
+        {logTarget && (
+          <p className="muted ask-target" role="status">
+            Adding to {MEAL_LABELS[logTarget.meal].toLowerCase()}, {dayLabel(logTarget.date, today)}.{' '}
+            {onClearTarget && <button type="button" className="link" onClick={onClearTarget}>Cancel</button>}
+          </p>
+        )}
         <form className="ask-form" onSubmit={(e) => { e.preventDefault(); ask(text) }}>
           <input
             data-tour="input"

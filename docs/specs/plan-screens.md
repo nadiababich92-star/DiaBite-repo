@@ -45,7 +45,7 @@ The `meal` is the answer's meal as today. The verdict tip (first-run tour) is no
 - A day with at least one planned entry shows one quiet line under the totals: **Planned: GL 14, not counted yet.** (the sum of `viewEntry(e).gl` of the planned entries, rounded as the day's total is; if any planned entry has `loadAvailable === false`, **Planned: GL 14 and carbohydrate only for some, not counted yet.**).
 - The day's totals, the budget bar and "left" of a viewed day read `eaten(...)` only. A future day with only planned entries shows the empty state "Nothing eaten for this day yet." and the planned list.
 - The week strip and the four-week strip are unchanged in layout; they ignore planned entries (data rule).
-- **Add a food** on a future day creates a planned entry and the button reads **Plan it**; on a day older than 14 days the form is disabled with **You can go back 14 days.** (`plan-data-and-rules.md`).
+- **Add food** (28 Oct: the card no longer has its own food search, which saw only the 86 seed foods) holds the Meal select, the repeat and copy chips, and one button, **Add food** (**Plan food** on a future day). The button takes the person to Ask with that day and meal (`logTarget`): Ask says "Adding to dinner, Tomorrow" with a Cancel, "Log it" goes to that day and meal, and the target ends when the person leaves Ask. On a day older than 14 days the button is disabled with **You can go back 14 days.** (`plan-data-and-rules.md`).
 
 ## Menu: "Plan it…" and "I ate this"
 
