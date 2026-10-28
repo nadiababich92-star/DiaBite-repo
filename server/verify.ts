@@ -94,18 +94,26 @@ export function verify(req: VerifyRequest): VerifyResponse {
  */
 const FIT_CLAIM = /\bfits\b|within (your |the |today'?s )?(budget|limit)/i
 const NO_FIT_CLAIM = /\b(does not|doesn'?t|do not|won'?t|will not) fit\b|\bover (your |the |today'?s )?budget\b|\bover (your |the )?(limit|target)\b/i
-const NOT_ABOUT_THIS_MEAL = /\bif\b|\bwould\b|\bcould\b|\bswap|\binstead\b|\balternative|\bbetter\b|\bthan\b|\?|can'?t (?:say|tell|judge)|cannot (?:say|judge)|\bnot\b|n'?t\b/i
-const NOT_ABOUT_THIS_MEAL_NO_NEGATION = /\bif\b|\bwould\b|\bcould\b|\bswap|\binstead\b|\balternative|\bbetter\b|\bthan\b|\?/i
+// "…, but I can't judge the day": the clause is the honest part, and what stands before it is still a claim.
+const CANNOT_JUDGE = /\b(?:i )?(?:can'?t|cannot)\s+(?:say|tell|judge)\b[^.!?\n]*/gi
+const CONDITIONAL = /\bif\b|\bwould\b|\bcould\b|\bswap|\binstead\b|\balternative|\bbetter\b|\bthan\b|\?/i
+const NEGATED = /\bnot\b|n'?t\b/i
+
+/** Models write ’ where the patterns above write '. */
+const plain = (text: string) => text.replace(/[\u2018\u2019\u02bc]/g, "'")
 
 export function verdictConflict(answer: string, fits: boolean | null | undefined, estimate = false): string | null {
-  const sentences = answer.split(/(?<=[.!?\n])/).map((s) => s.trim()).filter(Boolean)
+  const sentences = plain(answer).split(/(?<=[.!?\n])/).map((x) => x.trim()).filter(Boolean)
   if (fits !== true || estimate) {
     // Anything but a plain, fully scored "fits": no sentence may say the meal fits.
-    const s = sentences.find((x) => FIT_CLAIM.test(x) && !NOT_ABOUT_THIS_MEAL.test(x))
+    const s = sentences.find((x) => {
+      const claim = x.replace(CANNOT_JUDGE, ' ')
+      return FIT_CLAIM.test(claim) && !CONDITIONAL.test(claim) && !NEGATED.test(claim)
+    })
     if (s) return s
   }
   if (fits === true && !estimate) {
-    const s = sentences.find((x) => NO_FIT_CLAIM.test(x) && !NOT_ABOUT_THIS_MEAL_NO_NEGATION.test(x))
+    const s = sentences.find((x) => NO_FIT_CLAIM.test(x) && !CONDITIONAL.test(x))
     if (s) return s
   }
   return null
