@@ -14,7 +14,7 @@ import { supabase } from './supabase'
 import { sanitizeProfile } from './storage'
 import type { DiaryEntry, Profile } from '../types'
 
-export { CONSENT_VERSION, PENDING_KEY, LEGACY_DIARY_KEY, toRow, fromRow, diffEntries, mergeById, exportShape } from './syncCore'
+export { CONSENT_VERSION, PENDING_KEY, LEGACY_DIARY_KEY, toRow, fromRow, diffEntries, mergeById, reconcileAfterFailedPush, exportShape } from './syncCore'
 export type { DiaryRow, AccountExport } from './syncCore'
 import { CONSENT_VERSION as _CV, PENDING_KEY, LEGACY_DIARY_KEY, toRow, fromRow, diffEntries } from './syncCore'
 import type { AccountExport, DiaryRow } from './syncCore'

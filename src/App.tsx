@@ -17,7 +17,7 @@ import { supabaseConfigured } from './lib/supabase'
 import { loadDiary, loadProfile, loadTour, saveDiary, saveProfile, saveTour, thawWrites } from './lib/storage'
 import { initialSeen, type TourStep } from './lib/tour'
 import { showLanding } from './lib/landingRule'
-import { CONSENT_VERSION, LEGACY_DIARY_KEY, PENDING_KEY, loadAccount, mergeById, useAccountSync } from './lib/sync'
+import { CONSENT_VERSION, LEGACY_DIARY_KEY, PENDING_KEY, loadAccount, mergeById, reconcileAfterFailedPush, useAccountSync } from './lib/sync'
 import type { DiaryEntry, Profile } from './types'
 
 type Tab = 'ask' | 'diary' | 'menu' | 'profile'
@@ -77,8 +77,11 @@ export default function App() {
       const pending = (() => { try { return localStorage.getItem(PENDING_KEY) === '1' } catch { return false } })()
       // A failed push last time: this device holds the newer truth, so it is pushed, not overwritten.
       prime(a)
-      if (pending) { setServerHasProfile(true); setConsent({ at: a.consentAt, version: a.consentVersion }) }
-      else {
+      if (pending) {
+        setServerHasProfile(true); setConsent({ at: a.consentAt, version: a.consentVersion })
+        // Merged, not replaced: the account may hold entries from another device that this one never saw.
+        setDiary(reconcileAfterFailedPush(a.diary, local))
+      } else {
         // A diary from before sign-in is set aside, never dropped, until the person decides.
         try {
           if (local.length > 0 && !localStorage.getItem(LEGACY_DIARY_KEY) && local.some((e) => !a.diary.some((x) => x.id === e.id))) {

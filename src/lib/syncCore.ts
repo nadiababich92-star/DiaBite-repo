@@ -56,6 +56,16 @@ export function mergeById<T extends { id: string }>(a: T[], b: T[], at: (x: T) =
   return [...out.values()]
 }
 
+/**
+ * The first load after a push failed. This device holds the newer truth for what it changed, but the account may
+ * hold entries it never saw (added on another device meanwhile). Taking the local list alone, `diffEntries`
+ * reads every such entry as "removed here" and deletes it from the account, so the two lists are merged and the
+ * local copy wins where an id is on both. The cost is stated, not hidden: an entry deleted on this device
+ * while offline comes back, because a diary entry that reappears is a lesser harm than one that vanishes.
+ */
+export const reconcileAfterFailedPush = (server: DiaryEntry[], local: DiaryEntry[]): DiaryEntry[] =>
+  mergeById(server, local, () => '')
+
 export interface AccountExport {
   exportedAt: string
   email?: string

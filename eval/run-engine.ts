@@ -32,7 +32,7 @@ import { parseMeal } from '../src/lib/answer'
 import { afterMealFor, computeItem, computeMeal, dayState, driverOf, planDish, uninvertPhrase, withDayUnscored } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
 import { engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
-import { diffEntries, exportShape, fromRow, mergeById, storable, toRow } from '../src/lib/syncCore'
+import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
 import { boldSegments } from '../src/lib/answer'
@@ -754,6 +754,22 @@ const accountMisses: string[] = []
   ok('a removed entry is deleted on the server', d3.remove.length === 1 && d3.remove[0] === e1.id && d3.upsert.length === 0)
   const merged = mergeById([e1], [e1, e2], () => '')
   ok('moving a diary twice leaves one of each entry', merged.length === 2 && mergeById(merged, [e1, e2], () => '').length === 2)
+  // A push failed on this device; meanwhile another device added an entry. The first load after that must not
+  // read the other device's entry as "removed here".
+  {
+    const fromOtherDevice = { id: 'other', date: '2026-10-27', meal: 'lunch', foodId: 'seed:a', grams: 100 } as DiaryEntry
+    const addedHere = { id: 'here', date: '2026-10-27', meal: 'dinner', foodId: 'seed:b', grams: 120 } as DiaryEntry
+    const editedHere = { ...fromOtherDevice, grams: 150 }
+    const primed = new Map([[fromOtherDevice.id, JSON.stringify(fromOtherDevice)]]) // what prime(account) records
+    const before = diffEntries(primed, [addedHere])
+    ok('the old behaviour deleted the other device\'s entry (what this test guards against)', before.remove.includes('other'))
+    const merged = reconcileAfterFailedPush([fromOtherDevice], [addedHere])
+    const after = diffEntries(primed, merged)
+    ok('after a failed push the other device\'s entry is kept', merged.some((e) => e.id === 'other') && !after.remove.includes('other'))
+    ok('after a failed push this device\'s new entry is pushed', after.upsert.some((e) => e.id === 'here') && after.upsert.length === 1)
+    ok('this device\'s edit wins over the account\'s older copy', reconcileAfterFailedPush([fromOtherDevice], [editedHere]).find((e) => e.id === 'other')?.grams === 150)
+    ok('merging twice changes nothing', reconcileAfterFailedPush(merged, merged).length === 2)
+  }
   const newer = mergeById([{ id: 'a', n: 1, t: '2026-10-10T10:00' }], [{ id: 'a', n: 2, t: '2026-10-10T11:00' }], (x) => x.t)
   ok('where both have an id the later one wins', newer.length === 1 && newer[0].n === 2)
   ok('the export has exactly the keys consent, diary, email, exportedAt, profile',
