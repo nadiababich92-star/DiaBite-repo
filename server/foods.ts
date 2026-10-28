@@ -236,6 +236,12 @@ function householdPortion(rows: { label: string; grams: number }[] | undefined, 
     const sweet = (rows ?? []).filter((p) => p.grams >= 1 && p.grams <= 100 && !/\bcup\b|\bdry\b|yields|not specified|sharing|movie/i.test(p.label))
     if (sweet.length) return Math.round(sweet[0].grams)
   }
+  // A pizza is said in slices. The first portion USDA lists for most pizzas is a whole small one (516 g), which made
+  // "two slices of pepperoni pizza" 1,032 g. A listed piece is the portion; a pizza with none keeps the old rule.
+  if (/^pizza\b(?!\s+rolls)/i.test(name)) {
+    const piece = (rows ?? []).find((p) => /^1 piece\b/i.test(p.label) && p.grams >= 30 && p.grams <= 300)
+    if (piece) return Math.round(piece.grams)
+  }
   const usable = (rows ?? []).filter((p) => p.grams > 10 && p.grams <= 600 && !/\bdry\b|yields|not specified/i.test(p.label))
   const cup = usable.find((p) => /\bcup\b/i.test(p.label))
   return Math.round(cup?.grams ?? usable[0]?.grams ?? 100)

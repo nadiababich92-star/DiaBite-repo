@@ -950,6 +950,9 @@ hangMisses.forEach((m) => console.log(m))
   rp.forEach((r, i) => {
     if (r.candidates[0]?.id !== 'usda:2708638' || r.confidence !== 'high' || r.clarify) pizzaMisses.push(`    "${plain[i]}": ${r.candidates[0]?.id}, ${r.confidence}${r.clarify ? ', asks: ' + r.clarify : ''}`)
   })
+  // A slice, not a whole pizza: the first portion USDA lists was 516 g and "two slices" came to 1,032 g.
+  const base = loadFoods().byId.get('usda:2708638')
+  if (!base || base.defaultPortion < 60 || base.defaultPortion > 200) pizzaMisses.push(`    the plain pepperoni pizza's default portion is ${base?.defaultPortion} g, not a slice`)
   const named: [string, RegExp][] = [
     ['stuffed crust pepperoni pizza', /^usda:2708642$/],
     ['frozen pepperoni pizza', /^usda:27086(35|36|37)$/],
