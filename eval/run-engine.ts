@@ -47,7 +47,7 @@ import { loadWeekState } from '../src/lib/menuStore'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type NudgeContext } from '../src/lib/nudge'
 import { clampDate, dateAllowed, eaten, isPlanned, markEaten, pickerState, plannedOnly } from '../src/lib/diary'
 import { shoppingFromEntries } from '../src/lib/menu'
-import { loadDiary } from '../src/lib/storage'
+import { clearDevice, loadDiary, saveDiary, thawWrites } from '../src/lib/storage'
 import { execFileSync } from 'node:child_process'
 import type { DiaryEntry, Dish } from '../src/types'
 import { RATING_ONLY } from '../src/lib/feedbackCopy'
@@ -883,6 +883,44 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\nsession   ${tagMisses.length === 0 ? 'ok' : 'WRONG'}`)
   tagMisses.forEach((m) => console.log(m))
   if (tagMisses.length) process.exitCode = 1
+}
+
+// ── signout ───────────────────────────────────────────────────────────────
+// Signing out clears the device while the screen still holds the account's diary for one more render. Its save
+// effect must not put that diary back, or the next person to sign in here is offered it as their own.
+{
+  const outMisses: string[] = []
+  const g = globalThis as { localStorage?: unknown }
+  // Like the real Storage: the stored keys are what Object.keys sees, the methods are not.
+  const fake: Record<string, string> = {}
+  for (const [name, fn] of Object.entries({
+    getItem: (k: string) => fake[k] ?? null,
+    setItem: (k: string, v: string) => { fake[k] = v },
+    removeItem: (k: string) => { delete fake[k] },
+  })) Object.defineProperty(fake, name, { value: fn, enumerable: false })
+  g.localStorage = fake
+  const entry = { id: 'e1', date: '2026-10-27', meal: 'lunch', foodId: 'test:apple', grams: 100, snapshot: {} } as unknown as DiaryEntry
+  try {
+    saveDiary([entry])
+    fake['sb-other-key'] = 'kept'
+    fake['diabite.tour.v1'] = '[]'
+    if (loadDiary().length !== 1) outMisses.push('    the diary did not round-trip before the test began')
+    clearDevice()
+    if (Object.keys(fake).some((k) => k.startsWith('diabite.'))) outMisses.push('    clearDevice left a diabite key behind')
+    if (fake['sb-other-key'] !== 'kept') outMisses.push('    clearDevice removed a key that is not the app\'s')
+    // The save effect of the screen that still holds the diary:
+    saveDiary([entry])
+    if (Object.keys(fake).some((k) => k.startsWith('diabite.'))) outMisses.push('    a save after clearDevice put the diary back')
+    thawWrites()
+    saveDiary([entry])
+    if (loadDiary().length !== 1) outMisses.push('    saving did not resume after thawWrites')
+  } finally {
+    thawWrites()
+    delete g.localStorage
+  }
+  console.log(`\nsignout   ${outMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  outMisses.forEach((m) => console.log(m))
+  if (outMisses.length) process.exitCode = 1
 }
 
 // ── verdict ───────────────────────────────────────────────────────────────

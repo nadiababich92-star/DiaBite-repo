@@ -18,7 +18,25 @@ function read<T>(key: string, fallback: T): T {
   }
 }
 
+/**
+ * Signing out clears the device while the screen still holds the account's diary for one more render, and its
+ * save effect would put that diary straight back into the storage that was just emptied: the next person to
+ * sign in on this browser would be offered it as their own. So clearing freezes writes, and the app thaws them
+ * once the screen has been reset.
+ */
+let frozen = false
+export const thawWrites = (): void => { frozen = false }
+
+/** Every key this app keeps on the device. Signing out removes all of them, and nothing is written until `thawWrites`. */
+export function clearDevice(): void {
+  frozen = true
+  try {
+    for (const k of Object.keys(localStorage)) if (k.startsWith('diabite.')) localStorage.removeItem(k)
+  } catch { /* storage unavailable */ }
+}
+
 function write(key: string, value: unknown): void {
+  if (frozen) return
   try {
     localStorage.setItem(key, JSON.stringify(value))
   } catch {

@@ -11,6 +11,7 @@ import type { Session } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 import { adoptSessionOwner } from './session'
 import { AGENT_URL } from './agent'
+import { clearDevice, thawWrites } from './storage'
 
 export type AuthStatus = 'loading' | 'signedOut' | 'signedIn'
 export interface AuthState { status: AuthStatus; userId?: string; email?: string }
@@ -89,13 +90,11 @@ export async function accessToken(): Promise<string | null> {
   return data.session?.access_token ?? null
 }
 
-/** Every key this app keeps on the device. Signing out removes all of them. */
-export function clearDevice(): void {
-  try {
-    for (const k of Object.keys(localStorage)) if (k.startsWith('diabite.')) localStorage.removeItem(k)
-  } catch { /* storage unavailable */ }
-}
+export { clearDevice } from './storage'
 
 export async function signOutAndClear(): Promise<void> {
-  try { await supabase?.auth.signOut() } finally { clearDevice() }
+  // Cleared first, then signed out: the sign-out event re-renders the app, and what it reads from storage must
+  // already be empty. If the sign-out itself fails the person is still signed in, so writing resumes.
+  clearDevice()
+  try { await supabase?.auth.signOut() } catch (e) { thawWrites(); throw e }
 }

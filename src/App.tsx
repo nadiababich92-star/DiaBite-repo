@@ -14,7 +14,7 @@ import ProfilePage from './components/ProfilePage'
 import { calculateTargets } from './lib/profile'
 import { signOutAndClear, useAuth, useSignInRequired } from './lib/auth'
 import { supabaseConfigured } from './lib/supabase'
-import { loadDiary, loadProfile, loadTour, saveDiary, saveProfile, saveTour } from './lib/storage'
+import { loadDiary, loadProfile, loadTour, saveDiary, saveProfile, saveTour, thawWrites } from './lib/storage'
 import { initialSeen, type TourStep } from './lib/tour'
 import { showLanding } from './lib/landingRule'
 import { CONSENT_VERSION, LEGACY_DIARY_KEY, PENDING_KEY, loadAccount, mergeById, useAccountSync } from './lib/sync'
@@ -104,6 +104,8 @@ export default function App() {
     if (auth.status === 'signedOut') {
       // Signed out: nothing of the account stays on screen or in memory.
       if (wasSignedIn.current) { setProfile(loadProfile()); setDiary(loadDiary()); setWaiting(0) }
+      // Whatever sign-out cleared stays cleared until the screen above has been reset.
+      thawWrites()
       setAccount('none')
     }
   }, [auth.status, auth.userId, load])
