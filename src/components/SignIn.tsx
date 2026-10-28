@@ -83,7 +83,7 @@ export default function SignIn({ notice, onCancel }: { notice?: string; onCancel
           <form onSubmit={verify} noValidate>
             <h2>Check your mail</h2>
             <p role="status">
-              We sent a sign-in link to <b>{email.trim()}</b>. Open it on this device, or type the code from the email.
+              We sent a link and a code to <b>{email.trim()}</b>. Either one signs you in: open the link on this device, or type the code below.
             </p>
             <p className="muted">It can take a minute. If it does not arrive, look in your Spam or Junk folder.</p>
             <label className="field">
