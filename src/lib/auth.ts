@@ -96,5 +96,7 @@ export async function signOutAndClear(): Promise<void> {
   // Cleared first, then signed out: the sign-out event re-renders the app, and what it reads from storage must
   // already be empty. If the sign-out itself fails the person is still signed in, so writing resumes.
   clearDevice()
-  try { await supabase?.auth.signOut() } catch (e) { thawWrites(); throw e }
+  // `local`: the default is `global`, which also ends the person's sessions on their other devices, and those
+  // would then lose the session without clearing what they hold.
+  try { await supabase?.auth.signOut({ scope: 'local' }) } catch (e) { thawWrites(); throw e }
 }
