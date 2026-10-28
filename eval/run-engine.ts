@@ -939,6 +939,29 @@ hangMisses.forEach((m) => console.log(m))
   if (outMisses.length) process.exitCode = 1
 }
 
+// ── pizza ─────────────────────────────────────────────────────────────────
+// "Pepperoni pizza" matched twelve survey pizzas and nine brands within a hair of each other, and the agent asked
+// "stuffed crust or Tombstone?". The plain restaurant pizza is what people mean and is taken without a question;
+// anything more specific that the person says is still honoured.
+{
+  const pizzaMisses: string[] = []
+  const plain = ['pepperoni pizza', 'a slice of pepperoni pizza', 'pepperoni pizza slice']
+  const rp = await resolvePhrases(store, plain)
+  rp.forEach((r, i) => {
+    if (r.candidates[0]?.id !== 'usda:2708638' || r.confidence !== 'high' || r.clarify) pizzaMisses.push(`    "${plain[i]}": ${r.candidates[0]?.id}, ${r.confidence}${r.clarify ? ', asks: ' + r.clarify : ''}`)
+  })
+  const named: [string, RegExp][] = [
+    ['stuffed crust pepperoni pizza', /^usda:2708642$/],
+    ['frozen pepperoni pizza', /^usda:27086(35|36|37)$/],
+    ['Tombstone pepperoni pizza', /^branded:/],
+  ]
+  const rn = await resolvePhrases(store, named.map((n) => n[0]))
+  rn.forEach((r, i) => { if (!named[i][1].test(r.candidates[0]?.id ?? '')) pizzaMisses.push(`    "${named[i][0]}" went to ${r.candidates[0]?.id}`) })
+  console.log(`\npizza     ${pizzaMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  pizzaMisses.forEach((m) => console.log(m))
+  if (pizzaMisses.length) process.exitCode = 1
+}
+
 // ── verdict ───────────────────────────────────────────────────────────────
 // The verifier checks numbers, and no number is wrong in "it fits". The wording of a verdict is held to the
 // engine's afterMeal.fits: a meal that could only be partly scored, or an assumed recipe, is never said to fit.

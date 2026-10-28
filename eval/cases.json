@@ -721,12 +721,7 @@
       {
         "phrase": "pepperoni pizza",
         "expect": [
-          "branded:2679824",
-          "usda:2708642",
-          "usda:2708637",
-          "usda:2708635",
-          "usda:2708636",
-          "branded:2178367"
+          "usda:2708638"
         ],
         "tags": [
           "branded"

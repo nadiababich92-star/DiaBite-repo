@@ -269,6 +269,10 @@ const USDA_ALIASES: Record<string, string[]> = {
   'usda:2706071': ['buffalo wings', 'buffalo wing', 'hot wings'],            // Chicken wings with sauce, from fast food / restaurant
   'usda:2705848': ['pot roast'],                                          // Beef, pot roast
   'usda:2706979': ['blt', 'blt sandwich', 'bacon lettuce tomato sandwich'], // Bacon, lettuce, tomato sandwich on white
+  // "Pepperoni pizza" matched twelve survey pizzas and nine brands within a hair of each other, so the agent asked
+  // 'stuffed crust or Tombstone?'. The plain restaurant or fast-food pizza is the one people mean; a crust, a freezer
+  // or a school lunch is still reachable by naming it. Carbohydrate only: this survey food has no glycemic index.
+  'usda:2708638': ['pepperoni pizza', 'pizza with pepperoni', 'pepperoni pizza slice', 'slice of pepperoni pizza'], // Pizza with pepperoni, from restaurant or fast food
   'usda:2706191': ['breakfast sausage', 'sausage links', 'sausage patties'], // Pork sausage (the same phrase also names turkey and chicken sausage, so the engine asks which)
   // Found by eval/coverage with community-phrases.txt (22 October 2026): the same food under the name people use.
   // Dishes with no record at all (arroz con pollo, tostones, dosa, lumpia, pancit, sancocho, tzimmes...) stay holes on
