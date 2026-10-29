@@ -104,6 +104,7 @@ try {
       await scan('menu')
       await click('Shopping list'); await sleep(500); await scan('menu-shopping-list')
       await tab('You'); await scan('you')
+      await tab('Settings'); await scan('settings')
       await click('How it works'); await sleep(600); await scan('dialog-how-it-works'); await click('Close'); await sleep(300)
       await b.close()
     }
@@ -122,7 +123,7 @@ try {
     await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session','test-a11y-'+crypto.randomUUID()); localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log'])); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2'])); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`)
     await b.send('Page.reload'); await sleep(4500)
     const tab = async (n) => { await b.ev(`(()=>{[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes(${JSON.stringify(n)}))?.click()})()`); await sleep(1300) }
-    for (const screen of ['Ask', 'Diary', 'Menu', 'You']) {
+    for (const screen of ['Ask', 'Diary', 'Menu', 'You', 'Settings']) {
       await tab(screen)
       if (screen === 'Menu') for (let i = 0; i < 40 && !(await b.ev(`!!document.querySelector('.menu-meal')`)); i++) await sleep(300)
       const m = await b.ev(`({ scrollW: document.documentElement.scrollWidth, innerW: window.innerWidth, wide: [...document.querySelectorAll('body *')].filter(e => e.getBoundingClientRect().right > window.innerWidth + 1 && getComputedStyle(e).position !== 'fixed').slice(0, 3).map(e => e.tagName + '.' + (e.className || '').toString().slice(0, 30)) })`)
@@ -158,7 +159,7 @@ try {
     await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session','test-a11y-'+crypto.randomUUID()); localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log'])); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2'])); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`)
     await b.send('Page.reload'); await sleep(4500)
     const tab = async (n) => { await b.ev(`(()=>{[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes(${JSON.stringify(n)}))?.click()})()`); await sleep(1300) }
-    for (const screen of ['Ask', 'Diary', 'Menu', 'You']) {
+    for (const screen of ['Ask', 'Diary', 'Menu', 'You', 'Settings']) {
       await tab(screen)
       if (screen === 'Menu') for (let i = 0; i < 40 && !(await b.ev(`!!document.querySelector('.menu-meal')`)); i++) await sleep(300)
       await b.ev(`document.activeElement?.blur(); window.scrollTo(0,0); document.body.focus()`)

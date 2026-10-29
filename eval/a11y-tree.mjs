@@ -157,6 +157,7 @@ try {
     for (let i = 0; i < 40 && !(await b.ev(`!!document.querySelector('.menu-meal')`)); i++) await sleep(300)
     await scan('menu')
     await tab('You'); await scan('you')
+    await tab('Settings'); await scan('settings')
     {
       const opener = await click('How it works'); await sleep(700)
       const inside = await focusInfo(b); const list = await scan('dialog-how-it-works'); const dlg = list.find((n) => n.role === 'dialog')

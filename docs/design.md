@@ -47,7 +47,7 @@ There is a full dark set; both are defined together and must stay in step.
 Two looks, defined together, and they must stay in step. **Tape** is the default: the page is dark, and
 everything the product prints (a card, an answer, a dialog, the question box, the "Try one" chips) is a cream
 **slip**. **Paper** is the light look. `src/lib/theme.ts` sets `data-theme` to `tape` or `paper` on `<html>`; the
-user chooses Tape, Paper or Follow my phone (Paper by day, Tape after dark) in **You**. The old name for the dark
+user chooses Tape, Paper or Follow my phone (Paper by day, Tape after dark) in **Settings**. The old name for the dark
 look, Night, is Tape: a stored "night" choice is read as Tape.
 
 How the slips are made: the table's **Night** column below is the Tape *page* (background, bars, chips, text on the
@@ -164,8 +164,8 @@ at least 44px tall.
 ## Layout
 
 - **One column.** Everything stacks; nothing sits beside the ask box at any width.
-- **Navigation is a floating bar at the bottom**, four items (Ask, Diary, Menu,
-  You), reachable with a thumb, at every width. The page leaves room beneath it.
+- **Navigation is a floating bar at the bottom**, five items (Ask, Diary, Menu,
+  You, Settings), reachable with a thumb, at every width. The page leaves room beneath it.
 - **Below 560px:** the ask button goes under its input at full width, the
   receipt shows each food above its three numbers, figure tiles tighten.
 - **Mobile first.** Check every change at 375px before desktop.
@@ -226,8 +226,10 @@ Header hidden on phones.
 Raised: `--surface`, 1px border, radius 12, 15px, 44px minimum height.
 
 ### Navigation bar
-A floating slab at the bottom: four items, each an icon above a 13px label. The
-selected item sits on a marker pill. Feedback is not in the bar; it lives in **You**.
+A floating slab at the bottom: five items, each an icon above a 13px label. The
+selected item sits on a marker pill. Feedback is not in the bar; it lives in **Settings**.
+
+**You** holds what is about the person: their answers, their daily targets and the foods they leave out. **Settings** holds what is about the app: Appearance, the account (the sign-in card, or export, sign out and delete), Help (How it works, Send feedback) and, on a phone, how to add it to the home screen. The Settings icon is two sliders, drawn with the same 1.8 stroke as the others.
 
 ### The day, on the Diary
 A day is named (**Today**, **Yesterday**, or "Fri, Oct 9") between two 44px arrows; the next
@@ -245,7 +247,7 @@ The week card opens with one plain line ("4 of 7 days in range this week") and n
 
 A **tip** is a small card that points at the real screen: before the first question it points at the input, and after the first answer, one at a time, at the verdict, at Show calculation and at the log button. A ring in `--accent` marks what it points at. It uses the card tokens (`--surface`, `--border`, `--radius`, `--fx-raised`), the card-heading type and 14 px body text, and carries a "Next" or "Got it" key and a "Skip tips" link. It is **non-modal and never takes focus**; on a phone it is pinned above the tab bar. It carries **no figure**: tips explain where numbers come from and never display one.
 
-"How it works" (a button under Help in You) opens a plain dialog, one line for each tab.
+"How it works" (a button under Help in Settings) opens a plain dialog, one line for each tab.
 
 ### Feedback card, on the Ask screen
 
@@ -306,7 +308,7 @@ Almost none, and never for its own sake.
 3. Status is conveyed by text and icon, never colour alone.
 4. Decorative icons are `aria-hidden`; the day bar has an `aria-label` stating
    used and total.
-5. Respect `prefers-color-scheme` and `prefers-reduced-motion`. **You** offers
+5. Respect `prefers-color-scheme` and `prefers-reduced-motion`. **Settings** offers
    Tape (default), Paper and Follow my phone; the choice is kept on the device.
 
 ---

@@ -17,7 +17,7 @@ export { RATING_LABELS, RATING_ONLY } from './feedbackCopy'
 /** Typing this as the comment forces the error state, for testing the flow. */
 const FAIL_PHRASE = 'trigger error'
 
-/** Which moment asked: the form in You, a prompt after the third meal, or a prompt on a later day. */
+/** Which moment asked: the form in Settings, a prompt after the third meal, or a prompt on a later day. */
 export type FeedbackContext = 'form' | 'after_3_meals' | 'day_2'
 
 export interface Feedback {

@@ -6,7 +6,7 @@
 
 **The feature.** A short, interactive first-run guide that points at the real screen, as many apps do on first launch. Decided by the owner on 15 October:
 - **Form: a hybrid.** One tip on the empty Ask screen before the first question. Three more tips appear after the first **real** answer that carries a receipt: the verdict, "Show calculation", "Log what was counted". Menu and You are explained by a button, not by tips.
-- **Who sees it:** everyone on first launch, plus a **"How it works"** button in You.
+- **Who sees it:** everyone on first launch, plus a **"How it works"** button in Settings.
 - **Memory:** in this browser (`localStorage`); nothing is written to the server.
 - **The five moderated sessions: the tour stays on.** Stated consequence, below.
 
@@ -18,7 +18,7 @@
 
 ## 2. Scope
 
-**In:** a pure step logic with its own tests; a tip component anchored to existing elements; a "How it works" sheet; the button in You; styles from the existing tokens; the screens and rehearsal scripts made aware of the tour; the sessions protocol reworded.
+**In:** a pure step logic with its own tests; a tip component anchored to existing elements; a "How it works" sheet; the button in Settings; styles from the existing tokens; the screens and rehearsal scripts made aware of the tour; the sessions protocol reworded.
 
 **Out:** analytics of the tour (nothing is collected), a tour of Menu, You or the onboarding form, a sample answer with fixed numbers, any new table, endpoint or agent.
 
@@ -62,7 +62,7 @@ The tour shows **no number computed by anything**. Its copy contains no figure: 
 
 Buttons: "Next" on 2 and 3, "Got it" on 1 and 4, "Skip tips" always. Sentence-case, no exclamation marks, no emoji (design file).
 
-**The sheet "How it works"** (a plain card opened from a button in You, closable, no spotlight): four lines: *Ask* (describe a meal, get a verdict and the receipt), *Diary* (what you logged, and your week), *Menu* (a week of meals and a shopping list, not yet reviewed by a clinician), *You* (your profile, your data, delete your account); then "Every number is computed by the engine from a food database, never written by the AI. Open Show calculation on any answer to see it." No figures.
+**The sheet "How it works"** (a plain card opened from a button in Settings, closable, no spotlight): four lines: *Ask* (describe a meal, get a verdict and the receipt), *Diary* (what you logged, and your week), *Menu* (a week of meals and a shopping list, not yet reviewed by a clinician), *You* (your profile, your data, delete your account); then "Every number is computed by the engine from a food database, never written by the AI. Open Show calculation on any answer to see it." No figures.
 
 **Behaviour and accessibility.**
 - A tip is a small card with a ring on its anchor (the accent token), placed below the anchor on a laptop and, on a phone, as a card pinned above the tab bar so it never covers the input or the keyboard. It is **non-modal**: the page behind stays usable; typing, tapping and the tab bar all work.
@@ -117,7 +117,7 @@ No table, no migration. **Nothing is stored about a person on a server.** One `l
 
 ## 12. Open questions — the owner's
 
-Decided on 15 October: hybrid form; everyone at first launch plus a button in You; the tour is **not** turned off for the sessions; the memory lives in the browser.
+Decided on 15 October: hybrid form; everyone at first launch plus a button in Settings; the tour is **not** turned off for the sessions; the memory lives in the browser.
 
 1. **The copy of the four tips and the sheet** (section 5). The words are the owner's.
 2. **What the sessions now measure.** With the tour on, "do they find the receipt unprompted?" (`docs/USER_SESSIONS.md`, goal 1 and step 4) can no longer be answered: tip 3 tells them. The protocol is reworded instead: goal 1 becomes *"Do they open the receipt again, on a later meal, without the tip, and what do they make of it?"*; step 4 asks what the tip told them and whether they believe the number, and watches whether they return to "Show calculation" on a second answer. Confirm, or turn the tour off for sessions after all (a `?tour=off` link would do it with no stored data).

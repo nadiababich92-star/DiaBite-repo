@@ -49,7 +49,7 @@ Step 0 of onboarding gains, above the first question, one card: "What DiaBite ke
 
 On the first signed-in load, if the browser holds a diary or a profile (`diabite.diary.v1`, `diabite.profile.v1` with `onboarded: true`) and the account holds neither: a dialog (same focus trap as the feedback dialog): "We found a diary on this device. Move it to your account?" Buttons: **Move** (primary), **Not now**. Move upserts by the entries' own ids (a second tap changes nothing) and shows "Moved 14 entries" before clearing nothing: the local copy is removed only on sign-out (below). "Not now" asks again on the next sign-in, never silently moves, never silently discards.
 
-## Account block in the Profile tab
+## Account block in the Settings tab
 
 Under the profile: **Signed in as <address>**; **Export my data** (reads the person's own rows through row-level security and downloads one JSON file, `diabite-export-<date>.json`: profile, diary, consent time); **Sign out** (a confirm: "Signing out removes your profile and diary from this device. They stay in your account."), which clears every `diabite.*` key from `localStorage` and signs out; **Delete my account** (a dialog: "This deletes your account, your profile and your whole diary. It can't be undone. Type delete to confirm", a field, and a danger button "Delete everything" enabled only when the field reads `delete`), which calls `DELETE /account`, then clears local data and shows the sign-in screen with "Your account was deleted".
 
@@ -94,7 +94,7 @@ A normal account (`demo@<owner's address>` or a plus-address) signed in once on 
 
 ## As built, later on 10 October 2026
 
-- **The Profile tab is called You** and now also holds Appearance (Follow my phone, Paper, Night; kept on the device, not in the account) and Send feedback. The optional sign-in card ("Keep your profile and diary") and the account block (export, sign out, delete) are under it.
+- **Settings, the fifth tab (28 Oct), holds Appearance (Follow my phone, Paper, Night; kept on the device, not in the account), the optional sign-in card ("Keep your profile and diary") or the account block (export, sign out, delete), Help (How it works, Send feedback) and the home-screen note.** The tab called You keeps the person's answers, targets and excluded foods.
 - **How sync behaves, so nobody is surprised.** The app reads the account **once**, when it opens or when someone signs in. After that it only *writes*: a change settles for 0.8 s, then the changed entries and the profile are upserted; a failure is retried every 30 s and whenever the tab regains focus, and shows "Your changes haven't been saved". A second device therefore sees a meal logged on the first **after it reloads**, not live. Each device deletes only entries it had itself synced, so a stale device cannot erase another device's meals. The profile is last-write-wins, which can drop a profile change made on another device if this one changes its profile before reloading. None of this loses a meal; the profile case is the one to know about.
 - **`DELETE /account` is idempotent.** A token outlives the account it names, so a second press, or a retry after a lost reply, reaches Supabase for someone already gone and gets 404; that is answered `200 {"ok":true}`.
 - **The wall covers the new route too.** `POST /meal/recompute` (a portion changed, no model) answers 401 without a token when sign-in is required.
