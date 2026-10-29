@@ -945,18 +945,28 @@ hangMisses.forEach((m) => console.log(m))
 // anything more specific that the person says is still honoured.
 {
   const pizzaMisses: string[] = []
-  const plain = ['pepperoni pizza', 'a slice of pepperoni pizza', 'pepperoni pizza slice']
-  const rp = await resolvePhrases(store, plain)
+  // A margherita and a cheese pizza are the plain restaurant cheese pizza (the dish was once "unknown", then costed
+  // without its dough, and "cheese pizza" went to a white pizza with no tomato).
+  const plain: [string, string][] = [
+    ['pepperoni pizza', 'usda:2708638'], ['a slice of pepperoni pizza', 'usda:2708638'], ['pepperoni pizza slice', 'usda:2708638'],
+    ['margherita pizza', 'usda:2708614'], ['a slice of margherita pizza', 'usda:2708614'], ['pizza margherita', 'usda:2708614'],
+    ['cheese pizza', 'usda:2708614'], ['a slice of cheese pizza', 'usda:2708614'],
+  ]
+  const rp = await resolvePhrases(store, plain.map((n) => n[0]))
   rp.forEach((r, i) => {
-    if (r.candidates[0]?.id !== 'usda:2708638' || r.confidence !== 'high' || r.clarify) pizzaMisses.push(`    "${plain[i]}": ${r.candidates[0]?.id}, ${r.confidence}${r.clarify ? ', asks: ' + r.clarify : ''}`)
+    if (r.candidates[0]?.id !== plain[i][1] || r.confidence !== 'high' || r.clarify) pizzaMisses.push(`    "${plain[i][0]}": ${r.candidates[0]?.id}, ${r.confidence}${r.clarify ? ', asks: ' + r.clarify : ''}`)
   })
   // A slice, not a whole pizza: the first portion USDA lists was 516 g and "two slices" came to 1,032 g.
-  const base = loadFoods().byId.get('usda:2708638')
-  if (!base || base.defaultPortion < 60 || base.defaultPortion > 200) pizzaMisses.push(`    the plain pepperoni pizza's default portion is ${base?.defaultPortion} g, not a slice`)
+  for (const id of ['usda:2708638', 'usda:2708614']) {
+    const base = loadFoods().byId.get(id)
+    if (!base || base.defaultPortion < 60 || base.defaultPortion > 200) pizzaMisses.push(`    the plain pizza ${id} has a default portion of ${base?.defaultPortion} g, not a slice`)
+  }
   const named: [string, RegExp][] = [
     ['stuffed crust pepperoni pizza', /^usda:2708642$/],
     ['frozen pepperoni pizza', /^usda:27086(35|36|37)$/],
     ['Tombstone pepperoni pizza', /^branded:/],
+    ['thin crust cheese pizza', /^usda:2708615$/],
+    ['thick crust margherita pizza', /^usda:2708617$/],
   ]
   const rn = await resolvePhrases(store, named.map((n) => n[0]))
   rn.forEach((r, i) => { if (!named[i][1].test(r.candidates[0]?.id ?? '')) pizzaMisses.push(`    "${named[i][0]}" went to ${r.candidates[0]?.id}`) })

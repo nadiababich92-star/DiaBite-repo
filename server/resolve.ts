@@ -295,7 +295,9 @@ function band(phrase: string, cands: ResolveCandidate[]): Confidence {
   const vague = tokens(phrase).filter((t) => VAGUE_WORDS.has(t))
   if (vague.length && vague.some((t) => !norm(top.name).includes(stem(t)))) return 'medium'
   // A category word is never certain, however well it matched.
-  if (tokens(phrase).every((t) => CATEGORY_WORDS.has(t))) return 'medium'
+  // Unless a survey food was given exactly those words by hand ("cheese pizza": both are category words). An
+  // ingredient's everyday names do not count: "chicken" and "beans" are still a question.
+  if (tokens(phrase).every((t) => CATEGORY_WORDS.has(t)) && !(top.id.startsWith('usda:') && loadFoods().byId.get(top.id)?.aliases?.includes(norm(phrase)))) return 'medium'
   if (isNamed(phrase, top.name)) return 'high'
   const rival = cands.slice(1).find((c) => !sameFood(c.name, top.name))
   if (top.score >= HIGH_MIN && (!rival || top.score - rival.score >= HIGH_GAP)) return 'high'
@@ -426,7 +428,10 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
         const base = exact
           ? Math.max(ALIAS_SCORE, h.score)
           : Math.min(1, h.score + lexicalScore(phrase, rec.name) + kindPrior(phrase, rec.kind))
-        const penalty = h.id.startsWith('usda:') ? (rec.gi === null ? (rec.kind === 'unrated' ? UNRATED_PENALTY : NO_GI_PENALTY) : COVERAGE_PENALTY) : 0
+        // A survey food we wrote an everyday name for by hand is curated: the coverage-layer penalty exists to let a
+        // curated record win a tie, and this one is the curated record. Without this "cheese pizza" lost to a white pizza.
+        const handNamed = h.id.startsWith('usda:') && rec.kind === 'unrated' && rec.aliases?.includes(norm(phrase))
+        const penalty = handNamed ? 0 : h.id.startsWith('usda:') ? (rec.gi === null ? (rec.kind === 'unrated' ? UNRATED_PENALTY : NO_GI_PENALTY) : COVERAGE_PENALTY) : 0
         const branded = h.id.startsWith('branded:') ? ((brandWord(rec.name) && tokens(phrase).map(stem).includes(brandWord(rec.name))) ? 0 : BRANDED_PENALTY + COVERAGE_PENALTY) : 0
         const school = /\bschool\b/i.test(rec.name) && !/\bschool\b/i.test(phrase) ? SCHOOL_PENALTY : 0
         const score = base - penalty - school - branded

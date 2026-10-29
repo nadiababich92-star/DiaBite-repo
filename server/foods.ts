@@ -279,6 +279,12 @@ const USDA_ALIASES: Record<string, string[]> = {
   // 'stuffed crust or Tombstone?'. The plain restaurant or fast-food pizza is the one people mean; a crust, a freezer
   // or a school lunch is still reachable by naming it. Carbohydrate only: this survey food has no glycemic index.
   'usda:2708638': ['pepperoni pizza', 'pizza with pepperoni', 'pepperoni pizza slice', 'slice of pepperoni pizza'], // Pizza with pepperoni, from restaurant or fast food
+  // A margherita is a cheese pizza with tomato and basil. It was found nowhere ("unknown"), so the dish was costed
+  // from sauce and cheese with the dough left out, the one part that carries the carbohydrate. "Cheese pizza" went
+  // to a white pizza with no tomato. Both mean the plain restaurant or fast-food cheese pizza; naming a crust still works.
+  'usda:2708614': ['cheese pizza', 'margherita pizza', 'pizza margherita', 'margherita', 'cheese pizza slice', 'slice of cheese pizza', 'margherita pizza slice', 'slice of margherita pizza', 'pizza with cheese'], // Pizza, cheese, from restaurant or fast food
+  'usda:2708615': ['thin crust cheese pizza', 'thin crust margherita pizza', 'thin crust margherita'], // Pizza, cheese, from restaurant or fast food, thin crust
+  'usda:2708617': ['thick crust cheese pizza', 'thick crust margherita pizza', 'thick crust margherita'], // Pizza, cheese, from restaurant or fast food, thick crust
   'usda:2706191': ['breakfast sausage', 'sausage links', 'sausage patties'], // Pork sausage (the same phrase also names turkey and chicken sausage, so the engine asks which)
   // Found by eval/coverage with community-phrases.txt (22 October 2026): the same food under the name people use.
   // Dishes with no record at all (arroz con pollo, tostones, dosa, lumpia, pancit, sancocho, tzimmes...) stay holes on
