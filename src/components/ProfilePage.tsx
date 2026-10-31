@@ -189,7 +189,13 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
           placeholder="Start typing a food name"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          aria-describedby="excluded-hint"
         />
+        <p id="excluded-hint" className="muted" style={{ margin: '8px 0 0' }}>
+          This list is for single foods. For an allergy (for example shellfish, milk or nuts) or a way of eating
+          (for example vegetarian or halal), use the questions you answered at the start: they cover the whole group.{' '}
+          <button type="button" className="link" onClick={onRedoOnboarding}>Go through them again</button>
+        </p>
         {matches.length > 0 && (
           <div className="search-results">
             {matches.map((f) => (
