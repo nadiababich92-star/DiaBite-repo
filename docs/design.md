@@ -257,6 +257,8 @@ A **tip** is a small card that points at the real screen: before the first quest
 
 The **Day picker** is a label ("Day"), three chips (Today, Yesterday, Tomorrow; the Menu offers Today and Tomorrow) and a native date field ("Pick a date") built from the existing chip toggle. The chosen chip is pressed (`aria-pressed`); a date out of range snaps to the nearest allowed one and says so in one line ("You can go back 14 days." / "You can plan 14 days ahead."). It never takes focus. On Ask it sits above the log button; the button reads **Log it** up to today and **Plan it** after. On the Menu each meal has **I ate this** and **Plan it…**, which opens the picker under the card.
 
+On a day, the **Planned** card sits above the meals that were eaten (it is what is still to do); the day's figures count only what was eaten.
+
 A **planned row** in the Diary is in the muted text colour with a dashed **planned** pill (a past day: **planned, not eaten**), with **Ate it** (shown only for today and earlier) and ✕. A day with plans carries one quiet line under the figures: "Planned: GL 14, not counted yet." Nothing planned is counted in any figure, bar or week mark, and the state is a word, not a colour.
 
 ### The week, on the Menu

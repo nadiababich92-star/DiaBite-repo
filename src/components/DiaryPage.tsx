@@ -146,6 +146,33 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
         {notice && <>{notice.text}{' '}<button className="link" onClick={() => { notice.undo(); setNotice(null) }}>Undo</button></>}
       </p>
 
+      {/* What is planned comes first: it is what is still to do on this day. What was eaten follows. */}
+      {plannedEntries.length > 0 && (
+        <section className="card" aria-label="Planned">
+          <h2 className="diary-subhead" style={{ marginTop: 0 }}>Planned</h2>
+          <ul className="entries">
+            {plannedEntries.map((e) => {
+              const v = viewEntry(e)
+              return (
+                <li className="entry planned" key={e.id}>
+                  <div className="entry-main">
+                    <span className="entry-name">{v.name}</span>
+                    <span className="muted entry-sub">
+                      <span className="pill planned">{date < today ? 'planned, not eaten' : 'planned'}</span>{' '}
+                      {MEAL_LABELS[e.meal]} · {v.portion} · {v.availableCarbs.toFixed(1)} g carbs · GL {v.loadAvailable ? v.gl.toFixed(1) : '—'}
+                    </span>
+                  </div>
+                  <div className="entry-side">
+                    {date <= today && <button className="ghost ate-it" aria-label={`Ate it: ${v.name}, ${v.portion}`} onClick={() => ateIt(e)}>Ate it</button>}
+                    <button className="link entry-x" aria-label={`Remove ${v.name}, ${v.portion}`} onClick={() => remove(e)}>✕</button>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      )}
+
       {dayEntries.length === 0 && (
         <div className="empty">
           <p style={{ margin: '0 0 10px' }}>
@@ -202,32 +229,6 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
           </section>
         )
       })}
-
-      {plannedEntries.length > 0 && (
-        <section className="card" aria-label="Planned">
-          <h2 className="diary-subhead" style={{ marginTop: 0 }}>Planned</h2>
-          <ul className="entries">
-            {plannedEntries.map((e) => {
-              const v = viewEntry(e)
-              return (
-                <li className="entry planned" key={e.id}>
-                  <div className="entry-main">
-                    <span className="entry-name">{v.name}</span>
-                    <span className="muted entry-sub">
-                      <span className="pill planned">{date < today ? 'planned, not eaten' : 'planned'}</span>{' '}
-                      {MEAL_LABELS[e.meal]} · {v.portion} · {v.availableCarbs.toFixed(1)} g carbs · GL {v.loadAvailable ? v.gl.toFixed(1) : '—'}
-                    </span>
-                  </div>
-                  <div className="entry-side">
-                    {date <= today && <button className="ghost ate-it" aria-label={`Ate it: ${v.name}, ${v.portion}`} onClick={() => ateIt(e)}>Ate it</button>}
-                    <button className="link entry-x" aria-label={`Remove ${v.name}, ${v.portion}`} onClick={() => remove(e)}>✕</button>
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
-        </section>
-      )}
 
       <section className="card">
         <h2>Add food</h2>
