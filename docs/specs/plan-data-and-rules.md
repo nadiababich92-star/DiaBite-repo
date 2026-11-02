@@ -46,8 +46,8 @@ sort correctly). Today is the person's own, from `todayLocal()` / `useToday()`, 
 
 | Reader | Change |
 |---|---|
-| Ask: `todayEntries` (the budget bar, "left today") | `eaten(diary.filter(date === today))` |
-| Ask: the `entries` sent to the agent as the day so far | the same list: **no planned entry is ever sent** |
+| Ask: `dayEntries` (the budget bar, "left today" or the chosen day's) | `eaten(diary.filter(date === day))`, where `day` is the one chosen at the top of Ask (2 Nov): today by default |
+| Ask: the `entries` sent to the agent as the day so far | the same list, for the chosen day: **no planned entry is ever sent**, so a future day has none |
 | Diary: a day's totals, the budget bar of the viewed day | totals over `eaten(dayEntries)`; the planned entries are listed separately |
 | `weekSummary`, `weeksSummary` (`src/lib/history.ts`) | `group()` receives `eaten(diary)`, so a planned meal changes no status, slot count, `estimate` flag or `loggedDays`. A day with only planned entries is `none` |
 | `recentEntries` ("the foods you log again") | over `eaten(diary)`: a plan is not a habit |

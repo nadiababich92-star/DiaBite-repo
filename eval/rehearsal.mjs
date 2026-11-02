@@ -178,10 +178,10 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
     }
   }
   const diaryRows = async () => rows('diary_entries')
-  // A: ask, choose Tomorrow, "Plan it".
+  // A: choose Tomorrow at the top, ask, "Plan it". (The day is chosen first: it is the day the verdict is counted for.)
   await tabA('Ask')
-  await askOn(A, 'A cup of plain greek yogurt')
   await exact(A, 'Tomorrow'); await sleep(300)
+  await askOn(A, 'A cup of plain greek yogurt')
   const planLabel = await A.b.ev(`[...document.querySelectorAll('button.primary')].map(x=>x.innerText.trim()).join('|')`)
   await exact(A, 'Plan it'); await sleep(4500)
   const plannedRows = (await diaryRows()).filter((r) => r.planned === true && r.day === iso(1))

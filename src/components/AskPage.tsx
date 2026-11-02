@@ -454,9 +454,13 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   useEffect(() => { setLogDay(targetDay); setLogged(false); setLogNote('') }, [targetDay])
   // Only what was eaten counts: a planned meal is a promise, not a log.
   const counted = useMemo(() => eaten(diary), [diary])
-  const todayEntries = useMemo(() => counted.filter((e) => e.date === today), [counted, today])
-  const usedGL = useMemo(() => todayEntries.reduce((s, e) => s + viewEntry(e).gl, 0), [todayEntries])
+  // The day the person is asking about: today until they pick another. The budget, the verdict and "Log it" are that day's.
+  const day = logDay ?? today
+  const dayEntries = useMemo(() => counted.filter((e) => e.date === day), [counted, day])
+  const usedGL = useMemo(() => dayEntries.reduce((s, e) => s + viewEntry(e).gl, 0), [dayEntries])
   const left = Math.max(0, Math.round((targets.glBudget - usedGL) * 10) / 10)
+  const dayWord = day === today ? 'today' : ['tomorrow', 'yesterday'].includes(dayLabel(day, today).toLowerCase()) ? dayLabel(day, today).toLowerCase() : `on ${dayLabel(day, today)}`
+  const dayPick = useRef<HTMLDivElement>(null)
 
   const receipt = useMemo(() => receiptFrom(reply?.trace), [reply])
 
@@ -538,12 +542,21 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     return () => { clearTimeout(timer); ctl.abort() }
   }, [grams, removed, swap, baseLines, receipt, turn, onSessionEnded])
 
-  async function ask(message: string) {
+  // Another day is another budget: an answer on screen was counted against the old one, so it is asked again for the new day.
+  function pickDay(d: string) {
+    const next = d === today ? null : d
+    if ((next ?? today) === day) return
+    setLogDay(next); setLogged(false); setLogNote('')
+    if (reply && asked) void ask(asked, { day: d, force: true })
+  }
+
+  async function ask(message: string, opts: { day?: string; force?: boolean } = {}) {
     const q = message.trim()
-    if (!q || busy) return
+    if (!q || (busy && !opts.force)) return
+    const forDay = opts.day ?? day
     abort.current?.abort()
     abort.current = new AbortController()
-    setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(false); setLogged(false); setLogDay(targetDay); setLogNote(''); setAsked(q); setReplyText('')
+    setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(false); setLogged(false); setLogNote(''); setAsked(q); setReplyText('')
     setEditing(false); setGrams({}); setRemoved([]); setSwap(null); setRecalc(null); setRecalcError('')
     const sid = fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId()
     setTurn(sid)
@@ -553,7 +566,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
         message: q,
         budget: budgetOf(targets),
         avoid: avoidOf(profile),
-        entries: fresh ? [] : todayEntries.map((e) => (e.snapshot?.servings
+        entries: fresh ? [] : counted.filter((e) => e.date === forDay).map((e) => (e.snapshot?.servings
           ? { foodId: engineId(e), servings: e.snapshot.servings }
           : { foodId: engineId(e), grams: e.grams })),
       }, abort.current.signal, await accessToken())
@@ -607,14 +620,18 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     <div>
       <section className={`card ask-hero${reply || busy ? ' compact' : ''}`}>
         <div className="ask-budget">
-          <span className="label">glycemic load left today</span>
+          <span className="label">glycemic load left {dayWord}</span>
           <span className="value"><b className="num">{left}</b> <small>of {targets.glBudget}</small></span>
         </div>
         {/* The day, at a glance. A bar rather than a ring: a ring is a score
             to close, and the design canvas ruled those out. */}
         <div className="budget-bar" role="img"
-             aria-label={`${Math.round(Math.max(0, targets.glBudget - left) * 10) / 10} of ${targets.glBudget} glycemic load used today`}>
+             aria-label={`${Math.round(Math.max(0, targets.glBudget - left) * 10) / 10} of ${targets.glBudget} glycemic load used ${dayWord}`}>
           <span style={{ width: `${Math.min(100, Math.max(0, ((targets.glBudget - left) / Math.max(1, targets.glBudget)) * 100))}%` }} />
+        </div>
+        <div className="ask-day" ref={dayPick}>
+          <DayPicker value={day} today={today} onChange={pickDay} />
+          {day !== today && <p className="muted ask-day-note">The verdict is for {dayLabel(day, today)}: it counts what was eaten on that day.</p>}
         </div>
         <h2 className="ask-title">What are you about to eat?</h2>
         {!isDemo && <div className="row lab-row">
@@ -730,9 +747,10 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
           )}
 
           {receipt && (
-            <div className="log-day">
-              <DayPicker value={logDay ?? today} today={today} onChange={(d) => { setLogDay(d === today ? null : d); setLogged(false); setLogNote('') }} />
-            </div>
+            <p className="muted log-day">
+              Adding to {dayLabel(day, today)}.{' '}
+              <button type="button" className="link" onClick={() => { dayPick.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }); dayPick.current?.querySelector('button')?.focus({ preventScroll: true }) }}>Change day</button>
+            </p>
           )}
           {receipt && (
             <div className="row" style={{ marginBottom: 12 }}>

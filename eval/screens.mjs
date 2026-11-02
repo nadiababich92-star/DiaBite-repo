@@ -102,7 +102,9 @@ try {
     await sleep(1000)
     await shot('ask-answer')
     if (process.env.PLAN === '1') {
-      await b.ev(`(()=>{const e=[...document.querySelectorAll('.day-picker button')].find(x=>x.innerText.trim()==='Tomorrow'); e?.click()})()`); await sleep(500)
+      // The day is chosen at the top of Ask; with an answer on screen it is asked again for that day.
+      await b.ev(`(()=>{const e=[...document.querySelectorAll('.ask-day button')].find(x=>x.innerText.trim()==='Tomorrow'); e?.click()})()`); await sleep(1500)
+      for (let i = 0; i < 90; i++) { await sleep(500); if (!(await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`))) break }
       await b.ev(`document.querySelector('.log-day')?.scrollIntoView({block:'center'})`); await sleep(400)
       await shot('ask-plan')
     }

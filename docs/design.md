@@ -193,6 +193,10 @@ In this order: status disc + label → **verdict** → **three figures** → rea
 next action behind a dashed rule → verified pill. Advice, clarifying questions
 and refusals are plain prose; never dress them as a verdict.
 
+### The day, at the top of Ask
+
+Under the budget bar, above the question, sits the **Day picker** (Today, Yesterday, Tomorrow, Pick a date). The day chosen is the day the meal is asked about: the number above it reads "glycemic load left tomorrow" (or "on Fri 6 Nov"), the verdict is counted against that day's budget and what was eaten on it (a future day has nothing eaten, a planned entry never counts), and **Log it** puts the meal on it (**Plan it** for a future day). A line under the picker says so for any day but today. Choosing another day with an answer on screen asks the question again for that day, since the answer was counted against the old one. Under an answer, "Adding to Tomorrow. Change day" scrolls back to the picker. The Diary's **Add food** opens Ask on the day it was on.
+
 ### Accepting a swap
 
 When the **Next** line names one of the alternatives the engine returned ("swap the mashed potato for zucchini"), a ghost button **Accept the swap** (44 px) sits under it. It sends the meal back to the engine with the food replaced, at the weight the engine costed the alternative; the button reads **Counting again…**, then **Swap accepted** with "The new count is above." A failed count says so and offers **Try the swap again**. The new count is the same recalculated card that a portion change makes, above the original answer, saying "Recalculated with zucchini instead of mashed potato"; **Back to the original** undoes it, and **Log it** logs the swapped meal. Which alternative the sentence means is read from the sentence; the food, the weight and every number come from the engine. A dish counted from an assumed recipe has no swap button.
