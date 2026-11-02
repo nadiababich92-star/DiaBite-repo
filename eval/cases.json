@@ -4387,6 +4387,37 @@
         "branded",
         "day"
       ]
+    },
+    {
+      "id": "M1",
+      "dimension": "helpful",
+      "query": "steak, rice and beans",
+      "ground_truth": "All three foods are costed and the meal has one total; the portions are the defaults, said so, and the beans are named as the guess they are. Raised by the designer session of 27 October: several foods in one meal.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "itemsCount": 3,
+        "itemsAtLeast": {
+          "seed:rice-white|seed:rice-brown|seed:rice-wild|seed:rice-basmati": 100
+        },
+        "dayStateRemainingConsistent": false
+      },
+      "judge": "mechanical",
+      "tags": [
+        "meal",
+        "several"
+      ]
     }
   ]
 }

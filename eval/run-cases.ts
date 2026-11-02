@@ -275,6 +275,12 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
       say(`${foodId} costed at ${min}+`, typeof amount === 'number' && amount >= min, `got ${amount ?? 'nothing'}`)
     }
   }
+  // Every food the person listed is in the meal: three foods said, three costed. A list of several foods that
+  // arrives as two is a total that looks complete and is not.
+  if (typeof e.itemsCount === 'number') {
+    const items = (callOf(r, 'compute_meal')?.input as { items?: unknown[] } | undefined)?.items ?? []
+    say(`${e.itemsCount} foods costed`, items.length >= e.itemsCount, `got ${items.length}`)
+  }
   // A food costed under a neighbour's name: "baked potato" must not arrive as
   // the boiled record.
   if (Array.isArray(e.itemsExclude)) {
