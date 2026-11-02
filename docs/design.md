@@ -72,7 +72,7 @@ The verdict on an answer is printed as a stamp in the slip's corner (`--low`, `-
 | `--accent` | `#0e5a3c` | `#9fe0b6` | Links, focus, fills |
 | `--accent-soft` | `#e3f0e7` | `#1c3a2b` | Accent-tinted backgrounds, a chosen option |
 | `--on-accent` | `#fffcf5` | `#0a1812` | Text on an accent fill |
-| `--primary-1` / `--primary-2` / `--primary-ink` | `#18754e` / `#0e5a3c` / `#fffcf5` | `#f7faf2` / `#d9e3d2` / `#0a1812` | The main button (a green key in Paper, a cream key in Night) |
+| `--primary-1` / `--primary-2` / `--primary-ink` | `#18754e` / `#0e5a3c` / `#fffcf5` | `#dcf26b` / `#cde85a` / `#0c1b15` | The main button (a green key in Paper, a lime key, the marker colour, in Night) |
 | `--mark` | `#0e5a3c` | `#eef3e8` | The slip in the logo |
 | `--marker` / `--marker-ink` | `#dcf26b` / `#14201a` | `#dcf26b` / `#0c1b15` | The marker: the brand's one loud colour |
 
@@ -131,7 +131,7 @@ Three families, each with one job.
 |---|---|---|
 | Verdict | 25px (22px on phones) | Literata 600, `-0.02em`, `text-wrap: balance`, max ~22ch |
 | Card heading | 17px | Literata 600, `-0.01em` |
-| Wordmark | 24px | Literata 600, `-0.02em` |
+| Wordmark | 21px in the app's header, 25px on the landing page | Literata 600, `-0.02em` |
 | Body | 15px / 1.5 | |
 | Answer text | 15.5px / 1.55 | `max-width: 60ch` |
 | Secondary / dim | 14px | `--text-dim` |
@@ -153,8 +153,10 @@ A loose 4px grid. The values already in use:
 
 - **Gaps:** 6, 8, 10, 12 px. **Padding:** 8, 10, 12, 18 px (cards are 18px).
 - **Page:** max-width 880px, 16px side gutters, 64px bottom.
-- **Radius:** `--radius` 14px for cards; 12px for chips and the ask input;
-  8px for buttons and fields; 10px for figure tiles; 99px for pills and tabs.
+- **Radius:** `--radius` is 16px: cards and the other raised surfaces. 26px for the floating tab
+  bar; 14px for the appearance options in Settings and the desktop tab buttons; 12px for keys
+  (primary and ghost buttons), chips and the ask input; 10px for figure tiles, fields and notes;
+  8px for the danger button, search results and theme swatches; 99px for pills.
 
 Rules: cards never nest cards; one radius per element class; touch targets are
 at least 44px tall.

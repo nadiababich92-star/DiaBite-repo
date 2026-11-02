@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ACTIVITY_LABELS, ALLERGEN_LABELS, CARB_APPROACH_LABELS, COMORBIDITY_LABELS, CONDITION_LABELS,
   EXIT_COPY, GOAL_LABELS, INSULIN_LABELS, KIDNEY_LABELS, MED_LABELS,
@@ -80,6 +80,17 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
     go(2)
   }
 
+  // A new step is a new screen: the focus moves to its heading and a status line says where the person is, so
+  // a keyboard or a screen reader is not left on a button that is no longer there. Not on the first screen.
+  const card = useRef<HTMLElement>(null)
+  const seenStep = useRef(step)
+  useEffect(() => {
+    if (seenStep.current === step) return
+    seenStep.current = step
+    const h = card.current?.querySelector<HTMLElement>('h2')
+    if (h) { h.tabIndex = -1; h.focus() }
+  }, [step])
+
   const last = step === STEPS.length - 1
   // The first screen of a new account does not move on until what is kept has been agreed to.
   const canGoOn = !exit && !(askConsent && step === 0 && !consented)
@@ -104,7 +115,9 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
         <div className="onb-progress"><p className="onb-where"><b>Editing your answers</b> <span>{STEPS[only]}</span></p></div>
       )}
 
-      <section className="card onb-card">
+      <p className="sr-only" role="status" aria-live="polite">{only === undefined ? `Step ${step + 1} of ${STEPS.length}: ${STEPS[step]}` : `Editing your answers: ${STEPS[step]}`}</p>
+
+      <section className="card onb-card" ref={card}>
         {exit ? (
           <div className="onb-exit">
             <p className="eyebrow-line">This one is not for us to answer</p>
@@ -160,7 +173,7 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
                   </label>
                   <label className="field">
                     <span>Age</span>
-                    <input type="number" min={1} max={110} value={p.age}
+                    <input type="number" inputMode="numeric" min={1} max={110} value={p.age}
                       onChange={(e) => set('age', Number(e.target.value))} />
                   </label>
                 </div>
@@ -177,17 +190,17 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
                       <label className="field">
                         <span>Height</span>
                         <div className="row onb-height">
-                          <input type="number" min={3} max={7} value={ft} aria-label="Feet"
+                          <input type="number" inputMode="numeric" min={3} max={7} value={ft} aria-label="Feet"
                             onChange={(e) => set('heightCm', ftInToCm(Number(e.target.value), inch))} />
                           <span className="muted">ft</span>
-                          <input type="number" min={0} max={11} value={inch} aria-label="Inches"
+                          <input type="number" inputMode="numeric" min={0} max={11} value={inch} aria-label="Inches"
                             onChange={(e) => set('heightCm', ftInToCm(ft, Number(e.target.value)))} />
                           <span className="muted">in</span>
                         </div>
                       </label>
                       <label className="field">
                         <span>Weight, lb</span>
-                        <input type="number" min={80} max={660} value={kgToLb(p.weightKg)}
+                        <input type="number" inputMode="decimal" min={80} max={660} value={kgToLb(p.weightKg)}
                           onChange={(e) => set('weightKg', lbToKg(Number(e.target.value)))} />
                       </label>
                     </>
@@ -195,12 +208,12 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
                     <>
                       <label className="field">
                         <span>Height, cm</span>
-                        <input type="number" min={120} max={220} value={p.heightCm}
+                        <input type="number" inputMode="decimal" min={120} max={220} value={p.heightCm}
                           onChange={(e) => set('heightCm', Number(e.target.value))} />
                       </label>
                       <label className="field">
                         <span>Weight, kg</span>
-                        <input type="number" min={35} max={300} step={0.5} value={p.weightKg}
+                        <input type="number" inputMode="decimal" min={35} max={300} step={0.5} value={p.weightKg}
                           onChange={(e) => set('weightKg', Number(e.target.value))} />
                       </label>
                     </>

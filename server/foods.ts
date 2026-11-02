@@ -143,12 +143,14 @@ const num = (v: number | string | null): number | null => (v === null ? null : N
  * missing GI — true of cheese, false of baking powder — and the table path
  * ("food can be added without a deploy") is the one that must not skip it.
  */
-export function carbsWithoutLoad(r: { gi: number | null; per100?: Nutrients; kind?: string }): boolean {
+export function carbsWithoutLoad(r: { gi: number | null; per100?: Nutrients; perServing?: Nutrients & { availableCarbs: number }; kind?: string }): boolean {
   if (r.gi !== null && r.gi > 0) return false
   // The two exceptions, by design: a branded product and an unrated food are
   // *labelled* as carbohydrate without a load, costed for carbohydrate only, and
   // never for a glycemic load. Nothing else may hold carbohydrate without a GI.
   if (r.kind === 'branded' || r.kind === 'unrated') return false
+  // A recipe carries its numbers per serving, not per 100 g: a recipe row with carbohydrate and no index is the same fault.
+  if (r.perServing) return r.perServing.availableCarbs >= 5
   return !!r.per100 && Math.max(0, r.per100.carbs - (r.per100.fiber ?? 0)) >= 5
 }
 

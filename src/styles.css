@@ -613,7 +613,7 @@ body.modal-open { overflow: hidden; }
 .consent h2 { margin: 0 0 6px; }
 .consent ul { margin: 0 0 8px; padding-left: 18px; }
 .account-delete { margin-top: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; gap: 10px; }
-button.danger { background: var(--high); color: var(--on-accent); border: none; border-radius: 8px; padding: 9px 16px; font-weight: 600; cursor: pointer; align-self: flex-start; }
+button.danger { background: var(--high); color: var(--on-accent); border: none; border-radius: 8px; padding: 9px 16px; min-height: 44px; font-weight: 600; cursor: pointer; align-self: flex-start; }
 button.danger:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* The week: a thin bar per day, plain numbers, no colour but the verdict's (green within, red over). */
@@ -819,6 +819,8 @@ button.step-day:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; 
 .date-pick { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
 .date-pick-label { white-space: nowrap; }
 .date-pick input { font: inherit; font-size: 14px; color: inherit; background: transparent; border: none; padding: 0; min-height: 0; }
+/* This rule is more specific than the touch rule above and used to win: the one field iOS still zoomed on. */
+@media (hover: none) and (pointer: coarse) { .date-pick input { font-size: 16px; } }
 .date-pick.on input { font-weight: 600; }
 .day-note { min-height: 18px; margin: 0; }
 

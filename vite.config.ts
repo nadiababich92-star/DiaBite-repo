@@ -16,6 +16,12 @@ export default defineConfig({
     proxy: {
       '/agent': { target: new URL(AGENT_WEBHOOK).origin, changeOrigin: true, rewrite: () => new URL(AGENT_WEBHOOK).pathname },
       '/meal': { target: new URL(AGENT_WEBHOOK).origin, changeOrigin: true },
+      // Not proxied: in development the app talks to the deployed engine, and "Delete my account" must not delete a real
+      // account from a laptop. Unanswered, Vite returned index.html with 200 and the app reported the deletion done.
+      '/account': {
+        target: new URL(AGENT_WEBHOOK).origin,
+        bypass: (_req, res) => { res!.statusCode = 501; res!.setHeader('content-type', 'application/json'); res!.end(JSON.stringify({ error: 'not_in_development' })); return false },
+      },
     },
   },
 })

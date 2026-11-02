@@ -33,7 +33,9 @@ export default function AccountBlock({ userId, email }: { userId: string; email?
     try {
       const token = await accessToken()
       const r = await fetch(engineUrl('/account'), { method: 'DELETE', headers: token ? { authorization: `Bearer ${token}` } : {} })
-      if (!r.ok) throw new Error(String(r.status))
+      // The engine answers { ok: true }. A 200 that is not that (a page, a proxy's reply) is not a deletion.
+      const done = await r.json().then((b: { ok?: boolean }) => b?.ok === true, () => false)
+      if (!r.ok || !done) throw new Error(String(r.status))
       clearDevice()
       await supabase?.auth.signOut()
     } catch { setMessage("Couldn't delete your account. Nothing was changed. Try again in a moment."); setBusy(null) }

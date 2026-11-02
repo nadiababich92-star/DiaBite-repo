@@ -129,7 +129,13 @@ try {
     await b.send('Page.navigate', { url: APP }); await sleep(2500); await login(b, false); await b.send('Page.reload'); await sleep(4500)
     const tab = async (n) => { await b.ev(`(()=>{[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes(${JSON.stringify(n)}))?.click()})()`); await sleep(1300) }
     const click = (t, scope = 'button') => b.ev(`(()=>{const e=[...document.querySelectorAll(${JSON.stringify(scope)})].find(x=>x.innerText.trim().startsWith(${JSON.stringify(t)})); if(!e) return 'NO'; e.focus(); e.click(); return 'ok'})()`)
-    const scan = async (screen) => { const list = await readTree(b); results.screens.push(check(list, screen)); dump(screen, list); return list }
+    // An aria-controls, -labelledby or -describedby that names an id the page does not have is a reference to nothing.
+    const danglingIds = () => b.ev(`[...document.querySelectorAll('[aria-controls],[aria-labelledby],[aria-describedby],[aria-owns]')].flatMap((e) => ['aria-controls', 'aria-labelledby', 'aria-describedby', 'aria-owns'].flatMap((a) => (e.getAttribute(a) || '').split(' ').filter(Boolean).filter((id) => !document.getElementById(id)).map((id) => a + '=' + id)))`)
+    const scan = async (screen) => {
+      const list = await readTree(b); const r = check(list, screen)
+      for (const d of [...new Set(await danglingIds())]) r.problems.push(`${d} points at an id the page does not have`)
+      results.screens.push(r); dump(screen, list); return list
+    }
     await scan('ask-empty')
     await b.ev(`document.querySelector('input[type=text]').focus()`)
     await b.send('Input.insertText', { text: 'Two eggs, a slice of rye bread and half an avocado' })

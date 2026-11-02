@@ -210,7 +210,7 @@ export default function App() {
             change to your diet with your clinician.{' '}
           </span>
         )}
-        <button className="link disclaimer-toggle" aria-expanded={disclaimerOpen} aria-controls="disclaimer-rest"
+        <button className="link disclaimer-toggle" aria-expanded={disclaimerOpen} aria-controls={disclaimerOpen ? 'disclaimer-rest' : undefined}
           onClick={() => setDisclaimerOpen((v) => !v)}>{disclaimerOpen ? 'Show less' : 'Read more'}</button>
       </div>
 
@@ -221,7 +221,7 @@ export default function App() {
       )}
 
       <main>
-      <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
+      <div role="tabpanel" id="tabpanel" aria-labelledby={`tab-${tab}`}>
       {tab === 'ask' && (
         <AskPage
           profile={profile} targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} onOpenDiary={() => setTab('diary')} onSessionEnded={sessionEnded}
@@ -275,7 +275,7 @@ export default function App() {
             key={t.id}
             role="tab"
             id={`tab-${t.id}`}
-            aria-controls={`panel-${t.id}`}
+            aria-controls="tabpanel"
             aria-selected={tab === t.id}
             onClick={() => setTab(t.id)}
           >

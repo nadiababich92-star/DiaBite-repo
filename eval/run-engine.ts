@@ -165,6 +165,9 @@ const catalogueMisses = records.filter((r) => carbsWithoutLoad(r)).map((r) => ` 
 const probe = (gi: number | null, carbs: number, fibre = 0) => carbsWithoutLoad({ gi, per100: { kcal: 0, protein: 0, fat: 0, carbs, fiber: fibre } })
 const predicateOk = probe(null, 28) && probe(0, 12.7) && !probe(null, 0.5) && !probe(null, 8, 4) && !probe(56, 28)
 if (!predicateOk) catalogueMisses.push('    the rule 4 predicate disagreed with a probe')
+// A recipe row has no per100: its carbohydrate is per serving, and the rule has to read that.
+const recipeProbe = (gi: number | null, availableCarbs: number) => carbsWithoutLoad({ gi, kind: 'recipe', perServing: { kcal: 0, protein: 0, fat: 0, carbs: availableCarbs, fiber: 0, availableCarbs, gl: 0 } })
+if (!recipeProbe(null, 30) || recipeProbe(55, 30) || recipeProbe(null, 2)) catalogueMisses.push('    the rule 4 predicate does not read a recipe per serving')
 console.log(`\ncatalogue ${catalogueMisses.length === 0 ? 'ok' : 'WRONG'}  (${records.length} records, none carbohydrate-without-load)`)
 catalogueMisses.forEach((m) => console.log(m))
 
