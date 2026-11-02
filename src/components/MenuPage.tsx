@@ -3,7 +3,7 @@ import { CATEGORY_LABELS, getFood } from '../data/foods'
 import { MEAL_LABELS, recipeCount, regenerateSlot, replayWeek, amountText, shoppingFromEntries, shoppingList, shoppingText, menuHidden } from '../lib/menu'
 import { addDays, dayLabel, plannedOnly } from '../lib/diary'
 import DayPicker from './DayPicker'
-import { loadMenuRecipes } from '../lib/recipes'
+import { describeDish, loadMenuRecipes } from '../lib/recipes'
 import type { PlannedDay, PlannedMeal, WeekState } from '../lib/menu'
 import { loadWeekState, newWeekState, saveWeekState } from '../lib/menuStore'
 import { useToday } from '../lib/useToday'
@@ -299,6 +299,7 @@ function DayCard({ day, dayIndex, budget, added, slotKey, today, planning, onPla
                 <span className="muted">{m.nutrients.kcal.toFixed(0)} kcal</span>
               </span>
             </div>
+            {describeDish(m.dish) && <p className="menu-desc">{describeDish(m.dish)}</p>}
             <p className="ingredients"><GIPill gi={m.gi} /> {ingredients}</p>
             {m.dish.serving && (
               <p className="muted menu-serving">{m.scale === 1 ? '1 serving' : `${m.scale} servings`}{m.dish.minutes ? ` · ${m.dish.minutes} min` : ''}{m.dish.cuisine ? ` · ${m.dish.cuisine}` : ''}</p>

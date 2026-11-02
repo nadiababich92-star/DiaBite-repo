@@ -56,6 +56,7 @@ import { CONSENT_VERSION } from '../src/lib/syncCore'
 import { addDays, dayLabel, gramStep, mealForNow, nudgeGrams, recentEntries } from '../src/lib/diary'
 import { calculateTargets, DEFAULT_PROFILE } from '../src/lib/profile'
 import { answerRows } from '../src/lib/answers'
+import { describeDish, toDishes, type RawRecipe } from '../src/lib/recipes'
 import { CATEGORY_LABELS, getFood } from '../src/data/foods'
 import { getSession, noteResolution, putSession } from '../server/sessions'
 import { validateDish } from '../server/guard'
@@ -961,6 +962,24 @@ hangMisses.forEach((m) => console.log(m))
   // A brand name or an example in brackets never reaches the one-line summary.
   if (answerRows({ ...DEFAULT_PROFILE, meds: ['sulfonylurea', 'glp1'] })[0].text.includes('(')) misses.push('    a summary carries an example in brackets')
   console.log(`\nanswers   ${misses.length === 0 ? 'ok' : 'WRONG'}`)
+  misses.forEach((m) => console.log(m))
+  if (misses.length) process.exitCode = 1
+}
+
+// ── dish descriptions ────────────────────────────────────────────────
+// A line under each menu dish, built from the recipe's own ingredient list: no model, no number, no seasoning.
+{
+  const misses: string[] = []
+  const raw = JSON.parse(readFileSync(join(ROOT, 'src', 'data', 'menu-recipes.json'), 'utf8')) as RawRecipe[]
+  const dishes = toDishes(raw)
+  const lines = dishes.map((d) => ({ d, line: describeDish(d) }))
+  const empty = lines.filter((x) => !x.line)
+  if (empty.length) misses.push(`    ${empty.length} dishes with no description, e.g. ${empty.slice(0, 3).map((x) => x.d.name).join('; ')}`)
+  const bad = lines.filter((x) => x.line && (/[0-9()]/.test(x.line) || /\b(salt|pepper|vinegar|oil)\b/i.test(x.line) || x.line.split(', ').length > 4 || x.line.length > 90))
+  if (bad.length) misses.push(`    ${bad.length} descriptions break the form, e.g. "${bad[0].line}" for ${bad[0].d.name}`)
+  const omelet = dishes.find((d) => d.recipeId === 'DB-0001')
+  if (describeDish(omelet!) !== 'Egg whites, spinach, feta cheese') misses.push(`    DB-0001 is "${describeDish(omelet!)}"`)
+  console.log(`\ndishes    ${misses.length === 0 ? `ok (${dishes.length} recipes)` : 'WRONG'}`)
   misses.forEach((m) => console.log(m))
   if (misses.length) process.exitCode = 1
 }

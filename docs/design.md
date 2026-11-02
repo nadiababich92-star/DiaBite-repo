@@ -264,6 +264,8 @@ On a day, the **Planned** card sits above the meals that were eaten (it is what 
 A **planned row** in the Diary is in the muted text colour with a dashed **planned** pill (a past day: **planned, not eaten**), with **Ate it** (shown only for today and earlier) and ✕. A day with plans carries one quiet line under the figures: "Planned: GL 14, not counted yet." Nothing planned is counted in any figure, bar or week mark, and the state is a word, not a colour.
 
 ### The week, on the Menu
+
+Under each dish's title is **one short line** in `--text-dim`, 14 px: its main ingredients, heaviest first, at most four ("Egg whites, spinach, feta cheese"). It is built from the recipe's own ingredient list, never written by a model, and carries no number; oil, seasoning and small amounts are left out and stay in the full list below it.
 Seven day keys (the day's name and its planned glycemic load), today pre-selected, and one
 day open as a card: a bar, then each meal with its glycemic load, its foods at their weights,
 the recipe behind a disclosure, **I ate this**, **Plan it…** and **Replace**. The week stays on this
