@@ -17,6 +17,8 @@ interface Props {
   askConsent?: boolean
   /** Present when an existing user reopened onboarding from the profile tab. */
   onCancel?: () => void
+  /** Edit one step only (2 Medicines, 3 Conditions): no progress, no Back, Save and Cancel. The rules, exits included, are the same. */
+  only?: number
 }
 
 const STEPS = ['You', 'Diagnosis', 'Medicines', 'Conditions', 'Your day'] as const
@@ -37,9 +39,11 @@ function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
 }
 
-export default function Onboarding({ initial, onDone, askConsent, onCancel }: Props) {
+export default function Onboarding({ initial, onDone, askConsent, onCancel, only }: Props) {
   const [p, setP] = useState<Profile>({ ...initial, onboarded: false })
-  const [step, setStep] = useState(0)
+  const [step, setStep] = useState(only ?? 0)
+  // Editing one step, an answer that sends the person back (an exit screen's "Change that answer") stays on that step.
+  const go = (n: number) => setStep(only ?? n)
   const [agreed, setAgreed] = useState(false)
   const [consented, setConsented] = useState(false)
 
@@ -62,18 +66,18 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel }: Pr
    * and the person is stuck with no way to correct a mis-tap.
    */
   function changeAnswer() {
-    if (exit === 'minor') { setStep(0); return }
+    if (exit === 'minor') { go(0); return }
     if (exit === 'pregnancy') {
       setP((prev) => ({
         ...prev,
         pregnantOrBreastfeeding: false,
         condition: prev.condition === 'gestational' ? 'unsure' : prev.condition,
       }))
-      setStep(p.condition === 'gestational' ? 1 : 2)
+      go(p.condition === 'gestational' ? 1 : 2)
       return
     }
     setP((prev) => ({ ...prev, insulin: 'none' }))
-    setStep(2)
+    go(2)
   }
 
   const last = step === STEPS.length - 1
@@ -81,17 +85,24 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel }: Pr
   const canGoOn = !exit && !(askConsent && step === 0 && !consented)
   const next = () => (last ? agreed && onDone({ ...p, onboarded: true }, askConsent ? consented : undefined) : setStep(step + 1))
 
+  /** Saving one step: a medicine that blocks the carbohydrate approach the person already has changes it to moderate, as the last step does. */
+  const save = () => onDone({ ...p, onboarded: true, carbApproach: carbApproachBlocked(p, p.carbApproach) ? 'moderate' : p.carbApproach })
+
   const { ft, in: inch } = cmToFtIn(p.heightCm)
   const imperial = p.units === 'imperial'
 
   return (
     <div className="onb">
-      <div className="onb-progress" role="progressbar" aria-label="Onboarding progress" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1} aria-valuetext={`Step ${step + 1} of ${STEPS.length}: ${STEPS[step]}`}>
-        <div className="onb-bars" aria-hidden="true">
-          {STEPS.map((s, i) => <i key={s} className={i <= step ? 'on' : ''} />)}
+      {only === undefined ? (
+        <div className="onb-progress" role="progressbar" aria-label="Onboarding progress" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1} aria-valuetext={`Step ${step + 1} of ${STEPS.length}: ${STEPS[step]}`}>
+          <div className="onb-bars" aria-hidden="true">
+            {STEPS.map((s, i) => <i key={s} className={i <= step ? 'on' : ''} />)}
+          </div>
+          <p className="onb-where"><b>{STEPS[step]}</b> <span>{step + 1} of {STEPS.length}</span></p>
         </div>
-        <p className="onb-where"><b>{STEPS[step]}</b> <span>{step + 1} of {STEPS.length}</span></p>
-      </div>
+      ) : (
+        <div className="onb-progress"><p className="onb-where"><b>Editing your answers</b> <span>{STEPS[only]}</span></p></div>
+      )}
 
       <section className="card onb-card">
         {exit ? (
@@ -391,13 +402,20 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel }: Pr
               </>
             )}
 
-            <div className="row onb-actions">
-              {step > 0 && <button className="ghost" onClick={() => setStep(step - 1)}>Back</button>}
-              <button className="primary" onClick={next} disabled={!canGoOn || (last && !agreed)}>
-                {last ? 'Start using DiaBite' : 'Continue'}
-              </button>
-              {onCancel && <button className="link" onClick={onCancel}>Cancel</button>}
-            </div>
+            {only !== undefined ? (
+              <div className="row onb-actions">
+                <button className="primary" onClick={save}>Save</button>
+                {onCancel && <button className="ghost" onClick={onCancel}>Cancel</button>}
+              </div>
+            ) : (
+              <div className="row onb-actions">
+                {step > 0 && <button className="ghost" onClick={() => setStep(step - 1)}>Back</button>}
+                <button className="primary" onClick={next} disabled={!canGoOn || (last && !agreed)}>
+                  {last ? 'Start using DiaBite' : 'Continue'}
+                </button>
+                {onCancel && <button className="link" onClick={onCancel}>Cancel</button>}
+              </div>
+            )}
           </>
         )}
       </section>

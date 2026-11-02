@@ -12,7 +12,7 @@ import HowItWorks from './components/HowItWorks'
 import Onboarding from './components/Onboarding'
 import MenuPage from './components/MenuPage'
 import ProfilePage from './components/ProfilePage'
-import { calculateTargets } from './lib/profile'
+import { calculateTargets, CARB_APPROACH_LABELS } from './lib/profile'
 import { signOutAndClear, useAuth, useSignInRequired } from './lib/auth'
 import { supabaseConfigured } from './lib/supabase'
 import { loadDiary, loadProfile, loadTour, saveDiary, saveProfile, saveTour, thawWrites } from './lib/storage'
@@ -47,6 +47,10 @@ export default function App() {
   // Onboarding is the first screen until it has been completed once (PRD A4);
   // afterwards it can be reopened from the profile tab.
   const [onboarding, setOnboarding] = useState(false)
+  // One onboarding step opened from "Your answers" in You (2 Medicines, 3 Conditions), and the line that says what saving it did.
+  const [editStep, setEditStep] = useState<2 | 3 | null>(null)
+  const [youNote, setYouNote] = useState('')
+  useEffect(() => { if (tab !== 'profile') setYouNote('') }, [tab])
   const [profile, setProfile] = useState<Profile>(loadProfile)
   const [diary, setDiary] = useState<DiaryEntry[]>(loadDiary)
   // First-run tips: which were shown, in this browser. The start-up snapshot comes from storage alone, before
@@ -159,7 +163,7 @@ export default function App() {
     )
   }
 
-  if (!profile.onboarded || onboarding) {
+  if (!profile.onboarded || onboarding || editStep !== null) {
     return (
       <div className="app">
         <header className="masthead">
@@ -169,12 +173,20 @@ export default function App() {
         <main>
         <Onboarding
           initial={profile}
-          askConsent={auth.status === 'signedIn' && !serverHasProfile}
+          only={editStep ?? undefined}
+          askConsent={editStep === null && auth.status === 'signedIn' && !serverHasProfile}
           onDone={(p, consented) => {
             if (consented) { setConsent({ at: new Date().toISOString(), version: CONSENT_VERSION }); setServerHasProfile(true) }
-            setProfile(p); setOnboarding(false)
+            if (editStep !== null) {
+              // Saving one step says what it did, and what it had to change besides: a medicine can rule out the carbohydrate approach the person had.
+              setYouNote(p.carbApproach !== profile.carbApproach
+                ? `Saved. Your carbohydrate approach is now ${CARB_APPROACH_LABELS[p.carbApproach].split(' (')[0].toLowerCase()}, because of this answer.`
+                : 'Saved. Your daily targets are recalculated.')
+              setTab('profile')
+            }
+            setProfile(p); setOnboarding(false); setEditStep(null)
           }}
-          onCancel={profile.onboarded ? () => setOnboarding(false) : undefined}
+          onCancel={profile.onboarded ? () => { setOnboarding(false); setEditStep(null) } : undefined}
         />
         </main>
       </div>
@@ -234,6 +246,8 @@ export default function App() {
           targets={targets}
           onChange={setProfile}
           onRedoOnboarding={() => setOnboarding(true)}
+          onEditAnswers={(step) => { setYouNote(''); setEditStep(step) }}
+          note={youNote}
         />
       )}
       {tab === 'settings' && (

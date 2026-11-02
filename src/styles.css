@@ -959,3 +959,13 @@ body:has(.landing) { background: #0a1812; }
 :root[data-theme='tape'] .ask-form button.primary { background: var(--marker); color: var(--marker-ink); box-shadow: 0 4px 0 #8fa23a; }
 :root[data-theme='tape'] .ask-form button.primary:disabled { opacity: 1; background: #e9f2b3; color: var(--text-dim); box-shadow: 0 4px 0 #cfd7a6; }
 :root[data-theme='tape'] .chip-toggle.on { background: var(--marker); border-color: var(--marker); color: var(--marker-ink); }
+
+/* "Your answers": the onboarding answers with no field of their own, one line each, and Edit. */
+.answers { list-style: none; margin: 0; padding: 0; }
+.answers li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }
+.answers li:first-child { border-top: none; }
+.answers li > div { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.answers b { font-weight: 600; }
+.answers .muted { font-size: 14px; overflow-wrap: anywhere; }
+.answers button { flex: none; min-height: 44px; }
+.you-note { margin: 0 0 12px; }

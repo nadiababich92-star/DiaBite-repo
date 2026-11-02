@@ -55,6 +55,7 @@ import { buildReport, reportMarkdown, type AccountInput, type ReportInput } from
 import { CONSENT_VERSION } from '../src/lib/syncCore'
 import { addDays, dayLabel, gramStep, mealForNow, nudgeGrams, recentEntries } from '../src/lib/diary'
 import { calculateTargets, DEFAULT_PROFILE } from '../src/lib/profile'
+import { answerRows } from '../src/lib/answers'
 import { CATEGORY_LABELS, getFood } from '../src/data/foods'
 import { getSession, noteResolution, putSession } from '../server/sessions'
 import { validateDish } from '../server/guard'
@@ -937,6 +938,31 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\nsignout   ${outMisses.length === 0 ? 'ok' : 'WRONG'}`)
   outMisses.forEach((m) => console.log(m))
   if (outMisses.length) process.exitCode = 1
+}
+
+// ── your answers ─────────────────────────────────────────────────────
+// The onboarding answers with no field of their own are shown one line each, and each Edit opens the step that holds it.
+{
+  const misses: string[] = []
+  const want = (label: string, got: unknown, expected: unknown) => { if (JSON.stringify(got) !== JSON.stringify(expected)) misses.push(`    ${label}: ${JSON.stringify(got)}, wanted ${JSON.stringify(expected)}`) }
+  const none = answerRows({ ...DEFAULT_PROFILE, insulin: 'none', meds: [], kidney: 'none', comorbidities: [], pattern: 'none', avoided: [], allergens: [] })
+  want('four rows', none.map((r) => r.id), ['medicines', 'conditions', 'eating', 'allergies'])
+  want('steps', none.map((r) => r.step), [2, 3, 3, 3])
+  want('nothing taken', none[0].text, 'Nothing for glucose')
+  want('no preference', none[2].text, 'No preference')
+  want('no allergies', none[3].text, 'None')
+  const some = answerRows({ ...DEFAULT_PROFILE, insulin: 'none', meds: ['metformin', 'sglt2'], kidney: 'ckd', comorbidities: ['htn', 'gout'], pattern: 'vegetarian', avoided: ['pork'], allergens: ['shellfish', 'milk'] })
+  want('tablets without insulin', some[0].text, 'Metformin, SGLT2 inhibitor, no insulin')
+  want('kidneys and conditions', some[1].text, 'I have chronic kidney disease; High blood pressure, Gout')
+  want('how you eat', some[2].text, 'Vegetarian, no pork')
+  want('allergies', some[3].text, 'Shellfish, Milk')
+  const basal = answerRows({ ...DEFAULT_PROFILE, insulin: 'basal', meds: [] })
+  want('basal insulin', basal[0].text, 'Long-acting once a day')
+  // A brand name or an example in brackets never reaches the one-line summary.
+  if (answerRows({ ...DEFAULT_PROFILE, meds: ['sulfonylurea', 'glp1'] })[0].text.includes('(')) misses.push('    a summary carries an example in brackets')
+  console.log(`\nanswers   ${misses.length === 0 ? 'ok' : 'WRONG'}`)
+  misses.forEach((m) => console.log(m))
+  if (misses.length) process.exitCode = 1
 }
 
 // ── pizza ─────────────────────────────────────────────────────────────────

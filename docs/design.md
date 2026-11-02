@@ -229,6 +229,8 @@ Raised: `--surface`, 1px border, radius 12, 15px, 44px minimum height.
 A floating slab at the bottom: five items, each an icon above a 13px label. The
 selected item sits on a marker pill. Feedback is not in the bar; it lives in **Settings**.
 
+**Your answers** (a card in You, between the daily targets and Excluded foods) shows the onboarding answers that have no field of their own, one line each (Medicines; Kidneys and other conditions; How you eat; Allergies), with an **Edit** ghost button of at least 44 px on each row. Edit opens that one onboarding step on its own: the label "Editing your answers" and the step's name replace the progress bar, there is no Back, and the actions are **Save** and **Cancel**. The rules are the step's own, exits included. Back on You, a line at the top says what saving did, and when a medicine ruled out the carbohydrate approach the person had, that it was changed to moderate.
+
 **You** holds what is about the person: their answers, their daily targets and the foods they leave out. **Settings** holds what is about the app: Appearance, the account (the sign-in card, or export, sign out and delete), Help (How it works, Send feedback) and, on a phone, how to add it to the home screen. The Settings icon is two sliders, drawn with the same 1.8 stroke as the others.
 
 ### The day, on the Diary

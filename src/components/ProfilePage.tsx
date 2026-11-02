@@ -6,6 +6,7 @@ import {
   CONDITION_LABELS,
   GOAL_LABELS,
 } from '../lib/profile'
+import { answerRows } from '../lib/answers'
 import type { Activity, CarbApproach, Condition, Goal, Profile, Sex, Targets } from '../types'
 
 interface Props {
@@ -14,9 +15,13 @@ interface Props {
   onChange: (p: Profile) => void
   /** Reopens the onboarding flow, where the medical answers live. */
   onRedoOnboarding: () => void
+  /** Opens one onboarding step on its own: 2 Medicines, 3 Conditions. */
+  onEditAnswers: (step: 2 | 3) => void
+  /** What saving one step just did, shown at the top. */
+  note?: string
 }
 
-export default function ProfilePage({ profile, targets, onChange, onRedoOnboarding }: Props) {
+export default function ProfilePage({ profile, targets, onChange, onRedoOnboarding, onEditAnswers, note }: Props) {
   const [query, setQuery] = useState('')
 
   const set = <K extends keyof Profile>(key: K, value: Profile[K]) =>
@@ -32,6 +37,7 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
 
   return (
     <>
+      {note && <p className="muted you-note" role="status">{note}</p>}
       <section className="card">
         <h2>About you</h2>
         <div className="grid">
@@ -176,6 +182,22 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
           <button className="ghost" onClick={onRedoOnboarding}>Review my medical answers</button>
           <span className="muted">Insulin, medicines, kidneys, other conditions</span>
         </div>
+      </section>
+
+      <section className="card">
+        <h2>Your answers</h2>
+        <p className="muted" style={{ marginTop: 0 }}>What you told us at the start. Change one without going through the rest.</p>
+        <ul className="answers">
+          {answerRows(profile).map((r) => (
+            <li key={r.id}>
+              <div>
+                <b>{r.title}</b>
+                <span className="muted">{r.text}</span>
+              </div>
+              <button className="ghost" aria-label={`Edit ${r.title.toLowerCase()}`} onClick={() => onEditAnswers(r.step)}>Edit</button>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="card">
