@@ -56,6 +56,7 @@ import { CONSENT_VERSION } from '../src/lib/syncCore'
 import { addDays, dayLabel, gramStep, mealForNow, nudgeGrams, recentEntries } from '../src/lib/diary'
 import { calculateTargets, DEFAULT_PROFILE } from '../src/lib/profile'
 import { answerRows } from '../src/lib/answers'
+import { swapNamedIn } from '../src/lib/swap'
 import { describeDish, toDishes, type RawRecipe } from '../src/lib/recipes'
 import { CATEGORY_LABELS, getFood } from '../src/data/foods'
 import { getSession, noteResolution, putSession } from '../server/sessions'
@@ -962,6 +963,31 @@ hangMisses.forEach((m) => console.log(m))
   // A brand name or an example in brackets never reaches the one-line summary.
   if (answerRows({ ...DEFAULT_PROFILE, meds: ['sulfonylurea', 'glp1'] })[0].text.includes('(')) misses.push('    a summary carries an example in brackets')
   console.log(`\nanswers   ${misses.length === 0 ? 'ok' : 'WRONG'}`)
+  misses.forEach((m) => console.log(m))
+  if (misses.length) process.exitCode = 1
+}
+
+// ── the swap button ──────────────────────────────────────────────────
+// "Accept the swap" appears under the Next line when that line names one of the alternatives the engine returned.
+// Which one is read from the sentence; the food, the weight and every number come from the engine.
+{
+  const misses: string[] = []
+  const alt = (id: string, name: string) => ({ id, name, unit: 'g' as const, portion: 180 })
+  const zucchini = alt('seed:zucchini', 'Zucchini'), scalloped = alt('usda:2709449', 'Potato, scalloped, from fast food or restaurant')
+  const mash = { foodId: 'seed:potato-mash', name: 'Mashed potato' }
+  const pick = (next: string | undefined, alts: ReturnType<typeof alt>[]) =>
+    swapNamedIn(next, { alternatives: alts, alternativesFor: mash })?.id ?? null
+  const want = (label: string, got: unknown, expected: unknown) => { if (got !== expected) misses.push(`    ${label}: ${got}, wanted ${expected}`) }
+  const next = 'If you want to lower the load, swap the mashed potato for zucchini.'
+  want('zucchini first', pick(next, [zucchini, scalloped]), 'seed:zucchini')
+  want('zucchini last (the replaced food is in "potato, scalloped")', pick(next, [scalloped, zucchini]), 'seed:zucchini')
+  want('named in other words', pick('Swap the mashed potato for scalloped potato.', [zucchini, scalloped]), null)
+  want('nothing to change', pick('Nothing to change.', [zucchini, scalloped]), null)
+  want('no alternatives', pick(next, []), null)
+  want('no replaced food', swapNamedIn(next, { alternatives: [zucchini] })?.id ?? null, null)
+  want('no next line', pick(undefined, [zucchini]), null)
+  want('the replaced food only', pick('Keep the mashed potato.', [alt('seed:potato-mash2', 'Mashed potato')]), null)
+  console.log(`\nswap      ${misses.length === 0 ? 'ok' : 'WRONG'}`)
   misses.forEach((m) => console.log(m))
   if (misses.length) process.exitCode = 1
 }

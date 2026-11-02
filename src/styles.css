@@ -976,3 +976,5 @@ body:has(.landing) { background: #0a1812; }
 .lp-sources p { margin: 0; font-size: 17px; line-height: 1.55; color: var(--lp-dim); max-width: 62ch; }
 .lp-sources a { color: var(--lp-marker); font-weight: 600; text-underline-offset: 3px; }
 .lp-sources a:hover { color: #fff; }
+.answer-text .a-swap { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 10px 0 0; }
+.answer-text .a-swap button { min-height: 44px; }

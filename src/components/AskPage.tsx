@@ -9,6 +9,7 @@ import { nextStep, type TourStep } from '../lib/tour'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type Milestone } from '../lib/nudge'
 import { askAgent, avoidOf, budgetOf, engineId, lastMealCall, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
 import { dayLabel, eaten, mealForNow, viewEntry } from '../lib/diary'
+import { swapNamedIn, type SwapOffer } from '../lib/swap'
 import { MEAL_LABELS } from '../lib/menu'
 import DayPicker from './DayPicker'
 import { loadNudge, saveNudge } from '../lib/storage'
@@ -137,7 +138,7 @@ function Figures({ reply, onGl }: { reply: AgentResponse; onGl?: () => void }) {
  * word is the engine's `fits` and nothing else: true, false, or null for a meal with
  * a food missing. No number here is worked out in the browser.
  */
-function RecalcCard({ rc, onBack, onGl }: { rc: Recalc; onBack: () => void; onGl: () => void }) {
+function RecalcCard({ rc, onBack, onGl, note }: { rc: Recalc; onBack: () => void; onGl: () => void; note?: string }) {
   // A dish counted from an assumed recipe stays an estimate through every recalculation: never a plain "Fits".
   const tone = rc.assumed && rc.fits !== undefined ? 'estimate'
     : rc.fits === true ? 'good' : rc.fits === false ? 'bad' : rc.fits === null ? 'partial' : 'ask'
@@ -171,7 +172,7 @@ function RecalcCard({ rc, onBack, onGl }: { rc: Recalc; onBack: () => void; onGl
             <div className="figures"><div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{rc.mealGl}</span></div></div>
           </>
         )}
-        <p className="a-why">Recalculated with your portions. The explanation below was written for the original ones.</p>
+        <p className="a-why">{note ?? 'Recalculated with your portions. The explanation below was written for the original ones.'}</p>
       </div>
       <div className="verify-row">
         <span className="pill low">Calculated by the engine, nothing generated</span>
@@ -227,7 +228,12 @@ function PortionEditor({ lines, grams, busy, error, onNudge, assumed, removed, o
   )
 }
 
-function Answer({ text, reply, onGl }: { text: string; reply?: AgentResponse; onGl?: () => void }) {
+function Answer({ text, reply, onGl, onSwap, swapState }: {
+  text: string; reply?: AgentResponse; onGl?: () => void
+  /** Accept the swap the Next line suggests. Absent where the answer is not the one to act on. */
+  onSwap?: (alt: SwapOffer) => void
+  swapState?: { accepted: string | null; busy: boolean; failed: boolean }
+}) {
   const costed = !!reply?.trace?.some((x) => (x.tool.endsWith('compute_meal') || x.tool.endsWith('cost_dish')) && typeof (x.result as { totals?: unknown } | undefined)?.totals === 'object')
   const parts = parseMeal(text, { costed })
   const m = lastMealCall(reply?.trace)?.result as
@@ -254,6 +260,20 @@ function Answer({ text, reply, onGl }: { text: string; reply?: AgentResponse; on
             {bold(parts.next, 'x')}
           </p>
         )}
+        {onSwap && (() => {
+          const offer = swapNamedIn(parts.next, lastMealCall(reply?.trace)?.result as Parameters<typeof swapNamedIn>[1])
+          if (!offer) return null
+          const done = swapState?.accepted === offer.id
+          return (
+            <div className="a-swap">
+              <button className="ghost" onClick={() => onSwap(offer)} disabled={(done && !swapState?.failed) || !!swapState?.busy}>
+                {swapState?.busy && done ? 'Counting again…' : swapState?.failed && done ? 'Try the swap again' : done ? 'Swap accepted' : 'Accept the swap'}
+              </button>
+              {done && !swapState?.busy && !swapState?.failed && <span className="muted">The new count is above.</span>}
+              {done && swapState?.failed && <span className="muted">Couldn't count that. Your original answer is unchanged.</span>}
+            </div>
+          )
+        })()}
         {tail.map((l, i) => (
           <p key={`t${i}`} className="a-tail">{bold(l, `t${i}`)}</p>
         ))}
@@ -414,6 +434,8 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   // Ingredients of an assumed recipe the person took out (by line index).
   const [removed, setRemoved] = useState<number[]>([])
   const [recalc, setRecalc] = useState<Recalc | null>(null)
+  // A swap the person accepted from the Next line: which line of the meal it replaces, and by what (the engine's own numbers for it).
+  const [swap, setSwap] = useState<{ index: number; id: string; name: string; unit: 'g' | 'serving'; portion: number; replaced: string } | null>(null)
   const [recalcBusy, setRecalcBusy] = useState(false)
   const [recalcError, setRecalcError] = useState('')
   const [glOpen, setGlOpen] = useState(false)
@@ -454,10 +476,29 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   const cardClosed = () => { visitCard = null; setCard(null) }
   // What is logged and shown as the calculation: the portions the person chose, once they have chosen.
   const active = recalc?.receipt ?? receipt
+  // The meal's lines as the person has them now: the line a swap replaced shows the new food at the weight the engine costed it.
+  const baseLines = useMemo(() => {
+    if (!receipt) return []
+    if (!swap) return receipt.lines
+    return receipt.lines.map((l, i) => i !== swap.index ? l : {
+      ...l, foodId: swap.id, name: swap.name,
+      ...(swap.unit === 'serving' ? { servings: swap.portion, grams: 0 } : { servings: undefined, grams: swap.portion }),
+    })
+  }, [receipt, swap])
+
+  function acceptSwap(alt: SwapOffer) {
+    if (!receipt) return
+    const from = (lastMealCall(reply?.trace)?.result as { alternativesFor?: { foodId: string; name: string } } | undefined)?.alternativesFor
+    const index = from ? receipt.lines.findIndex((l) => l.foodId === from.foodId) : -1
+    if (index < 0 || !from) return
+    setGrams({}); setRemoved([])
+    setSwap({ index, id: alt.id, name: alt.name, unit: alt.unit, portion: alt.portion, replaced: from.name })
+    setLogged(false)
+  }
 
   function nudge(i: number, dir: 1 | -1) {
     if (!receipt) return
-    const l = receipt.lines[i]
+    const l = baseLines[i]
     const base = grams[i] ?? l.servings ?? l.grams
     const step = l.servings ? 0.5 : Math.max(5, Math.round((base * 0.1) / 5) * 5)
     const next = l.servings ? Math.min(12, Math.max(0.5, base + dir * step)) : Math.min(1500, Math.max(5, base + dir * step))
@@ -469,19 +510,19 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     setRemoved((r) => (r.includes(i) ? r.filter((x) => x !== i) : [...r, i]))
     setLogged(false)
   }
-  function resetRecipe() { setGrams({}); setRemoved([]); setLogged(false) }
+  function resetRecipe() { setGrams({}); setRemoved([]); setSwap(null); setLogged(false) }
 
   // Let the weight settle for a moment, then ask the engine to count it again.
   useEffect(() => {
     if (!receipt || !turn) return
-    const changed = receipt.lines.some((l, i) => grams[i] !== undefined && grams[i] !== (l.servings ?? l.grams)) || removed.length > 0
+    const changed = baseLines.some((l, i) => grams[i] !== undefined && grams[i] !== (l.servings ?? l.grams)) || removed.length > 0 || swap !== null
     if (!changed) { setRecalc(null); setRecalcError(''); return }
-    if (removed.length >= receipt.lines.length) { setRecalc(null); setRecalcError('Keep at least one ingredient.'); return }
+    if (removed.length >= baseLines.length) { setRecalc(null); setRecalcError('Keep at least one ingredient.'); return }
     const ctl = new AbortController()
     const timer = setTimeout(async () => {
       setRecalcBusy(true); setRecalcError('')
       try {
-        const items = receipt.lines.flatMap((l, i) => {
+        const items = baseLines.flatMap((l, i) => {
           if (removed.includes(i)) return []
           const v = grams[i] ?? l.servings ?? l.grams
           return [l.servings ? { foodId: l.foodId, servings: v } : { foodId: l.foodId, grams: v }]
@@ -495,7 +536,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
       } finally { setRecalcBusy(false) }
     }, 400)
     return () => { clearTimeout(timer); ctl.abort() }
-  }, [grams, removed, receipt, turn, onSessionEnded])
+  }, [grams, removed, swap, baseLines, receipt, turn, onSessionEnded])
 
   async function ask(message: string) {
     const q = message.trim()
@@ -503,7 +544,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     abort.current?.abort()
     abort.current = new AbortController()
     setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(false); setLogged(false); setLogDay(targetDay); setLogNote(''); setAsked(q); setReplyText('')
-    setEditing(false); setGrams({}); setRemoved([]); setRecalc(null); setRecalcError('')
+    setEditing(false); setGrams({}); setRemoved([]); setSwap(null); setRecalc(null); setRecalcError('')
     const sid = fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId()
     setTurn(sid)
     try {
@@ -646,8 +687,8 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
       {reply && (
         <>
           <p className="muted asked">{asked}</p>
-          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setRecalc(null) }} onGl={() => setGlOpen(true)} />}
-          {recalc && <p className="muted asked">Original answer, before you changed a portion</p>}
+          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setSwap(null); setRecalc(null) }} onGl={() => setGlOpen(true)} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The explanation below was written for the original meal.` : undefined} />}
+          {recalc && <p className="muted asked">{swap ? 'Original answer, before the swap' : 'Original answer, before you changed a portion'}</p>}
           <section className={`card answer tone-${tone}${recalc ? ' stale' : ''}`} role="status" aria-live="polite">
             <div className="eyebrow-line" data-tour="verdict">
               <StatusDot tone={tone} />
@@ -655,7 +696,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
                tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Not today' :
                tone === 'advice' ? 'Advice' : tone === 'estimate' ? 'Estimate' : tone === 'carbs' ? 'Carbs only' : tone === 'partial' ? 'Part of the meal' : 'One question first'}
             </div>
-            <Answer text={reply.answer} reply={reply} onGl={recalc ? undefined : () => setGlOpen(true)} />
+            <Answer text={reply.answer} reply={reply} onGl={recalc ? undefined : () => setGlOpen(true)} onSwap={receipt && !receipt.assumed ? acceptSwap : undefined} swapState={{ accepted: swap?.id ?? null, busy: !!swap && !recalc && !recalcError, failed: !!swap && !recalc && !!recalcError }} />
             {!reply.blocked && (
               <div className="verify-row">
                 {reply.verified ? (
@@ -704,7 +745,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
           {logNote && <p className="muted" role="status" aria-live="polite" style={{ margin: '-4px 0 12px' }}>{logNote}{onOpenDiary && <>{' '}<button type="button" className="link" onClick={onOpenDiary}>Open Diary</button></>}</p>}
 
           {editing && receipt && !receipt.carbsOnly && (
-            <PortionEditor lines={receipt.lines} grams={grams} busy={recalcBusy} error={recalcError} onNudge={nudge} assumed={receipt.assumed} removed={removed} onRemove={toggleRemoved} onReset={resetRecipe} />
+            <PortionEditor lines={baseLines} grams={grams} busy={recalcBusy} error={recalcError} onNudge={nudge} assumed={receipt.assumed} removed={removed} onRemove={toggleRemoved} onReset={resetRecipe} />
           )}
 
           {showReceipt && active && (

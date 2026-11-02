@@ -191,6 +191,10 @@ In this order: status disc + label → **verdict** → **three figures** → rea
 next action behind a dashed rule → verified pill. Advice, clarifying questions
 and refusals are plain prose; never dress them as a verdict.
 
+### Accepting a swap
+
+When the **Next** line names one of the alternatives the engine returned ("swap the mashed potato for zucchini"), a ghost button **Accept the swap** (44 px) sits under it. It sends the meal back to the engine with the food replaced, at the weight the engine costed the alternative; the button reads **Counting again…**, then **Swap accepted** with "The new count is above." A failed count says so and offers **Try the swap again**. The new count is the same recalculated card that a portion change makes, above the original answer, saying "Recalculated with zucchini instead of mashed potato"; **Back to the original** undoes it, and **Log it** logs the swapped meal. Which alternative the sentence means is read from the sentence; the food, the weight and every number come from the engine. A dish counted from an assumed recipe has no swap button.
+
 ### The answer box, under a question
 When the answer is a clarifying question (badge "One question first"), a field sits directly under it:
 a small label "Your answer", the input in the same card as the question box above, and a **Ghost**
