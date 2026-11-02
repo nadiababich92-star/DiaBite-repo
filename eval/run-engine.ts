@@ -1174,6 +1174,15 @@ fail([], '')
   ]
   for (const [name, want, input] of cases) if (showLanding(input) !== want) bits.push(`${name}: wanted ${want}`)
   if (!authInUrl(at('#type=recovery')) || authInUrl(at('', '?utm=x')) || !skipLanding({ search: '?signin=1' })) bits.push('authInUrl or skipLanding is wrong')
+  // The sources the page names are the ones docs/data-sources.md states, spelled as it spells them. "University of
+  // Columbia" was once written for the Sydney database by a model; the Sydney database is not named on the page at all.
+  const sourcesDoc = readFileSync(join(ROOT, 'docs', 'data-sources.md'), 'utf8')
+  for (const x of LANDING.sources) if (!sourcesDoc.includes(x.key)) bits.push(`the landing names "${x.key}", which docs/data-sources.md does not`)
+  if (LANDING.sources.length < 3) bits.push('the landing names fewer than three sources')
+  const landingText = readFileSync(join(ROOT, 'src', 'data', 'landing.ts'), 'utf8') + readFileSync(join(ROOT, 'src', 'components', 'Landing.tsx'), 'utf8')
+  const stripped = landingText.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+  if (/Columbia/i.test(stripped)) bits.push('the landing says "Columbia": the glycemic index database is the University of Sydney\'s')
+  if (/Sydney/i.test(stripped)) bits.push('the landing names the University of Sydney: its permission is an open item, so the page leaves it out')
   console.log(`\nlanding   ${bits.length === 0 ? 'ok' : 'WRONG'}`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) { console.log('the landing receipt is stale, or the rule for showing it is wrong: see landing above'); process.exit(1) }

@@ -31,6 +31,17 @@ export const LANDING = {
   records: 8633,
   /** A dated claim from docs/STATUS.md. Refresh when `npm run eval:agent` is rerun, and say so in STATUS.md. */
   checks: { passed: 204, of: 204, on: '2026-10-21' },
+  /**
+   * Where the food numbers come from, as docs/data-sources.md states them. Only sources whose status there is clear are named
+   * on the page; the University of Sydney glycemic index database is used for cross-checking only and its permission is a
+   * known open item, so it is not named here (the owner's decision, 2 November 2026). `key` is a phrase that must appear in
+   * data-sources.md: the `landing` block in eval/run-engine.ts fails if the page names a source the document does not.
+   */
+  sources: [
+    { key: 'USDA FoodData Central', name: 'USDA FoodData Central', what: 'The nutrients and the household portions of every food: Survey (FNDDS) 2021–2023, SR Legacy 2018 and Foundation Foods 2025.' },
+    { key: 'USDA Branded Foods', name: 'USDA Branded Foods', what: 'The label data of packaged products. Counted for carbohydrate, fibre and calories only, never for a glycemic load.' },
+    { key: 'International tables of glycemic index and glycemic load values 2021', name: 'International tables of glycemic index and glycemic load values, 2021', what: 'The published glycemic indices. Atkinson, Brand-Miller, Foster-Powell, Buyken and Goletzke, American Journal of Clinical Nutrition 114(5):1625–1632.' },
+  ],
   /** What is said in the clip, in order (scripts/demo-video/two-rhythms/script.json), also the captions. */
   transcript: [
     "Narrator: Forty million Americans live with diabetes. A hundred and fifteen million adults have prediabetes. And for all of them, every meal is the same question: does this fit my day?",

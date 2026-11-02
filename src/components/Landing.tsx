@@ -117,6 +117,21 @@ export default function Landing({ onEnter }: Props) {
           <p>A check confirms that every number in an answer appears in what the engine returned, before you see it.</p>
         </section>
 
+        <section className="lp-band lp-sources" aria-labelledby="landing-sources">
+          <div className="lp-in">
+            <h2 id="landing-sources">Where the numbers come from</h2>
+            <dl>
+              {L.sources.map((x) => (
+                <div key={x.name}>
+                  <dt>{x.name}</dt>
+                  <dd>{x.what}</dd>
+                </div>
+              ))}
+            </dl>
+            <p>A food DiaBite does not have is not filled in from somewhere else. It says so. <a href={L.links.dataSources} rel="noopener">The full list, with the terms of each source</a></p>
+          </div>
+        </section>
+
         <section className="lp-paper" aria-labelledby="landing-not">
           <div className="lp-in lp-paper-in">
             <div className="lp-paper-head">

@@ -970,3 +970,9 @@ body:has(.landing) { background: #0a1812; }
 .answers button { flex: none; min-height: 44px; }
 .you-note { margin: 0 0 12px; }
 .menu-desc { margin: 2px 0 6px; font-size: 14px; color: var(--text-dim); }
+.lp-sources dl { margin: 0 0 22px; display: grid; gap: 18px; max-width: 760px; }
+.lp-sources dt { font-family: var(--serif); font-weight: 600; font-size: 20px; color: var(--lp-text); line-height: 1.25; }
+.lp-sources dd { margin: 6px 0 0; font-size: 17px; line-height: 1.5; color: var(--lp-dim); }
+.lp-sources p { margin: 0; font-size: 17px; line-height: 1.55; color: var(--lp-dim); max-width: 62ch; }
+.lp-sources a { color: var(--lp-marker); font-weight: 600; text-underline-offset: 3px; }
+.lp-sources a:hover { color: #fff; }
