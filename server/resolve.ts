@@ -310,8 +310,12 @@ const DIET_SWAPS = /\b(squash|low[- ]carb|keto|no[- ]sugar|sugar[- ]free|caulifl
 // A plain food is never a stand-in either: "cooked spaghetti" found *Spaghetti squash, cooked*, and a dish costed from it
 // went into the arithmetic as squash. These words name another food whatever the record's kind.
 const FOOD_SWAPS = new Set(['squash', 'cauliflower', 'zucchini', 'shirataki', 'almond', 'lettuce'])
+// "Corned-Beef-Style Brisket Hash", "General Tso-Style Chicken", "Greek-Style Pasta Salad": the recipe imitates a dish, and a
+// person who typed that dish wants the dish. A place ("Maine-Style", "Korean-Style") is a different kind of "style".
+const PLACE_STYLE = new Set(['peruvian', 'german', 'filipino', 'nashville', 'kerala', 'korean', 'southern', 'taqueria', 'texas', 'seattle', 'maine', 'york', 'cuban', 'turkish', 'brazilian', 'northwest', 'kalua', 'irish', 'italian', 'french', 'mexican', 'spanish', 'thai', 'indian', 'chinese', 'japanese', 'vietnamese', 'mediterranean', 'cajun', 'creole', 'southwestern', 'hawaiian', 'jamaican', 'moroccan', 'lebanese', 'persian', 'ethiopian', 'seattle', 'cincinnati', 'chicago', 'philly', 'california', 'tex'])
 export function unaskedSwap(phrase: string, name: string, kind = 'recipe'): boolean {
   const asked = new Set(tokens(phrase).map(stem))
+  if (kind === 'recipe') for (const m of name.matchAll(/([A-Za-z]+)-Style\b/g)) if (asked.has(stem(m[1].toLowerCase())) && !PLACE_STYLE.has(m[1].toLowerCase())) return true
   for (const m of name.matchAll(DIET_SWAPS)) {
     if (kind !== 'recipe' && !FOOD_SWAPS.has(m[0].toLowerCase())) continue
     if (m[0].startsWith('(')) { if (!asked.has('no')) return true; continue }
@@ -496,7 +500,7 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
       .filter((h) => byId.has(h.id) || unknownId(h.id))
       .filter((h) => {
         const rec = byId.get(h.id)!
-        return !(unaskedSwap(phrase, rec.name, rec.kind) && !rec.aliases?.includes(norm(phrase)) && !isNamed(phrase, rec.name))
+        return !(unaskedSwap(phrase, rec.name, rec.kind) && !rec.aliases?.includes(norm(phrase)))
       })
       .map((h) => {
         const rec = byId.get(h.id)!

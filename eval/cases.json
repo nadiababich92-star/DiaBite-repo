@@ -785,7 +785,7 @@
       {
         "phrase": "general tso's chicken",
         "expect": [
-          "rec:DB-1282"
+          "usda:2706794"
         ],
         "tags": [
           "branded"
@@ -1539,7 +1539,7 @@
       {
         "phrase": "niçoise salad",
         "expect": [
-          "rec:DB-1608"
+          "rec:DB-0147"
         ],
         "tags": [
           "new-recipes"
