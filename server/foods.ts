@@ -302,6 +302,7 @@ const USDA_ALIASES: Record<string, string[]> = {
   'usda:2706399': ['pulled pork', 'bbq pork', 'barbecue pork'],           // Barbecue pork, with sauce
   'usda:2708299': ['pancake', 'pancakes', 'buttermilk pancakes'],         // Pancakes, plain, fast food / restaurant
   'usda:2706499': ['meatloaf', 'meat loaf'],                              // Meat loaf made with beef
+  'usda:2709822': ['garden salad', 'side salad', 'house salad', 'tossed salad', 'green salad'], // Lettuce, salad with assorted vegetables including tomatoes and/or carrots, no dressing
   'usda:2706375': ['chili con carne', 'beef chili'],                     // Chili with meat and beans
   'usda:2708352': ['egg noodles', 'noodles'],                             // Noodles, cooked
   'usda:2705949': ['fried chicken'],                                      // Chicken, NS as to part, fried, coated, skin eaten

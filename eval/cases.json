@@ -1647,7 +1647,7 @@
       {
         "phrase": "ranch dressing",
         "expect": [
-          "rec:DB-1811"
+          "usda:2710212"
         ],
         "tags": [
           "new-recipes"
@@ -1674,7 +1674,7 @@
       {
         "phrase": "salmon burger",
         "expect": [
-          "rec:DB-1791"
+          "rec:DB-0510"
         ],
         "tags": [
           "new-recipes"
@@ -1701,10 +1701,83 @@
       {
         "phrase": "noodle kugel",
         "expect": [
-          "rec:DB-1881"
+          "unknown"
         ],
         "tags": [
           "new-recipes"
+        ]
+      },
+      {
+        "phrase": "spaghetti bolognese",
+        "expect": [
+          "unknown"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "shawarma wrap",
+        "expect": [
+          "unknown"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "veggie pizza",
+        "expect": [
+          "unknown"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "protein box",
+        "expect": [
+          "unknown"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "grain bowl",
+        "expect": [
+          "unknown"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "clam chowder",
+        "expect": [
+          "usda:2707139"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "garden salad",
+        "expect": [
+          "usda:2709822"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "burrito bowl",
+        "expect": [
+          "usda:2708555",
+          "usda:2708564"
+        ],
+        "tags": [
+          "no-swap"
         ]
       },
       {

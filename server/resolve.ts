@@ -297,6 +297,29 @@ export function closeInCarbs(a: string, b: string): boolean {
 const VARIANT_WORDS = /\b(bowls?|lettuce|low-carb|keto|stuffed|zucchini noodles|cauliflower|skillet|muffins?|bites|salad|sheet pan|meal prep|almond)\b/i
 const isVariantOf = (phrase: string, name: string) => VARIANT_WORDS.test(name) && !VARIANT_WORDS.test(phrase)
 
+/**
+ * Words that make one of our recipes a lighter or lower-carbohydrate version of the dish people actually eat.
+ *
+ * The recipe collection is written for people with diabetes, so "spaghetti bolognese" found *Turkey Bolognese over
+ * Spaghetti Squash* (load 5.9, where the pasta is about 30), "blueberry muffin" found the almond-flour one (1.3) and
+ * "shawarma wrap" the low-carb wrap. Every one of those errors made the verdict kinder than the meal. A substitution the
+ * person did not name is not a match: the recipe is left out unless they said the word, and the dish is counted from the
+ * plain food, or as a typical recipe, which is what they ate.
+ */
+const DIET_SWAPS = /\b(squash|low[- ]carb|keto|no[- ]sugar|sugar[- ]free|cauliflower|zucchini|lettuce|almond|lightened|shirataki|thickened|yogurt|turkey|egg whites?)\b|\(no\b/gi
+export function unaskedSwap(phrase: string, name: string): boolean {
+  const asked = new Set(tokens(phrase).map(stem))
+  for (const m of name.matchAll(DIET_SWAPS)) {
+    if (m[0].startsWith('(')) { if (!asked.has('no')) return true; continue }
+    if (!norm(m[0]).split(' ').every((w) => asked.has(stem(w)))) return true
+  }
+  return false
+}
+
+/** "Burrito bowl", "protein box": the container is part of the dish, and the head word alone is a different food. */
+const CONTAINER = /\b(bowl|box)\b/i
+const CONTAINER_PENALTY = 0.25
+
 export function sameFood(a: string, b: string): boolean {
   const ta = new Set(tokens(a)), tb = new Set(tokens(b))
   const inter = [...ta].filter((t) => tb.has(t)).length
@@ -467,6 +490,10 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
       // before a deploy would otherwise crash the tool — and a 500 from a tool
       // costs the whole answer.
       .filter((h) => byId.has(h.id) || unknownId(h.id))
+      .filter((h) => {
+        const rec = byId.get(h.id)!
+        return !(rec.kind === 'recipe' && unaskedSwap(phrase, rec.name) && !rec.aliases?.includes(norm(phrase)) && !isNamed(phrase, rec.name))
+      })
       .map((h) => {
         const rec = byId.get(h.id)!
         const exact = rec.aliases?.includes(norm(phrase)) || norm(plainName(rec.name)) === norm(phrase) || isNamed(phrase, rec.name)
@@ -482,7 +509,8 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
         // A diet or format variant ranks under the plain dish, but its penalty is not taken off the score: that would
         // push every "Frittata" under the floor of what counts as found.
         const variant = rec.kind === 'recipe' && isVariantOf(phrase, rec.name) ? VARIANT_PENALTY : 0
-        const score = base - penalty - school - branded
+        const container = CONTAINER.test(phrase) && !CONTAINER.test(rec.name) ? CONTAINER_PENALTY : 0
+        const score = base - penalty - school - branded - container
         return { ...summary(rec), score, rank: score - variant }
       })
       .sort((a, b) => b.rank - a.rank)
