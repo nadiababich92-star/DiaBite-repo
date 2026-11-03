@@ -3124,7 +3124,7 @@
       "id": "H2",
       "dimension": "helpful",
       "query": "chicken",
-      "ground_truth": "Exactly one clarifying question (breast or ground?), no numbers.",
+      "ground_truth": "No question: every kind of chicken carries no carbohydrate, so the answer would not change. The first candidate is costed and named (decided 3 November 2026 from the owner's review of the 300 dishes).",
       "context": {
         "budget": {
           "glBudget": 54,
@@ -3134,9 +3134,12 @@
         "entries": []
       },
       "expect": {
-        "resolveBand": "medium",
-        "answerHasQuestion": true,
-        "noGL": true
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "resolveBand": "medium"
       },
       "judge": "mechanical",
       "tags": []
