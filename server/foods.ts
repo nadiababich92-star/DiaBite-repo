@@ -65,6 +65,18 @@ const INGREDIENT_PORTION_G: Record<string, number> = {
   ezekiel_bread: 34,
   // The record is "Egg, large (50 g each)": the default is one egg, so "two eggs" is two of it.
   egg: 50,
+  // A food eaten in a spoonful or a handful is not 100 g: "grits with butter" was a hundred grams of butter. These are the
+  // household amounts (a tablespoon, an ounce, a teaspoon) that the label reference amounts use; a stated amount still wins.
+  butter: 14, ghee: 14, olive_oil: 14, avocado_oil: 14, coconut_oil: 14, sesame_oil: 5, mayo: 14,
+  cream_cheese: 28, sour_cream: 30, heavy_cream: 15, hummus: 30,
+  cheddar: 28, feta: 28, goat_cheese: 28, swiss_cheese: 28, blue_cheese: 28, pepper_jack: 28, cotija: 28, parmesan: 10,
+  almonds: 28, walnuts: 28, pecans: 28, cashews: 28, peanuts: 28, macadamia: 28, hazelnuts: 28, pine_nuts: 28,
+  peanut_butter: 32, almond_butter: 32, tahini: 15,
+  chia_seeds: 15, flaxseed: 10, hemp_seeds: 10, sunflower_seeds: 28, pumpkin_seeds: 28, sesame_seeds: 9,
+  sugar_white: 4, honey: 21, maple_syrup: 20,
+  dijon: 5, yellow_mustard: 5, soy_sauce: 15, tamari: 15, fish_sauce: 15, hot_sauce: 5, salsa: 30,
+  rice_vinegar: 15, apple_cider_vinegar: 15, red_wine_vinegar: 15, white_wine_vinegar: 15, balsamic_vinegar: 15,
+  cocoa_powder: 5, dark_chocolate: 28, salt: 1,
 }
 
 const ALIASES: Record<string, string[]> = {
@@ -240,9 +252,15 @@ function householdPortion(rows: { label: string; grams: number }[] | undefined, 
   }
   // A pizza is said in slices. The first portion USDA lists for most pizzas is a whole small one (516 g), which made
   // "two slices of pepperoni pizza" 1,032 g. A listed piece is the portion; a pizza with none keeps the old rule.
-  if (/^pizza\b(?!\s+rolls)/i.test(name)) {
+  // Cornbread is said in pieces too: the first portion USDA lists is a cup of crumbs.
+  if (/^pizza\b(?!\s+rolls)|^cornbread, made from home recipe/i.test(name)) {
     const piece = (rows ?? []).find((p) => /^1 piece\b/i.test(p.label) && p.grams >= 30 && p.grams <= 300)
     if (piece) return Math.round(piece.grams)
+  }
+  // "Smothered chicken" is a piece of chicken in gravy, not the wing the table lists first.
+  if (/^chicken with gravy$/i.test(name)) {
+    const breast = (rows ?? []).find((p) => /breast/i.test(p.label))
+    if (breast) return Math.round(breast.grams)
   }
   const usable = (rows ?? []).filter((p) => p.grams > 10 && p.grams <= 600 && !/\bdry\b|yields|not specified/i.test(p.label))
   const cup = usable.find((p) => /\bcup\b/i.test(p.label))
@@ -287,6 +305,13 @@ const USDA_ALIASES: Record<string, string[]> = {
   'usda:2708614': ['cheese pizza', 'margherita pizza', 'pizza margherita', 'margherita', 'cheese pizza slice', 'slice of cheese pizza', 'margherita pizza slice', 'slice of margherita pizza', 'pizza with cheese'], // Pizza, cheese, from restaurant or fast food
   'usda:2708615': ['thin crust cheese pizza', 'thin crust margherita pizza', 'thin crust margherita'], // Pizza, cheese, from restaurant or fast food, thin crust
   'usda:2708617': ['thick crust cheese pizza', 'thick crust margherita pizza', 'thick crust margherita'], // Pizza, cheese, from restaurant or fast food, thick crust
+  // From the 300 familiar dishes of 27 October and a dietitian's own list (3 November 2026): each was asked about or
+  // counted as a different food. The plain survey record is the one people mean; naming a variant still finds it.
+  'usda:2708325': ['waffle', 'waffles', 'a waffle', 'belgian waffle', 'belgian waffles', 'plain waffle'], // Waffle, plain
+  'usda:2708313': ['toaster waffle', 'toaster waffles', 'frozen waffle', 'frozen waffles'], // Waffle, plain, frozen
+  'usda:2707811': ['cornbread', 'corn bread', 'piece of cornbread', 'slice of cornbread', 'homemade cornbread'], // Cornbread, made from home recipe
+  'usda:2708811': ['mac and cheese', 'macaroni and cheese', 'mac & cheese', 'mac n cheese', 'baked mac and cheese', 'homemade mac and cheese'], // Macaroni or noodles with cheese
+  'usda:2706428': ['smothered chicken', 'smothered chicken with gravy', 'chicken smothered in gravy', 'chicken and gravy'], // Chicken with gravy
   'usda:2706191': ['breakfast sausage', 'sausage links', 'sausage patties'], // Pork sausage (the same phrase also names turkey and chicken sausage, so the engine asks which)
   // Found by eval/coverage with community-phrases.txt (22 October 2026): the same food under the name people use.
   // Dishes with no record at all (arroz con pollo, tostones, dosa, lumpia, pancit, sancocho, tzimmes...) stay holes on

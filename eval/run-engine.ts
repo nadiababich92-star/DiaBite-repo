@@ -1013,6 +1013,42 @@ hangMisses.forEach((m) => console.log(m))
   if (misses.length) process.exitCode = 1
 }
 
+// ── familiar dishes ──────────────────────────────────────────────────
+// A dietitian's list and the 300 dishes of 27 October: "smothered chicken" was a burrito, "waffles" an almond-flour
+// recipe with strawberries, "mac and cheese" a recipe without macaroni, and "grits with butter" a hundred grams of butter.
+{
+  const misses: string[] = []
+  const plainDishes: [string, string, number, number][] = [
+    ['smothered chicken', 'usda:2706428', 100, 200],
+    ['cornbread', 'usda:2707811', 40, 100],
+    ['a piece of cornbread', 'usda:2707811', 40, 100],
+    ['mac and cheese', 'usda:2708811', 150, 300],
+    ['baked mac and cheese', 'usda:2708811', 150, 300],
+    ['waffles', 'usda:2708325', 40, 150],
+    ['Belgian waffles', 'usda:2708325', 40, 150],
+    ['toaster waffles', 'usda:2708313', 20, 100],
+  ]
+  const rd = await resolvePhrases(store, plainDishes.map((x) => x[0]))
+  rd.forEach((r, i) => {
+    const [phrase, id, lo, hi] = plainDishes[i]
+    if (r.candidates[0]?.id !== id || r.confidence !== 'high' || r.clarify) misses.push(`    "${phrase}": ${r.candidates[0]?.id}, ${r.confidence}${r.clarify ? ', asks: ' + r.clarify : ''}`)
+    const base = loadFoods().byId.get(id)
+    if (!base || base.defaultPortion < lo || base.defaultPortion > hi) misses.push(`    ${id} has a default portion of ${base?.defaultPortion} g, not ${lo} to ${hi}`)
+  })
+  // A brand name still finds the brand, even where the plain dish now has its own name.
+  const [kraft] = await resolvePhrases(store, ['A Kraft mac and cheese'])
+  if (!/^branded:/.test(kraft.candidates[0]?.id ?? '')) misses.push(`    "A Kraft mac and cheese" went to ${kraft.candidates[0]?.id}`)
+  // Foods eaten by the spoonful or the handful are not a hundred grams.
+  const spoon: [string, number][] = [['ing:butter', 20], ['ing:olive_oil', 20], ['ing:almonds', 40], ['ing:peanut_butter', 40], ['ing:honey', 25], ['ing:mayo', 20], ['ing:cheddar', 40]]
+  for (const [id, max] of spoon) {
+    const f = loadFoods().byId.get(id)
+    if (!f || f.defaultPortion > max) misses.push(`    ${id} defaults to ${f?.defaultPortion} g, a spoonful or a handful is at most ${max}`)
+  }
+  console.log(`\nfamiliar  ${misses.length === 0 ? 'ok' : 'WRONG'}`)
+  misses.forEach((m) => console.log(m))
+  if (misses.length) process.exitCode = 1
+}
+
 // ── pizza ─────────────────────────────────────────────────────────────────
 // "Pepperoni pizza" matched twelve survey pizzas and nine brands within a hair of each other, and the agent asked
 // "stuffed crust or Tombstone?". The plain restaurant pizza is what people mean and is taken without a question;
