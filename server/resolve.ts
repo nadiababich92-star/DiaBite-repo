@@ -307,9 +307,13 @@ const isVariantOf = (phrase: string, name: string) => VARIANT_WORDS.test(name) &
  * plain food, or as a typical recipe, which is what they ate.
  */
 const DIET_SWAPS = /\b(squash|low[- ]carb|keto|no[- ]sugar|sugar[- ]free|cauliflower|zucchini|lettuce|almond|lightened|shirataki|thickened|yogurt|turkey|egg whites?)\b|\(no\b/gi
-export function unaskedSwap(phrase: string, name: string): boolean {
+// A plain food is never a stand-in either: "cooked spaghetti" found *Spaghetti squash, cooked*, and a dish costed from it
+// went into the arithmetic as squash. These words name another food whatever the record's kind.
+const FOOD_SWAPS = new Set(['squash', 'cauliflower', 'zucchini', 'shirataki', 'almond', 'lettuce'])
+export function unaskedSwap(phrase: string, name: string, kind = 'recipe'): boolean {
   const asked = new Set(tokens(phrase).map(stem))
   for (const m of name.matchAll(DIET_SWAPS)) {
+    if (kind !== 'recipe' && !FOOD_SWAPS.has(m[0].toLowerCase())) continue
     if (m[0].startsWith('(')) { if (!asked.has('no')) return true; continue }
     if (!norm(m[0]).split(' ').every((w) => asked.has(stem(w)))) return true
   }
@@ -492,7 +496,7 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
       .filter((h) => byId.has(h.id) || unknownId(h.id))
       .filter((h) => {
         const rec = byId.get(h.id)!
-        return !(rec.kind === 'recipe' && unaskedSwap(phrase, rec.name) && !rec.aliases?.includes(norm(phrase)) && !isNamed(phrase, rec.name))
+        return !(unaskedSwap(phrase, rec.name, rec.kind) && !rec.aliases?.includes(norm(phrase)) && !isNamed(phrase, rec.name))
       })
       .map((h) => {
         const rec = byId.get(h.id)!

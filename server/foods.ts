@@ -85,7 +85,7 @@ const ALIASES: Record<string, string[]> = {
   'rice-white': ['rice', 'white rice', 'steamed rice', 'jasmine rice', 'sushi rice'],
   'rice-brown': ['brown rice'],
   'rice-basmati': ['basmati'],
-  'pasta-durum': ['spaghetti', 'pasta', 'penne', 'linguine', 'fettuccine', 'noodles', 'macaroni', 'rigatoni'],
+  'pasta-durum': ['spaghetti', 'pasta', 'penne', 'linguine', 'fettuccine', 'noodles', 'macaroni', 'rigatoni', 'cooked spaghetti', 'spaghetti pasta', 'spaghetti noodles', 'cooked pasta', 'cooked penne', 'penne pasta', 'rigatoni pasta', 'linguine pasta', 'fettuccine pasta', 'cooked fettuccine', 'cooked linguine', 'macaroni pasta', 'cooked macaroni', 'elbow macaroni', 'rotini', 'rotini pasta', 'rotelle', 'farfalle', 'bowtie pasta', 'ziti pasta', 'cooked ziti', 'ziti noodles'],
   'pasta-whole': ['whole wheat pasta', 'whole wheat spaghetti', 'whole grain pasta'],
   'bread-white': ['bread', 'toast', 'white toast', 'sandwich bread', 'bun', 'roll', 'bagel'],
   'bread-rye': ['rye bread', 'rye toast', 'pumpernickel'],

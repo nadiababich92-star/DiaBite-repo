@@ -1771,6 +1771,33 @@
         ]
       },
       {
+        "phrase": "cooked spaghetti",
+        "expect": [
+          "seed:pasta-durum"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "ziti pasta",
+        "expect": [
+          "seed:pasta-durum"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "cooked penne",
+        "expect": [
+          "seed:pasta-durum"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
         "phrase": "burrito bowl",
         "expect": [
           "usda:2708555",
