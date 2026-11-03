@@ -262,7 +262,7 @@ export function sameFamily(anchor: string, candidate: string): boolean {
   return head.every((t) => other.has(t))
 }
 
-/** Available carbohydrate of one default portion, in grams: what a wrong guess between two records would cost. */
+/** Available carbohydrate of one default portion, in grams. */
 function portionCarbs(id: string): number | null {
   const r = loadFoods().byId.get(id)
   if (!r) return null
@@ -271,11 +271,23 @@ function portionCarbs(id: string): number | null {
   return Math.max(0, r.per100.carbs - (r.per100.fiber ?? 0)) * r.defaultPortion / 100
 }
 
-/** Two records whose portions carry about the same carbohydrate: guessing between them changes little. */
-export function closeInCarbs(a: string, b: string): boolean {
+/**
+ * What a wrong guess between two records would cost, in the unit the answer is given in: the glycemic load of one
+ * default portion when both have an index (rolled oats and instant oats carry about the same carbohydrate, and an index
+ * of 55 against 79), and the carbohydrate when either has none.
+ */
+function portionLoad(a: string, b: string): [number, number] | null {
   const x = portionCarbs(a), y = portionCarbs(b)
-  if (x === null || y === null) return false
-  return Math.abs(x - y) <= Math.max(8, 0.3 * Math.max(x, y))
+  if (x === null || y === null) return null
+  const ga = loadFoods().byId.get(a)?.gi, gb = loadFoods().byId.get(b)?.gi
+  return ga && gb ? [x * ga / 100, y * gb / 100] : [x, y]
+}
+
+/** Two records whose portions weigh about the same on the day's budget: guessing between them changes little. */
+export function closeInCarbs(a: string, b: string): boolean {
+  const l = portionLoad(a, b)
+  if (!l) return false
+  return Math.abs(l[0] - l[1]) <= Math.max(5, 0.3 * Math.max(l[0], l[1]))
 }
 
 /**
