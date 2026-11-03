@@ -1035,6 +1035,21 @@ hangMisses.forEach((m) => console.log(m))
     const base = loadFoods().byId.get(id)
     if (!base || base.defaultPortion < lo || base.defaultPortion > hi) misses.push(`    ${id} has a default portion of ${base?.defaultPortion} g, not ${lo} to ${hi}`)
   })
+  // The owner's review of 3 November: obvious dishes are not asked about, and a spelling is not a different food.
+  const obvious = ['BBQ chicken', 'Denver omelette', 'Egg white omelette', 'Steak fajitas', 'Tuna melt', 'Lobster roll', 'Frittata', 'Egg bites', 'Breakfast burrito', 'Lemon herb chicken thighs']
+  const ro = await resolvePhrases(store, obvious)
+  ro.forEach((r, i) => { if (r.clarify || r.unknown) misses.push(`    "${obvious[i]}" still asks or is unknown: ${r.clarify ?? 'unknown'}`) })
+  const named2: [string, string][] = [
+    ['grilled ribeye', 'usda:2705829'], ['eggs over easy', 'usda:2707155'], ['country ham', 'usda:2705878'],
+    ['crispy chicken sandwich', 'usda:2707003'], ['baby back ribs', 'usda:2705894'], ['BBQ chicken', 'usda:2706434'], ['Denver omelette', 'rec:DB-'],
+  ]
+  const rn2 = await resolvePhrases(store, named2.map((x) => x[0]))
+  rn2.forEach((r, i) => { if (!(r.candidates[0]?.id ?? '').startsWith(named2[i][1])) misses.push(`    "${named2[i][0]}" went to ${r.candidates[0]?.id}, wanted ${named2[i][1]}`) })
+  // A spoonful, a ladle, an egg: not a cup.
+  for (const [id, max] of [['usda:2709750', 40], ['usda:2709733', 40], ['usda:2707145', 100], ['usda:2707155', 70]] as [string, number][]) {
+    const f = loadFoods().byId.get(id)
+    if (!f || f.defaultPortion > max) misses.push(`    ${id} defaults to ${f?.defaultPortion} g, at most ${max} g is a spoonful, a ladle or an egg`)
+  }
   // A brand name still finds the brand, even where the plain dish now has its own name.
   const [kraft] = await resolvePhrases(store, ['A Kraft mac and cheese'])
   if (!/^branded:/.test(kraft.candidates[0]?.id ?? '')) misses.push(`    "A Kraft mac and cheese" went to ${kraft.candidates[0]?.id}`)

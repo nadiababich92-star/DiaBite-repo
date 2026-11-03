@@ -13,6 +13,7 @@ import type { Confidence, ResolveCandidate, ResolvedPhrase } from './contract'
 const HIGH_MIN = 0.66      // best candidate must be at least this similar…
 const HIGH_GAP = 0.05      // …and this far ahead of the nearest *different* food
 const LOW_MAX = 0.60       // below this nothing is close enough to use
+const VARIANT_PENALTY = 0.02 // a diet or format variant of a dish ranks under the plain dish the person said
 const ALIAS_SCORE = 0.97   // the phrase IS one of the record's everyday names
 const LEXICAL_BOOST = 0.12 // every phrase token appears in the record name
 // Short phrases ("rice", "greek yogurt") are almost always an ingredient; long
@@ -162,7 +163,8 @@ export function withoutQuantity(phrase: string): string {
   return out || phrase.trim()
 }
 
-const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim()
+// Spelling variants that are one word: "BBQ chicken" and "Barbecue chicken", "omelette" and "omelet" ask no question.
+const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\bbbq\b/g, 'barbecue').replace(/\bomelettes?\b/g, 'omelet').replace(/\s+/g, ' ').trim()
 const STOP = new Set(['a', 'an', 'the', 'of', 'with', 'and', 'some', 'my', 'plate', 'bowl', 'cup', 'slice', 'slices', 'piece', 'pieces', 'pack', 'packet', 'bag', 'box', 'bottle', 'jar', 'can'])
 const tokens = (s: string) => norm(s).split(' ').filter((t) => t && !STOP.has(t))
 
@@ -199,6 +201,14 @@ function stem(t: string): string {
 }
 
 /** How much of the phrase the record's name accounts for, and what that is worth. */
+/** Every word the person said is in the record's name (or its stem). */
+function coversPhrase(phrase: string, name: string): boolean {
+  const ts = tokens(phrase)
+  const n = norm(plainName(name))
+  const stems = new Set(n.split(' ').map(stem))
+  return ts.length > 0 && ts.every((t) => n.includes(t) || stems.has(stem(t)))
+}
+
 function lexicalScore(phrase: string, name: string): number {
   const ts = tokens(phrase)
   if (ts.length === 0) return 0
@@ -251,6 +261,29 @@ export function sameFamily(anchor: string, candidate: string): boolean {
   const other = new Set(tokens(plainName(candidate)))
   return head.every((t) => other.has(t))
 }
+
+/** Available carbohydrate of one default portion, in grams: what a wrong guess between two records would cost. */
+function portionCarbs(id: string): number | null {
+  const r = loadFoods().byId.get(id)
+  if (!r) return null
+  if (r.perServing) return r.unit === 'serving' ? r.perServing.availableCarbs * (r.defaultPortion || 1) : null
+  if (!r.per100) return null
+  return Math.max(0, r.per100.carbs - (r.per100.fiber ?? 0)) * r.defaultPortion / 100
+}
+
+/** Two records whose portions carry about the same carbohydrate: guessing between them changes little. */
+export function closeInCarbs(a: string, b: string): boolean {
+  const x = portionCarbs(a), y = portionCarbs(b)
+  if (x === null || y === null) return false
+  return Math.abs(x - y) <= Math.max(8, 0.3 * Math.max(x, y))
+}
+
+/**
+ * Words that make a recipe a diet or format variant of a plain dish: "Steak Fajita Bowls", "Lobster Roll Lettuce Wraps",
+ * "Tuna Melt Stuffed Peppers". Someone who said "tuna melt" has not asked for the peppers, and is not asked about them.
+ */
+const VARIANT_WORDS = /\b(bowls?|lettuce|low-carb|keto|stuffed|zucchini noodles|cauliflower|skillet|muffins?|bites|salad|sheet pan|meal prep|almond)\b/i
+const isVariantOf = (phrase: string, name: string) => VARIANT_WORDS.test(name) && !VARIANT_WORDS.test(phrase)
 
 export function sameFood(a: string, b: string): boolean {
   const ta = new Set(tokens(a)), tb = new Set(tokens(b))
@@ -434,10 +467,14 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
         const penalty = handNamed ? 0 : h.id.startsWith('usda:') ? (rec.gi === null ? (rec.kind === 'unrated' ? UNRATED_PENALTY : NO_GI_PENALTY) : COVERAGE_PENALTY) : 0
         const branded = h.id.startsWith('branded:') ? ((brandWord(rec.name) && tokens(phrase).map(stem).includes(brandWord(rec.name))) ? 0 : BRANDED_PENALTY + COVERAGE_PENALTY) : 0
         const school = /\bschool\b/i.test(rec.name) && !/\bschool\b/i.test(phrase) ? SCHOOL_PENALTY : 0
+        // A diet or format variant ranks under the plain dish, but its penalty is not taken off the score: that would
+        // push every "Frittata" under the floor of what counts as found.
+        const variant = rec.kind === 'recipe' && isVariantOf(phrase, rec.name) ? VARIANT_PENALTY : 0
         const score = base - penalty - school - branded
-        return { ...summary(rec), score }
+        return { ...summary(rec), score, rank: score - variant }
       })
-      .sort((a, b) => b.score - a.score)
+      .sort((a, b) => b.rank - a.rank)
+      .map(({ rank: _rank, ...c }) => c)
     const candidates: ResolveCandidate[] = brandYields(phrase, ranked)
       .slice(0, topK)
       .map((c) => ({ ...c, score: Math.round(c.score * 1000) / 1000 }))
@@ -465,14 +502,21 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
     if (confidence === 'medium' && !clarify) {
       const q = norm(phrase)
       const named = loadFoods().records.filter((r) => r.aliases?.includes(q))
-      if (named.length >= 3) {
+      // Three of OUR recipes for one dish word are not a choice the person has; three foods that a diet may exclude are.
+      if (named.length >= 3 && named.some((r) => r.kind !== 'recipe')) {
         const names = [...new Set(named.map((r) => r.name))].slice(0, 4)
         clarify = `Did you mean ${names.slice(0, -1).join(', ')} or ${names[names.length - 1]}?`
       }
     }
     if (confidence === 'medium' && !clarify) {
-      const rival = cands.slice(1).find((c) => !sameFood(c.name, cands[0].name))
-      clarify = rival ? `Did you mean ${cands[0].name} or ${rival.name}?` : undefined
+      // A rival is a real alternative only if its name says everything the person said: "Tuna, canned" does not say "melt".
+      const rival = cands.slice(1).find((c) => !sameFood(c.name, cands[0].name) && !isVariantOf(phrase, c.name) && coversPhrase(phrase, c.name))
+      // A question is worth asking when the answer moves the number. "Turkey sandwich on white" or "on a sub" is two
+      // records with about the same carbohydrate: the first is used, said so, and the person may correct it.
+      // Two of our own recipes for the same dish ("Frittata": bites, cups, kale) are variants of one thing, not a choice
+      // the person made: the best is used and named in the answer, and the recipe is on the receipt.
+      const recipes = rival && byId.get(cands[0].id)?.kind === 'recipe' && byId.get(rival.id)?.kind === 'recipe'
+      clarify = rival && !recipes && !closeInCarbs(cands[0].id, rival.id) ? `Did you mean ${cands[0].name} or ${rival.name}?` : undefined
     }
     return { phrase: given[i], confidence, candidates: cands, clarify, unknown }
   }))

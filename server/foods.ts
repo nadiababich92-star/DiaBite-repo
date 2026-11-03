@@ -262,6 +262,21 @@ function householdPortion(rows: { label: string; grams: number }[] | undefined, 
     const breast = (rows ?? []).find((p) => /breast/i.test(p.label))
     if (breast) return Math.round(breast.grams)
   }
+  // A sauce, a dressing or a spread is said by the spoonful: "1 cup" of barbecue sauce is 272 g, and nobody pours that on
+  // brisket. USDA lists a guideline amount for a regular sandwich, or a tablespoon; a gravy lists only a cup, of which a ladle is a quarter.
+  if (/^(barbecue sauce|ketchup|catsup|mayonnaise|salad dressing|tartar sauce|salsa|soy sauce|cheese sauce|syrup|honey|jelly|jam\b|preserves|mustard$)/i.test(name)) {
+    const spoon = (rows ?? []).find((p) => /^guideline amount (on regular|per sandwich)|^1 tablespoon/i.test(p.label))
+    if (spoon) return Math.round(spoon.grams)
+  }
+  if (/^gravy\b/i.test(name)) {
+    const cup = (rows ?? []).find((p) => /^1 cup/i.test(p.label))
+    if (cup) return Math.round(cup.grams / 4)
+  }
+  // An egg is said by the egg, not by a cup of chopped egg.
+  if (/^egg\b/i.test(name)) {
+    const egg = (rows ?? []).find((p) => /^1 egg\b/i.test(p.label) && p.grams >= 30 && p.grams <= 120)
+    if (egg) return Math.round(egg.grams)
+  }
   const usable = (rows ?? []).filter((p) => p.grams > 10 && p.grams <= 600 && !/\bdry\b|yields|not specified/i.test(p.label))
   const cup = usable.find((p) => /\bcup\b/i.test(p.label))
   return Math.round(cup?.grams ?? usable[0]?.grams ?? 100)
@@ -305,6 +320,13 @@ const USDA_ALIASES: Record<string, string[]> = {
   'usda:2708614': ['cheese pizza', 'margherita pizza', 'pizza margherita', 'margherita', 'cheese pizza slice', 'slice of cheese pizza', 'margherita pizza slice', 'slice of margherita pizza', 'pizza with cheese'], // Pizza, cheese, from restaurant or fast food
   'usda:2708615': ['thin crust cheese pizza', 'thin crust margherita pizza', 'thin crust margherita'], // Pizza, cheese, from restaurant or fast food, thin crust
   'usda:2708617': ['thick crust cheese pizza', 'thick crust margherita pizza', 'thick crust margherita'], // Pizza, cheese, from restaurant or fast food, thick crust
+  // The 300 dishes, reviewed by the owner on 3 November 2026: common foods that were "not in the database", or asked about.
+  'usda:2705829': ['ribeye', 'rib eye', 'ribeye steak', 'grilled ribeye', 'rib-eye', 'rib eye steak'], // Beef, steak, ribeye, lean and fat eaten
+  'usda:2705824': ['filet mignon', 'filet', 'tenderloin steak', 'beef tenderloin', 'grilled steak'], // Beef, steak, NFS
+  'usda:2707155': ['eggs over easy', 'egg over easy', 'over easy eggs', 'over easy', 'eggs sunny side up', 'sunny side up eggs', 'eggs over medium', 'eggs over hard'], // Egg, whole, fried
+  'usda:2705878': ['country ham', 'ham slice', 'ham steak'], // Ham
+  'usda:2707003': ['crispy chicken sandwich', 'fried chicken sandwich', 'chicken sandwich', 'chicken fillet sandwich', 'spicy chicken sandwich'], // Chicken fillet sandwich, fried, from fast food
+  'usda:2705894': ['baby back ribs', 'pork ribs', 'barbecue ribs', 'spare ribs', 'ribs'], // Pork, ribs
   // From the 300 familiar dishes of 27 October and a dietitian's own list (3 November 2026): each was asked about or
   // counted as a different food. The plain survey record is the one people mean; naming a variant still finds it.
   'usda:2708325': ['waffle', 'waffles', 'a waffle', 'belgian waffle', 'belgian waffles', 'plain waffle'], // Waffle, plain
