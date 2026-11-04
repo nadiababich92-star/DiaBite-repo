@@ -558,7 +558,10 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
     }
     if (confidence === 'medium' && !clarify) {
       // A rival is a real alternative only if its name says everything the person said: "Tuna, canned" does not say "melt".
-      const rival = cands.slice(1).find((c) => !sameFood(c.name, cands[0].name) && !isVariantOf(phrase, c.name) && coversPhrase(phrase, c.name))
+      // A food that has the phrase only as something added to it ("Garlic bread, with parmesan cheese") is not an alternative to
+      // the food itself: its head is another food.
+      const headSays = (name: string) => { const h = new Set(tokens(name.split(/,? (?:with|on|and) /i)[0]).map(stem)); return tokens(phrase).some((t) => h.has(stem(t))) }
+      const rival = cands.slice(1).find((c) => !sameFood(c.name, cands[0].name) && !isVariantOf(phrase, c.name) && coversPhrase(phrase, c.name) && headSays(c.name))
       // A question is worth asking when the answer moves the number. "Turkey sandwich on white" or "on a sub" is two
       // records with about the same carbohydrate: the first is used, said so, and the person may correct it.
       // Two of our own recipes for the same dish ("Frittata": bites, cups, kale) are variants of one thing, not a choice
