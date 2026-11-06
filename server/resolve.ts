@@ -375,6 +375,9 @@ function band(phrase: string, cands: ResolveCandidate[]): Confidence {
   // ingredient's everyday names do not count: "chicken" and "beans" are still a question.
   if (tokens(phrase).every((t) => CATEGORY_WORDS.has(t)) && !(top.id.startsWith('usda:') && loadFoods().byId.get(top.id)?.aliases?.includes(norm(phrase)))) return 'medium'
   if (isNamed(phrase, top.name)) return 'high'
+  // A survey food written down by hand under exactly these words is the answer, not one of several ("pizza crust" is
+  // white bread, though "Pizza, no cheese, thick crust" says the same words).
+  if (top.id.startsWith('usda:') && top.score >= HIGH_MIN && loadFoods().byId.get(top.id)?.aliases?.includes(norm(phrase)) && cands.slice(1).every((c) => !loadFoods().byId.get(c.id)?.aliases?.includes(norm(phrase)))) return 'high'
   const rival = cands.slice(1).find((c) => !sameFood(c.name, top.name))
   if (top.score >= HIGH_MIN && (!rival || top.score - rival.score >= HIGH_GAP)) return 'high'
   return 'medium'

@@ -1872,6 +1872,26 @@
           "named",
           "dish-ingredient"
         ]
+      },
+      {
+        "phrase": "pizza crust",
+        "expect": [
+          "usda:2707600"
+        ],
+        "tags": [
+          "named",
+          "dish-ingredient"
+        ]
+      },
+      {
+        "phrase": "pizza sauce",
+        "expect": [
+          "ing:tomato_sauce"
+        ],
+        "tags": [
+          "named",
+          "dish-ingredient"
+        ]
       }
     ],
     "clarify": [

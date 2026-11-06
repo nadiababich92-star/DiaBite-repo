@@ -321,6 +321,10 @@ const USDA_ALIASES: Record<string, string[]> = {
   'usda:2708614': ['cheese pizza', 'margherita pizza', 'pizza margherita', 'margherita', 'cheese pizza slice', 'slice of cheese pizza', 'margherita pizza slice', 'slice of margherita pizza', 'pizza with cheese'], // Pizza, cheese, from restaurant or fast food
   'usda:2708615': ['thin crust cheese pizza', 'thin crust margherita pizza', 'thin crust margherita'], // Pizza, cheese, from restaurant or fast food, thin crust
   'usda:2708617': ['thick crust cheese pizza', 'thick crust margherita pizza', 'thick crust margherita'], // Pizza, cheese, from restaurant or fast food, thick crust
+  // A pizza crust is not in the database, so a typical pizza costed from its parts left the dough out, the one part
+  // that carries the carbohydrate (GL 0.4 to 1.4 for a whole pizza). The owner decided on 6 November 2026 that the
+  // crust of an assumed pizza is counted as white bread, as an assumption the answer names, never a plain "fits".
+  'usda:2707600': ['pizza crust', 'pizza dough', 'pizza base', 'pizza shell', 'thin pizza crust', 'thick pizza crust'], // Bread, white, made from home recipe or purchased at a bakery
   // The 300 dishes, reviewed by the owner on 3 November 2026: common foods that were "not in the database", or asked about.
   'usda:2705829': ['ribeye', 'rib eye', 'ribeye steak', 'grilled ribeye', 'rib-eye', 'rib eye steak'], // Beef, steak, ribeye, lean and fat eaten
   'usda:2705824': ['filet mignon', 'filet', 'tenderloin steak', 'beef tenderloin', 'grilled steak'], // Beef, steak, NFS
@@ -355,6 +359,8 @@ const USDA_ALIASES: Record<string, string[]> = {
 const INGREDIENT_ALIASES: Record<string, string[]> = {
   turkey_sausage: ['breakfast sausage', 'sausage links', 'sausage patties', 'turkey breakfast patties', 'turkey sausage patties', 'turkey breakfast sausage', 'turkey breakfast links'],
   chicken_sausage: ['breakfast sausage', 'sausage links', 'sausage patties'],
+  // 'pizza sauce' matched fish sauce, a neighbour by the word 'sauce'; on a pizza it is tomato sauce.
+  tomato_sauce: ['pizza sauce', 'pizza tomato sauce'],
 }
 
 /**

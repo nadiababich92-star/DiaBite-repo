@@ -306,6 +306,10 @@ const dishMisses: string[] = []
   const kraft = m6.items.find((it) => it.kind === 'branded')
   const a6 = afterMealFor({ gl: 54, carbsG: 107, kcal: 1653 }, m6.totals, [], m6.items.filter((it) => !it.loadAvailable).map((it) => it.name))
   if (!kraft || kraft.loadAvailable !== false || kraft.gl !== null || a6.fits === true || !a6.partial?.unscored?.length) dishMisses.push(`    a packaged ingredient was given a load or a fit: ${JSON.stringify(a6)}`)
+  // 7. A pizza crust is counted, as white bread, so a whole typical pizza carries its dough's load (owner's decision, 6 November).
+  const p7 = await planDish(store, { dish: 'personal pizza', ingredients: [{ phrase: 'pizza crust', grams: 110 }, { phrase: 'pizza sauce', grams: 40 }, { phrase: 'mozzarella', grams: 50 }] })
+  const m7 = computeMeal(p7.costed)
+  if (p7.unresolved.length || !m7.items.some((it) => it.foodId === 'usda:2707600') || m7.totals.gl < 25) dishMisses.push(`    a pizza crust was left out or not counted: unresolved ${JSON.stringify(p7.unresolved)}, GL ${m7.totals.gl}`)
   // 10. The last-resort answer for an estimate is conditional, never a plain "fits".
   const meal10 = computeMeal(p2.costed)
   const trace10 = [{ tool: 'diabite_engine_cost_dish', input: {}, result: { ...meal10, assumed: true, dish: 'cholent', ingredients: p2.costed, unresolved: [], afterMeal: afterMealFor({ gl: 54, carbsG: 107, kcal: 1653 }, meal10.totals, [], []) } }] as never
