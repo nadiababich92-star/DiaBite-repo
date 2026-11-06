@@ -122,6 +122,9 @@ const CATEGORY_QUESTION: Record<string, string> = {
   chili: 'Chili the dish (with meat, with beans), or chili powder?',
 }
 
+// Size and format words that say how much pizza, not what is on it.
+const PIZZA_FORMAT = new Set(['personal', 'pan', 'small', 'large', 'medium', 'mini', 'individual', 'whole', 'regular', 'big', 'by'])
+
 /**
  * A record's name with its negations removed.
  *
@@ -544,6 +547,10 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
         clarify = `Did you mean ${spelled.name}?`
       }
     }
+    // "Personal pizza", "pizza by the slice", "large pizza": a size or a format and no topping is still "pizza", and what is on it
+    // decides the number. Nothing matched it, so it was an unknown dish costed from a guessed topping; it is a question.
+    const bareSizedPizza = tokens(phrase).includes('pizza') && tokens(phrase).every((t) => t === 'pizza' || PIZZA_FORMAT.has(t))
+    if (bareSizedPizza) { confidence = 'medium'; clarify = CATEGORY_QUESTION.pizza }
     const unknown = confidence === 'low'
     const asked = tokens(phrase).length === 1 ? CATEGORY_QUESTION[tokens(phrase)[0]] : undefined
     if (confidence === 'medium' && !clarify && asked) clarify = asked

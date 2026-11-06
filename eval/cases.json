@@ -2064,6 +2064,21 @@
         "phrase": "nachos",
         "band": "medium",
         "why": "the name alone matched a bag of Doritos"
+      },
+      {
+        "phrase": "personal pizza",
+        "band": "medium",
+        "why": "a size and no topping is still a pizza whose topping decides the number; it was costed from a guessed topping"
+      },
+      {
+        "phrase": "pizza by the slice",
+        "band": "medium",
+        "why": "a format and no topping: the topping is the question"
+      },
+      {
+        "phrase": "large pizza",
+        "band": "medium",
+        "why": "a size and no topping: the topping is the question"
       }
     ],
     "verify": [
