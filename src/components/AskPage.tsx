@@ -686,7 +686,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
         <div className="ask-budget">
           <div className="ask-budget-text">
             <span className="label">glycemic load left {dayWord}</span>
-            <span className="ask-budget-note">How much your food can still add to your blood sugar {dayWord}.</span>
+            <span className="ask-budget-note">Glycemic load (GL) is how much a meal raises your blood sugar, counting both the food and the portion. This is what is left of your budget {dayWord}.</span>
           </div>
           <span className="value"><b className="num">{left}</b> <small>of {targets.glBudget}</small></span>
         </div>
