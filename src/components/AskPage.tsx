@@ -142,7 +142,7 @@ function RecalcCard({ rc, onBack, onGl, note }: { rc: Recalc; onBack: () => void
   // A dish counted from an assumed recipe stays an estimate through every recalculation: never a plain "Fits".
   const tone = rc.assumed && rc.fits !== undefined ? 'estimate'
     : rc.fits === true ? 'good' : rc.fits === false ? 'bad' : rc.fits === null ? 'partial' : 'ask'
-  const label = tone === 'estimate' ? 'Estimate' : tone === 'good' ? 'Fits' : tone === 'bad' ? 'Over your daily limit' : tone === 'partial' ? 'Part of the meal' : 'One question first'
+  const label = tone === 'estimate' ? 'Estimate' : tone === 'good' ? 'Fits' : tone === 'bad' ? 'Over today’s budget' : tone === 'partial' ? 'Part of the meal' : 'One question first'
   const verdict = tone === 'estimate'
     ? (rc.fits === true ? "If it's like this, it fits your day." : rc.fits === false ? "If it's like this, it does not fit today." : "I can't judge the day on this.")
     : tone === 'good' ? 'This fits your day.' : tone === 'bad' ? 'This does not fit today.'
@@ -710,7 +710,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
             <div className="eyebrow-line" data-tour="verdict">
               <StatusDot tone={tone} />
               {reply.blocked ? 'Not something I\'ll answer' :
-               tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Over your daily limit' :
+               tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Over today’s budget' :
                tone === 'advice' ? 'Advice' : tone === 'estimate' ? 'Estimate' : tone === 'carbs' ? 'Carbs only' : tone === 'partial' ? 'Part of the meal' : 'One question first'}
             </div>
             <Answer text={reply.answer} reply={reply} onGl={recalc ? undefined : () => setGlOpen(true)} onSwap={receipt && !receipt.assumed ? acceptSwap : undefined} swapState={{ accepted: swap?.id ?? null, busy: !!swap && !recalc && !recalcError, failed: !!swap && !recalc && !!recalcError }} />
