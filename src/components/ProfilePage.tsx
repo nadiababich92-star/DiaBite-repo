@@ -116,6 +116,10 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
             </select>
           </label>
         </div>
+        <p className="muted" style={{ margin: '12px 0 0' }}>
+          The carbohydrate approach moves your carbohydrate, fat and glycemic-load targets below. Calories
+          and protein come from your body, activity and weight goal, so they stay the same when you change it.
+        </p>
       </section>
 
       <section className="card">
@@ -252,6 +256,29 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
             ))}
           </div>
         )}
+      </section>
+
+      <section className="card">
+        <h2>Keep DiaBite on your phone</h2>
+        <p className="muted" style={{ marginTop: 0 }}>
+          Add it to your home screen and it opens like an app, with no address to type.
+        </p>
+        <details className="recipe-more">
+          <summary>iPhone or iPad</summary>
+          <ol className="recipe-steps">
+            <li>Open diabite.pro in Safari.</li>
+            <li>Tap the Share button, the square with an arrow.</li>
+            <li>Choose Add to Home Screen, then Add.</li>
+          </ol>
+        </details>
+        <details className="recipe-more">
+          <summary>Android</summary>
+          <ol className="recipe-steps">
+            <li>Open diabite.pro in Chrome.</li>
+            <li>Tap the menu, the three dots at the top right.</li>
+            <li>Choose Add to Home screen (or Install app), then confirm.</li>
+          </ol>
+        </details>
       </section>
     </>
   )

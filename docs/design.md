@@ -211,8 +211,9 @@ into it, so a phone's keyboard does not open over the question.
 
 ### Status disc
 A 20px filled circle in the verdict colour with a white icon, beside an
-uppercase label: ✓ Fits, + Fits with a change, ✕ Not today, ! One question first,
-i Advice.
+uppercase label: ✓ Fits, + Fits with a change, ✕ Over your daily limit, ! One question first,
+i Advice. The red label names a fact about the day, never a prohibition: "Not today" was changed on
+9 November 2026 after a person with diabetes said it sounded like a refusal.
 
 ### The three figures
 `this meal` · `before` · `left after`. The last carries the verdict colour and

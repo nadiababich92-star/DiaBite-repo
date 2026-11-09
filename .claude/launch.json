@@ -18,6 +18,15 @@
         "export PATH=/opt/homebrew/bin:$PATH && AGENT_WEBHOOK=http://localhost:8790/diabite exec npm run dev"
       ],
       "port": 5173
+    },
+    {
+      "name": "diabite-nosignin",
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": [
+        "-c",
+        "export PATH=/opt/homebrew/bin:$PATH && VITE_SUPABASE_URL= VITE_SUPABASE_PUBLISHABLE_KEY= exec npx vite --port 5174"
+      ],
+      "port": 5174
     }
   ]
 }
