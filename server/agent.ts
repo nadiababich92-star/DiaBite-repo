@@ -520,7 +520,7 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
     } else {
       lines.push(fits === true
         ? `**Verdict:** If your dish is like this, it fits what is left of today's budget.`
-        : `**Verdict:** If your dish is like this, it does not fit what is left of today's budget.`)
+        : `**Verdict:** If your dish is like this, it goes over what is left of today's budget.`)
     }
     lines.push(`**Numbers:** this estimate's glycemic load is ${gl}.`)
     lines.push('_Counted from a typical recipe; change anything that is not yours._')
@@ -530,7 +530,7 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
     // Understated by definition: never "fits", and say what is missing.
     const missing = unknownFoods.join(', ')
     lines.push(meal?.afterMeal?.fits === false
-      ? `**Verdict:** this already does not fit what is left of today's budget, and ${missing} is not counted yet.`
+      ? `**Verdict:** this already goes over what is left of today's budget, and ${missing} is not counted yet.`
       : `**Verdict:** I can't judge the day on a partial total: ${missing} is not in the database, so it is left out.`)
     lines.push(`**Numbers:** the glycemic load of the rest of the meal is ${gl}.`)
     lines.push(`**Question:** what is in ${missing}?`)
@@ -543,7 +543,7 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
   } else if (unscored.length > 0) {
     // Some foods have a load and some do not: what can be judged is only a part of the meal.
     lines.push(meal?.afterMeal?.fits === false
-      ? `**Verdict:** the part of this meal that has a load already does not fit what is left of today's budget.`
+      ? `**Verdict:** the part of this meal that has a load already goes over what is left of today's budget.`
       : `**Verdict:** I can't judge the day on a partial total: our data has no glycemic index for ${unscored.join(', ')}, so it is not scored.`)
     lines.push(`**Numbers:** the glycemic load of the scored part of the meal is ${gl}.`)
   } else if (typeof left === 'number' && typeof after === 'number') {
@@ -551,7 +551,7 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
     const fits = meal?.afterMeal?.fits ?? after >= 0
     lines.push(fits
       ? `**Verdict:** it fits what is left of today's budget.`
-      : `**Verdict:** it does not fit what is left of today's budget.`)
+      : `**Verdict:** it goes over what is left of today's budget.`)
     lines.push(`**Numbers:** this meal's glycemic load is ${gl}. You had ${left} left before it, which leaves ${after} after.`)
   } else {
     lines.push(`**Numbers:** this meal's glycemic load is ${gl}.`)

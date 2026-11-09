@@ -93,7 +93,7 @@ export function verify(req: VerifyRequest): VerifyResponse {
  * your dish is like this, it fits"), questions, swaps and "can't judge" are not claims about this meal.
  */
 const FIT_CLAIM = /\bfits\b|within (your |the |today'?s )?(budget|limit)/i
-const NO_FIT_CLAIM = /\b(does not|doesn'?t|do not|won'?t|will not) fit\b|\bover (your |the |today'?s )?budget\b|\bover (your |the )?(limit|target)\b/i
+const NO_FIT_CLAIM = /\b(does not|doesn'?t|do not|won'?t|will not) fit\b|\bover (your |the |today'?s )?budget\b|\bover (your |the )?(limit|target)\b|\bgoes over\b|\bover what(?: is|'s) left\b/i
 // "…, but I can't judge the day": the clause is the honest part, and what stands before it is still a claim.
 const CANNOT_JUDGE = /\b(?:i )?(?:can'?t|cannot)\s+(?:say|tell|judge)\b[^.!?\n]*/gi
 const CONDITIONAL = /\bif\b|\bwould\b|\bcould\b|\bswap|\binstead\b|\balternative|\bbetter\b|\bthan\b|\?/i

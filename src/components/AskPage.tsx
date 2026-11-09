@@ -144,8 +144,8 @@ function RecalcCard({ rc, onBack, onGl, note }: { rc: Recalc; onBack: () => void
     : rc.fits === true ? 'good' : rc.fits === false ? 'bad' : rc.fits === null ? 'partial' : 'ask'
   const label = tone === 'estimate' ? 'Estimate' : tone === 'good' ? 'Fits' : tone === 'bad' ? 'Over today’s budget' : tone === 'partial' ? 'Part of the meal' : 'One question first'
   const verdict = tone === 'estimate'
-    ? (rc.fits === true ? "If it's like this, it fits your day." : rc.fits === false ? "If it's like this, it does not fit today." : "I can't judge the day on this.")
-    : tone === 'good' ? 'This fits your day.' : tone === 'bad' ? 'This does not fit today.'
+    ? (rc.fits === true ? "If it's like this, it fits your day." : rc.fits === false ? "If it's like this, it goes over what is left today." : "I can't judge the day on this.")
+    : tone === 'good' ? 'This fits your day.' : tone === 'bad' ? 'This goes over what is left today.'
     : tone === 'partial' ? "I can't judge the day on a partial total." : "I no longer hold today's budget, so ask again for a verdict."
   const lead = rc.after === null ? null : Math.abs(rc.after)
   return (
@@ -320,7 +320,7 @@ function verdictTone(answer: string, route?: string, reply?: AgentResponse): 'go
     return (meal.alternatives?.length ?? 0) > 0 ? 'change' : 'good'
   }
   const first = answer.split('\n')[0].toLowerCase()
-  if (first.includes('does not fit') || first.includes("doesn't fit") || first.includes('not today')) return 'bad'
+  if (first.includes('does not fit') || first.includes("doesn't fit") || first.includes('not today') || first.includes('goes over')) return 'bad'
   if (first.includes('with a change') || first.includes('with one change') || first.includes('swap')) return 'change'
   if (first.includes('fits') || first.startsWith('**yes') || first.startsWith('yes')) return 'good'
   return 'ask'
