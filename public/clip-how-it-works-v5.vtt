@@ -1,70 +1,76 @@
 WEBVTT
 
-00:00.350 --> 00:09.470
+00:00.350 --> 00:09.550
 <v Narrator>Forty million Americans live with diabetes. A hundred and fifteen million adults have prediabetes. And for all of them, every meal is the same question: does this fit my day?
 
-00:10.870 --> 00:20.370
+00:10.950 --> 00:19.860
 <v Narrator>Meet Maya, who has insulin resistance, and Daniel, who has type 2 diabetes. Made up, but you know them. She has no time. He has a plan that keeps breaking.
 
-00:21.670 --> 00:25.850
+00:21.160 --> 00:24.650
 <v Maya>Wrap and chips. Is that okay? I honestly don't know.
 
-00:25.850 --> 00:30.900
+00:24.650 --> 00:30.030
 <v Narrator>Maya has no time to plan, so she guesses. Most tools ask for a life with spare time.
 
-00:32.200 --> 00:34.800
+00:31.330 --> 00:34.020
 <v Daniel>Sunday. The whole week, planned.
 
-00:34.750 --> 00:36.540
+00:33.970 --> 00:35.630
 <v Narrator>Daniel plans every meal.
 
-00:37.540 --> 00:40.920
+00:36.630 --> 00:39.820
 <v Daniel>Wednesday. A late meeting. Pizza.
 
-00:40.870 --> 00:44.230
+00:39.770 --> 00:42.970
 <v Narrator>Then life happens, and a broken plan feels like failing.
 
-00:45.430 --> 00:52.640
+00:44.170 --> 00:50.950
 <v Narrator>That is why DiaBite exists. Say what you are about to eat. It tells you if it fits what is left of your day, and shows the arithmetic.
 
-00:53.940 --> 00:56.060
+00:52.250 --> 00:54.210
 <v Maya>Grilled chicken sandwich and an apple.
 
-00:56.540 --> 01:01.040
+00:54.850 --> 00:59.730
 <v Narrator>A few seconds. It fits, but it names a lighter swap, and counts that too.
 
-01:01.340 --> 01:03.390
+01:00.030 --> 01:02.210
 <v Maya>Chicken salad instead. Fine.
 
-01:06.590 --> 01:10.540
+01:05.280 --> 01:09.370
 <v Narrator>Every number comes from a database. Open the receipt and check it yourself.
 
-01:10.690 --> 01:16.460
+01:09.520 --> 01:15.290
 <v Narrator>The foods come from USDA FoodData Central, and the glycemic values from published international tables.
 
-01:18.260 --> 01:23.010
+01:17.090 --> 01:21.840
 <v Narrator>It shows carbohydrate and glycemic load side by side, and you choose which comes first.
 
-01:26.160 --> 01:30.610
+01:25.190 --> 01:29.440
+<v Narrator>If your doctor gave you a number for a meal, and one for a snack, you can set them.
+
+01:30.690 --> 01:35.100
+<v Narrator>When a meal goes above it, DiaBite says so, plainly, next to the figures.
+
+01:36.400 --> 01:41.160
 <v Narrator>In the diary, his plan stays, dashed. Only what he really eats counts.
 
-01:30.680 --> 01:32.000
+01:41.230 --> 01:42.740
 <v Daniel>Chicken fried rice.
 
-01:35.030 --> 01:38.350
+01:45.770 --> 01:49.090
 <v Narrator>A plan that broke is not a failure. It is just Wednesday.
 
-01:39.650 --> 01:41.950
+01:50.390 --> 01:52.570
 <v Maya>How many units of insulin before pasta?
 
-01:42.200 --> 01:45.900
+01:52.940 --> 01:56.720
 <v Narrator>Some questions it never answers. Doses belong to your care team.
 
-01:46.950 --> 01:47.990
+01:57.770 --> 01:58.980
 <v Daniel>Grandma's cholent.
 
-01:48.690 --> 01:52.210
+01:59.680 --> 02:03.160
 <v Narrator>And when it does not know a dish, it says so, and calls it an estimate.
 
-01:53.510 --> 02:01.780
+02:04.460 --> 02:12.170
 <v Narrator>A quick check on the go. A diary for the days a plan breaks. Free to try at diabite.pro. A reference tool, not medical advice.

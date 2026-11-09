@@ -48,6 +48,7 @@ const manifest = {}
 const marks = {}   // per scene: when the typing ended, when the button was pressed, when the answer was on screen
 let port = 9921
 async function film(who, acct, run) {
+  if (process.env.ONLY_SCENE && !run.toString().includes(`'${process.env.ONLY_SCENE}'`)) return   // ONLY_SCENE=maya-limit: film just that scene
   const b = await launch({ port: port++, width: 360, height: 660, dpr: 2 })
   const ev = b.ev
   await b.send('Page.navigate', { url: APP }); await sleep(2500)
@@ -107,7 +108,7 @@ try {
       await T.sleep(300); await T.hold(1)
     }
     await T.hold(2)
-    await T.tab('Ask'); await T.hold(1); await T.click('Meal', '.kind-switch button'); await T.sleep(300); await T.type('a burrito bowl with rice and beans'); await T.answer(); await T.hold(4)
+    await T.tab('Ask'); await T.hold(1); await T.click('Meal', '.kind-switch button'); await T.sleep(300); await T.type('a chicken burrito bowl with white rice and black beans, 450 g'); await T.answer(); await T.hold(4)
   })
   await film('maya', maya, async (T) => {
     T.begin('maya-dose'); await T.hold(2); await T.type('How many units of insulin should I take before pasta?'); await T.answer(); await T.hold(4)

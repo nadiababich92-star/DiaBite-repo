@@ -59,6 +59,8 @@ export const LANDING = {
     "Narrator: Every number comes from a database. Open the receipt and check it yourself.",
     "Narrator: The foods come from USDA FoodData Central, and the glycemic values from published international tables.",
     "Narrator: It shows carbohydrate and glycemic load side by side, and you choose which comes first.",
+    "Narrator: If your doctor gave you a number for a meal, and one for a snack, you can set them.",
+    "Narrator: When a meal goes above it, DiaBite says so, plainly, next to the figures.",
     "Narrator: In the diary, his plan stays, dashed. Only what he really eats counts.",
     "Daniel: Chicken fried rice.",
     "Narrator: A plan that broke is not a failure. It is just Wednesday.",
