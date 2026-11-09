@@ -149,7 +149,8 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
               ))}
             </select>
           </label>
-          <MealCarbsLimit value={profile.mealCarbsG} onChange={(g) => set('mealCarbsG', g)} />
+          <MealCarbsLimit kind="meal" value={profile.mealCarbsG} onChange={(g) => set('mealCarbsG', g)} />
+          <MealCarbsLimit kind="snack" value={profile.snackCarbsG} onChange={(g) => set('snackCarbsG', g)} />
         </div>
         <p className="muted" style={{ margin: '12px 0 0' }}>
           The carbohydrate approach moves your carbohydrate, fat and glycemic-load targets below. Calories

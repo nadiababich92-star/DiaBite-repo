@@ -337,6 +337,7 @@ export const DEFAULT_PROFILE: Profile = {
   carbApproach: 'low',
   countBy: 'gl',
   mealCarbsG: 0,
+  snackCarbsG: 0,
   excludedFoodIds: [],
   insulin: 'none',
   meds: [],

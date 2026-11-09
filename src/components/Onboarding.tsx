@@ -397,7 +397,8 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
                 </div>
                 <GiGlExplainer />
 
-                <MealCarbsLimit value={p.mealCarbsG} onChange={(g) => set('mealCarbsG', g)} />
+                <MealCarbsLimit kind="meal" value={p.mealCarbsG} onChange={(g) => set('mealCarbsG', g)} />
+                <MealCarbsLimit kind="snack" value={p.snackCarbsG} onChange={(g) => set('snackCarbsG', g)} />
 
                 <h3>What that gives you</h3>
                 <div className="stats">

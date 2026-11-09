@@ -67,7 +67,10 @@ export function sanitizeProfile(stored: unknown): Profile {
   // A string field takes any string above; this one has two values, and anything else is the default.
   if (out.countBy !== 'gl' && out.countBy !== 'carbs') out.countBy = DEFAULT_PROFILE.countBy
   // The person's own per-meal number: a plausible figure, or none.
-  if (typeof out.mealCarbsG !== 'number' || out.mealCarbsG < MEAL_CARBS_MIN || out.mealCarbsG > MEAL_CARBS_MAX) out.mealCarbsG = 0
+  for (const k of ['mealCarbsG', 'snackCarbsG'] as const) {
+    const v = out[k]
+    if (typeof v !== 'number' || v < MEAL_CARBS_MIN || v > MEAL_CARBS_MAX) out[k] = 0
+  }
   return out as unknown as Profile
 }
 

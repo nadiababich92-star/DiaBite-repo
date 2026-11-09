@@ -1027,3 +1027,7 @@ body:has(.landing) { background: #0a1812; }
 .ask-day { margin: 0 0 14px; }
 .ask-day-note { margin: 6px 0 0; font-size: 14px; }
 .ask-hero.compact .ask-day-note { display: none; }
+
+/* "This is a Meal / Snack": which of the person's two carbohydrate numbers the answer is compared with. */
+.kind-switch { align-items: center; gap: 8px; margin: 0 0 12px; }
+.kind-switch .chip-btn { padding: 8px 16px; text-align: center; }

@@ -146,6 +146,8 @@ export interface Profile {
   countBy: CountBy
   /** Grams of carbohydrate per meal the person's doctor or dietitian suggested; 0 means they have no number. Only ever the person's own: DiaBite has no default. */
   mealCarbsG: number
+  /** The same for a snack; 0 means no number. */
+  snackCarbsG: number
   /** Food ids the user excludes: allergy, intolerance, or simply dislike. */
   excludedFoodIds: string[]
 
