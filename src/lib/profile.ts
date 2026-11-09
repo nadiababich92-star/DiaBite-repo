@@ -322,6 +322,10 @@ function glBudget(carbsG: number, condition: Condition): number {
   return Math.min(120, (carbsG * targetAvgGI) / 100)
 }
 
+/** The range a per-meal carbohydrate number may take: a typo guard, not advice. */
+export const MEAL_CARBS_MIN = 10
+export const MEAL_CARBS_MAX = 150
+
 export const DEFAULT_PROFILE: Profile = {
   sex: 'female',
   age: 35,
@@ -332,6 +336,7 @@ export const DEFAULT_PROFILE: Profile = {
   goal: 'lose',
   carbApproach: 'low',
   countBy: 'gl',
+  mealCarbsG: 0,
   excludedFoodIds: [],
   insulin: 'none',
   meds: [],

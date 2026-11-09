@@ -144,6 +144,8 @@ export interface Profile {
   carbApproach: CarbApproach
   /** What the person usually counts. Changes the order and emphasis of the figures, never a verdict or a target. */
   countBy: CountBy
+  /** Grams of carbohydrate per meal the person's doctor or dietitian suggested; 0 means they have no number. Only ever the person's own: DiaBite has no default. */
+  mealCarbsG: number
   /** Food ids the user excludes: allergy, intolerance, or simply dislike. */
   excludedFoodIds: string[]
 

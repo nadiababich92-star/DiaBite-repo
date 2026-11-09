@@ -6,6 +6,7 @@ import {
 } from '../lib/profile'
 import { AVOIDED_LABELS, PATTERN_LABELS, type Avoided } from '../lib/dietary'
 import GiGlExplainer from './GiGlExplainer'
+import MealCarbsLimit from './MealCarbsLimit'
 import type {
   Activity, Allergen, CarbApproach, Comorbidity, Condition, CountBy, Goal, Insulin, Kidney, Med, Pattern, Profile, Sex,
 } from '../types'
@@ -395,6 +396,8 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
                   ))}
                 </div>
                 <GiGlExplainer />
+
+                <MealCarbsLimit value={p.mealCarbsG} onChange={(g) => set('mealCarbsG', g)} />
 
                 <h3>What that gives you</h3>
                 <div className="stats">

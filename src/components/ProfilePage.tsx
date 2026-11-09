@@ -9,6 +9,7 @@ import {
 } from '../lib/profile'
 import { answerRows } from '../lib/answers'
 import GiGlExplainer from './GiGlExplainer'
+import MealCarbsLimit from './MealCarbsLimit'
 import type { Activity, CarbApproach, Condition, CountBy, Goal, Profile, Sex, Targets } from '../types'
 
 interface Props {
@@ -148,6 +149,7 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
               ))}
             </select>
           </label>
+          <MealCarbsLimit value={profile.mealCarbsG} onChange={(g) => set('mealCarbsG', g)} />
         </div>
         <p className="muted" style={{ margin: '12px 0 0' }}>
           The carbohydrate approach moves your carbohydrate, fat and glycemic-load targets below. Calories

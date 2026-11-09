@@ -83,7 +83,7 @@ const bold = (line: string, key: string) =>
  * the prose agrees with them — laid out so the one that matters is the one
  * you see.
  */
-function Figures({ reply, countBy }: { reply: AgentResponse; countBy: CountBy }) {
+function Figures({ reply, countBy, mealCarbsG }: { reply: AgentResponse; countBy: CountBy; mealCarbsG: number }) {
   const meal = lastMealCall(reply.trace)?.result as
     | { totals?: { gl?: number; carbs?: number; availableCarbs?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean | null }; assumed?: boolean }
     | undefined
@@ -111,7 +111,7 @@ function Figures({ reply, countBy }: { reply: AgentResponse; countBy: CountBy })
   const fits = meal?.afterMeal?.fits !== false
   return (
     <>
-      <FigurePair countBy={countBy} gl={{ mealGl, before, after, fits, partial, assumed: meal?.assumed }} carbs={meal?.totals as CarbFigures | undefined} />
+      <FigurePair countBy={countBy} gl={{ mealGl, before, after, fits, partial, assumed: meal?.assumed }} carbs={meal?.totals as CarbFigures | undefined} mealCarbsG={mealCarbsG} />
     </>
   )
 }
@@ -123,8 +123,10 @@ interface CarbFigures { carbs?: number; availableCarbs?: number; fiber?: number 
  * carbohydrate in blue. The one the person said they use is on the left. The verdict is still the engine's `fits`,
  * which is worked out from the glycemic load, and a line says so when the carbohydrate comes first.
  */
-function FigurePair({ countBy, gl, carbs }: {
+function FigurePair({ countBy, gl, carbs, mealCarbsG }: {
   countBy: CountBy
+  /** The person's own per-meal carbohydrate number from their doctor; 0 when they have none. */
+  mealCarbsG: number
   gl: { mealGl: number; before: number; after: number; fits: boolean; partial: boolean; assumed?: boolean }
   carbs?: CarbFigures
 }) {
@@ -149,6 +151,9 @@ function FigurePair({ countBy, gl, carbs }: {
   return (
     <>
       <div className="fig-pair">{countBy === 'carbs' ? [carbBlock, glBlock] : [glBlock, carbBlock]}</div>
+      {carbBlock && mealCarbsG > 0 && (carbs?.carbs ?? 0) > mealCarbsG && (
+        <p className="fig-basis">This meal is {carbs?.carbs} g, above the {mealCarbsG} g per meal you set.</p>
+      )}
       {countBy === 'carbs' && carbBlock && <p className="muted fig-basis">You count by carbohydrate, so it comes first. The verdict above is worked out from the glycemic load.</p>}
     </>
   )
@@ -164,7 +169,7 @@ function Fold({ when, title, children }: { when: boolean; title: string; childre
   return when ? <details className="was-original"><summary>{title}</summary>{children}</details> : <>{children}</>
 }
 
-function RecalcCard({ rc, onBack, note, was, countBy }: { rc: Recalc; onBack: () => void; note?: string; was?: { gl: number; after: number | null }; countBy: CountBy }) {
+function RecalcCard({ rc, onBack, note, was, countBy, mealCarbsG }: { rc: Recalc; onBack: () => void; note?: string; was?: { gl: number; after: number | null }; countBy: CountBy; mealCarbsG: number }) {
   // A dish counted from an assumed recipe stays an estimate through every recalculation: never a plain "Fits".
   const tone = rc.assumed && rc.fits !== undefined ? 'estimate'
     : rc.fits === true ? 'good' : rc.fits === false ? 'bad' : rc.fits === null ? 'partial' : 'ask'
@@ -181,7 +186,7 @@ function RecalcCard({ rc, onBack, note, was, countBy }: { rc: Recalc; onBack: ()
         <p className="a-verdict">{verdict}</p>
         {rc.before !== null && lead !== null ? (
           <>
-            <FigurePair countBy={countBy} gl={{ mealGl: rc.mealGl, before: rc.before, after: rc.after ?? 0, fits: rc.fits !== false, partial: tone === 'partial' || rc.fits === null, assumed: tone === 'estimate' }} carbs={rc.carbs} />
+            <FigurePair countBy={countBy} mealCarbsG={mealCarbsG} gl={{ mealGl: rc.mealGl, before: rc.before, after: rc.after ?? 0, fits: rc.fits !== false, partial: tone === 'partial' || rc.fits === null, assumed: tone === 'estimate' }} carbs={rc.carbs} />
             {was && (
               <p className="muted was-now">
                 Before the change: this meal <b className="num">{was.gl}</b>
@@ -251,7 +256,8 @@ function PortionEditor({ lines, grams, busy, error, onNudge, assumed, removed, o
   )
 }
 
-function Answer({ text, reply, onSwap, swapState, countBy }: {
+function Answer({ text, reply, onSwap, swapState, countBy, mealCarbsG }: {
+  mealCarbsG: number
   text: string; reply?: AgentResponse
   /** Which way of counting the person uses: its figures come first. */
   countBy: CountBy
@@ -276,7 +282,7 @@ function Answer({ text, reply, onSwap, swapState, countBy }: {
     return (
       <div className="answer-text">
         <p className="a-verdict">{bold(parts.verdict, 'v')}</p>
-        {reply && <Figures reply={reply} countBy={countBy} />}
+        {reply && <Figures reply={reply} countBy={countBy} mealCarbsG={mealCarbsG} />}
         {parts.numbers && !figuresShown && <p className="a-numbers">{bold(parts.numbers, 'n')}</p>}
         {parts.why && <p className="a-why">{bold(parts.why, 'w')}</p>}
         {parts.next && (
@@ -765,7 +771,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
       {reply && (
         <>
           <p className="muted asked">{asked}</p>
-          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setSwap(null); setRecalc(null) }} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The original answer is kept below.` : undefined} was={wasNow} countBy={profile.countBy} />}
+          {recalc && <RecalcCard rc={recalc} mealCarbsG={profile.mealCarbsG} onBack={() => { setGrams({}); setRemoved([]); setSwap(null); setRecalc(null) }} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The original answer is kept below.` : undefined} was={wasNow} countBy={profile.countBy} />}
           {recalc && logBlock}
           <Fold when={!!recalc} title={swap ? 'Original answer, before the swap' : 'Original answer, before you changed a portion'}>
           <section className={`card answer tone-${tone}${recalc ? ' stale' : ''}`} role="status" aria-live="polite">
@@ -775,7 +781,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
                tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Over today’s budget' :
                tone === 'advice' ? 'Advice' : tone === 'estimate' ? 'Estimate' : tone === 'carbs' ? 'Carbs only' : tone === 'partial' ? 'Part of the meal' : 'One question first'}
             </div>
-            <Answer text={reply.answer} reply={reply} countBy={profile.countBy} onSwap={receipt && !receipt.assumed ? acceptSwap : undefined} swapState={{ accepted: swap?.id ?? null, busy: !!swap && !recalc && !recalcError, failed: !!swap && !recalc && !!recalcError }} />
+            <Answer text={reply.answer} reply={reply} countBy={profile.countBy} mealCarbsG={profile.mealCarbsG} onSwap={receipt && !receipt.assumed ? acceptSwap : undefined} swapState={{ accepted: swap?.id ?? null, busy: !!swap && !recalc && !recalcError, failed: !!swap && !recalc && !!recalcError }} />
             {!reply.blocked && (
               <div className="verify-row">
                 {reply.verified ? (

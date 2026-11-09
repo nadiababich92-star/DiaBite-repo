@@ -1,6 +1,6 @@
 import type { DiaryEntry, Profile } from '../types'
 import { FOODS } from '../data/foods'
-import { DEFAULT_PROFILE } from './profile'
+import { DEFAULT_PROFILE, MEAL_CARBS_MAX, MEAL_CARBS_MIN } from './profile'
 
 const PROFILE_KEY = 'diabite.profile.v1'
 const DIARY_KEY = 'diabite.diary.v1'
@@ -66,6 +66,8 @@ export function sanitizeProfile(stored: unknown): Profile {
   }
   // A string field takes any string above; this one has two values, and anything else is the default.
   if (out.countBy !== 'gl' && out.countBy !== 'carbs') out.countBy = DEFAULT_PROFILE.countBy
+  // The person's own per-meal number: a plausible figure, or none.
+  if (typeof out.mealCarbsG !== 'number' || out.mealCarbsG < MEAL_CARBS_MIN || out.mealCarbsG > MEAL_CARBS_MAX) out.mealCarbsG = 0
   return out as unknown as Profile
 }
 
