@@ -64,6 +64,8 @@ export function sanitizeProfile(stored: unknown): Profile {
     if (typeof def === 'string') { if (typeof v === 'string') out[key] = v; continue }
     if (typeof def === 'boolean') { if (typeof v === 'boolean') out[key] = v }
   }
+  // A string field takes any string above; this one has two values, and anything else is the default.
+  if (out.countBy !== 'gl' && out.countBy !== 'carbs') out.countBy = DEFAULT_PROFILE.countBy
   return out as unknown as Profile
 }
 

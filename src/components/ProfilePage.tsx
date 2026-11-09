@@ -4,10 +4,12 @@ import {
   ACTIVITY_LABELS,
   CARB_APPROACH_LABELS,
   CONDITION_LABELS,
+  COUNT_BY_LABELS,
   GOAL_LABELS,
 } from '../lib/profile'
 import { answerRows } from '../lib/answers'
-import type { Activity, CarbApproach, Condition, Goal, Profile, Sex, Targets } from '../types'
+import GiGlExplainer from './GiGlExplainer'
+import type { Activity, CarbApproach, Condition, CountBy, Goal, Profile, Sex, Targets } from '../types'
 
 interface Props {
   profile: Profile
@@ -115,11 +117,21 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
               ))}
             </select>
           </label>
+          <label className="field">
+            <span>What you usually count</span>
+            <select value={profile.countBy} onChange={(e) => set('countBy', e.target.value as CountBy)}>
+              {Object.entries(COUNT_BY_LABELS).map(([k, v]) => (
+                <option key={k} value={k}>{v}</option>
+              ))}
+            </select>
+          </label>
         </div>
         <p className="muted" style={{ margin: '12px 0 0' }}>
           The carbohydrate approach moves your carbohydrate, fat and glycemic-load targets below. Calories
           and protein come from your body, activity and weight goal, so they stay the same when you change it.
+          What you usually count only decides which figures come first on an answer; both are always shown.
         </p>
+        <GiGlExplainer />
       </section>
 
       <section className="card">

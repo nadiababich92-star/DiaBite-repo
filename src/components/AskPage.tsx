@@ -16,7 +16,7 @@ import { loadNudge, saveNudge } from '../lib/storage'
 import { useToday } from '../lib/useToday'
 import { isDemo } from '../lib/demo'
 import { downloadResponses, saveResponse, savedCount } from '../lib/responses'
-import type { DiaryEntry, MealType, Profile, Targets } from '../types'
+import type { CountBy, DiaryEntry, MealType, Profile, Targets } from '../types'
 
 interface Props {
   profile: Profile
@@ -84,7 +84,7 @@ const bold = (line: string, key: string) =>
  * the prose agrees with them — laid out so the one that matters is the one
  * you see.
  */
-function Figures({ reply, onGl }: { reply: AgentResponse; onGl?: () => void }) {
+function Figures({ reply, onGl, countBy }: { reply: AgentResponse; onGl?: () => void; countBy: CountBy }) {
   const meal = lastMealCall(reply.trace)?.result as
     | { totals?: { gl?: number; carbs?: number; availableCarbs?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean | null }; assumed?: boolean }
     | undefined
@@ -110,8 +110,10 @@ function Figures({ reply, onGl }: { reply: AgentResponse; onGl?: () => void }) {
   // missing from the sum, so the figure is shown as "so far", not as a verdict.
   const partial = meal?.afterMeal?.fits === null
   const fits = meal?.afterMeal?.fits !== false
-  return (
-    <>
+  // Both ways of counting are always shown. The one the person said they use comes first and is marked; the verdict
+  // is still the engine's `fits`, which is worked out from the glycemic load.
+  const glBlock = (
+    <div key="gl" className={countBy === 'gl' ? 'fig-block pref' : 'fig-block'}>
       <p className="fig-title">Glycemic load (GL)</p>
       <div className="figures">
         <div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{mealGl}</span></div>
@@ -121,14 +123,24 @@ function Figures({ reply, onGl }: { reply: AgentResponse; onGl?: () => void }) {
           <span className="fig-v">{fits ? after : Math.abs(after)}</span>
         </div>
       </div>
-      {typeof meal?.totals?.carbs === 'number' && (
-        <p className="muted meal-carbs">
-          {partial ? 'Carbohydrate so far: ' : meal?.assumed ? 'Carbohydrate, about: ' : 'Carbohydrate in this meal: '}
-          <b className="num">{meal.totals.carbs} g</b>
-          {typeof meal.totals.availableCarbs === 'number' && meal.totals.availableCarbs !== meal.totals.carbs && ` (${meal.totals.availableCarbs} g with the fibre taken out)`}
-        </p>
-      )}
-      {onGl && <button className="link gl-link" onClick={onGl}>What is GL?</button>}
+    </div>
+  )
+  const totals = meal?.totals as { carbs?: number; availableCarbs?: number; fiber?: number } | undefined
+  const carbBlock = typeof totals?.carbs === 'number' ? (
+    <div key="carbs" className={countBy === 'carbs' ? 'fig-block pref' : 'fig-block'}>
+      <p className="fig-title">Carbohydrate{partial ? ', so far' : meal?.assumed ? ', about' : ''}</p>
+      <div className="figures">
+        <div className="fig"><span className="fig-k">carbohydrate</span><span className="fig-v">{totals.carbs} g</span></div>
+        {typeof totals.fiber === 'number' && <div className="fig"><span className="fig-k">fibre</span><span className="fig-v">{totals.fiber} g</span></div>}
+        {typeof totals.availableCarbs === 'number' && <div className="fig"><span className="fig-k">without the fibre</span><span className="fig-v">{totals.availableCarbs} g</span></div>}
+      </div>
+    </div>
+  ) : null
+  return (
+    <>
+      {countBy === 'carbs' ? [carbBlock, glBlock] : [glBlock, carbBlock]}
+      {countBy === 'carbs' && carbBlock && <p className="muted fig-basis">You count by carbohydrate, so it comes first. The verdict above is worked out from the glycemic load.</p>}
+      {onGl && <button className="link gl-link" onClick={onGl}>What are GI and GL?</button>}
     </>
   )
 }
@@ -228,8 +240,10 @@ function PortionEditor({ lines, grams, busy, error, onNudge, assumed, removed, o
   )
 }
 
-function Answer({ text, reply, onGl, onSwap, swapState }: {
+function Answer({ text, reply, onGl, onSwap, swapState, countBy }: {
   text: string; reply?: AgentResponse; onGl?: () => void
+  /** Which way of counting the person uses: its figures come first. */
+  countBy: CountBy
   /** Accept the swap the Next line suggests. Absent where the answer is not the one to act on. */
   onSwap?: (alt: SwapOffer) => void
   swapState?: { accepted: string | null; busy: boolean; failed: boolean }
@@ -251,7 +265,7 @@ function Answer({ text, reply, onGl, onSwap, swapState }: {
     return (
       <div className="answer-text">
         <p className="a-verdict">{bold(parts.verdict, 'v')}</p>
-        {reply && <Figures reply={reply} onGl={onGl} />}
+        {reply && <Figures reply={reply} onGl={onGl} countBy={countBy} />}
         {parts.numbers && !figuresShown && <p className="a-numbers">{bold(parts.numbers, 'n')}</p>}
         {parts.why && <p className="a-why">{bold(parts.why, 'w')}</p>}
         {parts.next && (
@@ -713,7 +727,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
                tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Over today’s budget' :
                tone === 'advice' ? 'Advice' : tone === 'estimate' ? 'Estimate' : tone === 'carbs' ? 'Carbs only' : tone === 'partial' ? 'Part of the meal' : 'One question first'}
             </div>
-            <Answer text={reply.answer} reply={reply} onGl={recalc ? undefined : () => setGlOpen(true)} onSwap={receipt && !receipt.assumed ? acceptSwap : undefined} swapState={{ accepted: swap?.id ?? null, busy: !!swap && !recalc && !recalcError, failed: !!swap && !recalc && !!recalcError }} />
+            <Answer text={reply.answer} reply={reply} countBy={profile.countBy} onGl={recalc ? undefined : () => setGlOpen(true)} onSwap={receipt && !receipt.assumed ? acceptSwap : undefined} swapState={{ accepted: swap?.id ?? null, busy: !!swap && !recalc && !recalcError, failed: !!swap && !recalc && !!recalcError }} />
             {!reply.blocked && (
               <div className="verify-row">
                 {reply.verified ? (

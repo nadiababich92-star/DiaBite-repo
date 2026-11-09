@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ACTIVITY_LABELS, ALLERGEN_LABELS, CARB_APPROACH_LABELS, COMORBIDITY_LABELS, CONDITION_LABELS,
+  ACTIVITY_LABELS, ALLERGEN_LABELS, CARB_APPROACH_LABELS, COMORBIDITY_LABELS, CONDITION_LABELS, COUNT_BY_LABELS,
   EXIT_COPY, GOAL_LABELS, INSULIN_LABELS, KIDNEY_LABELS, MED_LABELS,
   calculateTargets, carbApproachBlocked, cmToFtIn, exitReason, ftInToCm, kgToLb, lbToKg,
 } from '../lib/profile'
 import { AVOIDED_LABELS, PATTERN_LABELS, type Avoided } from '../lib/dietary'
+import GiGlExplainer from './GiGlExplainer'
 import type {
-  Activity, Allergen, CarbApproach, Comorbidity, Condition, Goal, Insulin, Kidney, Med, Pattern, Profile, Sex,
+  Activity, Allergen, CarbApproach, Comorbidity, Condition, CountBy, Goal, Insulin, Kidney, Med, Pattern, Profile, Sex,
 } from '../types'
 
 interface Props {
@@ -24,6 +25,7 @@ interface Props {
 const STEPS = ['You', 'Diagnosis', 'Medicines', 'Conditions', 'Your day'] as const
 
 const CONDITIONS: Condition[] = ['t2', 'prediabetes', 'ir', 't1', 'gestational', 'unsure']
+const COUNT_BYS: CountBy[] = ['gl', 'carbs']
 const INSULINS: Insulin[] = ['none', 'basal', 'mealtime_or_pump']
 const MEDS: Med[] = ['metformin', 'sulfonylurea', 'sglt2', 'glp1', 'other']
 const KIDNEYS: Kidney[] = ['none', 'mentioned', 'ckd', 'dialysis']
@@ -378,6 +380,21 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
                     )
                   })}
                 </div>
+
+                <h3>What do you usually count?</h3>
+                <p className="muted" style={{ marginTop: 0 }}>
+                  DiaBite shows both, always. This only decides which comes first. Not sure? Keep glycemic load: you can change it in You.
+                </p>
+                <div className="chips-col">
+                  {COUNT_BYS.map((c) => (
+                    <button key={c} className={`chip-btn${p.countBy === c ? ' on' : ''}`}
+                      aria-pressed={p.countBy === c}
+                      onClick={() => set('countBy', c)}>
+                      {COUNT_BY_LABELS[c]}
+                    </button>
+                  ))}
+                </div>
+                <GiGlExplainer />
 
                 <h3>What that gives you</h3>
                 <div className="stats">

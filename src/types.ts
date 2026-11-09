@@ -130,6 +130,8 @@ export interface Constraint {
 export type Goal = 'lose' | 'maintain' | 'gain'
 /** How hard we restrict carbohydrate. */
 export type CarbApproach = 'moderate' | 'low' | 'verylow'
+/** Which way of counting the person is used to: it only decides which figures come first. Both are always shown. */
+export type CountBy = 'gl' | 'carbs'
 
 export interface Profile {
   sex: Sex
@@ -140,6 +142,8 @@ export interface Profile {
   condition: Condition
   goal: Goal
   carbApproach: CarbApproach
+  /** What the person usually counts. Changes the order and emphasis of the figures, never a verdict or a target. */
+  countBy: CountBy
   /** Food ids the user excludes: allergy, intolerance, or simply dislike. */
   excludedFoodIds: string[]
 

@@ -1,5 +1,5 @@
 import type {
-  Activity, Allergen, CarbApproach, Comorbidity, Condition, Constraint, Insulin, Kidney, Med,
+  Activity, Allergen, CarbApproach, Comorbidity, Condition, Constraint, CountBy, Insulin, Kidney, Med,
   Profile, Targets,
 } from '../types'
 
@@ -91,6 +91,11 @@ export const CARB_APPROACH_LABELS: Record<CarbApproach, string> = {
   moderate: 'Moderate (~40% of calories from carbs)',
   low: 'Low carb (~26%)',
   verylow: 'Very low carb (~15%)',
+}
+
+export const COUNT_BY_LABELS: Record<CountBy, string> = {
+  gl: 'Glycemic load',
+  carbs: 'Carbohydrate, in grams',
 }
 
 /**
@@ -326,6 +331,7 @@ export const DEFAULT_PROFILE: Profile = {
   condition: 'ir',
   goal: 'lose',
   carbApproach: 'low',
+  countBy: 'gl',
   excludedFoodIds: [],
   insulin: 'none',
   meds: [],

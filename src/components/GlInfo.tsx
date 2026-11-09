@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { GI_GL_WORDS } from '../lib/glWords'
 
 /**
  * "What is GL?" in two sentences. A dialog with the same promises as the others:
@@ -37,13 +38,10 @@ export default function GlInfo({ budget, onClose }: { budget: number; onClose: (
   return createPortal(
     <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div className="modal card" role="dialog" aria-modal="true" aria-labelledby="gl-title" ref={dialog}>
-        <h2 id="gl-title">What is GL?</h2>
+        <h2 id="gl-title">What are GI and GL?</h2>
+        {GI_GL_WORDS.map((w) => <p key={w}>{w}</p>)}
         <p>
-          Glycemic load puts two things into one number: how fast a food raises blood sugar, and how much
-          carbohydrate is in your portion.
-        </p>
-        <p>
-          Your day has a budget of {budget}. Each meal spends some of it, and the number you see is what is left.
+          Your day has a glycemic-load budget of {budget}. Each meal spends some of it, and the load figure you see is what is left.
         </p>
         <div className="row">
           <button className="primary" ref={close} onClick={onClose}>Got it</button>

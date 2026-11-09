@@ -222,6 +222,15 @@ Every number says what it is: the tiles sit under a small title, "Glycemic load 
 calories "kcal"; the receipt's columns are "available carbs (g) · GI · GL" and its footer spells GL and GI
 out. A glycemic load has **no unit, and none is invented for it**.
 
+**Two ways of counting, both always shown.** Under the three glycemic-load figures sits a second block, "Carbohydrate":
+carbohydrate, fibre and carbohydrate without the fibre, in grams, from the same tool result. The person says in onboarding
+(and can change in You) which they are used to counting, "Glycemic load" or "Carbohydrate, in grams". That block comes
+first and is marked by a 3px `--accent` edge; the other follows, unmarked. This changes order and emphasis only: the
+verdict, the status disc and every target are still worked out from the glycemic load, and a line under the figures says
+so when carbohydrate comes first. A carbohydrate verdict per meal is not built: it waits for a clinician's answer
+(docs/PLAN.md, "Questions waiting for a clinician", item 6). "What are GI and GL?" is one text (`src/lib/glWords.ts`),
+shown as a dialog on an answer and as a folded card in onboarding and in You; it contains no figure.
+
 ### Day bar
 A 3px bar under the budget line showing how much of the day is used. Never a ring.
 
