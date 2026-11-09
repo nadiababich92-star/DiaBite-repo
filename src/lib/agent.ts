@@ -177,7 +177,7 @@ interface MealResult {
     kcal: number; carbs: number; fiber: number; protein: number; fat: number
     availableCarbs: number; gi: number | null; gl: number | null
   }[]
-  totals: { gl: number }
+  totals: { gl: number; carbs?: number; fiber?: number; availableCarbs?: number }
   /** The budget before this meal; compute_meal returns it when it was given a session. */
   dayState?: { remaining?: { gl: number } }
   afterMeal?: { remaining?: { gl: number }; fits?: boolean | null; partial?: { unknownFoods: string[]; unscored?: string[] } }
@@ -274,6 +274,8 @@ export interface Recalc {
   fits: boolean | null | undefined
   /** The meal is a dish counted from an assumed recipe: the card says "Estimate", never a plain "Fits". */
   assumed?: boolean
+  /** The same meal's carbohydrate, in grams, from the same engine result: shown beside the load. */
+  carbs?: { carbs?: number; fiber?: number; availableCarbs?: number }
 }
 
 const recomputeUrl = () => {
@@ -315,6 +317,7 @@ export async function recomputeMeal(
     receipt: buildReceipt(m, before, sources, assumed),
     mealGl: m.totals.gl, before, after,
     fits: m.afterMeal ? m.afterMeal.fits : undefined,
+    carbs: { carbs: m.totals.carbs, fiber: m.totals.fiber, availableCarbs: m.totals.availableCarbs },
     ...(assumed ? { assumed: true } : {}),
   }
 }

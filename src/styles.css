@@ -31,6 +31,11 @@
   --marker: #dcf26b;
   --marker-ink: #0c1b15;
   --marker-glow: 0 0 22px rgba(220, 242, 107, 0.3);
+  /* Carbohydrate has its own colour, blue: the verdict colours (green, amber, red) mean the day, and the lime marker is the load. */
+  --carb-marker: #2d5b82;
+  --carb-ink: #eaf4fb;
+  --carb-edge: #8fc1e8;
+  --carb-soft: #14283a;
   --low: #63b98c;
   --medium: #e2ad4c;
   --high: #d97b70;
@@ -83,6 +88,10 @@
   --marker: #dcf26b;
   --marker-ink: #14201a;
   --marker-glow: none;
+  --carb-marker: #cfe3f2;
+  --carb-ink: #13314a;
+  --carb-edge: #2f6f9f;
+  --carb-soft: #eaf3fa;
   --low: #1b6b45;
   --medium: #8f5200;
   --high: #9e3025;
@@ -306,9 +315,21 @@ tr:last-child td { border-bottom: none; }
 .figures { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; margin: 0 0 14px; }
 .fig { display: flex; flex-direction: column; gap: 1px; background: none; padding: 0; }
 .meal-carbs { margin: -4px 0 12px; font-size: 14px; }
-/* The way of counting the person said they use comes first and is marked by an accent edge; the other follows, unmarked. */
-.fig-block { margin: 0 0 6px; }
-.fig-block.pref { border-left: 3px solid var(--accent); padding-left: 12px; }
+/* Both ways of counting side by side, one colour each: the load in the lime marker, carbohydrate in blue. The one the
+   person said they use is on the left. A card's top edge and its big figure carry its colour; the words say what it is. */
+.fig-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 12px; }
+.fig-card { min-width: 0; display: flex; flex-direction: column; gap: 2px; border-radius: 12px; border-top: 3px solid; padding: 10px 12px 12px; }
+.fig-card.gl { background: var(--accent-soft); border-color: var(--accent); }
+.fig-card.carb { background: var(--carb-soft); border-color: var(--carb-edge); }
+.fig-card .fig-title { margin: 0; }
+.fig-card .fig-big { margin: 4px 0 0; font-family: var(--mono); font-size: 32px; font-weight: 500; line-height: 1.2; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; color: var(--text); }
+.fig-card .fig-big .num { padding: 0 6px; border-radius: 6px; }
+.fig-card .fig-big.gl.ok .num { background: var(--marker); color: var(--marker-ink); }
+.fig-card .fig-big.gl.over .num { color: var(--high); border-bottom: 3px dashed var(--high); border-radius: 0; padding: 0; }
+.fig-card .fig-big.carb .num { background: var(--carb-marker); color: var(--carb-ink); }
+.fig-card .fig-cap { margin: 0 0 6px; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+.fig-row { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.fig-row .fig-v { font-size: 16px; }
 .fig-basis { margin: 0 0 8px; font-size: 14px; }
 .was-now { margin: 0 0 6px; font-size: 14px; }
 /* Log it, Calculation, Portions: pinned above the bottom bar while the answer scrolls under them, so a long

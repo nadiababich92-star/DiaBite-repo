@@ -110,37 +110,48 @@ function Figures({ reply, onGl, countBy }: { reply: AgentResponse; onGl?: () => 
   // missing from the sum, so the figure is shown as "so far", not as a verdict.
   const partial = meal?.afterMeal?.fits === null
   const fits = meal?.afterMeal?.fits !== false
-  // Both ways of counting are always shown. The one the person said they use comes first and is marked; the verdict
-  // is still the engine's `fits`, which is worked out from the glycemic load.
+  return (
+    <>
+      <FigurePair countBy={countBy} gl={{ mealGl, before, after, fits, partial, assumed: meal?.assumed }} carbs={meal?.totals as CarbFigures | undefined} />
+      {onGl && <button className="link gl-link" onClick={onGl}>What are GI and GL?</button>}
+    </>
+  )
+}
+
+interface CarbFigures { carbs?: number; availableCarbs?: number; fiber?: number }
+
+/**
+ * Both ways of counting, always shown, side by side, each in its own colour: the load in the lime marker, the
+ * carbohydrate in blue. The one the person said they use is on the left. The verdict is still the engine's `fits`,
+ * which is worked out from the glycemic load, and a line says so when the carbohydrate comes first.
+ */
+function FigurePair({ countBy, gl, carbs }: {
+  countBy: CountBy
+  gl: { mealGl: number; before: number; after: number; fits: boolean; partial: boolean; assumed?: boolean }
+  carbs?: CarbFigures
+}) {
   const glBlock = (
-    <div key="gl" className={countBy === 'gl' ? 'fig-block pref' : 'fig-block'}>
+    <div key="gl" className="fig-card gl">
       <p className="fig-title">Glycemic load (GL)</p>
-      <div className="figures">
-        <div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{mealGl}</span></div>
-        <div className="fig"><span className="fig-k">before</span><span className="fig-v">{before}</span></div>
-        <div className={`fig fig-lead ${partial || meal?.assumed ? '' : fits ? 'ok' : 'over'}`}>
-          <span className="fig-k">{partial ? 'left so far' : fits ? 'left after' : 'over by'}</span>
-          <span className="fig-v">{fits ? after : Math.abs(after)}</span>
-        </div>
-      </div>
+      <p className={`fig-big gl ${gl.partial || gl.assumed ? '' : gl.fits ? 'ok' : 'over'}`}><span className="num">{gl.fits ? gl.after : Math.abs(gl.after)}</span></p>
+      <p className="fig-cap">{gl.partial ? 'left so far' : gl.fits ? 'left after' : 'over by'}</p>
+      <div className="fig-row"><span className="fig-k">this meal</span><span className="fig-v">{gl.mealGl}</span></div>
+      <div className="fig-row"><span className="fig-k">before</span><span className="fig-v">{gl.before}</span></div>
     </div>
   )
-  const totals = meal?.totals as { carbs?: number; availableCarbs?: number; fiber?: number } | undefined
-  const carbBlock = typeof totals?.carbs === 'number' ? (
-    <div key="carbs" className={countBy === 'carbs' ? 'fig-block pref' : 'fig-block'}>
-      <p className="fig-title">Carbohydrate{partial ? ', so far' : meal?.assumed ? ', about' : ''}</p>
-      <div className="figures">
-        <div className="fig"><span className="fig-k">carbohydrate</span><span className="fig-v">{totals.carbs} g</span></div>
-        {typeof totals.fiber === 'number' && <div className="fig"><span className="fig-k">fibre</span><span className="fig-v">{totals.fiber} g</span></div>}
-        {typeof totals.availableCarbs === 'number' && <div className="fig"><span className="fig-k">without the fibre</span><span className="fig-v">{totals.availableCarbs} g</span></div>}
-      </div>
+  const carbBlock = typeof carbs?.carbs === 'number' ? (
+    <div key="carbs" className="fig-card carb">
+      <p className="fig-title">Carbohydrate</p>
+      <p className="fig-big carb"><span className="num">{carbs.carbs} g</span></p>
+      <p className="fig-cap">{gl.partial ? 'so far' : gl.assumed ? 'about, in this meal' : 'in this meal'}</p>
+      {typeof carbs.fiber === 'number' && <div className="fig-row"><span className="fig-k">fibre</span><span className="fig-v">{carbs.fiber} g</span></div>}
+      {typeof carbs.availableCarbs === 'number' && <div className="fig-row"><span className="fig-k">without fibre</span><span className="fig-v">{carbs.availableCarbs} g</span></div>}
     </div>
   ) : null
   return (
     <>
-      {countBy === 'carbs' ? [carbBlock, glBlock] : [glBlock, carbBlock]}
+      <div className="fig-pair">{countBy === 'carbs' ? [carbBlock, glBlock] : [glBlock, carbBlock]}</div>
       {countBy === 'carbs' && carbBlock && <p className="muted fig-basis">You count by carbohydrate, so it comes first. The verdict above is worked out from the glycemic load.</p>}
-      {onGl && <button className="link gl-link" onClick={onGl}>What are GI and GL?</button>}
     </>
   )
 }
@@ -155,7 +166,7 @@ function Fold({ when, title, children }: { when: boolean; title: string; childre
   return when ? <details className="was-original"><summary>{title}</summary>{children}</details> : <>{children}</>
 }
 
-function RecalcCard({ rc, onBack, onGl, note, was }: { rc: Recalc; onBack: () => void; onGl: () => void; note?: string; was?: { gl: number; after: number | null } }) {
+function RecalcCard({ rc, onBack, onGl, note, was, countBy }: { rc: Recalc; onBack: () => void; onGl: () => void; note?: string; was?: { gl: number; after: number | null }; countBy: CountBy }) {
   // A dish counted from an assumed recipe stays an estimate through every recalculation: never a plain "Fits".
   const tone = rc.assumed && rc.fits !== undefined ? 'estimate'
     : rc.fits === true ? 'good' : rc.fits === false ? 'bad' : rc.fits === null ? 'partial' : 'ask'
@@ -172,15 +183,7 @@ function RecalcCard({ rc, onBack, onGl, note, was }: { rc: Recalc; onBack: () =>
         <p className="a-verdict">{verdict}</p>
         {rc.before !== null && lead !== null ? (
           <>
-            <p className="fig-title">Glycemic load (GL)</p>
-            <div className="figures">
-              <div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{rc.mealGl}</span></div>
-              <div className="fig"><span className="fig-k">before</span><span className="fig-v">{rc.before}</span></div>
-              <div className={`fig fig-lead ${tone === 'partial' || tone === 'estimate' ? '' : rc.fits ? 'ok' : 'over'}`}>
-                <span className="fig-k">{tone === 'partial' || rc.fits === null ? 'left so far' : rc.fits ? 'left after' : 'over by'}</span>
-                <span className="fig-v">{lead}</span>
-              </div>
-            </div>
+            <FigurePair countBy={countBy} gl={{ mealGl: rc.mealGl, before: rc.before, after: rc.after ?? 0, fits: rc.fits !== false, partial: tone === 'partial' || rc.fits === null, assumed: tone === 'estimate' }} carbs={rc.carbs} />
             {was && (
               <p className="muted was-now">
                 Before the change: this meal <b className="num">{was.gl}</b>
@@ -763,7 +766,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
       {reply && (
         <>
           <p className="muted asked">{asked}</p>
-          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setSwap(null); setRecalc(null) }} onGl={() => setGlOpen(true)} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The original answer is kept below.` : undefined} was={wasNow} />}
+          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setSwap(null); setRecalc(null) }} onGl={() => setGlOpen(true)} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The original answer is kept below.` : undefined} was={wasNow} countBy={profile.countBy} />}
           {recalc && logBlock}
           <Fold when={!!recalc} title={swap ? 'Original answer, before the swap' : 'Original answer, before you changed a portion'}>
           <section className={`card answer tone-${tone}${recalc ? ' stale' : ''}`} role="status" aria-live="polite">
