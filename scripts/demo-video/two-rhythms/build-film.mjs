@@ -53,16 +53,17 @@ const clock = (svg, from) => tag(svg).replace(new RegExp(`(<text[^>]*)>${from}</
 function rev(svg, re, at) { if (!re.test(svg)) throw new Error('reveal not found: ' + re); return svg.replace(re, (m) => `<g class="rev" data-at="${at}">${m}</g>`) }
 
 // the two characters of the receipt scene, lifted from the finale (without the phones in their hands)
-function bothArt() {
+function bothArt(sourcesAt = 99) {
   const F = lines(svgOf('Finale'))
   const grab = (startRe) => { const i = F.findIndex((l) => startRe.test(l)); let e = i + 1; while (!/^\s*<\/g><\/g><\/g>\s*$/.test(F[e])) e++; return F.slice(i, e + 1).join('\n') }
   const maya = grab(/translate\(170,300\) scale\(1\.25\)/).replace('translate(170,300) scale(1.25)', 'translate(150,262) scale(1)')
   const dan = grab(/translate\(790,300\) scale\(1\.25\)/).replace('translate(790,300) scale(1.25)', 'translate(410,262) scale(1)')
   return `<svg viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg"><rect width="960" height="540" fill="#0a1812"/><rect y="400" width="960" height="140" fill="#12291f"/>
   <rect x="40" y="40" width="520" height="340" rx="26" fill="#12291f"/>
-  <text x="300" y="104" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="500" font-size="20" letter-spacing="3" fill="#dcf26b">SHOW CALCULATION</text>
+  <text x="300" y="104" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="500" font-size="20" letter-spacing="3" fill="#dcf26b">CALCULATION</text>
   <text x="300" y="140" text-anchor="middle" font-family="Literata, Georgia, serif" font-weight="600" font-size="26" fill="#fffcf5">Line by line, from the database</text>
   ${wrapChars(maya)}\n${wrapChars(dan)}
+  <g class="rev" data-at="${sourcesAt}"><text x="300" y="186" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="500" font-size="15" letter-spacing="2" fill="#dcf26b">USDA FOODDATA CENTRAL</text><text x="300" y="210" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="500" font-size="15" letter-spacing="2" fill="#dcf26b">INTERNATIONAL GI TABLES, 2021</text></g>
   <text x="60" y="394" font-family="IBM Plex Mono, monospace" font-size="13" letter-spacing="1.5" fill="#a9bbaf">MAYA AND DANIEL</text></svg>`
 }
 // the title frame, four ways: the numbers, the introduction, the product, (and its labels)
@@ -90,7 +91,7 @@ const art = {
   kitchen: () => clock(wrapChars(stripPhoneAndCaption(svgOf('Daniel1'))), 'SUN 17:30'),
   station: () => clock(wrapChars(stripPhoneAndCaption(svgOf('Maya2'))), '13:10'),
   'kitchen-night': () => clock(wrapChars(stripPhoneAndCaption(svgOf('Daniel2'))), 'WED 20:15'),
-  both: bothArt,
+  both: () => bothArt(LEAD + D['rc-1'] + 0.35),
   finale: () => {
     let s = wrapChars(svgOf('Finale'))
     const st = sentStarts('fn-1', 0.5)
@@ -162,9 +163,13 @@ const tp = (id) => Math.min(D[id] + 0.15, 1.9)      // typing is quick: as long 
   add({ id: 'maya-petrol', art: 'station', dur: B.end + TAIL, clock: ['13:10', '13:11', B0], phone: [...A.pieces, ...B.pieces], typing: [A.typing, B.typing], answerAt: [A.answerAt, B.answerAt],
         lines: [line('mp-1', LEAD), line('mp-2', A.answerAt + 0.15), line('mp-3', B0 + 0.05)] })
 }
-{ // 8 · the receipt
-  const end = LEAD + D['rc-1'] + 0.9
-  add({ id: 'receipt', art: 'both', dur: end + TAIL, clock: null, phone: [uniform('maya-receipt', LEAD, end)], lines: [line('rc-1', LEAD)] })
+{ // 8 · the receipt, and where the foods come from
+  const t2 = LEAD + D['rc-1'] + 0.35, end = t2 + D['rc-2'] + 0.8
+  add({ id: 'receipt', art: 'both', dur: end + TAIL, clock: null, phone: [uniform('maya-receipt', LEAD, end)], lines: [line('rc-1', LEAD), line('rc-2', t2)] })
+}
+{ // 8b · carbohydrate and load, side by side: the setting in Profile, then a meal, then both blocks with the chosen one first
+  const p = typedCap('maya-count', LEAD, 4.2, 0.5, Math.max(3.0, D['cb-1'] - 3.6))
+  add({ id: 'count', art: 'station', dur: p.end + TAIL, clock: ['13:10', '13:11', p.answerAt], phone: p.pieces, typing: [p.typing], answerAt: [p.answerAt], lines: [line('cb-1', LEAD + 0.5)] })
 }
 { // 9 · Daniel logs what happened
   const pl = { cap: 'daniel-diary-planned', t0: LEAD - 0.1, t1: LEAD + D['dd-0'] + 0.2, s0: frames('daniel-diary-planned')[0].t, s1: total('daniel-diary-planned') }

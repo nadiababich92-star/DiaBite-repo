@@ -57,6 +57,8 @@ export const LANDING = {
     "Narrator: A few seconds. It fits, but it names a lighter swap, and counts that too.",
     "Maya: Chicken salad instead. Fine.",
     "Narrator: Every number comes from a database. Open the receipt and check it yourself.",
+    "Narrator: The foods come from USDA FoodData Central, and the glycemic values from published international tables.",
+    "Narrator: It shows carbohydrate and glycemic load side by side, and you choose which comes first.",
     "Narrator: In the diary, his plan stays, dashed. Only what he really eats counts.",
     "Daniel: Chicken fried rice.",
     "Narrator: A plan that broke is not a failure. It is just Wednesday.",

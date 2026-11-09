@@ -1,6 +1,6 @@
-# DiaBite — Financial Plan
+# DiaBite — Financial Plan · United States
 
-**Three-year operating model · seed round**
+**Three-year operating model · seed round · Delaware C-Corp**
 Nadia Babich · 8 October 2026 · Confidential
 
 **Currency:** US dollars. Revenue is earned in the US; the cost base is in euros
@@ -8,6 +8,10 @@ Nadia Babich · 8 October 2026 · Confidential
 **The model:** `docs/DiaBite-financial-model.xlsx` — every figure in this document is
 computed there, with editable assumptions and all three scenarios live. Where the two
 disagree, the workbook is right.
+**The other plan:** `docs/FINANCIAL_PLAN-NL.md` builds the same product as a Dutch BV
+raising a €1.6M pre-seed. The two are alternatives, not stages: a Delaware entity reaches
+NIH SBIR and US funds; a Dutch BV reaches WBSO, Innovatiekrediet, the regional ROMs and
+residence in the Netherlands. Choosing one closes the other.
 **Companion documents:** `docs/PRD.md` (product), `docs/PRD-post-course.md`
 (scope of work), `docs/COST-post-course.md` and `docs/monitoring.md` (measured
 costs), `docs/CLINICAL_REVIEW.md` (clinical validation).

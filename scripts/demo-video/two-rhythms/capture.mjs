@@ -83,12 +83,19 @@ try {
 
   await film('maya', maya, async (T) => {
     T.begin('maya-morning'); await T.hold(3); await T.type('coffee with milk and a banana'); await T.answer(); await T.hold(4)
-    T.begin('maya-receipt'); await T.click('Show calculation'); await T.sleep(900); await T.ev(`document.querySelector('.receipt')?.scrollIntoView({block:'start'})`); await T.sleep(600); await T.hold(4)
+    T.begin('maya-receipt'); await T.click('Calculation'); await T.sleep(900); await T.ev(`document.querySelector('.receipt')?.scrollIntoView({block:'start'})`); await T.sleep(600); await T.hold(4)
   })
   await film('maya', maya, async (T) => {
     T.begin('maya-petrol'); await T.hold(2); await T.type('a grilled chicken sandwich and an apple'); await T.answer(); await T.hold(4)
     await T.ev(`window.scrollTo(0,0)`); await T.sleep(400)
     T.begin('maya-petrol-swap'); await T.hold(2); await T.type('a chicken salad sandwich and an apple'); await T.answer(); await T.hold(4)
+  })
+  await film('maya', maya, async (T) => {
+    // Both ways of counting are always shown; the person says which comes first (Profile > What you usually count).
+    T.begin('maya-count'); await T.tab('Profile')
+    await T.ev(`(() => { const s = [...document.querySelectorAll('select')].find((x) => [...x.options].some((o) => o.value === 'carbs')); s?.scrollIntoView({ block: 'center' }) })()`); await T.sleep(600); await T.hold(3)
+    await T.ev(`(() => { const s = [...document.querySelectorAll('select')].find((x) => [...x.options].some((o) => o.value === 'carbs')); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(s, 'carbs'); s.dispatchEvent(new Event('change', { bubbles: true })) })()`); await T.sleep(900); await T.hold(3)
+    await T.tab('Ask'); await T.hold(2); await T.type('coffee with milk and a banana'); await T.answer(); await T.hold(4)
   })
   await film('maya', maya, async (T) => {
     T.begin('maya-dose'); await T.hold(2); await T.type('How many units of insulin should I take before pasta?'); await T.answer(); await T.hold(4)
