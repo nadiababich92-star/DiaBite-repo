@@ -22,7 +22,7 @@ the product impressive.**
    largest thing on the screen. *"This fits your day."* — never a label.
 2. **Then the number, then the reason.** Three figures, one of which is the
    answer to the question. The reason is supporting text, not the headline.
-3. **The arithmetic is on demand, never hidden.** "Show calculation" opens the
+3. **The arithmetic is on demand, never hidden.** "Calculation" opens the
    receipt: every food, portion, glycemic index and load, and where each number
    came from. A product that hides its working is asking for trust.
 4. **No rings, streaks, scores or badges for effort.** A ring is a score to
@@ -233,6 +233,8 @@ so when carbohydrate comes first. A carbohydrate verdict per meal is not built: 
 (docs/PLAN.md, "Questions waiting for a clinician", item 6). "What are GI and GL?" is one text (`src/lib/glWords.ts`),
 shown as a dialog on an answer and as a folded card in onboarding and in Profile; it contains no figure.
 
+**The actions under an answer** (Log it, Calculation, Portions) are one row that stays pinned above the bottom bar while the answer scrolls under it, so a long answer never pushes them out of reach; on a wide screen, where the bar is at the top, it sits at the bottom edge. Tapping Calculation or Portions brings what it opened into view, because it opens below the row. The labels are short on purpose: three buttons must fit one row at 375 px. Changed on 9 November 2026 after a tester had to scroll to reach them.
+
 ### Day bar
 A 3px bar under the budget line showing how much of the day is used. Never a ring.
 
@@ -294,7 +296,7 @@ the recipe behind a disclosure, **I ate this**, **Plan it…** and **Replace**. 
 device until **Generate again** is pressed.
 
 ### Portions
-After an answer, **Change a portion** opens one row per food: its name and a stepper
+After an answer, **Portions** (**Recipe** for a dish counted from an assumed recipe) opens one row per food: its name and a stepper
 (a 44px minus and plus around the weight, in mono). A change settles for 0.4s, then the
 engine counts the meal again; a card above the original answer shows the new figures
 with the verdict word taken from `fits`, and the original is dimmed under the label

@@ -43,7 +43,7 @@ export default function HowItWorks({ onClose }: { onClose: () => void }) {
           <div><dt>Profile</dt><dd>Your answers about yourself, your daily targets, the foods you leave out, and how to put DiaBite on your home screen.</dd></div>
           <div><dt>Settings</dt><dd>How the app looks, your account and data (export or delete), and help.</dd></div>
         </dl>
-        <p>Every number is computed by the engine from a food database, never written by the AI. Open Show calculation on any answer to see it.</p>
+        <p>Every number is computed by the engine from a food database, never written by the AI. Open Calculation on any answer to see it.</p>
         <div className="row">
           <button className="primary" ref={first} onClick={onClose}>Close</button>
         </div>

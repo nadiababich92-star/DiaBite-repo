@@ -117,8 +117,8 @@ try {
       }
     }
     // An estimate card (a dish counted from an assumed recipe) also gets its composition editor.
-    if (await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Edit the recipe'))`)) {
-      await click('Edit the recipe'); await sleep(800)
+    if (await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Recipe'))`)) {
+      await click('Recipe'); await sleep(800)
       await b.ev(`document.querySelector('.remove-step')?.click()`); await sleep(3500)
       await shot('ask-estimate-edited')
     }

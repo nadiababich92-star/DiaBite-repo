@@ -94,19 +94,29 @@ export default function Landing({ onEnter }: Props) {
             <h2 id="landing-how">How the tape gets printed</h2>
             <div className="lp-slips">
               <div className="lp-slip lp-tilt-a">
-                <span className="lp-slip-k">01 · YOU SAY IT</span>
+                <div className="lp-slip-head"><span>01 · YOU SAY IT</span><span>1/3</span></div>
                 <p className="lp-slip-h">The way you would say it to a friend.</p>
-                <p>No scanning, no weighing, no forms. A model reads the sentence and works out which foods you meant.</p>
+                <p>A model reads the sentence and works out which foods you meant.</p>
+                <div className="lp-rule" />
+                <div className="lp-row"><span>SCANNING</span><span className="lp-dots" aria-hidden="true" /><span>NONE</span></div>
+                <div className="lp-row"><span>WEIGHING</span><span className="lp-dots" aria-hidden="true" /><span>NONE</span></div>
+                <div className="lp-row"><span>FORMS</span><span className="lp-dots" aria-hidden="true" /><span>NONE</span></div>
               </div>
               <div className="lp-slip lp-tilt-b">
-                <span className="lp-slip-k">02 · THE ENGINE COUNTS</span>
+                <div className="lp-slip-head"><span>02 · THE ENGINE COUNTS</span><span>2/3</span></div>
                 <p className="lp-slip-h">A database and a calculator do the sums.</p>
-                <p>Every food is matched against a database of {L.records.toLocaleString('en-US')} records. The engine adds up carbohydrate, fibre, glycemic index and glycemic load.</p>
+                <p>Every food is matched against a database. The engine adds up carbohydrate, fibre, glycemic index and glycemic load, and shows you both carbohydrate and load.</p>
+                <div className="lp-rule" />
+                <div className="lp-row"><span>RECORDS</span><span className="lp-dots" aria-hidden="true" /><span>{L.records.toLocaleString('en-US')}</span></div>
+                <div className="lp-row"><span>NUMBERS MADE BY A MODEL</span><span className="lp-dots" aria-hidden="true" /><span>0</span></div>
               </div>
               <div className="lp-slip lp-tilt-c">
-                <span className="lp-slip-k">03 · THE DAY ANSWERS</span>
+                <div className="lp-slip-head"><span>03 · THE DAY ANSWERS</span><span>3/3</span></div>
                 <p className="lp-slip-h">Fits, or does not, against what is left.</p>
-                <p>The receipt shows each number. If DiaBite does not have a food, it says so and counts the rest, never a different food under its name. A dish it lacks is estimated from typical ingredients and labelled as an estimate.</p>
+                <p>The receipt shows each number. If DiaBite does not have a food, it says so and counts the rest, never a different food under its name.</p>
+                <div className="lp-rule" />
+                <div className="lp-row"><span>A FOOD WE LACK</span><span className="lp-dots" aria-hidden="true" /><span>NAMED</span></div>
+                <div className="lp-row"><span>A DISH WE LACK</span><span className="lp-dots" aria-hidden="true" /><span>ESTIMATE</span></div>
               </div>
             </div>
           </div>

@@ -639,6 +639,17 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     resultRef.current?.scrollIntoView({ block: 'start', behavior: calm ? 'auto' : 'smooth' })
   }, [reply])
 
+  // The actions (Log it, Calculation, Portions) follow the person down the screen, so what they open
+  // appears below them: bring it into view, or a tap would seem to do nothing.
+  const editorRef = useRef<HTMLDivElement>(null)
+  const receiptRef = useRef<HTMLElement>(null)
+  const bringIntoView = (el: HTMLElement | null) => {
+    const calm = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    el?.scrollIntoView({ block: 'start', behavior: calm ? 'auto' : 'smooth' })
+  }
+  useEffect(() => { if (editing) bringIntoView(editorRef.current) }, [editing])
+  useEffect(() => { if (showReceipt) bringIntoView(receiptRef.current) }, [showReceipt])
+
   const tone = reply ? (reply.blocked ? 'blocked' : verdictTone(reply.answer, reply.route, reply)) : null
 
   // The numbers of the answer as first given, for the line "before the change" on a recalculation. From the engine's
@@ -656,10 +667,10 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
         Adding to {dayLabel(day, today)}.{' '}
         <button type="button" className="link" onClick={() => { dayPick.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }); dayPick.current?.querySelector('button')?.focus({ preventScroll: true }) }}>Change day</button>
       </p>
-      <div className="row" style={{ marginBottom: 12 }}>
+      <div className="row act-bar">
         <button className="primary" data-tour="log" onClick={logIt} disabled={logged}>{logged ? (logDay && logDay > today ? 'Planned' : 'Logged') : logDay && logDay > today ? 'Plan it' : active?.partial || active?.unscored ? 'Log what was counted' : 'Log it'}</button>
-        <button className="ghost" data-tour="calc" onClick={() => setShowReceipt((v) => !v)}>{showReceipt ? 'Hide calculation' : 'Show calculation'}</button>
-        {!receipt.carbsOnly && <button className="ghost" aria-expanded={editing} onClick={() => setEditing((v) => !v)}>{editing ? 'Done' : receipt.assumed ? 'Edit the recipe' : 'Change a portion'}</button>}
+        <button className="ghost" data-tour="calc" onClick={() => setShowReceipt((v) => !v)}>{showReceipt ? 'Hide calculation' : 'Calculation'}</button>
+        {!receipt.carbsOnly && <button className="ghost" aria-expanded={editing} onClick={() => setEditing((v) => !v)}>{editing ? 'Done' : receipt.assumed ? 'Recipe' : 'Portions'}</button>}
       </div>
     </>
   ) : null
@@ -801,11 +812,13 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
           {logNote && <p className="muted" role="status" aria-live="polite" style={{ margin: '-4px 0 12px' }}>{logNote}{onOpenDiary && <>{' '}<button type="button" className="link" onClick={onOpenDiary}>Open Diary</button></>}</p>}
 
           {editing && receipt && !receipt.carbsOnly && (
-            <PortionEditor lines={baseLines} grams={grams} busy={recalcBusy} error={recalcError} onNudge={nudge} assumed={receipt.assumed} removed={removed} onRemove={toggleRemoved} onReset={resetRecipe} />
+            <div ref={editorRef}>
+              <PortionEditor lines={baseLines} grams={grams} busy={recalcBusy} error={recalcError} onNudge={nudge} assumed={receipt.assumed} removed={removed} onRemove={toggleRemoved} onReset={resetRecipe} />
+            </div>
           )}
 
           {showReceipt && active && (
-            <section className="card">
+            <section className="card" ref={receiptRef}>
               <h2>The receipt</h2>
               <ReceiptView r={active} />
             </section>

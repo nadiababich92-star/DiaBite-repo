@@ -145,7 +145,7 @@ try {
     await sleep(900)
     const answerLive = await b.ev(`(() => { const a = [...document.querySelectorAll('[aria-live], [role=status], [role=alert]')].filter(e => /fit|load|glycemic|left/i.test(e.innerText)); return { liveRegionsWithTheAnswer: a.length, politeness: a.map(e => e.getAttribute('aria-live') || e.getAttribute('role')), focusMovedTo: (document.activeElement && document.activeElement.tagName) } })()`)
     results.live.push({ what: 'the answer', liveRegionsBefore: before, ...answerLive })
-    await scan('ask-answer'); await click('Show calculation'); await sleep(600); await scan('ask-receipt')
+    await scan('ask-answer'); await click('Calculation'); await sleep(600); await scan('ask-receipt')
     // Dialogs: focus goes in when one opens and comes back when it closes.
     for (const [name, scope] of [['What is GL?', 'button, a']]) {
       const opener = await click(name, scope); await sleep(700)

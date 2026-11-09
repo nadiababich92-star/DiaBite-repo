@@ -93,7 +93,7 @@ try {
       for (let i = 0; i < 90; i++) { await sleep(500); if (!(await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break }
       await sleep(900)
       await scan('ask-answer')
-      await click('Show calculation'); await sleep(600); await scan('ask-receipt')
+      await click('Calculation'); await sleep(600); await scan('ask-receipt')
       await click('What is GL?', 'button, a'); await sleep(600); await scan('dialog-what-is-gl')
       await b.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }); await b.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }); await sleep(400)
       await click('Close'); await sleep(300)
