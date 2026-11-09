@@ -1,6 +1,6 @@
 /**
  * What GI and GL are, in plain words. One copy, used by the dialog behind "What are GI and GL?" on the answer and by
- * the card in onboarding and in You, so the three never say different things. No figure appears in it: every number
+ * the card in onboarding and in Profile, so the three never say different things. No figure appears in it: every number
  * the person sees comes from the engine, and a number in an explanation would be one nobody computed.
  */
 export const GI_GL_WORDS = [

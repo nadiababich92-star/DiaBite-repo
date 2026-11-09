@@ -40,7 +40,7 @@ export default function HowItWorks({ onClose }: { onClose: () => void }) {
           <div><dt>Ask</dt><dd>Describe a meal in your own words. You get a verdict, the numbers behind it, and a receipt showing every food.</dd></div>
           <div><dt>Diary</dt><dd>What you logged, what you planned for the days ahead, and your week.</dd></div>
           <div><dt>Menu</dt><dd>A week of meals, and a shopping list that follows what you planned. It has not been reviewed by a clinician yet.</dd></div>
-          <div><dt>You</dt><dd>Your answers about yourself, your daily targets, and the foods you leave out.</dd></div>
+          <div><dt>Profile</dt><dd>Your answers about yourself, your daily targets, the foods you leave out, and how to put DiaBite on your home screen.</dd></div>
           <div><dt>Settings</dt><dd>How the app looks, your account and data (export or delete), and help.</dd></div>
         </dl>
         <p>Every number is computed by the engine from a food database, never written by the AI. Open Show calculation on any answer to see it.</p>

@@ -11,7 +11,7 @@ interface Props {
   onHowItWorks: () => void
 }
 
-/** The app's own settings: how it looks, the account, help. The person's health answers stay in You. */
+/** The app's own settings: how it looks, the account, help. The person's health answers stay in Profile. */
 export default function SettingsPage({ account, onFeedback, onHowItWorks }: Props) {
   const [theme, setTheme] = useState<ThemeChoice>(loadTheme)
   const choose = (c: ThemeChoice) => { setTheme(c); saveTheme(c) }
@@ -43,11 +43,6 @@ export default function SettingsPage({ account, onFeedback, onHowItWorks }: Prop
           <button className="ghost" onClick={onHowItWorks}>How it works</button>
           <button className="ghost" onClick={onFeedback}>Send feedback</button>
         </div>
-      </section>
-
-      <section className="card touch-only">
-        <h2>Keep it in your pocket</h2>
-        <p className="muted">Put DiaBite on your home screen so it opens in one tap. On an iPhone, tap Share in Safari, then Add to Home Screen. On Android, tap the three dots in Chrome, then Add to Home screen.</p>
       </section>
     </>
   )

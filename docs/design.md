@@ -167,7 +167,7 @@ at least 44px tall.
 
 - **One column.** Everything stacks; nothing sits beside the ask box at any width.
 - **Navigation is a floating bar at the bottom**, five items (Ask, Diary, Menu,
-  You, Settings), reachable with a thumb, at every width. The page leaves room beneath it.
+  Profile, Settings), reachable with a thumb, at every width. The page leaves room beneath it.
 - **Below 560px:** the ask button goes under its input at full width, the
   receipt shows each food above its three numbers, figure tiles tighten.
 - **Mobile first.** Check every change at 375px before desktop.
@@ -226,12 +226,12 @@ out. A glycemic load has **no unit, and none is invented for it**.
 
 **Two ways of counting, both always shown.** Under the three glycemic-load figures sits a second block, "Carbohydrate":
 carbohydrate, fibre and carbohydrate without the fibre, in grams, from the same tool result. The person says in onboarding
-(and can change in You) which they are used to counting, "Glycemic load" or "Carbohydrate, in grams". That block comes
+(and can change in Profile) which they are used to counting, "Glycemic load" or "Carbohydrate, in grams". That block comes
 first and is marked by a 3px `--accent` edge; the other follows, unmarked. This changes order and emphasis only: the
 verdict, the status disc and every target are still worked out from the glycemic load, and a line under the figures says
 so when carbohydrate comes first. A carbohydrate verdict per meal is not built: it waits for a clinician's answer
 (docs/PLAN.md, "Questions waiting for a clinician", item 6). "What are GI and GL?" is one text (`src/lib/glWords.ts`),
-shown as a dialog on an answer and as a folded card in onboarding and in You; it contains no figure.
+shown as a dialog on an answer and as a folded card in onboarding and in Profile; it contains no figure.
 
 ### Day bar
 A 3px bar under the budget line showing how much of the day is used. Never a ring.
@@ -251,9 +251,9 @@ Raised: `--surface`, 1px border, radius 12, 15px, 44px minimum height.
 A floating slab at the bottom: five items, each an icon above a 13px label. The
 selected item sits on a marker pill. Feedback is not in the bar; it lives in **Settings**.
 
-**Your answers** (a card in You, between the daily targets and Excluded foods) shows the onboarding answers that have no field of their own, one line each (Medicines; Kidneys and other conditions; How you eat; Allergies), with an **Edit** ghost button of at least 44 px on each row. Edit opens that one onboarding step on its own: the label "Editing your answers" and the step's name replace the progress bar, there is no Back, and the actions are **Save** and **Cancel**. The rules are the step's own, exits included. Back on You, a line at the top says what saving did, and when a medicine ruled out the carbohydrate approach the person had, that it was changed to moderate.
+**Your answers** (a card in Profile, between the daily targets and Excluded foods) shows the onboarding answers that have no field of their own, one line each (Medicines; Kidneys and other conditions; How you eat; Allergies), with an **Edit** ghost button of at least 44 px on each row. Edit opens that one onboarding step on its own: the label "Editing your answers" and the step's name replace the progress bar, there is no Back, and the actions are **Save** and **Cancel**. The rules are the step's own, exits included. Back on You, a line at the top says what saving did, and when a medicine ruled out the carbohydrate approach the person had, that it was changed to moderate.
 
-**You** holds what is about the person: their answers, their daily targets and the foods they leave out. **Settings** holds what is about the app: Appearance, the account (the sign-in card, or export, sign out and delete), Help (How it works, Send feedback) and, on a phone, how to add it to the home screen. The Settings icon is two sliders, drawn with the same 1.8 stroke as the others.
+**Profile** (called You until 9 November 2026) holds what is about the person: their answers, their daily targets, the foods they leave out, and, in a folded card at the top, how to put DiaBite on the home screen of a phone or computer. **Settings** holds what is about the app: Appearance, the account (the sign-in card, or export, sign out and delete), Help (How it works, Send feedback). The Settings icon is two sliders, drawn with the same 1.8 stroke as the others.
 
 ### The day, on the Diary
 A day is named (**Today**, **Yesterday**, or "Fri, Oct 9") between two 44px arrows; the next

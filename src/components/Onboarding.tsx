@@ -383,7 +383,7 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
 
                 <h3>What do you usually count?</h3>
                 <p className="muted" style={{ marginTop: 0 }}>
-                  DiaBite shows both, always. This only decides which comes first. Not sure? Keep glycemic load: you can change it in You.
+                  DiaBite shows both, always. This only decides which comes first. Not sure? Keep glycemic load: you can change it in Profile.
                 </p>
                 <div className="chips-col">
                   {COUNT_BYS.map((c) => (

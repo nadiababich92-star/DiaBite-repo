@@ -88,7 +88,7 @@ await B.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.i
 let dt = ''
 for (let i = 0; i < 6; i++) { dt = await B.text(); if (/egg/i.test(dt)) break; await sleep(2000) }
 check('W6', 'device B: the Diary shows the meal logged on device A', /egg/i.test(dt), dt.slice(0, 300).replace(/\n+/g, ' | '))
-await B.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('You'))?.click()`); await sleep(800)
+await B.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('Profile'))?.click()`); await sleep(800)
 const pt = await B.text()
 check('W7', 'device B: the profile page shows the age entered on device A (52)', /52/.test(await B.b.ev(`[...document.querySelectorAll('input')].map(i=>i.value).join(',')`)), pt.slice(0, 80))
 
@@ -123,7 +123,7 @@ const after = (await rows('diary_entries')).length
 check('W13', '"I ate this" on the Menu reaches the account', after > before, `${before} -> ${after}`)
 await tabA('Diary')
 check('W14', 'bread units are off until switched on', !/Bread units/.test(await A.text()), '')
-await tabA('You')
+await tabA('Profile')
 await A.b.ev(`(()=>{const c=[...document.querySelectorAll('.check-row input')].find(i=>/bread units/i.test(i.closest('.check-row').innerText)); c?.click()})()`); await sleep(3500)
 await tabA('Diary')
 const profRow = (await rows('profiles'))[0]
@@ -223,7 +223,7 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
 }
 
 // ── the account can be removed, and takes everything with it ────────────────
-await A.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('You'))?.click()`); await sleep(800)
+await A.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('Profile'))?.click()`); await sleep(800)
 const del = await fetch(`${APP}/account`, { method: 'DELETE', headers: { authorization: `Bearer ${session.access_token}` } })
 await sleep(1500)
 const left = [(await rows('profiles')).length, (await rows('diary_entries')).length]

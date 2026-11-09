@@ -142,7 +142,7 @@ try {
       await b.ev(`document.querySelector('.plan-inline')?.scrollIntoView({block:'center'})`); await sleep(400)
       await shot('menu-plan')
     }
-    await tab('You'); await shot('you')
+    await tab('Profile'); await shot('you')
     await tab('Settings'); await shot('settings')
     if (process.env.TOUR === '1') { await click('How it works'); await sleep(700); await shot('how-it-works'); await click('Close') }
     if (errs.length) console.log('  script errors:', errs.slice(0, 2))
