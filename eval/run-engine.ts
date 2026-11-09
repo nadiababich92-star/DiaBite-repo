@@ -31,7 +31,7 @@ import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
 import { afterMealFor, computeItem, computeMeal, dayState, driverOf, planDish, uninvertPhrase, withDayUnscored } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
-import { engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
+import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
@@ -1146,6 +1146,22 @@ hangMisses.forEach((m) => console.log(m))
     }
   }
   if (engineVerdict([]) !== null) verdictMisses.push('    an empty trace has a verdict')
+  // A short reply to a question the meal specialist asked goes back to it (it went to the advisor, which cannot ask again).
+  const asked = { role: 'meal', asked: true }
+  for (const [label, prior, text, want] of [
+    ["'i don't know' after a meal question", asked, "i don't know", true],
+    ['a detail after a meal question', asked, 'boiled', true],
+    ['a question after a meal question', asked, 'is brown rice better than white?', false],
+    ['a new long message', asked, 'Two eggs, a slice of rye bread, half an avocado, a cup of black coffee and a handful of walnuts', false],
+    ['the meal specialist did not ask', { role: 'meal', asked: false }, "i don't know", false],
+    ['the advisor asked', { role: 'advisor', asked: true }, "i don't know", false],
+    ['no earlier turn', undefined, "i don't know", false],
+  ] as [string, { role: string; asked: boolean } | undefined, string, boolean][]) {
+    if (continuesMealQuestion(prior, text) !== want) verdictMisses.push(`    ${label}: want ${want}`)
+  }
+  if (!askedSomething([{ tool: 'diabite_engine_cost_dish', input: {}, result: { unresolved: [{ phrase: 'potatoes' }] } } as never], 'Counted.')) verdictMisses.push('    an unresolved ingredient did not count as a question')
+  if (!askedSomething([], 'Counted. What kind of potatoes?')) verdictMisses.push('    a question in the answer was not seen')
+  if (askedSomething([], 'This fits your day.')) verdictMisses.push('    a plain verdict counted as a question')
   console.log(`\nverdict   ${verdictMisses.length === 0 ? 'ok' : 'WRONG'}`)
   verdictMisses.forEach((m) => console.log(m))
   if (verdictMisses.length) process.exitCode = 1

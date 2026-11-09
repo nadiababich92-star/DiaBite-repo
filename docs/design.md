@@ -201,6 +201,8 @@ Under the budget bar, above the question, sits the **Day picker** (Today, Yester
 
 When the **Next** line names one of the alternatives the engine returned ("swap the mashed potato for zucchini"), a ghost button **Accept the swap** (44 px) sits under it. It sends the meal back to the engine with the food replaced, at the weight the engine costed the alternative; the button reads **Counting again…**, then **Swap accepted** with "The new count is above." A failed count says so and offers **Try the swap again**. The new count is the same recalculated card that a portion change makes, above the original answer, saying "Recalculated with zucchini instead of mashed potato"; **Back to the original** undoes it, and **Log it** logs the swapped meal. Which alternative the sentence means is read from the sentence; the food, the weight and every number come from the engine. A dish counted from an assumed recipe has no swap button.
 
+**After a swap or a new portion**, the person must not scroll to log the meal. Under the recalculated card come, in this order: a line "Before the change: this meal X, left after Y" (the first answer's own figures, from the engine), "Adding to Today. Change day", and the **Log it** row. The original answer is folded under "Original answer, before the swap" (closed by default) and opens on a tap. Added 9 November 2026 after a tester had to scroll past the whole original answer to reach Log it.
+
 ### The answer box, under a question
 When the answer is a clarifying question (badge "One question first"), a field sits directly under it:
 a small label "Your answer", the input in the same card as the question box above, and a **Ghost**

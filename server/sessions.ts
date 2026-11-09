@@ -86,7 +86,7 @@ export function getSession(id: string): SessionState | undefined {
 }
 
 /** Sizes of the maps, for the abuse suite. */
-export const _sizes = () => ({ store: store.size, lastResponse: lastResponse.size, conversations: conversations.size, owners: owners.size })
+export const _sizes = () => ({ store: store.size, lastResponse: lastResponse.size, conversations: conversations.size, owners: owners.size, lastTurn: lastTurn.size })
 
 export function sessionCount(): number {
   sweep()
@@ -113,6 +113,25 @@ export function previousResponseFor(sessionId: string): string | undefined {
 
 export function rememberResponse(sessionId: string, responseId: string): void {
   setBounded(lastResponse, sessionId, { responseId, storedAt: Date.now() })
+}
+
+/**
+ * What the last turn was: who answered it, and whether it ended by asking the person something. The router reads one
+ * message and has no memory, so "i don't know" in answer to "what kind of potatoes?" looked like a general question and
+ * went to the advisor, which has no tools, no database and no way to ask again. This is what lets a short reply to a
+ * question go back to whoever asked it.
+ */
+const lastTurn = new Map<string, { role: string; asked: boolean; storedAt: number }>()
+
+export function lastTurnOf(sessionId: string): { role: string; asked: boolean } | undefined {
+  const t = lastTurn.get(sessionId)
+  if (!t) return undefined
+  if (Date.now() - t.storedAt > TTL_MS) { lastTurn.delete(sessionId); return undefined }
+  return { role: t.role, asked: t.asked }
+}
+
+export function rememberTurn(sessionId: string, role: string, asked: boolean): void {
+  setBounded(lastTurn, sessionId, { role, asked, storedAt: Date.now() })
 }
 
 /**
@@ -154,7 +173,7 @@ export function rememberConversation(sessionId: string, id: string): void {
 const OWNER_TTL_MS = 2 * TTL_MS
 const owners = new Map<string, { sub: string; storedAt: number }>()
 
-const hasState = (id: string) => store.has(id) || lastResponse.has(id) || conversations.has(id)
+const hasState = (id: string) => store.has(id) || lastResponse.has(id) || conversations.has(id) || lastTurn.has(id)
 
 export function claimSession(id: string, sub: string | null | undefined, now = Date.now()): 'ok' | 'denied' {
   const o = owners.get(id)

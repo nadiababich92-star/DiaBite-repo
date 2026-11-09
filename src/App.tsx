@@ -16,7 +16,7 @@ import { calculateTargets, CARB_APPROACH_LABELS } from './lib/profile'
 import { signOutAndClear, useAuth, useSignInRequired } from './lib/auth'
 import { supabaseConfigured } from './lib/supabase'
 import { loadDiary, loadProfile, loadTour, saveDiary, saveProfile, saveTour, thawWrites } from './lib/storage'
-import { initialSeen, type TourStep } from './lib/tour'
+import { initialSeen, STEP_ORDER, type TourStep } from './lib/tour'
 import { showLanding } from './lib/landingRule'
 import { CONSENT_VERSION, LEGACY_DIARY_KEY, PENDING_KEY, loadAccount, mergeById, reconcileAfterFailedPush, useAccountSync } from './lib/sync'
 import type { DiaryEntry, MealType, Profile } from './types'
@@ -86,6 +86,9 @@ export default function App() {
       const pending = (() => { try { return localStorage.getItem(PENDING_KEY) === '1' } catch { return false } })()
       // A failed push last time: this device holds the newer truth, so it is pushed, not overwritten.
       prime(a)
+      // The tips are for a person's first visit. Which were shown is kept in this browser and signing out clears it, so
+      // an account that already holds answers or a diary has been here before: it is not shown them again.
+      if (a.profile?.onboarded || a.diary.length > 0) { setTourSeen([...STEP_ORDER]); saveTour([...STEP_ORDER]) }
       if (pending) {
         setServerHasProfile(true); setConsent({ at: a.consentAt, version: a.consentVersion })
         // Merged, not replaced: the account may hold entries from another device that this one never saw.

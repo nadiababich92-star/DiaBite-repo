@@ -310,6 +310,10 @@ tr:last-child td { border-bottom: none; }
 .fig-block { margin: 0 0 6px; }
 .fig-block.pref { border-left: 3px solid var(--accent); padding-left: 12px; }
 .fig-basis { margin: 0 0 8px; font-size: 14px; }
+.was-now { margin: 0 0 6px; font-size: 14px; }
+/* The original answer, folded once a swap or a new portion has replaced it at the top. */
+.was-original { margin: 0 0 12px; }
+.was-original > summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--accent); min-height: 44px; display: flex; align-items: center; }
 .gi-gl p { margin: 0 0 8px; font-size: 14px; line-height: 1.5; }
 .fig-title { margin: 0 0 6px; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
 .fig-k { font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }

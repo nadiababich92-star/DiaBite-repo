@@ -40,7 +40,7 @@ import { safetyGate } from './safety'
 import { chargeTurn } from './guard'
 import { verify, verdictConflict } from './verify'
 import type { AvoidList } from './avoid'
-import { claimSession, previousResponseFor, putSession, rememberResponse } from './sessions'
+import { claimSession, lastTurnOf, previousResponseFor, putSession, rememberResponse, rememberTurn } from './sessions'
 import type { DayBudget, MealItemInput } from './contract'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -333,7 +333,7 @@ export interface AskResponse {
   stripped?: boolean
   /** Which specialist answered, and what the router decided. */
   route?: Role
-  routedBy?: 'triage' | 'gate' | 'fallback'
+  routedBy?: 'triage' | 'gate' | 'fallback' | 'followup'
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -739,6 +739,29 @@ async function route(message: string): Promise<{ role: Role; by: 'triage' | 'fal
   return { role: 'meal', by: 'fallback' }
 }
 
+/** Longer than this, a message is its own question or meal, not the answer to the last question. */
+const REPLY_MAX_CHARS = 80
+
+/**
+ * Is this message the answer to the question the meal specialist just asked? Only when that specialist asked, the
+ * message is short, and it asks nothing itself. A message with a question mark still goes to the router: "can I use
+ * mashed instead?" is about food, "is brown rice better?" is for the advisor.
+ */
+export function continuesMealQuestion(prior: { role: string; asked: boolean } | undefined, message: string): boolean {
+  const m = message.trim()
+  return prior?.role === 'meal' && prior.asked && m.length > 0 && m.length <= REPLY_MAX_CHARS && !m.includes('?')
+}
+
+/**
+ * Did the answer end by asking the person something? The engine says so when it can (a food it could not cost, a
+ * choice between records); a question in the last lines is the rest.
+ */
+export function askedSomething(trace: ToolCallTrace[], answer: string): boolean {
+  const results = trace.map((t) => t.result as { unresolved?: unknown[]; afterMeal?: { partial?: unknown }; results?: { clarify?: string; unknown?: boolean }[] } | undefined)
+  if (results.some((r) => (r?.unresolved?.length ?? 0) > 0 || !!r?.afterMeal?.partial || r?.results?.some((x) => !!x.clarify || x.unknown))) return true
+  return answer.trim().slice(-300).includes('?')
+}
+
 /** Who is asking, as far as the limits are concerned. */
 export interface AskContext {
   /** The caller's address; absent for trusted callers, who are not rate limited. */
@@ -862,7 +885,12 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   const parked = parkDayState(req)
   const speculative = plainMeal ? parked.then(() => runAgent('meal', mealInput, previous, true, req.sessionId)) : null
   speculative?.catch(() => { /* its error is read where it is used */ })
-  const { role, by } = await route(req.message)
+  // A short reply to a question the meal specialist just asked goes back to it: the router sees one message and would
+  // read "i don't know" as a general question, and the advisor cannot ask again or cost anything.
+  const prior = lastTurnOf(req.sessionId)
+  const { role, by } = continuesMealQuestion(prior, req.message)
+    ? { role: 'meal' as Role, by: 'followup' as const }
+    : await route(req.message)
   clock.route = Date.now() - clock.t0
   const parkAt = Date.now()
   if (role === 'meal') await parked
@@ -962,6 +990,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   }
 
   if (responseId) rememberResponse(req.sessionId, responseId)
+  rememberTurn(req.sessionId, role, askedSomething(trace, answer))
   // Food preferences only, and only from advisory turns — the ones without a
   // diary, a budget or a number in them.
   if (role === 'advisor' && answer && !withheld) rememberPreferences(req.sessionId, req.message, answer)

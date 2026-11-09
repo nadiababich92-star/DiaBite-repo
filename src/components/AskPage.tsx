@@ -150,7 +150,12 @@ function Figures({ reply, onGl, countBy }: { reply: AgentResponse; onGl?: () => 
  * word is the engine's `fits` and nothing else: true, false, or null for a meal with
  * a food missing. No number here is worked out in the browser.
  */
-function RecalcCard({ rc, onBack, onGl, note }: { rc: Recalc; onBack: () => void; onGl: () => void; note?: string }) {
+/** Shows its children, or folds them under a title: the original answer, once a recalculation has replaced it at the top. */
+function Fold({ when, title, children }: { when: boolean; title: string; children: React.ReactNode }) {
+  return when ? <details className="was-original"><summary>{title}</summary>{children}</details> : <>{children}</>
+}
+
+function RecalcCard({ rc, onBack, onGl, note, was }: { rc: Recalc; onBack: () => void; onGl: () => void; note?: string; was?: { gl: number; after: number | null } }) {
   // A dish counted from an assumed recipe stays an estimate through every recalculation: never a plain "Fits".
   const tone = rc.assumed && rc.fits !== undefined ? 'estimate'
     : rc.fits === true ? 'good' : rc.fits === false ? 'bad' : rc.fits === null ? 'partial' : 'ask'
@@ -176,7 +181,13 @@ function RecalcCard({ rc, onBack, onGl, note }: { rc: Recalc; onBack: () => void
                 <span className="fig-v">{lead}</span>
               </div>
             </div>
-            <button className="link gl-link" onClick={onGl}>What is GL?</button>
+            {was && (
+              <p className="muted was-now">
+                Before the change: this meal <b className="num">{was.gl}</b>
+                {was.after !== null && <>, {was.after >= 0 ? 'left after' : 'over by'} <b className="num">{Math.abs(was.after)}</b></>}
+              </p>
+            )}
+            <button className="link gl-link" onClick={onGl}>What are GI and GL?</button>
           </>
         ) : (
           <>
@@ -184,7 +195,7 @@ function RecalcCard({ rc, onBack, onGl, note }: { rc: Recalc; onBack: () => void
             <div className="figures"><div className="fig"><span className="fig-k">this meal</span><span className="fig-v">{rc.mealGl}</span></div></div>
           </>
         )}
-        <p className="a-why">{note ?? 'Recalculated with your portions. The explanation below was written for the original ones.'}</p>
+        <p className="a-why">{note ?? 'Recalculated with your portions. The original answer is kept below.'}</p>
       </div>
       <div className="verify-row">
         <span className="pill low">Calculated by the engine, nothing generated</span>
@@ -630,6 +641,29 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
 
   const tone = reply ? (reply.blocked ? 'blocked' : verdictTone(reply.answer, reply.route, reply)) : null
 
+  // The numbers of the answer as first given, for the line "before the change" on a recalculation. From the engine's
+  // result for that answer; nothing is worked out here.
+  const firstMeal = lastMealCall(reply?.trace)?.result as { totals?: { gl?: number }; afterMeal?: { remaining?: { gl?: number } } } | undefined
+  const wasNow = typeof firstMeal?.totals?.gl === 'number'
+    ? { gl: firstMeal.totals.gl, after: typeof firstMeal.afterMeal?.remaining?.gl === 'number' ? firstMeal.afterMeal.remaining.gl : null }
+    : undefined
+
+  // Which day the meal goes to, and the button that puts it there. After a swap or a new portion it sits right under the
+  // recalculated card, so the person does not scroll past the original answer to reach it.
+  const logBlock = receipt ? (
+    <>
+      <p className="muted log-day">
+        Adding to {dayLabel(day, today)}.{' '}
+        <button type="button" className="link" onClick={() => { dayPick.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }); dayPick.current?.querySelector('button')?.focus({ preventScroll: true }) }}>Change day</button>
+      </p>
+      <div className="row" style={{ marginBottom: 12 }}>
+        <button className="primary" data-tour="log" onClick={logIt} disabled={logged}>{logged ? (logDay && logDay > today ? 'Planned' : 'Logged') : logDay && logDay > today ? 'Plan it' : active?.partial || active?.unscored ? 'Log what was counted' : 'Log it'}</button>
+        <button className="ghost" data-tour="calc" onClick={() => setShowReceipt((v) => !v)}>{showReceipt ? 'Hide calculation' : 'Show calculation'}</button>
+        {!receipt.carbsOnly && <button className="ghost" aria-expanded={editing} onClick={() => setEditing((v) => !v)}>{editing ? 'Done' : receipt.assumed ? 'Edit the recipe' : 'Change a portion'}</button>}
+      </div>
+    </>
+  ) : null
+
   return (
     <div>
       <section className={`card ask-hero${reply || busy ? ' compact' : ''}`}>
@@ -718,8 +752,9 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
       {reply && (
         <>
           <p className="muted asked">{asked}</p>
-          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setSwap(null); setRecalc(null) }} onGl={() => setGlOpen(true)} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The explanation below was written for the original meal.` : undefined} />}
-          {recalc && <p className="muted asked">{swap ? 'Original answer, before the swap' : 'Original answer, before you changed a portion'}</p>}
+          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setSwap(null); setRecalc(null) }} onGl={() => setGlOpen(true)} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The original answer is kept below.` : undefined} was={wasNow} />}
+          {recalc && logBlock}
+          <Fold when={!!recalc} title={swap ? 'Original answer, before the swap' : 'Original answer, before you changed a portion'}>
           <section className={`card answer tone-${tone}${recalc ? ' stale' : ''}`} role="status" aria-live="polite">
             <div className="eyebrow-line" data-tour="verdict">
               <StatusDot tone={tone} />
@@ -748,6 +783,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
               </div>
             )}
           </section>
+          </Fold>
 
           {tone === 'ask' && !reply.blocked && reply.route !== 'advisor' && (
             <form className="reply-box" onSubmit={(e) => { e.preventDefault(); ask(replyText) }}>
@@ -760,19 +796,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
             </form>
           )}
 
-          {receipt && (
-            <p className="muted log-day">
-              Adding to {dayLabel(day, today)}.{' '}
-              <button type="button" className="link" onClick={() => { dayPick.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }); dayPick.current?.querySelector('button')?.focus({ preventScroll: true }) }}>Change day</button>
-            </p>
-          )}
-          {receipt && (
-            <div className="row" style={{ marginBottom: 12 }}>
-              <button className="primary" data-tour="log" onClick={logIt} disabled={logged}>{logged ? (logDay && logDay > today ? 'Planned' : 'Logged') : logDay && logDay > today ? 'Plan it' : active?.partial || active?.unscored ? 'Log what was counted' : 'Log it'}</button>
-              <button className="ghost" data-tour="calc" onClick={() => setShowReceipt((v) => !v)}>{showReceipt ? 'Hide calculation' : 'Show calculation'}</button>
-              {!receipt.carbsOnly && <button className="ghost" aria-expanded={editing} onClick={() => setEditing((v) => !v)}>{editing ? 'Done' : receipt.assumed ? 'Edit the recipe' : 'Change a portion'}</button>}
-            </div>
-          )}
+          {!recalc && logBlock}
 
           {logNote && <p className="muted" role="status" aria-live="polite" style={{ margin: '-4px 0 12px' }}>{logNote}{onOpenDiary && <>{' '}<button type="button" className="link" onClick={onOpenDiary}>Open Diary</button></>}</p>}
 
