@@ -193,6 +193,7 @@ nav.tabs button[aria-selected='true'] .tab-ico svg { stroke-width: 1.9; }
 .card > h3 { margin: 20px 0 10px; font-size: 14px; color: var(--text-dim); font-weight: 600; }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); align-items: start; }
 
 label.field { display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: var(--text-dim); }
 label.field > span { font-weight: 500; }

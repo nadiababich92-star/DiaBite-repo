@@ -67,7 +67,7 @@ for (let i = 0; i < N; i++) pcm.writeInt16LE(Math.round(Math.max(-1, Math.min(1,
 writeFileSync(join(dir, `mix${SUF}.wav`), pcm); writeFileSync(join(dir, `two-rhythms${SUF}.vtt`), vtt.join('\n'))
 execFileSync('afconvert', ['-f', 'm4af', '-d', 'aac', '-b', '64000', join(dir, `mix${SUF}.wav`), join(dir, `mix${SUF}.m4a`)])
 const frames = readdirSync(join(dir, `out${SUF}`)).filter((f) => f.endsWith('.jpg')).sort()
-writeFileSync(join(dir, `plan${SUF}.json`), JSON.stringify({ width: 1280, height: 720, fps: TL.fps, dir: join(dir, `out${SUF}`), bitrate: 2_600_000, segments: frames.map((file, i) => ({ file, start: i, count: 1 })) }))
+writeFileSync(join(dir, `plan${SUF}.json`), JSON.stringify({ width: 1280, height: 720, fps: TL.fps, dir: join(dir, `out${SUF}`), bitrate: Number(process.env.BITRATE ?? 2_600_000), segments: frames.map((file, i) => ({ file, start: i, count: 1 })) }))
 const mux = join(dir, 'mux'); execFileSync('swiftc', ['-O', '-o', mux, join(here, '../mux.swift')], { stdio: 'inherit' })
 execFileSync(mux, ['video', join(dir, `plan${SUF}.json`), join(dir, `video${SUF}.mp4`)], { stdio: 'inherit' })
 execFileSync(mux, ['merge', join(dir, `video${SUF}.mp4`), join(dir, `mix${SUF}.m4a`), join(dir, `merged${SUF}.mp4`)], { stdio: 'inherit' })

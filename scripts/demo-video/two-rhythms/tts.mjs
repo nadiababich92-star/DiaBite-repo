@@ -11,8 +11,10 @@ const out = join(process.argv[2] ?? '/tmp/dv2', 'audio'); mkdirSync(out, { recur
 const S = JSON.parse(readFileSync(join(here, 'script.json'), 'utf8'))
 const token = execSync('az account get-access-token --resource https://cognitiveservices.azure.com --query accessToken -o tsv', { env: { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` } }).toString().trim()
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
-const durations = {}
+const only = process.env.ONLY?.split(','), durFile = join(out, 'durations.json')
+const durations = only ? JSON.parse(readFileSync(durFile, 'utf8')) : {}   // ONLY=cb-2,lm-1 says just those lines and keeps the rest
 for (const l of S.lines) {
+  if (only && !only.includes(l.id)) continue
   const v = S.voices[l.who]
   const ssml = `<speak version="1.0" xml:lang="en-US"><voice name="${v.name}"><prosody rate="${v.rate}">${esc(l.text.replace('diabite.pro', 'diabite dot pro'))}</prosody></voice></speak>`
   const res = await fetch('https://diabite-resource.cognitiveservices.azure.com/tts/cognitiveservices/v1', { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/ssml+xml', 'X-Microsoft-OutputFormat': 'riff-24khz-16bit-mono-pcm' }, body: ssml })

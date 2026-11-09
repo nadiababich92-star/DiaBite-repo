@@ -171,6 +171,11 @@ const tp = (id) => Math.min(D[id] + 0.15, 1.9)      // typing is quick: as long 
   const p = typedCap('maya-count', LEAD, 4.2, 0.5, Math.max(3.0, D['cb-1'] - 3.6))
   add({ id: 'count', art: 'station', dur: p.end + TAIL, clock: ['13:10', '13:11', p.answerAt], phone: p.pieces, typing: [p.typing], answerAt: [p.answerAt], lines: [line('cb-1', LEAD + 0.5)] })
 }
+{ // 8c · the number her doctor gave her, set in Profile, and a meal that goes above it
+  const p = typedCap('maya-limit', LEAD, Math.max(5.0, D['cb-2'] + 0.6), 0.5, D['lm-1'] + 1.0)
+  add({ id: 'limit', art: 'station', dur: p.end + TAIL, clock: ['13:10', '13:11', p.answerAt], phone: p.pieces, typing: [p.typing], answerAt: [p.answerAt],
+        lines: [line('cb-2', LEAD + 0.2), line('lm-1', p.answerAt + 0.2)] })
+}
 { // 9 · Daniel logs what happened
   const pl = { cap: 'daniel-diary-planned', t0: LEAD - 0.1, t1: LEAD + D['dd-0'] + 0.2, s0: frames('daniel-diary-planned')[0].t, s1: total('daniel-diary-planned') }
   const R0 = pl.t1 + 0.05

@@ -149,14 +149,17 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
               ))}
             </select>
           </label>
-          <MealCarbsLimit kind="meal" value={profile.mealCarbsG} onChange={(g) => set('mealCarbsG', g)} />
-          <MealCarbsLimit kind="snack" value={profile.snackCarbsG} onChange={(g) => set('snackCarbsG', g)} />
         </div>
         <p className="muted" style={{ margin: '12px 0 0' }}>
           The carbohydrate approach moves your carbohydrate, fat and glycemic-load targets below. Calories
           and protein come from your body, activity and weight goal, so they stay the same when you change it.
           What you usually count only decides which figures come first on an answer; both are always shown.
         </p>
+        <h3>Carbohydrate per meal</h3>
+        <div className="grid grid-2">
+          <MealCarbsLimit kind="meal" value={profile.mealCarbsG} onChange={(g) => set('mealCarbsG', g)} />
+          <MealCarbsLimit kind="snack" value={profile.snackCarbsG} onChange={(g) => set('snackCarbsG', g)} />
+        </div>
         <GiGlExplainer />
       </section>
 
@@ -255,11 +258,6 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
           onChange={(e) => setQuery(e.target.value)}
           aria-describedby="excluded-hint"
         />
-        <p id="excluded-hint" className="muted" style={{ margin: '8px 0 0' }}>
-          This list is for single foods. For an allergy (for example shellfish, milk or nuts) or a way of eating
-          (for example vegetarian or halal), use the questions you answered at the start: they cover the whole group.{' '}
-          <button type="button" className="link" onClick={onRedoOnboarding}>Go through them again</button>
-        </p>
         {matches.length > 0 && (
           <div className="search-results">
             {matches.map((f) => (
@@ -276,6 +274,16 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
             ))}
           </div>
         )}
+        {query.trim().length >= 2 && matches.length === 0 && (
+          <p className="muted" role="status" style={{ margin: '8px 0 0' }}>
+            No food in the list matches "{query.trim()}". The list has the everyday foods only.
+          </p>
+        )}
+        <p id="excluded-hint" className="muted" style={{ margin: '8px 0 0' }}>
+          This list is for single foods. For an allergy (for example shellfish, milk or nuts) or a way of eating
+          (for example vegetarian or halal), use the questions you answered at the start: they cover the whole group.{' '}
+          <button type="button" className="link" onClick={onRedoOnboarding}>Go through them again</button>
+        </p>
         {profile.excludedFoodIds.length > 0 && (
           <div className="chips">
             {profile.excludedFoodIds.map((id) => (

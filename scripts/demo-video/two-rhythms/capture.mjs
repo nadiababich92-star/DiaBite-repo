@@ -23,7 +23,7 @@ const PUB = env.match(/VITE_SUPABASE_PUBLISHABLE_KEY=(.+)/)?.[1]?.trim()
 const SVC = execSync('az containerapp secret show -g rg-nadia.babich92-5702 -n diabite-engine --secret-name supabase-service-key --query value -o tsv', { env: { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` } }).toString().trim()
 const admin = (path, init = {}) => fetch(SB + path, { ...init, headers: { apikey: SVC, authorization: `Bearer ${SVC}`, 'content-type': 'application/json', ...(init.headers ?? {}) } })
 
-const base = { excludedFoodIds: [], insulin: 'none', pregnantOrBreastfeeding: false, kidney: 'none', comorbidities: [], allergens: [], pattern: 'none', units: 'imperial', showBreadUnits: false, onboarded: true }
+const base = { mealCarbsG: 0, snackCarbsG: 0, excludedFoodIds: [], insulin: 'none', pregnantOrBreastfeeding: false, kidney: 'none', comorbidities: [], allergens: [], pattern: 'none', units: 'imperial', showBreadUnits: false, onboarded: true }
 const PEOPLE = {
   maya: { ...base, sex: 'female', age: 34, heightCm: 168, weightKg: 66, activity: 'moderate', condition: 'ir', goal: 'maintain', carbApproach: 'low', meds: [] },
   daniel: { ...base, sex: 'male', age: 52, heightCm: 178, weightKg: 88, activity: 'light', condition: 't2', goal: 'lose', carbApproach: 'low', meds: ['metformin'] },
@@ -72,7 +72,7 @@ async function film(who, acct, run) {
       await sleep(500)
       marks[scene].answer = (Date.now() - t0) / 1000
     },
-    sleep, ev,
+    sleep, ev, b,
   }
   try { await run(T) } finally { await b.close() }
 }
@@ -96,6 +96,18 @@ try {
     await T.ev(`(() => { const s = [...document.querySelectorAll('select')].find((x) => [...x.options].some((o) => o.value === 'carbs')); s?.scrollIntoView({ block: 'center' }) })()`); await T.sleep(600); await T.hold(3)
     await T.ev(`(() => { const s = [...document.querySelectorAll('select')].find((x) => [...x.options].some((o) => o.value === 'carbs')); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(s, 'carbs'); s.dispatchEvent(new Event('change', { bubbles: true })) })()`); await T.sleep(900); await T.hold(3)
     await T.tab('Ask'); await T.hold(2); await T.type('coffee with milk and a banana'); await T.answer(); await T.hold(4)
+  })
+  await film('maya', maya, async (T) => {
+    // The number a doctor gave her, typed into Profile (a meal and a snack), then a meal that goes above it.
+    T.begin('maya-limit'); await T.tab('Profile')
+    await T.ev(`(() => { const i = document.querySelector('#meal-carbs-hint')?.closest('label')?.querySelector('input'); i?.scrollIntoView({ block: 'center' }) })()`); await T.sleep(600); await T.hold(2)
+    for (const [hint, g] of [['meal', '45'], ['snack', '30']]) {
+      await T.ev(`document.querySelector('#${hint}-carbs-hint').closest('label').querySelector('input').focus()`)
+      for (const c of g) { await T.b.send('Input.insertText', { text: c }); await T.sleep(220); await T.shot() }
+      await T.sleep(300); await T.hold(1)
+    }
+    await T.hold(2)
+    await T.tab('Ask'); await T.hold(1); await T.click('Meal', '.kind-switch button'); await T.sleep(300); await T.type('a burrito bowl with rice and beans'); await T.answer(); await T.hold(4)
   })
   await film('maya', maya, async (T) => {
     T.begin('maya-dose'); await T.hold(2); await T.type('How many units of insulin should I take before pasta?'); await T.answer(); await T.hold(4)
