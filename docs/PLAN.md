@@ -151,6 +151,21 @@ today.
 
 ---
 
+## Possible features, not now
+
+Ideas that came from people, written down so they are not lost and not built before the evidence is there.
+
+### A voice or character you pick by mood *(9 November 2026, from a person living with diabetes)*
+She liked Happy Bob, an app with several characters she can choose between to suit her mood. For DiaBite it would first be a **voice**, not a picture: a setting in the profile with three choices ("Plain" by default, "Warm", "Playful") that changes only the words around the numbers. Numbers, verdicts, refusals and red-flag answers stay exactly as they are.
+
+- **Why wait:** one person said it, and she uses a glucose sensor, which most people with type 2 or prediabetes do not. The beta of 10 to 20 people should say whether anyone changes the setting at all.
+- **Against the design contract:** `docs/design.md` rules out streaks, scores, confetti and praise, so a picture or a mascot needs a decision from the owner. A voice does not.
+- **Safety rules if it is ever built:** refusals, dosing answers and red flags read the same in every voice; a person who told us about disordered eating always gets the plain voice; no voice is sarcastic about a meal that went over (the reason "Not today" was changed).
+- **Cost:** a prompt instruction and a profile field; every voice has to pass the agent evals, so the run is repeated per voice.
+- **First test, cheap:** three sample answers to the same question, shown to the testers, before anything is built.
+
+---
+
 ## What I would not build yet
 
 - **Photo logging.** It is the most demanded feature in this category and the
