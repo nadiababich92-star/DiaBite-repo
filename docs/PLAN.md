@@ -151,6 +151,24 @@ today.
 
 ---
 
+## Questions waiting for a clinician
+
+*From a literature check on 9 November 2026 (a search tool that reads papers, given the five decisions in `docs/research-brief-literature.md`).* Nothing here has been changed in the product. The owner decides which physician receives which question; no message has been sent.
+
+1. **Protein cap with kidney disease.** Today: 0.8 g/kg for anyone who reports chronic kidney disease, 1.0 g/kg if they only mention kidney trouble. The search found that guidelines converge on 0.8 g/kg only for advanced disease (eGFR below 30) and do not advise restriction earlier, so an unstaged cap may under-feed most people who report it. *Options:* a cap only when a stage or eGFR is stated; or no protein target at all when kidney disease is reported. *Pack question:* Q4.
+2. **Protein while losing weight.** Today: 1.6 g/kg. Above the type 2 diabetes literature, inside the GLP-1 literature. *Option:* a range of 1.2 to 1.6 g/kg instead of a single value. *Pack questions:* Q3, Q19.
+3. **Disordered eating.** Today: no deficit, no "budget left" framing, very low carbohydrate blocked, referral when raised in conversation. The search suggests it should be an exit (no targets at all), and notes that risk is higher in type 2 than type 1 diabetes. *Pack question:* the same exits in section A.
+4. **The 70 mg/dL stop.** Today: at a stated glucose below 70 the conversation about food stops and the person is told to seek help; no hypoglycaemia instruction is given. The search judged this the rule most likely to be wrong, and a person living with diabetes independently mentioned fifteen-gram treatment. *Option:* a fixed, pre-written instruction in the safety rules (not model-written), worded by physicians. *Pack question:* Q12.
+5. **Present the daily glycemic-load ceiling as a guide, not a target.** Two separate searches found no direct evidence for a daily ceiling or for the 45, 50 and 120 numbers. *Option:* soften the wording in the app ("daily guide") and say in the review pack that it is a heuristic. *Pack questions:* Q7 to Q9, Q18.
+
+**Best supported, no change proposed:** blocking very low carbohydrate with an SGLT2 inhibitor; a 1.2 g/kg protein floor with a GLP-1 medicine.
+
+**How far to trust this.** The tool reads a limited set of papers, so "no support in these papers" does not mean "no support". Some figures come from other populations (for example, adults on intensive insulin, who are not our users). Open every cited paper before quoting it, and bring physicians the papers with the question, not the tool's summary.
+
+**Next:** choose who gets which question; prepare a one-page note for physicians (what we do now, what the sources say, two or three wordings to choose from).
+
+---
+
 ## Possible features, not now
 
 Ideas that came from people, written down so they are not lost and not built before the evidence is there.
