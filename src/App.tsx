@@ -9,6 +9,7 @@ import SettingsPage from './components/SettingsPage'
 import SignIn from './components/SignIn'
 import Landing from './components/Landing'
 import HowItWorks from './components/HowItWorks'
+import GlInfo from './components/GlInfo'
 import Onboarding from './components/Onboarding'
 import MenuPage from './components/MenuPage'
 import ProfilePage from './components/ProfilePage'
@@ -61,6 +62,7 @@ export default function App() {
     return seen
   })
   const [howOpen, setHowOpen] = useState(false)
+  const [glOpen, setGlOpen] = useState(false)
 
   // The account: loaded once per sign-in, then kept in step by useAccountSync.
   const [account, setAccount] = useState<AccountState>('none')
@@ -229,7 +231,7 @@ export default function App() {
         <AskPage
           profile={profile} targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} onOpenDiary={() => setTab('diary')} onSessionEnded={sessionEnded}
           logTarget={logTarget} onClearTarget={() => setLogTarget(null)}
-          tourSeen={tourSeen} onTourSeen={(s) => { setTourSeen(s); saveTour(s) }} tourSuspended={feedbackOpen || waiting > 0 || howOpen}
+          tourSeen={tourSeen} onTourSeen={(s) => { setTourSeen(s); saveTour(s) }} tourSuspended={feedbackOpen || waiting > 0 || howOpen || glOpen}
         />
       )}
       {tab === 'diary' && (
@@ -257,6 +259,7 @@ export default function App() {
         <SettingsPage
           onFeedback={() => setFeedbackOpen(true)}
           onHowItWorks={() => setHowOpen(true)}
+          onGlInfo={() => setGlOpen(true)}
           account={<>
             {auth.status === 'signedIn' && auth.userId && <AccountBlock userId={auth.userId} email={auth.email} />}
             {auth.status === 'signedOut' && !signInRequired && supabaseConfigured && (
@@ -290,6 +293,7 @@ export default function App() {
 
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
       {howOpen && <HowItWorks onClose={() => setHowOpen(false)} />}
+      {glOpen && <GlInfo budget={targets.glBudget} onClose={() => setGlOpen(false)} />}
       {waiting > 0 && !feedbackOpen && <ImportPrompt count={waiting} onMove={moveLegacyDiary} onLater={() => setWaiting(0)} />}
     </div>
   )

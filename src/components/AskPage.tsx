@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import GlInfo from './GlInfo'
 import { boldSegments, isLabelled, parseMeal } from '../lib/answer'
 import { sessionId } from '../lib/session'
 import { accessToken } from '../lib/auth'
@@ -84,7 +83,7 @@ const bold = (line: string, key: string) =>
  * the prose agrees with them — laid out so the one that matters is the one
  * you see.
  */
-function Figures({ reply, onGl, countBy }: { reply: AgentResponse; onGl?: () => void; countBy: CountBy }) {
+function Figures({ reply, countBy }: { reply: AgentResponse; countBy: CountBy }) {
   const meal = lastMealCall(reply.trace)?.result as
     | { totals?: { gl?: number; carbs?: number; availableCarbs?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean | null }; assumed?: boolean }
     | undefined
@@ -113,7 +112,6 @@ function Figures({ reply, onGl, countBy }: { reply: AgentResponse; onGl?: () => 
   return (
     <>
       <FigurePair countBy={countBy} gl={{ mealGl, before, after, fits, partial, assumed: meal?.assumed }} carbs={meal?.totals as CarbFigures | undefined} />
-      {onGl && <button className="link gl-link" onClick={onGl}>What are GI and GL?</button>}
     </>
   )
 }
@@ -166,7 +164,7 @@ function Fold({ when, title, children }: { when: boolean; title: string; childre
   return when ? <details className="was-original"><summary>{title}</summary>{children}</details> : <>{children}</>
 }
 
-function RecalcCard({ rc, onBack, onGl, note, was, countBy }: { rc: Recalc; onBack: () => void; onGl: () => void; note?: string; was?: { gl: number; after: number | null }; countBy: CountBy }) {
+function RecalcCard({ rc, onBack, note, was, countBy }: { rc: Recalc; onBack: () => void; note?: string; was?: { gl: number; after: number | null }; countBy: CountBy }) {
   // A dish counted from an assumed recipe stays an estimate through every recalculation: never a plain "Fits".
   const tone = rc.assumed && rc.fits !== undefined ? 'estimate'
     : rc.fits === true ? 'good' : rc.fits === false ? 'bad' : rc.fits === null ? 'partial' : 'ask'
@@ -190,7 +188,6 @@ function RecalcCard({ rc, onBack, onGl, note, was, countBy }: { rc: Recalc; onBa
                 {was.after !== null && <>, {was.after >= 0 ? 'left after' : 'over by'} <b className="num">{Math.abs(was.after)}</b></>}
               </p>
             )}
-            <button className="link gl-link" onClick={onGl}>What are GI and GL?</button>
           </>
         ) : (
           <>
@@ -254,8 +251,8 @@ function PortionEditor({ lines, grams, busy, error, onNudge, assumed, removed, o
   )
 }
 
-function Answer({ text, reply, onGl, onSwap, swapState, countBy }: {
-  text: string; reply?: AgentResponse; onGl?: () => void
+function Answer({ text, reply, onSwap, swapState, countBy }: {
+  text: string; reply?: AgentResponse
   /** Which way of counting the person uses: its figures come first. */
   countBy: CountBy
   /** Accept the swap the Next line suggests. Absent where the answer is not the one to act on. */
@@ -279,7 +276,7 @@ function Answer({ text, reply, onGl, onSwap, swapState, countBy }: {
     return (
       <div className="answer-text">
         <p className="a-verdict">{bold(parts.verdict, 'v')}</p>
-        {reply && <Figures reply={reply} onGl={onGl} countBy={countBy} />}
+        {reply && <Figures reply={reply} countBy={countBy} />}
         {parts.numbers && !figuresShown && <p className="a-numbers">{bold(parts.numbers, 'n')}</p>}
         {parts.why && <p className="a-why">{bold(parts.why, 'w')}</p>}
         {parts.next && (
@@ -466,7 +463,6 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   const [swap, setSwap] = useState<{ index: number; id: string; name: string; unit: 'g' | 'serving'; portion: number; replaced: string } | null>(null)
   const [recalcBusy, setRecalcBusy] = useState(false)
   const [recalcError, setRecalcError] = useState('')
-  const [glOpen, setGlOpen] = useState(false)
   const [saved, setSaved] = useState<number>(savedCount)
   const [fresh, setFresh] = useState<boolean>(readFresh)
   const toggleFresh = () => {
@@ -495,15 +491,15 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   // "How is it going?": after the third meal and on a later day, once each, and only when nothing else is going on.
   const [card, setCard] = useState<Milestone | null>(visitCard)
   const facts = useMemo(() => nudgeFacts(diary), [diary])
-  const tipShowing = nextStep(tourSeen, { hasReply: !!reply, hasReceipt: !!receipt, assumed: !!receipt?.assumed, busy, suspended: tourSuspended || glOpen }) !== null
+  const tipShowing = nextStep(tourSeen, { hasReply: !!reply, hasReceipt: !!receipt, assumed: !!receipt?.assumed, busy, suspended: tourSuspended }) !== null
   useEffect(() => {
     if (card) return
     const due = nextNudge({
       ...facts, today, asked: sanitizeAsked(loadNudge()),
-      busy: busy || !!recalcBusy, suspended: tourSuspended || glOpen || tipShowing, shownThisVisit: visitCardShown,
+      busy: busy || !!recalcBusy, suspended: tourSuspended || tipShowing, shownThisVisit: visitCardShown,
     })
     if (due) { visitCard = due; visitCardShown = true; setCard(due) }
-  }, [card, facts, today, busy, recalcBusy, tourSuspended, glOpen, tipShowing])
+  }, [card, facts, today, busy, recalcBusy, tourSuspended, tipShowing])
   const cardAsked = (m: Milestone) => saveNudge(markAsked(sanitizeAsked(loadNudge()), m))
   const cardClosed = () => { visitCard = null; setCard(null) }
   // What is logged and shown as the calculation: the portions the person chose, once they have chosen.
@@ -682,7 +678,10 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     <div>
       <section className={`card ask-hero${reply || busy ? ' compact' : ''}`}>
         <div className="ask-budget">
-          <span className="label">glycemic load left {dayWord}</span>
+          <div className="ask-budget-text">
+            <span className="label">glycemic load left {dayWord}</span>
+            <span className="ask-budget-note">How much your food can still add to your blood sugar {dayWord}.</span>
+          </div>
           <span className="value"><b className="num">{left}</b> <small>of {targets.glBudget}</small></span>
         </div>
         {/* The day, at a glance. A bar rather than a ring: a ring is a score
@@ -766,7 +765,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
       {reply && (
         <>
           <p className="muted asked">{asked}</p>
-          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setSwap(null); setRecalc(null) }} onGl={() => setGlOpen(true)} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The original answer is kept below.` : undefined} was={wasNow} countBy={profile.countBy} />}
+          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setSwap(null); setRecalc(null) }} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The original answer is kept below.` : undefined} was={wasNow} countBy={profile.countBy} />}
           {recalc && logBlock}
           <Fold when={!!recalc} title={swap ? 'Original answer, before the swap' : 'Original answer, before you changed a portion'}>
           <section className={`card answer tone-${tone}${recalc ? ' stale' : ''}`} role="status" aria-live="polite">
@@ -776,7 +775,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
                tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Over today’s budget' :
                tone === 'advice' ? 'Advice' : tone === 'estimate' ? 'Estimate' : tone === 'carbs' ? 'Carbs only' : tone === 'partial' ? 'Part of the meal' : 'One question first'}
             </div>
-            <Answer text={reply.answer} reply={reply} countBy={profile.countBy} onGl={recalc ? undefined : () => setGlOpen(true)} onSwap={receipt && !receipt.assumed ? acceptSwap : undefined} swapState={{ accepted: swap?.id ?? null, busy: !!swap && !recalc && !recalcError, failed: !!swap && !recalc && !!recalcError }} />
+            <Answer text={reply.answer} reply={reply} countBy={profile.countBy} onSwap={receipt && !receipt.assumed ? acceptSwap : undefined} swapState={{ accepted: swap?.id ?? null, busy: !!swap && !recalc && !recalcError, failed: !!swap && !recalc && !!recalcError }} />
             {!reply.blocked && (
               <div className="verify-row">
                 {reply.verified ? (
@@ -853,8 +852,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
       </div>
       {/* After everything else: the question box stays first on the screen, and the card is met on the way down, never in front of an answer. */}
       {card && <FeedbackNudge milestone={card} onAsked={cardAsked} onClose={cardClosed} />}
-      {glOpen && <GlInfo budget={targets.glBudget} onClose={() => setGlOpen(false)} />}
-      <Tour seen={tourSeen} onSeen={onTourSeen} ctx={{ hasReply: !!reply, hasReceipt: !!receipt, assumed: !!receipt?.assumed, busy, suspended: tourSuspended || glOpen }} />
+      <Tour seen={tourSeen} onSeen={onTourSeen} ctx={{ hasReply: !!reply, hasReceipt: !!receipt, assumed: !!receipt?.assumed, busy, suspended: tourSuspended }} />
     </div>
   )
 }

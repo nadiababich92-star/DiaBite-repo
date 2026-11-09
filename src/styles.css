@@ -300,6 +300,8 @@ tr:last-child td { border-bottom: none; }
 .ask-hero { padding: 22px 20px 20px; }
 .ask-budget { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
 .ask-budget .label, .chips-col .label { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+.ask-budget-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ask-budget-note { font-size: 13px; line-height: 1.35; color: var(--text-dim); }
 .ask-budget .value { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; }
 .ask-budget .value small { font-size: 13px; color: var(--text-faint); font-weight: 400; }
 .budget-bar {

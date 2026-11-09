@@ -9,10 +9,12 @@ interface Props {
   onFeedback: () => void
   /** Opens the "How it works" sheet. */
   onHowItWorks: () => void
+  /** Opens "What are GI and GL?". */
+  onGlInfo: () => void
 }
 
 /** The app's own settings: how it looks, the account, help. The person's health answers stay in Profile. */
-export default function SettingsPage({ account, onFeedback, onHowItWorks }: Props) {
+export default function SettingsPage({ account, onFeedback, onHowItWorks, onGlInfo }: Props) {
   const [theme, setTheme] = useState<ThemeChoice>(loadTheme)
   const choose = (c: ThemeChoice) => { setTheme(c); saveTheme(c) }
 
@@ -41,6 +43,7 @@ export default function SettingsPage({ account, onFeedback, onHowItWorks }: Prop
         <p className="muted">Tell us what was wrong, unclear or missing. It goes to the people building DiaBite.</p>
         <div className="row">
           <button className="ghost" onClick={onHowItWorks}>How it works</button>
+          <button className="ghost" onClick={onGlInfo}>What are GI and GL?</button>
           <button className="ghost" onClick={onFeedback}>Send feedback</button>
         </div>
       </section>
