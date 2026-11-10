@@ -42,7 +42,7 @@ import { authInUrl, showLanding, skipLanding } from '../src/lib/landingRule'
 import { allCopy, allSteps, copyFor, initialSeen, markSeen, nextStep, sanitizeSeen, STEP_ORDER, type TourContext } from '../src/lib/tour'
 import { generateWeek, menuHidden, regenerateSlot, replayWeek, setRecipes, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
 import { toDishes } from '../src/lib/recipes'
-import { ALLERGEN_PATTERNS, PATTERN_PATTERNS, AVOIDED_PATTERNS } from '../src/lib/dietary'
+import { ALLERGEN_PATTERNS, PATTERN_PATTERNS, AVOIDED_PATTERNS, dietaryReason } from '../src/lib/dietary'
 import { loadWeekState } from '../src/lib/menuStore'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type NudgeContext } from '../src/lib/nudge'
 import { clampDate, dateAllowed, eaten, isPlanned, markEaten, pickerState, plannedOnly } from '../src/lib/diary'
@@ -74,7 +74,7 @@ interface GateCase { phrase: string; rule: string | null }
 interface VerifyCase { id: string; answer: string; toolResults: unknown[]; ok: boolean }
 
 const cases = JSON.parse(readFileSync(join(ROOT, 'eval', 'cases.json'), 'utf8')) as {
-  engine: { resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[]; answer: AnswerCase[]; portion: { id: string; grams: number }[]; partial: PartialCase[]; branded: { id: string; foodId: string; grams: number }[] }
+  engine: { resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[]; answer: AnswerCase[]; portion: { id: string; grams: number }[]; partial: PartialCase[]; branded: { id: string; foodId: string; grams: number }[]; carbLimit: { id: string; kind: 'meal' | 'snack' | null; limitG: number | null; mealCarbs: number; over: boolean | null }[]; avoidWords: { id: string; word: string; text: string; hit: boolean }[] }
 }
 
 const t0 = Date.now()
@@ -1195,6 +1195,28 @@ for (const c of cases.engine.partial) {
 console.log(`\npartial   ${cases.engine.partial.length - partialMisses.length}/${cases.engine.partial.length}`)
 if (partialMisses.length) { console.log('  a partial meal got the wrong verdict:'); partialMisses.forEach((m) => console.log(m)) }
 
+// ── carbLimit and typed words ─────────────────────────────────────────────────
+// The person's own carbohydrate number is compared by the engine, and the answer only reads the result: `over` never
+// changes `fits`. A word typed from the recipes' ingredients keeps a food out of swaps the way an excluded record does.
+
+const carbMisses: string[] = []
+for (const c of cases.engine.carbLimit) {
+  const after = afterMealFor(room(20), { gl: 5, carbs: c.mealCarbs, kcal: 100 }, [], [], c.kind ? { kind: c.kind, g: c.limitG as number } : undefined)
+  const got = after.carbLimit
+  const ok = c.over === null ? got === undefined : got?.over === c.over && got.limitG === c.limitG && got.mealG === c.mealCarbs && got.kind === c.kind && after.fits === true
+  if (!ok) carbMisses.push(`    ${c.id.padEnd(26)} want over=${c.over} got ${JSON.stringify(got)} fits=${after.fits}`)
+}
+console.log(`\ncarbLimit ${cases.engine.carbLimit.length - carbMisses.length}/${cases.engine.carbLimit.length}`)
+if (carbMisses.length) { console.log('  the engine compared the person\'s own carbohydrate number wrongly:'); carbMisses.forEach((m) => console.log(m)) }
+
+const wordMisses: string[] = []
+for (const c of cases.engine.avoidWords) {
+  const got = dietaryReason(c.text, { words: [c.word] }) !== null
+  if (got !== c.hit) wordMisses.push(`    ${c.id.padEnd(26)} "${c.word}" in "${c.text}" want ${c.hit} got ${got}`)
+}
+console.log(`avoidWords ${cases.engine.avoidWords.length - wordMisses.length}/${cases.engine.avoidWords.length}`)
+if (wordMisses.length) { console.log('  a typed ingredient was matched wrongly:'); wordMisses.forEach((m) => console.log(m)) }
+
 // ── answer ────────────────────────────────────────────────────────────────────
 // The browser reads a meal answer's verdict and next step out of the agent's
 // text. The model writes the labelled form and the plain form about equally,
@@ -1302,6 +1324,8 @@ if (gateMisses.length) { console.log('the safety gate disagreed with a probe'); 
 if (answerMisses.length) { console.log('an answer was parsed wrong'); process.exit(1) }
 if (portionMisses.length) { console.log('a default serving is wrong'); process.exit(1) }
 if (partialMisses.length) { console.log('a partial meal was called a fit'); process.exit(1) }
+if (carbMisses.length) { console.log('the person\'s own carbohydrate number was compared wrongly'); process.exit(1) }
+if (wordMisses.length) { console.log('a typed ingredient was matched wrongly'); process.exit(1) }
 if (menuMisses.length) { console.log('the weekly menu broke a rule'); process.exit(1) }
 if (routeMisses.length) { console.log('a message started the meal agent that should have waited'); process.exit(1) }
 if (accountMisses.length) { console.log('the account sync or the sign-in messages misbehaved'); process.exit(1) }

@@ -33,7 +33,7 @@ interface Case {
   dimension: string
   query: string
   ground_truth: string
-  context: { budget: { glBudget: number; carbsG: number; kcal: number }; entries: unknown[] }
+  context: { budget: { glBudget: number; carbsG: number; kcal: number }; entries: unknown[]; carbLimit?: { kind: 'meal' | 'snack'; g: number }; avoid?: Record<string, unknown> }
   expect: Record<string, unknown>
   judge: string
   tags: string[]
@@ -166,6 +166,22 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
     for (const op of e.toolsCalled as string[]) say(`calls ${op}`, called(r, op))
   }
   if (e.verified === true) say('verified', r.verified === true, JSON.stringify(r.unmatchedNumbers))
+  // The person's own carbohydrate number (rule 7: the engine's comparison is read from the tool result, and the answer is
+  // checked for the engine's figures, never for a phrase). Over: the answer carries both numbers. Not over: it carries neither
+  // the limit nor a mention of one. No limit set: the engine returns no such field at all.
+  {
+    const cl = (callOf(r, 'compute_meal')?.result as { afterMeal?: { carbLimit?: { limitG: number; mealG: number; over: boolean } } } | undefined)?.afterMeal?.carbLimit
+    const said = new Set(r.matchedNumbers ?? [])
+    if (e.carbLimitOver === true) {
+      say('engine says the meal is over the person\'s number', cl?.over === true, JSON.stringify(cl))
+      say('the answer states the limit and the meal\'s carbohydrate', !!cl && said.has(cl.limitG) && said.has(cl.mealG), `limit ${cl?.limitG} meal ${cl?.mealG} said ${[...said].join(',')}`)
+    }
+    if (e.carbLimitUnder === true) {
+      say('engine says the meal is not over the person\'s number', cl?.over === false, JSON.stringify(cl))
+      say('the answer does not raise a limit the meal is under', !!cl && !said.has(cl.limitG), `limit ${cl?.limitG} said ${[...said].join(',')}`)
+    }
+    if (e.noCarbLimitField === true) say('no carbohydrate limit in the result when none was set', cl === undefined, JSON.stringify(cl))
+  }
   if (e.noComputeMeal === true) say('no compute_meal', !called(r, 'compute_meal'))
   if (e.noToolCalls === true) say('no tool calls', (r.toolCalls ?? 0) === 0)
   if (e.blocked === true) say('blocked', r.blocked === true)
@@ -501,6 +517,8 @@ for (const c of runnable) {
       message: c.query,
       budget: c.context?.budget,
       entries: c.context?.entries,
+      ...(c.context?.carbLimit ? { carbLimit: c.context.carbLimit } : {}),
+      ...(c.context?.avoid ? { avoid: c.context.avoid } : {}),
     }),
   })
   if (!res.ok) {

@@ -24,7 +24,9 @@ export interface AgentRequest {
    * hand. Sent with the day state so the engine can filter suggestions itself —
    * an allergy is not something to leave to a prompt.
    */
-  avoid?: { allergens?: string[]; foodIds?: string[]; pattern?: string; avoided?: string[] }
+  avoid?: { allergens?: string[]; foodIds?: string[]; pattern?: string; avoided?: string[]; words?: string[] }
+  /** The person's own carbohydrate number for what they are asking about; the engine compares it, the answer only reads the result. */
+  carbLimit?: { kind: 'meal' | 'snack'; g: number }
 }
 
 export interface TraceStep {
@@ -66,10 +68,12 @@ export function avoidOf(p: Profile): AgentRequest['avoid'] {
   const allergens = [...(p.allergens ?? [])]
   // Only the everyday foods are known to the engine; a hand-typed ingredient (`ing:`) is kept out of the menu, not sent here.
   const foodIds = (p.excludedFoodIds ?? []).filter((id) => !id.startsWith('ing:')).map((id) => `seed:${id}`)
+  // The engine accepts letters and spaces only (server/guard.ts), so a name like "half & half" is cleaned here, never refused there.
+  const words = [...new Set((p.excludedFoodIds ?? []).filter((id) => id.startsWith('ing:')).map((id) => id.slice(4).replace(/[^a-z ]/gi, ' ').replace(/\s+/g, ' ').trim().toLowerCase()).filter((w) => w.length >= 3 && w.length <= 40))].slice(0, 50)
   if (p.comorbidities?.includes('celiac') && !allergens.includes('gluten')) allergens.push('gluten')
   const pattern = p.pattern && p.pattern !== 'none' ? p.pattern : undefined
   const avoided = [...(p.avoided ?? [])]
-  return allergens.length || foodIds.length || pattern || avoided.length ? { allergens, foodIds, pattern, avoided } : undefined
+  return allergens.length || foodIds.length || pattern || avoided.length || words.length ? { allergens, foodIds, pattern, avoided, ...(words.length ? { words } : {}) } : undefined
 }
 
 /** The engine said "not now": over a limit, with how long to wait. Not an agent answer. */

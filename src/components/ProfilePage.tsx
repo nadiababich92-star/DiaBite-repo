@@ -293,8 +293,8 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
         </p>
         {profile.excludedFoodIds.some(isIngredientId) && (
           <p className="muted" style={{ margin: '8px 0 0' }}>
-            An ingredient you add from the recipes is kept out of the weekly menu. When you ask about a single meal,
-            DiaBite does not check it yet, so look at what it used.
+            An ingredient you add from the recipes is kept out of the weekly menu and out of the swaps DiaBite suggests.
+            If you describe a meal that contains it, DiaBite still counts the meal as you said it, so look at what it used.
           </p>
         )}
         {profile.excludedFoodIds.length > 0 && (

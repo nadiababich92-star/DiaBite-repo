@@ -73,6 +73,8 @@ export interface AvoidList {
   pattern?: Pattern
   /** Meats the person does not eat, by their own choice. */
   avoided?: Avoided[]
+  /** Ingredients the person left out by hand from the recipes' own list ("pistachios"): a word at the start of a word in a name. */
+  words?: string[]
 }
 
 /**
@@ -88,6 +90,7 @@ export function dietaryReason(text: string, avoid: AvoidList | undefined): strin
   for (const m of avoid.avoided ?? []) if (AVOIDED_PATTERNS[m]?.test(text)) return m
   const p = avoid.pattern
   if (p && p !== 'none' && PATTERN_PATTERNS[p].test(text)) return p
+  for (const w of avoid.words ?? []) if (new RegExp(`\\b${w.replace(/[^a-z0-9 ]/gi, '').replace(/s$/i, '')}`, 'i').test(text)) return 'excluded'
   return null
 }
 

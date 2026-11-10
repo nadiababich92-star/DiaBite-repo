@@ -606,6 +606,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
         message: q,
         budget: budgetOf(targets),
         avoid: avoidOf(profile),
+        ...(carbLimit.g > 0 ? { carbLimit: { kind: carbLimit.kind, g: carbLimit.g } } : {}),
         entries: fresh ? [] : counted.filter((e) => e.date === forDay).map((e) => (e.snapshot?.servings
           ? { foodId: engineId(e), servings: e.snapshot.servings }
           : { foodId: engineId(e), grams: e.grams })),

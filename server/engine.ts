@@ -36,7 +36,7 @@ import { openApiSpec } from './openapi'
 import { ask, SessionNotYours, SignInRequired, type AskRequest } from './agent'
 import { personOf, signInRequired } from './auth'
 import { createHash, timingSafeEqual } from 'node:crypto'
-import { RateLimited, addressKey, chargeDelete, chargeRecompute, originAllowed, sourceTag, validSessionId, validateAsk, validateDish, validateRecompute } from './guard'
+import { RateLimited, addressKey, chargeDelete, chargeRecompute, originAllowed, sourceTag, validCarbLimit, validSessionId, validateAsk, validateDish, validateRecompute } from './guard'
 import type {
   AlternativesRequest, ComputeMealRequest, CostDishRequest, DayStateRequest, ResolveRequest, VerifyRequest,
 } from './contract'
@@ -194,10 +194,11 @@ async function main() {
 
   /** The client parks the day's budget and log here, then hands the agent only the id. */
   app.put('/session/:id', (req, res) => {
-    const { budget, entries, avoid } = req.body ?? {}
+    const { budget, entries, avoid, carbLimit } = req.body ?? {}
     if (!validSessionId(req.params.id)) return res.status(400).json({ error: 'invalid session id' })
     if (!budget || !Array.isArray(entries) || entries.length > 100) return res.status(400).json({ error: 'budget and at most 100 entries required' })
-    putSession(req.params.id, budget, entries, avoid)
+    if (carbLimit !== undefined && !validCarbLimit(carbLimit)) return res.status(400).json({ error: 'invalid carbLimit' })
+    putSession(req.params.id, budget, entries, avoid, carbLimit)
     res.json({ ok: true, sessionId: req.params.id, entries: entries.length })
   })
 
@@ -339,7 +340,7 @@ async function main() {
         out.dayState = day
         const unknownFoods = getSession(body.sessionId)?.unknownFoods ?? []
         const unscored = meal.items.filter((it) => !it.loadAvailable).map((it) => it.name)
-        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, withDayUnscored(unscored, day))
+        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, withDayUnscored(unscored, day), (body.sessionId ? getSession(body.sessionId)?.carbLimit : undefined))
       }
       res.json(out)
     } catch (e) {
@@ -397,7 +398,7 @@ async function main() {
       if (day && !('unknown' in day)) {
         const unknownFoods = (body.sessionId ? getSession(body.sessionId)?.unknownFoods : undefined) ?? []
         const unscored = meal.items.filter((it) => !it.loadAvailable).map((it) => it.name)
-        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, withDayUnscored(unscored, day))
+        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, withDayUnscored(unscored, day), (body.sessionId ? getSession(body.sessionId)?.carbLimit : undefined))
       }
 
       const remaining = day && !('unknown' in day) ? day.remaining.gl : undefined
@@ -468,7 +469,7 @@ async function main() {
       if (day && !('unknown' in day)) {
         const unknownFoods = (body.sessionId ? getSession(body.sessionId)?.unknownFoods : undefined) ?? []
         const unscored = meal.items.filter((it) => !it.loadAvailable).map((it) => it.name)
-        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, withDayUnscored(unscored, day))
+        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, withDayUnscored(unscored, day), (body.sessionId ? getSession(body.sessionId)?.carbLimit : undefined))
       }
       res.json(out)
     } catch (e) {

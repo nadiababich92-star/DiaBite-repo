@@ -63,7 +63,14 @@ export function validateAsk(body: unknown): Invalid | null {
     }
   }
   if (b.avoid !== undefined && !validAvoid(b.avoid)) return { field: 'avoid' }
+  if (b.carbLimit !== undefined && !validCarbLimit(b.carbLimit)) return { field: 'carbLimit' }
   return null
+}
+
+/** The person's own carbohydrate number for the thing they are about to eat: a meal or a snack, 10 to 150 g. */
+export function validCarbLimit(v: unknown): boolean {
+  const c = v as Record<string, unknown> | null
+  return !!c && typeof c === 'object' && (c.kind === 'meal' || c.kind === 'snack') && finite(c.g) && (c.g as number) >= 10 && (c.g as number) <= 150
 }
 
 /**
@@ -82,6 +89,7 @@ function validAvoid(v: unknown): boolean {
   return known(a.allergens, (s) => Object.hasOwn(ALLERGEN_PATTERNS, s), 20)
     && known(a.avoided, (s) => Object.hasOwn(AVOIDED_PATTERNS, s), 8)
     && known(a.foodIds, () => true, MAX_ENTRIES)
+    && known(a.words, (s) => /^[a-z][a-z ]{1,39}$/i.test(s), 50)
     && (a.pattern === undefined || a.pattern === 'none' || (typeof a.pattern === 'string' && Object.hasOwn(PATTERN_PATTERNS, a.pattern)))
 }
 

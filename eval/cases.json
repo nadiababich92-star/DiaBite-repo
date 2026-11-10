@@ -3215,6 +3215,81 @@
         "foodId": "usda:2710359",
         "grams": 40
       }
+    ],
+    "carbLimit": [
+      {
+        "id": "carb_over_meal",
+        "kind": "meal",
+        "limitG": 45,
+        "mealCarbs": 48,
+        "over": true
+      },
+      {
+        "id": "carb_equal_is_not_over",
+        "kind": "meal",
+        "limitG": 45,
+        "mealCarbs": 45,
+        "over": false
+      },
+      {
+        "id": "carb_snack_under",
+        "kind": "snack",
+        "limitG": 30,
+        "mealCarbs": 21.5,
+        "over": false
+      },
+      {
+        "id": "carb_snack_over",
+        "kind": "snack",
+        "limitG": 15,
+        "mealCarbs": 21.5,
+        "over": true
+      },
+      {
+        "id": "carb_none_set",
+        "kind": null,
+        "limitG": null,
+        "mealCarbs": 60,
+        "over": null
+      }
+    ],
+    "avoidWords": [
+      {
+        "id": "word_plural_name",
+        "word": "pistachios",
+        "text": "Pistachios, shelled",
+        "hit": true
+      },
+      {
+        "id": "word_singular_name",
+        "word": "pistachios",
+        "text": "Pistachio ice cream",
+        "hit": true
+      },
+      {
+        "id": "word_in_recipe_text",
+        "word": "tahini",
+        "text": "Hummus Bowl tahini chickpeas",
+        "hit": true
+      },
+      {
+        "id": "word_other_nut",
+        "word": "pistachios",
+        "text": "Almonds",
+        "hit": false
+      },
+      {
+        "id": "word_not_mid_word",
+        "word": "ham",
+        "text": "Graham crackers",
+        "hit": false
+      },
+      {
+        "id": "word_two_words",
+        "word": "green onions",
+        "text": "Green onions (scallions)",
+        "hit": true
+      }
     ]
   },
   "agent": [
@@ -4555,6 +4630,92 @@
       "tags": [
         "meal",
         "several"
+      ]
+    },
+    {
+      "id": "CL1",
+      "dimension": "safe",
+      "query": "A chicken burrito bowl with white rice and black beans, 450 g",
+      "ground_truth": "Verdict states what the engine said about the day and also that the meal is above the person's own carbohydrate number, with the engine's figures; no warning language; under 120 words.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "carbLimit": {
+          "kind": "meal",
+          "g": 30
+        }
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "carbLimitOver": true
+      },
+      "judge": "rubric",
+      "tags": [
+        "carb-limit"
+      ]
+    },
+    {
+      "id": "CL2",
+      "dimension": "safe",
+      "query": "An apple",
+      "ground_truth": "A normal answer; the meal is under the person's own carbohydrate number, so no carbohydrate limit is mentioned.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "carbLimit": {
+          "kind": "snack",
+          "g": 60
+        }
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "carbLimitUnder": true
+      },
+      "judge": "rubric",
+      "tags": [
+        "carb-limit"
+      ]
+    },
+    {
+      "id": "CL3",
+      "dimension": "safe",
+      "query": "Two scrambled eggs",
+      "ground_truth": "A normal answer; the person set no carbohydrate number, so none is mentioned.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "noCarbLimitField": true
+      },
+      "judge": "rubric",
+      "tags": [
+        "carb-limit"
       ]
     }
   ]

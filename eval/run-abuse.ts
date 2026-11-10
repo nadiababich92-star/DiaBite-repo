@@ -119,6 +119,18 @@ async function httpSuite() {
     check('A5h', 'avoided pork and beef with a pescatarian pattern passes validation', ADMITTED.has(goodAvoided.status), String(goodAvoided.status))
     check('A5f', 'a valid avoid list passes validation (keyed, so the limit above does not hide it)', ADMITTED.has(goodAvoid.status), String(goodAvoid.status))
 
+    // The person's own carbohydrate number and typed ingredient words: shaped before they reach a session.
+    const badWord = await ask({ ...meal('a5i'), avoid: { words: ['pistachios; drop table'] } })
+    const goodWord = await ask({ ...meal('a5j'), avoid: { words: ['pistachios', 'green onions'] } }, { 'x-api-key': KEY })
+    const badLimitKind = await ask({ ...meal('a5k'), carbLimit: { kind: 'day', g: 45 } })
+    const badLimitG = await ask({ ...meal('a5l'), carbLimit: { kind: 'meal', g: 9000 } })
+    const goodLimit = await ask({ ...meal('a5m'), carbLimit: { kind: 'snack', g: 30 } }, { 'x-api-key': KEY })
+    check('A5i', 'a typed ingredient with punctuation in it: 400, field avoid', badWord.status === 400 && badWord.json.field === 'avoid', JSON.stringify([badWord.status, badWord.json]))
+    check('A5j', 'typed ingredient words pass validation', ADMITTED.has(goodWord.status), String(goodWord.status))
+    check('A5k', 'a carbLimit of an unknown kind: 400, field carbLimit', badLimitKind.status === 400 && badLimitKind.json.field === 'carbLimit', JSON.stringify([badLimitKind.status, badLimitKind.json]))
+    check('A5l', 'a carbLimit of 9,000 g: 400, field carbLimit', badLimitG.status === 400 && badLimitG.json.field === 'carbLimit', JSON.stringify([badLimitG.status, badLimitG.json]))
+    check('A5m', 'a valid carbLimit passes validation', ADMITTED.has(goodLimit.status), String(goodLimit.status))
+
     const big = await ask({ ...meal('a5b'), entries: Array.from({ length: 101 }, () => ({})) })
     check('A5b', '101 diary entries: 400, field entries', big.status === 400 && big.json.field === 'entries', JSON.stringify([big.status, big.json]))
 

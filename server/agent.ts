@@ -303,6 +303,8 @@ export interface AskRequest {
   entries?: MealItemInput[]
   /** Allergens and excluded foods; parked with the day state, never shown to the model. */
   avoid?: AvoidList
+  /** The person's own carbohydrate number for this meal or snack; parked with the day state, compared by the engine. */
+  carbLimit?: { kind: 'meal' | 'snack'; g: number }
 }
 
 export interface ToolCallTrace {
@@ -567,11 +569,11 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
 /** Park the day state where only the engine can read it. */
 async function parkDayState(req: AskRequest): Promise<void> {
   if (!req.budget || !req.entries) return
-  if (!ENGINE_URL) { putSession(req.sessionId, req.budget, req.entries, req.avoid); return }
+  if (!ENGINE_URL) { putSession(req.sessionId, req.budget, req.entries, req.avoid, req.carbLimit); return }
   const r = await fetch(`${ENGINE_URL}/session/${encodeURIComponent(req.sessionId)}`, {
     method: 'PUT',
     headers: { 'content-type': 'application/json', ...(ENGINE_KEY ? { 'x-api-key': ENGINE_KEY } : {}) },
-    body: JSON.stringify({ budget: req.budget, entries: req.entries, avoid: req.avoid }),
+    body: JSON.stringify({ budget: req.budget, entries: req.entries, avoid: req.avoid, carbLimit: req.carbLimit }),
   })
   if (!r.ok) throw new Error(`could not park the day state: ${r.status} ${await r.text()}`)
 }

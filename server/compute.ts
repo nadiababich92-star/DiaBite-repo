@@ -239,6 +239,7 @@ export function afterMealFor(
   meal: { gl: number; carbs: number; kcal: number },
   unknownFoods: string[] = [],
   unscored: string[] = [],
+  carbLimit?: { kind: 'meal' | 'snack'; g: number },
 ) {
   const after = {
     gl: Math.round((remaining.gl - meal.gl) * 10) / 10,
@@ -250,6 +251,7 @@ export function afterMealFor(
     remaining: after,
     fits: partial ? (after.gl >= 0 ? null : false) : after.gl >= 0,
     ...(partial ? { partial: { unknownFoods, ...(unscored.length ? { unscored } : {}) } } : {}),
+    ...(carbLimit ? { carbLimit: { kind: carbLimit.kind, limitG: carbLimit.g, mealG: meal.carbs, over: meal.carbs > carbLimit.g } } : {}),
   }
 }
 
