@@ -35,7 +35,7 @@ A person types a meal in their own words; DiaBite answers in about five seconds 
 
 **Anatomy of an answer:** the verdict as a sentence a person would say, three figures (this meal, before, left after), the reason (the food driving the load, and any portion assumed), and one next action taken from alternatives the engine returned. "Show calculation" opens a receipt of every food, portion, index and load, with its source marked checked or unverified.
 
-**A real answer (****16**** October):** "Two eggs, a slice of rye bread and half an avocado" costs 7.2 glycemic load against the day's 45, so it fits with 37.8 left; the rye bread drives the load, and the answer says which portions were assumed.
+**A real answer (10 November):** "Two eggs, a slice of rye bread and half an avocado" costs 7.2 glycemic load against the day's 45, so it fits with 37.8 left; the rye bread drives the load, and the answer says which portions were assumed.
 
 **What it does when it does not know:** a food the database lacks is never costed under a neighbour's name. The answer says it does not have it and asks what is in it. A meal with a missing food is costed without it, labelled partial, and never called a fit. One narrow exception: a prepared dish the database lacks can be counted from its own ingredients, each of them in the database, and is shown as an estimate with its assumed weights, never as a plain fit. Foods with no glycemic index (pizza, candy, packaged foods) show carbohydrate, fibre and calories and never an invented load.
 
