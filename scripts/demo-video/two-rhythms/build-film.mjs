@@ -99,7 +99,12 @@ const art = {
     s = s.replace('<rect x="304" y="156" width="352"', '<rect x="250" y="156" width="460"')
     s = rev(s, /<rect x="250" y="156"[^>]*\/>\s*<text[^>]*>A diary when it works\.<\/text>/, st[1])
     s = rev(s, /<text x="480" y="276"[^>]*>[^<]*<\/text>/, st[1] + 0.4)
-    s = s.replace(/(<defs><mask id="fb">[\s\S]*?<text x="582"[^>]*>Bite<\/text>)/, '<g transform="translate(-40,0)">$1</g>')
+    // The wordmark: the board drew "Dia" 44 units wide, the real font is 56, so "Bite" sat on top of it and the mark floated
+    // far to the left. Closed up to the measured widths (Dia 55.7, Bite 63.6) and centred on 480, by moving each part itself.
+    s = s.replace('translate(414,320) scale(1.05)', 'translate(371,320) scale(1.05)')
+         .replace('<text x="530" y="368"', '<text x="451" y="368"')
+         .replace('<rect x="574" y="336" width="86" height="40" rx="7" fill="#dcf26b" transform="rotate(-1.5 617 356)"/>', '<rect x="507" y="336" width="80" height="40" rx="7" fill="#dcf26b" transform="rotate(-1.5 547 356)"/>')
+         .replace('<text x="582" y="368"', '<text x="515" y="368"')
     s = rev(s, /<defs><mask id="fb">[\s\S]*?Free to try\. You sign in with your email\.<\/text>/, st[2])
     return s
   },
