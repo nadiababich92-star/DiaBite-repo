@@ -64,7 +64,8 @@ export function budgetOf(t: Targets): AgentRequest['budget'] {
 export function avoidOf(p: Profile): AgentRequest['avoid'] {
   // A copy: pushing onto the profile's own array would persist 'gluten' into it.
   const allergens = [...(p.allergens ?? [])]
-  const foodIds = (p.excludedFoodIds ?? []).map((id) => `seed:${id}`)
+  // Only the everyday foods are known to the engine; a hand-typed ingredient (`ing:`) is kept out of the menu, not sent here.
+  const foodIds = (p.excludedFoodIds ?? []).filter((id) => !id.startsWith('ing:')).map((id) => `seed:${id}`)
   if (p.comorbidities?.includes('celiac') && !allergens.includes('gluten')) allergens.push('gluten')
   const pattern = p.pattern && p.pattern !== 'none' ? p.pattern : undefined
   const avoided = [...(p.avoided ?? [])]

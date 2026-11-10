@@ -1,6 +1,6 @@
 import { DISHES } from '../data/dishes'
 import { dietaryReason } from './dietary'
-import { FOODS, getFood } from '../data/foods'
+import { FOODS, FOOD_BY_ID, getFood } from '../data/foods'
 import { addDays, isPlanned, MAX_AHEAD_DAYS } from './diary'
 import type { DiaryEntry, Dish, FoodCategory, MealType, Nutrients, Profile, Targets } from '../types'
 import { glycemicLoad, nutrientsFor, sumNutrients, weightedGI } from './glycemic'
@@ -156,13 +156,17 @@ export function menuHidden(profile: Profile): boolean {
 let RECIPES: Dish[] = []
 export const setRecipes = (list: Dish[]) => { RECIPES = list }
 export const recipeCount = () => RECIPES.length
+export const recipeList = (): Dish[] => RECIPES
 const library = (): Dish[] => (RECIPES.length ? [...DISHES, ...RECIPES] : DISHES)
 
 /** Words that name a food someone excluded by hand, to be looked for in a recipe's ingredients. Over-matching is the cheap mistake. */
 const GENERIC = new Set(['white', 'brown', 'red', 'green', 'black', 'cooked', 'raw', 'fresh', 'dried', 'whole', 'plain', 'low', 'fat', 'mixed', 'sweet', 'with', 'and', 'the'])
 export function excludedKeywords(foodId: string): string[] {
-  const name = (getFood(foodId)?.name ?? '').toLowerCase().split(/[,(]/)[0]
-  return [...new Set([...foodId.toLowerCase().split(/[-_ ]/), ...name.split(/[^a-z]+/)].filter((w) => w.length >= 3 && !GENERIC.has(w)))]
+  // A hand-typed ingredient ("ing:pistachios") is the word itself; an everyday food has a record to read the name from.
+  const typed = foodId.startsWith('ing:')
+  const name = (typed ? foodId.slice(4) : FOOD_BY_ID.get(foodId)?.name ?? '').toLowerCase().split(/[,(]/)[0]
+  const ids = typed ? [] : foodId.toLowerCase().split(/[-_ ]/)
+  return [...new Set([...ids, ...name.split(/[^a-z]+/)].filter((w) => w.length >= 3 && !GENERIC.has(w)))]
 }
 
 /** The dishes this person may be offered: the same answers the agent respects. */

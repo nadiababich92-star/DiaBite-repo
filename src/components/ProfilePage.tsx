@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { CATEGORY_LABELS, FOODS, getFood } from '../data/foods'
+import { CATEGORY_LABELS, FOODS } from '../data/foods'
+import { excludedLabel, ingredientOptions, isIngredientId } from '../lib/excludable'
+import { loadMenuRecipes } from '../lib/recipes'
 import {
   ACTIVITY_LABELS,
   CARB_APPROACH_LABELS,
@@ -31,12 +33,16 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
     onChange({ ...profile, [key]: value })
 
   const excluded = new Set(profile.excludedFoodIds)
-  const matches =
-    query.trim().length < 2
+  // The recipes' ingredients are in a separate file, fetched the first time the box is used.
+  const [, setRecipesReady] = useState(0)
+  const loadIngredients = () => { loadMenuRecipes().then(() => setRecipesReady((n) => n + 1)).catch(() => {}) }
+  const q = query.trim().toLowerCase()
+  const matches: { id: string; name: string; hint: string }[] =
+    q.length < 2
       ? []
-      : FOODS.filter(
-          (f) => !excluded.has(f.id) && f.name.toLowerCase().includes(query.trim().toLowerCase()),
-        ).slice(0, 8)
+      : [...FOODS.map((f) => ({ id: f.id, name: f.name, hint: CATEGORY_LABELS[f.category] })), ...ingredientOptions()]
+          .filter((f) => !excluded.has(f.id) && f.name.toLowerCase().includes(q))
+          .slice(0, 8)
 
   return (
     <>
@@ -256,6 +262,7 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
           placeholder="Start typing a food name"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onFocus={loadIngredients}
           aria-describedby="excluded-hint"
         />
         {matches.length > 0 && (
@@ -269,14 +276,14 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
                 }}
               >
                 <span>{f.name}</span>
-                <span className="meta">{CATEGORY_LABELS[f.category]}</span>
+                <span className="meta">{f.hint}</span>
               </button>
             ))}
           </div>
         )}
         {query.trim().length >= 2 && matches.length === 0 && (
           <p className="muted" role="status" style={{ margin: '8px 0 0' }}>
-            No food in the list matches "{query.trim()}". The list has the everyday foods only.
+            No food or recipe ingredient matches "{query.trim()}".
           </p>
         )}
         <p id="excluded-hint" className="muted" style={{ margin: '8px 0 0' }}>
@@ -284,14 +291,20 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
           (for example vegetarian or halal), use the questions you answered at the start: they cover the whole group.{' '}
           <button type="button" className="link" onClick={onRedoOnboarding}>Go through them again</button>
         </p>
+        {profile.excludedFoodIds.some(isIngredientId) && (
+          <p className="muted" style={{ margin: '8px 0 0' }}>
+            An ingredient you add from the recipes is kept out of the weekly menu. When you ask about a single meal,
+            DiaBite does not check it yet, so look at what it used.
+          </p>
+        )}
         {profile.excludedFoodIds.length > 0 && (
           <div className="chips">
             {profile.excludedFoodIds.map((id) => (
               <span key={id} className="chip">
-                {getFood(id).name}
+                {excludedLabel(id)}
                 <button
                   className="link"
-                  aria-label={`Remove ${getFood(id).name} from exclusions`}
+                  aria-label={`Remove ${excludedLabel(id)} from exclusions`}
                   onClick={() =>
                     set('excludedFoodIds', profile.excludedFoodIds.filter((x) => x !== id))
                   }
