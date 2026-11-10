@@ -1,8 +1,8 @@
 # DiaBite — Product Requirements (whole product)
 
-> A copy, made on 19 October 2026, of the Claude Docs document "DiaBite — Product Requirements (whole product)": https://claude.ai/artifact/N9q43Ju8mrP1ZWbtmF2q6D. The document is the live version; this file lets the repository, and anything reading it, see the same text. `docs/PRD.md` is the course PRD (Weeks 1 to 5) and stays as the full record with its revision log. The diagram in "At a glance" is in the document only.
+> A copy, made on 19 October 2026 and brought up to date on 10 November 2026, of the Claude Docs document "DiaBite — Product Requirements (whole product)": https://claude.ai/artifact/N9q43Ju8mrP1ZWbtmF2q6D. The document is the live version; this file lets the repository, and anything reading it, see the same text. `docs/PRD.md` is the course PRD (Weeks 1 to 5) and stays as the full record with its revision log. The diagram in "At a glance" is in the document only.
 
-Last updated 16 October 2026 · Nadia Babich
+Last updated 10 November 2026 · Nadia Babich
 
 DiaBite tells an adult with type 2 diabetes, prediabetes or insulin resistance in the US whether a meal fits what is left of their day, and shows the arithmetic. It is built and running at diabite.pro with accounts, a diary, a weekly menu, planning and a feedback loop, and is being prepared for its first outside users. The work-size estimates to a public launch are from 8 October and have not been re-estimated since.
 
@@ -49,15 +49,15 @@ All V0 requirements across the five epics are built, and so are many of the V1 i
 
 | Epic | Built (V0) | Next (V1) | Later |
 |---|---|---|---|
-| **A. Profile and targets** | Targets for energy, carbohydrate, protein, fat, fibre and glycemic load, each with its formula (A1, A2); permanent exclusions for allergies and dislikes (A3); a non-dismissible disclaimer (A4); a clear "not for you" for intensive insulin (A5); first-run tips that point at the real screen, one at a time (A6) | Targets that account for eating pattern, such as a vegan's protein | Three-way target split, if clinicians say it changes numbers |
-| **B. Meal logging** | Log a meal in free text with portions estimated and correctable (B1); one clarifying question instead of a guess (B2); carbohydrate and glycemic load per entry (B3); budget left, always visible (B4); the foods a person logs again in one tap (B5); a meal logged on any of the last 14 days (B9); a meal planned up to 14 days ahead that counts only once it is marked eaten (B10) | None open at this level | Photo (B6), voice (B7), bread units (B8) |
-| **C. The agent loop** | Verdict with number, reason and action (C1); at least two ranked alternatives (C2); a modification, not only a refusal (C3); show calculation (C4); no dosing, ever (C5); red-flag escalation (C6); unknown foods named, not guessed, and a dish counted from its ingredients as a labelled estimate (C7); an expandable tool trace (C8) | Memory of accepted and rejected suggestions (C9) |  |
+| **A. Profile and targets** | Targets for energy, carbohydrate, protein, fat, fibre and glycemic load, each with its formula (A1, A2); permanent exclusions for allergies and dislikes (A3); a non-dismissible disclaimer (A4); a clear "not for you" for intensive insulin (A5); first-run tips that point at the real screen, one at a time (A6); the person's own carbohydrate number for a main meal and another for a snack, optional and never filled in for them, set in onboarding and in the Profile (A7); the choice of what to count first, carbohydrate or glycemic load, with both always shown (A8); foods left out by hand can be any ingredient the recipes use, such as pistachios (A3) | Targets that account for eating pattern, such as a vegan's protein | Three-way target split, if clinicians say it changes numbers |
+| **B. Meal logging** | Log a meal in free text with portions estimated and correctable (B1); one clarifying question instead of a guess (B2); carbohydrate and glycemic load per entry (B3); budget left, always visible (B4); the foods a person logs again in one tap (B5); a meal logged on any of the last 14 days (B9); a meal planned up to 14 days ahead that counts only once it is marked eaten (B10); a Meal or Snack switch on the ask screen that picks which of the person's own numbers applies and which diary slot the meal goes to (B11) | None open at this level | Photo (B6), voice (B7), bread units (B8) |
+| **C. The agent loop** | Verdict with number, reason and action (C1); at least two ranked alternatives (C2); a modification, not only a refusal (C3); show calculation (C4); no dosing, ever (C5); red-flag escalation (C6); unknown foods named, not guessed, and a dish counted from its ingredients as a labelled estimate (C7); an expandable tool trace (C8); the answer says when a meal is above the person's own carbohydrate number, without changing the glycemic-load verdict, and swaps leave out the ingredients they excluded (C10) | Memory of accepted and rejected suggestions (C9) |  |
 | **D. Weekly menu** | A week of meals within ±10% of energy and under the glycemic budget (D1); a shopping list that follows what the person planned and falls back to the generated week (D2); regenerate one slot (D3); no dish within 3 days (D4); no plan for kidney disease or a history of an eating disorder (D6). Not clinically reviewed, and the app says so | The weekly cap of two per dish (D4) | Cooking time and cost (D5) |
-| **E. Trust, safety, data** | Sign-in by email, with the profile and the diary (planned meals included) kept in an EU region and readable only by their owner (E1); every turn logged for evaluation (E2); every food record carries a source and a date (E3); one-tap export and deletion of everything (E4); a weekly report and an in-app feedback card for the people testing it (E5) | Counsel's review of the consent text |  |
+| **E. Trust, safety, data** | Sign-in by email, with the profile and the diary (planned meals included) kept in an EU region and readable only by their owner (E1); every turn logged for evaluation (E2); every food record carries a source and a date (E3); one-tap export and deletion of everything (E4); a weekly report and an in-app feedback card for the people testing it (E5); a Settings tab for the account, the look of the app and help, which now holds the explanation of glycemic index and load (E6) | Counsel's review of the consent text |  |
 
 **Non-functional:** a full agent answer under 10 seconds at p90 and a deterministic logging round trip under 3 seconds; identical inputs always give identical numbers; deterministic calculations run in the browser from the same module the engine uses; WCAG AA, 16 px minimum type and a full screen-reader pass on the logging flow, because the main persona skews 40 and over.
 
-Also built beyond V0: a feedback form and a feedback card, a phone layout checked at 375 px with a dark theme, and a permanent address (diabite.pro) where one container serves both the app and the agent.
+Also built beyond V0: a landing page with a two-minute film made from the live app (re-recorded on 10 November), a feedback form and a feedback card, a phone layout checked at 375 px with a dark theme, and a permanent address (diabite.pro) where one container serves both the app and the agent.
 
 ## Agents and safety
 
@@ -171,6 +171,10 @@ The first clinical review found a real bug within a day, and no clinician has si
 | Q18: the calorie-counting objection | The ceiling is derived from the calorie target, so the objection sits inside the design |
 | Q19, Q20: lean mass on GLP-1 drugs; splitting targets three ways | May change wording, or the numbers |
 
+**First outside voices.** On 6 November Phyllisa Deroze, who lives with diabetes and helps find testers, met Nadia. Her feedback, and what became of it: the red "Not today" label pushes people away (same as Demo Day); she has counted only carbohydrate for 15 years and finds glycemic load overloading, so the person now chooses which comes first (built); her doctors taught her carbohydrate per meal, 45 g for a meal and 15 to 30 g for a snack, not per day, so the person can set their own number for each (built; whether a per-meal number belongs in the product at all is a question for the clinicians, listed below); protein and calories seemed not to change with the carbohydrate approach (they are meant to stay the same, and the Profile now says so); the confirmation email arrives without the DiaBite name and looks like spam (open); a home-screen instruction in the Profile (built). She offered to introduce four or five people with type 2 diabetes or prediabetes by email. She is one person, probably a CGM user, so the sessions below stay the test.
+
+**Usage on 10 November 2026:** 7 accounts, 6 of them real (not test addresses); 2 signed in during the previous 7 days, 1 new in that week; 5 profiles are filled in and 1 person kept a diary that week. The product does not yet count visitors who do not sign in.
+
 **User sessions.** Five people with type 2 diabetes, prediabetes or insulin resistance in the US, 30 minutes each on the hosted app, not friends. The rule for the moderator: when someone is stuck, say nothing for ten seconds. What we want to learn: whether people open the receipt unprompted, what they actually type, what they do at "I don't have that food", whether they understand glycemic load, and whether they arrive wanting to log what they already ate. Every phrase a participant types that the product cannot resolve becomes a test case that week.
 
 ## After the course
@@ -204,6 +208,23 @@ A harm failure (a wrong dose, a missed red flag, a refusal that did not refuse),
 | WS5 Photo and voice | After the diary exists | 11 to 16 |
 | WS10 Iteration | CGM import, personalisation, caregiver view, clinician summary | not sized |
 
+**Next steps as of 10 November 2026**, in the order proposed. The first four are small and need no one's permission; the rest wait on a decision or a person.
+
+| # | Step | Why, and what it waits on |
+|---|---|---|
+| 1 | Search tolerates a typo ("pistacio") in the list of foods left out | A person typed it and found nothing; today the match is an exact part of a word |
+| 2 | The reserve answer, used when the check rejects the model's text, says when a meal is above the person's number | It does not know the number today; only the line under the card tells the person |
+| 3 | Small search defects: the "Game" label becomes "Game meat"; "butter beans" resolves to lima beans (a catalogue sync and a restart of the revision); "pizza with mushrooms" no longer resolves to mushrooms | Each is a wrong or confusing answer seen in real use |
+| 4 | The rest of the 27 October code review: items 4, 5, 6, 8 and 9 (an account sync that can delete entries absent on this device, a sign-out race, hanging evaluations) | Item 5 can lose a person's entries |
+| 5 | A meal the person describes is checked against the ingredients they left out, and the answer says so | Today it is counted as described; whether to warn is the owner's decision |
+| 6 | Count active people in the weekly report (signed in or asked a question in the last 7 days) | The product cannot say how many people use it; proposed, not yet agreed |
+| 7 | Capacity for the model's tokens per minute before the beta | On 10 November four of twelve test questions in a row failed with a rate-limit error from the deployment after a full evaluation run; a queue of real people would hit the same ceiling |
+| 8 | The confirmation email comes from DiaBite and is not marked as spam | The sender is set at the domain host; Nadia's step |
+| 9 | Send the five clinician questions, including whether a per-meal carbohydrate number belongs in the product, to named recipients | Waits on Nadia choosing the recipients |
+| 10 | Check the first-run tips in the dark theme; a full agent evaluation after every prompt or data change | Not yet checked; the last full run on 10 November passed 255 of 256 checks |
+| 11 | A budget alert on Azure spend | Deferred by Nadia; to be raised again, not created without her yes |
+| 12 | Five sessions with people Phyllisa introduces, plus the five already planned | The gate to Stage A; recruiting is under way |
+
 **Not built yet, on purpose:** photo and voice logging; a second model, region or queue; other languages in the safety rules; reminders, recurring meals, and a plan the agent knows about.
 
 ## Economics
@@ -230,7 +251,7 @@ The aim is investment to keep developing the product, so what matters is what it
 
 ## Decisions, risks and sources
 
-Nine product decisions are listed, five questions are for the clinicians, and the biggest risk is that the answers do not arrive.
+Eleven product decisions are listed, six questions are for the clinicians, and the biggest risk is that the answers do not arrive.
 
 | Decision | Options | Recommended |
 |---|---|---|
@@ -239,12 +260,14 @@ Nine product decisions are listed, five questions are for the clinicians, and th
 | What we promise about data | Deletion on request is the floor; the wording in onboarding | A plain statement of what is kept. The data is held in the EU, so data protection needs counsel |
 | Weekly menu | In the product now, or after the sessions | Decided 10 October: in the product, hidden for two profiles, labelled as not clinically reviewed |
 | Logging meal sentences | On by default, or only during sessions | Decided 15 October: on, kept 30 days under a session id only, and the consent card says so |
+| A person's own carbohydrate number | Per meal, per day, or neither; a default or none; what it does to the verdict | Decided 9 and 10 November, by the owner: the person's own number only, one for a main meal and one for a snack, never prefilled, 10 to 150 g. It never changes the verdict, which stays the glycemic-load comparison for the day; it adds a plain line saying the meal is above it. Whether this is clinically right is for the clinicians |
+| Foods left out by hand | Everyday foods only, or any recipe ingredient; known to the menu only, or to the agent too | Decided 10 November: any recipe ingredient, kept out of the weekly menu and out of the swaps the engine offers (built). A meal the person describes is still counted as said (step 5 above) |
 | Feedback spam | A control before the sessions, or not | Open |
 | Deploying on push | Keep the human step, or give the CI identity rights over the app | Keep it for now |
 | Incentives | Whether session participants are paid | Open |
 | Price | Which to test | $14.99 against $19.99, from the sessions and the beta |
 
-**For the clinicians:** what the advisor says on a low reading (Q12); the ceiling (Q7 to Q9); the unstaged kidney cap (Q4); eating pattern and protein; splitting targets three ways (Q20).
+**For the clinicians:** whether carbohydrate per meal, not per day, is the right frame, and what a person's own number should do to an answer (from Phyllisa's doctors); what the advisor says on a low reading (Q12); the ceiling (Q7 to Q9); the unstaged kidney cap (Q4); eating pattern and protein; splitting targets three ways (Q20).
 
 **Risks that shape the plan:**
 
@@ -255,5 +278,6 @@ Nine product decisions are listed, five questions are for the clinicians, and th
 5. **Regulation.** Whether a "can I eat this" verdict for people with diagnosed diabetes stays inside FDA general-wellness guidance is the sharpest open risk; no counsel has been consulted yet.
 6. **Azure has bad mornings.** On 8 October nine of eighteen turns failed inside ten minutes with connection timeouts, then not again; at launch this needs an alert and a runbook, and the demo needs a recording.
 7. **A model upgrade can change behaviour the tests do not cover**, so each one is an evaluation cycle.
+8. **The model deployment has a ceiling.** The tokens per minute allowed on the meal agent's model are shared by every turn; a burst of people, or an evaluation run, gets a rate-limit error that reaches the person as a failed turn. Capacity has to be planned before Stage B.
 
 **Sources.** This document summarises the project's own papers, kept in the repository: `docs/PRD.md` (the course PRD, Weeks 1 to 5, with a revision log), `docs/PRD-post-course.md`, `docs/COST-post-course.md`, `docs/PLAN.md`, `docs/``ROADMAP-to-investors.md`, `docs/``CLINICAL_REVIEW.md`, `docs/USER_SESSIONS.md`, `docs/``FEEDBACK-demo-day.md`, `docs/``security/security-plan.md`, `docs/engineering/` (the plans for dish estimates, the week, first-run tips, planning, and monitoring), `docs/monitoring.md` and `docs/FINANCIAL_PLAN.md` (draft, flagged as built on costs about six times too high). External figures: [CDC National Diabetes Statistics Report](https://www.cdc.gov/diabetes/php/data-research/index.html) and [ADA, Economic Costs of Diabetes in the U.S. in 2022](https://diabetesjournals.org/care/article/47/1/26/153797/Economic-Costs-of-Diabetes-in-the-U-S-in-2022), both opened on 8 October 2026; costs from Azure Cost Management and the Azure retail price list.
