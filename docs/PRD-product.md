@@ -30,7 +30,7 @@ A person types a meal in their own words; DiaBite answers in about five seconds 
 **The promise: every number a user sees was computed, not generated.** A language model reads the question and writes the sentence. It never produces a nutrition number, and a change that would let it is stopped.
 
 1. **Read.** A model turns "a burrito bowl" into foods and portions, and asks exactly one question when it is unsure.
-2. **Compute.** A deterministic engine over 6,054 foods works out available carbohydrate, glycemic index and load, and what is left of the day. The same meal always gives the same number.
+2. **Compute.** A deterministic engine over 8,633 records works out available carbohydrate, glycemic index and load, and what is left of the day. The same meal always gives the same number.
 3. **Check.** A verifier compares every number in the written answer with the tool results. If one cannot be traced, the answer is regenerated once, then replaced by one built only from tool output.
 
 **Anatomy of an answer:** the verdict as a sentence a person would say, three figures (this meal, before, left after), the reason (the food driving the load, and any portion assumed), and one next action taken from alternatives the engine returned. "Show calculation" opens a receipt of every food, portion, index and load, with its source marked checked or unverified.
@@ -86,7 +86,7 @@ The rules are English only, on purpose, because the market is the US. The gate r
 
 ## Data
 
-The catalogue holds 8,633 records, and a food it does not have is named as unknown, never guessed. How often real people ask for a food it lacks is not measured yet: there are no outside users, and the turn log of the last seven days is mostly our own test questions, many of them foods we know are missing on purpose.
+The catalogue holds 8,633 records, and a food it does not have is named as unknown, never guessed. How often real people ask for a food it lacks is not measured yet: only a handful of people have used it so far, and the turn log of the seven days to 10 November (2,088 turns) is almost all our own test and sampling runs, many of them foods we know are missing on purpose.
 
 | Layer | Records | Where it comes from |
 |---|---|---|
@@ -114,22 +114,22 @@ Accounts exist since 10 October: sign-in by email link or code, required. The da
 
 ## Quality
 
-On 15 October the deployed agent passed 204 of 204 behavioural checks, with a median answer time of 4 to 5 seconds and a p90 of 7 to 9. On 12 October Azure AI Foundry's judges, with a different model as the judge, scored groundedness 74 of 75 and intent resolution 86 of 86.
+On 10 November the deployed agent (meal prompt version 46) passed 255 of 256 behavioural checks over 107 questions, with a median answer time of 4.7 seconds and a p90 of 10.1, just over the 10-second target; the one miss did not repeat in eight fresh samples. On 12 October Azure AI Foundry's judges, with a different model as the judge, scored groundedness 74 of 75 and intent resolution 86 of 86.
 
 | Measure | Target | Measured |
 |---|---|---|
-| Ungrounded numbers in answers | 0 | 99.9% of 3,680 turns logged in the seven days to 16 October were verified, our own test runs included |
-| Food resolution on a fixed set | 90% or better | 191 of 191; clarification 31 of 31 |
-| Safety phrasings handled correctly, no model | 100% | 63 of 63 (28 of them failed before 6 October) |
-| Behavioural checks on the live agent | all | 204 of 204 on 15 October; 199 of 202 on 8 October |
-| Answer time, p90 | under 10 s | 7 to 9 s (median 4 to 5 s) over 102 questions on 15 October; 8.2 s on 8 October |
-| Share of food phrases that resolve to nothing | falling | Not measured on real users yet (our own tests: 168 of 2,656 evaluation turns in seven days named a food it lacks, on purpose) |
+| Ungrounded numbers in answers | 0 | 100% of 2,088 turns logged in the seven days to 10 November were verified, our own test runs included |
+| Food resolution on a fixed set | 90% or better | 205 of 205; clarification 36 of 36 |
+| Safety phrasings handled correctly, no model | 100% | 72 of 72 (28 of the first 63 failed before 6 October) |
+| Behavioural checks on the live agent | all | 255 of 256 on 10 November (107 questions; the miss did not repeat in 8 fresh samples); 204 of 204 on 15 October; 199 of 202 on 8 October |
+| Answer time, p90 | under 10 s | 10.1 s (median 4.7 s) over 107 questions on 10 November, just over the target; 7 to 9 s on 15 October; 8.2 s on 8 October |
+| Share of food phrases that resolve to nothing | falling | Not measured on real users yet (our own tests: 419 of 2,088 turns in the seven days to 10 November named a food it lacks, on purpose) |
 | Answer parsing in the app | both forms the model writes | 19 of 19 |
 | Verifier probes | altered numbers rejected | 18 of 18 |
 
 **How it is checked:** `npm run eval` needs no model and runs in a few seconds (food resolution, clarification, safety phrasings, answer parsing, the verifier, the diary, the week, planning, the weekly report); `npm run eval:abuse` proves the public route's limits against a real engine; `npm run eval:agent` runs the cases against the deployed agent; `npm run rehearsal` drives two real browsers through sign-in, sync, planning and the feedback card; and a model-graded run in Azure AI Foundry reports with its spread. Mechanical checks read tool results, not the product's wording, because checks that read prose broke the day the agent started sounding human. A phrase that ever gets past a rule becomes a permanent test.
 
-**Model-graded scores.** Azure AI Foundry's judges, run on 12 October with a different model as the judge: intent resolution 86 of 86, groundedness 74 of 75, task adherence 96 of 102 and tool-call accuracy 64 of 75. The judge disagrees with the policy of asking when a food match is unsure, so most of its misses are that disagreement, and each was read. The one real fault it found (two hard candies counted as 320 g) was a data fault and was fixed. The live checks that missed on 8 October named the dish and not its heaviest food, a wording miss and not a wrong number.
+**Model-graded scores.** Azure AI Foundry's judges, run on 12 October with a different model as the judge: intent resolution 86 of 86, groundedness 74 of 75, task adherence 96 of 102 and tool-call accuracy 64 of 75. The judge disagrees with the policy of asking when a food match is unsure, so most of its misses are that disagreement, and each was read. The one real fault it found (two hard candies counted as 320 g) was a data fault and was fixed. The live checks that missed on 8 October named the dish and not its heaviest food, a wording miss and not a wrong number. These are the 12 October figures and have not been re-run: the judge model used then is no longer deployed, and the meal prompt has changed since (version 46), so a new run needs a judge deployment and tens of minutes.
 
 ## Architecture, security and operations
 
@@ -179,7 +179,7 @@ The first clinical review found a real bug within a day, and no clinician has si
 
 ## After the course
 
-The work to a public launch was sized on 8 October at about 83 to 106 working days across nine workstreams, 17 to 21 weeks of one builder, before waiting on clinicians, counsel and recruited users; photo and voice logging and the iteration stream come after. The sizes below have not been re-estimated. Since then most of WS3 (accounts, the diary kept on the server, export and deletion, the week view) and parts of WS0, WS2 (packaged-food records, dish estimates), WS4 (the menu back with regeneration, frequent foods) and WS9 (the diabite.pro address) have been built.
+The work to a public launch was sized on 8 October at about 83 to 106 working days across nine workstreams, 17 to 21 weeks of one builder, before waiting on clinicians, counsel and recruited users; photo and voice logging and the iteration stream come after. The sizes below have not been re-estimated. Since then most of WS3 (accounts, the diary kept on the server, export and deletion, the week view) and parts of WS0, WS2 (packaged-food records, dish estimates), WS4 (the menu back with regeneration, frequent foods) and WS9 (the diabite.pro address and the landing page) have been built.
 
 **Three stages, each with a gate:**
 
@@ -229,9 +229,9 @@ A harm failure (a wrong dose, a missed red flag, a refusal that did not refuse),
 
 ## Economics
 
-The aim is investment to keep developing the product, so what matters is what it costs to run, fixed and variable, and what the build to a public launch costs. **Variable:** a question costs about €0.0026 in model charges, so this part grows with use. **Fixed:** about €26 a month in the measured period (an always-on replica and the registry), plus Supabase and the domain. 1,000 people asking daily cost about €470 a month in all. The build to launch needs €10,800 to €111,500 depending on how much is built by others (see Use of funds). Every price for outside specialists is an assumed range to be replaced by quotes; the draft financial plan is being rebuilt from these measurements.
+The aim is investment to keep developing the product, so what matters is what it costs to run, fixed and variable, and what the build to a public launch costs. **Variable:** a question cost about €0.0026 in model charges in September, and the 30 days to 10 November came to about €0.005 a logged turn, mostly our own test runs, so this figure is to be measured again on real use; it grows with use. **Fixed:** about €26 a month (€26.06 in the 30 days to 10 November) (an always-on replica and the registry), plus Supabase and the domain. 1,000 people asking daily cost about €470 a month in all. The build to launch needs €10,800 to €111,500 depending on how much is built by others (see Use of funds). Every price for outside specialists is an assumed range to be replaced by quotes; the draft financial plan is being rebuilt from these measurements.
 
-**Measured** (Azure Cost Management and Foundry traces, 20 September to 8 October, 1,941 questions): about 4,900 tokens in (74% cached) and 140 out per question for the meal and advice agent; billed about €0.0026 a question, memory and context included; about €26 a month fixed (an always-on replica and the registry). The Azure Pricing Calculator gave €243.72 for a month of 135,000 questions, but it shows the always-on replica as €0 and prices the traced tokens, which are 57% under the bill; the figure to budget for that month is about €415.
+**Measured** (Azure Cost Management and Foundry traces, 20 September to 8 October, 1,941 questions): about 4,900 tokens in (74% cached) and 140 out per question for the meal and advice agent; billed about €0.0026 a question, memory and context included; about €26 a month fixed (an always-on replica and the registry). The Azure Pricing Calculator gave €243.72 for a month of 135,000 questions, but it shows the always-on replica as €0 and prices the traced tokens, which are 57% under the bill; the figure to budget for that month is about €415. The 30 days to 10 November (Azure Cost Management) cost €60.12 in all: €33.16 in model charges, €20.83 for Container Apps, €5.23 for the registry and €0.89 for Foundry tools. In the same 30 days 6,628 turns were logged, nearly all our own tests, evaluation runs and prompt samples, so model charges came to about €0.005 a logged turn; the €0.0026 above was measured on September's traffic and needs re-measuring on real use before the table below is trusted.
 
 | Active users, each asking | Model charges | Fixed (Azure, Supabase, domain) | Total a month |
 |---|---|---|---|
@@ -280,4 +280,4 @@ Eleven product decisions are listed, six questions are for the clinicians, and t
 7. **A model upgrade can change behaviour the tests do not cover**, so each one is an evaluation cycle.
 8. **The model deployment has a ceiling.** The tokens per minute allowed on the meal agent's model are shared by every turn; a burst of people, or an evaluation run, gets a rate-limit error that reaches the person as a failed turn. Capacity has to be planned before Stage B.
 
-**Sources.** This document summarises the project's own papers, kept in the repository: `docs/PRD.md` (the course PRD, Weeks 1 to 5, with a revision log), `docs/PRD-post-course.md`, `docs/COST-post-course.md`, `docs/PLAN.md`, `docs/``ROADMAP-to-investors.md`, `docs/``CLINICAL_REVIEW.md`, `docs/USER_SESSIONS.md`, `docs/``FEEDBACK-demo-day.md`, `docs/``security/security-plan.md`, `docs/engineering/` (the plans for dish estimates, the week, first-run tips, planning, and monitoring), `docs/monitoring.md` and `docs/FINANCIAL_PLAN.md` (draft, flagged as built on costs about six times too high). External figures: [CDC National Diabetes Statistics Report](https://www.cdc.gov/diabetes/php/data-research/index.html) and [ADA, Economic Costs of Diabetes in the U.S. in 2022](https://diabetesjournals.org/care/article/47/1/26/153797/Economic-Costs-of-Diabetes-in-the-U-S-in-2022), both opened on 8 October 2026; costs from Azure Cost Management and the Azure retail price list.
+**Sources.** This document summarises the project's own papers, kept in the repository: `docs/PRD.md` (the course PRD, Weeks 1 to 5, with a revision log), `docs/PRD-post-course.md`, `docs/COST-post-course.md`, `docs/PLAN.md`, `docs/``ROADMAP-to-investors.md`, `docs/``CLINICAL_REVIEW.md`, `docs/USER_SESSIONS.md`, `docs/``FEEDBACK-demo-day.md`, `docs/``security/security-plan.md`, `docs/engineering/` (the plans for dish estimates, the week, first-run tips, planning, and monitoring), `docs/monitoring.md` and `docs/FINANCIAL_PLAN.md` (draft, flagged as built on costs about six times too high). External figures: [CDC National Diabetes Statistics Report](https://www.cdc.gov/diabetes/php/data-research/index.html) and [ADA, Economic Costs of Diabetes in the U.S. in 2022](https://diabetesjournals.org/care/article/47/1/26/153797/Economic-Costs-of-Diabetes-in-the-U-S-in-2022), the CDC page opened again on 10 November 2026 and unchanged (updated 16 September 2026), the ADA paper opened on 8 October 2026; costs from Azure Cost Management and the Azure retail price list.
