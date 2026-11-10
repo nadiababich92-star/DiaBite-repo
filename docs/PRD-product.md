@@ -114,22 +114,22 @@ Accounts exist since 10 October: sign-in by email link or code, required. The da
 
 ## Quality
 
-On 10 November the deployed agent (meal prompt version 46) passed 255 of 256 behavioural checks over 107 questions, with a median answer time of 4.7 seconds and a p90 of 10.1, just over the 10-second target; the one miss did not repeat in eight fresh samples. On 12 October Azure AI Foundry's judges, with a different model as the judge, scored groundedness 74 of 75 and intent resolution 86 of 86.
+On 10 November the deployed agent (meal prompt version 49) passed 263 of 264 behavioural checks over 111 questions, with a median answer time of 4.8 seconds and a p90 of 8.1; the one miss ("chicken" answered with a question instead of the first match costed) happened in 3 of 12 fresh samples, and its rate before this week's prompt changes was not measured. On 12 October Azure AI Foundry's judges, with a different model as the judge, scored groundedness 74 of 75 and intent resolution 86 of 86.
 
 | Measure | Target | Measured |
 |---|---|---|
 | Ungrounded numbers in answers | 0 | 100% of 2,088 turns logged in the seven days to 10 November were verified, our own test runs included |
 | Food resolution on a fixed set | 90% or better | 205 of 205; clarification 36 of 36 |
 | Safety phrasings handled correctly, no model | 100% | 72 of 72 (28 of the first 63 failed before 6 October) |
-| Behavioural checks on the live agent | all | 255 of 256 on 10 November (107 questions; the miss did not repeat in 8 fresh samples); 204 of 204 on 15 October; 199 of 202 on 8 October |
-| Answer time, p90 | under 10 s | 10.1 s (median 4.7 s) over 107 questions on 10 November, just over the target; 7 to 9 s on 15 October; 8.2 s on 8 October |
+| Behavioural checks on the live agent | all | 263 of 264 on 10 November (111 questions; the one miss, "chicken" asked about, in 3 of 12 fresh samples); 204 of 204 on 15 October; 199 of 202 on 8 October |
+| Answer time, p90 | under 10 s | 8.1 s (median 4.8 s) over 111 questions on 10 November (an earlier run the same day gave 10.1 s); 7 to 9 s on 15 October; 8.2 s on 8 October |
 | Share of food phrases that resolve to nothing | falling | Not measured on real users yet (our own tests: 419 of 2,088 turns in the seven days to 10 November named a food it lacks, on purpose) |
 | Answer parsing in the app | both forms the model writes | 19 of 19 |
 | Verifier probes | altered numbers rejected | 18 of 18 |
 
 **How it is checked:** `npm run eval` needs no model and runs in a few seconds (food resolution, clarification, safety phrasings, answer parsing, the verifier, the diary, the week, planning, the weekly report); `npm run eval:abuse` proves the public route's limits against a real engine; `npm run eval:agent` runs the cases against the deployed agent; `npm run rehearsal` drives two real browsers through sign-in, sync, planning and the feedback card; and a model-graded run in Azure AI Foundry reports with its spread. Mechanical checks read tool results, not the product's wording, because checks that read prose broke the day the agent started sounding human. A phrase that ever gets past a rule becomes a permanent test.
 
-**Model-graded scores.** Azure AI Foundry's judges, run on 12 October with a different model as the judge: intent resolution 86 of 86, groundedness 74 of 75, task adherence 96 of 102 and tool-call accuracy 64 of 75. The judge disagrees with the policy of asking when a food match is unsure, so most of its misses are that disagreement, and each was read. The one real fault it found (two hard candies counted as 320 g) was a data fault and was fixed. The live checks that missed on 8 October named the dish and not its heaviest food, a wording miss and not a wrong number. These are the 12 October figures and have not been re-run: the judge model used then is no longer deployed, and the meal prompt has changed since (version 46), so a new run needs a judge deployment and tens of minutes.
+**Model-graded scores.** Azure AI Foundry's judges, run on 12 October with a different model as the judge: intent resolution 86 of 86, groundedness 74 of 75, task adherence 96 of 102 and tool-call accuracy 64 of 75. The judge disagrees with the policy of asking when a food match is unsure, so most of its misses are that disagreement, and each was read. The one real fault it found (two hard candies counted as 320 g) was a data fault and was fixed. The live checks that missed on 8 October named the dish and not its heaviest food, a wording miss and not a wrong number. These are the 12 October figures and have not been re-run: the judge model used then is no longer deployed, and the meal prompt has changed since (version 49), so a new run needs a judge deployment and tens of minutes.
 
 ## Architecture, security and operations
 
