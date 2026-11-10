@@ -327,6 +327,7 @@ tr:last-child td { border-bottom: none; }
 .fig-card .fig-title { margin: 0; }
 .fig-card .fig-big { margin: 4px 0 0; font-family: var(--mono); font-size: 32px; font-weight: 500; line-height: 1.2; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; color: var(--text); }
 .fig-card .fig-big .num { padding: 0 6px; border-radius: 6px; }
+.fig-card .fig-big .unit { font-size: 0.6em; letter-spacing: 0; }
 .fig-card .fig-big.gl.ok .num { background: var(--marker); color: var(--marker-ink); }
 .fig-card .fig-big.gl.over .num { color: var(--high); border-bottom: 3px dashed var(--high); border-radius: 0; padding: 0; }
 .fig-card .fig-big.carb .num { background: var(--carb-marker); color: var(--carb-ink); }
@@ -486,6 +487,12 @@ tr:last-child td { border-bottom: none; }
   .answer-text .a-verdict { font-size: 22px; max-width: none; }
   .fig-v { font-size: 18px; }
   .fig-lead .fig-v { font-size: 48px; }
+  /* The two figure cards share a phone's width: tighter type so a number and its unit stay on one line. */
+  .fig-pair { gap: 8px; }
+  .fig-card { padding: 10px 10px 12px; }
+  .fig-card .fig-title { font-size: 12px; letter-spacing: 0.02em; }
+  .fig-card .fig-big { font-size: 28px; white-space: nowrap; }
+  .fig-card .fig-big .num { padding: 0 4px; }
   .ask-form { flex-direction: column; gap: 10px; }
   .ask-form button { width: 100%; }
 

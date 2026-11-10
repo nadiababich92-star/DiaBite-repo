@@ -145,7 +145,7 @@ function FigurePair({ countBy, gl, carbs, carbLimit }: {
   const carbBlock = typeof carbs?.carbs === 'number' ? (
     <div key="carbs" className="fig-card carb">
       <p className="fig-title">Carbohydrate</p>
-      <p className="fig-big carb"><span className="num">{carbs.carbs} g</span></p>
+      <p className="fig-big carb"><span className="num">{carbs.carbs}<small className="unit"> g</small></span></p>
       <p className="fig-cap">{gl.partial ? 'so far' : gl.assumed ? 'about, in this meal' : 'in this meal'}</p>
       {typeof carbs.fiber === 'number' && <div className="fig-row"><span className="fig-k">fibre</span><span className="fig-v">{carbs.fiber} g</span></div>}
       {typeof carbs.availableCarbs === 'number' && <div className="fig-row"><span className="fig-k">without fibre</span><span className="fig-v">{carbs.availableCarbs} g</span></div>}
