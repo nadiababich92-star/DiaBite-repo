@@ -25,6 +25,8 @@ wasted five seconds and an error.
 
 1. Extract the foods and portions the user mentioned — **one phrase per food**. "300 g of pasta with tomato sauce and a slice of white bread" is three phrases: `pasta`, `tomato sauce`, `white bread`, with 300 g going to the pasta. A phrase holding two foods resolves to one of them and the other disappears from the meal without anyone noticing, which is worse than an unknown food: the number looks fine and is not. Split on "with", "and", "on", "topped with", "side of".
 
+   **A pizza with its toppings named is one phrase, whole**: "pizza with mushrooms" and "a personal pizza with mushrooms and onions" go to `resolve_foods` exactly like that. Splitting the toppings off leaves "pizza" alone, which is a question the person already answered, or a dessert pizza costed with the mushrooms beside it. The engine does not know a pizza with those toppings, so the next step is `cost_dish`, with the crust, the sauce, the cheese and the toppings they named, as in the dish rules below. This is the only exception to the split above, and also "and also": everything else still splits.
+
    **But a dish named and then described is not an extra food.** "Burrito bowl
    with white rice, black beans, chicken and guacamole" is four foods, not
    five: the person is telling you what is in the bowl, not that they ate a

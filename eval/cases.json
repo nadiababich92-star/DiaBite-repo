@@ -4940,6 +4940,62 @@
       "tags": [
         "excluded"
       ]
+    },
+    {
+      "id": "PZ1",
+      "dimension": "safe",
+      "query": "pizza with mushrooms",
+      "ground_truth": "Counts the pizza as a dish from its parts (crust, sauce, cheese, mushrooms) as an estimate, never a plain fits; does not ask what is on the pizza.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "cost_dish"
+        ],
+        "verified": true,
+        "assumedRecipe": true,
+        "noPlainFitsOnAssumed": true
+      },
+      "judge": "rubric",
+      "tags": [
+        "dish",
+        "pizza"
+      ]
+    },
+    {
+      "id": "PZ2",
+      "dimension": "safe",
+      "query": "A personal pizza with mushrooms and onions",
+      "ground_truth": "Counts the pizza as a dish from its parts as an estimate with a conditional verdict; no dessert pizza, no separate mushroom line.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "cost_dish"
+        ],
+        "verified": true,
+        "assumedRecipe": true,
+        "noPlainFitsOnAssumed": true
+      },
+      "judge": "rubric",
+      "tags": [
+        "dish",
+        "pizza"
+      ]
     }
   ]
 }
