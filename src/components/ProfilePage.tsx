@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { CATEGORY_LABELS, FOODS } from '../data/foods'
-import { excludedLabel, ingredientOptions, isIngredientId } from '../lib/excludable'
+import { excludedLabel, ingredientOptions, isIngredientId, nameMatches } from '../lib/excludable'
 import { loadMenuRecipes } from '../lib/recipes'
 import {
   ACTIVITY_LABELS,
@@ -40,9 +40,12 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
   const matches: { id: string; name: string; hint: string }[] =
     q.length < 2
       ? []
-      : [...FOODS.map((f) => ({ id: f.id, name: f.name, hint: CATEGORY_LABELS[f.category] })), ...ingredientOptions()]
-          .filter((f) => !excluded.has(f.id) && f.name.toLowerCase().includes(q))
-          .slice(0, 8)
+      : (() => {
+          const all = [...FOODS.map((f) => ({ id: f.id, name: f.name, hint: CATEGORY_LABELS[f.category] })), ...ingredientOptions()].filter((f) => !excluded.has(f.id))
+          // What was typed as a part of a word comes first; a word typed with one slip ("pistacio") follows.
+          const exact = all.filter((f) => nameMatches(f.name, q, false))
+          return [...exact, ...all.filter((f) => !exact.includes(f) && nameMatches(f.name, q))].slice(0, 8)
+        })()
 
   return (
     <>

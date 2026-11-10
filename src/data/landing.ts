@@ -30,7 +30,7 @@ export const LANDING = {
   leftAfterGl: 37.8,
   records: 8633,
   /** A dated claim from docs/STATUS.md. Refresh when `npm run eval:agent` is rerun, and say so in STATUS.md. */
-  checks: { passed: 204, of: 204, on: '2026-10-21' },
+  checks: { passed: 255, of: 256, on: '2026-11-10' },
   /**
    * Where the food numbers come from, as docs/data-sources.md states them. Only sources whose status there is clear are named
    * on the page; the University of Sydney glycemic index database is used for cross-checking only and its permission is a

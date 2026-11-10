@@ -551,6 +551,12 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
     // decides the number. Nothing matched it, so it was an unknown dish costed from a guessed topping; it is a question.
     const bareSizedPizza = tokens(phrase).includes('pizza') && tokens(phrase).every((t) => t === 'pizza' || PIZZA_FORMAT.has(t))
     if (bareSizedPizza) { confidence = 'medium'; clarify = CATEGORY_QUESTION.pizza }
+    // "Pizza with mushrooms" and "mushroom pizza" are a crust with those on it, and the nearest records were the topping
+    // alone ("White mushrooms"), costed as the whole meal. Unless the best match is itself a pizza, or a record written
+    // down by hand under exactly these words ("pizza crust"), it is a dish we do not have: the agent counts it from its parts.
+    const top = cands[0] ? byId.get(cands[0].id) : undefined
+    if (tokens(phrase).includes('pizza') && !bareSizedPizza && confidence !== 'low' && top
+        && !/\bpizza\b/i.test(top.name) && !top.aliases?.includes(norm(phrase))) confidence = 'low'
     const unknown = confidence === 'low'
     const asked = tokens(phrase).length === 1 ? CATEGORY_QUESTION[tokens(phrase)[0]] : undefined
     if (confidence === 'medium' && !clarify && asked) clarify = asked

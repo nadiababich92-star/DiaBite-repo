@@ -1892,6 +1892,42 @@
           "named",
           "dish-ingredient"
         ]
+      },
+      {
+        "phrase": "pizza with mushrooms",
+        "expect": [
+          "unknown"
+        ],
+        "tags": [
+          "dish-ingredient"
+        ]
+      },
+      {
+        "phrase": "mushroom pizza",
+        "expect": [
+          "unknown"
+        ],
+        "tags": [
+          "dish-ingredient"
+        ]
+      },
+      {
+        "phrase": "pizza crust",
+        "expect": [
+          "usda:2707600"
+        ],
+        "tags": [
+          "dish-ingredient"
+        ]
+      },
+      {
+        "phrase": "butter beans",
+        "expect": [
+          "ing:lima_beans"
+        ],
+        "tags": [
+          "everyday"
+        ]
       }
     ],
     "clarify": [
@@ -3289,6 +3325,131 @@
         "word": "green onions",
         "text": "Green onions (scallions)",
         "hit": true
+      }
+    ],
+    "excludeSearch": [
+      {
+        "id": "part_of_word",
+        "typed": "pistach",
+        "name": "Pistachios",
+        "hit": true
+      },
+      {
+        "id": "one_letter_left_out",
+        "typed": "pistacio",
+        "name": "Pistachios",
+        "hit": true
+      },
+      {
+        "id": "one_letter_changed",
+        "typed": "almand",
+        "name": "Almonds",
+        "hit": true
+      },
+      {
+        "id": "one_extra_letter",
+        "typed": "tahinni",
+        "name": "Tahini",
+        "hit": true
+      },
+      {
+        "id": "too_short_is_not_forgiven",
+        "typed": "alm",
+        "name": "Walnuts",
+        "hit": false
+      },
+      {
+        "id": "two_slips_are_not_a_match",
+        "typed": "pstachos",
+        "name": "Pistachios",
+        "hit": false
+      },
+      {
+        "id": "another_food",
+        "typed": "pistacio",
+        "name": "Pasta",
+        "hit": false
+      }
+    ],
+    "excludedIn": [
+      {
+        "id": "hand_picked_word",
+        "items": [
+          {
+            "foodId": "ing:pistachios",
+            "name": "Pistachios, shelled"
+          }
+        ],
+        "avoid": {
+          "words": [
+            "pistachios"
+          ]
+        },
+        "hit": [
+          "ing:pistachios"
+        ]
+      },
+      {
+        "id": "other_nut_is_not_hit",
+        "items": [
+          {
+            "foodId": "seed:almonds",
+            "name": "Almonds"
+          }
+        ],
+        "avoid": {
+          "words": [
+            "pistachios"
+          ]
+        },
+        "hit": []
+      },
+      {
+        "id": "excluded_record",
+        "items": [
+          {
+            "foodId": "seed:almonds",
+            "name": "Almonds"
+          },
+          {
+            "foodId": "seed:egg",
+            "name": "Egg"
+          }
+        ],
+        "avoid": {
+          "foodIds": [
+            "seed:almonds"
+          ]
+        },
+        "hit": [
+          "seed:almonds"
+        ]
+      },
+      {
+        "id": "nothing_excluded",
+        "items": [
+          {
+            "foodId": "seed:egg",
+            "name": "Egg"
+          }
+        ],
+        "avoid": {},
+        "hit": []
+      },
+      {
+        "id": "allergen_is_not_read_here",
+        "items": [
+          {
+            "foodId": "seed:almonds",
+            "name": "Almonds"
+          }
+        ],
+        "avoid": {
+          "allergens": [
+            "treenuts"
+          ]
+        },
+        "hit": []
       }
     ]
   },
@@ -4716,6 +4877,68 @@
       "judge": "rubric",
       "tags": [
         "carb-limit"
+      ]
+    },
+    {
+      "id": "EX1",
+      "dimension": "safe",
+      "query": "A handful of pistachios",
+      "ground_truth": "Counts the meal as described and says once that it has a food the person left out, by the engine's name; no warning language; the verdict and numbers are the engine's.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "avoid": {
+          "words": [
+            "pistachios"
+          ]
+        }
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "excludedReported": true
+      },
+      "judge": "rubric",
+      "tags": [
+        "excluded"
+      ]
+    },
+    {
+      "id": "EX2",
+      "dimension": "safe",
+      "query": "A handful of almonds",
+      "ground_truth": "A normal answer; the person left out pistachios, not almonds, so exclusions are not mentioned.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "avoid": {
+          "words": [
+            "pistachios"
+          ]
+        }
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "noExcludedField": true
+      },
+      "judge": "rubric",
+      "tags": [
+        "excluded"
       ]
     }
   ]

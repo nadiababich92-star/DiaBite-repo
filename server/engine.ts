@@ -29,7 +29,7 @@ import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
-import { afterMealFor, computeMeal, dayState, driverOf, findAlternatives, planDish, withDayUnscored } from './compute'
+import { afterMealFor, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, withDayUnscored } from './compute'
 import { verify } from './verify'
 import { claimSession, getSession, noteResolution, putSession } from './sessions'
 import { openApiSpec } from './openapi'
@@ -341,6 +341,7 @@ async function main() {
         const unknownFoods = getSession(body.sessionId)?.unknownFoods ?? []
         const unscored = meal.items.filter((it) => !it.loadAvailable).map((it) => it.name)
         out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, withDayUnscored(unscored, day), (body.sessionId ? getSession(body.sessionId)?.carbLimit : undefined))
+        { const ex = excludedIn(meal.items, body.sessionId ? getSession(body.sessionId)?.avoid : undefined); if (ex.length) out.excluded = ex }
       }
       res.json(out)
     } catch (e) {
@@ -399,6 +400,7 @@ async function main() {
         const unknownFoods = (body.sessionId ? getSession(body.sessionId)?.unknownFoods : undefined) ?? []
         const unscored = meal.items.filter((it) => !it.loadAvailable).map((it) => it.name)
         out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, withDayUnscored(unscored, day), (body.sessionId ? getSession(body.sessionId)?.carbLimit : undefined))
+        { const ex = excludedIn(meal.items, body.sessionId ? getSession(body.sessionId)?.avoid : undefined); if (ex.length) out.excluded = ex }
       }
 
       const remaining = day && !('unknown' in day) ? day.remaining.gl : undefined
@@ -470,6 +472,7 @@ async function main() {
         const unknownFoods = (body.sessionId ? getSession(body.sessionId)?.unknownFoods : undefined) ?? []
         const unscored = meal.items.filter((it) => !it.loadAvailable).map((it) => it.name)
         out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, withDayUnscored(unscored, day), (body.sessionId ? getSession(body.sessionId)?.carbLimit : undefined))
+        { const ex = excludedIn(meal.items, body.sessionId ? getSession(body.sessionId)?.avoid : undefined); if (ex.length) out.excluded = ex }
       }
       res.json(out)
     } catch (e) {

@@ -255,6 +255,18 @@ export function afterMealFor(
   }
 }
 
+/**
+ * Which foods of this meal the person left out by hand (an excluded record, or a word typed from the recipes' ingredients).
+ * The meal is counted as they described it: a person who types "pistachio ice cream" has said what they are eating. The
+ * answer is told, so it says so once. Allergens from onboarding are not read here: they filter what is offered, not what was said.
+ */
+export function excludedIn(items: { foodId: string; name: string }[], avoid?: AvoidList): { foodId: string; name: string }[] {
+  if (!avoid || !((avoid.foodIds?.length ?? 0) + (avoid.words?.length ?? 0))) return []
+  const only: AvoidList = { foodIds: avoid.foodIds, words: avoid.words }
+  const { byId } = loadFoods()
+  return items.filter((it) => { const rec = byId.get(it.foodId); return !!rec && isAvoided(rec, only) }).map((it) => ({ foodId: it.foodId, name: it.name }))
+}
+
 /** The scored item with the largest load; none when no item has one (a meal of branded products). */
 export function driverOf(items: MealItemResult[]): { foodId: string; name: string; gl: number } | undefined {
   const scored = items.filter((it) => it.gl !== null)

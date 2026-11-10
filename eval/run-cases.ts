@@ -180,6 +180,13 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
       say('engine says the meal is not over the person\'s number', cl?.over === false, JSON.stringify(cl))
       say('the answer does not raise a limit the meal is under', !!cl && !said.has(cl.limitG), `limit ${cl?.limitG} said ${[...said].join(',')}`)
     }
+    const ex = (callOf(r, 'compute_meal')?.result as { excluded?: { name: string }[] } | undefined)?.excluded
+    if (e.excludedReported === true) {
+      say('engine reports the food the person left out', (ex?.length ?? 0) > 0, JSON.stringify(ex))
+      // The wording is the model's, so it is a style check: the engine's own name for the food should appear in the answer.
+      style('the answer names the food they left out', !!ex?.some((x) => answer.toLowerCase().includes(x.name.toLowerCase().split(/[,(]/)[0].trim().replace(/s$/, ''))), answer.slice(0, 100))
+    }
+    if (e.noExcludedField === true) say('no excluded foods reported when the meal has none', ex === undefined, JSON.stringify(ex))
     if (e.noCarbLimitField === true) say('no carbohydrate limit in the result when none was set', cl === undefined, JSON.stringify(cl))
   }
   if (e.noComputeMeal === true) say('no compute_meal', !called(r, 'compute_meal'))

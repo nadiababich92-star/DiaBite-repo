@@ -361,6 +361,8 @@ const INGREDIENT_ALIASES: Record<string, string[]> = {
   chicken_sausage: ['breakfast sausage', 'sausage links', 'sausage patties'],
   // 'pizza sauce' matched fish sauce, a neighbour by the word 'sauce'; on a pizza it is tomato sauce.
   tomato_sauce: ['pizza sauce', 'pizza tomato sauce'],
+  // Butter beans are lima beans; the nearest record to the phrase was green beans cooked with butter.
+  lima_beans: ['butter beans', 'butter bean', 'baby lima beans'],
 }
 
 /**

@@ -34,7 +34,7 @@ export const LANDING = {
   leftAfterGl: 37.8,        // budgetGl - totalGl, to one decimal
   records: 8633,            // the size of the catalogue, as in docs/STATUS.md; shown in S5
   /** A dated claim from docs/STATUS.md. Refresh when `npm run eval:agent` is rerun, and say so in STATUS.md. */
-  checks: { passed: 204, of: 204, on: '2026-10-15' },
+  checks: { passed: 255, of: 256, on: '2026-11-10' },
   transcript: [             // the five lines of the clip's narration, scripts/demo-video/narration-clip.json
     'This is DiaBite. You type a meal the way you would say it.',
     'The engine finds each food and does the arithmetic. It fits, and the receipt shows every number.',
@@ -104,7 +104,7 @@ The figures were read from the running engine on 20 October 2026 (`compute_meal`
 **S8 · For clinicians and reviewers**
 - `h2`: `For clinicians and reviewers`
 - `A router sends each question either to a meal agent that can call the engine's tools, or to an advisor that has no tools and states no numbers. The rules for doses, red flags, prolonged fasting and referral run before any model. Every decision the product makes about a person is written down for review.`
-- The dated count, built from `checks`: `204 of 204 behavioural checks passed on the live agent on 15 October 2026.`
+- The dated count, built from `checks`: `255 of 256 behavioural checks passed on the live agent on 10 November 2026.`
 - Two links: `The safety case` (`links.safetyCase`) and `Where the food numbers come from` (`links.dataSources`), both `rel="noopener"`.
 - `If something in them is wrong, I would like to know.` followed by the `Write to me` link.
 

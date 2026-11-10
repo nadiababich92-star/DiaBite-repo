@@ -35,7 +35,7 @@ export function loadMenuRecipes(): Promise<number> {
 const NOT_THE_DISH = /\b(salt|pepper|vinegar|seasoning|sweetener|stevia|erythritol|extract|paprika|cumin|oregano|cinnamon|turmeric|cayenne|nutmeg|powder|flakes|spice|sauce)\b/i
 
 /** "Egg, large (50 g each)" is "egg"; "Greek yogurt, plain 2%" is "greek yogurt"; "Ground beef 90% lean" is "ground beef". The kind of food, not how it is bought. */
-const kindOf = (name: string) => name.replace(/\s*\(.*?\)/g, '').replace(/\s+\d+%(\s+lean)?/gi, '').split(',')[0].trim().toLowerCase()
+export const kindOf = (name: string) => name.replace(/\s*\(.*?\)/g, '').replace(/\s+\d+%(\s+lean)?/gi, '').split(',')[0].trim().toLowerCase()
 
 /**
  * One short line under a dish: its main ingredients, from the recipe's own list, heaviest first

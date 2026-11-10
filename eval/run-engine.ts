@@ -29,7 +29,7 @@ import { resolvePhrases } from '../server/resolve'
 import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
-import { afterMealFor, computeItem, computeMeal, dayState, driverOf, planDish, uninvertPhrase, withDayUnscored } from '../server/compute'
+import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, uninvertPhrase, withDayUnscored } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
@@ -42,6 +42,7 @@ import { authInUrl, showLanding, skipLanding } from '../src/lib/landingRule'
 import { allCopy, allSteps, copyFor, initialSeen, markSeen, nextStep, sanitizeSeen, STEP_ORDER, type TourContext } from '../src/lib/tour'
 import { generateWeek, menuHidden, regenerateSlot, replayWeek, setRecipes, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
 import { toDishes } from '../src/lib/recipes'
+import { nameMatches } from '../src/lib/excludable'
 import { ALLERGEN_PATTERNS, PATTERN_PATTERNS, AVOIDED_PATTERNS, dietaryReason } from '../src/lib/dietary'
 import { loadWeekState } from '../src/lib/menuStore'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type NudgeContext } from '../src/lib/nudge'
@@ -74,7 +75,7 @@ interface GateCase { phrase: string; rule: string | null }
 interface VerifyCase { id: string; answer: string; toolResults: unknown[]; ok: boolean }
 
 const cases = JSON.parse(readFileSync(join(ROOT, 'eval', 'cases.json'), 'utf8')) as {
-  engine: { resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[]; answer: AnswerCase[]; portion: { id: string; grams: number }[]; partial: PartialCase[]; branded: { id: string; foodId: string; grams: number }[]; carbLimit: { id: string; kind: 'meal' | 'snack' | null; limitG: number | null; mealCarbs: number; over: boolean | null }[]; avoidWords: { id: string; word: string; text: string; hit: boolean }[] }
+  engine: { resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[]; answer: AnswerCase[]; portion: { id: string; grams: number }[]; partial: PartialCase[]; branded: { id: string; foodId: string; grams: number }[]; excludedIn: { id: string; items: { foodId: string; name: string }[]; avoid: Record<string, string[]>; hit: string[] }[]; excludeSearch: { id: string; typed: string; name: string; hit: boolean }[]; carbLimit: { id: string; kind: 'meal' | 'snack' | null; limitG: number | null; mealCarbs: number; over: boolean | null }[]; avoidWords: { id: string; word: string; text: string; hit: boolean }[] }
 }
 
 const t0 = Date.now()
@@ -1217,6 +1218,23 @@ for (const c of cases.engine.avoidWords) {
 console.log(`avoidWords ${cases.engine.avoidWords.length - wordMisses.length}/${cases.engine.avoidWords.length}`)
 if (wordMisses.length) { console.log('  a typed ingredient was matched wrongly:'); wordMisses.forEach((m) => console.log(m)) }
 
+const excludedMisses: string[] = []
+for (const c of cases.engine.excludedIn) {
+  const got = excludedIn(c.items, c.avoid).map((x) => x.foodId).join(',')
+  if (got !== c.hit.join(',')) excludedMisses.push(`    ${c.id.padEnd(28)} want [${c.hit}] got [${got}]`)
+}
+console.log(`excludedIn ${cases.engine.excludedIn.length - excludedMisses.length}/${cases.engine.excludedIn.length}`)
+if (excludedMisses.length) { console.log('  a food left out by hand was reported wrongly:'); excludedMisses.forEach((m) => console.log(m)) }
+
+// A word typed with one slip still finds the food a person means to leave out; two slips, or a very short word, does not.
+const searchMisses: string[] = []
+for (const c of cases.engine.excludeSearch) {
+  const got = nameMatches(c.name, c.typed)
+  if (got !== c.hit) searchMisses.push(`    ${c.id.padEnd(28)} "${c.typed}" for "${c.name}" want ${c.hit} got ${got}`)
+}
+console.log(`excludeSearch ${cases.engine.excludeSearch.length - searchMisses.length}/${cases.engine.excludeSearch.length}`)
+if (searchMisses.length) { console.log('  the search for foods to leave out matched wrongly:'); searchMisses.forEach((m) => console.log(m)) }
+
 // ── answer ────────────────────────────────────────────────────────────────────
 // The browser reads a meal answer's verdict and next step out of the agent's
 // text. The model writes the labelled form and the plain form about equally,
@@ -1326,6 +1344,8 @@ if (portionMisses.length) { console.log('a default serving is wrong'); process.e
 if (partialMisses.length) { console.log('a partial meal was called a fit'); process.exit(1) }
 if (carbMisses.length) { console.log('the person\'s own carbohydrate number was compared wrongly'); process.exit(1) }
 if (wordMisses.length) { console.log('a typed ingredient was matched wrongly'); process.exit(1) }
+if (searchMisses.length) { console.log('the search for foods to leave out matched wrongly'); process.exit(1) }
+if (excludedMisses.length) { console.log('a food left out by hand was reported wrongly'); process.exit(1) }
 if (menuMisses.length) { console.log('the weekly menu broke a rule'); process.exit(1) }
 if (routeMisses.length) { console.log('a message started the meal agent that should have waited'); process.exit(1) }
 if (accountMisses.length) { console.log('the account sync or the sign-in messages misbehaved'); process.exit(1) }

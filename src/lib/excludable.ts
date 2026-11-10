@@ -1,5 +1,6 @@
 import { FOODS, FOOD_BY_ID } from '../data/foods'
 import { recipeList } from './menu'
+import { kindOf } from './recipes'
 
 /**
  * What a person can leave out by hand: the everyday foods DiaBite knows, and every ingredient the recipes use ("pistachios",
@@ -10,10 +11,35 @@ export const ING_PREFIX = 'ing:'
 
 export interface Excludable { id: string; name: string; hint: string }
 
+/** One slip is allowed: a letter added, left out or changed. */
+function withinOne(a: string, b: string): boolean {
+  if (a === b) return true
+  if (Math.abs(a.length - b.length) > 1) return false
+  let i = 0
+  while (i < a.length && i < b.length && a[i] === b[i]) i++
+  if (a.length === b.length) return a.slice(i + 1) === b.slice(i + 1)      // one letter changed
+  const [long, short] = a.length > b.length ? [a, b] : [b, a]
+  return long.slice(i + 1) === short.slice(i)                             // one letter left out
+}
+
+/**
+ * Does what the person typed point at this name? A part of a word always does ("pistach" for "Pistachios"); a word typed with
+ * one slip ("pistacio", "almnd") does too, once it is four letters long, compared with the start of each word of the name.
+ */
+export function nameMatches(name: string, typed: string, forgiving = true): boolean {
+  const n = name.toLowerCase(), q = typed.trim().toLowerCase()
+  if (!q) return false
+  if (n.includes(q)) return true
+  if (!forgiving || q.length < 4) return false
+  for (const w of n.split(/[^a-z]+/)) {
+    if (w.length < 3) continue
+    for (const len of [q.length - 1, q.length, q.length + 1]) if (len >= 3 && w.length >= len && withinOne(w.slice(0, len), q)) return true
+  }
+  return false
+}
+
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
-/** "Pistachios, shelled" is "pistachios"; "Egg, large (50 g each)" is "egg": the kind of food, not how it is bought. */
-const kindOf = (name: string) => name.replace(/\s*\(.*?\)/g, '').replace(/\s+\d+%(\s+lean)?/gi, '').split(',')[0].trim().toLowerCase()
 
 /** The name to show for an excluded id, whichever kind it is. Never throws. */
 export function excludedLabel(id: string): string {

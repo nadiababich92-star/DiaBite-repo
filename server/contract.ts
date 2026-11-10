@@ -156,6 +156,8 @@ export interface ComputeMealResponse {
   driver?: { foodId: string; name: string; gl: number }
   /** Swaps for the heaviest item, when the meal needed them. */
   alternatives?: Alternative[]
+  /** Foods of this meal that the person left out by hand; the meal is still counted as described. Absent when none. */
+  excluded?: { foodId: string; name: string }[]
   /** Which item the alternatives replace. */
   alternativesFor?: { foodId: string; name: string; grams: number }
   /** The arithmetic, stated so the UI can show it verbatim. */

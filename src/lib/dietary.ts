@@ -110,5 +110,5 @@ export const PATTERN_LABELS: Record<Pattern, string> = {
 }
 
 export const AVOIDED_LABELS: Record<Avoided, string> = {
-  pork: 'Pork', beef: 'Beef', lamb: 'Lamb and goat', chicken: 'Chicken', turkey: 'Turkey', duck: 'Duck and goose', game: 'Game (venison, bison, rabbit)',
+  pork: 'Pork', beef: 'Beef', lamb: 'Lamb and goat', chicken: 'Chicken', turkey: 'Turkey', duck: 'Duck and goose', game: 'Game meat (venison, bison, rabbit)',
 }
