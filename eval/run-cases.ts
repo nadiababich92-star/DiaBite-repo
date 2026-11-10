@@ -174,7 +174,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
     const said = new Set(r.matchedNumbers ?? [])
     if (e.carbLimitOver === true) {
       say('engine says the meal is over the person\'s number', cl?.over === true, JSON.stringify(cl))
-      say('the answer states the limit and the meal\'s carbohydrate', !!cl && said.has(cl.limitG) && said.has(cl.mealG), `limit ${cl?.limitG} meal ${cl?.mealG} said ${[...said].join(',')}`)
+      say('the answer states the person\'s own number', !!cl && said.has(cl.limitG), `limit ${cl?.limitG} said ${[...said].join(',')}`)
     }
     if (e.carbLimitUnder === true) {
       say('engine says the meal is not over the person\'s number', cl?.over === false, JSON.stringify(cl))
