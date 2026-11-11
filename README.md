@@ -62,8 +62,9 @@ In dev the app calls `/agent`, which Vite proxies to `/agent/ask` on the
 deployed engine (`AGENT_WEBHOOK` overrides the target — point it at
 `http://localhost:8787/agent/ask` with `npm run server` to work against a
 local engine). For a production build set `VITE_AGENT_URL`. The Foundry setup
-is described in `agent/SETUP.md`; `n8n/SETUP.md` documents the workflow this
-replaced.
+is described in `agent/SETUP.md`. The n8n workflow it replaced is no longer in the tree
+(its safety gate had fallen behind `server/safety.ts`); it is in git history, in the commit
+that removed `n8n/`.
 
 ## Layout
 
@@ -92,7 +93,6 @@ server/
   sessions.ts          day state and thread, kept out of the model's hands
   openapi.ts           the OpenAPI spec Foundry's tool reads
 agent/                 system prompt, provisioning, Foundry setup guide
-n8n/                   the workflow this replaced, kept for reference
 ```
 
 `lib/` and `data/` are pure TypeScript with no React dependency. The React

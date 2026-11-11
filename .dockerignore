@@ -7,7 +7,6 @@ dist
 .claude
 docs
 eval
-n8n
 *.xlsx
 *.tsbuildinfo
 config.json
