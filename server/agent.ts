@@ -481,6 +481,12 @@ export function engineVerdict(trace: ToolCallTrace[]): { fits: boolean | null; e
  * plainly. Blunter prose, but every figure is the engine's.
  */
 export function templatedAnswer(trace: ToolCallTrace[]): string | null {
+  const limitLine = (r: { afterMeal?: { carbLimit?: { kind: string; limitG: number; mealG: number; over: boolean } } } | undefined): string | null => {
+    // The person's own number for a meal or a snack. It never changes the verdict (that is the glycemic load),
+    // and it is named only when the engine says the meal is above it. Both figures are the engine's.
+    const c = r?.afterMeal?.carbLimit
+    return c?.over === true ? `**Your limit:** this meal has ${c.mealG} g of carbohydrate, above the ${c.limitG} g you set for a ${c.kind}.` : null
+  }
   // The later of the two: a dish counted from an assumed recipe (cost_dish) is answered like a meal,
   // but as an estimate, never a plain "fits".
   const lastIndex = (op: string) => trace.map((t) => t.tool === op || t.tool.endsWith(`_${op}`)).lastIndexOf(true)
@@ -491,7 +497,7 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
         // The budget rides in the same reply as the meal, so there is no second
         // tool to read. (It once read get_day_state, which the agent no longer
         // has, and the last-resort answer lost its verdict.)
-        afterMeal?: { remaining?: { gl: number }; fits?: boolean | null; partial?: { unknownFoods: string[]; unscored?: string[] } }
+        afterMeal?: { remaining?: { gl: number }; fits?: boolean | null; partial?: { unknownFoods: string[]; unscored?: string[] }; carbLimit?: { kind: string; limitG: number; mealG: number; over: boolean } }
         dayState?: { remaining?: { gl: number } }
         items?: { loadAvailable?: boolean }[]
         assumed?: boolean
@@ -525,6 +531,8 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
         : `**Verdict:** If your dish is like this, it goes over what is left of today's budget.`)
     }
     lines.push(`**Numbers:** this estimate's glycemic load is ${gl}.`)
+    const estLimit = limitLine(meal)
+    if (estLimit) lines.push(estLimit)
     lines.push('_Counted from a typical recipe; change anything that is not yours._')
     return lines.join('\n\n')
   }
@@ -558,6 +566,9 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
   } else {
     lines.push(`**Numbers:** this meal's glycemic load is ${gl}.`)
   }
+
+  const mealLimit = limitLine(meal)
+  if (mealLimit) lines.push(mealLimit)
 
   const alts = (lastCall(trace, 'find_alternatives')?.result as { alternatives?: { name: string; gl: number }[] } | undefined)?.alternatives
   if (alts?.length) lines.push(`**Next action:** ${alts[0].name} would come to ${alts[0].gl} instead.`)

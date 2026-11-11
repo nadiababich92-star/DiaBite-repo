@@ -1146,6 +1146,22 @@ hangMisses.forEach((m) => console.log(m))
       if (c) verdictMisses.push(`    the templated answer contradicts its own verdict (${fits}, assumed ${assumed}): ${c}`)
     }
   }
+  // The person's own carbohydrate limit reaches the last-resort answer too, and only when the engine says the meal is above it.
+  for (const assumed of [false, true]) {
+    const mk = (carbLimit: object | undefined) => [{ tool: assumed ? 'cost_dish' : 'compute_meal', input: {}, result: { assumed, totals: { gl: 10, carbs: 48 }, items: [{ loadAvailable: true }], afterMeal: { remaining: { gl: 5 }, fits: true, ...(carbLimit ? { carbLimit } : {}) }, dayState: { remaining: { gl: 15 } } } }]
+    const label = assumed ? 'estimate' : 'meal'
+    const over = templatedAnswer(mk({ kind: 'meal', limitG: 45, mealG: 48, over: true })) ?? ''
+    if (!/48 g of carbohydrate, above the 45 g you set for a meal/.test(over)) verdictMisses.push(`    the last-resort answer for a ${label} above the limit does not say so: ${over.slice(0, 160)}`)
+    const ov = engineVerdict(mk({ kind: 'meal', limitG: 45, mealG: 48, over: true }))
+    if (ov && verdictConflict(over, ov.fits, ov.estimate)) verdictMisses.push(`    the limit line makes the last-resort answer for a ${label} contradict its verdict`)
+    const under = templatedAnswer(mk({ kind: 'snack', limitG: 60, mealG: 48, over: false })) ?? ''
+    if (/you set|limit/i.test(under)) verdictMisses.push(`    the last-resort answer for a ${label} under the limit mentions it: ${under.slice(0, 160)}`)
+    const none = templatedAnswer(mk(undefined)) ?? ''
+    if (/you set|limit/i.test(none)) verdictMisses.push(`    the last-resort answer for a ${label} with no limit mentions one`)
+    // every number it prints is one the engine gave (the verifier runs on it in production)
+    const r = verify({ answer: over, toolResults: mk({ kind: 'meal', limitG: 45, mealG: 48, over: true }).map((t) => t.result), userText: '' })
+    if (!r.ok) verdictMisses.push(`    the limit line carries a number the engine did not give: ${JSON.stringify(r.unmatched)}`)
+  }
   if (engineVerdict([]) !== null) verdictMisses.push('    an empty trace has a verdict')
   // A short reply to a question the meal specialist asked goes back to it (it went to the advisor, which cannot ask again).
   const asked = { role: 'meal', asked: true }
