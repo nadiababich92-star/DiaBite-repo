@@ -36,13 +36,17 @@ import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush,
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
 import { boldSegments } from '../src/lib/answer'
-import { lookOf } from '../src/lib/theme'
+import { applyTheme, lookOf, pinThemeColor } from '../src/lib/theme'
 import { LANDING } from '../src/data/landing'
 import { authInUrl, showLanding, skipLanding } from '../src/lib/landingRule'
 import { allCopy, allSteps, copyFor, initialSeen, markSeen, nextStep, sanitizeSeen, STEP_ORDER, type TourContext } from '../src/lib/tour'
 import { generateWeek, menuHidden, regenerateSlot, replayWeek, setRecipes, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
 import { toDishes } from '../src/lib/recipes'
-import { nameMatches } from '../src/lib/excludable'
+import { excludedLabel, nameMatches } from '../src/lib/excludable'
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import Logo, { Wordmark } from '../src/components/Logo'
+import ImportPrompt from '../src/components/ImportPrompt'
 import { ALLERGEN_PATTERNS, PATTERN_PATTERNS, AVOIDED_PATTERNS, dietaryReason } from '../src/lib/dietary'
 import { loadWeekState } from '../src/lib/menuStore'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type NudgeContext } from '../src/lib/nudge'
@@ -55,7 +59,8 @@ import { RATING_ONLY } from '../src/lib/feedbackCopy'
 import { buildReport, reportMarkdown, type AccountInput, type ReportInput } from '../src/lib/report'
 import { CONSENT_VERSION } from '../src/lib/syncCore'
 import { addDays, dayLabel, gramStep, mealForNow, nudgeGrams, recentEntries } from '../src/lib/diary'
-import { calculateTargets, DEFAULT_PROFILE } from '../src/lib/profile'
+import { calculateTargets, DEFAULT_PROFILE, weightUsed } from '../src/lib/profile'
+import { lockCount, lockPage } from '../src/lib/pageLock'
 import { answerRows } from '../src/lib/answers'
 import { swapNamedIn } from '../src/lib/swap'
 import { describeDish, toDishes, type RawRecipe } from '../src/lib/recipes'
@@ -1290,12 +1295,123 @@ console.log(`\nverify    ${cases.engine.verify.length - verifyMisses.length}/${c
 if (verifyMisses.length) { console.log('  wrong verdict:'); verifyMisses.forEach((m) => console.log(m)) }
 fail([], '')
 
+// Two dialogs open at once (the import prompt arrives while "What are GI and GL?" is up): the page stays locked
+// until the LAST one closes. Each dialog used to give the page back when it closed, whatever else was showing.
+{
+  const bits: string[] = []
+  const classes = new Set<string>()
+  const attrs = () => { const a = new Set<string>(); return { a, setAttribute: (k: string) => { a.add(k) }, removeAttribute: (k: string) => { a.delete(k) }, hasAttribute: (k: string) => a.has(k) } }
+  const behind = [attrs(), attrs()]
+  const foreign = attrs(); foreign.setAttribute('inert') // inert before we ever touched it: not ours to remove
+  const g = globalThis as unknown as { document?: unknown }
+  g.document = { body: { classList: { add: (c: string) => { classes.add(c) }, remove: (c: string) => { classes.delete(c) } } }, querySelectorAll: () => [...behind, foreign] }
+  const locked = () => classes.has('modal-open') && behind.every((e) => e.a.has('inert'))
+  const free = () => !classes.has('modal-open') && behind.every((e) => !e.a.has('inert'))
+  const a = lockPage()
+  if (!locked()) bits.push('one dialog does not lock the page')
+  a()
+  if (!free()) bits.push('closing the only dialog does not release the page')
+  if (!foreign.a.has('inert')) bits.push('release removed an inert it never set')
+  const b = lockPage(), c = lockPage()
+  b()
+  if (!locked()) bits.push('the first of two dialogs to close released the page while the other was open')
+  b() // closing twice must not count twice
+  if (!locked()) bits.push('closing the same dialog twice released the page under the other one')
+  if (lockCount() !== 1) bits.push(`holders should be 1, are ${lockCount()}`)
+  c()
+  if (!free() || lockCount() !== 0) bits.push('closing the last dialog does not release the page')
+  // a dialog that re-opens (its effect runs again) goes 1 -> 0 -> 1 and must end locked
+  const d = lockPage(); d(); const e = lockPage()
+  if (!locked()) bits.push('a re-opened dialog is not locked')
+  e()
+  delete g.document
+  console.log(`\npagelock  ${bits.length === 0 ? 'ok' : 'WRONG'}`)
+  for (const m of bits) console.log(`    ${m}`)
+  if (bits.length) process.exit(1)
+}
+// A weight field cleared or mistyped mid-edit must never reach a "g/kg" label as 0, empty or NaN (it once printed "Infinity g/kg").
+// The label divides by weightUsed, the weight the formula itself used, so the two always agree.
+{
+  const bits: string[] = []
+  const cases: [number, number][] = [[0, 30], [NaN, DEFAULT_PROFILE.weightKg], [-5, 30], [25, 30], [72, 72], [350, 300], [Infinity, DEFAULT_PROFILE.weightKg]]
+  for (const [typed, used] of cases) {
+    const got = weightUsed({ weightKg: typed })
+    if (got !== used) bits.push(`weight ${typed} should be used as ${used}, got ${got}`)
+    const perKg = calculateTargets({ ...DEFAULT_PROFILE, weightKg: typed }).proteinG / got
+    if (!Number.isFinite(perKg) || perKg <= 0) bits.push(`weight ${typed} gives a protein label of ${perKg} g/kg`)
+  }
+  console.log(`\nweight    ${bits.length === 0 ? 'ok' : 'WRONG'}`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exit(1)
+}
 // The two looks: Tape is the default; Follow my phone is Paper by day and Tape after dark.
 {
   const bits: string[] = []
   const want: [Parameters<typeof lookOf>[0], boolean, string][] = [['tape', true, 'tape'], ['tape', false, 'tape'], ['paper', true, 'paper'], ['paper', false, 'paper'], ['system', true, 'paper'], ['system', false, 'tape']]
   for (const [choice, light, look] of want) if (lookOf(choice, light) !== look) bits.push(`${choice} on a ${light ? 'light' : 'dark'} phone should be ${look}`)
   console.log(`\ntheme     ${bits.length === 0 ? 'ok' : 'WRONG'}`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exit(1)
+}
+// A screen reader says "DiaBite" once in the mast, not twice (the mark beside the heading is decoration), and the mark
+// alone, where the wordmark is hidden, still says it. And an excluded id the catalogue does not know (an old entry, a food
+// since renamed) is shown as it is: it never throws, which once took the whole tab down.
+{
+  const bits: string[] = []
+  const html = (...els: Parameters<typeof renderToStaticMarkup>[0][]) => els.map((e) => renderToStaticMarkup(e)).join('')
+  const names = (s: string) => (s.match(/aria-label="DiaBite"/g) ?? []).length
+  const mast = html(createElement(Logo, { decorative: true }), createElement(Wordmark, {}))
+  if (names(mast) !== 1) bits.push(`the mast says DiaBite ${names(mast)} times to a screen reader, want 1`)
+  if (!/aria-hidden="true"/.test(html(createElement(Logo, { decorative: true })))) bits.push('a decorative mark is not hidden')
+  const alone = html(createElement(Logo, {}), createElement(Wordmark, { as: 'span' }))
+  if (names(alone) !== 1 || !/role="img"/.test(alone)) bits.push('on the landing the name is not said exactly once, by the mark')
+  for (const id of ['seed:does-not-exist', 'ing:', 'ing:tahini', '', 'zzz']) {
+    try { if (typeof excludedLabel(id) !== 'string') bits.push(`excludedLabel(${JSON.stringify(id)}) is not text`) }
+    catch (e) { bits.push(`excludedLabel(${JSON.stringify(id)}) throws: ${(e as Error).message}`) }
+  }
+  console.log(`\nmast      ${bits.length === 0 ? 'ok' : 'WRONG'}`)
+  for (const m of bits) console.log(`    ${m}`)
+  if (bits.length) process.exit(1)
+}
+// The old-diary dialog opens as a question with three answers, and says nothing about deleting until "Don't move" is chosen:
+// nothing is deleted, or even offered for deletion, by a first look.
+{
+  const bits: string[] = []
+  const noop = () => {}
+  const view = (count: number) => renderToStaticMarkup(createElement(ImportPrompt, { count, onMove: noop, onLater: noop, onDiscard: noop }))
+  const many = view(14), one = view(1)
+  for (const label of ['Move', 'Not now', 'Don&#x27;t move']) if (!many.includes(`>${label}</button>`)) bits.push(`the dialog has no "${label.replace('&#x27;', "'")}" button`)
+  if (/cannot be undone|class="danger"|>Delete</.test(many)) bits.push('the dialog offers deletion before "Don\'t move" is chosen')
+  if (!/14 entries from before you signed in/.test(many) || !/1 entry from before you signed in/.test(one)) bits.push('the count is not said in the right number')
+  console.log(`\nimport    ${bits.length === 0 ? 'ok' : 'WRONG'}`)
+  for (const m of bits) console.log(`    ${m}`)
+  if (bits.length) process.exit(1)
+}
+// The browser's bar (<meta name="theme-color">) follows the look, except over the landing, which is always the dark page:
+// a visitor who chose Paper must not see a light bar over it, and a phone switching light/dark must not undo that.
+{
+  const bits: string[] = []
+  let bar = '', dataTheme = '', light = false
+  const g = globalThis as unknown as { document?: unknown; window?: unknown }
+  g.window = { matchMedia: () => ({ matches: light }) }
+  g.document = { documentElement: { setAttribute: (_k: string, v: string) => { dataTheme = v } }, querySelector: () => ({ setAttribute: (_k: string, v: string) => { bar = v } }) }
+  const TAPE = '#0a1812', PAPER = '#f1ece0'
+  const expect = (what: string, got: string, want: string) => { if (got !== want) bits.push(`${what}: bar ${got}, want ${want}`) }
+  applyTheme('paper'); expect('Paper', bar, PAPER)
+  applyTheme('tape'); expect('Tape', bar, TAPE)
+  applyTheme('paper')
+  const release = pinThemeColor('tape')
+  expect('Paper under the landing', bar, TAPE)
+  if (dataTheme !== 'paper') bits.push(`the pin changed the app's look to ${dataTheme}`)
+  light = true; applyTheme('system'); expect('the phone going light under the landing', bar, TAPE)
+  release(); expect('leaving the landing on a light phone', bar, PAPER)
+  light = false; applyTheme('system'); expect('a dark phone after the landing', bar, TAPE)
+  release(); expect('letting go twice', bar, TAPE)
+  const r1 = pinThemeColor('tape'); const r2 = pinThemeColor('tape'); r1(); applyTheme('paper')
+  expect('a stale release must not undo a newer pin', bar, TAPE)
+  r2(); expect('the newer pin released', bar, PAPER)
+  delete g.document; delete g.window
+  console.log(`\nthemebar  ${bits.length === 0 ? 'ok' : 'WRONG'}`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exit(1)
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { lockPage } from '../lib/pageLock'
 
 /**
  * "How it works": what each tab is for, and where the numbers come from. A dialog with the same promises as the
@@ -11,9 +12,7 @@ export default function HowItWorks({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     const opener = document.activeElement as HTMLElement | null
-    const behind = [...document.querySelectorAll<HTMLElement>('.app > :not(.modal-backdrop)')]
-    behind.forEach((el) => el.setAttribute('inert', ''))
-    document.body.classList.add('modal-open')
+    const unlock = lockPage()
     first.current?.focus()
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { onClose(); return }
@@ -26,8 +25,7 @@ export default function HowItWorks({ onClose }: { onClose: () => void }) {
     document.addEventListener('keydown', onKey)
     return () => {
       document.removeEventListener('keydown', onKey)
-      behind.forEach((el) => el.removeAttribute('inert'))
-      document.body.classList.remove('modal-open')
+      unlock()
       opener?.focus?.()
     }
   }, [onClose])

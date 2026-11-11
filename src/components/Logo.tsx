@@ -3,9 +3,12 @@
  * way the product stamps FITS on a receipt. At 16px it is still a ring and a tick.
  * Colours come from tokens, so it follows Tape and Paper (docs/design.md).
  */
-export default function Logo({ size = 28 }: { size?: number }) {
+export default function Logo({ size = 28, decorative = false }: { size?: number; decorative?: boolean }) {
+  // Beside a heading that already says "DiaBite" (the app's mast, the sign-in screen) the mark is decoration: a screen
+  // reader would otherwise say the name twice. Alone (the landing, whose wordmark is hidden instead) it says it.
+  const a11y = decorative ? { 'aria-hidden': true as const } : { role: 'img' as const, 'aria-label': 'DiaBite' }
   return (
-    <svg className="logo" width={size} height={size} viewBox="0 0 64 64" role="img" aria-label="DiaBite">
+    <svg className="logo" width={size} height={size} viewBox="0 0 64 64" {...a11y}>
       <defs>
         <mask id="logo-bite">
           <rect width="64" height="64" fill="#fff" />

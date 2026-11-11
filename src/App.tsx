@@ -140,6 +140,14 @@ export default function App() {
     setWaiting(0)
   }
 
+  // "Not now": asked again at the next sign-in, nothing lost. "Don't move", after its own confirmation: the old diary
+  // is deleted from this device and never asked about again. Stable, so the dialog's effect does not run again on every render.
+  const holdLegacyDiary = useCallback(() => setWaiting(0), [])
+  const discardLegacyDiary = useCallback(() => {
+    try { localStorage.removeItem(LEGACY_DIARY_KEY) } catch { /* storage unavailable: nothing was kept to delete */ }
+    setWaiting(0)
+  }, [])
+
   // Not yet known whether to ask for a sign-in, or who is asking: nothing of the app is shown.
   if (signInRequired === null || auth.status === 'loading' || (auth.status === 'signedIn' && account !== 'ready' && account !== 'failed')) {
     return <div className="app"><p className="muted" role="status">Opening DiaBite…</p></div>
@@ -172,7 +180,7 @@ export default function App() {
     return (
       <div className="app">
         <header className="masthead">
-          <Logo />
+          <Logo decorative />
           <Wordmark />
         </header>
         <main>
@@ -201,7 +209,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="masthead">
-        <Logo />
+        <Logo decorative />
         <Wordmark />
       </header>
 
@@ -294,7 +302,7 @@ export default function App() {
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
       {howOpen && <HowItWorks onClose={() => setHowOpen(false)} />}
       {glOpen && <GlInfo budget={targets.glBudget} onClose={() => setGlOpen(false)} />}
-      {waiting > 0 && !feedbackOpen && <ImportPrompt count={waiting} onMove={moveLegacyDiary} onLater={() => setWaiting(0)} />}
+      {waiting > 0 && !feedbackOpen && <ImportPrompt count={waiting} onMove={moveLegacyDiary} onLater={holdLegacyDiary} onDiscard={discardLegacyDiary} />}
     </div>
   )
 }

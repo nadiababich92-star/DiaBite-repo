@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { GI_GL_WORDS } from '../lib/glWords'
+import { lockPage } from '../lib/pageLock'
 
 /**
  * "What is GL?" in two sentences. A dialog with the same promises as the others:
@@ -16,9 +17,7 @@ export default function GlInfo({ budget, onClose }: { budget: number; onClose: (
 
   useEffect(() => {
     const opener = document.activeElement as HTMLElement | null
-    const behind = [...document.querySelectorAll<HTMLElement>('.app > :not(.modal-backdrop)')]
-    behind.forEach((el) => el.setAttribute('inert', ''))
-    document.body.classList.add('modal-open')
+    const unlock = lockPage()
     close.current?.focus()
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { onClose(); return }
@@ -28,8 +27,7 @@ export default function GlInfo({ budget, onClose }: { budget: number; onClose: (
     document.addEventListener('keydown', onKey)
     return () => {
       document.removeEventListener('keydown', onKey)
-      behind.forEach((el) => el.removeAttribute('inert'))
-      document.body.classList.remove('modal-open')
+      unlock()
       opener?.focus?.()
     }
   }, [onClose])

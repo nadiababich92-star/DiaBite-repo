@@ -8,6 +8,7 @@ import {
   CONDITION_LABELS,
   COUNT_BY_LABELS,
   GOAL_LABELS,
+  weightUsed,
 } from '../lib/profile'
 import { answerRows } from '../lib/answers'
 import GiGlExplainer from './GiGlExplainer'
@@ -192,7 +193,7 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
           <div className="stat">
             <div className="label">Protein</div>
             <div className="value">{targets.proteinG} g</div>
-            <div className="sub">{(targets.proteinG / profile.weightKg).toFixed(1)} g/kg</div>
+            <div className="sub">{(targets.proteinG / weightUsed(profile)).toFixed(1)} g/kg</div>
           </div>
           <div className="stat">
             <div className="label">Fat</div>

@@ -47,7 +47,7 @@ Step 0 of onboarding gains, above the first question, one card: "What DiaBite ke
 
 ## Moving the diary from this browser
 
-On the first signed-in load, if the browser holds a diary or a profile (`diabite.diary.v1`, `diabite.profile.v1` with `onboarded: true`) and the account holds neither: a dialog (same focus trap as the feedback dialog): "We found a diary on this device. Move it to your account?" Buttons: **Move** (primary), **Not now**. Move upserts by the entries' own ids (a second tap changes nothing) and shows "Moved 14 entries" before clearing nothing: the local copy is removed only on sign-out (below). "Not now" asks again on the next sign-in, never silently moves, never silently discards.
+On the first signed-in load, if the browser holds a diary or a profile (`diabite.diary.v1`, `diabite.profile.v1` with `onboarded: true`) and the account holds neither: a dialog (same focus trap as the feedback dialog): "We found a diary on this device. Move it to your account?" Buttons: **Move** (primary), **Not now**, **Don't move** (added 11 November 2026, the owner's choice after the code review of 27 October: a person who does not want the old diary otherwise saw the dialog at every sign-in for ever). Move upserts by the entries' own ids (a second tap changes nothing) and shows "Moved 14 entries" before clearing nothing: the local copy is removed only on sign-out (below). "Not now" asks again on the next sign-in, never silently moves, never silently discards. **Don't move** asks once more ("Delete these 14 entries? They are on this device only ... cannot be undone. Your account is not touched.", buttons **Keep them** and **Delete**) and only **Delete** removes `diabite.legacy.diary.v1` from this device; it is then never offered again.
 
 ## Account block in the Settings tab
 
@@ -89,7 +89,7 @@ A normal account (`demo@<owner's address>` or a plus-address) signed in once on 
 - The sign-in uses Supabase's **implicit** flow, not PKCE as first written: a link asked for on a laptop must work when tapped on a phone, and a PKCE link only works in the browser that asked.
 - Whether to show the wall comes from the engine: `GET /health` now carries `signIn: true|false`, so `REQUIRE_SIGN_IN` is one revision and no new build. If the engine cannot be reached the app shows the wall.
 - Pure parts live in `src/lib/syncCore.ts` and `src/lib/authCore.ts` and are tested in `npm run eval` (`account` section); the network parts in `sync.ts` and `auth.ts`.
-- A diary from before sign-in is set aside in `diabite.legacy.diary.v1` when it holds entries the account lacks; "Not now" leaves it there and it is offered again at the next sign-in; sign-out clears it with everything else.
+- A diary from before sign-in is set aside in `diabite.legacy.diary.v1` when it holds entries the account lacks; "Not now" leaves it there and it is offered again at the next sign-in; "Don't move", confirmed, deletes it; sign-out clears it with everything else.
 - The code length is **Supabase's** setting (it was 8 on the project, not 6); the app accepts 6 to 10 digits and says "a code", never "six-digit".
 
 ## As built, later on 10 October 2026

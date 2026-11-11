@@ -178,12 +178,15 @@ const BMI = (p: Profile) => p.weightKg / (p.heightCm / 100) ** 2
  */
 const clampTo = (v: number, lo: number, hi: number, fallback: number) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : fallback)
 
+/** The body weight the formula uses. A label that divides by weight must divide by this, not by what is typed in the field. */
+export const weightUsed = (p: Pick<Profile, 'weightKg'>) => clampTo(p.weightKg, 30, 300, DEFAULT_PROFILE.weightKg)
+
 export function calculateTargets(raw: Profile): Targets {
   const p: Profile = {
     ...raw,
     age: clampTo(raw.age, 14, 110, DEFAULT_PROFILE.age),
     heightCm: clampTo(raw.heightCm, 100, 230, DEFAULT_PROFILE.heightCm),
-    weightKg: clampTo(raw.weightKg, 30, 300, DEFAULT_PROFILE.weightKg),
+    weightKg: weightUsed(raw),
   }
   const constraints: Constraint[] = []
   const add = (id: string, field: Constraint['field'], reason: string) =>

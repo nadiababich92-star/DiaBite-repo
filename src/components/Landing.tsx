@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import Logo, { Wordmark } from './Logo'
 import { LANDING, longDate } from '../data/landing'
+import { pinThemeColor } from '../lib/theme'
 
 interface Props {
   /** "Try DiaBite" and "Sign in": the parent shows the sign-in screen. */
@@ -20,6 +22,8 @@ const shortDate = (iso: string) => longDate(iso).toUpperCase().replace(/(\d+) (\
  */
 export default function Landing({ onEnter }: Props) {
   const L = LANDING
+  // The page is always the dark one, so the browser's bar is too, whatever look the person chose for the app.
+  useEffect(() => pinThemeColor('tape'), [])
   return (
     <div className="landing">
       <a className="skip" href="#landing-main">Skip to the page</a>

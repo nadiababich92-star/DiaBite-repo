@@ -53,7 +53,7 @@ export default function SignIn({ notice, onCancel }: { notice?: string; onCancel
   return (
     <div className="app">
       <header className="masthead">
-        <Logo />
+        <Logo decorative />
         <Wordmark />
       </header>
 

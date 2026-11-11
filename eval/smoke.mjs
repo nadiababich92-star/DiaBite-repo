@@ -12,6 +12,7 @@
  *
  * With sign-in required it can only check the wall, because a stranger cannot sign in.
  */
+import { readFileSync } from 'node:fs'
 import { launch } from './lib/cdp.mjs'
 
 const URL_ = (process.argv[2] ?? process.env.SMOKE_URL ?? 'https://diabite-engine.greenglacier-ab5551c6.swedencentral.azurecontainerapps.io').replace(/\/$/, '')
@@ -33,12 +34,17 @@ check('M2', 'the page loads with its security headers', page.status === 200 && c
 {
   const html = await (await fetch(`${URL_}/`)).text()
   const tag = (re) => re.test(html)
-  const img = await fetch(`${URL_}/share.png`); const vtt = await fetch(`${URL_}/clip-how-it-works-v4.vtt`)
-  const clip = await fetch(`${URL_}/clip-how-it-works-v4.mp4`, { headers: { range: 'bytes=0-1023' } })
-  check('M15', 'the share tags are in the page a crawler reads, and the image, the captions and a ranged clip answer',
+  // The clip's name comes from the page's own source, so a new version cannot leave this pointing at a file that is
+  // gone. The type is checked too: an address the server does not have is answered with the app page (200, and 206
+  // for a range), so a status code alone passed for a clip that did not exist.
+  const clipName = /\/(clip-how-it-works-v\d+)\.mp4/.exec(readFileSync(new URL('../src/components/Landing.tsx', import.meta.url), 'utf8'))?.[1] ?? 'clip-how-it-works-MISSING'
+  const img = await fetch(`${URL_}/share.png`); const vtt = await fetch(`${URL_}/${clipName}.vtt`)
+  const clip = await fetch(`${URL_}/${clipName}.mp4`, { headers: { range: 'bytes=0-1023' } })
+  const kind = (r) => r.headers.get('content-type') ?? ''
+  check('M15', 'the share tags are in the page a crawler reads, and the image, the captions and a ranged clip answer, each as what it is',
     tag(/property="og:title"/) && tag(/property="og:description"/) && tag(/property="og:image" content="https:\/\/diabite\.pro\/share\.png"/) && tag(/name="twitter:card"/)
-      && img.status === 200 && /image\/png/.test(img.headers.get('content-type') ?? '') && vtt.status === 200 && clip.status === 206,
-    JSON.stringify([img.status, vtt.status, clip.status]))
+      && img.status === 200 && /image\/png/.test(kind(img)) && vtt.status === 200 && /text\/vtt/.test(kind(vtt)) && clip.status === 206 && /video\/mp4/.test(kind(clip)),
+    JSON.stringify([clipName, img.status, kind(img), vtt.status, kind(vtt), clip.status, kind(clip)]))
 }
 
 {
@@ -138,13 +144,13 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
 
     // The bowl's answer is on screen: the disclaimer's rest is one tap away, GL has a gloss, and a portion can change.
     await b.ev(`(()=>{[...document.querySelectorAll('button')].find(x=>x.innerText.trim()==='Read more')?.click()})()`)
-    check('M15', 'the disclaimer shows its first sentence, and the rest opens on a tap',
+    check('M22', 'the disclaimer shows its first sentence, and the rest opens on a tap',
       /reference tool, not medical advice/i.test(await b.ev(`document.querySelector('.disclaimer')?.innerText ?? ''`))
         && await until(b, `/never be used to calculate insulin doses/.test(document.querySelector('.disclaimer')?.innerText ?? '')`, 5), '')
     await b.ev(`(()=>{[...document.querySelectorAll('button')].find(x=>x.innerText.includes('What is GL?'))?.click()})()`)
     const glOpened = await until(b, `!!document.querySelector('[role=dialog]') && /how fast a food raises blood sugar/.test(document.querySelector('[role=dialog]').innerText)`, 5)
     await b.ev(`(()=>{[...document.querySelectorAll('[role=dialog] button')].find(x=>x.innerText.includes('Got it'))?.click()})()`)
-    check('M16', '"What is GL?" opens a dialog with the gloss, and closes', glOpened && await until(b, `!document.querySelector('[role=dialog]')`, 5), '')
+    check('M23', '"What is GL?" opens a dialog with the gloss, and closes', glOpened && await until(b, `!document.querySelector('[role=dialog]')`, 5), '')
     const before = Number(await b.ev(`document.querySelector('.figures .fig .fig-v')?.innerText ?? 'NaN'`))
     await b.ev(`(()=>{[...document.querySelectorAll('button')].find(x=>x.innerText.includes('Portions'))?.click()})()`)
     await until(b, `!!document.querySelector('.portions')`, 5)

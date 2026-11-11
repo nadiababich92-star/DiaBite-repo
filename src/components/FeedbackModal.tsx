@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { COMMENT_MAX, RATING_LABELS, submitFeedback, validate, type FeedbackErrors } from '../lib/feedback'
+import { lockPage } from '../lib/pageLock'
 
 interface Props {
   onClose: () => void
@@ -31,9 +32,7 @@ export default function FeedbackModal({ onClose }: Props) {
   // (no Tab, no screen-reader virtual cursor), the page behind does not scroll,
   // Tab wraps inside, and focus goes back to what opened it.
   useEffect(() => {
-    const behind = [...document.querySelectorAll<HTMLElement>('.app > :not(.modal-backdrop)')]
-    behind.forEach((el) => el.setAttribute('inert', ''))
-    document.body.classList.add('modal-open')
+    const unlock = lockPage()
     const trap = (e: KeyboardEvent) => {
       if (e.key !== 'Tab' || !dialog.current) return
       const items = [...dialog.current.querySelectorAll<HTMLElement>('button, input, textarea, select, a[href], [tabindex]:not([tabindex="-1"])')]
@@ -46,8 +45,7 @@ export default function FeedbackModal({ onClose }: Props) {
     document.addEventListener('keydown', trap)
     return () => {
       document.removeEventListener('keydown', trap)
-      behind.forEach((el) => el.removeAttribute('inert'))
-      document.body.classList.remove('modal-open')
+      unlock()
       opener?.focus?.()
     }
   }, [opener])
