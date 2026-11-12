@@ -56,7 +56,7 @@ try {
   for (const n of [6, 17]) add(n, 'lunch', 'lentils', 150)
   // The clip has no setup scene: the profile is stored off camera, the same one the setup scene would have made.
   if (CLIP) {
-    const profile = { sex: 'female', age: 52, heightCm: 168, weightKg: 70, activity: 'light', condition: 't2', goal: 'lose', carbApproach: 'low', excludedFoodIds: [], insulin: 'none', meds: ['metformin'], pregnantOrBreastfeeding: false, kidney: 'none', comorbidities: [], allergens: [], pattern: 'none', units: 'imperial', showBreadUnits: false, onboarded: true }
+    const profile = { sex: 'female', age: 52, heightCm: 168, weightKg: 70, activity: 'light', condition: 't2', goal: 'lose', carbApproach: 'low', countBy: 'carbs', mealCarbsG: 45, snackCarbsG: 30, excludedFoodIds: [], insulin: 'none', meds: ['metformin'], pregnantOrBreastfeeding: false, kidney: 'none', comorbidities: [], allergens: [], pattern: 'none', units: 'imperial', showBreadUnits: false, onboarded: true }
     const p = await admin('/rest/v1/profiles', { method: 'POST', body: JSON.stringify({ user_id: uid, data: profile, consent_at: new Date().toISOString(), consent_version: '2026-10-b', updated_at: new Date().toISOString() }), headers: { prefer: 'return=minimal' } })
     console.log('stored the profile:', p.status)
   }
@@ -227,12 +227,26 @@ try {
     await b.ev(`window.scrollTo(0, 0)`)
     end = say('k0'); await typeIn('Two eggs, a slice of rye bread and half an avocado')
     await clickOn({ text: 'Check this meal' }); await awaitAnswer('section.answer'); await holdTo(end)
+    // carbohydrate first (this person counts by carbohydrate), then the receipt and where the numbers come from
     end = say('k1'); await b.ev(`window.scrollTo(0, 0)`)
-    await wander(['.eyebrow-line', '.fig-lead'], vt() + (end - vt()) * 0.4)
-    await clickOn({ text: 'Show calculation' }); await sleep(900); await driftScroll(end - 0.6, 380)
+    // centre the two figures so the action bar at the foot of the screen does not sit on the carbohydrate card
+    await b.ev(`document.querySelector('.fig-pair')?.scrollIntoView({ block: 'center', behavior: 'smooth' })`); await sleep(900)
+    await wander(['.fig-pair .fig-card.carb', '.fig-pair .fig-card.gl'], end)
+    end = say('k1b')
+    await clickOn({ text: 'Calculation' }); await sleep(700)
+    // the receipt from its top, drifting down until its foot (the sources) is on screen as the sentence ends
+    await b.ev(`document.querySelector('.receipt')?.scrollIntoView({ block: 'start', behavior: 'smooth' }); window.scrollBy(0, -90)`); await sleep(1000)
+    const reach = await b.ev(`(()=>{ const s = document.querySelector('.receipt-sources') ?? document.querySelector('.receipt-foot'); return s ? Math.round(s.getBoundingClientRect().bottom - window.innerHeight + 110) : 0 })()`)
+    await driftScroll(end - 0.6, Math.max(0, reach))
     await b.ev(`window.scrollTo(0, 0)`); await clickOn({ text: 'Log' }); await sleep(700)
     end = say('k2'); await b.ev(`window.scrollTo(0, 0)`)
     await askUntil('Spaghetti with tomato sauce, garlic bread and a glass of orange juice', async () => (await b.ev(`!!document.querySelector('.tone-bad')`)) && (await b.ev(`/wap/.test(document.body.innerText)`)))
+    await holdTo(end)
+    // her doctor's number for a meal: the plain line next to the figures when the meal goes above it
+    if (!(await has('.fig-basis')())) throw new Error('the carbohydrate limit line is not showing: is the profile limit stored?')
+    end = say('k2l')
+    await b.ev(`document.querySelector('.fig-pair')?.scrollIntoView({ block: 'center', behavior: 'smooth' })`); await sleep(900)
+    await wander(['.fig-pair .fig-card.carb', '.fig-basis'], end); await holdTo(end)
     end = say('k2b')
     await b.ev(`(()=>{ const n = document.querySelector('.a-next'); n?.scrollIntoView({ block: 'center', behavior: 'smooth' }); n?.classList.add('tour-ring') })()`)
     await sleep(900); await wander(['.a-next'], Math.max(vt() + 2.2, end - 1.5))
@@ -283,7 +297,7 @@ try {
   end = say('b1b'); await wander(['.eyebrow-line', '.fig-lead', '.verify-row'], end)
   end = say('b1c'); await wander(['.tour-tip h2', '.tour-tip p'], end); await clickOn({ sel: '.tour-tip button.primary' })
   await sleep(500)
-  await clickOn({ text: 'Show calculation' })
+  await clickOn({ text: 'Calculation' })
   end = say('b1d'); await sleep(1200); await driftScroll(end - 0.5, 420)
   await clickOn({ sel: '.tour-tip button.primary' })
   end = say('b1e'); await clickOn({ text: 'Log' }); await sleep(500)

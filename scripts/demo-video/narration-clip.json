@@ -4,8 +4,10 @@
   "segments": {
     "k00": "DiaBite checks a meal against what is left of your day.",
     "k0": "You type it the way you would say it: two eggs, a slice of rye bread, half an avocado.",
-    "k1": "The engine finds each food and does the arithmetic. It fits, and the receipt shows every number.",
+    "k1": "The engine finds each food and does the arithmetic. This person counts by carbohydrate, so carbohydrate comes first. It fits.",
+    "k1b": "Open the receipt and check it yourself: each food, its portion, its glycemic index and its load. The foods come from USDA FoodData Central, and the glycemic values from published tables.",
     "k2": "An evening meal that does not fit does not just get a no. Spaghetti, garlic bread and orange juice goes over today.",
+    "k2l": "Her doctor gave her a number for a meal, forty-five grams of carbohydrate, and one for a snack. When a meal goes above it, DiaBite says so, plainly, next to the figures.",
     "k2b": "It names a swap, and the engine counts it. Whole wheat pasta, water instead of juice. Same dinner, lighter load. Let's ask again with it.",
     "k2c": "Now it fits, and every number is traced to a tool.",
     "k3": "A meal can also be planned for another day.",
