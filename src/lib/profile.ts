@@ -29,7 +29,7 @@ export const ACTIVITY_LABELS: Record<Activity, string> = {
 export const CONDITION_LABELS: Record<Condition, string> = {
   t2: 'Type 2 diabetes',
   prediabetes: 'Prediabetes',
-  ir: 'Insulin resistance or PCOS',
+  ir: 'Insulin resistance or PMOS (formerly PCOS)',
   t1: 'Type 1 diabetes or LADA',
   gestational: 'Gestational diabetes',
   unsure: "I'm not sure",
@@ -63,7 +63,7 @@ export const COMORBIDITY_LABELS: Record<Comorbidity, string> = {
   gout: 'Gout',
   gastroparesis: 'Gastroparesis (slow stomach emptying)',
   celiac: 'Celiac disease',
-  pcos: 'PCOS',
+  pcos: 'PMOS (formerly PCOS)',
   eatingDisorder: 'A history of disordered eating',
   brittle: 'Blood sugar that swings hard and unpredictably',
 }
