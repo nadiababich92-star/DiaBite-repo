@@ -36,7 +36,7 @@ import { AIProjectClient } from '@azure/ai-projects'
 import { DefaultAzureCredential } from '@azure/identity'
 import OpenAI from 'openai'
 import { openApiSpec } from './openapi'
-import { safetyGate } from './safety'
+import { normalise, safetyGate } from './safety'
 import { chargeTurn } from './guard'
 import { verify, verdictConflict } from './verify'
 import type { AvoidList } from './avoid'
@@ -801,8 +801,16 @@ export class SessionNotYours extends Error {
  * carries a line like it could steer the tool calls at another day, so such a line is taken out of the message
  * before the model sees it. Nothing a person asks about food contains one.
  */
-export const withoutSessionTag = (message: string): string =>
-  message.replace(/\[?\s*session[\s_-]*id\s*[:=][^\]\n]*\]?/gi, ' ').replace(/[ \t]{2,}/g, ' ').trim()
+const SESSION_TAG = /\[?\s*session[\s_-]*id\s*[:=][^\]\n]*\]?/i
+const cutSessionTag = (m: string) => m.replace(new RegExp(SESSION_TAG.source, 'gi'), ' ').replace(/[ \t]{2,}/g, ' ').trim()
+export const withoutSessionTag = (message: string): string => {
+  const out = cutSessionTag(message)
+  // A tag written to get past the pattern (zero-width characters, full-width letters, a soft hyphen, the word
+  // spelled letter by letter) is found on the normalised text, the same reading the safety gate gives a message.
+  // Only then is the message replaced by its normalised form, so ordinary food talk ("½ an avocado") is never rewritten.
+  const flat = normalise(out)
+  return SESSION_TAG.test(flat) ? cutSessionTag(flat) : out
+}
 
 export async function ask(req: AskRequest, ctx: AskContext = {}): Promise<AskResponse> {
   const started = Date.now()
