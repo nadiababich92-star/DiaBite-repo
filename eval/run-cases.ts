@@ -24,6 +24,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { openApiSpec } from '../server/openapi'
+import { bindSession } from '../server/bind'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const AGENT_URL = process.env.AGENT_URL ?? 'http://localhost:8787/agent/ask'
@@ -569,7 +570,7 @@ for (const c of runnable) {
     // invented, and tool_call_accuracy fails for a fault in the dataset.
     query: [
       { role: 'system', content: prompts[reply.route ?? 'meal'] ?? prompts.meal },
-      { role: 'user', content: `[session_id: ${sessionId}]\n\n${c.query}` },
+      { role: 'user', content: `[session_id: ${bindSession(sessionId, process.env.ENGINE_API_KEY)}]\n\n${c.query}` },
     ],
     // Groundedness compares a string answer against a string question. Handed
     // the message array it reports "the QUERY is empty" and scores nothing.

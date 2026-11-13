@@ -32,6 +32,7 @@ import { parseMeal } from '../src/lib/answer'
 import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, uninvertPhrase, withDayUnscored } from '../server/compute'
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
+import { bindSession, unbindSession } from '../server/bind'
 import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
@@ -922,6 +923,34 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\nsession   ${tagMisses.length === 0 ? 'ok' : 'WRONG'}`)
   tagMisses.forEach((m) => console.log(m))
   if (tagMisses.length) process.exitCode = 1
+}
+
+// ── bound session ─────────────────────────────────────────────────────────
+// The id the model carries to the tools is signed with the tool key (server/bind.ts), so an id a person typed, or one with
+// another id's signature, is not accepted by a tool even when it is a real person's id.
+{
+  const bindMisses: string[] = []
+  const K = 'test-key', K2 = 'another-key'
+  const good = bindSession('victim-1', K)
+  const other = bindSession('someone-2', K)
+  const cases: [string, unknown, string | null][] = [
+    ['round trip', good, 'victim-1'],
+    ['the plain id', 'victim-1', null],
+    ['another id\'s signature on this id', `victim-1.${other.split('.')[1]}`, null],
+    ['a made-up signature', 'victim-1.AAAAAAAAAAAAAAAAAAAAAA', null],
+    ['an empty signature', 'victim-1.', null],
+    ['no id, only a signature', `.${good.split('.')[1]}`, null],
+    ['a signature made with another key', bindSession('victim-1', K2), null],
+    ['an id with a dot of its own', `a.b.${bindSession('a.b', K).split('.').pop()}`, null],
+    ['not a string', 42, null],
+    ['a truncated signature', good.slice(0, -1), null],
+  ]
+  for (const [what, value, want] of cases) { const got = unbindSession(value, K); if (got !== want) bindMisses.push(`    ${what}: ${JSON.stringify(got)}, wanted ${JSON.stringify(want)}`) }
+  if (!/^[\w.-]+$/.test(good)) bindMisses.push(`    the signed form has characters outside [\\w.-]: ${good}`)
+  if (bindSession('victim-1', undefined) !== 'victim-1' || unbindSession('victim-1', undefined) !== 'victim-1') bindMisses.push('    with no key configured the id should pass through as it was given')
+  console.log(`\nbind      ${bindMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  bindMisses.forEach((m) => console.log(m))
+  if (bindMisses.length) process.exitCode = 1
 }
 
 // ── signout ───────────────────────────────────────────────────────────────

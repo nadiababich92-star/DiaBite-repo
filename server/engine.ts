@@ -32,6 +32,7 @@ import { resolvePhrases } from './resolve'
 import { afterMealFor, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, withDayUnscored } from './compute'
 import { verify } from './verify'
 import { claimSession, getSession, noteResolution, putSession } from './sessions'
+import { bindSession, unbindSession } from './bind'
 import { openApiSpec } from './openapi'
 import { ask, SessionNotYours, SignInRequired, type AskRequest } from './agent'
 import { personOf, signInRequired } from './auth'
@@ -306,8 +307,22 @@ async function main() {
   const dayStateFor = (sessionId: string | undefined) => {
     if (sessionId === undefined) return undefined
     const held = sessionId ? getSession(sessionId) : undefined
-    if (!held) return { unknown: true as const, sessionId: sessionId ?? '' }
+    // The marker carries the id as the model is to carry it (signed), so a retry with it is accepted.
+    if (!held) return { unknown: true as const, sessionId: sessionId ? bindSession(sessionId) : '' }
     return dayState(held.budget, costable(held.entries))
+  }
+
+  /**
+   * The session id a model-facing tool was handed, as a plain id. The model carries the id the engine wrote for
+   * the turn, signed (server/bind.ts); an id without the engine's own signature is not a turn's id, and the tool
+   * answers with an error the model can read (model-facing tools answer 200, see resolve_foods) instead of
+   * touching a day that may be someone else's. An id that is absent or empty reaches no one's day and passes.
+   */
+  const NOT_BOUND = 'session_not_bound: pass the session id exactly as you were given it, including everything after the dot. This one was not given for this turn.'
+  const plainSession = (raw: unknown): { id: string | undefined } | null => {
+    if (raw === undefined || raw === '') return { id: raw as undefined }
+    const id = unbindSession(raw)
+    return id === null ? null : { id }
   }
 
   /**
@@ -353,6 +368,9 @@ async function main() {
 
   app.post('/tools/resolve_foods', async (req, res) => {
     const body = req.body as ResolveRequest
+    const sess = plainSession(body?.sessionId)
+    if (!sess) return res.json({ results: [], error: NOT_BOUND })
+    if (body) body.sessionId = sess.id
     // Model-facing tools answer 200 even when the call was wrong. Foundry turns
     // any non-2xx from an OpenAPI tool into a `tool_user_error` that kills the
     // whole response, so a 400 costs the user their answer and tells the model
@@ -373,6 +391,9 @@ async function main() {
 
   app.post('/tools/compute_meal', async (req, res) => {
     const body = req.body as ComputeMealRequest
+    const sess = plainSession(body?.sessionId)
+    if (!sess) return res.json({ error: NOT_BOUND })
+    if (body) body.sessionId = sess.id
     if (!Array.isArray(body?.items) || body.items.length === 0) {
       return res.json({ error: 'items must be a non-empty list of { foodId, grams } — call resolve_foods first to get the ids.' })
     }
@@ -435,6 +456,9 @@ async function main() {
    */
   app.post('/tools/cost_dish', async (req, res) => {
     const body = req.body as CostDishRequest
+    const sess = plainSession(body?.sessionId)
+    if (!sess) return res.json({ error: NOT_BOUND })
+    if (body) body.sessionId = sess.id
     const bad = validateDish(body)
     if (bad) return res.json({ error: bad })
     try {
@@ -490,6 +514,9 @@ async function main() {
     // a budget. Which key is present tells the two apart, and an empty id
     // counts as present — the agent is told to send one rather than invent it.
     if (body && 'sessionId' in body) {
+      const sess = plainSession(body.sessionId)
+      if (!sess) return res.json({ unknown: true, error: NOT_BOUND })
+      body.sessionId = sess.id
       const s = body.sessionId ? getSession(body.sessionId) : undefined
       // A session we do not hold is answered, not refused. Foundry turns any
       // non-2xx from a tool into a `tool_user_error` that kills the whole
@@ -497,7 +524,7 @@ async function main() {
       // engine could otherwise mostly answer — and sessions expire after an
       // hour. Saying "no day state" lets the model cost the meal and admit it
       // does not know the budget.
-      if (!s) return res.json({ unknown: true, sessionId: body.sessionId ?? '' })
+      if (!s) return res.json({ unknown: true, sessionId: body.sessionId ? bindSession(body.sessionId) : '' })
       budget = s.budget
       entries = s.entries
     }
@@ -508,6 +535,9 @@ async function main() {
 
   app.post('/tools/find_alternatives', async (req, res) => {
     const body = req.body as AlternativesRequest
+    const sess = plainSession(body?.sessionId)
+    if (!sess) return res.json({ alternatives: [], error: NOT_BOUND })
+    if (body) body.sessionId = sess.id
     if (typeof body?.maxGL !== 'number') {
       return res.json({ alternatives: [], error: 'maxGL is required — pass the remaining glycemic load from get_day_state.' })
     }

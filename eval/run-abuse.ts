@@ -19,6 +19,7 @@ import { fileURLToPath } from 'node:url'
 import { chargeTurn, addressKey, _reset, _state, RateLimited, MAX_KEYS } from '../server/guard'
 import { newSessionId, sessionId } from '../src/lib/session'
 import { putSession, rememberResponse, _sizes, MAX_SESSIONS } from '../server/sessions'
+import { bindSession } from '../server/bind'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 let PORT = 8800 + Math.floor(Math.random() * 100)
@@ -208,9 +209,14 @@ async function httpSuite() {
     })
     check('A15', 'PUT /session refuses an id over 64 characters and accepts a normal one', badPut.status === 400 && okPut.status === 200, `${badPut.status} ${okPut.status}`)
     // ── cost_dish: a dish counted from an assumed recipe, through the real route ─────
-    const post = (path: string, body: unknown, headers: Record<string, string> = { 'x-api-key': KEY }) => fetch(`${BASE}${path}`, {
+    // The model carries the session id signed by the engine (server/bind.ts); `post` signs a sessionId the way the engine does for a turn,
+    // `postRaw` sends the body as it is, to prove what an unsigned id does.
+    const bound = (b: unknown) => (b && typeof b === 'object' && typeof (b as { sessionId?: unknown }).sessionId === 'string'
+      ? { ...(b as object), sessionId: bindSession((b as { sessionId: string }).sessionId, KEY) } : b)
+    const postRaw = (path: string, body: unknown, headers: Record<string, string> = { 'x-api-key': KEY }) => fetch(`${BASE}${path}`, {
       method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(body),
     }).then(async (r) => ({ status: r.status, json: await r.json().catch(() => ({})) as Record<string, any> }))
+    const post = (path: string, body: unknown, headers: Record<string, string> = { 'x-api-key': KEY }) => postRaw(path, bound(body), headers)
     const park = (id: string) => fetch(`${BASE}/session/${id}`, { method: 'PUT', headers: { 'content-type': 'application/json', 'x-api-key': KEY },
       body: JSON.stringify({ budget: { glBudget: 49, carbsG: 108, kcal: 1660 }, entries: [] }) })
     await park('cd-1')
@@ -242,6 +248,37 @@ async function httpSuite() {
       d5.status === 200 && typeof d5.json.error === 'string' && d6.status === 200 && /only phrase, grams and gramsStated/.test(d6.json.error), JSON.stringify([d5.json, d6.json]))
     const noKeyDish = await post('/tools/cost_dish', { dish: 'cholent', ingredients: cholent }, {})
     check('D7', 'cost_dish is a key-protected tool route: without the key it is refused', noKeyDish.status === 401 || noKeyDish.status === 403, String(noKeyDish.status))
+
+    // ── the session id a tool takes from the model is the one the engine signed for the turn (the review of 13 November, finding 1) ─────
+    await park('bd-1'); await park('bd-2')
+    const tagOfBd1 = bindSession('bd-1', KEY).split('.')[1]
+    const gd = (sessionId: unknown) => postRaw('/tools/get_day_state', { sessionId })
+    const bAsGiven = await gd(bindSession('bd-1', KEY))
+    const bPlain = await gd('bd-1')
+    const bGrafted = await gd(`bd-2.${tagOfBd1}`)
+    const bWrongTag = await gd('bd-1.AAAAAAAAAAAAAAAAAAAAAA')
+    check('B1', 'get_day_state: the id as the engine signed it returns the day; the same id plain, with another id\'s tag, or with a made-up tag returns an error and no day',
+      bAsGiven.json.unknown !== true && !!bAsGiven.json.remaining
+        && [bPlain, bGrafted, bWrongTag].every((r) => r.status === 200 && r.json.unknown === true && /session_not_bound/.test(r.json.error ?? '') && !r.json.remaining),
+      JSON.stringify([bAsGiven.json, bPlain.json, bGrafted.json, bWrongTag.json]))
+    const bMeal = await postRaw('/tools/compute_meal', { sessionId: 'bd-1', items: [{ foodId: 'seed:rice-white', grams: 100 }] })
+    const bFoods = await postRaw('/tools/resolve_foods', { phrases: ['rice'], sessionId: 'bd-1' })
+    const bAlt = await postRaw('/tools/find_alternatives', { maxGL: 10, sessionId: 'bd-1' })
+    const bDish = await postRaw('/tools/cost_dish', { dish: 'cholent', sessionId: 'bd-1', ingredients: [{ phrase: 'beef chuck', grams: 90 }] })
+    check('B2', 'compute_meal, resolve_foods, find_alternatives and cost_dish with a plain id: 200, an error the model can read, nothing computed or read for that day',
+      [bMeal, bFoods, bAlt, bDish].every((r) => r.status === 200 && /session_not_bound/.test(r.json.error ?? ''))
+        && bMeal.json.afterMeal === undefined && bFoods.json.results?.length === 0 && bAlt.json.alternatives?.length === 0 && bDish.json.ingredients === undefined,
+      JSON.stringify([bMeal.json, bFoods.json, bAlt.json, bDish.json]).slice(0, 400))
+    const bNever = await gd(bindSession('bd-never', KEY))
+    const bRetry = await gd(bNever.json.sessionId)
+    check('B3', 'a session the engine does not hold answers unknown with the id in its signed form, and that value is accepted when the model sends it back',
+      bNever.json.unknown === true && bNever.json.sessionId === bindSession('bd-never', KEY) && bRetry.json.unknown === true && bRetry.json.error === undefined,
+      JSON.stringify([bNever.json, bRetry.json]))
+    const bBudget = await postRaw('/tools/get_day_state', { budget: { glBudget: 49, carbsG: 108, kcal: 1660 }, entries: [] })
+    const bAbsent = await postRaw('/tools/compute_meal', { items: [{ foodId: 'seed:rice-white', grams: 100 }] })
+    check('B4', 'a call with no session id at all (the frontend with its own budget, a meal without a day) is not affected',
+      bBudget.status === 200 && !!bBudget.json.remaining && bAbsent.status === 200 && bAbsent.json.error === undefined && !!bAbsent.json.totals,
+      JSON.stringify([bBudget.json, bAbsent.json]).slice(0, 300))
 
     const wrongKey = await fetch(`${BASE}/tools/resolve_foods`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': KEY + 'x' }, body: '{}' })
     const noKey = await fetch(`${BASE}/tools/resolve_foods`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })

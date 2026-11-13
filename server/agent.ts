@@ -37,6 +37,7 @@ import { DefaultAzureCredential } from '@azure/identity'
 import OpenAI from 'openai'
 import { openApiSpec } from './openapi'
 import { normalise, safetyGate } from './safety'
+import { bindSession } from './bind'
 import { chargeTurn } from './guard'
 import { verify, verdictConflict } from './verify'
 import type { AvoidList } from './avoid'
@@ -895,7 +896,8 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
 
   const clock = { t0: Date.now(), route: 0, park: 0, agent: [] as number[] }
   let previous = previousResponseFor(req.sessionId)
-  const mealInput = `[session_id: ${req.sessionId}]\n\n${req.message}`
+  // The model carries this id to the tools, which take it only with the engine's signature on it (server/bind.ts).
+  const mealInput = `[session_id: ${bindSession(req.sessionId)}]\n\n${req.message}`
 
   // A message that is plainly a list of foods (no question, no word that asks for an opinion) is a
   // meal, and the router only has to agree. So the meal run starts at the same moment as the router
