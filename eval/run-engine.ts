@@ -34,6 +34,7 @@ import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
 import { householdPortion } from '../server/foods'
+import { FigurePair } from '../src/components/FigurePair'
 import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
@@ -924,6 +925,27 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\nsession   ${tagMisses.length === 0 ? 'ok' : 'WRONG'}`)
   tagMisses.forEach((m) => console.log(m))
   if (tagMisses.length) process.exitCode = 1
+}
+
+// ── the line about the person's own carbohydrate number ───────────────────
+// The engine compares the meal with the number it was parked with and returns `afterMeal.carbLimit.over`; the screen says
+// "above" only when that is true and works out nothing itself (the review of 13 November, finding 2): a meal of 45 g beside
+// a 20 g snack number the engine did not compare must not make the screen print "above 20 g".
+{
+  const limitMisses: string[] = []
+  const gl = { mealGl: 7, before: 45, after: 38, fits: true, partial: false }
+  const carbs = { carbs: 45, fiber: 5, availableCarbs: 40 }
+  const render = (limit?: { kind: 'meal' | 'snack'; limitG: number; mealG: number; over: boolean }) =>
+    renderToStaticMarkup(createElement(FigurePair, { countBy: 'carbs', gl, carbs, limit }))
+  const over = render({ kind: 'meal', limitG: 30, mealG: 45, over: true })
+  if (!/This meal is 45 g, above the 30 g per meal you set\./.test(over)) limitMisses.push(`    over:true did not print the line: ${over.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 160)}`)
+  for (const [what, html] of [
+    ['over:false although the meal is above the number the screen holds (45 g against a 20 g snack number)', render({ kind: 'snack', limitG: 20, mealG: 45, over: false })],
+    ['no limit at all', render(undefined)],
+  ] as const) if (/above the \d+ g per/.test(html)) limitMisses.push(`    ${what}: the line was printed`)
+  console.log(`\ncarblimit ${limitMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  limitMisses.forEach((m) => console.log(m))
+  if (limitMisses.length) process.exitCode = 1
 }
 
 // ── household portion ─────────────────────────────────────────────────────

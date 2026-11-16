@@ -6,7 +6,8 @@ import Tour from './Tour'
 import FeedbackNudge from './FeedbackNudge'
 import { nextStep, type TourStep } from '../lib/tour'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type Milestone } from '../lib/nudge'
-import { askAgent, avoidOf, budgetOf, engineId, lastMealCall, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
+import { askAgent, avoidOf, budgetOf, engineId, lastMealCall, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type CarbLimitResult, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
+import { FigurePair, type CarbFigures } from './FigurePair'
 import { dayLabel, eaten, mealForNow, viewEntry } from '../lib/diary'
 import { swapNamedIn, type SwapOffer } from '../lib/swap'
 import { MEAL_LABELS } from '../lib/menu'
@@ -83,9 +84,9 @@ const bold = (line: string, key: string) =>
  * the prose agrees with them — laid out so the one that matters is the one
  * you see.
  */
-function Figures({ reply, countBy, carbLimit }: { reply: AgentResponse; countBy: CountBy; carbLimit: CarbLimit }) {
+function Figures({ reply, countBy }: { reply: AgentResponse; countBy: CountBy }) {
   const meal = lastMealCall(reply.trace)?.result as
-    | { totals?: { gl?: number; carbs?: number; availableCarbs?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean | null }; assumed?: boolean }
+    | { totals?: { gl?: number; carbs?: number; availableCarbs?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean | null; carbLimit?: CarbLimitResult }; assumed?: boolean }
     | undefined
   const mealGl = meal?.totals?.gl
   // A meal of branded products only: the three tiles are what the label gives —
@@ -111,7 +112,7 @@ function Figures({ reply, countBy, carbLimit }: { reply: AgentResponse; countBy:
   const fits = meal?.afterMeal?.fits !== false
   return (
     <>
-      <FigurePair countBy={countBy} gl={{ mealGl, before, after, fits, partial, assumed: meal?.assumed }} carbs={meal?.totals as CarbFigures | undefined} carbLimit={carbLimit} />
+      <FigurePair countBy={countBy} gl={{ mealGl, before, after, fits, partial, assumed: meal?.assumed }} carbs={meal?.totals as CarbFigures | undefined} limit={meal?.afterMeal?.carbLimit} />
     </>
   )
 }
@@ -119,48 +120,6 @@ function Figures({ reply, countBy, carbLimit }: { reply: AgentResponse; countBy:
 /** The person's own carbohydrate number for what they are eating now; g is 0 when they have none. */
 interface CarbLimit { g: number; kind: 'meal' | 'snack' }
 
-interface CarbFigures { carbs?: number; availableCarbs?: number; fiber?: number }
-
-/**
- * Both ways of counting, always shown, side by side, each in its own colour: the load in the lime marker, the
- * carbohydrate in blue. The one the person said they use is on the left. The verdict is still the engine's `fits`,
- * which is worked out from the glycemic load, and a line says so when the carbohydrate comes first.
- */
-function FigurePair({ countBy, gl, carbs, carbLimit }: {
-  countBy: CountBy
-  /** The person's own per-meal carbohydrate number from their doctor; 0 when they have none. */
-  carbLimit: CarbLimit
-  gl: { mealGl: number; before: number; after: number; fits: boolean; partial: boolean; assumed?: boolean }
-  carbs?: CarbFigures
-}) {
-  const glBlock = (
-    <div key="gl" className="fig-card gl">
-      <p className="fig-title">Glycemic load (GL)</p>
-      <p className={`fig-big gl ${gl.partial || gl.assumed ? '' : gl.fits ? 'ok' : 'over'}`}><span className="num">{gl.fits ? gl.after : Math.abs(gl.after)}</span></p>
-      <p className="fig-cap">{gl.partial ? 'left so far' : gl.fits ? 'left after' : 'over by'}</p>
-      <div className="fig-row"><span className="fig-k">this meal</span><span className="fig-v">{gl.mealGl}</span></div>
-      <div className="fig-row"><span className="fig-k">before</span><span className="fig-v">{gl.before}</span></div>
-    </div>
-  )
-  const carbBlock = typeof carbs?.carbs === 'number' ? (
-    <div key="carbs" className="fig-card carb">
-      <p className="fig-title">Carbohydrate</p>
-      <p className="fig-big carb"><span className="num">{carbs.carbs}<small className="unit"> g</small></span></p>
-      <p className="fig-cap">{gl.partial ? 'so far' : gl.assumed ? 'about, in this meal' : 'in this meal'}</p>
-      {typeof carbs.fiber === 'number' && <div className="fig-row"><span className="fig-k">fibre</span><span className="fig-v">{carbs.fiber} g</span></div>}
-      {typeof carbs.availableCarbs === 'number' && <div className="fig-row"><span className="fig-k">without fibre</span><span className="fig-v">{carbs.availableCarbs} g</span></div>}
-    </div>
-  ) : null
-  return (
-    <>
-      <div className="fig-pair">{countBy === 'carbs' ? [carbBlock, glBlock] : [glBlock, carbBlock]}</div>
-      {carbBlock && carbLimit.g > 0 && (carbs?.carbs ?? 0) > carbLimit.g && (
-        <p className="fig-basis">This {carbLimit.kind} is {carbs?.carbs} g, above the {carbLimit.g} g per {carbLimit.kind} you set.</p>
-      )}
-      {countBy === 'carbs' && carbBlock && <p className="muted fig-basis">You count by carbohydrate, so it comes first. The verdict above is worked out from the glycemic load.</p>}
-    </>
-  )
-}
 
 /**
  * The same meal at the weights the person chose, costed by the engine. The verdict
@@ -172,7 +131,7 @@ function Fold({ when, title, children }: { when: boolean; title: string; childre
   return when ? <details className="was-original"><summary>{title}</summary>{children}</details> : <>{children}</>
 }
 
-function RecalcCard({ rc, onBack, note, was, countBy, carbLimit }: { rc: Recalc; onBack: () => void; note?: string; was?: { gl: number; after: number | null }; countBy: CountBy; carbLimit: CarbLimit }) {
+function RecalcCard({ rc, onBack, note, was, countBy }: { rc: Recalc; onBack: () => void; note?: string; was?: { gl: number; after: number | null }; countBy: CountBy }) {
   // A dish counted from an assumed recipe stays an estimate through every recalculation: never a plain "Fits".
   const tone = rc.assumed && rc.fits !== undefined ? 'estimate'
     : rc.fits === true ? 'good' : rc.fits === false ? 'bad' : rc.fits === null ? 'partial' : 'ask'
@@ -189,7 +148,7 @@ function RecalcCard({ rc, onBack, note, was, countBy, carbLimit }: { rc: Recalc;
         <p className="a-verdict">{verdict}</p>
         {rc.before !== null && lead !== null ? (
           <>
-            <FigurePair countBy={countBy} carbLimit={carbLimit} gl={{ mealGl: rc.mealGl, before: rc.before, after: rc.after ?? 0, fits: rc.fits !== false, partial: tone === 'partial' || rc.fits === null, assumed: tone === 'estimate' }} carbs={rc.carbs} />
+            <FigurePair countBy={countBy} limit={rc.carbLimit} gl={{ mealGl: rc.mealGl, before: rc.before, after: rc.after ?? 0, fits: rc.fits !== false, partial: tone === 'partial' || rc.fits === null, assumed: tone === 'estimate' }} carbs={rc.carbs} />
             {was && (
               <p className="muted was-now">
                 Before the change: this meal <b className="num">{was.gl}</b>
@@ -259,8 +218,7 @@ function PortionEditor({ lines, grams, busy, error, onNudge, assumed, removed, o
   )
 }
 
-function Answer({ text, reply, onSwap, swapState, countBy, carbLimit }: {
-  carbLimit: CarbLimit
+function Answer({ text, reply, onSwap, swapState, countBy }: {
   text: string; reply?: AgentResponse
   /** Which way of counting the person uses: its figures come first. */
   countBy: CountBy
@@ -285,7 +243,7 @@ function Answer({ text, reply, onSwap, swapState, countBy, carbLimit }: {
     return (
       <div className="answer-text">
         <p className="a-verdict">{bold(parts.verdict, 'v')}</p>
-        {reply && <Figures reply={reply} countBy={countBy} carbLimit={carbLimit} />}
+        {reply && <Figures reply={reply} countBy={countBy} />}
         {parts.numbers && !figuresShown && <p className="a-numbers">{bold(parts.numbers, 'n')}</p>}
         {parts.why && <p className="a-why">{bold(parts.why, 'w')}</p>}
         {parts.next && (
@@ -793,7 +751,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
       {reply && (
         <>
           <p className="muted asked">{asked}</p>
-          {recalc && <RecalcCard rc={recalc} carbLimit={carbLimit} onBack={() => { setGrams({}); setRemoved([]); setSwap(null); setRecalc(null) }} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The original answer is kept below.` : undefined} was={wasNow} countBy={profile.countBy} />}
+          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setSwap(null); setRecalc(null) }} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The original answer is kept below.` : undefined} was={wasNow} countBy={profile.countBy} />}
           {recalc && logBlock}
           <Fold when={!!recalc} title={swap ? 'Original answer, before the swap' : 'Original answer, before you changed a portion'}>
           <section className={`card answer tone-${tone}${recalc ? ' stale' : ''}`} role="status" aria-live="polite">
@@ -803,7 +761,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
                tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Over today’s budget' :
                tone === 'advice' ? 'Advice' : tone === 'estimate' ? 'Estimate' : tone === 'carbs' ? 'Carbs only' : tone === 'partial' ? 'Part of the meal' : 'One question first'}
             </div>
-            <Answer text={reply.answer} reply={reply} countBy={profile.countBy} carbLimit={carbLimit} onSwap={receipt && !receipt.assumed ? acceptSwap : undefined} swapState={{ accepted: swap?.id ?? null, busy: !!swap && !recalc && !recalcError, failed: !!swap && !recalc && !!recalcError }} />
+            <Answer text={reply.answer} reply={reply} countBy={profile.countBy} onSwap={receipt && !receipt.assumed ? acceptSwap : undefined} swapState={{ accepted: swap?.id ?? null, busy: !!swap && !recalc && !recalcError, failed: !!swap && !recalc && !!recalcError }} />
             {!reply.blocked && (
               <div className="verify-row">
                 {reply.verified ? (

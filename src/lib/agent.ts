@@ -185,7 +185,7 @@ interface MealResult {
   totals: { gl: number; carbs?: number; fiber?: number; availableCarbs?: number }
   /** The budget before this meal; compute_meal returns it when it was given a session. */
   dayState?: { remaining?: { gl: number } }
-  afterMeal?: { remaining?: { gl: number }; fits?: boolean | null; partial?: { unknownFoods: string[]; unscored?: string[] } }
+  afterMeal?: { remaining?: { gl: number }; fits?: boolean | null; partial?: { unknownFoods: string[]; unscored?: string[] }; carbLimit?: CarbLimitResult }
   /** Present on a cost_dish result: the dish was counted from an assumed recipe. */
   assumed?: boolean
   dish?: string
@@ -269,6 +269,13 @@ function buildReceipt(m: MealResult, leftBefore: number | null, sources: Receipt
   }
 }
 
+/**
+ * The engine's own comparison of a meal's carbohydrate with the number the person gave for the kind of meal it was parked
+ * with when they asked. `over` is the engine's, never worked out in the browser: the screen says "above your number" only
+ * when it is true, and it never changes the verdict.
+ */
+export interface CarbLimitResult { kind: 'meal' | 'snack'; limitG: number; mealG: number; over: boolean }
+
 /** A meal costed again with a portion the person changed: the engine's numbers, and its verdict. */
 export interface Recalc {
   receipt: Receipt
@@ -281,6 +288,8 @@ export interface Recalc {
   assumed?: boolean
   /** The same meal's carbohydrate, in grams, from the same engine result: shown beside the load. */
   carbs?: { carbs?: number; fiber?: number; availableCarbs?: number }
+  /** The engine's comparison with the person's own number, for this recalculated meal. */
+  carbLimit?: CarbLimitResult
 }
 
 const recomputeUrl = () => {
@@ -323,6 +332,7 @@ export async function recomputeMeal(
     mealGl: m.totals.gl, before, after,
     fits: m.afterMeal ? m.afterMeal.fits : undefined,
     carbs: { carbs: m.totals.carbs, fiber: m.totals.fiber, availableCarbs: m.totals.availableCarbs },
+    ...(m.afterMeal?.carbLimit ? { carbLimit: m.afterMeal.carbLimit } : {}),
     ...(assumed ? { assumed: true } : {}),
   }
 }
