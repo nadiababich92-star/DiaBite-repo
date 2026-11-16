@@ -13,6 +13,7 @@
  * Like the rehearsal it creates a throwaway account with the service key (read from the Container App
  * secret, never printed), walks onboarding, asks one question, logs the meal, and deletes the account.
  */
+import './lib/timeouts.mjs'  // a default timeout on every fetch
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { launch } from './lib/cdp.mjs'
@@ -25,7 +26,7 @@ const OUT = process.env.OUT ?? '/tmp/diabite-screens'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const env = readFileSync(`${ROOT}/.env.local`, 'utf8')
 const PUB = env.match(/VITE_SUPABASE_PUBLISHABLE_KEY=(.+)/)?.[1]?.trim()
-const SVC = execSync(`az containerapp secret show -g rg-nadia.babich92-5702 -n diabite-engine --secret-name supabase-service-key --query value -o tsv`, { env: { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` } }).toString().trim()
+const SVC = execSync(`az containerapp secret show -g rg-nadia.babich92-5702 -n diabite-engine --secret-name supabase-service-key --query value -o tsv`, { timeout: 60_000, env: { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` } }).toString().trim()
 const admin = (path, init = {}) => fetch(SB + path, { ...init, headers: { apikey: SVC, authorization: `Bearer ${SVC}`, 'content-type': 'application/json', ...(init.headers ?? {}) } })
 mkdirSync(OUT, { recursive: true })
 

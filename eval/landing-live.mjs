@@ -8,6 +8,7 @@
  *
  *   node eval/landing-live.mjs        # SERVICE=https://diabite.pro
  */
+import './lib/timeouts.mjs'  // a default timeout on every fetch
 import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -20,7 +21,7 @@ const rows = [...src.matchAll(/\{ foodId: '([^']+)', name: '[^']*', grams: ([\d.
   .map((m) => ({ foodId: m[1], grams: +m[2], availableCarbs: +m[3], gi: m[4] === 'null' ? null : +m[4], gl: +m[5] }))
 const totalGl = +src.match(/totalGl: ([\d.]+)/)[1]
 if (rows.length !== 3) { console.log('FAIL  could not read the three rows from src/data/landing.ts'); process.exit(1) }
-const key = execSync('az containerapp secret show -g rg-nadia.babich92-5702 -n diabite-engine --secret-name engine-api-key --query value -o tsv', { env: { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` }, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+const key = execSync('az containerapp secret show -g rg-nadia.babich92-5702 -n diabite-engine --secret-name engine-api-key --query value -o tsv', { timeout: 60_000, env: { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` }, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
 const res = await (await fetch(`${SERVICE}/tools/compute_meal`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': key }, body: JSON.stringify({ items: rows.map((r) => ({ foodId: r.foodId, grams: r.grams })) }) })).json()
 const r1 = (n) => Math.round(n * 10) / 10
 const bad = []

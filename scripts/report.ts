@@ -9,6 +9,7 @@
  * docs/reports/<today>.md. No email, name or id is written anywhere: people are numbered by sign-up order.
  * The arithmetic is in src/lib/report.ts and is tested by `npm run eval`.
  */
+import '../eval/lib/timeouts.mjs'  // a default timeout on every fetch
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { buildReport, reportMarkdown, type AccountInput, type FeedbackInput, type TurnGroup, type TurnStats } from '../src/lib/report'
@@ -20,7 +21,7 @@ import type { DiaryEntry } from '../src/types'
 const SB = 'https://qennxqfbvgqyodjmkguo.supabase.co'
 const RG = 'rg-nadia.babich92-5702'
 const env = { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` }
-const az = (args: string[]) => execFileSync('az', args, { env, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+const az = (args: string[]) => execFileSync('az', args, { timeout: 60_000, env, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
 
 const exclude = new Set(
   (process.argv.find((a, i) => process.argv[i - 1] === '--exclude') ?? '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean),

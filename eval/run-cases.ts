@@ -20,6 +20,7 @@
  * they are what the judges score, and they cover ground the hand-written
  * cases do not: one-word asks, brand-name foods, follow-ups.
  */
+import './lib/timeouts.mjs'  // a default timeout on every fetch
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'

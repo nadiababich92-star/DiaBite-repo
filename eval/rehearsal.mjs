@@ -10,6 +10,7 @@
  * checks the first, then deletes the account and checks nothing is left. Run it after any change
  * to sign-in, sync, the profile or the diary, and before switching REQUIRE_SIGN_IN on.
  */
+import './lib/timeouts.mjs'  // a default timeout on every fetch
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { launch } from './lib/cdp.mjs'
@@ -21,7 +22,7 @@ const APP = process.env.APP ?? 'https://diabite-engine.greenglacier-ab5551c6.swe
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const env = readFileSync(`${ROOT}/.env.local`, 'utf8')
 const PUB = env.match(/VITE_SUPABASE_PUBLISHABLE_KEY=(.+)/)?.[1]?.trim()
-const SVC = execSync(`az containerapp secret show -g rg-nadia.babich92-5702 -n diabite-engine --secret-name supabase-service-key --query value -o tsv`, { env: { ...process.env, PATH: '/opt/homebrew/bin:' + process.env.PATH } }).toString().trim()
+const SVC = execSync(`az containerapp secret show -g rg-nadia.babich92-5702 -n diabite-engine --secret-name supabase-service-key --query value -o tsv`, { timeout: 60_000, env: { ...process.env, PATH: '/opt/homebrew/bin:' + process.env.PATH } }).toString().trim()
 const admin = (path, init = {}) => fetch(SB + path, { ...init, headers: { apikey: SVC, authorization: `Bearer ${SVC}`, 'content-type': 'application/json', ...(init.headers ?? {}) } })
 const results = []
 const check = (id, what, ok, detail = '') => { results.push(ok); console.log(`${ok ? 'PASS' : 'FAIL'}  ${id}  ${what}${ok ? '' : '  → ' + detail}`) }

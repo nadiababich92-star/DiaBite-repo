@@ -70,7 +70,7 @@ import { answerRows } from '../src/lib/answers'
 import { swapNamedIn } from '../src/lib/swap'
 import { describeDish, toDishes, type RawRecipe } from '../src/lib/recipes'
 import { CATEGORY_LABELS, getFood } from '../src/data/foods'
-import { getSession, noteResolution, putSession } from '../server/sessions'
+import { dropCarbLimit, getSession, noteResolution, putSession } from '../server/sessions'
 import { validateDish } from '../server/guard'
 import type { VerifyRequest } from '../server/contract'
 
@@ -1104,6 +1104,22 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\nportion   ${portionMisses.length === 0 ? 'ok' : 'WRONG'}`)
   portionMisses.forEach((m) => console.log(m))
   if (portionMisses.length) process.exitCode = 1
+}
+
+// ── a parked carbohydrate number belongs to its turn ──────────────────────
+// A turn that arrives with no day state must not meet the number (and its kind, meal or snack) parked by an earlier turn of the same session.
+{
+  const dropMisses: string[] = []
+  putSession('drop-1', { glBudget: 49, carbsG: 108, kcal: 1660 }, [], undefined, { kind: 'snack', g: 20 })
+  if (getSession('drop-1')?.carbLimit?.g !== 20) dropMisses.push('    the limit was not parked')
+  dropCarbLimit('drop-1')
+  const s = getSession('drop-1')
+  if (s?.carbLimit !== undefined) dropMisses.push(`    the limit outlived dropCarbLimit: ${JSON.stringify(s?.carbLimit)}`)
+  if (s?.budget?.glBudget !== 49) dropMisses.push('    dropping the limit also lost the day state')
+  dropCarbLimit('never-parked')
+  console.log(`\ndropcarb  ${dropMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  dropMisses.forEach((m) => console.log(m))
+  if (dropMisses.length) process.exitCode = 1
 }
 
 // ── bound session ─────────────────────────────────────────────────────────

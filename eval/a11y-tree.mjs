@@ -13,6 +13,7 @@
  * This is NOT a screen-reader session. It cannot say whether the order makes sense by ear, whether a label is clear, or how a
  * real reader's virtual cursor behaves. Like `a11y.mjs` it makes a throwaway account with the service key and deletes it at the end.
  */
+import './lib/timeouts.mjs'  // a default timeout on every fetch
 import { launch } from './lib/cdp.mjs'
 import { execSync } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -26,7 +27,7 @@ const READING = process.env.READING ?? '/tmp/a11y-reading.txt'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const env = readFileSync(`${ROOT}/.env.local`, 'utf8')
 const PUB = env.match(/VITE_SUPABASE_PUBLISHABLE_KEY=(.+)/)?.[1]?.trim()
-const SVC = execSync(`az containerapp secret show -g rg-nadia.babich92-5702 -n diabite-engine --secret-name supabase-service-key --query value -o tsv`, { env: { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` } }).toString().trim()
+const SVC = execSync(`az containerapp secret show -g rg-nadia.babich92-5702 -n diabite-engine --secret-name supabase-service-key --query value -o tsv`, { timeout: 60_000, env: { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` } }).toString().trim()
 const admin = (path, init = {}) => fetch(SB + path, { ...init, headers: { apikey: SVC, authorization: `Bearer ${SVC}`, 'content-type': 'application/json', ...(init.headers ?? {}) } })
 const email = `a11y-${Date.now()}@example.com`, password = 'A11y-' + Math.random().toString(36).slice(2) + 'Aa1'
 const uid = (await (await admin('/auth/v1/admin/users', { method: 'POST', body: JSON.stringify({ email, password, email_confirm: true }) })).json()).id

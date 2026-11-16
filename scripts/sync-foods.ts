@@ -19,6 +19,7 @@
  *                         Faster for a full rewrite, and the only way to drop
  *                         stale rows in one statement.
  */
+import '../eval/lib/timeouts.mjs'  // a default timeout on every fetch
 import { readFileSync, existsSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'

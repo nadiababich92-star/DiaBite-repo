@@ -11,6 +11,7 @@
  *
  * Cases come from docs/engineering/engineering-doc.md §10 (A1–A10).
  */
+import './lib/timeouts.mjs'  // a default timeout on every fetch
 import { createServer } from 'node:http'
 import { spawn } from 'node:child_process'
 import { SignJWT, exportJWK, generateKeyPair } from 'jose'
@@ -130,6 +131,8 @@ async function httpSuite() {
     check('A5j', 'typed ingredient words pass validation', ADMITTED.has(goodWord.status), String(goodWord.status))
     check('A5k', 'a carbLimit of an unknown kind: 400, field carbLimit', badLimitKind.status === 400 && badLimitKind.json.field === 'carbLimit', JSON.stringify([badLimitKind.status, badLimitKind.json]))
     check('A5l', 'a carbLimit of 9,000 g: 400, field carbLimit', badLimitG.status === 400 && badLimitG.json.field === 'carbLimit', JSON.stringify([badLimitG.status, badLimitG.json]))
+    const fracLimit = await ask({ ...meal('a5n'), carbLimit: { kind: 'meal', g: 45.5 } })
+    check('A5n', 'a carbLimit with a fraction of a gram (45.5): 400, field carbLimit', fracLimit.status === 400 && fracLimit.json.field === 'carbLimit', JSON.stringify([fracLimit.status, fracLimit.json]))
     check('A5m', 'a valid carbLimit passes validation', ADMITTED.has(goodLimit.status), String(goodLimit.status))
 
     const big = await ask({ ...meal('a5b'), entries: Array.from({ length: 101 }, () => ({})) })

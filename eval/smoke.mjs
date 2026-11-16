@@ -12,6 +12,7 @@
  *
  * With sign-in required it can only check the wall, because a stranger cannot sign in.
  */
+import './lib/timeouts.mjs'  // a default timeout on every fetch
 import { readFileSync } from 'node:fs'
 import { launch } from './lib/cdp.mjs'
 
@@ -78,6 +79,23 @@ check('M14', health.signIn === true
   ? 'with sign-in required, a portion change from a stranger is 401'
   : 'the engine costs a portion with no model: 180 g of white rice carries a load of 36.3',
   health.signIn === true ? rcOk.status === 401 : rcOk.status === 200 && rcJson.totals?.gl === 36.3, JSON.stringify([rcOk.status, rcJson.totals?.gl]))
+
+// The person's own carbohydrate number, without a sign-in: the browser's contract with the engine and the screens that carry it.
+// A fraction of a gram is refused by the live validation (400, field carbLimit); a whole number is never a 400 (the sign-in wall may answer 401, an open
+// service 200). And the app's own code still has the field, the line about the number and the engine's "over" it reads (the review of 13 November).
+{
+  const post = (body) => fetch(`${URL_}/agent/ask`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(30_000) })
+  const bad = await post({ sessionId: `smoke-${Date.now()}-a`, message: 'rice', carbLimit: { kind: 'meal', g: 45.5 } })
+  const ok = await post({ sessionId: `smoke-${Date.now()}-b`, message: 'a bowl of oatmeal', carbLimit: { kind: 'meal', g: 45 } })
+  const html = await (await fetch(`${URL_}/`, { signal: AbortSignal.timeout(30_000) })).text()
+  const scripts = [...new Set([...html.matchAll(/(?:src|href)="(\/assets\/[^"]+\.js)"/g)].map((m) => m[1]))].slice(0, 8)
+  const code = (await Promise.all(scripts.map((u) => fetch(`${URL_}${u}`, { signal: AbortSignal.timeout(30_000) }).then((r) => r.text()).catch(() => '')))).join('\n')
+  // Behind the sign-in wall the body is never read (401 for both), so there is nothing to see: say so instead of passing silently.
+  if (bad.status === 401 && ok.status === 401) console.log('SKIP  M24  the carbohydrate limit validation (a fraction is a 400): the sign-in wall answers first, so it is checked only on a service with no wall (npm run smoke -- http://localhost:8787 with sign-in off) and in eval:abuse A5n')
+  else check('M24', 'the carbohydrate limit: a fraction of a gram is a 400 on carbLimit, a whole number is not', bad.status === 400 && ((await bad.json().catch(() => ({}))).field === 'carbLimit') && ok.status !== 400, `${bad.status} ${ok.status}`)
+  check('M25', 'the app still carries the field for the number, the line "above the ... you set" and the engine\'s `over` it reads',
+    /Carbohydrate per /.test(code) && /you set/.test(code) && /carbLimit/.test(code) && /\.over/.test(code), scripts.join(','))
+}
 
 // ── the page, as a person ─────────────────────────────────────────────────
 const b = await launch({ port: 9500 + Math.floor(Math.random() * 400), width: 900, height: 1100, dpr: 1 })

@@ -41,7 +41,7 @@ import { bindSession } from './bind'
 import { chargeTurn } from './guard'
 import { verify, verdictConflict } from './verify'
 import type { AvoidList } from './avoid'
-import { claimSession, lastTurnOf, previousResponseFor, putSession, rememberResponse, rememberTurn } from './sessions'
+import { claimSession, dropCarbLimit, lastTurnOf, previousResponseFor, putSession, rememberResponse, rememberTurn } from './sessions'
 import type { DayBudget, MealItemInput } from './contract'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -580,7 +580,7 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
 
 /** Park the day state where only the engine can read it. */
 async function parkDayState(req: AskRequest): Promise<void> {
-  if (!req.budget || !req.entries) return
+  if (!req.budget || !req.entries) { if (!ENGINE_URL) dropCarbLimit(req.sessionId); return }
   if (!ENGINE_URL) { putSession(req.sessionId, req.budget, req.entries, req.avoid, req.carbLimit); return }
   const r = await fetch(`${ENGINE_URL}/session/${encodeURIComponent(req.sessionId)}`, {
     method: 'PUT',

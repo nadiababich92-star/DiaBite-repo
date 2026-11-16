@@ -12,6 +12,7 @@
  * Every action waits for the real app; the time spent waiting for a model is cut from the video, and each
  * narration segment is placed on the video's own clock so words and screen stay together. The account is deleted at the end.
  */
+import '../../eval/lib/timeouts.mjs'  // a default timeout on every fetch
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { execSync } from 'node:child_process'
@@ -29,7 +30,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const dur = JSON.parse(readFileSync(join(OUT, 'durations.json'), 'utf8'))
 const env = readFileSync(`${ROOT}/.env.local`, 'utf8')
 const PUB = env.match(/VITE_SUPABASE_PUBLISHABLE_KEY=(.+)/)?.[1]?.trim()
-const az = (cmd) => execSync(cmd, { env: { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` } }).toString().trim()
+const az = (cmd) => execSync(cmd, { timeout: 60_000, env: { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` } }).toString().trim()
 const SVC = az(`az containerapp secret show -g rg-nadia.babich92-5702 -n diabite-engine --secret-name supabase-service-key --query value -o tsv`)
 const admin = (path, init = {}) => fetch(SB + path, { ...init, headers: { apikey: SVC, authorization: `Bearer ${SVC}`, 'content-type': 'application/json', ...(init.headers ?? {}) } })
 

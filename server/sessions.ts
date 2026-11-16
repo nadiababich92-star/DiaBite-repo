@@ -84,6 +84,15 @@ export function noteResolution(id: string, results: { phrase: string; unknown: b
   s.unknownFoods = [...unknown]
 }
 
+/**
+ * A turn that arrives with no day state must not meet the carbohydrate number parked by an earlier turn of the same session: the number
+ * and its kind (meal or snack) belong to the question they were sent with. The day state itself is left as it was.
+ */
+export function dropCarbLimit(id: string): void {
+  const s = store.get(id)
+  if (s) s.carbLimit = undefined
+}
+
 export function getSession(id: string): SessionState | undefined {
   sweep()
   return store.get(id)

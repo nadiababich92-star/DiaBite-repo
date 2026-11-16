@@ -4,6 +4,7 @@
  *
  *   node scripts/demo-video/tts.mjs [outDir=/tmp/dv]
  */
+import '../../eval/lib/timeouts.mjs'  // a default timeout on every fetch
 import { execSync } from 'node:child_process'
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -14,7 +15,7 @@ const out = process.argv[2] ?? '/tmp/dv'
 mkdirSync(out, { recursive: true })
 // NARRATION=narration-clip.json makes the short clip for the pitch deck instead of the full demo.
 const n = JSON.parse(readFileSync(join(here, process.env.NARRATION ?? 'narration.json'), 'utf8'))
-const token = execSync('az account get-access-token --resource https://cognitiveservices.azure.com --query accessToken -o tsv', { env: { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` } }).toString().trim()
+const token = execSync('az account get-access-token --resource https://cognitiveservices.azure.com --query accessToken -o tsv', { timeout: 60_000, env: { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` } }).toString().trim()
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 const durations = {}
 for (const [id, text] of Object.entries(n.segments)) {
