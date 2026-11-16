@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { sumNutrients } from '../lib/glycemic'
 import { MEAL_LABELS, MEAL_ORDER } from '../lib/menu'
-import { addDays, dateAllowed, dateRange, dayLabel, eaten, markEaten, mealForNow, nudgeGrams, plannedOnly, recentEntries, viewEntry } from '../lib/diary'
+import { addDays, dateAllowed, dateRange, dayLabel, eaten, markEaten, mealForNow, noLoadNote, nudgeGrams, plannedOnly, recentEntries, viewEntry } from '../lib/diary'
 import { weeksSummary, type DayPoint } from '../lib/history'
 import { useToday } from '../lib/useToday'
 import type { DiaryEntry, MealType, Targets } from '../types'
@@ -124,6 +124,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
           <span className="fig-v">{isToday ? Math.abs(left) : totals.gl.toFixed(1)}</span>
         </div>
         <p className="muted" style={{ margin: '0 0 6px' }}>{totals.gl.toFixed(1)} used of {targets.glBudget}</p>
+        {noLoadNote(dayEntries, isToday && !over ? 'left' : 'used') && <p className="muted no-load-note" style={{ margin: '0 0 6px' }}>{noLoadNote(dayEntries, isToday && !over ? 'left' : 'used')}</p>}
         {plannedEntries.length > 0 && (
           <p className="muted planned-line">
             Planned: GL {plannedGL.toFixed(0)}{plannedPartial ? ' and carbohydrate only for some' : ''}, not counted yet.

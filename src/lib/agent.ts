@@ -12,7 +12,7 @@ import type { DiaryEntry, Profile, Targets } from '../types'
 import { renewSession } from './session'
 
 /** Dev: proxied by Vite to the Container App (see vite.config.ts). Prod: set VITE_AGENT_URL. */
-export const AGENT_URL = import.meta.env.VITE_AGENT_URL ?? '/agent'
+export const AGENT_URL = import.meta.env?.VITE_AGENT_URL ?? '/agent'
 
 export interface AgentRequest {
   sessionId: string
@@ -250,7 +250,7 @@ export function receiptFrom(trace: TraceStep[] | undefined): Receipt | null {
 }
 
 /** The receipt of one costed meal. The same lines whether the agent asked for the meal or the person changed a portion. */
-function buildReceipt(m: MealResult, leftBefore: number | null, sources: Receipt['sources'], assumed?: Receipt['assumed']): Receipt {
+export function buildReceipt(m: MealResult, leftBefore: number | null, sources: Receipt['sources'], assumed?: Receipt['assumed']): Receipt {
   const lines: ReceiptLine[] = m.items.map((it) => ({
     foodId: it.foodId, name: it.name,
     portion: it.servings ? `${it.servings} serving${it.servings === 1 ? '' : 's'}` : `${it.grams} g`,
@@ -260,7 +260,9 @@ function buildReceipt(m: MealResult, leftBefore: number | null, sources: Receipt
   }))
   return {
     lines, total: m.totals.gl, leftBefore,
-    leftAfter: leftBefore === null ? null : Math.round((leftBefore - m.totals.gl) * 10) / 10,
+    // The engine's own figure for what is left, never a second subtraction made here: the comparison is the engine's, and a day
+    // with a food that has no load is not the sum of the foods that do (the review of 13 November, finding 5).
+    leftAfter: typeof m.afterMeal?.remaining?.gl === 'number' ? m.afterMeal.remaining.gl : null,
     sources,
     ...(m.afterMeal?.partial?.unknownFoods.length ? { partial: m.afterMeal.partial.unknownFoods } : {}),
     ...(m.afterMeal?.partial?.unscored?.length ? { unscored: m.afterMeal.partial.unscored } : {}),

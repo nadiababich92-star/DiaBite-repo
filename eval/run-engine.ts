@@ -35,6 +35,7 @@ import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, te
 import { bindSession, unbindSession } from '../server/bind'
 import { householdPortion } from '../server/foods'
 import { FigurePair } from '../src/components/FigurePair'
+import { buildReceipt } from '../src/lib/agent'
 import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
@@ -61,7 +62,7 @@ import type { DiaryEntry, Dish } from '../src/types'
 import { RATING_ONLY } from '../src/lib/feedbackCopy'
 import { buildReport, reportMarkdown, type AccountInput, type ReportInput } from '../src/lib/report'
 import { CONSENT_VERSION } from '../src/lib/syncCore'
-import { addDays, dayLabel, gramStep, mealForNow, nudgeGrams, recentEntries } from '../src/lib/diary'
+import { addDays, dayLabel, gramStep, mealForNow, noLoadNote, nudgeGrams, recentEntries } from '../src/lib/diary'
 import { calculateTargets, DEFAULT_PROFILE, weightUsed } from '../src/lib/profile'
 import { lockCount, lockPage } from '../src/lib/pageLock'
 import { answerRows } from '../src/lib/answers'
@@ -946,6 +947,46 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\ncarblimit ${limitMisses.length === 0 ? 'ok' : 'WRONG'}`)
   limitMisses.forEach((m) => console.log(m))
   if (limitMisses.length) process.exitCode = 1
+}
+
+// ── a day's load with something that has none ─────────────────────────────
+// A branded or unrated food adds 0 to the sum of a day's glycemic load because it has none, not because it is free. The hero
+// number and the diary must say so beside it, or "two slices of pizza" reads as "48 left of 48" (the review, finding 5).
+{
+  const noLoadMisses: string[] = []
+  const snap = (over: object) => ({ name: 'x', kcal: 100, carbs: 20, fiber: 1, protein: 3, fat: 2, availableCarbs: 19, gi: null, gl: 0, ...over })
+  const at = (id: string, over: object): DiaryEntry => ({ id, date: '2026-11-17', meal: 'lunch', foodId: `ing:${id}`, grams: 100, snapshot: snap(over) })
+  const scored = at('a', { gi: 50, gl: 9.5, loadAvailable: true })
+  const pizza = at('b', { name: 'Pizza', loadAvailable: false })
+  const pizza2 = at('c', { name: 'Pizza', loadAvailable: false })
+  if (noLoadNote([scored]) !== null) noLoadMisses.push('    a day with a load for every entry gets a note')
+  if (noLoadNote([]) !== null) noLoadMisses.push('    an empty day gets a note')
+  const one = noLoadNote([scored, pizza]) ?? ''
+  if (!/^1 food has no glycemic load in our data and is not counted, so what is left may be less\.$/.test(one)) noLoadMisses.push(`    one unscored entry: ${JSON.stringify(one)}`)
+  const two = noLoadNote([pizza, pizza2, scored], 'used') ?? ''
+  if (!/^2 foods have no glycemic load in our data and are not counted, so the real load may be higher\.$/.test(two)) noLoadMisses.push(`    two unscored entries on a past day: ${JSON.stringify(two)}`)
+  console.log(`\nnoload    ${noLoadMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  noLoadMisses.forEach((m) => console.log(m))
+  if (noLoadMisses.length) process.exitCode = 1
+}
+
+// ── the receipt's "left after" is the engine's ────────────────────────────
+// buildReceipt used to work out leftBefore - the meal's load itself. The engine returns afterMeal.remaining.gl, and the two
+// differ when a food of the day has no load (the engine does not count it as free); one screen must not carry two numbers.
+{
+  const leftMisses: string[] = []
+  const meal = (afterGl: number | undefined) => ({
+    items: [{ foodId: 'usda:1', name: 'Rice', grams: 100, gl: 7.2, gi: 70, availableCarbs: 10, kcal: 130, carbs: 28, fiber: 0.4, protein: 2.7, fat: 0.3 }],
+    totals: { gl: 7.2, carbs: 28 },
+    ...(afterGl === undefined ? {} : { afterMeal: { remaining: { gl: afterGl }, fits: true } }),
+  }) as unknown as Parameters<typeof buildReceipt>[0]
+  const engineSays = buildReceipt(meal(30), 45, [])
+  if (engineSays.leftAfter !== 30) leftMisses.push(`    the receipt shows ${engineSays.leftAfter}, the engine said 30 (45 - 7.2 would be 37.8)`)
+  const noAfter = buildReceipt(meal(undefined), 45, [])
+  if (noAfter.leftAfter !== null) leftMisses.push(`    with no afterMeal the receipt made up ${noAfter.leftAfter}`)
+  console.log(`\nleftafter ${leftMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  leftMisses.forEach((m) => console.log(m))
+  if (leftMisses.length) process.exitCode = 1
 }
 
 // ── pizza crust ───────────────────────────────────────────────────────────

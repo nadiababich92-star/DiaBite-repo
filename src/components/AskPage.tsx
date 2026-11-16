@@ -8,7 +8,7 @@ import { nextStep, type TourStep } from '../lib/tour'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type Milestone } from '../lib/nudge'
 import { askAgent, avoidOf, budgetOf, engineId, lastMealCall, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type CarbLimitResult, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
 import { FigurePair, type CarbFigures } from './FigurePair'
-import { dayLabel, eaten, mealForNow, viewEntry } from '../lib/diary'
+import { dayLabel, eaten, mealForNow, noLoadNote, viewEntry } from '../lib/diary'
 import { swapNamedIn, type SwapOffer } from '../lib/swap'
 import { MEAL_LABELS } from '../lib/menu'
 import DayPicker from './DayPicker'
@@ -657,6 +657,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
           <div className="ask-budget-text">
             <span className="label">glycemic load left {dayWord}</span>
             <span className="ask-budget-note">Glycemic load (GL) is how much a meal raises your blood sugar, counting both the food and the portion. This is what is left of your budget {dayWord}.</span>
+            {noLoadNote(dayEntries) && <span className="ask-budget-note no-load-note">{noLoadNote(dayEntries)}</span>}
           </div>
           <span className="value"><b className="num">{left}</b> <small>of {targets.glBudget}</small></span>
         </div>

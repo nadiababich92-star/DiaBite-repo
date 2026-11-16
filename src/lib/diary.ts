@@ -37,6 +37,19 @@ export function viewEntry(e: DiaryEntry): EntryView {
 }
 
 /**
+ * What to say beside a day's glycemic load when something logged that day has none (a branded product, an unrated survey food):
+ * the figure counts only the foods that have one, because such an entry adds 0 to the sum, which is not the same as no load. Said
+ * in the same voice as a result, so the number is never read as complete ("48 left of 48" after two slices of pizza).
+ * `left` is the day still to come (what is left may be less); `used` is a day that is over (the load may be higher).
+ */
+export function noLoadNote(entries: DiaryEntry[], kind: 'left' | 'used' = 'left'): string | null {
+  const n = entries.filter((e) => !viewEntry(e).loadAvailable).length
+  if (n === 0) return null
+  const lead = `${n} ${n === 1 ? 'food has' : 'foods have'} no glycemic load in our data and ${n === 1 ? 'is' : 'are'} not counted`
+  return kind === 'left' ? `${lead}, so what is left may be less.` : `${lead}, so the real load may be higher.`
+}
+
+/**
  * The foods this person logs again and again, newest first: one per food and weight, at most `n`.
  * Hand-logged entries and ones logged from an answer both count, because an answer's numbers are
  * stored with it and can be logged again as they were.
