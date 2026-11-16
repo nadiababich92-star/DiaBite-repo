@@ -25,6 +25,13 @@ interface Props {
 
 const STEPS = ['You', 'Diagnosis', 'Medicines', 'Conditions', 'Your day'] as const
 
+/**
+ * Whether the focus goes to the heading when the screen opens. A person who reopened it from the Profile (onCancel is given) pressed a
+ * button that is gone now, and the focus would fall to the page, so it moves to the heading. A new account's first screen is left alone: a
+ * page load never takes the focus.
+ */
+export const focusesHeadingOnOpen = (p: { onCancel?: unknown }): boolean => !!p.onCancel
+
 const CONDITIONS: Condition[] = ['t2', 'prediabetes', 'ir', 't1', 'gestational', 'unsure']
 const COUNT_BYS: CountBy[] = ['gl', 'carbs']
 const INSULINS: Insulin[] = ['none', 'basal', 'mealtime_or_pump']
@@ -93,6 +100,13 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
     const h = card.current?.querySelector<HTMLElement>('h2')
     if (h) { h.tabIndex = -1; h.focus() }
   }, [step])
+
+  useEffect(() => {
+    if (!focusesHeadingOnOpen({ onCancel })) return
+    const h = card.current?.querySelector<HTMLElement>('h2')
+    if (h) { h.tabIndex = -1; h.focus() }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const last = step === STEPS.length - 1
   // The first screen of a new account does not move on until what is kept has been agreed to.

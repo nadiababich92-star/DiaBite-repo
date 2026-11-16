@@ -49,7 +49,7 @@ export default function Landing({ onEnter }: Props) {
           </div>
 
           <div className="lp-tape-wrap">
-            <div className="lp-tape" aria-label="A real receipt">
+            <div className="lp-tape" role="group" aria-label="A real receipt">
               <div className="lp-tape-head"><span>DIABITE · THE CHECK</span><span>{shortDate(L.receiptAsOf)}</span></div>
               <p className="lp-question">“{L.question}”</p>
               <div className="lp-rule" />

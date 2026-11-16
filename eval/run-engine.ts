@@ -65,6 +65,7 @@ import { CONSENT_VERSION } from '../src/lib/syncCore'
 import { addDays, dayLabel, gramStep, mealForNow, noLoadNote, nudgeGrams, portionText, recentEntries } from '../src/lib/diary'
 import { calculateTargets, cmToFtIn, DEFAULT_PROFILE, ftInToCm, kgToLb, lbToKg, weightUsed } from '../src/lib/profile'
 import { HeightWeight, UnitsSwitch } from '../src/components/BodyUnits'
+import { focusesHeadingOnOpen } from '../src/components/Onboarding'
 import { lockCount, lockPage } from '../src/lib/pageLock'
 import { answerRows } from '../src/lib/answers'
 import { swapNamedIn } from '../src/lib/swap'
@@ -1120,6 +1121,32 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\ndropcarb  ${dropMisses.length === 0 ? 'ok' : 'WRONG'}`)
   dropMisses.forEach((m) => console.log(m))
   if (dropMisses.length) process.exitCode = 1
+}
+
+// ── onboarding focus ──────────────────────────────────────────────────────
+// Reopened from the Profile (Edit, or Redo), the button the person pressed is gone and the focus fell to the page: it goes to the heading.
+// A new account's first screen is left alone.
+{
+  const focusMisses: string[] = []
+  if (!focusesHeadingOnOpen({ onCancel: () => {} })) focusMisses.push('    reopened from the Profile: the focus should move to the heading')
+  if (focusesHeadingOnOpen({})) focusMisses.push('    a new account: the focus must not move on a page load')
+  console.log(`\nfocus     ${focusMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  focusMisses.forEach((m) => console.log(m))
+  if (focusMisses.length) process.exitCode = 1
+}
+
+// ── two marks on a page ───────────────────────────────────────────────────
+// The mark's mask had a fixed id, so the mast and the sign-in screen, or two instances, shared one id (the review of 13 November).
+{
+  const markMisses: string[] = []
+  const html = renderToStaticMarkup(createElement('div', null, createElement(Logo, { decorative: true }), createElement(Logo, { decorative: true })))
+  const ids = [...html.matchAll(/<mask id="([^"]+)"/g)].map((m) => m[1])
+  const refs = [...html.matchAll(/mask="url\(#([^)]+)\)"/g)].map((m) => m[1])
+  if (ids.length !== 2 || new Set(ids).size !== 2) markMisses.push(`    two marks should carry two different mask ids: ${JSON.stringify(ids)}`)
+  if (refs.join() !== ids.join()) markMisses.push(`    each ring must point at its own mask: ${JSON.stringify([ids, refs])}`)
+  console.log(`\nmarks     ${markMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  markMisses.forEach((m) => console.log(m))
+  if (markMisses.length) process.exitCode = 1
 }
 
 // ── bound session ─────────────────────────────────────────────────────────

@@ -1,21 +1,25 @@
+import { useId } from 'react'
+
 /**
  * The mark: a stamp. A ring with a bite out of its top-right corner and a tick in the marker colour, the
  * way the product stamps FITS on a receipt. At 16px it is still a ring and a tick.
  * Colours come from tokens, so it follows Tape and Paper (docs/design.md).
  */
 export default function Logo({ size = 28, decorative = false }: { size?: number; decorative?: boolean }) {
+  // One mask id per mark: two marks on a page (the mast and the sign-in) must not share an id.
+  const bite = `logo-bite-${useId().replace(/[^a-zA-Z0-9]/g, '')}`
   // Beside a heading that already says "DiaBite" (the app's mast, the sign-in screen) the mark is decoration: a screen
   // reader would otherwise say the name twice. Alone (the landing, whose wordmark is hidden instead) it says it.
   const a11y = decorative ? { 'aria-hidden': true as const } : { role: 'img' as const, 'aria-label': 'DiaBite' }
   return (
     <svg className="logo" width={size} height={size} viewBox="0 0 64 64" {...a11y}>
       <defs>
-        <mask id="logo-bite">
+        <mask id={bite}>
           <rect width="64" height="64" fill="#fff" />
           <circle cx="53" cy="11" r="12" fill="#000" />
         </mask>
       </defs>
-      <circle className="logo-ring" cx="32" cy="32" r="24" fill="none" strokeWidth="6" mask="url(#logo-bite)" />
+      <circle className="logo-ring" cx="32" cy="32" r="24" fill="none" strokeWidth="6" mask={`url(#${bite})`} />
       <path className="logo-tick" d="M21 33l8 8 14-16" fill="none" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )

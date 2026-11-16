@@ -309,6 +309,7 @@ tr:last-child td { border-bottom: none; }
   display: block; height: 10px; border-radius: 99px; background: var(--groove); box-shadow: var(--groove-fx);
   margin: 0 0 18px; overflow: hidden;
 }
+@media (prefers-reduced-motion: reduce) { .budget-bar span { transition: none; } }
 .budget-bar span { display: block; height: 100%; background: var(--bead); border-radius: 99px; transition: width .5s ease; }
 
 /* The three figures a verdict rests on. The one that answers the question is

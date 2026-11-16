@@ -21,7 +21,7 @@ let failed = 0
 const check = (id, what, ok, detail = '') => { if (!ok) failed++; console.log(`${ok ? 'PASS' : 'FAIL'}  ${id}  ${what}${ok ? '' : `  → ${detail}`}`) }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 /** Poll the page until a condition holds, so a cold start is waited for, not guessed at. */
-const until = async (b, js, seconds = 25) => { for (let i = 0; i < seconds * 4; i++) { try { if (await b.ev(js)) return true } catch { /* the page is still loading */ } await sleep(250) } return false }
+const until = async (b, js, seconds = 25) => { let last = ''; for (let i = 0; i < seconds * 4; i++) { try { if (await b.ev(js)) return true } catch (e) { last = String(e?.message ?? e).slice(0, 120) /* the page is still loading */ } await sleep(250) } if (last) console.log(`  (a wait gave up after ${seconds} s; the last error was: ${last})`); return false }
 
 // ── the service, without a browser ────────────────────────────────────────
 const health = await (await fetch(`${URL_}/health`)).json().catch(() => ({}))
@@ -165,10 +165,7 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
     check('M22', 'the disclaimer shows its first sentence, and the rest opens on a tap',
       /reference tool, not medical advice/i.test(await b.ev(`document.querySelector('.disclaimer')?.innerText ?? ''`))
         && await until(b, `/never be used to calculate insulin doses/.test(document.querySelector('.disclaimer')?.innerText ?? '')`, 5), '')
-    await b.ev(`(()=>{[...document.querySelectorAll('button')].find(x=>x.innerText.includes('What is GL?'))?.click()})()`)
-    const glOpened = await until(b, `!!document.querySelector('[role=dialog]') && /how fast a food raises blood sugar/.test(document.querySelector('[role=dialog]').innerText)`, 5)
-    await b.ev(`(()=>{[...document.querySelectorAll('[role=dialog] button')].find(x=>x.innerText.includes('Got it'))?.click()})()`)
-    check('M23', '"What is GL?" opens a dialog with the gloss, and closes', glOpened && await until(b, `!document.querySelector('[role=dialog]')`, 5), '')
+    check('M23', 'the gloss of glycemic load is on the screen without a tap (it is printed under the budget)', /how much a meal raises your blood sugar/i.test(await b.ev(`document.body.innerText`)), '')
     const before = Number(await b.ev(`document.querySelector('.figures .fig .fig-v')?.innerText ?? 'NaN'`))
     await b.ev(`(()=>{[...document.querySelectorAll('button')].find(x=>x.innerText.includes('Portions'))?.click()})()`)
     await until(b, `!!document.querySelector('.portions')`, 5)

@@ -97,17 +97,21 @@ try {
   const key = async (b, k, code, vk) => { await b.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: k, code, windowsVirtualKeyCode: vk }); await b.send('Input.dispatchKeyEvent', { type: 'keyUp', key: k, code, windowsVirtualKeyCode: vk }) }
 
   // Signed out: the first thing a stranger meets is the landing page, then the sign-in screen behind "Try DiaBite".
+  // An aria-controls, -labelledby, -describedby or -owns that names an id the page does not have is a reference to nothing: checked on every screen, not one.
+  const danglingIdsOf = (b) => b.ev(`[...document.querySelectorAll('[aria-controls],[aria-labelledby],[aria-describedby],[aria-owns]')].flatMap((e) => ['aria-controls', 'aria-labelledby', 'aria-describedby', 'aria-owns'].flatMap((a) => (e.getAttribute(a) || '').split(' ').filter(Boolean).filter((id) => !document.getElementById(id)).map((id) => a + '=' + id)))`)
   {
     const b = await launch({ port: 9871, width: 390, height: 844, dpr: 2 })
     await b.send('Page.navigate', { url: APP }); await sleep(3500)
     const meta = await b.ev(`({ lang: document.documentElement.lang, title: document.title, video: !!document.querySelector('video'), captions: !!document.querySelector('video track[kind=captions]'), h1: document.querySelectorAll('h1').length })`)
     const landing = await readTree(b); const lr = check(landing, 'landing (signed out)')
+    for (const d of [...new Set(await danglingIdsOf(b))]) lr.problems.push(`${d} points at an id the page does not have`)
     if (!meta.lang) lr.problems.push('<html> has no lang'); if (!meta.title) lr.problems.push('page has no title')
     if (meta.h1 !== 1) lr.problems.push(`${meta.h1} h1 elements (want exactly one)`)
     if (!meta.video) lr.problems.push('no video element on the landing page'); else if (!meta.captions) lr.problems.push('the clip has no captions track')
     results.screens.push({ ...lr, meta }); dump('landing (signed out)', landing)
     await b.ev(`[...document.querySelectorAll('button')].find(x => x.innerText.trim() === 'Try DiaBite')?.click()`); await sleep(900)
     const list = await readTree(b); const r = check(list, 'sign-in (signed out)')
+    for (const d of [...new Set(await danglingIdsOf(b))]) r.problems.push(`${d} points at an id the page does not have`)
     results.screens.push(r); dump('sign-in (signed out)', list); await b.close()
   }
 
@@ -116,6 +120,7 @@ try {
     const b = await launch({ port: 9872, width: 390, height: 844, dpr: 2 })
     await b.send('Page.navigate', { url: APP }); await sleep(2500); await login(b, true); await b.send('Page.reload'); await sleep(4500)
     const list = await readTree(b); const r = check(list, 'ask-empty (first-run tips on)')
+    for (const d of [...new Set(await danglingIdsOf(b))]) r.problems.push(`${d} points at an id the page does not have`)
     const focus = await focusInfo(b)
     const tipLive = await b.ev(`(() => { const t = document.querySelector('.tour-tip'); if (!t) return { found: false }; const live = t.closest('[aria-live]') || t.getAttribute('aria-live') || t.getAttribute('role'); return { found: true, role: t.getAttribute('role'), live: live ? (typeof live === 'string' ? live : live.getAttribute('aria-live')) : null, holdsFocus: t.contains(document.activeElement) } })()`)
     results.screens.push(r); results.live.push({ what: 'first-run tip', ...tipLive, focusOnLoad: focus })
@@ -131,7 +136,7 @@ try {
     const tab = async (n) => { await b.ev(`(()=>{[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes(${JSON.stringify(n)}))?.click()})()`); await sleep(1300) }
     const click = (t, scope = 'button') => b.ev(`(()=>{const e=[...document.querySelectorAll(${JSON.stringify(scope)})].find(x=>x.innerText.trim().startsWith(${JSON.stringify(t)})); if(!e) return 'NO'; e.focus(); e.click(); return 'ok'})()`)
     // An aria-controls, -labelledby or -describedby that names an id the page does not have is a reference to nothing.
-    const danglingIds = () => b.ev(`[...document.querySelectorAll('[aria-controls],[aria-labelledby],[aria-describedby],[aria-owns]')].flatMap((e) => ['aria-controls', 'aria-labelledby', 'aria-describedby', 'aria-owns'].flatMap((a) => (e.getAttribute(a) || '').split(' ').filter(Boolean).filter((id) => !document.getElementById(id)).map((id) => a + '=' + id)))`)
+    const danglingIds = () => danglingIdsOf(b)
     const scan = async (screen) => {
       const list = await readTree(b); const r = check(list, screen)
       for (const d of [...new Set(await danglingIds())]) r.problems.push(`${d} points at an id the page does not have`)
@@ -146,9 +151,10 @@ try {
     await sleep(900)
     const answerLive = await b.ev(`(() => { const a = [...document.querySelectorAll('[aria-live], [role=status], [role=alert]')].filter(e => /fit|load|glycemic|left/i.test(e.innerText)); return { liveRegionsWithTheAnswer: a.length, politeness: a.map(e => e.getAttribute('aria-live') || e.getAttribute('role')), focusMovedTo: (document.activeElement && document.activeElement.tagName) } })()`)
     results.live.push({ what: 'the answer', liveRegionsBefore: before, ...answerLive })
-    await scan('ask-answer'); await click('Calculation'); await sleep(600); await scan('ask-receipt')
+    await scan('ask-answer'); await sleep(600); await scan('ask-receipt')  // the receipt is open under the verdict now, nothing to press
     // Dialogs: focus goes in when one opens and comes back when it closes.
-    for (const [name, scope] of [['What is GL?', 'button, a']]) {
+    // "What is GL?" is the gloss printed under the budget now, not a button that opens a dialog; the one dialog left is "How it works", checked on its own below.
+    for (const [name, scope] of []) {
       const opener = await click(name, scope); await sleep(700)
       const inside = await focusInfo(b); const list = await scan('dialog-' + name)
       const dlg = list.find((n) => n.role === 'dialog')

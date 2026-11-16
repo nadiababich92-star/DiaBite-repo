@@ -48,7 +48,7 @@ export default function AccountBlock({ userId, email }: { userId: string; email?
       <div className="row">
         <button className="ghost" onClick={download} disabled={busy !== null}>{busy === 'export' ? 'Preparing…' : 'Export my data'}</button>
         <button className="ghost" onClick={signOut} disabled={busy !== null}>Sign out</button>
-        <button className="link" onClick={() => { setDeleting((d) => !d); setTyped('') }}>Delete my account</button>
+        <button className="link" aria-expanded={deleting} onClick={() => { setDeleting((d) => !d); setTyped('') }}>Delete my account</button>
       </div>
       {deleting && (
         <div className="account-delete">
