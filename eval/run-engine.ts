@@ -948,6 +948,23 @@ hangMisses.forEach((m) => console.log(m))
   if (limitMisses.length) process.exitCode = 1
 }
 
+// ── pizza crust ───────────────────────────────────────────────────────────
+// "Pizza crust" is white bread only as one ingredient of a dish counted as an estimate (cost_dish; owner's decision of 6 November).
+// Said on its own it is a food the database lacks and must come back unknown, not white bread with a plain "fits" (the review of
+// 13 November, finding 4, and rule 3).
+{
+  const crustMisses: string[] = []
+  const alone = ['pizza crust', 'pizza dough', 'a thin pizza crust']
+  const ra = await resolvePhrases(store, alone)
+  ra.forEach((r, i) => { if (!r.unknown) crustMisses.push(`    "${alone[i]}" said on its own was counted as ${r.candidates[0]?.id} (${r.confidence}), not unknown`) })
+  const parts = ['pizza crust', 'pizza dough', 'pizza sauce']
+  const rd = await resolvePhrases(store, parts, 3, { asIngredient: true })
+  rd.forEach((r, i) => { if (r.unknown || !r.candidates[0]) crustMisses.push(`    "${parts[i]}" as an ingredient of a dish came back unknown`) })
+  console.log(`\ncrust     ${crustMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  crustMisses.forEach((m) => console.log(m))
+  if (crustMisses.length) process.exitCode = 1
+}
+
 // ── household portion ─────────────────────────────────────────────────────
 // A burrito bowl is said by the bowl: USDA lists "1 cup" (120 g) first, which made "a burrito bowl" a fifth of a bowl (a dietitian's test, 15 November).
 {

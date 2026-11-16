@@ -483,7 +483,13 @@ function brandYields<T extends { id: string; name: string; score: number }>(phra
   return [ranked[i], ...ranked.slice(0, i), ...ranked.slice(i + 1)]
 }
 
-export async function resolvePhrases(store: VectorStore, phrases: string[], topK = 5): Promise<ResolvedPhrase[]> {
+/**
+ * `asIngredient` is set only by cost_dish, where a phrase is one ingredient of a dish that is counted as an estimate and the
+ * whole answer says so. A record written down by hand under a pizza word ("pizza crust" for white bread, the owner's decision of
+ * 6 November) is allowed there. Said on its own, as a food in a meal, it is a food the database lacks, and counting it under a
+ * neighbour's name with a plain "fits" is what rule 3 of CLAUDE.md forbids: it comes back unknown.
+ */
+export async function resolvePhrases(store: VectorStore, phrases: string[], topK = 5, opts: { asIngredient?: boolean } = {}): Promise<ResolvedPhrase[]> {
   const { byId } = loadFoods()
   const given = phrases.map((p) => p.trim()).filter(Boolean)
   if (given.length === 0) return []
@@ -553,10 +559,11 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
     if (bareSizedPizza) { confidence = 'medium'; clarify = CATEGORY_QUESTION.pizza }
     // "Pizza with mushrooms" and "mushroom pizza" are a crust with those on it, and the nearest records were the topping
     // alone ("White mushrooms"), costed as the whole meal. Unless the best match is itself a pizza, or a record written
-    // down by hand under exactly these words ("pizza crust"), it is a dish we do not have: the agent counts it from its parts.
+    // down by hand under exactly these words ("pizza crust") and the phrase is one ingredient of a dish (`asIngredient`), it is a
+    // dish we do not have: the agent counts it from its parts. A crust named on its own is not a meal item either.
     const top = cands[0] ? byId.get(cands[0].id) : undefined
     if (tokens(phrase).includes('pizza') && !bareSizedPizza && confidence !== 'low' && top
-        && !/\bpizza\b/i.test(top.name) && !top.aliases?.includes(norm(phrase))) confidence = 'low'
+        && !/\bpizza\b/i.test(top.name) && (!top.aliases?.includes(norm(phrase)) || !opts.asIngredient)) confidence = 'low'
     const unknown = confidence === 'low'
     const asked = tokens(phrase).length === 1 ? CATEGORY_QUESTION[tokens(phrase)[0]] : undefined
     if (confidence === 'medium' && !clarify && asked) clarify = asked

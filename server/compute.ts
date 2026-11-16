@@ -106,7 +106,7 @@ export async function planDish(store: VectorStore, req: CostDishRequest): Promis
   ingredients: DishIngredientResult[]
   unresolved: UnresolvedIngredient[]
 }> {
-  const resolved = await resolvePhrases(store, req.ingredients.map((i) => uninvertPhrase(i.phrase)), 3)
+  const resolved = await resolvePhrases(store, req.ingredients.map((i) => uninvertPhrase(i.phrase)), 3, { asIngredient: true })
   const costed: MealItemInput[] = []
   const ingredients: DishIngredientResult[] = []
   const unresolved: UnresolvedIngredient[] = []
