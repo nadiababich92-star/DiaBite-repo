@@ -401,6 +401,14 @@ async function main() {
     if (bad) {
       return res.json({ error: `grams and servings must be positive numbers; ${bad.foodId} had none. Use the defaultPortion from resolve_foods when the user gave no amount.` })
     }
+    // A burrito bowl record is the whole bowl, its rice and beans already in it. A person who says "a burrito bowl with rice and
+    // beans" is telling what is in the bowl, not that they ate a bowl and a portion of each beside it: the same words came out as
+    // 33 g, 39 g and 94 g depending on how the model split them (a dietitian's test, 15 November). The prompt already says to cost the
+    // parts and drop the container; this is the rule that does not depend on the model keeping it.
+    const wholeBowl = body.items.length > 1 && body.items.some((it) => /^burrito bowl\b/i.test(loadFoods().byId.get(it.foodId)?.name ?? ''))
+    if (wholeBowl) {
+      return res.json({ error: 'A burrito bowl record is the whole bowl, with its rice and beans already in it, so it cannot be counted beside them. When the person listed what is in the bowl, cost those foods alone and leave the bowl record out; when they did not, cost the bowl record alone.' })
+    }
     try {
       const meal = computeMeal(body.items)
       const day = dayStateFor(body.sessionId)

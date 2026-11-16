@@ -269,6 +269,16 @@ async function httpSuite() {
       [bMeal, bFoods, bAlt, bDish].every((r) => r.status === 200 && /session_not_bound/.test(r.json.error ?? ''))
         && bMeal.json.afterMeal === undefined && bFoods.json.results?.length === 0 && bAlt.json.alternatives?.length === 0 && bDish.json.ingredients === undefined,
       JSON.stringify([bMeal.json, bFoods.json, bAlt.json, bDish.json]).slice(0, 400))
+    // A burrito bowl record is the whole bowl: counted beside its own rice and beans it is a double count, so the route refuses that.
+    const rbowl = await post('/tools/resolve_foods', { phrases: ['burrito bowl'] })
+    const bowlId: string = rbowl.json.results?.[0]?.candidates?.[0]?.id ?? ''
+    const twice = await post('/tools/compute_meal', { items: [{ foodId: bowlId, grams: 225 }, { foodId: 'seed:rice-white', grams: 180 }] })
+    const once = await post('/tools/compute_meal', { items: [{ foodId: bowlId, grams: 225 }] })
+    const parts = await post('/tools/compute_meal', { items: [{ foodId: 'seed:rice-white', grams: 180 }, { foodId: 'seed:egg', grams: 50 }] })
+    check('BW1', 'a burrito bowl record beside other foods: 200 with an error the model can read and nothing costed; alone, or the parts without the bowl, are costed',
+      /^usda:|^branded:/.test(bowlId) && twice.status === 200 && /whole bowl/.test(twice.json.error ?? '') && twice.json.totals === undefined
+        && once.json.error === undefined && !!once.json.totals && parts.json.error === undefined && !!parts.json.totals,
+      JSON.stringify([bowlId, twice.json.error, once.json.error, parts.json.error]).slice(0, 300))
     const bNever = await gd(bindSession('bd-never', KEY))
     const bRetry = await gd(bNever.json.sessionId)
     check('B3', 'a session the engine does not hold answers unknown with the id in its signed form, and that value is accepted when the model sends it back',
