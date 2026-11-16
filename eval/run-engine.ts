@@ -630,6 +630,38 @@ const menuMisses: string[] = []
     }))
   }
   if (repeats > 0) menuMisses.push(`    ${repeats} dishes repeated inside 3 days over 200 seeds`)
+  // (a2) a carbohydrate number the person's doctor gave for a meal is a ceiling: no planned meal and no replacement is above it.
+  {
+    const own = { ...profile, mealCarbsG: 45, snackCarbsG: 15 }
+    const ownTargets = calculateTargets(own)
+    let over = 0, withoutNumber = 0, meals = 0, snacks = 0
+    for (let seed = 1; seed <= 40; seed++) {
+      for (const d of generateWeek(own, ownTargets, seed).days) for (const m of d.meals) {
+        meals++
+        if (m.meal === 'snack') snacks++
+        if (m.nutrients.carbs > (m.meal === 'snack' ? 15 : 45) + 1e-6) over++
+      }
+      for (const d of generateWeek(profile, targets, seed).days) for (const m of d.meals) if (m.nutrients.carbs > (m.meal === 'snack' ? 15 : 45) + 1e-6) withoutNumber++
+    }
+    if (over > 0) menuMisses.push(`    ${over} planned meals were above the person's own number (45 g a meal, 15 g a snack)`)
+    if (withoutNumber === 0) menuMisses.push('    the control is empty: with no number the menu never went above 45 g, so the test above proves nothing')
+    if (snacks === 0 || meals < 40 * 7 * 3) menuMisses.push(`    a ceiling left the weeks short: ${meals} meals, ${snacks} snacks`)
+    const week = generateWeek(own, ownTargets, 3)
+    for (const slot of ['lunch', 'snack', 'dinner'] as const) {
+      let replaced = 0, bad = 0
+      for (let seed = 1; seed <= 30; seed++) {
+        const r = regenerateSlot(week, 1, slot, own, ownTargets, seed)
+        const got = r.plan.days[1].meals.find((m) => m.meal === slot)
+        if (r.changed) replaced++
+        if (got && got.nutrients.carbs > (slot === 'snack' ? 15 : 45) + 1e-6) bad++
+      }
+      if (bad > 0) menuMisses.push(`    replacing a ${slot} gave a dish above the person's number ${bad} times`)
+      if (replaced === 0) menuMisses.push(`    nothing could replace a ${slot} under the number: the test is empty`)
+    }
+    // A number no dish can meet leaves the slot out rather than going over it.
+    const tight = { ...profile, mealCarbsG: 10 }
+    for (const d of generateWeek(tight, calculateTargets(tight), 5).days) for (const m of d.meals) if (m.meal !== 'snack' && m.nutrients.carbs > 10 + 1e-6) menuMisses.push(`    a ${m.meal} of ${m.nutrients.carbs.toFixed(1)} g was planned under a 10 g number`)
+  }
   // (b) one slot changes, nothing else, and the day still adds up
   const plan = generateWeek(profile, targets, 7)
   const r = regenerateSlot(plan, 2, 'lunch', profile, targets, 99)

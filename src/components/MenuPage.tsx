@@ -175,6 +175,14 @@ export default function MenuPage({ profile, targets, diary, onAsk, onAdd, onRemo
               Averaging {avgKcal.toFixed(0)} kcal and GL {avgGL.toFixed(0)} a day, against a target of{' '}
               {targets.kcal} kcal and GL {targets.glBudget}.
             </p>
+            {(profile.mealCarbsG > 0 || profile.snackCarbsG > 0) && (
+              <p className="muted" style={{ margin: '4px 0 0' }}>
+                Every meal stays at or under the carbohydrate your doctor or dietitian gave you
+                {profile.mealCarbsG > 0 ? `: ${profile.mealCarbsG} g a main meal` : ''}
+                {profile.snackCarbsG > 0 ? `${profile.mealCarbsG > 0 ? ',' : ':'} ${profile.snackCarbsG} g a snack` : ''}.
+                Portions are made smaller where a dish would go over.
+              </p>
+            )}
             <p className="muted" style={{ margin: '4px 0 0' }}>
               These meals have not been reviewed by a clinician yet. Treat them as ideas, and check anything
               that matters for your health with your doctor or dietitian.

@@ -97,6 +97,33 @@ function fitScale(dish: Dish, targetKcal: number): number {
 }
 
 /**
+ * The carbohydrate the person's doctor or dietitian allowed for this meal, in grams; 0 when they gave no number.
+ * A snack has its own number. A daily number is not a ceiling for one meal: it only moves the target (calculateTargets).
+ */
+export function mealCeiling(profile: Profile, meal: MealType): number {
+  return meal === 'snack' ? profile.snackCarbsG : profile.mealCarbsG
+}
+
+/**
+ * The portion scale for a dish at one meal: the one that lands on the energy target and, when the person has a number
+ * for this meal, never carries more carbohydrate than it. A dish too heavy in carbohydrate even at the smallest
+ * plausible plate is not offered (null): the number is the person's doctor's, so the menu never goes over it.
+ */
+function scaleFor(dish: Dish, targetKcal: number, ceiling: number): number | null {
+  let scale = fitScale(dish, targetKcal)
+  if (ceiling <= 0) return scale
+  const step = dish.serving ? 0.25 : 0.05
+  const min = dish.serving ? RECIPE_MIN : MIN_SCALE
+  const perOne = evaluate(dish, 1).nutrients.carbs
+  if (perOne <= 0) return scale
+  while (scale >= min - 1e-9 && evaluate(dish, scale).nutrients.carbs > ceiling + 1e-9) {
+    scale = Math.min(scale - step, Math.floor((ceiling / perOne) / step) * step)
+  }
+  scale = Math.round(scale * 100) / 100
+  return scale >= min - 1e-9 ? scale : null
+}
+
+/**
  * Penalty for a dish deviating from the targets of a meal.
  *
  * Carbohydrate and glycemic-load deviations are penalised asymmetrically:
@@ -214,8 +241,9 @@ export function generateWeek(profile: Profile, targets: Targets, seed = Date.now
       const targetCarbs = targets.carbsG * share
       const targetGL = targets.glBudget * share
 
-      const candidates = available
-        .filter((d) => d.meals.includes(meal))
+      const ceiling = mealCeiling(profile, meal)
+      const eligible = available.filter((d) => d.meals.includes(meal) && scaleFor(d, targetKcal, ceiling) !== null)
+      const candidates = eligible
         .filter((d) => !usedToday.has(d.id))
         .filter((d) => {
           const last = lastUsed.get(d.id)
@@ -227,13 +255,13 @@ export function generateWeek(profile: Profile, targets: Targets, seed = Date.now
       const pool =
         candidates.length > 0
           ? (fresh.length >= FRESH_ENOUGH ? fresh : candidates)
-          : available.filter((d) => d.meals.includes(meal) && !usedToday.has(d.id))
+          : eligible.filter((d) => !usedToday.has(d.id))
 
       if (pool.length === 0) continue
 
       const scored = pool
         .map((dish) => {
-          const scale = fitScale(dish, targetKcal)
+          const scale = scaleFor(dish, targetKcal, ceiling) ?? 1
           const ev = evaluate(dish, scale)
           // A small random nudge, so weeks do not come out identical when
           // several options score about the same.
@@ -376,7 +404,10 @@ export function regenerateSlot(
 
   const rnd = mulberry32(seed)
   const current = day.meals[slot].dish.id
-  const available = availableDishes(profile).filter((d) => d.meals.includes(meal) && d.id !== current)
+  const share = MEAL_SHARE[meal]
+  const targetKcal = targets.kcal * share, targetCarbs = targets.carbsG * share, targetGL = targets.glBudget * share
+  const ceiling = mealCeiling(profile, meal)
+  const available = availableDishes(profile).filter((d) => d.meals.includes(meal) && d.id !== current && scaleFor(d, targetKcal, ceiling) !== null)
   const inDay = new Set(day.meals.map((m) => m.dish.id))
   const nearby = (id: string) => plan.days.some((d, i) => i !== dayIndex && Math.abs(i - dayIndex) < REPEAT_GAP && d.meals.some((m) => m.dish.id === id))
 
@@ -389,11 +420,9 @@ export function regenerateSlot(
   if (candidates.length === 0) { candidates = available.filter((d) => !inDay.has(d.id)); relaxed = true }
   if (candidates.length === 0) return { plan, relaxed: false, changed: false }
 
-  const share = MEAL_SHARE[meal]
-  const targetKcal = targets.kcal * share, targetCarbs = targets.carbsG * share, targetGL = targets.glBudget * share
   const best = candidates
     .map((dish) => {
-      const scale = fitScale(dish, targetKcal)
+      const scale = scaleFor(dish, targetKcal, ceiling) ?? 1
       const ev = evaluate(dish, scale)
       return { dish, scale, ev, s: score(ev, targetKcal, targetCarbs, targetGL) + rnd() * 0.15 }
     })
