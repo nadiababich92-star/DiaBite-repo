@@ -35,7 +35,7 @@ import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, te
 import { bindSession, unbindSession } from '../server/bind'
 import { householdMeasure, householdPortion } from '../server/foods'
 import { FigurePair } from '../src/components/FigurePair'
-import { buildReceipt } from '../src/lib/agent'
+import { budgetOf, buildReceipt } from '../src/lib/agent'
 import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
@@ -49,6 +49,7 @@ import { toDishes } from '../src/lib/recipes'
 import { excludedLabel, nameMatches } from '../src/lib/excludable'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
+import MealCarbsLimit from '../src/components/MealCarbsLimit'
 import Logo, { Wordmark } from '../src/components/Logo'
 import ImportPrompt from '../src/components/ImportPrompt'
 import { ALLERGEN_PATTERNS, PATTERN_PATTERNS, AVOIDED_PATTERNS, dietaryReason } from '../src/lib/dietary'
@@ -1121,6 +1122,43 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\ndropcarb  ${dropMisses.length === 0 ? 'ok' : 'WRONG'}`)
   dropMisses.forEach((m) => console.log(m))
   if (dropMisses.length) process.exitCode = 1
+}
+
+// ── the person's own daily carbohydrate number ───────────────────────────
+// Set in the onboarding or the Profile, it replaces the figure DiaBite would calculate, and the day is counted against it
+// (the engine gets it as the day's budget). Empty means DiaBite's own figure. Calories and protein do not move.
+{
+  const dailyMisses: string[] = []
+  const base = calculateTargets(DEFAULT_PROFILE)
+  const own = calculateTargets({ ...DEFAULT_PROFILE, dailyCarbsG: 150 })
+  if (own.carbsG !== 150) dailyMisses.push(`    a doctor's 150 g gave ${own.carbsG}`)
+  if (!own.constraints.some((c) => c.id === 'own-carbs' && c.field === 'carbsG')) dailyMisses.push('    no note says the number is the doctor\'s')
+  if (base.constraints.some((c) => c.id === 'own-carbs')) dailyMisses.push('    the note appears with no number set')
+  if (own.kcal !== base.kcal || own.proteinG !== base.proteinG) dailyMisses.push('    a carbohydrate number moved calories or protein')
+  if (own.glBudget !== Math.round(Math.min(120, (150 * 50) / 100))) dailyMisses.push(`    the glycemic-load budget did not follow the number: ${own.glBudget}`)
+  if (budgetOf(own).carbsG !== 150) dailyMisses.push('    the engine would not be told the number')
+  for (const approach of ['moderate', 'verylow'] as const) {
+    const c = calculateTargets({ ...DEFAULT_PROFILE, carbApproach: approach, dailyCarbsG: 150 }).carbsG
+    if (c !== 150) dailyMisses.push(`    carb approach ${approach} overrode the doctor's number: ${c}`)
+  }
+  for (const bad of [0, 10, 29, 401, 5000, -80, Number.NaN]) {
+    if (calculateTargets({ ...DEFAULT_PROFILE, dailyCarbsG: bad }).carbsG !== base.carbsG) dailyMisses.push(`    ${bad} was taken as a doctor's number`)
+  }
+  if (sanitizeProfile({ dailyCarbsG: 150 }).dailyCarbsG !== 150) dailyMisses.push('    a stored 150 was dropped')
+  for (const bad of [5, 500, '150', null, true, -1]) {
+    if (sanitizeProfile({ dailyCarbsG: bad }).dailyCarbsG !== 0) dailyMisses.push(`    a stored ${JSON.stringify(bad)} was trusted`)
+  }
+  if (sanitizeProfile({}).dailyCarbsG !== 0) dailyMisses.push('    a new profile has a number')
+  const week = generateWeek({ ...DEFAULT_PROFILE, dailyCarbsG: 150 }, own, 11)
+  if (!week || week.length === 0) dailyMisses.push('    the menu was not planned around the number')
+  const field = (kind: 'day' | 'meal') => renderToStaticMarkup(createElement(MealCarbsLimit, { kind, value: kind === 'day' ? 140 : 0, onChange: () => {} }))
+  const day = field('day'), meal = field('meal')
+  if (!/Carbohydrate a day your doctor or dietitian suggested/.test(day) || !/min="30" max="400"/.test(day) || !/value="140"/.test(day)) dailyMisses.push('    the daily field is mislabelled, mis-ranged or not prefilled from the profile')
+  if (!/counts your day against it instead of its own figure|against it instead/.test(day.replace(/DiaBite /, ''))) dailyMisses.push('    the daily field does not say it replaces our figure')
+  if (!/per main meal/.test(meal) || !/min="10" max="150"/.test(meal)) dailyMisses.push('    the meal field changed')
+  console.log(`\ndailycarb ${dailyMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  dailyMisses.forEach((m) => console.log(m))
+  if (dailyMisses.length) process.exitCode = 1
 }
 
 // ── onboarding focus ──────────────────────────────────────────────────────

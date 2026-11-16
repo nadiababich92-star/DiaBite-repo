@@ -1,6 +1,6 @@
 import type { DiaryEntry, Profile } from '../types'
 import { FOODS } from '../data/foods'
-import { DEFAULT_PROFILE, MEAL_CARBS_MAX, MEAL_CARBS_MIN } from './profile'
+import { DAILY_CARBS_MAX, DAILY_CARBS_MIN, DEFAULT_PROFILE, MEAL_CARBS_MAX, MEAL_CARBS_MIN } from './profile'
 
 const PROFILE_KEY = 'diabite.profile.v1'
 const DIARY_KEY = 'diabite.diary.v1'
@@ -71,6 +71,7 @@ export function sanitizeProfile(stored: unknown): Profile {
     const v = out[k]
     if (typeof v !== 'number' || v < MEAL_CARBS_MIN || v > MEAL_CARBS_MAX) out[k] = 0
   }
+  if (typeof out.dailyCarbsG !== 'number' || out.dailyCarbsG < DAILY_CARBS_MIN || out.dailyCarbsG > DAILY_CARBS_MAX) out.dailyCarbsG = 0
   return out as unknown as Profile
 }
 

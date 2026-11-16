@@ -216,7 +216,11 @@ export function calculateTargets(raw: Profile): Targets {
     add('kcal-floor', 'kcal', `Raised to ${floor} kcal, the floor below which a day cannot carry enough protein and micronutrients.`)
   }
 
-  const carbsG = (kcal * CARB_SHARE[p.carbApproach]) / 4
+  // The person's own daily number wins: it is what their doctor or dietitian said, and the day is counted against
+  // it. Without one, the number comes from the approach they chose. Calories and protein do not change either way.
+  const ownCarbs = p.dailyCarbsG >= DAILY_CARBS_MIN && p.dailyCarbsG <= DAILY_CARBS_MAX ? Math.round(p.dailyCarbsG) : 0
+  const carbsG = ownCarbs > 0 ? ownCarbs : (kcal * CARB_SHARE[p.carbApproach]) / 4
+  if (ownCarbs > 0) add('own-carbs', 'carbsG', `Carbohydrate is the ${ownCarbs} g a day your doctor or dietitian gave you, not a number DiaBite calculated.`)
 
   // Protein: 1.6 g/kg when losing weight (to preserve muscle), else 1.4 g/kg.
   // We do not raise it further on very low carbohydrate - the excess feeds
@@ -328,6 +332,9 @@ function glBudget(carbsG: number, condition: Condition): number {
 /** The range a per-meal carbohydrate number may take: a typo guard, not advice. */
 export const MEAL_CARBS_MIN = 10
 export const MEAL_CARBS_MAX = 150
+/** The same typo guard for a daily number. */
+export const DAILY_CARBS_MIN = 30
+export const DAILY_CARBS_MAX = 400
 
 export const DEFAULT_PROFILE: Profile = {
   sex: 'female',
@@ -341,6 +348,7 @@ export const DEFAULT_PROFILE: Profile = {
   countBy: 'gl',
   mealCarbsG: 0,
   snackCarbsG: 0,
+  dailyCarbsG: 0,
   excludedFoodIds: [],
   insulin: 'none',
   meds: [],

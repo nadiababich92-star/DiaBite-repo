@@ -154,8 +154,9 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
           and protein come from your body, activity and weight goal, so they stay the same when you change it.
           What you usually count only decides which figures come first on an answer; both are always shown.
         </p>
-        <h3>Carbohydrate per meal</h3>
+        <h3>Your doctor's carbohydrate numbers</h3>
         <div className="grid grid-2">
+          <MealCarbsLimit kind="day" value={profile.dailyCarbsG} onChange={(g) => set('dailyCarbsG', g)} />
           <MealCarbsLimit kind="meal" value={profile.mealCarbsG} onChange={(g) => set('mealCarbsG', g)} />
           <MealCarbsLimit kind="snack" value={profile.snackCarbsG} onChange={(g) => set('snackCarbsG', g)} />
         </div>
@@ -177,7 +178,7 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
           <div className="stat">
             <div className="label">Carbohydrate</div>
             <div className="value">{targets.carbsG} g</div>
-            <div className="sub">{profile.showBreadUnits ? `≈ ${(targets.carbsG / 12).toFixed(1)} BU` : 'grams a day'}</div>
+            <div className="sub">{profile.showBreadUnits ? `≈ ${(targets.carbsG / 12).toFixed(1)} BU` : profile.dailyCarbsG > 0 ? 'grams a day, your doctor\'s number' : 'grams a day'}</div>
           </div>
           <div className="stat">
             <div className="label">Protein</div>

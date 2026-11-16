@@ -150,6 +150,8 @@ export interface Profile {
   mealCarbsG: number
   /** The same for a snack; 0 means no number. */
   snackCarbsG: number
+  /** Grams of carbohydrate a day the person's doctor or dietitian gave them; 0 means no number. When set it replaces the figure DiaBite would calculate. */
+  dailyCarbsG: number
   /** Food ids the user excludes: allergy, intolerance, or simply dislike. */
   excludedFoodIds: string[]
 
