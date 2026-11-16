@@ -1198,6 +1198,20 @@ hangMisses.forEach((m) => console.log(m))
   expectConflict('partial called fit', "Verdict: it fits what is left of today's budget.", null, false, true)
   expectConflict('partial called within budget', 'This is within your budget.', null, false, true)
   expectConflict('over called fit', 'The meal fits your day.', false, false, true)
+  // The person's own carbohydrate number is a second statement, never the verdict (the review of 13 November, finding 3): the prompt asks for both in
+  // one sentence when `carbLimit.over` is true and the day still fits, and the engine says fits, so that sentence is true and must not be cut.
+  expectConflict('fits, and says so beside the number the person set', 'This fits your day, though it goes over the 45 g you set for a meal.', true, false, false)
+  expectConflict('fits, over "your limit of 45 g"', 'This fits your day, but it is over your limit of 45 g.', true, false, false)
+  expectConflict('fits, in two sentences', 'This fits your day. This meal is 48 g, above the 45 g you set.', true, false, false)
+  expectConflict('fits, "past the 30 g per snack"', 'It fits what is left of today, but it runs past the 30 g per snack you set.', true, false, false)
+  // ...and a false claim about the budget beside that number is still caught.
+  expectConflict('budget claim beside the personal number, but the day fits', "This goes over what is left of today's budget, and it is above the 45 g you set.", true, false, true)
+  expectConflict('"does not fit" beside the personal number, but the day fits', "This doesn't fit your day and is over the 45 g you set.", true, false, true)
+  expectConflict('"over your limit" with no number is the budget, and the day fits', 'This fits, but it is over your limit.', true, false, true)
+  // The other direction: "within" the person's own grams is not a claim that the day holds.
+  expectConflict('within the personal number, but the day does not fit', "This meal is within your limit of 45 g, but it goes over what is left of today's budget.", false, false, false)
+  expectConflict('within "the 45 g you set", the day is partial', "It is within the 45 g you set, but I can't judge the day on a partial total.", null, false, false)
+  expectConflict('"within your limit" with no number is the budget, and the day does not fit', 'This meal is within your limit.', false, false, true)
   expectConflict('estimate called fit', 'It fits what is left of today.', true, true, true)
   expectConflict('fit called over', 'Verdict: it does not fit what is left of today.', true, false, true)
   expectConflict('fit called goes over', "This goes over what is left of today's budget.", true, false, true)

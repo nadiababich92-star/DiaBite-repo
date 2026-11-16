@@ -99,6 +99,24 @@ const CANNOT_JUDGE = /\b(?:i )?(?:can'?t|cannot)\s+(?:say|tell|judge)\b[^.!?\n]*
 const CONDITIONAL = /\bif\b|\bwould\b|\bcould\b|\bswap|\binstead\b|\balternative|\bbetter\b|\bthan\b|\?/i
 const NEGATED = /\bnot\b|n'?t\b/i
 
+/**
+ * What is said about the person's own carbohydrate number is a second statement, never the verdict. When `carbLimit.over` is
+ * true and the day still fits, the prompt asks for both in one sentence: "This fits your day, though it goes over the 45 g you
+ * set for a meal." The engine says fits, so that sentence is true, and the words "goes over" in it are about grams of
+ * carbohydrate, not about today's budget. These phrases are taken out before the sentence is read for a no-fit claim; each needs
+ * a number of grams (or "you set"), so "over your limit" on its own is still read as the budget, and "goes over what is left of
+ * today's budget" beside the number is still caught.
+ */
+const PERSONAL_NUMBER = [
+  /\b(?:goes |go |is |are |was |runs |sits |sit )?(?:over|above|past|exceeds?)\s+(?:the |your |that )?\d+(?:\.\d+)?\s*g\b[^.!?\n,;]*/gi,
+  /\b(?:over|above|past)\s+(?:your|the)\s+(?:own\s+)?(?:carb(?:ohydrate)?\s+)?(?:limit|number|target)\s+of\s+\d+(?:\.\d+)?\s*g\b/gi,
+  /\b(?:over|above|past)\s+(?:your|the)\s+(?:own\s+)?(?:carb(?:ohydrate)?\s+)?(?:limit|number)\s+you set\b/gi,
+  // The other direction: "within your limit of 45 g" is about the grams, not a claim that today's budget holds.
+  /\bwithin\s+(?:your|the)\s+(?:own\s+)?(?:carb(?:ohydrate)?\s+)?(?:limit|number)\s+of\s+\d+(?:\.\d+)?\s*g\b/gi,
+  /\bwithin\s+(?:the |your )?\d+(?:\.\d+)?\s*g\b[^.!?\n,;]*/gi,
+]
+const withoutPersonalNumber = (text: string) => PERSONAL_NUMBER.reduce((t, re) => t.replace(re, ' '), text)
+
 /** Models write ’ where the patterns above write '. */
 const plain = (text: string) => text.replace(/[\u2018\u2019\u02bc]/g, "'")
 
@@ -107,13 +125,13 @@ export function verdictConflict(answer: string, fits: boolean | null | undefined
   if (fits !== true || estimate) {
     // Anything but a plain, fully scored "fits": no sentence may say the meal fits.
     const s = sentences.find((x) => {
-      const claim = x.replace(CANNOT_JUDGE, ' ')
+      const claim = withoutPersonalNumber(x.replace(CANNOT_JUDGE, ' '))
       return FIT_CLAIM.test(claim) && !CONDITIONAL.test(claim) && !NEGATED.test(claim)
     })
     if (s) return s
   }
   if (fits === true && !estimate) {
-    const s = sentences.find((x) => NO_FIT_CLAIM.test(x) && !CONDITIONAL.test(x))
+    const s = sentences.find((x) => NO_FIT_CLAIM.test(withoutPersonalNumber(x)) && !CONDITIONAL.test(x))
     if (s) return s
   }
   return null
