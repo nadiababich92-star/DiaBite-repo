@@ -12,6 +12,7 @@ import {
 } from '../lib/profile'
 import { answerRows } from '../lib/answers'
 import GiGlExplainer from './GiGlExplainer'
+import { HeightWeight, UnitsSwitch } from './BodyUnits'
 import MealCarbsLimit from './MealCarbsLimit'
 import type { Activity, CarbApproach, Condition, CountBy, Goal, Profile, Sex, Targets } from '../types'
 
@@ -76,6 +77,7 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
       </section>
       <section className="card">
         <h2>About you</h2>
+        <UnitsSwitch profile={profile} set={set} />
         <div className="grid">
           <label className="field">
             <span>Sex</span>
@@ -92,20 +94,7 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
               onChange={(e) => set('age', Number(e.target.value))}
             />
           </label>
-          <label className="field">
-            <span>Height, cm</span>
-            <input
-              type="number" inputMode="decimal" min={120} max={220} value={profile.heightCm}
-              onChange={(e) => set('heightCm', Number(e.target.value))}
-            />
-          </label>
-          <label className="field">
-            <span>Weight, kg</span>
-            <input
-              type="number" inputMode="decimal" min={35} max={250} step={0.5} value={profile.weightKg}
-              onChange={(e) => set('weightKg', Number(e.target.value))}
-            />
-          </label>
+          <HeightWeight profile={profile} set={set} />
         </div>
 
         <h3>Condition and goals</h3>

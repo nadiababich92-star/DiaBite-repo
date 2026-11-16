@@ -356,7 +356,8 @@ export const DEFAULT_PROFILE: Profile = {
 }
 
 // ── imperial ↔ metric, for the screens (storage stays metric) ────────────
-export const cmToFtIn = (cm: number) => ({ ft: Math.floor(cm / 2.54 / 12), in: Math.round((cm / 2.54) % 12) })
+// Whole inches first, then feet and the rest: rounding the remainder alone gave "5 ft 12 in" for 182.5 cm.
+export const cmToFtIn = (cm: number) => { const total = Math.round(cm / 2.54); return { ft: Math.floor(total / 12), in: total % 12 } }
 export const ftInToCm = (ft: number, inch: number) => Math.round((ft * 12 + inch) * 2.54)
 export const kgToLb = (kg: number) => Math.round(kg * 2.2046)
 export const lbToKg = (lb: number) => Math.round((lb / 2.2046) * 10) / 10

@@ -63,7 +63,8 @@ import { RATING_ONLY } from '../src/lib/feedbackCopy'
 import { buildReport, reportMarkdown, type AccountInput, type ReportInput } from '../src/lib/report'
 import { CONSENT_VERSION } from '../src/lib/syncCore'
 import { addDays, dayLabel, gramStep, mealForNow, noLoadNote, nudgeGrams, recentEntries } from '../src/lib/diary'
-import { calculateTargets, DEFAULT_PROFILE, weightUsed } from '../src/lib/profile'
+import { calculateTargets, cmToFtIn, DEFAULT_PROFILE, ftInToCm, kgToLb, lbToKg, weightUsed } from '../src/lib/profile'
+import { HeightWeight, UnitsSwitch } from '../src/components/BodyUnits'
 import { lockCount, lockPage } from '../src/lib/pageLock'
 import { answerRows } from '../src/lib/answers'
 import { swapNamedIn } from '../src/lib/swap'
@@ -987,6 +988,28 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\nleftafter ${leftMisses.length === 0 ? 'ok' : 'WRONG'}`)
   leftMisses.forEach((m) => console.log(m))
   if (leftMisses.length) process.exitCode = 1
+}
+
+// ── height and weight in the person's own units (Profile page) ────────────
+// The Profile page showed centimetres and kilograms only, while Onboarding had the switch (a dietitian's test, 15 November).
+// Storage stays metric; the screens convert, and rounding must never give "5 ft 12 in".
+{
+  const unitMisses: string[] = []
+  const eq = (what: string, got: unknown, want: unknown) => { if (JSON.stringify(got) !== JSON.stringify(want)) unitMisses.push(`    ${what}: ${JSON.stringify(got)}, wanted ${JSON.stringify(want)}`) }
+  eq('182.5 cm is 6 ft 0 in, not 5 ft 12 in', cmToFtIn(182.5), { ft: 6, in: 0 })
+  eq('168 cm', cmToFtIn(168), { ft: 5, in: 6 })
+  eq('5 ft 6 in to cm and back', cmToFtIn(ftInToCm(5, 6)), { ft: 5, in: 6 })
+  eq('150 lb to kg and back', kgToLb(lbToKg(150)), 150)
+  eq('every height from 140 to 210 cm shows 0 to 11 inches', Array.from({ length: 71 }, (_, i) => cmToFtIn(140 + i).in).every((n) => n >= 0 && n <= 11), true)
+  const html = (units: 'imperial' | 'metric') => renderToStaticMarkup(createElement(HeightWeight, { profile: { units, heightCm: 168, weightKg: 70 }, set: () => {} }))
+  const imp = html('imperial'), met = html('metric')
+  if (!/Weight, lb/.test(imp) || !/value="154"/.test(imp) || !/aria-label="Feet"/.test(imp)) unitMisses.push('    imperial does not show pounds, 154 lb and feet and inches')
+  if (!/Weight, kg/.test(met) || !/value="70"/.test(met) || /aria-label="Feet"/.test(met)) unitMisses.push('    metric does not show kilograms and centimetres only')
+  const sw = renderToStaticMarkup(createElement(UnitsSwitch, { profile: { units: 'imperial' }, set: () => {} }))
+  if (!/ft \/ lb/.test(sw) || !/cm \/ kg/.test(sw) || !/aria-pressed="true"/.test(sw)) unitMisses.push('    the switch does not show both choices with the current one pressed')
+  console.log(`\nunits     ${unitMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  unitMisses.forEach((m) => console.log(m))
+  if (unitMisses.length) process.exitCode = 1
 }
 
 // ── pizza crust ───────────────────────────────────────────────────────────
