@@ -1049,6 +1049,29 @@ hangMisses.forEach((m) => console.log(m))
   if (measureMisses.length) process.exitCode = 1
 }
 
+// ── measures for curated foods ────────────────────────────────────────────
+// The curated ingredients and everyday foods, where the most typed foods live, have no table of household measures of their own.
+// scripts/map-portions.py matches them to USDA SR Legacy records and writes data/recipes-db/portion_mapping.json (close matches only);
+// the engine gives each food in that file the matched record's measures. Every entry must reach its record, and "black beans" must say a cup.
+{
+  const mapMisses: string[] = []
+  const file = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'recipes-db', 'portion_mapping.json'), 'utf8')) as { foods: Record<string, { measures: { label: string; grams: number }[] }> }
+  const keys = Object.keys(file.foods)
+  const { byId } = loadFoods()
+  // A few mapped foods are not catalogue records at all (vanilla extract and baking powder carry carbohydrate with no load and are left out), so only those present count.
+  const present = keys.filter((k) => byId.has(k))
+  const lost = present.filter((k) => !byId.get(k)?.portions?.length)
+  if (lost.length) mapMisses.push(`    ${lost.length} mapped foods have no portions on their record, e.g. ${lost.slice(0, 3).join(', ')}`)
+  if (present.length < 100) mapMisses.push(`    only ${present.length} of the ${keys.length} mapped foods are in the catalogue`)
+  const beans = byId.get('ing:black_beans')
+  const cup = beans?.portions?.find((p) => /^(1 )?cup$/i.test(p.label.trim()))
+  const said = beans && cup ? householdMeasure(beans.portions, cup.grams)?.text : undefined
+  if (said !== '1 cup') mapMisses.push(`    black beans at one cup (${cup?.grams} g) say ${JSON.stringify(said)}, wanted "1 cup"`)
+  console.log(`\nmapped    ${mapMisses.length === 0 ? 'ok' : 'WRONG'}  (${keys.length} foods)`)
+  mapMisses.forEach((m) => console.log(m))
+  if (mapMisses.length) process.exitCode = 1
+}
+
 // ── pizza crust ───────────────────────────────────────────────────────────
 // "Pizza crust" is white bread only as one ingredient of a dish counted as an estimate (cost_dish; owner's decision of 6 November).
 // Said on its own it is a food the database lacks and must come back unknown, not white bread with a plain "fits" (the review of

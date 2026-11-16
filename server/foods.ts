@@ -288,10 +288,28 @@ export function householdPortion(rows: { label: string; grams: number }[] | unde
   return Math.round(cup?.grams ?? usable[0]?.grams ?? 100)
 }
 
+/**
+ * USDA's household measures for a curated ingredient or everyday food, from `data/recipes-db/portion_mapping.json`: made by
+ * `scripts/map-portions.py`, which matches each food to the USDA SR Legacy record whose nutrients and name agree, and keeps only
+ * the close matches (distance 0.10 or less, 60% of the words). A food that is not in the file simply has no household measure.
+ */
+let PORTION_MAP: Record<string, { label: string; grams: number }[]> | null = null
+function portionMap(): Record<string, { label: string; grams: number }[]> {
+  if (PORTION_MAP) return PORTION_MAP
+  PORTION_MAP = {}
+  const path = join(DATA, 'portion_mapping.json')
+  if (existsSync(path)) {
+    const file = JSON.parse(readFileSync(path, 'utf8')) as { foods?: Record<string, { measures?: { label: string; grams: number }[] }> }
+    for (const [key, v] of Object.entries(file.foods ?? {})) if (v.measures?.length) PORTION_MAP[key] = v.measures
+  }
+  return PORTION_MAP
+}
+
 /** A weight in a household measure the record's own table lists ("1 cup", "1/2 cup", "2 slices"), and how it is said. */
 export interface HouseholdMeasure { count: number; unit: string; text: string }
 
-const MEASURE_LABEL = /^(?:1 )?(cup|tablespoon|teaspoon|fl oz|oz|slice|piece|medium|small|large)$/i
+// SR Legacy writes "tbsp" and "tsp"; the survey tables write the words. Both are the same measure.
+const MEASURE_LABEL = /^(?:1 )?(cup|tablespoon|tbsp|teaspoon|tsp|fl oz|oz|slice|piece|medium|small|large)$/i
 /** The most of a unit that is said in it: eleven tablespoons is two thirds of a cup, and nobody says it that way. */
 const MOST_OF: Record<string, number> = { cup: 8, tablespoon: 4, teaspoon: 3, 'fl oz': 16, oz: 16, slice: 12, piece: 12, medium: 6, small: 6, large: 6 }
 const FRACTIONS: [number, string][] = [[0, ''], [1 / 4, '1/4'], [1 / 3, '1/3'], [1 / 2, '1/2'], [2 / 3, '2/3'], [3 / 4, '3/4']]
@@ -309,7 +327,7 @@ export function householdMeasure(rows: { label: string; grams: number }[] | unde
   for (const p of rows) {
     const m = MEASURE_LABEL.exec(String(p.label).trim())
     if (!m || !(p.grams > 0)) continue
-    const unit = m[1].toLowerCase()
+    const unit = ({ tbsp: 'tablespoon', tsp: 'teaspoon' } as Record<string, string>)[m[1].toLowerCase()] ?? m[1].toLowerCase()
     for (let whole = 0; whole <= 12; whole++) {
       for (const [f, fraction] of FRACTIONS) {
         const count = whole + f
@@ -530,6 +548,7 @@ export function loadFoods() {
       // with it.
       aliases: [r.id.replace(/_/g, ' '), ...(INGREDIENT_ALIASES[r.id] ?? [])],
       per100: r.per100,
+      portions: portionMap()[`ing:${r.id}`],
     })
   }
 
@@ -540,6 +559,7 @@ export function loadFoods() {
       category: f.category, unit: 'g', defaultPortion: f.portion.grams,
       searchText: `${f.name}. ${aliases.join(', ')}. ${f.category}. ${f.id.replace(/-/g, ' ')}`,
       per100: f.per100, aliases,
+      portions: portionMap()[`seed:${f.id}`],
     })
   }
 

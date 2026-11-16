@@ -18,7 +18,7 @@ RUN npm ci && npm cache clean --force
 COPY index.html vite.config.ts tsconfig.json tsconfig.server.json ./
 COPY src ./src
 COPY public ./public
-COPY data/recipes-db/ingredients.json data/recipes-db/recipes_db.json ./data/recipes-db/
+COPY data/recipes-db/ingredients.json data/recipes-db/recipes_db.json data/recipes-db/portion_mapping.json ./data/recipes-db/
 # In dev, Vite proxies /agent to the engine's /agent/ask. Served from the
 # engine there is no proxy, so the path is the real one.
 ENV VITE_AGENT_URL=/agent/ask
@@ -49,7 +49,7 @@ COPY src/lib/profile.ts ./src/lib/profile.ts
 # makes a forgotten one a crash at boot rather than a wrong answer later.
 COPY src/lib/dietary.ts ./src/lib/dietary.ts
 COPY src/data/foods.ts ./src/data/foods.ts
-COPY data/recipes-db/ingredients.json data/recipes-db/recipes_db.json ./data/recipes-db/
+COPY data/recipes-db/ingredients.json data/recipes-db/recipes_db.json data/recipes-db/portion_mapping.json ./data/recipes-db/
 # The coverage layer: USDA's "foods as eaten", which is what someone types
 # into a diary. 7 MB next to an 87 MB model.
 COPY data/foods-usda/foods_usda.json data/foods-usda/branded_common.json ./data/foods-usda/
