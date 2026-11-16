@@ -112,7 +112,7 @@ const ALIASES: Record<string, string[]> = {
   'yogurt': ['yogurt', 'yoghurt'],
   'milk': ['milk', 'glass of milk'],
   'banana': ['banana', 'bananas'],
-  'apple': ['apple', 'apples'],
+  'apple': ['apple', 'apples', 'gala apple', 'gala apples', 'fuji apple', 'honeycrisp apple', 'granny smith apple', 'red delicious apple', 'red apple', 'green apple'],
   'grapes': ['grapes'],
   'watermelon': ['watermelon'],
   'corn': ['corn', 'corn on the cob', 'sweetcorn'],
@@ -243,7 +243,7 @@ interface UsdaRow {
 const CONFECTIONERY = /^(candy|chewing gum|gum\b|lollipop|marshmallow|jelly bean)/i
 
 /** The portion a person would say, not the one a lab would weigh. */
-function householdPortion(rows: { label: string; grams: number }[] | undefined, name = ''): number {
+export function householdPortion(rows: { label: string; grams: number }[] | undefined, name = ''): number {
   if (CONFECTIONERY.test(name)) {
     // "1 cup" of hard candy is 160 g and made "two hard candies" 320 g; the first listed piece-sized
     // portion is what someone means. Nothing under a gram, nothing over a pouch.
@@ -261,6 +261,12 @@ function householdPortion(rows: { label: string; grams: number }[] | undefined, 
   if (/^chicken with gravy$/i.test(name)) {
     const breast = (rows ?? []).find((p) => /breast/i.test(p.label))
     if (breast) return Math.round(breast.grams)
+  }
+  // A burrito bowl is said by the bowl. USDA lists "1 cup" first, 120 g, which made "a burrito bowl" a fifth of a bowl and
+  // 20 g of carbohydrate with a plain "fits" (a dietitian's test, 15 November); the listed item is the portion.
+  if (/^burrito bowl\b/i.test(name)) {
+    const bowl = (rows ?? []).find((p) => /^1 item\b/i.test(p.label) && p.grams >= 150 && p.grams <= 600)
+    if (bowl) return Math.round(bowl.grams)
   }
   // A sauce, a dressing or a spread is said by the spoonful: "1 cup" of barbecue sauce is 272 g, and nobody pours that on
   // brisket. USDA lists a guideline amount for a regular sandwich, or a tablespoon; a gravy lists only a cup, of which a ladle is a quarter.

@@ -33,6 +33,7 @@ import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf,
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
+import { householdPortion } from '../server/foods'
 import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
@@ -923,6 +924,23 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\nsession   ${tagMisses.length === 0 ? 'ok' : 'WRONG'}`)
   tagMisses.forEach((m) => console.log(m))
   if (tagMisses.length) process.exitCode = 1
+}
+
+// ── household portion ─────────────────────────────────────────────────────
+// A burrito bowl is said by the bowl: USDA lists "1 cup" (120 g) first, which made "a burrito bowl" a fifth of a bowl (a dietitian's test, 15 November).
+{
+  const portionMisses: string[] = []
+  const bowlRows = [{ label: '1 cup', grams: 120 }, { label: '1 item, any size', grams: 270 }]
+  const checks: [string, ReturnType<typeof householdPortion>, number][] = [
+    ['burrito bowl with beans', householdPortion(bowlRows, 'Burrito bowl, beef or pork, with beans'), 270],
+    ['burrito bowl, rows in the other order', householdPortion([...bowlRows].reverse(), 'Burrito bowl, NFS'), 270],
+    ['a bowl with no listed item keeps the old rule (the cup)', householdPortion([{ label: '1 cup', grams: 120 }], 'Burrito bowl, NFS'), 120],
+    ['an ordinary food is untouched (rice keeps its cup)', householdPortion([{ label: '1 cup', grams: 158 }, { label: '1 item, any size', grams: 300 }], 'Rice, white, cooked'), 158],
+  ]
+  for (const [what, got, want] of checks) if (got !== want) portionMisses.push(`    ${what}: ${got}, wanted ${want}`)
+  console.log(`\nportion   ${portionMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  portionMisses.forEach((m) => console.log(m))
+  if (portionMisses.length) process.exitCode = 1
 }
 
 // ── bound session ─────────────────────────────────────────────────────────

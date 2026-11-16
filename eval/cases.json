@@ -324,6 +324,26 @@
         ]
       },
       {
+        "phrase": "a gala apple",
+        "expect": [
+          "seed:apple",
+          "ing:apple"
+        ],
+        "tags": [
+          "everyday"
+        ]
+      },
+      {
+        "phrase": "honeycrisp apple",
+        "expect": [
+          "seed:apple",
+          "ing:apple"
+        ],
+        "tags": [
+          "everyday"
+        ]
+      },
+      {
         "phrase": "grapes",
         "expect": [
           "seed:grapes"
