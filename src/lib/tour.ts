@@ -41,7 +41,7 @@ const COPY: Record<TourStep, TourCopy> = {
   },
   calc: {
     title: 'Check the arithmetic',
-    body: 'Tap Calculation to see every food, its weight and its load. Each number comes from the database.',
+    body: 'The calculation is open below the answer: every food, its weight and its load, and the weight can be changed. Each number comes from the database.',
     button: 'Next',
   },
   log: {

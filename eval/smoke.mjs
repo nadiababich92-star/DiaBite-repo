@@ -139,7 +139,7 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
 
     const meal = await ask('Burrito bowl with white rice, black beans, chicken and guacamole')
     check('M8', 'a meal gets a verdict, three figures, a verified mark and the calculation',
-      /THIS MEAL/i.test(meal.text) && /LEFT AFTER|OVER BY|LEFT SO FAR/i.test(meal.text) && /Verified/.test(meal.text) && /Calculation/.test(meal.text), meal.text.slice(0, 200))
+      /THIS MEAL/i.test(meal.text) && /LEFT AFTER|OVER BY|LEFT SO FAR/i.test(meal.text) && /Verified/.test(meal.text) && /The receipt/.test(meal.text) && /Portions|Recipe|Done/.test(meal.text), meal.text.slice(0, 200))
     check('M9', 'the answer arrives in under 15 seconds', meal.secs < 15, `${meal.secs.toFixed(1)} s`)
 
     // The bowl's answer is on screen: the disclaimer's rest is one tap away, GL has a gloss, and a portion can change.

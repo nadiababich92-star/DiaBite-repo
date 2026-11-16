@@ -414,14 +414,15 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   const [asked, setAsked] = useState('')
   // The answer to a question the agent asked, typed right under it rather than in the box above the screen.
   const [replyText, setReplyText] = useState('')
-  const [showReceipt, setShowReceipt] = useState(false)
+  // The receipt and the portions are open under the verdict, so the arithmetic and the weight can be seen and changed without opening anything (the owner's decision, 18 November); both can still be folded away.
+  const [showReceipt, setShowReceipt] = useState(true)
   const [logged, setLogged] = useState(false)
   // Which day "Log it" puts the meal on: today until the person picks another. Reset with each question.
   const [logDay, setLogDay] = useState<string | null>(null)
   const [logNote, setLogNote] = useState('')
   // Changing a portion: which session the answer was made in, what the person changed, and what the engine said back.
   const [turn, setTurn] = useState('')
-  const [editing, setEditing] = useState(false)
+  const [editing, setEditing] = useState(true)
   const [grams, setGrams] = useState<Record<number, number>>({})
   // Ingredients of an assumed recipe the person took out (by line index).
   const [removed, setRemoved] = useState<number[]>([])
@@ -554,8 +555,8 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     const forDay = opts.day ?? day
     abort.current?.abort()
     abort.current = new AbortController()
-    setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(false); setLogged(false); setLogNote(''); setAsked(q); setReplyText('')
-    setEditing(false); setGrams({}); setRemoved([]); setSwap(null); setRecalc(null); setRecalcError('')
+    setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(true); setLogged(false); setLogNote(''); setAsked(q); setReplyText('')
+    setEditing(true); setGrams({}); setRemoved([]); setSwap(null); setRecalc(null); setRecalcError('')
     const sid = fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId()
     setTurn(sid)
     try {
