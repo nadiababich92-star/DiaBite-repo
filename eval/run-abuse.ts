@@ -279,6 +279,12 @@ async function httpSuite() {
       /^usda:|^branded:/.test(bowlId) && twice.status === 200 && /whole bowl/.test(twice.json.error ?? '') && twice.json.totals === undefined
         && once.json.error === undefined && !!once.json.totals && parts.json.error === undefined && !!parts.json.totals,
       JSON.stringify([bowlId, twice.json.error, once.json.error, parts.json.error]).slice(0, 300))
+    // The household measure is the engine's, found in the record's own USDA table: 120 g of a burrito bowl is its listed "1 cup"; 100 g fits no measure.
+    const cupBowl = await post('/tools/compute_meal', { items: [{ foodId: bowlId, grams: 120 }] })
+    const noMeasure = await post('/tools/compute_meal', { items: [{ foodId: bowlId, grams: 100 }] })
+    check('MS1', 'compute_meal says 120 g of a burrito bowl as "1 cup" and gives no measure for 100 g, with the grams and the nutrition unchanged',
+      cupBowl.json.items?.[0]?.measure?.text === '1 cup' && cupBowl.json.items[0].grams === 120 && noMeasure.json.items?.[0]?.measure === undefined && noMeasure.json.items[0].grams === 100,
+      JSON.stringify([cupBowl.json.items?.[0]?.measure, noMeasure.json.items?.[0]?.measure]))
     const bNever = await gd(bindSession('bd-never', KEY))
     const bRetry = await gd(bNever.json.sessionId)
     check('B3', 'a session the engine does not hold answers unknown with the id in its signed form, and that value is accepted when the model sends it back',

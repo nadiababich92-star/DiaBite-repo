@@ -8,7 +8,7 @@ import { nextStep, type TourStep } from '../lib/tour'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type Milestone } from '../lib/nudge'
 import { askAgent, avoidOf, budgetOf, engineId, lastMealCall, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type CarbLimitResult, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
 import { FigurePair, type CarbFigures } from './FigurePair'
-import { dayLabel, eaten, mealForNow, noLoadNote, viewEntry } from '../lib/diary'
+import { dayLabel, eaten, mealForNow, noLoadNote, portionText, viewEntry } from '../lib/diary'
 import { swapNamedIn, type SwapOffer } from '../lib/swap'
 import { MEAL_LABELS } from '../lib/menu'
 import DayPicker from './DayPicker'
@@ -332,14 +332,14 @@ function answerHint(trace?: TraceStep[]): string {
   return 'Type your answer here'
 }
 
-function ReceiptView({ r }: { r: Receipt }) {
+function ReceiptView({ r, units }: { r: Receipt; units?: 'imperial' | 'metric' }) {
   return (
     <div className="receipt">
       {r.assumed && <p className="receipt-note">Counted as a typical <strong>{r.assumed.dish}</strong>. Change anything that isn't yours.</p>}
       <div className="receipt-head"><span>food · portion</span><span>available carbs (g) · GI · GL</span></div>
       {r.lines.map((l) => (
         <div className="receipt-line" key={l.foodId + l.portion}>
-          <span>{l.name} <em>{l.portion}</em>{r.assumed?.assumedFoodIds.includes(l.foodId) && <> <span className="pill none assumed">assumed</span></>}</span>
+          <span>{l.name} <em>{portionText(l.portion, l.measure, units)}</em>{r.assumed?.assumedFoodIds.includes(l.foodId) && <> <span className="pill none assumed">assumed</span></>}</span>
           <span>{l.availableCarbs.toFixed(1)} · {l.gi ?? '—'} · <b>{l.gl === null ? '—' : l.gl.toFixed(1)}</b></span>
         </div>
       ))}
@@ -597,6 +597,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
       snapshot: {
         name: l.name, kcal: l.kcal, carbs: l.carbs, fiber: l.fiber, protein: l.protein, fat: l.fat,
         availableCarbs: l.availableCarbs, gi: l.gi, gl: l.gl ?? 0, loadAvailable: l.gl !== null, servings: l.servings,
+        ...(l.measure ? { measure: l.measure } : {}),
         ...(active.assumed ? { assumed: true } : {}),
       },
     })))
@@ -809,7 +810,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
           {showReceipt && active && (
             <section className="card" ref={receiptRef}>
               <h2>The receipt</h2>
-              <ReceiptView r={active} />
+              <ReceiptView r={active} units={profile.units} />
             </section>
           )}
 

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { sumNutrients } from '../lib/glycemic'
 import { MEAL_LABELS, MEAL_ORDER } from '../lib/menu'
-import { addDays, dateAllowed, dateRange, dayLabel, eaten, markEaten, mealForNow, noLoadNote, nudgeGrams, plannedOnly, recentEntries, viewEntry } from '../lib/diary'
+import { addDays, dateAllowed, dateRange, dayLabel, eaten, markEaten, mealForNow, noLoadNote, nudgeGrams, portionText, plannedOnly, recentEntries, viewEntry } from '../lib/diary'
 import { weeksSummary, type DayPoint } from '../lib/history'
 import { useToday } from '../lib/useToday'
 import type { DiaryEntry, MealType, Targets } from '../types'
@@ -15,11 +15,13 @@ interface Props {
   onAsk?: (target?: { date: string; meal: MealType }) => void
   /** Bread units are an opt-in display setting (You); off, they are not shown at all. */
   showBreadUnits?: boolean
+  /** The person's units: imperial shows a household measure first, with the grams beside it. */
+  units?: 'imperial' | 'metric'
 }
 
 const newId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 
-export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUnits = false }: Props) {
+export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUnits = false, units }: Props) {
   // The day on show follows the calendar until the person moves to another one.
   const today = useToday()
   const [picked, setPicked] = useState<string | null>(null)
@@ -160,7 +162,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
                     <span className="entry-name">{v.name}</span>
                     <span className="muted entry-sub">
                       <span className="pill planned">{date < today ? 'planned, not eaten' : 'planned'}</span>{' '}
-                      {MEAL_LABELS[e.meal]} · {v.portion} · {v.availableCarbs.toFixed(1)} g carbs · GL {v.loadAvailable ? v.gl.toFixed(1) : '—'}
+                      {MEAL_LABELS[e.meal]} · {portionText(v.portion, v.measure, units)} · {v.availableCarbs.toFixed(1)} g carbs · GL {v.loadAvailable ? v.gl.toFixed(1) : '—'}
                     </span>
                   </div>
                   <div className="entry-side">

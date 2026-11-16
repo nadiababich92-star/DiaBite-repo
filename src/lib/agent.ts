@@ -143,6 +143,8 @@ export interface ReceiptLine {
   foodId: string
   name: string
   portion: string
+  /** The engine's household measure for this weight ("1 cup"), when it has one. */
+  measure?: string
   availableCarbs: number
   gi: number | null
   /** Null for a branded product: no glycemic index is published, so no load exists. */
@@ -181,6 +183,8 @@ interface MealResult {
     foodId: string; name: string; grams: number; servings?: number
     kcal: number; carbs: number; fiber: number; protein: number; fat: number
     availableCarbs: number; gi: number | null; gl: number | null
+    /** The grams said as a household measure the engine found in the food's own USDA table; absent when none fits. */
+    measure?: { count: number; unit: string; text: string }
   }[]
   totals: { gl: number; carbs?: number; fiber?: number; availableCarbs?: number }
   /** The budget before this meal; compute_meal returns it when it was given a session. */
@@ -256,7 +260,7 @@ export function buildReceipt(m: MealResult, leftBefore: number | null, sources: 
     portion: it.servings ? `${it.servings} serving${it.servings === 1 ? '' : 's'}` : `${it.grams} g`,
     availableCarbs: it.availableCarbs, gi: it.gi, gl: it.gl,
     kcal: it.kcal, carbs: it.carbs, fiber: it.fiber, protein: it.protein, fat: it.fat,
-    grams: it.grams, servings: it.servings,
+    grams: it.grams, servings: it.servings, ...(it.measure?.text ? { measure: it.measure.text } : {}),
   }))
   return {
     lines, total: m.totals.gl, leftBefore,

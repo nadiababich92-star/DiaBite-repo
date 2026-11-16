@@ -97,6 +97,8 @@ export interface MealItemResult extends Nutrients {
   gl: number | null
   glLevel: Level | null
   loadAvailable: boolean
+  /** The grams said as a household measure the record's own USDA table lists ("1 cup"), when they match one; absent otherwise. */
+  measure?: { count: number; unit: string; text: string }
 }
 
 export interface MealTotals extends Nutrients {

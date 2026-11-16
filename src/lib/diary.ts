@@ -13,7 +13,16 @@ export interface EntryView {
   /** False when no glycemic load exists for this entry (a branded product); `gl` is then 0 and must be shown as unavailable. */
   loadAvailable: boolean
   breadUnits: number
+  /** The household measure kept with the entry ("1 cup"), when the engine found one. */
+  measure?: string
 }
+
+/**
+ * How a portion is said: a person who chose feet and pounds sees the household measure first with the grams beside it
+ * ("1 cup (158 g)"), everyone else, and any portion with no measure, sees the grams. The measure is the engine's, not worked out here.
+ */
+export const portionText = (portion: string, measure: string | undefined, units: 'imperial' | 'metric' | undefined): string =>
+  units === 'imperial' && measure ? `${measure} (${portion})` : portion
 
 export function viewEntry(e: DiaryEntry): EntryView {
   if (e.snapshot) {
@@ -24,6 +33,7 @@ export function viewEntry(e: DiaryEntry): EntryView {
       nutrients: { kcal: s.kcal, carbs: s.carbs, fiber: s.fiber, protein: s.protein, fat: s.fat },
       availableCarbs: s.availableCarbs, gi: s.gi, gl: s.gl, loadAvailable: s.loadAvailable !== false,
       breadUnits: s.availableCarbs / CARBS_PER_BREAD_UNIT,
+      ...(s.measure ? { measure: s.measure } : {}),
     }
   }
   const food = getFood(e.foodId)

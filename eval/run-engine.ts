@@ -33,7 +33,7 @@ import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf,
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
-import { householdPortion } from '../server/foods'
+import { householdMeasure, householdPortion } from '../server/foods'
 import { FigurePair } from '../src/components/FigurePair'
 import { buildReceipt } from '../src/lib/agent'
 import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
@@ -62,7 +62,7 @@ import type { DiaryEntry, Dish } from '../src/types'
 import { RATING_ONLY } from '../src/lib/feedbackCopy'
 import { buildReport, reportMarkdown, type AccountInput, type ReportInput } from '../src/lib/report'
 import { CONSENT_VERSION } from '../src/lib/syncCore'
-import { addDays, dayLabel, gramStep, mealForNow, noLoadNote, nudgeGrams, recentEntries } from '../src/lib/diary'
+import { addDays, dayLabel, gramStep, mealForNow, noLoadNote, nudgeGrams, portionText, recentEntries } from '../src/lib/diary'
 import { calculateTargets, cmToFtIn, DEFAULT_PROFILE, ftInToCm, kgToLb, lbToKg, weightUsed } from '../src/lib/profile'
 import { HeightWeight, UnitsSwitch } from '../src/components/BodyUnits'
 import { lockCount, lockPage } from '../src/lib/pageLock'
@@ -1010,6 +1010,43 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\nunits     ${unitMisses.length === 0 ? 'ok' : 'WRONG'}`)
   unitMisses.forEach((m) => console.log(m))
   if (unitMisses.length) process.exitCode = 1
+}
+
+// ── household measures ────────────────────────────────────────────────────
+// A weight is said as a measure only when it is a whole number or a simple fraction of a measure the record's own USDA table lists,
+// within 3%; never by density. Grams always stay beside it for a person on imperial units (plan: docs/engineering/engineering-doc-us-units.md).
+{
+  const measureMisses: string[] = []
+  const rice = [{ label: '1 cup', grams: 158 }, { label: '1 tablespoon', grams: 9.9 }, { label: '1 cup, sliced', grams: 109 }, { label: '1 item, any size', grams: 200 }]
+  const said = (grams: number, rows = rice) => householdMeasure(rows, grams)?.text ?? null
+  const cases: [string, string | null, string | null][] = [
+    ['a cup', said(158), '1 cup'],
+    ['half a cup', said(79), '1/2 cup'],
+    ['a cup and a half', said(237), '1 1/2 cups'],
+    ['two cups', said(316), '2 cups'],
+    ['within 3% of a cup', said(162), '1 cup'],
+    ['a third of a cup', said(52.7), '1/3 cup'],
+    ['the larger unit wins over sixteen tablespoons', said(158.4), '1 cup'],
+    ['a tablespoon', said(9.9), '1 tbsp'],
+    ['a cup and a quarter (200 g is 1.27 cups, 1.2% off)', said(200), '1 1/4 cups'],
+    ['180 g fits no measure of this food', said(180), null],
+    ['eleven tablespoons is not said that way', said(109), null],
+    ['a qualified label ("1 cup, sliced") is not used', householdMeasure([{ label: '1 cup, sliced', grams: 109 }], 109)?.text ?? null, null],
+    ['no table at all', householdMeasure(undefined, 158)?.text ?? null, null],
+    ['two slices', householdMeasure([{ label: '1 slice', grams: 28 }], 56)?.text ?? null, '2 slices'],
+    ['a drink in fluid ounces', householdMeasure([{ label: '1 fl oz', grams: 30 }], 240)?.text ?? null, '8 fl oz'],
+    ['a medium fruit', householdMeasure([{ label: '1 medium', grams: 182 }], 182)?.text ?? null, '1 medium'],
+  ]
+  for (const [what, got, want] of cases) if (got !== want) measureMisses.push(`    ${what}: ${JSON.stringify(got)}, wanted ${JSON.stringify(want)}`)
+  const said2: [string, string][] = [
+    ['imperial with a measure', portionText('158 g', '1 cup', 'imperial')], ['metric with a measure', portionText('158 g', '1 cup', 'metric')],
+    ['imperial with no measure', portionText('158 g', undefined, 'imperial')], ['no units chosen', portionText('158 g', '1 cup', undefined)],
+  ]
+  const want2 = ['1 cup (158 g)', '158 g', '158 g', '158 g']
+  said2.forEach(([what, got], i) => { if (got !== want2[i]) measureMisses.push(`    ${what}: ${JSON.stringify(got)}, wanted ${JSON.stringify(want2[i])}`) })
+  console.log(`\nmeasure   ${measureMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  measureMisses.forEach((m) => console.log(m))
+  if (measureMisses.length) process.exitCode = 1
 }
 
 // ── pizza crust ───────────────────────────────────────────────────────────

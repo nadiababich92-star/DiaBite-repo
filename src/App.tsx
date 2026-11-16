@@ -243,7 +243,7 @@ export default function App() {
         />
       )}
       {tab === 'diary' && (
-        <DiaryPage targets={targets} diary={diary} onChange={setDiary} onAsk={(target) => { setLogTarget(target ?? null); setTab('ask') }} showBreadUnits={profile.showBreadUnits} />
+        <DiaryPage targets={targets} diary={diary} onChange={setDiary} onAsk={(target) => { setLogTarget(target ?? null); setTab('ask') }} showBreadUnits={profile.showBreadUnits} units={profile.units} />
       )}
       {tab === 'menu' && (
         <MenuPage

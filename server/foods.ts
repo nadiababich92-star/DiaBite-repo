@@ -288,6 +288,45 @@ export function householdPortion(rows: { label: string; grams: number }[] | unde
   return Math.round(cup?.grams ?? usable[0]?.grams ?? 100)
 }
 
+/** A weight in a household measure the record's own table lists ("1 cup", "1/2 cup", "2 slices"), and how it is said. */
+export interface HouseholdMeasure { count: number; unit: string; text: string }
+
+const MEASURE_LABEL = /^(?:1 )?(cup|tablespoon|teaspoon|fl oz|oz|slice|piece|medium|small|large)$/i
+/** The most of a unit that is said in it: eleven tablespoons is two thirds of a cup, and nobody says it that way. */
+const MOST_OF: Record<string, number> = { cup: 8, tablespoon: 4, teaspoon: 3, 'fl oz': 16, oz: 16, slice: 12, piece: 12, medium: 6, small: 6, large: 6 }
+const FRACTIONS: [number, string][] = [[0, ''], [1 / 4, '1/4'], [1 / 3, '1/3'], [1 / 2, '1/2'], [2 / 3, '2/3'], [3 / 4, '3/4']]
+
+/**
+ * The household measure that says this many grams, taken from the record's own USDA table of measures and never worked out by
+ * density: the grams must be a whole number or a simple fraction (1/4, 1/3, 1/2, 2/3, 3/4) of a listed measure within 3%, or
+ * there is no measure and the screen shows grams only. A cup of rice and a cup of flour weigh different amounts, so a measure
+ * the table does not list is never guessed. Among measures that fit, the largest unit wins (a cup, not sixteen tablespoons).
+ * The grams stay the engine's number; this only says them the way a person in the US would.
+ */
+export function householdMeasure(rows: { label: string; grams: number }[] | undefined, grams: number): HouseholdMeasure | null {
+  if (!rows?.length || !(grams > 0)) return null
+  let best: { unitGrams: number; err: number; count: number; unit: string; fraction: string; whole: number } | null = null
+  for (const p of rows) {
+    const m = MEASURE_LABEL.exec(String(p.label).trim())
+    if (!m || !(p.grams > 0)) continue
+    const unit = m[1].toLowerCase()
+    for (let whole = 0; whole <= 12; whole++) {
+      for (const [f, fraction] of FRACTIONS) {
+        const count = whole + f
+        if (count === 0 || count > (MOST_OF[unit] ?? 12)) continue
+        const err = Math.abs(grams - count * p.grams) / grams
+        if (err > 0.03) continue
+        if (!best || p.grams > best.unitGrams || (p.grams === best.unitGrams && err < best.err)) best = { unitGrams: p.grams, err, count, unit, fraction, whole }
+      }
+    }
+  }
+  if (!best) return null
+  const number = best.whole > 0 ? (best.fraction ? `${best.whole} ${best.fraction}` : `${best.whole}`) : best.fraction
+  const short = best.unit === 'tablespoon' ? 'tbsp' : best.unit === 'teaspoon' ? 'tsp' : best.unit
+  const plural = best.count > 1 && ['cup', 'slice', 'piece'].includes(short) ? `${short}s` : short
+  return { count: Math.round(best.count * 1000) / 1000, unit: short, text: `${number} ${plural}` }
+}
+
 /** "Grits, NFS" is how a nutritionist codes it, not how anyone says it. */
 const readableName = (name: string) =>
   name.replace(/,\s*(NFS|NS as to [^,]+)/gi, '').replace(/\s{2,}/g, ' ').replace(/,\s*$/, '').trim()
@@ -422,7 +461,7 @@ function usdaRecords(): FoodRecord[] {
     out.push({
       id: `usda:${r.fdc_id}`, kind: unrated ? 'unrated' : 'ingredient', name, gi, giLevel: giLevel(gi),
       aliases: USDA_ALIASES[`usda:${r.fdc_id}`],
-      category: 'grains', unit: 'g', defaultPortion: householdPortion(r.portions, r.name),
+      category: 'grains', unit: 'g', defaultPortion: householdPortion(r.portions, r.name), portions: r.portions,
       searchText: `${name}. ${r.name}. ${r.category}.${USDA_ALIASES[`usda:${r.fdc_id}`] ? ` ${USDA_ALIASES[`usda:${r.fdc_id}`].join(', ')}.` : ''}`,
       per100: { kcal: r.per100.kcal, protein: r.per100.protein, fat: r.per100.fat, carbs: r.per100.carbs, fiber: r.per100.fiber },
       source: unrated

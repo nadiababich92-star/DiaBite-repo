@@ -100,6 +100,8 @@ export interface DiaryEntry {
     servings?: number
     /** Logged from a dish counted with an assumed recipe (an estimate): the diary says so. */
     assumed?: boolean
+    /** The weight said as a household measure the engine found for it ("1 cup"), kept so the diary can show it without the food table. */
+    measure?: string
   }
 }
 
