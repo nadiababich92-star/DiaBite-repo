@@ -76,7 +76,13 @@ for it in items:
 # The engine reads this file (server/foods.ts) and gives the curated food that USDA record's household measures. Provenance stays beside each entry.
 approved = {k: {'fdc_id': v['fdc_id'], 'usda_name': v['usda_name'], 'measures': v['measures']} for k, v in out.items()
             if v.get('distance', 9) <= 0.10 and v.get('name_overlap', 0) >= 0.6 and v.get('measures')}
-(ROOT / 'data/recipes-db/portion_mapping.json').write_text(json.dumps({'meta': {'source': 'USDA FoodData Central, SR Legacy and Foundation Foods household measures; matched by name and nutrients by scripts/map-portions.py', 'rule': 'distance <= 0.10 and name overlap >= 0.6'}, 'foods': approved}, indent=1, ensure_ascii=False))
+# Matches the owner read one by one and accepted on 18 November 2026, although they were just outside the strict gate: the pair is the right food.
+OWNER_ACCEPTED = ['Extra-virgin olive oil', 'Parmesan, grated', 'Fresh cilantro', 'Chicken broth, low sodium', 'Cheddar cheese', 'Fresh ginger',
+                  'Milk, 2%', 'Tamari (gluten-free soy sauce)', 'Shrimp, peeled']
+for k, v in out.items():
+    if v['name'] in OWNER_ACCEPTED and v.get('measures') and k not in approved:
+        approved[k] = {'fdc_id': v['fdc_id'], 'usda_name': v['usda_name'], 'measures': v['measures'], 'accepted_by': 'owner'}
+(ROOT / 'data/recipes-db/portion_mapping.json').write_text(json.dumps({'meta': {'source': 'USDA FoodData Central, SR Legacy and Foundation Foods household measures; matched by name and nutrients by scripts/map-portions.py', 'rule': 'distance <= 0.10 and name overlap >= 0.6, plus the matches the owner accepted one by one (accepted_by: owner)'}, 'foods': approved}, indent=1, ensure_ascii=False))
 print('approved entries written:', len(approved))
 cnt = collections.Counter(v['confidence'].split(' ')[0] for v in out.values())
 usable = sum(1 for v in out.values() if v['confidence'] in ('high', 'medium'))

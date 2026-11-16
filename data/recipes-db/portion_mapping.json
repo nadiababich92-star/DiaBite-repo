@@ -1,7 +1,7 @@
 {
  "meta": {
   "source": "USDA FoodData Central, SR Legacy and Foundation Foods household measures; matched by name and nutrients by scripts/map-portions.py",
-  "rule": "distance <= 0.10 and name overlap >= 0.6"
+  "rule": "distance <= 0.10 and name overlap >= 0.6, plus the matches the owner accepted one by one (accepted_by: owner)"
  },
  "foods": {
   "ing:chicken_breast": {
@@ -2039,6 +2039,113 @@
      "grams": 30.7
     }
    ]
+  },
+  "ing:shrimp": {
+   "fdc_id": "175179",
+   "usda_name": "Crustaceans, shrimp, raw",
+   "measures": [
+    {
+     "label": "oz",
+     "grams": 85.0
+    }
+   ],
+   "accepted_by": "owner"
+  },
+  "ing:parmesan": {
+   "fdc_id": "173431",
+   "usda_name": "Cheese, parmesan, shredded",
+   "measures": [
+    {
+     "label": "tbsp",
+     "grams": 5.0
+    }
+   ],
+   "accepted_by": "owner"
+  },
+  "ing:cheddar": {
+   "fdc_id": "173440",
+   "usda_name": "Cheese, low-sodium, cheddar or colby",
+   "measures": [
+    {
+     "label": "oz",
+     "grams": 28.4
+    }
+   ],
+   "accepted_by": "owner"
+  },
+  "ing:ginger": {
+   "fdc_id": "169231",
+   "usda_name": "Ginger root, raw",
+   "measures": [
+    {
+     "label": "tsp",
+     "grams": 2.0
+    }
+   ],
+   "accepted_by": "owner"
+  },
+  "ing:olive_oil": {
+   "fdc_id": "167737",
+   "usda_name": "Oil, corn, peanut, and olive",
+   "measures": [
+    {
+     "label": "tablespoon",
+     "grams": 14.0
+    },
+    {
+     "label": "teaspoon",
+     "grams": 4.5
+    }
+   ],
+   "accepted_by": "owner"
+  },
+  "ing:tamari": {
+   "fdc_id": "174278",
+   "usda_name": "Soy sauce made from soy (tamari)",
+   "measures": [
+    {
+     "label": "tbsp",
+     "grams": 18.0
+    },
+    {
+     "label": "tsp",
+     "grams": 6.0
+    }
+   ],
+   "accepted_by": "owner"
+  },
+  "ing:chicken_broth": {
+   "fdc_id": "172888",
+   "usda_name": "Soup, chicken broth, less/reduced sodium, ready to serve",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 240.0
+    }
+   ],
+   "accepted_by": "owner"
+  },
+  "ing:cilantro": {
+   "fdc_id": "169997",
+   "usda_name": "Coriander (cilantro) leaves, raw",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 4.0
+    }
+   ],
+   "accepted_by": "owner"
+  },
+  "seed:milk": {
+   "fdc_id": "172205",
+   "usda_name": "Milk, reduced fat, fluid, 2% milkfat, without added vitamin A and vitamin D",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 246.0
+    }
+   ],
+   "accepted_by": "owner"
   }
  }
 }
