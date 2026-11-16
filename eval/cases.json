@@ -3165,6 +3165,158 @@
       {
         "id": "usda:2710359",
         "grams": 60
+      },
+      {
+        "id": "ing:white_rice",
+        "grams": 158
+      },
+      {
+        "id": "ing:brown_rice",
+        "grams": 195
+      },
+      {
+        "id": "ing:wild_rice",
+        "grams": 164
+      },
+      {
+        "id": "ing:quinoa",
+        "grams": 185
+      },
+      {
+        "id": "ing:barley",
+        "grams": 157
+      },
+      {
+        "id": "ing:bulgur",
+        "grams": 182
+      },
+      {
+        "id": "ing:buckwheat",
+        "grams": 168
+      },
+      {
+        "id": "ing:soba",
+        "grams": 114
+      },
+      {
+        "id": "ing:egg_noodles",
+        "grams": 160
+      },
+      {
+        "id": "ing:rolled_oats",
+        "grams": 40
+      },
+      {
+        "id": "ing:lentils",
+        "grams": 99
+      },
+      {
+        "id": "ing:red_lentils",
+        "grams": 99
+      },
+      {
+        "id": "ing:chickpeas",
+        "grams": 82
+      },
+      {
+        "id": "ing:black_beans",
+        "grams": 86
+      },
+      {
+        "id": "ing:kidney_beans",
+        "grams": 89
+      },
+      {
+        "id": "ing:pinto_beans",
+        "grams": 86
+      },
+      {
+        "id": "ing:white_beans",
+        "grams": 90
+      },
+      {
+        "id": "ing:navy_beans",
+        "grams": 91
+      },
+      {
+        "id": "ing:lima_beans",
+        "grams": 94
+      },
+      {
+        "id": "ing:split_peas",
+        "grams": 98
+      },
+      {
+        "id": "ing:milk",
+        "grams": 246
+      },
+      {
+        "id": "ing:chili_powder",
+        "grams": 3
+      },
+      {
+        "id": "ing:paprika",
+        "grams": 2
+      },
+      {
+        "id": "ing:turmeric",
+        "grams": 3
+      },
+      {
+        "id": "ing:cinnamon",
+        "grams": 3
+      },
+      {
+        "id": "ing:nutmeg",
+        "grams": 2
+      },
+      {
+        "id": "ing:cayenne",
+        "grams": 2
+      },
+      {
+        "id": "ing:red_pepper_flakes",
+        "grams": 2
+      },
+      {
+        "id": "ing:garlic_powder",
+        "grams": 3
+      },
+      {
+        "id": "ing:onion_powder",
+        "grams": 2
+      },
+      {
+        "id": "ing:curry_powder",
+        "grams": 2
+      },
+      {
+        "id": "ing:dried_dill",
+        "grams": 1
+      },
+      {
+        "id": "ing:dried_rosemary",
+        "grams": 1
+      },
+      {
+        "id": "ing:mustard_seed",
+        "grams": 2
+      },
+      {
+        "id": "ing:parsley",
+        "grams": 4
+      },
+      {
+        "id": "ing:rosemary",
+        "grams": 2
+      },
+      {
+        "id": "ing:thyme",
+        "grams": 1
+      },
+      {
+        "id": "ing:ginger",
+        "grams": 2
       }
     ],
     "partial": [

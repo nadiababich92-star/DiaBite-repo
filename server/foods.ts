@@ -77,6 +77,17 @@ const INGREDIENT_PORTION_G: Record<string, number> = {
   dijon: 5, yellow_mustard: 5, soy_sauce: 15, tamari: 15, fish_sauce: 15, hot_sauce: 5, salsa: 30,
   rice_vinegar: 15, apple_cider_vinegar: 15, red_wine_vinegar: 15, white_wine_vinegar: 15, balsamic_vinegar: 15,
   cocoa_powder: 5, dark_chocolate: 28, salt: 1,
+  // Added 18 November (worklist 65, the owner's choice: "only the base"). What a person says for these is a cup, half a cup,
+  // a teaspoon: the USDA household measure of the record itself, so 100 g was neither a portion nor a number anyone could check.
+  // Cooked grains and rice, a cup; cooked beans and lentils, half a cup (the label serving); milk, a cup; dried spices, a
+  // teaspoon; fresh herbs, a tablespoon (rosemary and thyme by the teaspoon they are sold in). Meat, fish, vegetables and fruit stay 100 g.
+  white_rice: 158, brown_rice: 195, wild_rice: 164, quinoa: 185, barley: 157, bulgur: 182, buckwheat: 168, soba: 114, egg_noodles: 160,
+  rolled_oats: 40,
+  lentils: 99, red_lentils: 99, chickpeas: 82, black_beans: 86, kidney_beans: 89, pinto_beans: 86, white_beans: 90, navy_beans: 91, lima_beans: 94, split_peas: 98,
+  milk: 246,
+  chili_powder: 3, paprika: 2, turmeric: 3, cinnamon: 3, nutmeg: 2, cayenne: 2, red_pepper_flakes: 2, garlic_powder: 3, onion_powder: 2, curry_powder: 2,
+  dried_dill: 1, dried_rosemary: 1, mustard_seed: 2,
+  parsley: 4, rosemary: 2, thyme: 1, ginger: 2,
 }
 
 const ALIASES: Record<string, string[]> = {
