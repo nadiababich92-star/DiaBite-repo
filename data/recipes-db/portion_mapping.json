@@ -2146,6 +2146,43 @@
     }
    ],
    "accepted_by": "owner"
+  },
+  "ing:egg": {
+   "fdc_id": "171287",
+   "usda_name": "Egg, whole, raw, fresh",
+   "measures": [
+    {
+     "label": "large",
+     "grams": 50.0
+    }
+   ],
+   "accepted_by": "owner, 18 Nov: egg, bread, oats (go-ahead for worklist 66)"
+  },
+  "ing:white_bread": {
+   "fdc_id": "174924",
+   "usda_name": "Bread, white, commercially prepared (includes soft bread crumbs)",
+   "measures": [
+    {
+     "label": "slice",
+     "grams": 29.0
+    },
+    {
+     "label": "oz",
+     "grams": 28.4
+    }
+   ],
+   "accepted_by": "owner, 18 Nov: egg, bread, oats (go-ahead for worklist 66)"
+  },
+  "seed:oats": {
+   "fdc_id": "173905",
+   "usda_name": "Cereals, oats, regular and quick, unenriched, cooked with water",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 234.0
+    }
+   ],
+   "accepted_by": "owner, 18 Nov: egg, bread, oats (go-ahead for worklist 66)"
   }
  }
 }

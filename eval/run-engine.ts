@@ -1237,6 +1237,9 @@ hangMisses.forEach((m) => console.log(m))
   eq('and 180 g is not called a cup', rice.measure, undefined)
   const chicken = computeMeal([{ foodId: 'ing:chicken_breast', grams: 113 }]).items[0]
   eq('113 g of chicken is not "1 oz"', chicken.measure, undefined)
+  eq('an egg is a large', computeMeal([{ foodId: 'ing:egg', grams: 100 }]).items[0].measure?.text, '2 large')
+  eq('a slice of white bread is a slice', computeMeal([{ foodId: 'ing:white_bread', grams: 29 }]).items[0].measure?.text, '1 slice')
+  eq('cooked oats step by the cup', computeMeal([{ foodId: 'seed:oats', grams: 200 }]).items[0].stepUnit, { unit: 'cup', unitGrams: 234 })
   console.log(`\nstepper   ${stepMisses.length === 0 ? 'ok' : 'WRONG'}`)
   stepMisses.forEach((m) => console.log(m))
   if (stepMisses.length) process.exitCode = 1
