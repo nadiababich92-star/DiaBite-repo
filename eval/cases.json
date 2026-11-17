@@ -1993,6 +1993,138 @@
         "tags": [
           "everyday"
         ]
+      },
+      {
+        "phrase": "chipotle chicken",
+        "expect": [
+          "rest:chipotle-chicken"
+        ],
+        "tags": [
+          "restaurant"
+        ]
+      },
+      {
+        "phrase": "chipotle white rice",
+        "expect": [
+          "rest:chipotle-cilantro-lime-white-rice"
+        ],
+        "tags": [
+          "restaurant"
+        ]
+      },
+      {
+        "phrase": "chipotle black beans",
+        "expect": [
+          "rest:chipotle-black-beans"
+        ],
+        "tags": [
+          "restaurant"
+        ]
+      },
+      {
+        "phrase": "chicken at chipotle",
+        "expect": [
+          "rest:chipotle-chicken"
+        ],
+        "tags": [
+          "restaurant"
+        ]
+      },
+      {
+        "phrase": "guacamole",
+        "expect": [],
+        "notBranded": true,
+        "tags": [
+          "restaurant-not"
+        ]
+      },
+      {
+        "phrase": "white rice",
+        "expect": [],
+        "notBranded": true,
+        "tags": [
+          "restaurant-not"
+        ]
+      },
+      {
+        "phrase": "black beans",
+        "expect": [],
+        "notBranded": true,
+        "tags": [
+          "restaurant-not"
+        ]
+      },
+      {
+        "phrase": "pinto beans",
+        "expect": [],
+        "notBranded": true,
+        "tags": [
+          "restaurant-not"
+        ]
+      },
+      {
+        "phrase": "sour cream",
+        "expect": [],
+        "notBranded": true,
+        "tags": [
+          "restaurant-not"
+        ]
+      },
+      {
+        "phrase": "salsa",
+        "expect": [],
+        "notBranded": true,
+        "tags": [
+          "restaurant-not"
+        ]
+      },
+      {
+        "phrase": "brown rice",
+        "expect": [],
+        "notBranded": true,
+        "tags": [
+          "restaurant-not"
+        ]
+      },
+      {
+        "phrase": "lettuce",
+        "expect": [],
+        "notBranded": true,
+        "tags": [
+          "restaurant-not"
+        ]
+      },
+      {
+        "phrase": "chicken",
+        "expect": [],
+        "notBranded": true,
+        "tags": [
+          "restaurant-not"
+        ]
+      },
+      {
+        "phrase": "fajita vegetables",
+        "expect": [],
+        "notBranded": true,
+        "tags": [
+          "restaurant-not"
+        ]
+      },
+      {
+        "phrase": "tomato salsa",
+        "expect": [],
+        "notBranded": true,
+        "tags": [
+          "restaurant-not"
+        ]
+      },
+      {
+        "phrase": "queso",
+        "expect": [],
+        "notBranded": true,
+        "tags": [
+          "restaurant-not"
+        ]
       }
     ],
     "clarify": [
@@ -5216,6 +5348,57 @@
       "tags": [
         "dish",
         "pizza"
+      ]
+    },
+    {
+      "id": "RS1",
+      "dimension": "helpful",
+      "query": "Chipotle chicken, Chipotle white rice, Chipotle black beans and Chipotle guacamole",
+      "ground_truth": "Carbohydrate, fibre and calories from the chain's published table, no glycemic load, never 'fits', the figure called the chain's own.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "engineUnscored": true,
+        "noFitsClaim": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "restaurant"
+      ]
+    },
+    {
+      "id": "RS2",
+      "dimension": "helpful",
+      "query": "A burrito bowl from Chipotle with chicken, white rice, black beans and guacamole",
+      "ground_truth": "Whatever the engine resolves, the numbers are verified; the bowl is asked or costed from named foods, never from an invented total.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods"
+        ],
+        "verified": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "restaurant"
       ]
     }
   ]

@@ -20,11 +20,12 @@
  * Exits non-zero when resolve falls under its target, so this can gate a
  * build. The target is the PRD's: parsing at or above 90%.
  */
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { carbsWithoutLoad, loadFoods } from '../server/foods'
-import { openStore } from '../server/embeddings'
+import { embed, loadOrBuildIndex, openStore } from '../server/embeddings'
+import { tmpdir } from 'node:os'
 import { resolvePhrases } from '../server/resolve'
 import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
@@ -114,7 +115,7 @@ cases.engine.resolve.forEach((c, i) => {
   // and saying so is the correct behaviour.
   const top = r.candidates[0]?.id ?? ''
   const ok = c.notBranded
-    ? !!top && !top.startsWith('branded:')
+    ? !!top && !top.startsWith('branded:') && !top.startsWith('rest:')
     : c.expect.includes('unknown')
       ? r.unknown === true
       : c.expect.includes(top)
@@ -1309,6 +1310,44 @@ hangMisses.forEach((m) => console.log(m))
   if (glMisses.length) process.exitCode = 1
 }
 
+// ── the vector index grows without moving what is already in it ───────────────
+// A record appended to the catalogue keeps every vector already in the file. Rebuilding them all moved two foods that tie
+// exactly ("Potato, boiled" and "chick-fil-a sandwich") past each other, so adding a chain's menu to the catalogue
+// changed how unrelated foods were found. Anything but an append (a record removed, moved) still rebuilds.
+{
+  const idxMisses: string[] = []
+  const dir = mkdtempSync(join(tmpdir(), 'diabite-index-'))
+  const files = { bin: join(dir, 'e.bin'), ids: join(dir, 'e.ids.json') }
+  try {
+    const base = loadFoods().records.slice(0, 40)
+    const said: string[] = []
+    const quiet = (m: string) => { said.push(m) }
+    await loadOrBuildIndex(base, quiet, files)
+    const before = readFileSync(files.bin)
+    const extra = { ...base[0], id: 'rest:index-probe', searchText: 'Probechain test burrito. restaurant.' }
+    await loadOrBuildIndex([...base, extra], quiet, files)
+    const after = readFileSync(files.bin)
+    if (!said.some((m) => /extended by 1 \(40 kept\)/.test(m))) idxMisses.push(`    appending one record did not extend the index: ${said.at(-1)}`)
+    if (after.length !== before.length + 384 * 4) idxMisses.push(`    the file grew by ${after.length - before.length} bytes, not one vector`)
+    else if (!after.subarray(0, before.length).equals(before)) idxMisses.push('    appending a record moved the vectors already in the file')
+    if (JSON.parse(readFileSync(files.ids, 'utf8')).at(-1) !== 'rest:index-probe') idxMisses.push('    the id list does not end with the appended record')
+    // the appended vector is the record's own: asking for its text finds it first
+    const store = await loadOrBuildIndex([...base, extra], quiet, files)
+    const [hit] = await store.search((await embed(['Probechain test burrito. restaurant.']))[0], 1)
+    if (hit?.id !== 'rest:index-probe') idxMisses.push(`    the appended vector is not the record's own (top hit ${hit?.id})`)
+    // a record taken out is not an append: everything is rebuilt, and the file matches the new list
+    await loadOrBuildIndex(base.slice(1), quiet, files)
+    const rebuilt = readFileSync(files.bin)
+    if (rebuilt.length !== (base.length - 1) * 384 * 4 || JSON.parse(readFileSync(files.ids, 'utf8')).length !== base.length - 1) idxMisses.push('    removing a record left the old vectors in place')
+    // a changed list in the middle must not be treated as an append
+    await loadOrBuildIndex([extra, ...base], quiet, files)
+    if (JSON.parse(readFileSync(files.ids, 'utf8'))[0] !== 'rest:index-probe') idxMisses.push('    a record put first was treated as an append')
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+  console.log(`\nindex     ${idxMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  idxMisses.forEach((m) => console.log(m))
+  if (idxMisses.length) process.exitCode = 1
+}
+
 // ── restaurant items ──────────────────────────────────────────────────────
 // A chain's menu item is the third kind that holds carbohydrate without a glycemic index. It is costed for carbohydrate
 // from the chain's own published table, never for a load, never a swap, and a meal that holds one is partial and never
@@ -1368,6 +1407,21 @@ hangMisses.forEach((m) => console.log(m))
     if (r.read > new Date().toISOString().slice(0, 10)) restMisses.push(`    ${r.id} was read on a day that has not come`)
   }
   if (records.filter((r) => r.kind === 'restaurant').length !== shipped.length) restMisses.push('    the catalogue holds a different number of restaurant records than the file')
+  // Figures typed by hand from Chipotle's own table (US-Nutrition-Facts-Paper-Menu-3-2025.pdf, main table), not read from the file:
+  // the engine at the serving the table names must give back what the table says, so a misread column or a wrong weight cannot pass.
+  const table: [string, number, number, number, number][] = [   // id, grams, kcal, carbohydrate, fibre
+    ['rest:chipotle-cilantro-lime-white-rice', 113, 210, 40, 1], ['rest:chipotle-cilantro-lime-brown-rice', 113, 210, 36, 2],
+    ['rest:chipotle-black-beans', 113, 130, 22, 7], ['rest:chipotle-pinto-beans', 113, 130, 21, 8], ['rest:chipotle-chicken', 113, 180, 0, 0],
+    ['rest:chipotle-sofritas', 113, 150, 9, 3], ['rest:chipotle-guacamole-topping-side', 113, 230, 8, 6], ['rest:chipotle-chips-regular', 113, 540, 73, 7],
+    ['rest:chipotle-sour-cream', 57, 110, 2, 0], ['rest:chipotle-fresh-tomato-salsa', 113, 25, 4, 1], ['rest:chipotle-chipotle-honey-vinaigrette', 59, 220, 18, 1],
+  ]
+  for (const [id, grams, kcal, carbs, fiber] of table) {
+    if (!records.some((r) => r.id === id)) { restMisses.push(`    ${id} is not in the catalogue`); continue }
+    const it = computeItem({ foodId: id, grams })
+    if (Math.abs(it.kcal - kcal) > 0.6 || Math.abs(it.carbs - carbs) > 0.6 || Math.abs(it.fiber - fiber) > 0.6) restMisses.push(`    ${id} at ${grams} g gives ${it.kcal} kcal, ${it.carbs} g carbohydrate, ${it.fiber} g fibre; the chain's table says ${kcal}, ${carbs}, ${fiber}`)
+  }
+  // The tortillas are in the table with no weight, so they are not here: a burrito with a tortilla is a partial meal, not one with the tortilla guessed.
+  if (records.some((r) => /^rest:chipotle-.*tortilla/.test(r.id))) restMisses.push('    a tortilla was given a weight the chain does not publish')
   console.log(`\nrestaurant ${restMisses.length === 0 ? 'ok' : 'WRONG'}  (${shipped.length} items in the file)`)
   restMisses.forEach((m) => console.log(m))
   if (restMisses.length) process.exitCode = 1

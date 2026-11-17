@@ -104,27 +104,35 @@ export async function openStore(records: FoodRecord[], log = console.log): Promi
   return pg
 }
 
-export async function loadOrBuildIndex(records: FoodRecord[], log = console.log): Promise<VectorStore> {
+export async function loadOrBuildIndex(records: FoodRecord[], log = console.log, files: { bin: string; ids: string } = { bin: BIN, ids: IDS }): Promise<VectorStore> {
   const wantIds = records.map((r) => r.id)
-  if (existsSync(BIN) && existsSync(IDS)) {
-    const ids = JSON.parse(readFileSync(IDS, 'utf8')) as string[]
+  let reuse = 0   // how many leading records already have their vector in the file
+  let cached: Float32Array | null = null
+  if (existsSync(files.bin) && existsSync(files.ids)) {
+    const ids = JSON.parse(readFileSync(files.ids, 'utf8')) as string[]
+    const buf = readFileSync(files.bin)
+    const vectors = new Float32Array(buf.buffer, buf.byteOffset, buf.byteLength / 4)
     if (ids.length === wantIds.length && ids.every((id, i) => id === wantIds[i])) {
-      const buf = readFileSync(BIN)
-      const vectors = new Float32Array(buf.buffer, buf.byteOffset, buf.byteLength / 4)
       log(`vector index loaded: ${ids.length} vectors`)
       return new MemoryVectorStore(ids, vectors)
     }
+    // Records added at the END of the catalogue (a new kind of food is appended) keep every vector already in the file:
+    // rebuilding all of them moves two near-tied foods past each other (it did, on 17 November, for "Potato, boiled" and
+    // "chick-fil-a sandwich"), so adding a food must not change how the others are found. Any other change (a record
+    // removed, moved or renamed in the list) still rebuilds everything.
+    if (ids.length < wantIds.length && vectors.length === ids.length * DIM && ids.every((id, i) => id === wantIds[i])) { reuse = ids.length; cached = vectors }
   }
   const t0 = Date.now()
   const vectors = new Float32Array(records.length * DIM)
+  if (cached) vectors.set(cached)
   const BATCH = 32
-  for (let i = 0; i < records.length; i += BATCH) {
-    const chunk = records.slice(i, i + BATCH)
+  for (let i = reuse; i < records.length; i += BATCH) {
+    const chunk = records.slice(i, Math.min(i + BATCH, records.length))
     const vs = await embed(chunk.map((r) => r.searchText))
     vs.forEach((v, j) => vectors.set(v, (i + j) * DIM))
   }
-  writeFileSync(BIN, Buffer.from(vectors.buffer))
-  writeFileSync(IDS, JSON.stringify(wantIds))
-  log(`vector index built: ${records.length} vectors in ${Date.now() - t0} ms`)
+  writeFileSync(files.bin, Buffer.from(vectors.buffer))
+  writeFileSync(files.ids, JSON.stringify(wantIds))
+  log(`vector index ${reuse ? `extended by ${records.length - reuse} (${reuse} kept)` : 'built'}: ${records.length} vectors in ${Date.now() - t0} ms`)
   return new MemoryVectorStore(wantIds, vectors)
 }

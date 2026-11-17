@@ -1,1 +1,496 @@
-[]
+[
+ {
+  "id": "rest:chipotle-cilantro-lime-brown-rice",
+  "name": "Cilantro-Lime Brown Rice",
+  "chain": "Chipotle",
+  "category": "grains",
+  "per100": {
+   "kcal": 185.841,
+   "protein": 3.54,
+   "fat": 5.31,
+   "carbs": 31.858,
+   "fiber": 1.77
+  },
+  "serving": {
+   "grams": 113,
+   "label": "4 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-cilantro-lime-white-rice",
+  "name": "Cilantro-Lime White Rice",
+  "chain": "Chipotle",
+  "category": "grains",
+  "per100": {
+   "kcal": 185.841,
+   "protein": 3.54,
+   "fat": 3.54,
+   "carbs": 35.398,
+   "fiber": 0.885
+  },
+  "serving": {
+   "grams": 113,
+   "label": "4 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-black-beans",
+  "name": "Black Beans",
+  "chain": "Chipotle",
+  "category": "legumes",
+  "per100": {
+   "kcal": 115.044,
+   "protein": 7.08,
+   "fat": 1.327,
+   "carbs": 19.469,
+   "fiber": 6.195
+  },
+  "serving": {
+   "grams": 113,
+   "label": "4 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-pinto-beans",
+  "name": "Pinto Beans",
+  "chain": "Chipotle",
+  "category": "legumes",
+  "per100": {
+   "kcal": 115.044,
+   "protein": 7.08,
+   "fat": 1.327,
+   "carbs": 18.584,
+   "fiber": 7.08
+  },
+  "serving": {
+   "grams": 113,
+   "label": "4 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-fajita-vegetables",
+  "name": "Fajita Vegetables",
+  "chain": "Chipotle",
+  "category": "vegetables",
+  "per100": {
+   "kcal": 35.088,
+   "protein": 1.754,
+   "fat": 0.0,
+   "carbs": 8.772,
+   "fiber": 1.754
+  },
+  "serving": {
+   "grams": 57,
+   "label": "2 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-barbacoa",
+  "name": "Barbacoa",
+  "chain": "Chipotle",
+  "category": "protein",
+  "per100": {
+   "kcal": 150.442,
+   "protein": 21.239,
+   "fat": 6.195,
+   "carbs": 1.77,
+   "fiber": 0.885
+  },
+  "serving": {
+   "grams": 113,
+   "label": "4 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-chicken",
+  "name": "Chicken",
+  "chain": "Chipotle",
+  "category": "protein",
+  "per100": {
+   "kcal": 159.292,
+   "protein": 28.319,
+   "fat": 6.195,
+   "carbs": 0.0,
+   "fiber": 0.0
+  },
+  "serving": {
+   "grams": 113,
+   "label": "4 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-carnitas",
+  "name": "Carnitas",
+  "chain": "Chipotle",
+  "category": "protein",
+  "per100": {
+   "kcal": 185.841,
+   "protein": 20.354,
+   "fat": 10.619,
+   "carbs": 0.0,
+   "fiber": 0.0
+  },
+  "serving": {
+   "grams": 113,
+   "label": "4 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-steak",
+  "name": "Steak",
+  "chain": "Chipotle",
+  "category": "protein",
+  "per100": {
+   "kcal": 132.743,
+   "protein": 18.584,
+   "fat": 5.31,
+   "carbs": 0.885,
+   "fiber": 0.885
+  },
+  "serving": {
+   "grams": 113,
+   "label": "4 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-sofritas",
+  "name": "Sofritas",
+  "chain": "Chipotle",
+  "category": "protein",
+  "per100": {
+   "kcal": 132.743,
+   "protein": 7.08,
+   "fat": 8.85,
+   "carbs": 7.965,
+   "fiber": 2.655
+  },
+  "serving": {
+   "grams": 113,
+   "label": "4 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-fresh-tomato-salsa",
+  "name": "Fresh Tomato Salsa",
+  "chain": "Chipotle",
+  "category": "vegetables",
+  "per100": {
+   "kcal": 22.124,
+   "protein": 0.0,
+   "fat": 0.0,
+   "carbs": 3.54,
+   "fiber": 0.885
+  },
+  "serving": {
+   "grams": 113,
+   "label": "4 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-roasted-chili-corn-salsa",
+  "name": "Roasted Chili-Corn Salsa",
+  "chain": "Chipotle",
+  "category": "vegetables",
+  "per100": {
+   "kcal": 70.796,
+   "protein": 2.655,
+   "fat": 1.327,
+   "carbs": 14.159,
+   "fiber": 2.655
+  },
+  "serving": {
+   "grams": 113,
+   "label": "4 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-tomatillo-green-chili-salsa",
+  "name": "Tomatillo-Green Chili Salsa",
+  "chain": "Chipotle",
+  "category": "vegetables",
+  "per100": {
+   "kcal": 25.424,
+   "protein": 0.0,
+   "fat": 0.0,
+   "carbs": 6.78,
+   "fiber": 0.0
+  },
+  "serving": {
+   "grams": 59,
+   "label": "2 fl oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-tomatillo-red-chili-salsa",
+  "name": "Tomatillo-Red Chili Salsa",
+  "chain": "Chipotle",
+  "category": "vegetables",
+  "per100": {
+   "kcal": 50.847,
+   "protein": 0.0,
+   "fat": 0.0,
+   "carbs": 6.78,
+   "fiber": 1.695
+  },
+  "serving": {
+   "grams": 59,
+   "label": "2 fl oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-cheese",
+  "name": "Cheese",
+  "chain": "Chipotle",
+  "category": "dairy",
+  "per100": {
+   "kcal": 392.857,
+   "protein": 21.429,
+   "fat": 28.571,
+   "carbs": 3.571,
+   "fiber": 0.0
+  },
+  "serving": {
+   "grams": 28,
+   "label": "1 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-sour-cream",
+  "name": "Sour Cream",
+  "chain": "Chipotle",
+  "category": "dairy",
+  "per100": {
+   "kcal": 192.982,
+   "protein": 3.509,
+   "fat": 15.789,
+   "carbs": 3.509,
+   "fiber": 0.0
+  },
+  "serving": {
+   "grams": 57,
+   "label": "2 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-guacamole-topping-side",
+  "name": "Guacamole (topping/side)",
+  "chain": "Chipotle",
+  "category": "fats",
+  "per100": {
+   "kcal": 203.54,
+   "protein": 1.77,
+   "fat": 19.469,
+   "carbs": 7.08,
+   "fiber": 5.31
+  },
+  "serving": {
+   "grams": 113,
+   "label": "4 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-guacamole-large",
+  "name": "Guacamole (large)",
+  "chain": "Chipotle",
+  "category": "fats",
+  "per100": {
+   "kcal": 202.643,
+   "protein": 1.762,
+   "fat": 19.383,
+   "carbs": 7.048,
+   "fiber": 5.286
+  },
+  "serving": {
+   "grams": 227,
+   "label": "8 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-queso-blanco-entre",
+  "name": "Queso Blanco (entreé)",
+  "chain": "Chipotle",
+  "category": "dairy",
+  "per100": {
+   "kcal": 210.526,
+   "protein": 8.772,
+   "fat": 15.789,
+   "carbs": 7.018,
+   "fiber": 0.0
+  },
+  "serving": {
+   "grams": 57,
+   "label": "2 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-queso-blanco-side",
+  "name": "Queso Blanco (side)",
+  "chain": "Chipotle",
+  "category": "dairy",
+  "per100": {
+   "kcal": 212.389,
+   "protein": 8.85,
+   "fat": 15.929,
+   "carbs": 6.195,
+   "fiber": 0.0
+  },
+  "serving": {
+   "grams": 113,
+   "label": "4 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-queso-blanco-large",
+  "name": "Queso Blanco (large)",
+  "chain": "Chipotle",
+  "category": "dairy",
+  "per100": {
+   "kcal": 211.454,
+   "protein": 8.811,
+   "fat": 16.3,
+   "carbs": 6.167,
+   "fiber": 0.0
+  },
+  "serving": {
+   "grams": 227,
+   "label": "8 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-supergreens-salad-mix",
+  "name": "Supergreens Salad Mix",
+  "chain": "Chipotle",
+  "category": "vegetables",
+  "per100": {
+   "kcal": 17.647,
+   "protein": 1.176,
+   "fat": 0.0,
+   "carbs": 3.529,
+   "fiber": 2.353
+  },
+  "serving": {
+   "grams": 85,
+   "label": "3 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-romaine-lettuce-tacos",
+  "name": "Romaine Lettuce (tacos)",
+  "chain": "Chipotle",
+  "category": "vegetables",
+  "per100": {
+   "kcal": 17.857,
+   "protein": 0.0,
+   "fat": 0.0,
+   "carbs": 3.571,
+   "fiber": 3.571
+  },
+  "serving": {
+   "grams": 28,
+   "label": "1 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-chips-regular",
+  "name": "Chips (regular)",
+  "chain": "Chipotle",
+  "category": "grains",
+  "per100": {
+   "kcal": 477.876,
+   "protein": 6.195,
+   "fat": 22.124,
+   "carbs": 64.602,
+   "fiber": 6.195
+  },
+  "serving": {
+   "grams": 113,
+   "label": "4 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-chips-large",
+  "name": "Chips (large)",
+  "chain": "Chipotle",
+  "category": "grains",
+  "per100": {
+   "kcal": 476.471,
+   "protein": 6.471,
+   "fat": 22.353,
+   "carbs": 64.706,
+   "fiber": 6.471
+  },
+  "serving": {
+   "grams": 170,
+   "label": "6 oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ },
+ {
+  "id": "rest:chipotle-chipotle-honey-vinaigrette",
+  "name": "Chipotle-Honey Vinaigrette",
+  "chain": "Chipotle",
+  "category": "fats",
+  "per100": {
+   "kcal": 372.881,
+   "protein": 1.695,
+   "fat": 27.119,
+   "carbs": 30.508,
+   "fiber": 1.695
+  },
+  "serving": {
+   "grams": 59,
+   "label": "2 fl oz"
+  },
+  "url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+  "read": "2026-11-17"
+ }
+]
