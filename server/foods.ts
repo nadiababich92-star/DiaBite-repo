@@ -60,6 +60,8 @@ interface RecipeRow {
  * set as the sessions show which ones are asked about.
  */
 const INGREDIENT_PORTION_G: Record<string, number> = {
+  // White bread was 100 g, three and a half slices: "a slice of bread" was costed as 3 1/2 (a glycemic load of 33.8 for one). A slice is 29 g in the record's own table.
+  white_bread: 29,
   rye_bread: 35,
   whole_grain_bread: 35,
   ezekiel_bread: 34,

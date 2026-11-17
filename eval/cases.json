@@ -3131,6 +3131,10 @@
     ],
     "portion": [
       {
+        "id": "ing:white_bread",
+        "grams": 29
+      },
+      {
         "id": "ing:rye_bread",
         "grams": 35
       },
