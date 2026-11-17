@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { GI_GL_WORDS } from '../lib/glWords'
+import { GI_GL_HOW, GI_GL_VIDEO, GI_GL_WORDS } from '../lib/glWords'
 import { lockPage } from '../lib/pageLock'
 
 /**
@@ -21,8 +21,14 @@ export default function GlInfo({ budget, onClose }: { budget: number; onClose: (
     close.current?.focus()
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { onClose(); return }
-      // One control in the dialog: Tab stays on it rather than leaving the dialog.
-      if (e.key === 'Tab') { e.preventDefault(); close.current?.focus() }
+      // Tab stays inside the dialog: the video's controls (when there is a video) and the button, round and round.
+      if (e.key === 'Tab') {
+        const stops = [...(dialog.current?.querySelectorAll<HTMLElement>('video[controls], button') ?? [])]
+        if (stops.length === 0) return
+        const at = stops.indexOf(document.activeElement as HTMLElement)
+        e.preventDefault()
+        stops[(at + (e.shiftKey ? -1 : 1) + stops.length) % stops.length].focus()
+      }
     }
     document.addEventListener('keydown', onKey)
     return () => {
@@ -38,6 +44,13 @@ export default function GlInfo({ budget, onClose }: { budget: number; onClose: (
       <div className="modal card" role="dialog" aria-modal="true" aria-labelledby="gl-title" ref={dialog}>
         <h2 id="gl-title">What are GI and GL?</h2>
         {GI_GL_WORDS.map((w) => <p key={w}>{w}</p>)}
+        <p>{GI_GL_HOW}</p>
+        {GI_GL_VIDEO && (
+          <video className="gl-video" controls preload="none" playsInline poster={GI_GL_VIDEO.poster} aria-label="A one-minute film: what GI and GL are, on a real answer">
+            <source src={GI_GL_VIDEO.src} type="video/mp4" />
+            <track kind="captions" src={GI_GL_VIDEO.captions} srcLang="en" label="English" default />
+          </video>
+        )}
         <p>
           Your day has a glycemic-load budget of {budget}. Each meal spends some of it, and the load figure you see is what is left.
         </p>

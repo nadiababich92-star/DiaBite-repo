@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import GlHelp from './GlHelp'
 import { CATEGORY_LABELS, FOODS } from '../data/foods'
 import { excludedLabel, ingredientOptions, isIngredientId, nameMatches } from '../lib/excludable'
 import { loadMenuRecipes } from '../lib/recipes'
@@ -198,7 +199,7 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
           <div className="stat">
             <div className="label">Glycemic load</div>
             <div className="value">{targets.glBudget}</div>
-            <div className="sub">daily ceiling</div>
+            <div className="sub">daily ceiling <GlHelp label="What is this?" /></div>
           </div>
         </div>
         <p className="muted">

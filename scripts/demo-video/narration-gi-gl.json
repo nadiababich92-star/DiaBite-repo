@@ -1,0 +1,14 @@
+{
+  "voice": "en-US-Emma:DragonHDLatestNeural",
+  "rate": "+18%",
+  "segments": {
+    "g0": "Two numbers on your DiaBite receipt can look alike, but they answer different questions.",
+    "g1": "The glycemic index, or GI, tells you how fast a food raises blood sugar.",
+    "g2": "But GI says nothing about how much you eat. That is what glycemic load, or GL, adds: the index and the portion together. It tells you how much a meal raises it.",
+    "g3": "Here is one slice of rye bread, thirty-five grams. Fourteen point two grams of available carbohydrate. GI fifty. Glycemic load seven point one.",
+    "g4": "Now two slices, seventy grams. The index is still fifty. But the load doubles, to fourteen point two.",
+    "g5": "Same bread, same GI, twice the effect. That is why the portion matters.",
+    "g6": "On the receipt, read each food's portion and available carbohydrate first, then its GI, then its load. The load is the figure that adds up across a meal.",
+    "g7": "DiaBite is a reference tool. It does not replace your care team."
+  }
+}

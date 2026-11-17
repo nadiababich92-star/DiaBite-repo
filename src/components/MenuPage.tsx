@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import GlHelp from './GlHelp'
 import { CATEGORY_LABELS, getFood } from '../data/foods'
 import { MEAL_LABELS, recipeCount, regenerateSlot, replayWeek, amountText, shoppingFromEntries, shoppingList, shoppingText, menuHidden } from '../lib/menu'
 import { addDays, dayLabel, plannedOnly } from '../lib/diary'
@@ -173,7 +174,7 @@ export default function MenuPage({ profile, targets, diary, onAsk, onAdd, onRemo
             <h2 style={{ margin: 0 }}>Weekly menu</h2>
             <p className="muted" style={{ margin: '4px 0 0' }}>
               Averaging {avgKcal.toFixed(0)} kcal and GL {avgGL.toFixed(0)} a day, against a target of{' '}
-              {targets.kcal} kcal and GL {targets.glBudget}.
+              {targets.kcal} kcal and GL {targets.glBudget}. <GlHelp />
             </p>
             {(profile.mealCarbsG > 0 || profile.snackCarbsG > 0) && (
               <p className="muted" style={{ margin: '4px 0 0' }}>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import GlHelp from './GlHelp'
 import { boldSegments, isLabelled, parseMeal } from '../lib/answer'
 import { sessionId } from '../lib/session'
 import { accessToken } from '../lib/auth'
@@ -356,7 +357,7 @@ function ReceiptView({ r, units }: { r: Receipt; units?: 'imperial' | 'metric' }
         </>
       )}
       <div className="receipt-foot">
-        GL (glycemic load) = GI (glycemic index) × available carbs ÷ 100. Available carbs = total − fibre, in grams. GL has no unit.
+        GL (glycemic load) = GI (glycemic index) × available carbs ÷ 100. Available carbs = total − fibre, in grams. GL has no unit. <GlHelp label="What are GI and GL, and how do I use them?" />
         {r.assumed && ' This dish is not in our database, so it is an estimate from typical ingredients, not a record of your meal.'}
         {r.unscored && ' Where our data has no glycemic index for a food, none is estimated: its carbohydrate, fibre and calories are counted and its load is not.'}
         {r.sources.length > 0 && (
@@ -665,6 +666,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
             <span className="label">glycemic load left {dayWord}</span>
             <span className="ask-budget-note">Glycemic load (GL) is how much a meal raises your blood sugar, counting both the food and the portion. This is what is left of your budget {dayWord}.</span>
             {noLoadNote(dayEntries) && <span className="ask-budget-note no-load-note">{noLoadNote(dayEntries)}</span>}
+            <GlHelp label="What is GL, and how do I use it?" />
           </div>
           <span className="value"><b className="num">{left}</b> <small>of {targets.glBudget}</small></span>
         </div>

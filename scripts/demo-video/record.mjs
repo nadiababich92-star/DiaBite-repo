@@ -36,13 +36,16 @@ const admin = (path, init = {}) => fetch(SB + path, { ...init, headers: { apikey
 
 // CLIP=1 records the short how-it-works clip for the pitch deck (OUT=/tmp/dvc, narration-clip.json) instead of the full demo story.
 const CLIP = process.env.CLIP === '1'
+// GIGL=1 records the GI and GL explainer shown inside the app (OUT=/tmp/dvg, NARRATION=narration-gi-gl.json, SKIP_CARDS=1): the glycemic index and load of one slice of rye bread, then two.
+const GIGL = process.env.GIGL === '1'
+const SHORT = CLIP || GIGL
 mkdirSync(OUT, { recursive: true })
 const email = `demo-${Date.now()}@example.com`, password = 'Dm-' + Math.random().toString(36).slice(2) + 'Aa1'
 const created = await (await admin('/auth/v1/admin/users', { method: 'POST', body: JSON.stringify({ email, password, email_confirm: true }) })).json()
 const uid = created.id
 const session = await (await fetch(`${SB}/auth/v1/token?grant_type=password`, { method: 'POST', headers: { apikey: PUB, 'content-type': 'application/json' }, body: JSON.stringify({ email, password }) })).json()
 const stored = JSON.stringify({ ...session, expires_at: Math.floor(Date.now() / 1000) + session.expires_in })
-const FRESH = `localStorage.clear(); localStorage.setItem('diabite.session', 'test-demo-' + crypto.randomUUID()); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2']))${CLIP ? "; localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log']))" : ''}`
+const FRESH = `localStorage.clear(); localStorage.setItem('diabite.session', 'test-demo-' + crypto.randomUUID()); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2']))${SHORT ? "; localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log']))" : ''}`
 
 try {
   // ── 1. Off camera: only the diary history (onboarding is on camera) ────────
@@ -56,8 +59,9 @@ try {
   for (const n of [4, 11]) overDay(n)
   for (const n of [6, 17]) add(n, 'lunch', 'lentils', 150)
   // The clip has no setup scene: the profile is stored off camera, the same one the setup scene would have made.
-  if (CLIP) {
-    const profile = { sex: 'female', age: 52, heightCm: 168, weightKg: 70, activity: 'light', condition: 't2', goal: 'lose', carbApproach: 'low', countBy: 'carbs', mealCarbsG: 45, snackCarbsG: 30, excludedFoodIds: [], insulin: 'none', meds: ['metformin'], pregnantOrBreastfeeding: false, kidney: 'none', comorbidities: [], allergens: [], pattern: 'none', units: 'imperial', showBreadUnits: false, onboarded: true }
+  if (SHORT) {
+    // The explainer counts by glycemic load and sets no carbohydrate number, so nothing on the screen is about anything but GI and GL.
+    const profile = { sex: 'female', age: 52, heightCm: 168, weightKg: 70, activity: 'light', condition: 't2', goal: 'lose', carbApproach: 'low', countBy: GIGL ? 'gl' : 'carbs', mealCarbsG: GIGL ? 0 : 45, snackCarbsG: GIGL ? 0 : 30, excludedFoodIds: [], insulin: 'none', meds: ['metformin'], pregnantOrBreastfeeding: false, kidney: 'none', comorbidities: [], allergens: [], pattern: 'none', units: 'imperial', showBreadUnits: false, onboarded: true }
     const p = await admin('/rest/v1/profiles', { method: 'POST', body: JSON.stringify({ user_id: uid, data: profile, consent_at: new Date().toISOString(), consent_version: '2026-10-b', updated_at: new Date().toISOString() }), headers: { prefer: 'return=minimal' } })
     console.log('stored the profile:', p.status)
   }
@@ -222,7 +226,42 @@ try {
   }
   zone(0.03)
 
-  if (CLIP) {
+  if (GIGL) {
+    // ── GI and GL, on one slice of rye bread and then two (docs/video-gi-gl/script.md) ──────────
+    // The numbers in the narration are the engine's: each receipt is read back and the recording stops if one is not the number the voice says.
+    const receipt = () => b.ev(`(document.querySelector('.receipt')?.innerText ?? '').replace(/\\s+/g, ' ')`)
+    const must = async (what, re) => { const t = await receipt(); if (!re.test(t)) throw new Error(`the receipt is not what the narration says (${what}): ${t.slice(0, 220)}`); console.log('receipt ok:', what) }
+    // A ring on what is being named, not a pointer on top of it: the pointer would sit on the very figures the voice reads.
+    const ring = async (sels, end) => {
+      const step = Math.max(0, end - vt()) / sels.length
+      for (const sel of sels) {
+        const until = vt() + step
+        await b.ev(`document.querySelectorAll(${JSON.stringify(sel)}).forEach((e) => e.classList.add('tour-ring'))`); await holdTo(until)
+        await b.ev(`document.querySelectorAll('.tour-ring').forEach((e) => e.classList.remove('tour-ring'))`)
+      }
+    }
+    end = say('g0'); await openApp('A demo person · GI and GL explained')
+    await b.ev(`window.scrollTo(0, 0)`); await wander(['.ask-budget', 'input[type=text]'], end)
+    end = say('g1'); await typeIn('A slice of rye bread')
+    await clickOn({ text: 'Check this meal' }); await awaitAnswer('section.answer'); await holdTo(end)
+    await must('one slice: 35 g, GI 50, GL 7.1', /35 g.*14\.2 · 50 · 7\.1/)
+    end = say('g2')
+    await b.ev(`document.querySelector('.fig-pair')?.scrollIntoView({ block: 'center', behavior: 'smooth' })`); await sleep(900)
+    await ring(['.fig-pair .fig-card.gl'], end)
+    end = say('g3')
+    await b.ev(`document.querySelector('.receipt')?.scrollIntoView({ block: 'center', behavior: 'smooth' })`); await sleep(1000)
+    await ring(['.receipt-head + .receipt-line span em', '.receipt-head + .receipt-line span:last-child', '.receipt-head + .receipt-line b'], end)
+    end = say('g4'); await b.ev(`window.scrollTo(0, 0)`)
+    await askUntil('Two slices of rye bread', async () => /70 g.*28\.4 · 50 · 14\.2/.test(await receipt()))
+    await must('two slices: 70 g, GI 50, GL 14.2', /70 g.*28\.4 · 50 · 14\.2/)
+    await b.ev(`document.querySelector('.receipt')?.scrollIntoView({ block: 'center', behavior: 'smooth' })`); await sleep(900)
+    await ring(['.receipt-head + .receipt-line span em', '.receipt-head + .receipt-line span:last-child', '.receipt-head + .receipt-line b'], end)
+    end = say('g5'); await ring(['.receipt-head + .receipt-line span:last-child', '.receipt-head + .receipt-line b'], end)
+    end = say('g6'); await ring(['.receipt-head + .receipt-line span em', '.receipt-head + .receipt-line span:last-child', '.receipt-head + .receipt-line b', '.receipt-total'], end)
+    end = say('g7')
+    await showCard(`<!doctype html><meta charset=utf-8><body style="margin:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#0a1812;color:#eef3e8;font:600 44px/1.2 Georgia,serif;text-align:center"><div>DiaBite is a reference tool.</div><div style="font-size:30px;font-weight:400;color:#d3e0d6">It does not replace your care team.</div><div style="font:500 24px ui-monospace,monospace;color:#dcf26b;margin-top:18px">diabite.pro</div>`)
+    await holdTo(end + 1.2)
+  } else if (CLIP) {
     // ── the short clip: breakfast, a no with a swap, a plan, a refused dose question ─────────────
     end = say('k00'); await openApp('Thursday')
     await b.ev(`window.scrollTo(0, 0)`)

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import GlHelp from './GlHelp'
 import { sumNutrients } from '../lib/glycemic'
 import { MEAL_LABELS, MEAL_ORDER } from '../lib/menu'
 import { addDays, dateAllowed, dateRange, dayLabel, eaten, markEaten, mealForNow, noLoadNote, nudgeGrams, portionText, plannedOnly, recentEntries, viewEntry } from '../lib/diary'
@@ -125,7 +126,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
           <span className="fig-k">{isToday ? (over ? 'glycemic load over' : 'glycemic load left') : 'glycemic load used'}</span>
           <span className="fig-v">{isToday ? Math.abs(left) : totals.gl.toFixed(1)}</span>
         </div>
-        <p className="muted" style={{ margin: '0 0 6px' }}>{totals.gl.toFixed(1)} used of {targets.glBudget}</p>
+        <p className="muted" style={{ margin: '0 0 6px' }}>{totals.gl.toFixed(1)} used of {targets.glBudget} <GlHelp /></p>
         {noLoadNote(dayEntries, isToday && !over ? 'left' : 'used') && <p className="muted no-load-note" style={{ margin: '0 0 6px' }}>{noLoadNote(dayEntries, isToday && !over ? 'left' : 'used')}</p>}
         {plannedEntries.length > 0 && (
           <p className="muted planned-line">

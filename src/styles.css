@@ -228,6 +228,10 @@ button.link {
   color: var(--text-dim); padding: 2px 6px; font-size: 13px;
 }
 button.link:hover { color: var(--high); }
+/* The footnote beside a mention of GL: its own row under the figure, left-aligned with it, underlined so it reads as a link. */
+button.link.gl-help { display: block; padding: 2px 0; text-align: left; text-decoration: underline; text-underline-offset: 3px; }
+.receipt-foot button.link.gl-help { display: inline; }
+.gl-video { display: block; width: 100%; max-height: 52vh; border-radius: 12px; background: var(--surface-2); margin: 0 0 12px; }
 
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
 .stat { background: var(--surface-2); border-radius: 12px; padding: 12px; box-shadow: var(--fx-raised); }

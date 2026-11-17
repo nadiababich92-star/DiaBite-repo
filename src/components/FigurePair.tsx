@@ -1,4 +1,5 @@
 import type { CountBy } from '../types'
+import GlHelp from './GlHelp'
 import type { CarbLimitResult } from '../lib/agent'
 
 export interface CarbFigures { carbs?: number; availableCarbs?: number; fiber?: number }
@@ -18,6 +19,7 @@ export function FigurePair({ countBy, gl, carbs, limit }: {
   const glBlock = (
     <div key="gl" className="fig-card gl">
       <p className="fig-title">Glycemic load (GL)</p>
+      <GlHelp />
       <p className={`fig-big gl ${gl.partial || gl.assumed ? '' : gl.fits ? 'ok' : 'over'}`}><span className="num">{gl.fits ? gl.after : Math.abs(gl.after)}</span></p>
       <p className="fig-cap">{gl.partial ? 'left so far' : gl.fits ? 'left after' : 'over by'}</p>
       <div className="fig-row"><span className="fig-k">this meal</span><span className="fig-v">{gl.mealGl}</span></div>

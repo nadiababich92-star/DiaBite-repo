@@ -20,7 +20,7 @@
  * Exits non-zero when resolve falls under its target, so this can gate a
  * build. The target is the PRD's: parsing at or above 90%.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { carbsWithoutLoad, loadFoods } from '../server/foods'
@@ -36,6 +36,8 @@ import { bindSession, unbindSession } from '../server/bind'
 import { GI_CROSSCHECKED_ON, getRecord, householdMeasure, householdPortion, stepUnit, summary } from '../server/foods'
 import { countOf, countText, measureLabel, nudgeMeasure } from '../src/lib/measure'
 import { FigurePair } from '../src/components/FigurePair'
+import GlHelp, { GlHelpContext } from '../src/components/GlHelp'
+import { GI_GL_HOW, GI_GL_VIDEO, GI_GL_WORDS } from '../src/lib/glWords'
 import { budgetOf, buildReceipt, receiptFrom } from '../src/lib/agent'
 import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
@@ -1283,6 +1285,28 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\ncoverage  ${coverMisses.length === 0 ? 'ok' : 'WRONG'}`)
   coverMisses.forEach((m) => console.log(m))
   if (coverMisses.length) process.exitCode = 1
+}
+
+// ── the footnote beside GL ────────────────────────────────────────────────
+// Wherever glycemic load is named, a small "what is this" opens the same dialog. It shows only where the app can open the
+// dialog, and the words in it carry no figure (a figure in an explanation would be one nobody computed).
+{
+  const glMisses: string[] = []
+  const gl = { mealGl: 7.1, before: 54, after: 46.9, fits: true, partial: false }
+  const withDialog = renderToStaticMarkup(createElement(GlHelpContext.Provider, { value: () => {} }, createElement(FigurePair, { countBy: 'gl', gl })))
+  const without = renderToStaticMarkup(createElement(FigurePair, { countBy: 'gl', gl }))
+  if (!/class="link gl-help"[^>]*aria-haspopup="dialog"[^>]*>What is GL\?</.test(withDialog)) glMisses.push('    the answer shows no "What is GL?" footnote where the app can open the dialog')
+  if (/gl-help/.test(without)) glMisses.push('    a screen with no dialog behind it shows a button that does nothing')
+  const where = ['AskPage', 'DiaryPage', 'MenuPage', 'ProfilePage', 'FigurePair']
+  for (const f of where) if (!/<GlHelp\b/.test(readFileSync(join(ROOT, 'src', 'components', `${f}.tsx`), 'utf8'))) glMisses.push(`    ${f} names glycemic load and has no footnote`)
+  // The definitions say "0 to 100" and "divided by 100", which is the scale and the formula; the how-to line has no figure of anyone's.
+  if (/\d/.test(GI_GL_HOW)) glMisses.push(`    the how-to line carries a figure: ${GI_GL_HOW.slice(0, 60)}`)
+  if (GI_GL_WORDS.length < 4) glMisses.push('    the definitions lost a paragraph')
+  if (GI_GL_VIDEO && !existsSync(join(ROOT, 'public', GI_GL_VIDEO.src.replace(/^\//, '')))) glMisses.push('    the dialog points at a video that is not in public/')
+  if (GI_GL_VIDEO && !existsSync(join(ROOT, 'public', GI_GL_VIDEO.captions.replace(/^\//, '')))) glMisses.push('    the video has no captions file')
+  console.log(`\nglhelp    ${glMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  glMisses.forEach((m) => console.log(m))
+  if (glMisses.length) process.exitCode = 1
 }
 
 // ── onboarding focus ──────────────────────────────────────────────────────
