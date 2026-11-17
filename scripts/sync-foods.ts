@@ -25,12 +25,14 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import postgres from 'postgres'
 import { loadFoods, provenance } from '../server/foods'
+import { readTextHashes, staleIds } from '../server/index-hash'
 
 type Row = Record<string, unknown>
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const BIN = join(ROOT, 'data', 'recipes-db', 'embeddings.bin')
 const IDS = join(ROOT, 'data', 'recipes-db', 'embeddings.ids.json')
+const TEXT = join(ROOT, 'data', 'recipes-db', 'embeddings.text.json')
 const DIM = 384
 const BATCH = 200
 
@@ -74,6 +76,26 @@ const missing = ids.filter((id) => !byId.has(id))
 if (missing.length) {
   console.error(`the index holds ${missing.length} ids the food table does not, e.g. ${missing[0]} — rebuild the index first`)
   process.exit(1)
+}
+
+// The table is a copy of the index, so it must not be a copy of a stale one: every vector has to have been made from the
+// record's current text (embeddings.text.json), and every record has to have a vector. Either failing pushed stale vectors
+// or left a food out of search without a word (48 stale vectors found on 17 November; 26 Chipotle items with no row).
+{
+  const hashes = readTextHashes(TEXT)
+  if (!hashes) {
+    console.error(`no usable ${TEXT} — the vectors cannot be shown to match the records' text. Rebuild the index: run the engine (npm run server) once.`)
+    process.exit(1)
+  }
+  const indexed = new Set(ids)
+  const unindexed = records.filter((r) => !indexed.has(r.id)).map((r) => r.id)
+  const stale = staleIds(records.filter((r) => indexed.has(r.id)), hashes)
+  if (unindexed.length || stale.length) {
+    if (unindexed.length) console.error(`${unindexed.length} records have no vector in the index, e.g. ${unindexed.slice(0, 3).join(', ')}`)
+    if (stale.length) console.error(`${stale.length} vectors were not made from their record's current text, e.g. ${stale.slice(0, 3).join(', ')}`)
+    console.error('Rebuild the index first: run the engine (npm run server) once, then commit data/recipes-db/embeddings.*')
+    process.exit(1)
+  }
 }
 
 // pgvector accepts its text form; six decimals is well inside float32's precision

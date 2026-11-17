@@ -53,7 +53,7 @@ COPY data/recipes-db/ingredients.json data/recipes-db/recipes_db.json data/recip
 # The coverage layer: USDA's "foods as eaten", which is what someone types
 # into a diary. 7 MB next to an 87 MB model.
 COPY data/foods-usda/foods_usda.json data/foods-usda/branded_common.json data/foods-usda/restaurant_items.json ./data/foods-usda/
-COPY data/recipes-db/embeddings.bin data/recipes-db/embeddings.ids.json ./data/recipes-db/
+COPY data/recipes-db/embeddings.bin data/recipes-db/embeddings.ids.json data/recipes-db/embeddings.text.json ./data/recipes-db/
 # Warm the model cache in the image. The local .cache is gitignored, so the
 # build fetches the model rather than copying it — same result, no 87 MB in git.
 RUN node -e "import('@huggingface/transformers').then(async (m) => { m.env.cacheDir = '/app/.cache/transformers'; await m.pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', { dtype: 'fp32' }); console.log('model cached'); })"

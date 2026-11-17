@@ -535,10 +535,18 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
         const variant = rec.kind === 'recipe' && isVariantOf(phrase, rec.name) ? VARIANT_PENALTY : 0
         const container = CONTAINER.test(phrase) && !CONTAINER.test(rec.name) ? CONTAINER_PENALTY : 0
         const score = base - penalty - school - branded - container
-        return { ...summary(rec), score, rank: score - variant }
+        // Tie-break data, used only when two candidates have exactly the same rank. Among the curated records (seed:, ing:, rec:),
+        // the one whose NAME is the phrase goes first, not one that merely lists it as an alias or is longer: "Potato, boiled" is
+        // seed:potato-boil, not "Potato, boiled, peeled". A curated record then goes before a coverage-layer one. Coverage-layer
+        // (usda:, branded:, rest:) ties are left in the order the vector search gave them: the owner's hand-written names for
+        // them ("pizza crust" is white bread) were tuned against that order, and a name match there would override them.
+        // Whatever is still tied keeps vector order too, which cases such as "energy drink" rely on.
+        const tier = /^(seed|ing|rec):/.test(h.id) ? 0 : 1
+        const nameHit = tier === 0 && (norm(plainName(rec.name)) === norm(phrase) || isNamed(phrase, rec.name))
+        return { ...summary(rec), score, rank: score - variant, nameHit, tier }
       })
-      .sort((a, b) => b.rank - a.rank)
-      .map(({ rank: _rank, ...c }) => c)
+      .sort((a, b) => b.rank - a.rank || Number(b.nameHit) - Number(a.nameHit) || a.tier - b.tier)
+      .map(({ rank: _rank, nameHit: _n, tier: _t, ...c }) => c)
     const candidates: ResolveCandidate[] = brandYields(phrase, ranked)
       .slice(0, topK)
       .map((c) => ({ ...c, score: Math.round(c.score * 1000) / 1000 }))

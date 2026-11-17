@@ -47,6 +47,9 @@ ENGINE_API_KEY=<key> AGENT_URL=<url>/agent/ask npm run eval:agent   # agent eval
 npm run deploy                   # waits for that commit's image build, updates the app, retires old revisions
 npx tsx agent/provision.ts       # republish the three agents after editing agent/prompts/*.md (needs the env in agent/SETUP.md)
 npx tsx scripts/sync-foods.ts    # push the catalogue and vectors to Supabase (needs .env.local)
+                                 # refuses to run unless every vector was made from its record's current text
+                                 # (data/recipes-db/embeddings.text.json). After changing a name or alias, run the engine or
+                                 # `npm run eval` once: it re-embeds only the changed records; commit data/recipes-db/embeddings.*
 ```
 
 The shell does not have Node on its PATH by default: prefix with

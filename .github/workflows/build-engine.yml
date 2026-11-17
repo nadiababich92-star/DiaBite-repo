@@ -29,6 +29,7 @@ on:
       - 'data/recipes-db/recipes_db.json'
       - 'data/recipes-db/embeddings.bin'
       - 'data/recipes-db/embeddings.ids.json'
+      - 'data/recipes-db/embeddings.text.json'
       - '.github/workflows/build-engine.yml'
   workflow_dispatch:
 

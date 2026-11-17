@@ -24,7 +24,8 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { carbsWithoutLoad, loadFoods } from '../server/foods'
-import { embed, loadOrBuildIndex, openStore } from '../server/embeddings'
+import { embed, loadOrBuildIndex, openStore, type VectorStore } from '../server/embeddings'
+import { readTextHashes, staleIds } from '../server/index-hash'
 import { tmpdir } from 'node:os'
 import { resolvePhrases } from '../server/resolve'
 import { verify, verdictConflict } from '../server/verify'
@@ -96,10 +97,21 @@ const cases = JSON.parse(readFileSync(join(ROOT, 'eval', 'cases.json'), 'utf8'))
 
 const t0 = Date.now()
 const { records } = loadFoods()
+// Before anything below can repair it: does every vector in the committed index come from its record's current text? A stale
+// vector was invisible until 17 November (48 of 8,659), because only the id list was compared. openStore repairs the files in
+// the working tree, so this has to be read first; the run then fails once, and the repaired files are what gets committed.
+const indexHashes = readTextHashes(join(ROOT, 'data', 'recipes-db', 'embeddings.text.json'))
+const indexStale = indexHashes ? staleIds(records, indexHashes) : null
 // Whichever store the engine itself would open, so the same cases prove the
 // database returns what the embedded index does.
 const store = await openStore(records, (m: string) => { if (/pg-store|pgvector/.test(m)) console.log(m) })
 console.log(`engine ready: ${records.length} records in ${Date.now() - t0} ms\n`)
+if (indexStale === null) { console.log('index current  WRONG: no usable data/recipes-db/embeddings.text.json, so no vector can be shown to match its text\n'); process.exitCode = 1 }
+else if (indexStale.length) {
+  console.log(`index current  WRONG: ${indexStale.length} vectors were not made from their record's current text, e.g. ${indexStale.slice(0, 3).join(', ')}`)
+  console.log('  they were embedded again just now; commit data/recipes-db/embeddings.bin, .ids.json and .text.json, and run this again\n')
+  process.exitCode = 1
+} else console.log('index current  ok  (every vector comes from its record\'s current text)\n')
 
 const fail = <T>(list: T[], label: string) => { if (list.length) console.log(`  ${label}: ${list.length}`) }
 
@@ -1310,24 +1322,33 @@ hangMisses.forEach((m) => console.log(m))
   if (glMisses.length) process.exitCode = 1
 }
 
-// ── the vector index grows without moving what is already in it ───────────────
-// A record appended to the catalogue keeps every vector already in the file. Rebuilding them all moved two foods that tie
-// exactly ("Potato, boiled" and "chick-fil-a sandwich") past each other, so adding a chain's menu to the catalogue
-// changed how unrelated foods were found. Anything but an append (a record removed, moved) still rebuilds.
+// ── the vector index keeps every vector whose text did not change ───────────
+// A vector is reused when the hash of the text it was made from equals the hash of the record's current text, wherever the
+// record sits in the list. Re-embedding all of them moved two foods that tie exactly ("Potato, boiled" and "chick-fil-a
+// sandwich") past each other on 17 November, so adding or rewording one food must not change how the others are found; and
+// a record whose text changed must be embedded again, which comparing only the id list never did.
 {
   const idxMisses: string[] = []
   const dir = mkdtempSync(join(tmpdir(), 'diabite-index-'))
-  const files = { bin: join(dir, 'e.bin'), ids: join(dir, 'e.ids.json') }
+  const files = { bin: join(dir, 'e.bin'), ids: join(dir, 'e.ids.json'), text: join(dir, 'e.text.json') }
+  const vec = (b: Buffer, i: number) => b.subarray(i * 384 * 4, (i + 1) * 384 * 4)
+  const said: string[] = []
+  const quiet = (m: string) => { said.push(m) }
+  const last = () => said.at(-1) ?? ''
   try {
     const base = loadFoods().records.slice(0, 40)
-    const said: string[] = []
-    const quiet = (m: string) => { said.push(m) }
     await loadOrBuildIndex(base, quiet, files)
+    if (!existsSync(files.text)) idxMisses.push('    building the index wrote no hash file')
     const before = readFileSync(files.bin)
+
+    await loadOrBuildIndex(base, quiet, files)
+    if (!/index loaded: 40 vectors$/.test(last())) idxMisses.push(`    an unchanged index was not simply loaded: ${last()}`)
+
+    // an appended record keeps every vector already in the file
     const extra = { ...base[0], id: 'rest:index-probe', searchText: 'Probechain test burrito. restaurant.' }
     await loadOrBuildIndex([...base, extra], quiet, files)
     const after = readFileSync(files.bin)
-    if (!said.some((m) => /extended by 1 \(40 kept\)/.test(m))) idxMisses.push(`    appending one record did not extend the index: ${said.at(-1)}`)
+    if (!/updated: 1 embedded, 40 kept/.test(last())) idxMisses.push(`    appending one record did not keep the other 40: ${last()}`)
     if (after.length !== before.length + 384 * 4) idxMisses.push(`    the file grew by ${after.length - before.length} bytes, not one vector`)
     else if (!after.subarray(0, before.length).equals(before)) idxMisses.push('    appending a record moved the vectors already in the file')
     if (JSON.parse(readFileSync(files.ids, 'utf8')).at(-1) !== 'rest:index-probe') idxMisses.push('    the id list does not end with the appended record')
@@ -1335,17 +1356,65 @@ hangMisses.forEach((m) => console.log(m))
     const store = await loadOrBuildIndex([...base, extra], quiet, files)
     const [hit] = await store.search((await embed(['Probechain test burrito. restaurant.']))[0], 1)
     if (hit?.id !== 'rest:index-probe') idxMisses.push(`    the appended vector is not the record's own (top hit ${hit?.id})`)
-    // a record taken out is not an append: everything is rebuilt, and the file matches the new list
-    await loadOrBuildIndex(base.slice(1), quiet, files)
-    const rebuilt = readFileSync(files.bin)
-    if (rebuilt.length !== (base.length - 1) * 384 * 4 || JSON.parse(readFileSync(files.ids, 'utf8')).length !== base.length - 1) idxMisses.push('    removing a record left the old vectors in place')
-    // a changed list in the middle must not be treated as an append
-    await loadOrBuildIndex([extra, ...base], quiet, files)
-    if (JSON.parse(readFileSync(files.ids, 'utf8'))[0] !== 'rest:index-probe') idxMisses.push('    a record put first was treated as an append')
+
+    // a record whose text changed is embedded again, and only that one
+    const edited = [...base.map((r, i) => (i === 3 ? { ...r, searchText: `${r.searchText} An alias added after the vector was made.` } : r)), extra]
+    await loadOrBuildIndex(edited, quiet, files)
+    const b2 = readFileSync(files.bin)
+    if (!/updated: 1 embedded, 40 kept/.test(last())) idxMisses.push(`    a changed text did not re-embed exactly one record: ${last()}`)
+    const moved = [...Array(41).keys()].filter((i) => !vec(b2, i).equals(vec(after, i)))
+    if (moved.join() !== '3') idxMisses.push(`    changing one record's text moved vectors ${moved.join(', ') || '(none)'}, not just 3`)
+    const own = new Float32Array(b2.buffer, b2.byteOffset + 3 * 384 * 4, 384)
+    const [want] = await embed([edited[3].searchText])
+    if (own.reduce((t, v, d) => t + v * want[d], 0) < 0.9999) idxMisses.push('    the re-embedded vector is not the new text\'s')
+    if (staleIds(edited, readTextHashes(files.text)!).length) idxMisses.push('    after a repair the hash file still calls a vector stale')
+    if (staleIds(base, readTextHashes(files.text)!).join() !== base[3].id) idxMisses.push('    the hash file does not tell the old text from the new one')
+
+    // a record taken out, or put first, keeps every other vector as it was
+    await loadOrBuildIndex(edited.slice(1), quiet, files)
+    const b3 = readFileSync(files.bin)
+    if (b3.length !== 40 * 384 * 4) idxMisses.push('    removing a record left the old vectors in place')
+    else if (![...Array(40).keys()].every((i) => vec(b3, i).equals(vec(b2, i + 1)))) idxMisses.push('    removing a record moved the vectors that stayed')
+    await loadOrBuildIndex([extra, ...edited.slice(1, 40)], quiet, files)
+    const b4 = readFileSync(files.bin)
+    if (JSON.parse(readFileSync(files.ids, 'utf8'))[0] !== 'rest:index-probe') idxMisses.push('    a record put first is not first in the id list')
+    else if (!vec(b4, 0).equals(vec(b2, 40)) || !vec(b4, 1).equals(vec(b2, 1))) idxMisses.push('    moving a record changed its vector or its neighbours\'')
+
+    // an index with no hash file cannot be vouched for: it is loaded as it is, said so, and no hash file is invented
+    rmSync(files.text)
+    await loadOrBuildIndex([extra, ...edited.slice(1, 40)], quiet, files)
+    if (!/NOT checked/.test(last()) || existsSync(files.text)) idxMisses.push(`    an index without hashes was not flagged, or one was made up for it: ${last()}`)
+    // …and the first change to it rebuilds everything and writes the hashes
+    await loadOrBuildIndex(base, quiet, files)
+    if (!/built: 40 vectors/.test(last()) || !existsSync(files.text)) idxMisses.push(`    an unverifiable index was not rebuilt with its hashes: ${last()}`)
   } finally { rmSync(dir, { recursive: true, force: true }) }
+
+  // what ships: the image and the build trigger both carry the hash file, or a deploy would run an index nobody can check
+  const dockerfile = readFileSync(join(ROOT, 'Dockerfile'), 'utf8')
+  if (!/^COPY .*embeddings\.text\.json/m.test(dockerfile)) idxMisses.push('    the Dockerfile does not copy embeddings.text.json into the image')
+  if (!readFileSync(join(ROOT, '.github', 'workflows', 'build-engine.yml'), 'utf8').includes("data/recipes-db/embeddings.text.json")) idxMisses.push('    the image build does not watch embeddings.text.json')
   console.log(`\nindex     ${idxMisses.length === 0 ? 'ok' : 'WRONG'}`)
   idxMisses.forEach((m) => console.log(m))
   if (idxMisses.length) process.exitCode = 1
+}
+
+// ── a food the person named exactly does not depend on vector order ───────────
+// "Potato, boiled" is three foods at the same score (its own name, another record's alias, a near neighbour). Which one came
+// first was decided by which vector happened to be closest, so re-embedding one moved it, and the answer changed from "high"
+// to a question the person had already answered.
+{
+  const tieMisses: string[] = []
+  const { byId } = loadFoods()
+  const orders = [['ing:potato_boiled', 'seed:potato-boil', 'ing:new_potato'], ['ing:new_potato', 'ing:potato_boiled', 'seed:potato-boil'], ['seed:potato-boil', 'ing:new_potato', 'ing:potato_boiled']]
+  if (orders[0].some((id) => !byId.has(id))) tieMisses.push('    the records the case needs are not in the catalogue')
+  else for (const order of orders) {
+    const fake: VectorStore = { search: async () => order.map((id, i) => ({ id, score: 0.8096 - i * 0.001 })), vectorOf: () => undefined }
+    const [r] = await resolvePhrases(fake, ['Potato, boiled'])
+    if (r.candidates[0]?.id !== 'seed:potato-boil' || r.confidence !== 'high') tieMisses.push(`    with the vectors ordered ${order.join(' > ')}: ${r.candidates[0]?.id}, ${r.confidence}`)
+  }
+  console.log(`\nties      ${tieMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  tieMisses.forEach((m) => console.log(m))
+  if (tieMisses.length) process.exitCode = 1
 }
 
 // ── restaurant items ──────────────────────────────────────────────────────

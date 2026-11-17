@@ -12,13 +12,12 @@ import { dirname, join } from 'node:path'
 import { env, pipeline, type FeatureExtractionPipeline } from '@huggingface/transformers'
 import { adoptCatalogue, type FoodRecord } from './foods'
 import { PgVectorStore, pgConfigFromEnv } from './pg-store'
+import { DIM, MODEL, readTextHashes, serializeTextHashes, textHash } from './index-hash'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(here, '..')
 env.cacheDir = join(ROOT, '.cache', 'transformers')
 
-const MODEL = 'Xenova/all-MiniLM-L6-v2'
-const DIM = 384
 
 let extractor: Promise<FeatureExtractionPipeline> | null = null
 
@@ -75,8 +74,8 @@ export class MemoryVectorStore implements VectorStore {
 
 const BIN = join(ROOT, 'data', 'recipes-db', 'embeddings.bin')
 const IDS = join(ROOT, 'data', 'recipes-db', 'embeddings.ids.json')
+const TEXT = join(ROOT, 'data', 'recipes-db', 'embeddings.text.json')
 
-/** Load the persisted index if it matches the current records, else build and persist it. */
 /**
  * The store the engine will use.
  *
@@ -104,35 +103,61 @@ export async function openStore(records: FoodRecord[], log = console.log): Promi
   return pg
 }
 
-export async function loadOrBuildIndex(records: FoodRecord[], log = console.log, files: { bin: string; ids: string } = { bin: BIN, ids: IDS }): Promise<VectorStore> {
+/**
+ * Load the persisted index, embedding again only what no longer matches.
+ *
+ * A stored vector is reused when its id is in the file AND the hash of the text it was made from (embeddings.text.json)
+ * equals the hash of the record's current `searchText`. A record whose text changed is embedded again; one that is new is
+ * embedded; one taken out or moved simply is not copied. Everything else is byte-for-byte what was in the file, so adding
+ * or rewording one food cannot change how the others are found (rebuilding all of them moved two near-tied foods past each
+ * other on 17 November). Before this, the file was accepted whenever its id list matched, and 48 vectors had drifted from
+ * their text without anything noticing.
+ *
+ * With no hash file (an index written before it existed) nothing can be vouched for: a file whose ids match is loaded as it
+ * is, with a warning, and any other change rebuilds everything and writes the hash file.
+ */
+export async function loadOrBuildIndex(records: FoodRecord[], log = console.log, files: { bin: string; ids: string; text: string } = { bin: BIN, ids: IDS, text: TEXT }): Promise<VectorStore> {
   const wantIds = records.map((r) => r.id)
-  let reuse = 0   // how many leading records already have their vector in the file
-  let cached: Float32Array | null = null
+  let stored: { pos: Map<string, number>; vectors: Float32Array; ids: string[] } | null = null
   if (existsSync(files.bin) && existsSync(files.ids)) {
     const ids = JSON.parse(readFileSync(files.ids, 'utf8')) as string[]
     const buf = readFileSync(files.bin)
     const vectors = new Float32Array(buf.buffer, buf.byteOffset, buf.byteLength / 4)
-    if (ids.length === wantIds.length && ids.every((id, i) => id === wantIds[i])) {
-      log(`vector index loaded: ${ids.length} vectors`)
-      return new MemoryVectorStore(ids, vectors)
-    }
-    // Records added at the END of the catalogue (a new kind of food is appended) keep every vector already in the file:
-    // rebuilding all of them moves two near-tied foods past each other (it did, on 17 November, for "Potato, boiled" and
-    // "chick-fil-a sandwich"), so adding a food must not change how the others are found. Any other change (a record
-    // removed, moved or renamed in the list) still rebuilds everything.
-    if (ids.length < wantIds.length && vectors.length === ids.length * DIM && ids.every((id, i) => id === wantIds[i])) { reuse = ids.length; cached = vectors }
+    if (vectors.length === ids.length * DIM) stored = { pos: new Map(ids.map((id, i) => [id, i])), vectors, ids }
   }
+  const hashes = readTextHashes(files.text)
+  const sameIds = !!stored && stored.ids.length === wantIds.length && stored.ids.every((id, i) => id === wantIds[i])
+
+  if (stored && !hashes) {
+    if (sameIds) {
+      log(`vector index loaded: ${stored.ids.length} vectors — NOT checked against the records' text, there is no ${files.text.split('/').pop()}`)
+      return new MemoryVectorStore(stored.ids, stored.vectors)
+    }
+    stored = null   // nothing in the file can be vouched for: embed everything and write the hashes
+  }
+
   const t0 = Date.now()
   const vectors = new Float32Array(records.length * DIM)
-  if (cached) vectors.set(cached)
+  const todo: number[] = []
+  records.forEach((r, i) => {
+    const at = stored?.pos.get(r.id)
+    if (stored && hashes && at !== undefined && hashes[r.id] === textHash(r.searchText)) vectors.set(stored.vectors.subarray(at * DIM, (at + 1) * DIM), i * DIM)
+    else todo.push(i)
+  })
+  if (todo.length === 0 && sameIds) {
+    log(`vector index loaded: ${wantIds.length} vectors`)
+    return new MemoryVectorStore(wantIds, vectors)
+  }
   const BATCH = 32
-  for (let i = reuse; i < records.length; i += BATCH) {
-    const chunk = records.slice(i, Math.min(i + BATCH, records.length))
-    const vs = await embed(chunk.map((r) => r.searchText))
-    vs.forEach((v, j) => vectors.set(v, (i + j) * DIM))
+  for (let b = 0; b < todo.length; b += BATCH) {
+    const chunk = todo.slice(b, b + BATCH)
+    const vs = await embed(chunk.map((i) => records[i].searchText))
+    vs.forEach((v, j) => vectors.set(v, chunk[j] * DIM))
   }
   writeFileSync(files.bin, Buffer.from(vectors.buffer))
   writeFileSync(files.ids, JSON.stringify(wantIds))
-  log(`vector index ${reuse ? `extended by ${records.length - reuse} (${reuse} kept)` : 'built'}: ${records.length} vectors in ${Date.now() - t0} ms`)
+  writeFileSync(files.text, serializeTextHashes(records))
+  const kept = records.length - todo.length
+  log(`vector index ${kept ? `updated: ${todo.length} embedded, ${kept} kept` : 'built'}: ${records.length} vectors in ${Date.now() - t0} ms`)
   return new MemoryVectorStore(wantIds, vectors)
 }
