@@ -1272,6 +1272,19 @@ hangMisses.forEach((m) => console.log(m))
   if (srcMisses.length) process.exitCode = 1
 }
 
+// ── words that once found nothing ─────────────────────────────────────────
+// A case in `resolve` passes when the best candidate is right, even if the resolver called the phrase unknown, which is what the
+// agent reads. These five were unknown in the log of 17 November, so each is checked to be a food, not an unknown.
+{
+  const coverMisses: string[] = []
+  const phrases = ['homemade chicken wing', 'apple fritter', 'toaster pastry', 'cold cereal', 'breakfast cereal']
+  const rs = await resolvePhrases(store, phrases)
+  rs.forEach((r, i) => { if (r.unknown === true) coverMisses.push(`    "${phrases[i]}" is still unknown (best: ${r.candidates[0]?.name})`) })
+  console.log(`\ncoverage  ${coverMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  coverMisses.forEach((m) => console.log(m))
+  if (coverMisses.length) process.exitCode = 1
+}
+
 // ── onboarding focus ──────────────────────────────────────────────────────
 // Reopened from the Profile (Edit, or Redo), the button the person pressed is gone and the focus fell to the page: it goes to the heading.
 // A new account's first screen is left alone.
