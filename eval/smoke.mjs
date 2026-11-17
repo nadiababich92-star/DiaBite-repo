@@ -94,7 +94,7 @@ check('M14', health.signIn === true
   if (bad.status === 401 && ok.status === 401) console.log('SKIP  M24  the carbohydrate limit validation (a fraction is a 400): the sign-in wall answers first, so it is checked only on a service with no wall (npm run smoke -- http://localhost:8787 with sign-in off) and in eval:abuse A5n')
   else check('M24', 'the carbohydrate limit: a fraction of a gram is a 400 on carbLimit, a whole number is not', bad.status === 400 && ((await bad.json().catch(() => ({}))).field === 'carbLimit') && ok.status !== 400, `${bad.status} ${ok.status}`)
   check('M25', 'the app still carries the field for the number, the line "above the ... you set" and the engine\'s `over` it reads',
-    /Carbohydrate per /.test(code) && /you set/.test(code) && /carbLimit/.test(code) && /\.over/.test(code), scripts.join(','))
+    /your doctor or dietitian suggested/.test(code) && /you set/.test(code) && /carbLimit/.test(code) && /\.over/.test(code), scripts.join(','))
 }
 
 // ── the page, as a person ─────────────────────────────────────────────────
