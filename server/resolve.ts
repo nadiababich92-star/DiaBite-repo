@@ -168,7 +168,8 @@ export function withoutQuantity(phrase: string): string {
 
 // Spelling variants that are one word: "BBQ chicken" and "Barbecue chicken", "omelette" and "omelet" ask no question.
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\bbbq\b/g, 'barbecue').replace(/\bomelettes?\b/g, 'omelet').replace(/\s+/g, ' ').trim()
-const STOP = new Set(['a', 'an', 'the', 'of', 'with', 'and', 'some', 'my', 'plate', 'bowl', 'cup', 'slice', 'slices', 'piece', 'pieces', 'pack', 'packet', 'bag', 'box', 'bottle', 'jar', 'can'])
+// 'homemade' says who cooked it, not what it is: "homemade chicken wing" found nothing while "chicken wing" is in the catalogue.
+const STOP = new Set(['a', 'an', 'the', 'of', 'with', 'and', 'some', 'my', 'homemade', 'plate', 'bowl', 'cup', 'slice', 'slices', 'piece', 'pieces', 'pack', 'packet', 'bag', 'box', 'bottle', 'jar', 'can'])
 const tokens = (s: string) => norm(s).split(' ').filter((t) => t && !STOP.has(t))
 
 /**

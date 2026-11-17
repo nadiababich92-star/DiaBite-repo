@@ -442,6 +442,10 @@ const readableName = (name: string) =>
  */
 const USDA_ALIASES: Record<string, string[]> = {
   'usda:2709458': ['french fries', 'french fry', 'fries'], // Potato, french fries, from fresh, fried
+  // Worklist 63, the owner's yes on 17 November: words people used that found nothing, each given the record that is that food.
+  'usda:2708025': ['apple fritter', 'apple fritters', 'fruit fritter', 'fruit fritters'], // Fritter, fruit
+  'usda:2708058': ['toaster pastry', 'toaster pastries'],                   // Breakfast pastry
+  'usda:2708482': ['cold cereal', 'breakfast cereal', 'ready to eat cereal', 'ready-to-eat cereal'], // Cereal, other, plain
   // Found by eval/coverage: everyday names that resolved to nothing, or to a
   // neighbour that is a different food (taco -> taco seasoning, chili -> chili
   // powder, donut -> an iced-coffee drink). Each points at a record that was

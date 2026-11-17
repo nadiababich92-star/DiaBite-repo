@@ -1032,6 +1032,51 @@
         ]
       },
       {
+        "phrase": "apple fritter",
+        "expect": [
+          "usda:2708025"
+        ],
+        "tags": [
+          "everyday"
+        ]
+      },
+      {
+        "phrase": "toaster pastry",
+        "expect": [
+          "usda:2708058"
+        ],
+        "tags": [
+          "everyday"
+        ]
+      },
+      {
+        "phrase": "cold cereal",
+        "expect": [
+          "usda:2708482"
+        ],
+        "tags": [
+          "everyday"
+        ]
+      },
+      {
+        "phrase": "breakfast cereal",
+        "expect": [
+          "usda:2708482"
+        ],
+        "tags": [
+          "everyday"
+        ]
+      },
+      {
+        "phrase": "homemade chicken wing",
+        "expect": [
+          "usda:2706056"
+        ],
+        "tags": [
+          "everyday"
+        ]
+      },
+      {
         "phrase": "sweet potato fries",
         "expect": [
           "usda:2709709"
