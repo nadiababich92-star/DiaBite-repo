@@ -18,7 +18,7 @@ RUN npm ci && npm cache clean --force
 COPY index.html vite.config.ts tsconfig.json tsconfig.server.json ./
 COPY src ./src
 COPY public ./public
-COPY data/recipes-db/ingredients.json data/recipes-db/recipes_db.json data/recipes-db/portion_mapping.json ./data/recipes-db/
+COPY data/recipes-db/ingredients.json data/recipes-db/recipes_db.json data/recipes-db/portion_mapping.json data/recipes-db/gi_crosscheck.json ./data/recipes-db/
 # In dev, Vite proxies /agent to the engine's /agent/ask. Served from the
 # engine there is no proxy, so the path is the real one.
 ENV VITE_AGENT_URL=/agent/ask

@@ -148,6 +148,8 @@ export interface FoodRecord extends FoodSummary {
   source?: string
   /** When a human last checked them against that source; absent means nobody has. */
   verifiedAt?: string
+  /** The record's own USDA household measures ("cup", "slice"), where we hold a table that matches it. */
+  portions?: { label: string; grams: number }[]
 }
 
 /** A record as `public.foods` stores it. */
@@ -219,6 +221,39 @@ export async function adoptCatalogue(rows: unknown[], log = console.log): Promis
   cache = { records: built, byId: new Map(built.map((r) => [r.id, r])) }
   log(`[foods] catalogue from the database: ${built.length} records`)
   return true
+}
+
+/**
+ * Where a record's numbers come from, and when anyone last checked them. The one place this is decided: the receipt shows it
+ * ("checked" or "unverified" beside the source line), and the sync script writes the same text into the table, so the files
+ * in the image and the table never disagree. A record that carries its own source (a USDA survey food, a branded product)
+ * keeps it; this is only the default for the curated ingredients, the everyday foods and the recipes.
+ *
+ * The cross-check file is the only real verification this data has had: 88 ingredient glycemic index values compared against
+ * published tables, 51 of which agreed. Everything else is unverified and says so, rather than borrowing the credibility of
+ * the ones that were checked. Before 17 November the files in the image carried no source for these records at all, so a
+ * meal of curated foods printed a receipt with no source line (worklist 16).
+ */
+export const GI_CROSSCHECKED_ON = '2026-09-30'
+let crossChecked: Set<string> | null = null
+function checkedIds(): Set<string> {
+  if (crossChecked) return crossChecked
+  crossChecked = new Set()
+  const path = join(DATA, 'gi_crosscheck.json')
+  if (existsSync(path)) {
+    for (const row of JSON.parse(readFileSync(path, 'utf8')) as { key: string; flag: string }[]) if (row.flag === '') crossChecked.add(`ing:${row.key}`)
+  }
+  return crossChecked
+}
+export function provenance(id: string): { source: string; verified_at: string | null } {
+  if (id.startsWith('rec:')) {
+    return { source: 'Computed from its ingredients: nutrients summed, glycemic index as a carbohydrate-weighted mean (Wolever & Jenkins).', verified_at: null }
+  }
+  if (id.startsWith('seed:')) return { source: 'Seed food table: published averages for everyday US foods.', verified_at: null }
+  return {
+    source: 'Nutrients from USDA FoodData Central; glycemic index from the International Tables of Glycemic Index (2021).',
+    verified_at: checkedIds().has(id) ? GI_CROSSCHECKED_ON : null,
+  }
 }
 
 /** Map the ingredient table's groups onto the app's coarser categories. */
@@ -638,6 +673,12 @@ export function loadFoods() {
   // USDA_FOODS=off to measure without it.
   if (process.env.USDA_FOODS !== 'off') records.push(...usdaRecords())
   records.push(...brandedRecords())
+  for (const r of records) {
+    if (r.source) continue
+    const p = provenance(r.id)
+    r.source = p.source
+    if (p.verified_at) r.verifiedAt = p.verified_at
+  }
 
   cache = { records, byId: new Map(records.map((x) => [x.id, x])) }
   return cache

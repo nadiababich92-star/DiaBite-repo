@@ -20,11 +20,11 @@
  *                         stale rows in one statement.
  */
 import '../eval/lib/timeouts.mjs'  // a default timeout on every fetch
-import { readFileSync, existsSync, statSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import postgres from 'postgres'
-import { loadFoods } from '../server/foods'
+import { loadFoods, provenance } from '../server/foods'
 
 type Row = Record<string, unknown>
 
@@ -132,39 +132,7 @@ async function pushOverRest(rows: Row[]): Promise<void> {
   console.log(`synced ${rows.length} records${stale.length ? `, removed ${stale.length} stale` : ''} over PostgREST; the table held ${have.length} before`)
 }
 
-/**
- * Where a record's numbers come from, and when anyone last checked them.
- *
- * The cross-check file is the only real verification this data has had: 88
- * ingredient GI values compared against published tables. Everything else is
- * unverified, and says so rather than borrowing the credibility of the ones
- * that were checked.
- */
-const CROSSCHECK = join(ROOT, 'data', 'recipes-db', 'gi_crosscheck.json')
-const checked = new Map<string, string>()
-if (existsSync(CROSSCHECK)) {
-  const when = new Date(statSync(CROSSCHECK).mtime).toISOString().slice(0, 10)
-  for (const row of JSON.parse(readFileSync(CROSSCHECK, 'utf8')) as { key: string; flag: string }[]) {
-    if (row.flag === '') checked.set(`ing:${row.key}`, when)
-  }
-}
-
-/** The default source line, by id prefix, for a record with none of its own. Never the last word: see the row builder. */
-function provenance(id: string): { source: string; verified_at: string | null } {
-  if (id.startsWith('rec:')) {
-    return {
-      source: 'Computed from its ingredients: nutrients summed, glycemic index as a carbohydrate-weighted mean (Wolever & Jenkins).',
-      verified_at: null,
-    }
-  }
-  if (id.startsWith('seed:')) {
-    return { source: 'Seed food table: published averages for everyday US foods.', verified_at: null }
-  }
-  return {
-    source: 'Nutrients from USDA FoodData Central; glycemic index from the International Tables of Glycemic Index (2021).',
-    verified_at: checked.get(id) ?? null,
-  }
-}
+// Where a record's numbers come from, and when anyone last checked them: server/foods.ts decides, so the table and the files agree.
 
 const rows: Row[] = ids.map((id, i) => {
   const r = byId.get(id)!

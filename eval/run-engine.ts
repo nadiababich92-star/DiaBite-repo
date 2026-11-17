@@ -33,10 +33,10 @@ import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf,
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
-import { householdMeasure, householdPortion, stepUnit } from '../server/foods'
+import { GI_CROSSCHECKED_ON, getRecord, householdMeasure, householdPortion, stepUnit, summary } from '../server/foods'
 import { countOf, countText, measureLabel, nudgeMeasure } from '../src/lib/measure'
 import { FigurePair } from '../src/components/FigurePair'
-import { budgetOf, buildReceipt } from '../src/lib/agent'
+import { budgetOf, buildReceipt, receiptFrom } from '../src/lib/agent'
 import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
 import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
@@ -1243,6 +1243,31 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\nstepper   ${stepMisses.length === 0 ? 'ok' : 'WRONG'}`)
   stepMisses.forEach((m) => console.log(m))
   if (stepMisses.length) process.exitCode = 1
+}
+
+// ── where every number comes from ─────────────────────────────────────────
+// The receipt prints a source line for each food it used, from what resolve_foods said. The files in the image carried no source for the
+// curated ingredients, the everyday foods and the recipes, so a meal of those printed a receipt with no source line (worklist 16).
+{
+  const srcMisses: string[] = []
+  const none = loadFoods().records.filter((r) => !r.source).map((r) => r.id)
+  if (none.length) srcMisses.push(`    ${none.length} records carry no source, such as ${none.slice(0, 3).join(', ')}`)
+  const verified = loadFoods().records.filter((r) => r.verifiedAt).map((r) => r.id)
+  if (verified.length < 40 || verified.some((id) => !id.startsWith('ing:') || getRecord(id).verifiedAt !== GI_CROSSCHECKED_ON)) srcMisses.push(`    the checked records are wrong: ${verified.length}`)
+  if (getRecord('ing:greek_yogurt').verifiedAt !== undefined) srcMisses.push('    an ingredient whose glycemic index the cross-check flagged is called checked')
+  if (!getRecord('seed:rice-white').source?.includes('Seed food table')) srcMisses.push('    the everyday foods do not say what they are')
+  // the receipt, from a trace of curated foods only
+  const ids = ['ing:white_rice', 'seed:chicken', 'ing:black_beans']
+  const trace = [
+    { tool: 'diabite_engine_resolve_foods', input: {}, result: { results: ids.map((id) => ({ candidates: [summary(getRecord(id))] })) } },
+    { tool: 'diabite_engine_compute_meal', input: {}, result: computeMeal(ids.map((foodId) => ({ foodId, grams: 100 }))) },
+  ] as unknown as Parameters<typeof receiptFrom>[0]
+  const rc = receiptFrom(trace)
+  if (!rc || rc.sources.length === 0) srcMisses.push('    a meal of curated foods prints a receipt with no source line')
+  else if (!rc.sources.some((x) => x.verified)) srcMisses.push('    the receipt says nothing is checked, though black beans were')
+  console.log(`\nsources   ${srcMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  srcMisses.forEach((m) => console.log(m))
+  if (srcMisses.length) process.exitCode = 1
 }
 
 // ── onboarding focus ──────────────────────────────────────────────────────
