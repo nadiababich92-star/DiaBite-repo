@@ -1309,6 +1309,37 @@ hangMisses.forEach((m) => console.log(m))
   if (glMisses.length) process.exitCode = 1
 }
 
+// ── installable app ───────────────────────────────────────────────────────
+// "Put DiaBite on your home screen" only works while the manifest is complete and every icon it names is the size it claims.
+// The mark sits inside the central 80% of the square, so the same file serves as the plain and the maskable icon.
+{
+  const pwaMisses: string[] = []
+  const pub = join(ROOT, 'public')
+  const manifest = JSON.parse(readFileSync(join(pub, 'manifest.webmanifest'), 'utf8')) as { id?: string; start_url?: string; scope?: string; display?: string; icons?: { src: string; sizes: string; purpose?: string }[] }
+  if (manifest.id !== '/') pwaMisses.push('    the manifest has no id: an install would be identified by whatever address it was opened from')
+  if (manifest.display !== 'standalone') pwaMisses.push('    the manifest does not open as an app (display is not standalone)')
+  if (manifest.start_url !== '/' || manifest.scope !== '/') pwaMisses.push('    start_url or scope is not the site root')
+  const icons = manifest.icons ?? []
+  for (const size of ['192x192', '512x512']) for (const purpose of ['any', 'maskable']) {
+    if (!icons.some((i) => i.sizes === size && i.purpose === purpose)) pwaMisses.push(`    no ${purpose} icon at ${size}`)
+  }
+  for (const i of icons) {
+    const file = join(pub, i.src.replace(/^\//, ''))
+    if (!existsSync(file)) { pwaMisses.push(`    ${i.src} is not in public/`); continue }
+    const png = readFileSync(file)
+    const w = png.readUInt32BE(16), h = png.readUInt32BE(20)
+    if (`${w}x${h}` !== i.sizes) pwaMisses.push(`    ${i.src} is ${w}x${h}, the manifest says ${i.sizes}`)
+  }
+  const apple = join(pub, 'apple-touch-icon.png')
+  if (!existsSync(apple) || readFileSync(apple).readUInt32BE(16) !== 180) pwaMisses.push('    apple-touch-icon.png is missing or not 180 px (iOS ignores the manifest icons)')
+  const indexHtml = readFileSync(join(ROOT, 'index.html'), 'utf8')
+  if (!/rel="manifest"\s+href="\/manifest\.webmanifest"/.test(indexHtml)) pwaMisses.push('    index.html does not link the manifest')
+  if (!/rel="apple-touch-icon"/.test(indexHtml)) pwaMisses.push('    index.html does not link the apple-touch-icon')
+  console.log(`\ninstall   ${pwaMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  pwaMisses.forEach((m) => console.log(m))
+  if (pwaMisses.length) process.exitCode = 1
+}
+
 // ── onboarding focus ──────────────────────────────────────────────────────
 // Reopened from the Profile (Edit, or Redo), the button the person pressed is gone and the focus fell to the page: it goes to the heading.
 // A new account's first screen is left alone.
