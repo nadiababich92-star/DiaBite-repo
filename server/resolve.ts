@@ -353,6 +353,9 @@ function isNamed(phrase: string, name: string): boolean {
   return a.size > 0 && a.size === b.size && [...a].every((t) => b.has(t))
 }
 
+/** A product or menu item that belongs to a brand: USDA branded foods and a chain's menu items. Both are named by their first word. */
+const isBrandId = (id: string) => id.startsWith('branded:') || id.startsWith('rest:')
+
 /** The brand word of a branded name (its first word), or '' when that word is a food, not a brand. */
 function brandWord(name: string): string {
   const w = stem(tokens(name)[0] ?? '')
@@ -476,10 +479,10 @@ function closestBySpelling(phrase: string, records: FoodRecord[]): FoodRecord | 
 /** Ranked candidates with a brand nobody typed moved behind the plain record that is nearly as good. */
 function brandYields<T extends { id: string; name: string; score: number }>(phrase: string, ranked: T[]): T[] {
   const top = ranked[0]
-  if (!top || !top.id.startsWith('branded:')) return ranked
+  if (!top || !isBrandId(top.id)) return ranked
   const bw = brandWord(top.name)
   if (bw && tokens(phrase).map(stem).includes(bw)) return ranked
-  const i = ranked.findIndex((c) => !c.id.startsWith('branded:') && top.score - c.score <= BRAND_YIELD)
+  const i = ranked.findIndex((c) => !isBrandId(c.id) && top.score - c.score <= BRAND_YIELD)
   if (i <= 0) return ranked
   return [ranked[i], ...ranked.slice(0, i), ...ranked.slice(i + 1)]
 }
@@ -525,7 +528,7 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
         // curated record win a tie, and this one is the curated record. Without this "cheese pizza" lost to a white pizza.
         const handNamed = h.id.startsWith('usda:') && rec.kind === 'unrated' && rec.aliases?.includes(norm(phrase))
         const penalty = handNamed ? 0 : h.id.startsWith('usda:') ? (rec.gi === null ? (rec.kind === 'unrated' ? UNRATED_PENALTY : NO_GI_PENALTY) : COVERAGE_PENALTY) : 0
-        const branded = h.id.startsWith('branded:') ? ((brandWord(rec.name) && tokens(phrase).map(stem).includes(brandWord(rec.name))) ? 0 : BRANDED_PENALTY + COVERAGE_PENALTY) : 0
+        const branded = isBrandId(h.id) ?((brandWord(rec.name) && tokens(phrase).map(stem).includes(brandWord(rec.name))) ? 0 : BRANDED_PENALTY + COVERAGE_PENALTY) : 0
         const school = /\bschool\b/i.test(rec.name) && !/\bschool\b/i.test(phrase) ? SCHOOL_PENALTY : 0
         // A diet or format variant ranks under the plain dish, but its penalty is not taken off the score: that would
         // push every "Frittata" under the floor of what counts as found.

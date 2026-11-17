@@ -4,7 +4,7 @@
  */
 import { availableCarbs, dayGlLevel, glLevel, glycemicLoad, nutrientsFor } from '../src/lib/glycemic'
 import { isAvoided, type AvoidList } from './avoid'
-import { asFood, getRecord, householdMeasure, loadFoods, stepUnit, summary } from './foods'
+import { asFood, getRecord, hasNoLoad, householdMeasure, loadFoods, stepUnit, summary } from './foods'
 import { embed, type VectorStore } from './embeddings'
 import { resolvePhrases, sameFamily, sameFood } from './resolve'
 import type {
@@ -20,10 +20,11 @@ const r1 = (x: number) => Math.round(x * 10) / 10
 
 export function computeItem(input: MealItemInput): MealItemResult {
   const rec = getRecord(input.foodId)
-  if (rec.kind === 'branded' || rec.kind === 'unrated') {
+  if (rec.kind === 'branded' || rec.kind === 'unrated' || rec.kind === 'restaurant') {
     // Carbohydrate, fibre and energy are real; the glycemic load is not available
     // and is not estimated (the promise, and PLAN's option three). A branded product
-    // gets them from its label, an unrated food from USDA's survey table.
+    // gets them from its label, an unrated food from USDA's survey table, a restaurant
+    // item from the chain's own published table.
     const grams = input.grams ?? rec.defaultPortion
     const p = rec.per100!
     const k = grams / 100
@@ -185,8 +186,8 @@ export async function findAlternatives(
     const rec = byId.get(id)
     // Dropped before ranking, not after: an allergen is not a tie-breaker.
     if (rec && isAvoided(rec, avoid)) return false
-    // A branded or unrated item has no load to compare, so it is never a swap.
-    if (rec?.kind === 'branded' || rec?.kind === 'unrated') return false
+    // An item with no load (branded, unrated, restaurant) has nothing to compare, so it is never a swap.
+    if (hasNoLoad(rec?.kind)) return false
     if (req.sameCategory && anchor) return rec?.category === anchor.category
     return true
   }

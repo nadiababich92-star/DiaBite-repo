@@ -165,6 +165,15 @@ interface FoodRow {
 const num = (v: number | string | null): number | null => (v === null ? null : Number(v))
 
 /**
+ * The kinds that are costed for carbohydrate, fibre and energy and never for a glycemic load: a packaged
+ * product, an everyday food USDA gives no index to, and a chain restaurant's menu item. One list, so a fourth
+ * place cannot forget one of them (the swap filter once did).
+ */
+export function hasNoLoad(kind: string | undefined): boolean {
+  return kind === 'branded' || kind === 'unrated' || kind === 'restaurant'
+}
+
+/**
  * Rule 4 of CLAUDE.md, for every path a record can enter by: a record with real
  * carbohydrate and no glycemic index stays out. The load helper answers 0 for a
  * missing GI — true of cheese, false of baking powder — and the table path
@@ -172,10 +181,10 @@ const num = (v: number | string | null): number | null => (v === null ? null : N
  */
 export function carbsWithoutLoad(r: { gi: number | null; per100?: Nutrients; perServing?: Nutrients & { availableCarbs: number }; kind?: string }): boolean {
   if (r.gi !== null && r.gi > 0) return false
-  // The two exceptions, by design: a branded product and an unrated food are
+  // The three exceptions, by design: a branded product, an unrated food and a restaurant item are
   // *labelled* as carbohydrate without a load, costed for carbohydrate only, and
   // never for a glycemic load. Nothing else may hold carbohydrate without a GI.
-  if (r.kind === 'branded' || r.kind === 'unrated') return false
+  if (hasNoLoad(r.kind)) return false
   // A recipe carries its numbers per serving, not per 100 g: a recipe row with carbohydrate and no index is the same fault.
   if (r.perServing) return r.perServing.availableCarbs >= 5
   return !!r.per100 && Math.max(0, r.per100.carbs - (r.per100.fiber ?? 0)) >= 5
@@ -607,6 +616,68 @@ function brandedRecords(): FoodRecord[] {
   }))
 }
 
+/**
+ * A chain restaurant's menu item, as the chain itself publishes it.
+ *
+ * Costed exactly like a branded product: carbohydrate, fibre, energy, protein and fat for the serving the chain
+ * names, no glycemic index and none invented, so a meal that holds one is partial and is never "fits". Two things
+ * make it a kind of its own. The figure is the chain's, not a laboratory's (a 2011 JAMA study found one item in
+ * five off by more than 100 kcal, most in carbohydrate-rich sides, soups, salads and desserts), and a restaurant
+ * portion varies between locations. So every row must say where it was read and when, and the source line
+ * the person sees says the figure is published, not measured.
+ */
+export interface RestaurantRow {
+  id: string; name: string; chain: string; category: string
+  per100: Nutrients; serving: { grams: number; label: string }
+  /** The page or file of the chain's own nutrition table the row was read from. */
+  url: string
+  /** The day it was read, YYYY-MM-DD: a menu changes, and the line shown to the person carries the date. */
+  read: string
+}
+
+/** Why a row may not enter the catalogue; empty when it may. Loud on purpose: a wrong carbohydrate figure is the worst fault this kind can have. */
+export function restaurantFaults(r: RestaurantRow): string[] {
+  const out: string[] = []
+  if (!/^rest:[a-z0-9-]+$/.test(r.id ?? '')) out.push('id must be rest: and a lowercase slug')
+  if (!r.name?.trim() || !r.chain?.trim()) out.push('name and chain are required')
+  if (!/^https:\/\//.test(r.url ?? '')) out.push('url must be the chain\'s own https page or file')
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(r.read ?? '') || Number.isNaN(Date.parse(r.read))) out.push('read must be a date, YYYY-MM-DD')
+  const s = r.serving
+  if (!s || !(s.grams > 0) || !s.label?.trim()) out.push('serving needs grams above 0 and a label')
+  const p = r.per100
+  if (!p || ![p.kcal, p.carbs, p.fiber, p.protein, p.fat].every((x) => Number.isFinite(x) && x >= 0)) out.push('per100 needs kcal, carbs, fiber, protein and fat, none negative')
+  else {
+    if (p.fiber > p.carbs) out.push('fibre is more than total carbohydrate')
+    if (p.carbs + p.protein + p.fat > 100.5) out.push('carbohydrate, protein and fat add up to more than 100 g per 100 g')
+  }
+  if (!r.category) out.push('category is required')
+  return out
+}
+
+export function restaurantRecordsFrom(rows: RestaurantRow[]): FoodRecord[] {
+  const seen = new Set<string>()
+  return rows.map((r) => {
+    const faults = restaurantFaults(r)
+    if (seen.has(r.id)) faults.push('duplicate id')
+    seen.add(r.id)
+    if (faults.length) throw new Error(`restaurant item ${r.id ?? '(no id)'} is not allowed in: ${faults.join('; ')}`)
+    return {
+      id: r.id, kind: 'restaurant' as const, name: `${r.chain} ${r.name}`, gi: null, giLevel: giLevel(null),
+      category: r.category as FoodRecord['category'], unit: 'g' as const, defaultPortion: r.serving.grams,
+      searchText: `${r.chain} ${r.name}. ${r.chain}. restaurant. ${r.category}.`,
+      per100: r.per100,
+      source: `${r.chain}'s own published nutrition table (${r.url}), read ${r.read}. A restaurant's published figures are not laboratory-checked and portions vary between locations. No glycemic index exists for it.`,
+    }
+  })
+}
+
+function restaurantRecords(): FoodRecord[] {
+  if (process.env.RESTAURANT_FOODS === 'off') return []
+  const path = join(here, '..', 'data', 'foods-usda', 'restaurant_items.json')
+  if (!existsSync(path)) return []
+  return restaurantRecordsFrom(JSON.parse(readFileSync(path, 'utf8')) as RestaurantRow[])
+}
+
 let cache: { records: FoodRecord[]; byId: Map<string, FoodRecord> } | null = null
 
 export function loadFoods() {
@@ -677,6 +748,7 @@ export function loadFoods() {
   // USDA_FOODS=off to measure without it.
   if (process.env.USDA_FOODS !== 'off') records.push(...usdaRecords())
   records.push(...brandedRecords())
+  records.push(...restaurantRecords())
   for (const r of records) {
     if (r.source) continue
     const p = provenance(r.id)
@@ -714,5 +786,5 @@ export function asFood(rec: FoodRecord): Food {
 }
 
 export function kindOf(id: string): FoodKind {
-  return id.startsWith('rec:') ? 'recipe' : id.startsWith('branded:') ? 'branded' : 'ingredient'
+  return id.startsWith('rec:') ? 'recipe' : id.startsWith('branded:') ? 'branded' : id.startsWith('rest:') ? 'restaurant' : 'ingredient'
 }

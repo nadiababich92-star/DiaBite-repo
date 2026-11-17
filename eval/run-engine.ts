@@ -33,7 +33,7 @@ import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf,
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
-import { GI_CROSSCHECKED_ON, getRecord, householdMeasure, householdPortion, stepUnit, summary } from '../server/foods'
+import { GI_CROSSCHECKED_ON, getRecord, hasNoLoad, householdMeasure, householdPortion, restaurantFaults, restaurantRecordsFrom, stepUnit, summary, type RestaurantRow } from '../server/foods'
 import { countOf, countText, measureLabel, nudgeMeasure } from '../src/lib/measure'
 import { FigurePair } from '../src/components/FigurePair'
 import GlHelp, { GlHelpContext } from '../src/components/GlHelp'
@@ -591,7 +591,7 @@ const imageMisses: string[] = []
   // (gi_crosscheck.json was, on 17 November, and every receipt said nothing was checked).
   const dockerfile = readFileSync(join(ROOT, 'Dockerfile'), 'utf8').split(/^FROM /m).pop()!
   const read = readFileSync(join(ROOT, 'server', 'foods.ts'), 'utf8') + readFileSync(join(ROOT, 'server', 'embeddings.ts'), 'utf8')
-  for (const f of ['foods_usda.json', 'branded_common.json', 'ingredients.json', 'recipes_db.json', 'portion_mapping.json', 'gi_crosscheck.json', 'embeddings.bin', 'embeddings.ids.json']) {
+  for (const f of ['foods_usda.json', 'branded_common.json', 'restaurant_items.json', 'ingredients.json', 'recipes_db.json', 'portion_mapping.json', 'gi_crosscheck.json', 'embeddings.bin', 'embeddings.ids.json']) {
     if (read.includes(f) && !dockerfile.includes(f)) imageMisses.push(`    ${f} is read by the engine and not copied into the image`)
   }
 }
@@ -1307,6 +1307,70 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\nglhelp    ${glMisses.length === 0 ? 'ok' : 'WRONG'}`)
   glMisses.forEach((m) => console.log(m))
   if (glMisses.length) process.exitCode = 1
+}
+
+// ── restaurant items ──────────────────────────────────────────────────────
+// A chain's menu item is the third kind that holds carbohydrate without a glycemic index. It is costed for carbohydrate
+// from the chain's own published table, never for a load, never a swap, and a meal that holds one is partial and never
+// "fits". Its rows must say where and when they were read, and a malformed row stops the engine rather than entering.
+{
+  const restMisses: string[] = []
+  const row = (over: Partial<RestaurantRow> = {}): RestaurantRow => ({
+    id: 'rest:testchain-chicken-bowl', name: 'Chicken Bowl', chain: 'Testchain', category: 'grains',
+    per100: { kcal: 150, protein: 9, fat: 5, carbs: 17, fiber: 3 }, serving: { grams: 400, label: '1 bowl' },
+    url: 'https://example.com/testchain-nutrition.pdf', read: '2026-11-17', ...over,
+  })
+  const good = restaurantRecordsFrom([row()])[0]
+  if (good.kind !== 'restaurant' || good.gi !== null) restMisses.push('    a restaurant record is not kind restaurant with no glycemic index')
+  if (carbsWithoutLoad(good)) restMisses.push('    the catalogue rule would turn a restaurant item away')
+  if (!/Testchain/.test(good.searchText) || !/Testchain Chicken Bowl/.test(good.name)) restMisses.push('    the chain is not in the name and the search text')
+  if (!/own published nutrition table/.test(good.source ?? '') || !/2026-11-17/.test(good.source ?? '') || !/example\.com/.test(good.source ?? '')) restMisses.push('    the source line omits who published it, where, or when')
+  if (!/not laboratory-checked/.test(good.source ?? '') || !/vary/.test(good.source ?? '')) restMisses.push('    the source line does not say a published figure is not measured and portions vary')
+  // Every way a row can be wrong must stop it: a wrong carbohydrate figure is the worst fault this kind can have.
+  const bad: [string, Partial<RestaurantRow>][] = [
+    ['an id that is not rest:', { id: 'branded:1' }], ['no chain', { chain: '' }], ['no source address', { url: '' }], ['an http source', { url: 'http://example.com/x' }],
+    ['no read date', { read: '' }], ['an impossible date', { read: '2026-13-45' }], ['a zero serving', { serving: { grams: 0, label: '1 bowl' } }],
+    ['no serving label', { serving: { grams: 100, label: '' } }], ['negative carbohydrate', { per100: { kcal: 150, protein: 9, fat: 5, carbs: -1, fiber: 0 } }],
+    ['fibre above carbohydrate', { per100: { kcal: 150, protein: 9, fat: 5, carbs: 3, fiber: 9 } }], ['macros above 100 g', { per100: { kcal: 900, protein: 50, fat: 50, carbs: 50, fiber: 1 } }],
+    ['a missing nutrient', { per100: { kcal: 150, protein: 9, fat: 5, carbs: 17 } as never }], ['no category', { category: '' }],
+  ]
+  for (const [what, over] of bad) if (restaurantFaults(row(over)).length === 0) restMisses.push(`    a row with ${what} was allowed in`)
+  let dup = false
+  try { restaurantRecordsFrom([row(), row()]) } catch { dup = true }
+  if (!dup) restMisses.push('    two rows with one id were allowed in')
+  // Costed like a branded product: carbohydrate, fibre and energy from the table, no load.
+  const { byId } = loadFoods()
+  byId.set(good.id, good)
+  try {
+    const it = computeItem({ foodId: good.id, grams: 200 })
+    if (it.kind !== 'restaurant' || it.loadAvailable !== false || it.gl !== null || it.glLevel !== null || it.gi !== null) restMisses.push(`    a restaurant item has a load: ${JSON.stringify(it)}`)
+    if (Math.abs(it.carbs - 34) > 0.11 || Math.abs(it.kcal - 300) > 0.11 || Math.abs(it.fiber - 6) > 0.11) restMisses.push(`    the arithmetic of 200 g of the fixture is wrong: ${JSON.stringify(it)}`)
+    const alone = computeMeal([{ foodId: good.id, grams: 400 }])
+    const a = afterMealFor({ gl: 54, carbsG: 107, kcal: 1653 }, alone.totals, [], alone.items.map((i) => i.name))
+    if (a.fits === true) restMisses.push('    a meal of a restaurant item alone was called a fit')
+    if (!a.partial?.unscored?.includes('Testchain Chicken Bowl')) restMisses.push('    the restaurant item is not named as unscored')
+    if (driverOf(alone.items) !== undefined) restMisses.push('    a meal of a restaurant item has a driver')
+    const mixed = computeMeal([{ foodId: good.id, grams: 400 }, { foodId: 'ing:apple', grams: 150 }])
+    if (!/apple/i.test(driverOf(mixed.items)?.name ?? '')) restMisses.push('    an item with no load became the driver')
+    const day = dayState({ glBudget: 54, carbsG: 107, kcal: 1653 }, [{ foodId: good.id, grams: 400 }])
+    if (!day.unscored?.length) restMisses.push('    a day with a restaurant item in it does not name it as unscored')
+    const afterApple = afterMealFor(day.remaining, computeMeal([{ foodId: 'ing:apple', grams: 150 }]).totals, [], withDayUnscored([], day))
+    if (afterApple.fits !== null) restMisses.push('    an apple after a restaurant meal got a verdict')
+  } finally { byId.delete(good.id) }
+  // Never a swap, and the three kinds with no load are exactly these three.
+  for (const k of ['branded', 'unrated', 'restaurant']) if (!hasNoLoad(k)) restMisses.push(`    ${k} is not a kind with no load`)
+  for (const k of ['ingredient', 'recipe', undefined]) if (hasNoLoad(k)) restMisses.push(`    ${k} is treated as a kind with no load`)
+  // The shipped table passes the same rules, and was read on a day that has happened.
+  const shipped = JSON.parse(readFileSync(join(ROOT, 'data', 'foods-usda', 'restaurant_items.json'), 'utf8')) as RestaurantRow[]
+  for (const r of shipped) {
+    const f = restaurantFaults(r)
+    if (f.length) restMisses.push(`    ${r.id}: ${f.join('; ')}`)
+    if (r.read > new Date().toISOString().slice(0, 10)) restMisses.push(`    ${r.id} was read on a day that has not come`)
+  }
+  if (records.filter((r) => r.kind === 'restaurant').length !== shipped.length) restMisses.push('    the catalogue holds a different number of restaurant records than the file')
+  console.log(`\nrestaurant ${restMisses.length === 0 ? 'ok' : 'WRONG'}  (${shipped.length} items in the file)`)
+  restMisses.forEach((m) => console.log(m))
+  if (restMisses.length) process.exitCode = 1
 }
 
 // ── installable app ───────────────────────────────────────────────────────

@@ -11,9 +11,10 @@ import type { Level } from '../src/lib/glycemic'
 /**
  * `branded`: a packaged product (USDA Branded Foods). `unrated`: an everyday food USDA gives
  * nutrients for but to which no glycemic index has been assigned (pizza, ready-to-eat cereal,
- * candy). Both are costed for carbohydrate, fibre and energy and never for a load.
+ * candy). `restaurant`: a chain's menu item as the chain publishes it. All three are costed for
+ * carbohydrate, fibre and energy and never for a load.
  */
-export type FoodKind = 'ingredient' | 'recipe' | 'branded' | 'unrated'
+export type FoodKind = 'ingredient' | 'recipe' | 'branded' | 'unrated' | 'restaurant'
 
 export interface FoodSummary {
   id: string
