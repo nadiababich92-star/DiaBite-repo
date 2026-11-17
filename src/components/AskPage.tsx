@@ -8,6 +8,7 @@ import { nextStep, type TourStep } from '../lib/tour'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type Milestone } from '../lib/nudge'
 import { askAgent, avoidOf, budgetOf, engineId, lastMealCall, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type CarbLimitResult, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
 import { FigurePair, type CarbFigures } from './FigurePair'
+import { measureLabel, nudgeMeasure } from '../lib/measure'
 import { dayLabel, eaten, mealForNow, noLoadNote, portionText, viewEntry } from '../lib/diary'
 import { swapNamedIn, type SwapOffer } from '../lib/swap'
 import { MEAL_LABELS } from '../lib/menu'
@@ -177,8 +178,8 @@ function RecalcCard({ rc, onBack, note, was, countBy }: { rc: Recalc; onBack: ()
  * For a dish counted from an assumed recipe it is the composition card: an ingredient can also be taken
  * out and put back, and the whole thing reset to what the agent suggested.
  */
-function PortionEditor({ lines, grams, busy, error, onNudge, assumed, removed, onRemove, onReset }: {
-  lines: ReceiptLine[]; grams: Record<number, number>; busy: boolean; error: string; onNudge: (i: number, dir: 1 | -1) => void
+function PortionEditor({ lines, grams, units, busy, error, onNudge, assumed, removed, onRemove, onReset }: {
+  lines: ReceiptLine[]; grams: Record<number, number>; units?: 'imperial' | 'metric'; busy: boolean; error: string; onNudge: (i: number, dir: 1 | -1) => void
   assumed?: Receipt['assumed']; removed: number[]; onRemove: (i: number) => void; onReset: () => void
 }) {
   const edited = Object.keys(grams).length > 0 || removed.length > 0
@@ -190,6 +191,8 @@ function PortionEditor({ lines, grams, busy, error, onNudge, assumed, removed, o
         {lines.map((l, i) => {
           const value = grams[i] ?? l.servings ?? l.grams
           const unit = l.servings ? (value === 1 ? 'serving' : 'servings') : 'g'
+          // On US units, a food with a measure in its own table is moved by that measure and shows it beside the grams.
+          const said = units === 'imperial' && !l.servings ? measureLabel(value, l.measureUnit) : null
           const gone = removed.includes(i)
           return (
             <li key={`${l.foodId}-${i}`} className={gone ? 'removed' : undefined}>
@@ -203,7 +206,7 @@ function PortionEditor({ lines, grams, busy, error, onNudge, assumed, removed, o
               ) : (
                 <span className="stepper">
                   <button className="step" aria-label={`Less ${l.name}`} onClick={() => onNudge(i, -1)}>−</button>
-                  <span className="step-v" aria-live="polite">{value} {unit}</span>
+                  <span className="step-v" aria-live="polite">{said ? `${said} · ${value} ${unit}` : `${value} ${unit}`}</span>
                   <button className="step" aria-label={`More ${l.name}`} onClick={() => onNudge(i, 1)}>+</button>
                   {assumed && <button className="step remove-step" aria-label={`Remove ${l.name}`} onClick={() => onRemove(i)}>×</button>}
                 </span>
@@ -503,6 +506,8 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     if (!receipt) return
     const l = baseLines[i]
     const base = grams[i] ?? l.servings ?? l.grams
+    const measured = profile.units === 'imperial' && !l.servings && l.measureUnit ? nudgeMeasure(base, l.measureUnit, dir) : null
+    if (measured !== null) { setGrams((g) => ({ ...g, [i]: measured })); setLogged(false); return }
     const step = l.servings ? 0.5 : Math.max(5, Math.round((base * 0.1) / 5) * 5)
     const next = l.servings ? Math.min(12, Math.max(0.5, base + dir * step)) : Math.min(1500, Math.max(5, base + dir * step))
     setGrams((g) => ({ ...g, [i]: Math.round(next * 100) / 100 }))
@@ -804,7 +809,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
 
           {editing && receipt && !receipt.carbsOnly && (
             <div ref={editorRef}>
-              <PortionEditor lines={baseLines} grams={grams} busy={recalcBusy} error={recalcError} onNudge={nudge} assumed={receipt.assumed} removed={removed} onRemove={toggleRemoved} onReset={resetRecipe} />
+              <PortionEditor lines={baseLines} grams={grams} units={profile.units} busy={recalcBusy} error={recalcError} onNudge={nudge} assumed={receipt.assumed} removed={removed} onRemove={toggleRemoved} onReset={resetRecipe} />
             </div>
           )}
 

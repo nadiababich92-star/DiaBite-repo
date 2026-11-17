@@ -99,6 +99,8 @@ export interface MealItemResult extends Nutrients {
   loadAvailable: boolean
   /** The grams said as a household measure the record's own USDA table lists ("1 cup"), when they match one; absent otherwise. */
   measure?: { count: number; unit: string; text: string }
+  /** The unit the portion editor steps this food in, and what one weighs ("cup", 158): the record's own table, a unit that is at least half of this weight. Absent when no unit fits; the editor then steps in grams. */
+  stepUnit?: { unit: string; unitGrams: number }
 }
 
 export interface MealTotals extends Nutrients {

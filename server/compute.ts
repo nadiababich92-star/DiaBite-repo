@@ -4,7 +4,7 @@
  */
 import { availableCarbs, dayGlLevel, glLevel, glycemicLoad, nutrientsFor } from '../src/lib/glycemic'
 import { isAvoided, type AvoidList } from './avoid'
-import { asFood, getRecord, householdMeasure, loadFoods, summary } from './foods'
+import { asFood, getRecord, householdMeasure, loadFoods, stepUnit, summary } from './foods'
 import { embed, type VectorStore } from './embeddings'
 import { resolvePhrases, sameFamily, sameFood } from './resolve'
 import type {
@@ -75,8 +75,10 @@ export function totalsOf(items: MealItemResult[]): MealTotals {
 
 /** An item with its grams said as a household measure, when the record's own USDA table has one that fits. Nothing else changes. */
 const withMeasure = (r: MealItemResult): MealItemResult => {
-  const m = r.grams > 0 ? householdMeasure(getRecord(r.foodId).portions, r.grams) : null
-  return m ? { ...r, measure: m } : r
+  const rows = getRecord(r.foodId).portions
+  const m = r.grams > 0 ? householdMeasure(rows, r.grams) : null
+  const step = r.grams > 0 ? stepUnit(rows, r.grams) : null
+  return { ...r, ...(m ? { measure: m } : {}), ...(step ? { stepUnit: step } : {}) }
 }
 
 export function computeMeal(items: MealItemInput[]): ComputeMealResponse {

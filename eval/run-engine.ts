@@ -33,7 +33,8 @@ import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf,
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
-import { householdMeasure, householdPortion } from '../server/foods'
+import { householdMeasure, householdPortion, stepUnit } from '../server/foods'
+import { countOf, countText, measureLabel, nudgeMeasure } from '../src/lib/measure'
 import { FigurePair } from '../src/components/FigurePair'
 import { budgetOf, buildReceipt } from '../src/lib/agent'
 import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
@@ -1191,6 +1192,54 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\ndailycarb ${dailyMisses.length === 0 ? 'ok' : 'WRONG'}`)
   dailyMisses.forEach((m) => console.log(m))
   if (dailyMisses.length) process.exitCode = 1
+}
+
+// ── the portion editor on US units ────────────────────────────────────────
+// A food with a measure in its own USDA table is moved by that measure (a quarter of a cup, one slice), not by ten grams; the
+// grams that result are what the engine counts. USDA's "4 oz" arrives as "oz = 113 g": that is never said as "1 oz".
+{
+  const stepMisses: string[] = []
+  const cup = { unit: 'cup', unitGrams: 158 }
+  const eq = (what: string, got: unknown, want: unknown) => { if (JSON.stringify(got) !== JSON.stringify(want)) stepMisses.push(`    ${what}: ${JSON.stringify(got)}, wanted ${JSON.stringify(want)}`) }
+  // which unit a food steps in
+  eq('rice 180 g steps in the 158 g cup', stepUnit([{ label: 'cup', grams: 158 }], 180), cup)
+  eq('a 100 g chicken breast (a 4 oz row and a 272 g piece) steps in grams', stepUnit([{ label: 'oz', grams: 113 }, { label: 'piece', grams: 272 }], 100), null)
+  eq('a whole 1200 g jicama is not a unit for 100 g', stepUnit([{ label: 'large', grams: 1200 }], 100), null)
+  eq('a banana of 118 g steps by the medium', stepUnit([{ label: 'medium', grams: 118 }], 118), { unit: 'medium', unitGrams: 118 })
+  eq('the closest unit wins: 30 g of oil is a tablespoon, not a cup', stepUnit([{ label: 'cup', grams: 218 }, { label: 'tablespoon', grams: 14 }], 28), { unit: 'tbsp', unitGrams: 14 })
+  eq('a real ounce is a unit', stepUnit([{ label: 'oz', grams: 28.4 }], 57)?.unit, 'oz')
+  // the lost "4" in "4 oz"
+  eq('113 g under the label oz is not "1 oz"', householdMeasure([{ label: 'oz', grams: 113 }], 113), null)
+  eq('28.4 g under the label oz is "1 oz"', householdMeasure([{ label: 'oz', grams: 28.4 }], 28.4)?.text, '1 oz')
+  // the taps
+  eq('1 cup, one tap up, is 1 1/4 cups', nudgeMeasure(158, cup, 1), 198)
+  eq('1 cup, one tap down, is 3/4 cup', nudgeMeasure(158, cup, -1), 119)
+  eq('180 g, between the stops, goes up to 1 1/4 cups', nudgeMeasure(180, cup, 1), 198)
+  eq('180 g goes down to the whole cup', nudgeMeasure(180, cup, -1), 158)
+  eq('1/3 cup goes to 2/3, not to 7/12', nudgeMeasure(53, cup, 1), 105)
+  eq('a quarter cup stays a quarter cup', nudgeMeasure(40, cup, -1), 40)
+  eq('a slice goes by one', nudgeMeasure(29, { unit: 'slice', unitGrams: 29 }, 1), 58)
+  eq('the most of a cup is eight', nudgeMeasure(8 * 158, cup, 1), 1264)
+  eq('an unknown unit gives no step', nudgeMeasure(100, { unit: 'package', unitGrams: 926 }, 1), null)
+  // the words
+  eq('1 1/4 cups', countText(1.25, 'cup'), '1 1/4 cups')
+  eq('1 cup', countText(1, 'cup'), '1 cup')
+  eq('1/2 tbsp', countText(0.5, 'tbsp'), '1/2 tbsp')
+  eq('2 slices', countText(2, 'slice'), '2 slices')
+  eq('2/3 cup', countText(2 / 3, 'cup'), '2/3 cup')
+  eq('a weight that is no measure says nothing', measureLabel(180, cup), null)
+  eq('a weight that is one says it', measureLabel(198, cup), '1 1/4 cups')
+  eq('no unit, no label', measureLabel(180, undefined), null)
+  eq('countOf a whole cup', countOf(158, cup), 1)
+  // what the engine hands over
+  const rice = computeMeal([{ foodId: 'seed:rice-white', grams: 180 }]).items[0]
+  eq('the engine says the unit for 180 g of rice', rice.stepUnit, cup)
+  eq('and 180 g is not called a cup', rice.measure, undefined)
+  const chicken = computeMeal([{ foodId: 'ing:chicken_breast', grams: 113 }]).items[0]
+  eq('113 g of chicken is not "1 oz"', chicken.measure, undefined)
+  console.log(`\nstepper   ${stepMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  stepMisses.forEach((m) => console.log(m))
+  if (stepMisses.length) process.exitCode = 1
 }
 
 // ── onboarding focus ──────────────────────────────────────────────────────
