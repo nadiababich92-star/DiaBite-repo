@@ -585,9 +585,11 @@ dishMisses.forEach((m) => console.log(m))
 
 const imageMisses: string[] = []
 {
-  const dockerfile = readFileSync(join(ROOT, 'Dockerfile'), 'utf8')
+  // The engine runs in the LAST stage of the Dockerfile: a file copied only into the stage that builds the app is not in the image it runs in
+  // (gi_crosscheck.json was, on 17 November, and every receipt said nothing was checked).
+  const dockerfile = readFileSync(join(ROOT, 'Dockerfile'), 'utf8').split(/^FROM /m).pop()!
   const read = readFileSync(join(ROOT, 'server', 'foods.ts'), 'utf8') + readFileSync(join(ROOT, 'server', 'embeddings.ts'), 'utf8')
-  for (const f of ['foods_usda.json', 'branded_common.json', 'ingredients.json', 'recipes_db.json', 'embeddings.bin', 'embeddings.ids.json']) {
+  for (const f of ['foods_usda.json', 'branded_common.json', 'ingredients.json', 'recipes_db.json', 'portion_mapping.json', 'gi_crosscheck.json', 'embeddings.bin', 'embeddings.ids.json']) {
     if (read.includes(f) && !dockerfile.includes(f)) imageMisses.push(`    ${f} is read by the engine and not copied into the image`)
   }
 }
