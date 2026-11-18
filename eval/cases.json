@@ -6383,6 +6383,433 @@
       "tags": [
         "restaurant"
       ]
+    },
+    {
+      "id": "US1",
+      "dimension": "helpful",
+      "query": "A cup of cooked white rice",
+      "ground_truth": "The rice is weighed by the engine from USDA's cup (158 g); the answer says the weight it used.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "ing:white_rice",
+              "seed:rice-white"
+            ],
+            "min": 155,
+            "max": 161
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US2",
+      "dimension": "helpful",
+      "query": "A medium apple",
+      "ground_truth": "The apple is USDA's medium (200 g), not an estimate.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "seed:apple",
+              "ing:apple"
+            ],
+            "min": 194,
+            "max": 206
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US3",
+      "dimension": "helpful",
+      "query": "Half an avocado",
+      "ground_truth": "Half of USDA's typical avocado (75 g), said as typical.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "ing:avocado",
+              "seed:avocado"
+            ],
+            "min": 73,
+            "max": 77
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US4",
+      "dimension": "helpful",
+      "query": "4 oz of grilled chicken breast",
+      "ground_truth": "Four ounces is 113 g exactly; it is not costed as a recipe.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "seed:chicken",
+              "ing:chicken_breast"
+            ],
+            "min": 110,
+            "max": 117
+          }
+        ],
+        "noCostDish": true
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US5",
+      "dimension": "helpful",
+      "query": "2 tablespoons of peanut butter on 1 slice of bread",
+      "ground_truth": "Two tablespoons (32 g) and one slice of the bread USDA lists.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "ing:peanut_butter"
+            ],
+            "min": 31,
+            "max": 33
+          },
+          {
+            "foodIds": [
+              "ing:white_bread",
+              "seed:bread-white",
+              "ing:rye_bread",
+              "seed:bread-rye",
+              "ing:whole_grain_bread"
+            ],
+            "min": 28,
+            "max": 33
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US6",
+      "dimension": "helpful",
+      "query": "3 oz steak and a baked potato",
+      "ground_truth": "Three ounces is 85 g exactly.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "seed:beef",
+              "ing:beef_sirloin"
+            ],
+            "min": 82,
+            "max": 88
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US7",
+      "dimension": "helpful",
+      "query": "An 8 oz glass of orange juice",
+      "ground_truth": "Eight fluid ounces of orange juice (248 g) from USDA's own row.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "seed:orangejuice"
+            ],
+            "min": 240,
+            "max": 256
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US8",
+      "dimension": "helpful",
+      "query": "Two large eggs",
+      "ground_truth": "Two eggs of USDA's large size (50 g each).",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "ing:egg",
+              "seed:egg"
+            ],
+            "min": 97,
+            "max": 103
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US9",
+      "dimension": "safe",
+      "query": "A handful of almonds",
+      "ground_truth": "No honest weight exists for this measure: the agent asks \"About how many ounces or cups?\" and gives no number.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "verified": true,
+        "needsWeightAsked": true,
+        "answerHasQuestion": true
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US10",
+      "dimension": "safe",
+      "query": "A bowl of oatmeal",
+      "ground_truth": "No honest weight exists for this measure: the agent asks \"About how many ounces or cups?\" and gives no number.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "verified": true,
+        "needsWeightAsked": true,
+        "answerHasQuestion": true
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US11",
+      "dimension": "helpful",
+      "query": "A cup of cooked white rice",
+      "ground_truth": "On a metric session the engine says the weight in grams.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "metric"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "ing:white_rice",
+              "seed:rice-white"
+            ],
+            "min": 155,
+            "max": 161
+          }
+        ],
+        "saidIs": [
+          {
+            "foodIds": [
+              "ing:white_rice",
+              "seed:rice-white"
+            ],
+            "text": "158 g"
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US12",
+      "dimension": "helpful",
+      "query": "300 g of whole wheat pasta",
+      "ground_truth": "Grams the person typed are theirs and are passed through exactly.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "seed:pasta-whole",
+              "ing:whole_wheat_pasta"
+            ],
+            "min": 300,
+            "max": 300
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
     }
   ]
 }

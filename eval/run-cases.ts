@@ -35,7 +35,7 @@ interface Case {
   dimension: string
   query: string
   ground_truth: string
-  context: { budget: { glBudget: number; carbsG: number; kcal: number }; entries: unknown[]; carbLimit?: { kind: 'meal' | 'snack'; g: number }; avoid?: Record<string, unknown> }
+  context: { budget: { glBudget: number; carbsG: number; kcal: number }; entries: unknown[]; carbLimit?: { kind: 'meal' | 'snack'; g: number }; avoid?: Record<string, unknown>; units?: 'imperial' | 'metric' }
   expect: Record<string, unknown>
   judge: string
   tags: string[]
@@ -192,6 +192,28 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
     }
     if (e.noExcludedField === true) say('no excluded foods reported when the meal has none', ex === undefined, JSON.stringify(ex))
     if (e.noCarbLimitField === true) say('no carbohydrate limit in the result when none was set', cl === undefined, JSON.stringify(cl))
+  }
+  // A measure the person said is turned into grams by the engine, never by the model (docs/specs/quantity-evals.md): the item's weight is read
+  // from the compute_meal result, and the item must carry the `quantity` the engine echoes, so a weight the model wrote itself is not a pass.
+  if (Array.isArray(e.quantityGrams)) {
+    const items = ((lastCallOf(r, 'compute_meal')?.result as { items?: { foodId: string; grams: number; quantity?: unknown; basis?: string }[] } | undefined)?.items ?? [])
+    for (const q of e.quantityGrams as { foodId?: string; foodIds?: string[]; min: number; max: number }[]) {
+      const ids = q.foodIds ?? [q.foodId as string]
+      const it = items.find((i) => ids.includes(i.foodId))
+      say(`${ids[0]} weighed by the engine from what the person said, ${q.min} to ${q.max} g`, !!it && it.quantity !== undefined && it.grams >= q.min && it.grams <= q.max,
+        it ? `${it.foodId} ${it.grams} g, quantity ${JSON.stringify(it.quantity)}` : `no item for ${ids.join('/')} among ${items.map((i) => i.foodId).join(',')}`)
+    }
+  }
+  if (Array.isArray(e.saidIs)) {
+    const items = ((lastCallOf(r, 'compute_meal')?.result as { items?: { foodId: string; said?: string }[] } | undefined)?.items ?? [])
+    for (const q of e.saidIs as { foodIds: string[]; text: string }[]) {
+      const it = items.find((i) => q.foodIds.includes(i.foodId))
+      say(`${q.foodIds[0]} is said as ${JSON.stringify(q.text)} (the engine's words for the session's units)`, it?.said === q.text, JSON.stringify(it?.said))
+    }
+  }
+  if (e.needsWeightAsked === true) {
+    const res = lastCallOf(r, 'compute_meal')?.result as { needsWeight?: unknown; totals?: unknown } | undefined
+    say('no weight was guessed: the engine said needsWeight or the agent asked before costing', !called(r, 'compute_meal') || (res?.needsWeight !== undefined && res?.totals === undefined), JSON.stringify(res)?.slice(0, 120))
   }
   if (e.noComputeMeal === true) say('no compute_meal', !called(r, 'compute_meal'))
   if (e.noToolCalls === true) say('no tool calls', (r.toolCalls ?? 0) === 0)
@@ -530,6 +552,7 @@ for (const c of runnable) {
       entries: c.context?.entries,
       ...(c.context?.carbLimit ? { carbLimit: c.context.carbLimit } : {}),
       ...(c.context?.avoid ? { avoid: c.context.avoid } : {}),
+      ...(c.context?.units ? { units: c.context.units } : {}),
     }),
   })
   if (!res.ok) {
