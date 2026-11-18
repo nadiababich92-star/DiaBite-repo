@@ -366,7 +366,6 @@ function portionMap(): Record<string, { label: string; grams: number }[]> {
 export interface HouseholdMeasure { count: number; unit: string; text: string }
 
 // SR Legacy writes "tbsp" and "tsp"; the survey tables write the words. Both are the same measure.
-const MEASURE_LABEL = /^(?:1 )?(cup|tablespoon|tbsp|teaspoon|tsp|fl oz|oz|slice|piece|medium|small|large)$/i
 /** The most of a unit that is said in it: eleven tablespoons is two thirds of a cup, and nobody says it that way. */
 const MOST_OF: Record<string, number> = { cup: 8, tablespoon: 4, teaspoon: 3, 'fl oz': 16, oz: 16, slice: 12, piece: 12, medium: 6, small: 6, large: 6 }
 const FRACTIONS: [number, string][] = [[0, ''], [1 / 4, '1/4'], [1 / 3, '1/3'], [1 / 2, '1/2'], [2 / 3, '2/3'], [3 / 4, '3/4']]
@@ -390,6 +389,77 @@ function plausibleUnit(label: string, grams: number): boolean {
   return true
 }
 
+/**
+ * One household row of a USDA table, read from its label (docs/specs/quantity-labels-and-links.md). The tables we hold have 26,977
+ * rows in 2,143 label shapes; a bare unit word ("cup") was the only shape read before, so most survey tables were invisible.
+ * `qualifier` is what the label says beyond the unit ("chopped", "ice"): a qualified row is kept but never used for a plain measure.
+ */
+export interface PortionRow {
+  unit: 'cup' | 'tbsp' | 'tsp' | 'fl oz' | 'oz' | 'lb' | 'slice' | 'piece' | 'small' | 'medium' | 'large' | 'whole'
+  /** Only for a slice: "medium or regular slice", "large or thick slice", "small or thin/very thin slice". */
+  size?: 'small' | 'medium' | 'large'
+  qualifier: string
+  /** The word to say: "cup", "medium", "regular", "banana". */
+  word: string
+  grams: number
+  /** USDA's own label, kept for provenance and display. */
+  label: string
+  /** The unit as the label wrote it, lower case ("tablespoon", "tbsp"): the old readers keyed on it. */
+  rawUnit: string
+}
+
+const WHOLE_WORDS = new Set(['regular', 'whole', 'fruit', 'item', 'each'])
+const stemWord = (w: string) => w.toLowerCase().replace(/ies$/, 'y').replace(/s$/, '')
+
+/** The qualifier of a unit row: what follows the unit word, with the harmless parts ("(8 fl oz)", "nfs") removed. */
+function qualifierOf(rest: string): string {
+  let r = rest.trim().toLowerCase()
+  r = r.replace(/\((?:8 fl oz|nfs)\)/g, ' ').replace(/^,?\s*nfs\b/, ' ').replace(/^,\s*/, ' ')
+  if (/\(1 nlea serving\)/.test(r)) return 'nlea'
+  if (/\((?:no|with) ice\)/.test(r)) return 'ice'
+  r = r.replace(/[()]/g, ' ').replace(/\s+/g, ' ').trim()
+  return r
+}
+
+export function readPortion(label: string, grams: number, recordName: string): PortionRow | null {
+  if (!(grams > 0)) return null
+  const raw = String(label).trim()
+  const lead = /^(\d+(?:\.\d+)?(?:\/\d+)?)\s+(.*)$/.exec(raw)
+  const rest = (lead ? lead[2] : raw).trim()
+  if (lead && Number(lead[1].includes('/') ? 0 : lead[1]) !== 1) return null   // a count other than 1 is a multiple of unknown size
+  const low = rest.toLowerCase()
+  const row = (unit: PortionRow['unit'], rawUnit: string, qualifier: string, word: string, size?: PortionRow['size']): PortionRow | null =>
+    ((unit === 'oz' || unit === 'fl oz') && !plausibleUnit(unit, grams)) ? null : { unit, ...(size ? { size } : {}), qualifier, word, grams, label: raw, rawUnit }
+  let m: RegExpExecArray | null
+  if ((m = /^(medium or regular|large or thick|small or thin\/very thin) slice\b(.*)$/.exec(low))) {
+    return row('slice', 'slice', qualifierOf(m[2]), 'slice', m[1].startsWith('medium') ? 'medium' : m[1].startsWith('large') ? 'large' : 'small')
+  }
+  if ((m = /^(cup|tablespoon|tbsp|teaspoon|tsp|fl oz|oz|lb|slice|piece|medium|small|large)\b(.*)$/.exec(low))) {
+    const w = m[1]
+    const unit = (w === 'tablespoon' ? 'tbsp' : w === 'teaspoon' ? 'tsp' : w) as PortionRow['unit']
+    return row(unit, w, qualifierOf(m[2]), w === 'tablespoon' ? 'tbsp' : w === 'teaspoon' ? 'tsp' : w)
+  }
+  if ((m = /^(\w+)$/.exec(low)) && (WHOLE_WORDS.has(m[1]) || recordName.toLowerCase().split(/[^a-z]+/).filter(Boolean).map(stemWord).includes(stemWord(m[1])))) {
+    return row('whole', m[1], '', m[1])
+  }
+  return null
+}
+
+/** The rows `householdMeasure` and `stepUnit` have always read: a plain row in one of the old units. Everything new is additive. */
+const OLD_UNITS = new Set(['cup', 'tbsp', 'tsp', 'fl oz', 'oz', 'slice', 'piece', 'medium', 'small', 'large'])
+/** The label shape read before 18 November: a bare unit word, with or without "1". */
+const BARE_LABEL = /^(?:1 )?(cup|tablespoon|tbsp|teaspoon|tsp|fl oz|oz|slice|piece|medium|small|large)$/i
+/**
+ * A plain row in one of the old units. `strict` is the old reading (a bare unit word only); without it, the new label shapes count too.
+ * A measure is looked for in the strict rows first and in the wider reading only when they say nothing, so a food a person already
+ * sees in slices is not renamed in cups: what the wider reading adds is new, it does not replace.
+ */
+function plainRow(p: { label: string; grams: number }, strict: boolean): PortionRow | null {
+  if (strict && !BARE_LABEL.test(String(p.label).trim())) return null
+  const r = readPortion(p.label, p.grams, '')
+  return r && !r.qualifier && OLD_UNITS.has(r.unit) ? r : null
+}
+
 const STEP_UNITS = ['cup', 'slice', 'piece', 'medium', 'large', 'small', 'tbsp', 'tsp', 'oz', 'fl oz']
 const UNIT_SHORT: Record<string, string> = { tablespoon: 'tbsp', teaspoon: 'tsp' }
 
@@ -400,12 +470,15 @@ const UNIT_SHORT: Record<string, string> = { tablespoon: 'tbsp', teaspoon: 'tsp'
  * steps in grams. Null when none fits. It says nothing about what the portion is called; that is `householdMeasure`.
  */
 export function stepUnit(rows: { label: string; grams: number }[] | undefined, grams: number): { unit: string; unitGrams: number } | null {
+  return stepUnitFrom(rows, grams, true) ?? stepUnitFrom(rows, grams, false)
+}
+function stepUnitFrom(rows: { label: string; grams: number }[] | undefined, grams: number, strict: boolean): { unit: string; unitGrams: number } | null {
   if (!rows?.length || !(grams > 0)) return null
   let best: { unit: string; unitGrams: number; d: number } | null = null
   for (const p of rows) {
-    const m = MEASURE_LABEL.exec(String(p.label).trim())
-    if (!m || !(p.grams > 0) || !plausibleUnit(m[1], p.grams)) continue
-    const raw = m[1].toLowerCase()
+    const pr = plainRow(p, strict)
+    if (!pr) continue
+    const raw = pr.rawUnit
     const unit = UNIT_SHORT[raw] ?? raw
     if (!STEP_UNITS.includes(unit)) continue
     const count = grams / p.grams
@@ -417,12 +490,15 @@ export function stepUnit(rows: { label: string; grams: number }[] | undefined, g
 }
 
 export function householdMeasure(rows: { label: string; grams: number }[] | undefined, grams: number): HouseholdMeasure | null {
+  return householdMeasureFrom(rows, grams, true) ?? householdMeasureFrom(rows, grams, false)
+}
+function householdMeasureFrom(rows: { label: string; grams: number }[] | undefined, grams: number, strict: boolean): HouseholdMeasure | null {
   if (!rows?.length || !(grams > 0)) return null
   let best: { unitGrams: number; err: number; count: number; unit: string; fraction: string; whole: number } | null = null
   for (const p of rows) {
-    const m = MEASURE_LABEL.exec(String(p.label).trim())
-    if (!m || !(p.grams > 0) || !plausibleUnit(m[1], p.grams)) continue
-    const unit = ({ tbsp: 'tablespoon', tsp: 'teaspoon' } as Record<string, string>)[m[1].toLowerCase()] ?? m[1].toLowerCase()
+    const pr = plainRow(p, strict)
+    if (!pr) continue
+    const unit = ({ tbsp: 'tablespoon', tsp: 'teaspoon' } as Record<string, string>)[pr.rawUnit] ?? pr.rawUnit
     for (let whole = 0; whole <= 12; whole++) {
       for (const [f, fraction] of FRACTIONS) {
         const count = whole + f

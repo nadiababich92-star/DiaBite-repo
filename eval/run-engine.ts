@@ -35,7 +35,8 @@ import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf,
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
-import { GI_CROSSCHECKED_ON, getRecord, hasNoLoad, householdMeasure, householdPortion, restaurantFaults, restaurantRecordsFrom, stepUnit, summary, type RestaurantRow } from '../server/foods'
+import { GI_CROSSCHECKED_ON, getRecord, hasNoLoad, householdMeasure, householdPortion, readPortion, restaurantFaults, restaurantRecordsFrom, stepUnit, summary, type RestaurantRow } from '../server/foods'
+import { legacyHouseholdMeasure, legacyStepUnit } from './legacy-measure'
 import { countOf, countText, measureLabel, nudgeMeasure } from '../src/lib/measure'
 import { FigurePair } from '../src/components/FigurePair'
 import GlHelp, { GlHelpContext } from '../src/components/GlHelp'
@@ -1257,6 +1258,64 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\nmapped    ${mapMisses.length === 0 ? 'ok' : 'WRONG'}  (${keys.length} foods)`)
   mapMisses.forEach((m) => console.log(m))
   if (mapMisses.length) process.exitCode = 1
+}
+
+// ── reading USDA's household labels ───────────────────────────────────────
+// docs/specs/quantity-labels-and-links.md. The tables we hold have 26,977 rows in 2,143 label shapes and only a bare unit word was read.
+// readPortion reads the leading unit and keeps the rest as a qualifier. Q5: each shape reads to what the spec says. Q7: reading more
+// shapes took no measure away and changed none a person already sees (eval/legacy-measure.ts is the frozen reference).
+{
+  const labelMisses: string[] = []
+  const want = (label: string, grams: number, name: string, exp: { unit: string; size?: string; qualifier?: string; word?: string } | null) => {
+    const got = readPortion(label, grams, name)
+    const ok = exp === null ? got === null : got !== null && got.unit === exp.unit && (got.size ?? '') === (exp.size ?? '') && got.qualifier === (exp.qualifier ?? '') && (exp.word === undefined || got.word === exp.word)
+    if (!ok) labelMisses.push(`    ${JSON.stringify(label)} (${grams} g, ${name}) read ${JSON.stringify(got && { unit: got.unit, size: got.size, qualifier: got.qualifier, word: got.word })}, wanted ${JSON.stringify(exp)}`)
+  }
+  want('1 cup', 158, 'Rice', { unit: 'cup', word: 'cup' }); want('cup', 158, 'Rice', { unit: 'cup' })
+  want('1 cup (8 fl oz)', 240, 'Milk', { unit: 'cup' }); want('1 cup, NFS', 150, 'Rice', { unit: 'cup' }); want('cup (1 NLEA serving)', 85, 'Cereal', { unit: 'cup', qualifier: 'nlea' })
+  want('1 cup, chopped', 160, 'Onions', { unit: 'cup', qualifier: 'chopped' }); want('1 cup, cooked, diced', 135, 'Chicken', { unit: 'cup', qualifier: 'cooked, diced' })
+  want('1 tablespoon', 16, 'Peanut butter', { unit: 'tbsp', word: 'tbsp' }); want('tbsp', 14.2, 'Butter', { unit: 'tbsp' }); want('1 teaspoon', 5, 'Sugar', { unit: 'tsp' }); want('tsp', 4.5, 'Oil', { unit: 'tsp' })
+  want('1 fl oz', 30.5, 'Milk', { unit: 'fl oz' }); want('1 fl oz (NFS)', 30, 'Cola', { unit: 'fl oz' }); want('1 fl oz (with ice)', 28, 'Cola', { unit: 'fl oz', qualifier: 'ice' }); want('1 fl oz (no ice)', 29, 'Cola', { unit: 'fl oz', qualifier: 'ice' })
+  want('1 oz', 28.35, 'Cheese', { unit: 'oz' }); want('oz', 113, 'Chicken', null)   // four ounces written as "oz": refused by plausibleUnit
+  want('1 oz, cooked', 28.35, 'Chicken', { unit: 'oz', qualifier: 'cooked' }); want('lb', 453.6, 'Beef', { unit: 'lb' })
+  want('1 slice', 28, 'Bread', { unit: 'slice' }); want('1 medium or regular slice', 32, 'Bread, rye', { unit: 'slice', size: 'medium' }); want('1 large or thick slice', 43, 'Bread, rye', { unit: 'slice', size: 'large' })
+  want('1 small or thin/very thin slice', 24, 'Bread', { unit: 'slice', size: 'small' }); want('1 slice, crust not eaten', 15, 'Bread', { unit: 'slice', qualifier: 'crust not eaten' })
+  want('1 piece', 50, 'Pizza', { unit: 'piece' }); want('1 medium', 200, 'Apple, raw', { unit: 'medium' }); want('1 small', 165, 'Apple, raw', { unit: 'small' }); want('1 large', 50, 'Egg', { unit: 'large' })
+  want('1 regular', 120, 'Peppers, sweet, green, raw', { unit: 'whole', word: 'regular' }); want('1 whole', 125, 'Tomatoes, raw', { unit: 'whole', word: 'whole' }); want('1 fruit', 150, 'Peach, raw', { unit: 'whole', word: 'fruit' })
+  want('1 item', 40, 'Candy', { unit: 'whole', word: 'item' }); want('1 banana', 126, 'Banana, raw', { unit: 'whole', word: 'banana' }); want('1 egg', 50, 'Egg, whole, raw', { unit: 'whole', word: 'egg' })
+  want('1 banana', 126, 'Apple, raw', null)            // a word that is not part of the food's own name is not "one of it"
+  want('2 slices', 56, 'Bread', null); want('4 oz', 113, 'Chicken', null); want('1 cubic inch', 17, 'Cheese', null); want('1 serving', 100, 'Soup', null); want('1 miniature', 30, 'Pepper', null)
+  want('1 cup', 0, 'Rice', null); want('Guideline amount per sandwich', 32, 'Peanut butter', null); want('1 extra large', 295, 'Apple', null)
+  console.log(`\nlabels    ${labelMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  labelMisses.forEach((m) => console.log(m))
+  if (labelMisses.length) process.exitCode = 1
+
+  // Q7: the regression. Over every record that has household rows, at weights chosen around each row (a quarter to three times it)
+  // and on a fixed grid, the new readers return, wherever the old ones returned something, exactly that. Only new measures may appear.
+  const regress: string[] = []
+  const grid = [5, 10, 15, 20, 30, 50, 75, 100, 150, 200, 300, 500, 1000]
+  let records = 0, gained = 0
+  const sample: string[] = []
+  for (const r of loadFoods().records) {
+    if (!r.portions?.length) continue
+    records++
+    const ws = new Set(grid)
+    for (const p of r.portions) for (const k of [0.25, 0.5, 1 / 3, 2 / 3, 0.75, 1, 1.5, 2, 3, 4]) { const w = Math.round(p.grams * k * 10) / 10; if (w >= 1 && w <= 1500) ws.add(w) }
+    let changed = false
+    for (const w of ws) {
+      const a = legacyHouseholdMeasure(r.portions, w), b = householdMeasure(r.portions, w)
+      if (a !== null && JSON.stringify(a) !== JSON.stringify(b)) regress.push(`    ${r.id} measure at ${w} g: was ${JSON.stringify(a)}, now ${JSON.stringify(b)}`)
+      if (a === null && b !== null) changed = true
+      const c = legacyStepUnit(r.portions, w), d = stepUnit(r.portions, w)
+      if (c !== null && JSON.stringify(c) !== JSON.stringify(d)) regress.push(`    ${r.id} step unit at ${w} g: was ${JSON.stringify(c)}, now ${JSON.stringify(d)}`)
+      if (c === null && d !== null) changed = true
+    }
+    if (changed) { gained++; if (sample.length < 6) sample.push(`${r.id} ${r.name.slice(0, 30)}`) }
+    if (regress.length > 8) break
+  }
+  console.log(`measureread ${regress.length === 0 ? 'ok' : 'WRONG'}  (${records} records with rows; ${gained} gained a measure they did not say before, e.g. ${sample.slice(0, 3).join(' | ')})`)
+  regress.slice(0, 8).forEach((m) => console.log(m))
+  if (regress.length) process.exitCode = 1
 }
 
 // ── pizza crust ───────────────────────────────────────────────────────────
