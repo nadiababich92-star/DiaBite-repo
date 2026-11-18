@@ -176,3 +176,7 @@ export function needsWeightHint(foodName: string, units: 'imperial' | 'metric' |
   const q = units === 'imperial' ? `About how many ounces or cups of ${foodName}?` : `About how many grams of ${foodName}?`
   return `ask the person exactly: "${q}" Do not estimate.`
 }
+
+/** The same question with <food> left for the agent to fill: `resolve_foods` carries it, so the agent can ask before any weight is tried. */
+export const weightQuestion = (units: 'imperial' | 'metric' | undefined): string =>
+  units === 'imperial' ? 'About how many ounces or cups of <food>?' : 'About how many grams of <food>?'

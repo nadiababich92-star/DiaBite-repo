@@ -32,7 +32,7 @@ import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
 import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
-import { gramsFor, needsWeightHint, quantityError, saidText, type Quantity } from '../server/quantity'
+import { gramsFor, needsWeightHint, quantityError, saidText, weightQuestion, type Quantity } from '../server/quantity'
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
@@ -1315,6 +1315,7 @@ hangMisses.forEach((m) => console.log(m))
   if (mixed.needs.length !== 1 || mixed.needs[0].foodId !== 'ing:egg' || !mixed.needs[0].units.includes('oz') || mixed.needs[0].why !== 'no USDA household measure for this food in cup') miss(`a meal with one unweighable item: ${JSON.stringify(mixed.needs)}`)
   const hintI = needsWeightHint('Egg', 'imperial'), hintM = needsWeightHint('Egg', 'metric'), hintN = needsWeightHint('Egg', undefined)
   if (!hintI.includes('"About how many ounces or cups of Egg?"') || !hintM.includes('"About how many grams of Egg?"') || hintN !== hintM) miss(`the question in the session's units: ${hintI} | ${hintM} | ${hintN}`)
+  if (!weightQuestion('imperial').includes('About how many ounces or cups of <food>?') || !weightQuestion('metric').includes('About how many grams of <food>?') || weightQuestion(undefined) !== weightQuestion('metric')) miss('the weight question resolve_foods carries is not the owner\'s wording in the session\'s units')
   // The reply says the weight in the session's units, from the engine.
   const plan = planQuantities([{ foodId: 'ing:white_rice', quantity: { count: 1, unit: 'cup' } }, { foodId: 'ing:white_bread', grams: 29 }])
   const costed = computeMeal(plan.items)

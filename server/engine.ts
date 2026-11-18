@@ -30,7 +30,7 @@ import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
 import { afterMealFor, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, withDayUnscored, withSaid } from './compute'
-import { needsWeightHint, quantityError } from './quantity'
+import { needsWeightHint, quantityError, weightQuestion } from './quantity'
 import { verify } from './verify'
 import { claimSession, getSession, noteResolution, putSession } from './sessions'
 import { bindSession, unbindSession } from './bind'
@@ -387,6 +387,8 @@ async function main() {
     if (body.sessionId) noteResolution(body.sessionId, results)
     res.json({
       results,
+      // The question to ask, word for word, when the person's amount is not one the tables can weigh (a handful, a bowl): in their units.
+      weightQuestion: weightQuestion(body.sessionId ? getSession(body.sessionId)?.units : undefined),
       ...(body.sessionId !== undefined ? { dayState: dayStateFor(body.sessionId) } : {}),
     })
   })
