@@ -102,6 +102,9 @@ export interface DiaryEntry {
     assumed?: boolean
     /** The weight said as a household measure the engine found for it ("1 cup"), kept so the diary can show it without the food table. */
     measure?: string
+    /** What the engine said the weight was in the person's units when they gave it as a measure ("1 medium (200 g)"), and how it was got. */
+    said?: string
+    basis?: string
   }
 }
 

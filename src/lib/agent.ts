@@ -27,6 +27,8 @@ export interface AgentRequest {
   avoid?: { allergens?: string[]; foodIds?: string[]; pattern?: string; avoided?: string[]; words?: string[] }
   /** The person's own carbohydrate number for what they are asking about; the engine compares it, the answer only reads the result. */
   carbLimit?: { kind: 'meal' | 'snack'; g: number }
+  /** The person's units; parked with the day so the engine says a weight in them ("1 cup (158 g)" or "158 g"). */
+  units?: 'imperial' | 'metric'
 }
 
 export interface TraceStep {
@@ -147,6 +149,10 @@ export interface ReceiptLine {
   measure?: string
   /** The unit that measure is in and what one weighs: the portion editor steps in it for a person on US units. */
   measureUnit?: { unit: string; unitGrams: number }
+  /** The engine's words for a weight the person gave as a measure, in their units; the screen prints it as it is. */
+  said?: string
+  /** 'typical' when USDA lists only a regular or whole one and the engine used it: the receipt says so. */
+  basis?: string
   availableCarbs: number
   gi: number | null
   /** Null for a branded product: no glycemic index is published, so no load exists. */
@@ -188,6 +194,9 @@ interface MealResult {
     /** The grams said as a household measure the engine found in the food's own USDA table; absent when none fits. */
     measure?: { count: number; unit: string; text: string }
     stepUnit?: { unit: string; unitGrams: number }
+    /** What the person said as a measure was turned into this weight by the engine: the words for it and how it was got. */
+    said?: string
+    basis?: string
   }[]
   totals: { gl: number; carbs?: number; fiber?: number; availableCarbs?: number }
   /** The budget before this meal; compute_meal returns it when it was given a session. */
@@ -265,6 +274,7 @@ export function buildReceipt(m: MealResult, leftBefore: number | null, sources: 
     kcal: it.kcal, carbs: it.carbs, fiber: it.fiber, protein: it.protein, fat: it.fat,
     grams: it.grams, servings: it.servings, ...(it.measure?.text ? { measure: it.measure.text } : {}),
     ...(it.stepUnit ? { measureUnit: it.stepUnit } : {}),
+    ...(it.said ? { said: it.said } : {}), ...(it.basis ? { basis: it.basis } : {}),
   }))
   return {
     lines, total: m.totals.gl, leftBefore,

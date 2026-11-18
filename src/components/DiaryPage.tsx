@@ -163,7 +163,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
                     <span className="entry-name">{v.name}</span>
                     <span className="muted entry-sub">
                       <span className="pill planned">{date < today ? 'planned, not eaten' : 'planned'}</span>{' '}
-                      {MEAL_LABELS[e.meal]} · {portionText(v.portion, v.measure, units, v.grams)} · {v.availableCarbs.toFixed(1)} g carbs · GL {v.loadAvailable ? v.gl.toFixed(1) : '—'}
+                      {MEAL_LABELS[e.meal]} · {portionText(v.portion, v.measure, units, v.grams, v.said)} · {v.availableCarbs.toFixed(1)} g carbs · GL {v.loadAvailable ? v.gl.toFixed(1) : '—'}
                     </span>
                   </div>
                   <div className="entry-side">
@@ -216,7 +216,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
                     </div>
                     <div className="entry-side">
                       {e.snapshot ? (
-                        <span className="step-v">{portionText(v.portion, v.measure, units, v.grams)}</span>
+                        <span className="step-v">{portionText(v.portion, v.measure, units, v.grams, v.said)}</span>
                       ) : (
                         <span className="stepper">
                           <button className="step" aria-label={`Less ${v.name}`} onClick={() => nudge(e, -1)}>−</button>

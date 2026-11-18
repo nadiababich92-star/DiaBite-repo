@@ -345,7 +345,7 @@ function ReceiptView({ r, units }: { r: Receipt; units?: 'imperial' | 'metric' }
       <div className="receipt-head"><span>food · portion</span><span>available carbs (g) · GI · GL</span></div>
       {r.lines.map((l) => (
         <div className="receipt-line" key={l.foodId + l.portion}>
-          <span>{l.name} <em>{portionText(l.portion, l.measure, units, l.servings ? undefined : l.grams)}</em>{r.assumed?.assumedFoodIds.includes(l.foodId) && <> <span className="pill none assumed">assumed</span></>}</span>
+          <span>{l.name} <em>{l.said ?? portionText(l.portion, l.measure, units, l.servings ? undefined : l.grams)}</em>{l.basis === 'typical' && <> <span className="pill none typical">typical size</span></>}{r.assumed?.assumedFoodIds.includes(l.foodId) && <> <span className="pill none assumed">assumed</span></>}</span>
           <span>{l.availableCarbs.toFixed(1)} · {l.gi ?? '—'} · <b>{l.gl === null ? '—' : l.gl.toFixed(1)}</b></span>
         </div>
       ))}
@@ -573,6 +573,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
         message: q,
         budget: budgetOf(targets),
         avoid: avoidOf(profile),
+        units: profile.units,
         ...(carbLimit.g > 0 ? { carbLimit: { kind: carbLimit.kind, g: carbLimit.g } } : {}),
         entries: fresh ? [] : counted.filter((e) => e.date === forDay).map((e) => (e.snapshot?.servings
           ? { foodId: engineId(e), servings: e.snapshot.servings }
@@ -607,6 +608,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
         name: l.name, kcal: l.kcal, carbs: l.carbs, fiber: l.fiber, protein: l.protein, fat: l.fat,
         availableCarbs: l.availableCarbs, gi: l.gi, gl: l.gl ?? 0, loadAvailable: l.gl !== null, servings: l.servings,
         ...(l.measure ? { measure: l.measure } : {}),
+        ...(l.said ? { said: l.said } : {}), ...(l.basis ? { basis: l.basis } : {}),
         ...(active.assumed ? { assumed: true } : {}),
       },
     })))

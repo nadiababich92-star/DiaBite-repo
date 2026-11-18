@@ -18,6 +18,8 @@ export interface EntryView {
   measure?: string
   /** The weight, when the portion is a weight (not "2 servings"): what the ounces are said from. */
   grams?: number
+  /** The engine's words for the weight, when the person gave it as a measure: "1 medium (200 g)". */
+  said?: string
 }
 
 /**
@@ -25,8 +27,10 @@ export interface EntryView {
  * ("1 cup (158 g)"); where the food has no measure and the portion is a weight (`grams`), the weight in ounces ("1.9 oz (55 g)");
  * everyone else sees the grams. The measure is the engine's, not worked out here; the ounces only restate the grams.
  */
-export const portionText = (portion: string, measure: string | undefined, units: 'imperial' | 'metric' | undefined, grams?: number): string => {
+export const portionText = (portion: string, measure: string | undefined, units: 'imperial' | 'metric' | undefined, grams?: number, said?: string): string => {
   if (units !== 'imperial') return portion
+  // The engine's own words, when the person gave the amount as a measure ("1 medium (200 g)"), are never rebuilt here.
+  if (said && said.includes('(')) return said
   if (measure) return `${measure} (${portion})`
   const oz = grams === undefined ? null : ouncesText(grams)
   return oz ? `${oz} (${portion})` : portion
@@ -43,6 +47,7 @@ export function viewEntry(e: DiaryEntry): EntryView {
       breadUnits: s.availableCarbs / CARBS_PER_BREAD_UNIT,
       ...(s.measure ? { measure: s.measure } : {}),
       ...(s.servings ? {} : { grams: e.grams }),
+      ...(s.said ? { said: s.said } : {}),
     }
   }
   const food = getFood(e.foodId)

@@ -296,6 +296,8 @@ engine counts the meal again; a card above the original answer shows the new fig
 with the verdict word taken from `fits`, and the original is dimmed under the label
 "Original answer, before you changed a portion". No figure is worked out in the browser.
 
+A measure the person typed is said back the way they said it, with the grams beside it (`1 medium (200 g)`); when USDA lists only a "regular" or "whole" for a food, the line says that word and carries the pill **typical size** (the same pill style as **assumed**). The engine writes the words; the screen prints them.
+
 ### Plain-words link
 **What is GL?** sits under the main figure as an underlined link and opens a short
 dialog, drawn into `.app` so the rest of the page can go inert behind it.

@@ -251,7 +251,7 @@ button.link.gl-help { display: block; padding: 2px 0; text-align: left; text-dec
 .pill.medium { background: var(--medium-bg); color: var(--medium); }
 .pill.high { background: var(--high-bg); color: var(--high); }
 .pill.none { background: var(--surface-2); color: var(--text-dim); }
-.pill.assumed { white-space: nowrap; }
+.pill.assumed, .pill.typical { white-space: nowrap; }
 
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th { text-align: left; font-size: 13px; color: var(--text-dim); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--border); }
