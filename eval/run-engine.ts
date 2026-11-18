@@ -89,6 +89,7 @@ import type { VerifyRequest } from '../server/contract'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const TARGET = Number(process.env.RESOLVE_TARGET ?? 90)
 
+interface DefaultCase { foodId: string; grams: number; quantity?: Quantity; unchanged?: boolean }
 interface QuantityCase { id: string; foodId: string; quantity: Quantity; grams?: number; basis?: string; said_imperial?: string; needs?: boolean; why?: string }
 interface ResolveCase { phrase: string; expect: string[]; tags: string[]; notBranded?: boolean }
 interface ClarifyCase { phrase: string; band: string; why: string; offers?: string[] }
@@ -98,7 +99,7 @@ interface GateCase { phrase: string; rule: string | null }
 interface VerifyCase { id: string; answer: string; toolResults: unknown[]; ok: boolean }
 
 const cases = JSON.parse(readFileSync(join(ROOT, 'eval', 'cases.json'), 'utf8')) as {
-  engine: { quantity: QuantityCase[]; resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[]; answer: AnswerCase[]; portion: { id: string; grams: number }[]; partial: PartialCase[]; branded: { id: string; foodId: string; grams: number }[]; excludedIn: { id: string; items: { foodId: string; name: string }[]; avoid: Record<string, string[]>; hit: string[] }[]; excludeSearch: { id: string; typed: string; name: string; hit: boolean }[]; carbLimit: { id: string; kind: 'meal' | 'snack' | null; limitG: number | null; mealCarbs: number; over: boolean | null }[]; avoidWords: { id: string; word: string; text: string; hit: boolean }[] }
+  engine: { quantity: QuantityCase[]; defaults: DefaultCase[]; resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[]; answer: AnswerCase[]; portion: { id: string; grams: number }[]; partial: PartialCase[]; branded: { id: string; foodId: string; grams: number }[]; excludedIn: { id: string; items: { foodId: string; name: string }[]; avoid: Record<string, string[]>; hit: string[] }[]; excludeSearch: { id: string; typed: string; name: string; hit: boolean }[]; carbLimit: { id: string; kind: 'meal' | 'snack' | null; limitG: number | null; mealCarbs: number; over: boolean | null }[]; avoidWords: { id: string; word: string; text: string; hit: boolean }[] }
 }
 
 const t0 = Date.now()
@@ -1317,6 +1318,29 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\nquantity  ${qMisses.length === 0 ? 'ok' : 'WRONG'}  (${cases.engine.quantity.length} conversions)`)
   qMisses.forEach((m) => console.log(m))
   if (qMisses.length) process.exitCode = 1
+}
+
+// ── default portions in household units ──────────────────────────────────
+// docs/specs/quantity-defaults.md: the owner approved this list on 18 November 2026. Each default is exactly the approved grams, and (for a household
+// measure) the same weight as one of that measure within 3%, so "an apple" and "1 medium apple" cost the same. Every record that is not on the list
+// keeps the default it had (eval/default-portions-baseline.json, taken from before the change).
+{
+  const dMisses: string[] = []
+  const baseline = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'default-portions-baseline.json'), 'utf8')) as Record<string, number>
+  const listed = new Set(cases.engine.defaults.map((c) => c.foodId))
+  for (const c of cases.engine.defaults) {
+    const rec = getRecord(c.foodId)
+    if (c.unchanged) { if (rec.defaultPortion !== baseline[c.foodId]) dMisses.push(`    ${c.foodId} was ${baseline[c.foodId]} g and is ${rec.defaultPortion} g, wanted it unchanged`); continue }
+    if (rec.defaultPortion !== c.grams) dMisses.push(`    ${c.foodId} defaults to ${rec.defaultPortion} g, approved ${c.grams} g`)
+    const via = gramsFor(rec, c.quantity!)
+    if ('needs' in via) dMisses.push(`    ${c.foodId}: ${c.quantity!.count} ${c.quantity!.unit} is "${via.needs}", the default has no household measure`)
+    else if (via.grams !== undefined && Math.abs(via.grams - rec.defaultPortion) / rec.defaultPortion > 0.03) dMisses.push(`    ${c.foodId}: ${c.quantity!.count} ${c.quantity!.unit} is ${via.grams} g, the default is ${rec.defaultPortion} g`)
+  }
+  const drifted = Object.entries(baseline).filter(([id, g]) => !listed.has(id) && getRecord(id).defaultPortion !== g)
+  if (drifted.length) dMisses.push(`    ${drifted.length} records off the list changed their default, e.g. ${drifted.slice(0, 3).map(([id, g]) => `${id} ${g} -> ${getRecord(id).defaultPortion}`).join(', ')}`)
+  console.log(`\ndefaults  ${dMisses.length === 0 ? 'ok' : 'WRONG'}  (${cases.engine.defaults.length} foods on the list)`)
+  dMisses.forEach((m) => console.log(m))
+  if (dMisses.length) process.exitCode = 1
 }
 
 // ── reading USDA's household labels ───────────────────────────────────────

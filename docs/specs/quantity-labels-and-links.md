@@ -69,6 +69,8 @@ Counts are the number of rows of that shape in the local file (`n`).
 | `extra large`, `miniature`, `miniature/slider`, `miniature/bite size` | | none | | no |
 | `cubic inch`, `surface inch`, `linear inch`, `Guideline amount ...`, `single serving ...`, `serving`, `calorie package`, `package (N oz)`, `can (N oz)`, `bottle (N fl oz)`, `jar`, `bar`, `packet`, `pouch`, `drink`, `scoop`, `sandwich`, `steak`, `fillet`, `patty`, `roast`, `chop`, `unit (yield ...)`, `piece, cooked, excluding refuse (yield ...)` | thousands | none | | no |
 
+**Whole-class rows are capped at 600 g** (a "1 breast" of 1,769 g on a whole turkey breast, or a whole pineapple, is not what anyone means by one of it): above that the row is not used. **A candidate whose USDA name has a preparation word ours lacks ("cooked") is not auto-accepted**, and neither is one with more than two unexplained extra words (a variety such as "golden delicious").
+
 **Why a qualified row is never matched in this version:** a person who says "a cup of rice" and a table that lists "cup, cooked" and "cup, dry" would be matched to the wrong one half the time; the plain "cup" rows are enough for the foods we map, and `readPortion` keeps the qualifier so the next version can match "a cup of chopped onion" to "cup, chopped".
 
 ### Regression rule (nothing a person sees today may change)

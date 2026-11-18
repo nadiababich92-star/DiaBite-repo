@@ -4415,6 +4415,377 @@
           "unit": "piece"
         },
         "needs": true
+      },
+      {
+        "id": "L1-apple-medium",
+        "foodId": "seed:apple",
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        },
+        "grams": 200,
+        "basis": "usda_measure",
+        "said_imperial": "1 medium (200 g)"
+      },
+      {
+        "id": "L2-apple-whole",
+        "foodId": "seed:apple",
+        "quantity": {
+          "count": 1,
+          "unit": "whole"
+        },
+        "grams": 200,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "L3-banana-medium",
+        "foodId": "seed:banana",
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        },
+        "grams": 126,
+        "basis": "typical",
+        "said_imperial": "1 banana (126 g)"
+      },
+      {
+        "id": "L4-peach-medium",
+        "foodId": "seed:peach",
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        },
+        "grams": 150,
+        "basis": "typical",
+        "said_imperial": "1 fruit (150 g)"
+      },
+      {
+        "id": "L5-pepper-medium",
+        "foodId": "seed:bellpepper",
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        },
+        "grams": 120,
+        "basis": "typical",
+        "said_imperial": "1 regular (120 g)"
+      },
+      {
+        "id": "L6-tomato-medium",
+        "foodId": "seed:tomato",
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        },
+        "grams": 125,
+        "basis": "typical",
+        "said_imperial": "1 whole (125 g)"
+      },
+      {
+        "id": "L7-avocado-half",
+        "foodId": "ing:avocado",
+        "quantity": {
+          "count": 0.5,
+          "unit": "whole"
+        },
+        "grams": 75,
+        "basis": "typical",
+        "said_imperial": "1/2 fruit (75 g)"
+      },
+      {
+        "id": "L8-rye-slice",
+        "foodId": "seed:bread-rye",
+        "quantity": {
+          "count": 1,
+          "unit": "slice"
+        },
+        "grams": 32,
+        "basis": "usda_measure",
+        "said_imperial": "1 slice (32 g)"
+      },
+      {
+        "id": "L9-pb-2tbsp",
+        "foodId": "ing:peanut_butter",
+        "quantity": {
+          "count": 2,
+          "unit": "tbsp"
+        },
+        "grams": 32,
+        "basis": "usda_measure",
+        "said_imperial": "2 tbsp (32 g)"
+      },
+      {
+        "id": "L10-apple-large",
+        "foodId": "seed:apple",
+        "quantity": {
+          "count": 1,
+          "unit": "large"
+        },
+        "needs": true
+      },
+      {
+        "id": "L11-wholewheat-slice",
+        "foodId": "ing:whole_grain_bread",
+        "quantity": {
+          "count": 1,
+          "unit": "slice"
+        },
+        "needs": true
+      }
+    ],
+    "defaults": [
+      {
+        "foodId": "seed:apple",
+        "grams": 200,
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        }
+      },
+      {
+        "foodId": "ing:apple",
+        "grams": 200,
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        }
+      },
+      {
+        "foodId": "seed:banana",
+        "grams": 126,
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        }
+      },
+      {
+        "foodId": "seed:orange",
+        "grams": 154,
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        }
+      },
+      {
+        "foodId": "ing:orange",
+        "grams": 154,
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        }
+      },
+      {
+        "foodId": "seed:peach",
+        "grams": 150,
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        }
+      },
+      {
+        "foodId": "ing:peach",
+        "grams": 150,
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        }
+      },
+      {
+        "foodId": "ing:bell_pepper",
+        "grams": 120,
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        }
+      },
+      {
+        "foodId": "seed:tomato",
+        "grams": 125,
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        }
+      },
+      {
+        "foodId": "ing:tomato",
+        "grams": 125,
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        }
+      },
+      {
+        "foodId": "seed:avocado",
+        "grams": 75,
+        "quantity": {
+          "count": 0.5,
+          "unit": "whole"
+        }
+      },
+      {
+        "foodId": "ing:avocado",
+        "grams": 75,
+        "quantity": {
+          "count": 0.5,
+          "unit": "whole"
+        }
+      },
+      {
+        "foodId": "ing:cucumber",
+        "grams": 120,
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        }
+      },
+      {
+        "foodId": "ing:strawberries",
+        "grams": 150,
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        }
+      },
+      {
+        "foodId": "seed:egg",
+        "grams": 50,
+        "quantity": {
+          "count": 1,
+          "unit": "large"
+        }
+      },
+      {
+        "foodId": "seed:bread-rye",
+        "grams": 32,
+        "quantity": {
+          "count": 1,
+          "unit": "slice"
+        }
+      },
+      {
+        "foodId": "ing:rye_bread",
+        "grams": 35,
+        "unchanged": true
+      },
+      {
+        "foodId": "seed:bread-white",
+        "grams": 29,
+        "quantity": {
+          "count": 1,
+          "unit": "slice"
+        }
+      },
+      {
+        "foodId": "seed:chicken",
+        "grams": 113,
+        "quantity": {
+          "count": 4,
+          "unit": "oz"
+        }
+      },
+      {
+        "foodId": "ing:chicken_breast",
+        "grams": 113,
+        "quantity": {
+          "count": 4,
+          "unit": "oz"
+        }
+      },
+      {
+        "foodId": "seed:turkey",
+        "grams": 113,
+        "quantity": {
+          "count": 4,
+          "unit": "oz"
+        }
+      },
+      {
+        "foodId": "ing:turkey_breast",
+        "grams": 113,
+        "quantity": {
+          "count": 4,
+          "unit": "oz"
+        }
+      },
+      {
+        "foodId": "seed:salmon",
+        "grams": 85,
+        "quantity": {
+          "count": 3,
+          "unit": "oz"
+        }
+      },
+      {
+        "foodId": "ing:salmon",
+        "grams": 85,
+        "quantity": {
+          "count": 3,
+          "unit": "oz"
+        }
+      },
+      {
+        "foodId": "seed:shrimp",
+        "grams": 85,
+        "quantity": {
+          "count": 3,
+          "unit": "oz"
+        }
+      },
+      {
+        "foodId": "ing:shrimp",
+        "grams": 85,
+        "quantity": {
+          "count": 3,
+          "unit": "oz"
+        }
+      },
+      {
+        "foodId": "seed:beef",
+        "grams": 85,
+        "quantity": {
+          "count": 3,
+          "unit": "oz"
+        }
+      },
+      {
+        "foodId": "ing:beef_sirloin",
+        "grams": 85,
+        "quantity": {
+          "count": 3,
+          "unit": "oz"
+        }
+      },
+      {
+        "foodId": "seed:cheese",
+        "grams": 28,
+        "quantity": {
+          "count": 1,
+          "unit": "oz"
+        }
+      },
+      {
+        "foodId": "seed:milk",
+        "grams": 246,
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        }
+      },
+      {
+        "foodId": "seed:rice-white",
+        "grams": 158,
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        }
+      },
+      {
+        "foodId": "seed:oats",
+        "grams": 234,
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        }
       }
     ]
   },

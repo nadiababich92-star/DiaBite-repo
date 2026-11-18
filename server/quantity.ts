@@ -97,7 +97,8 @@ export function gramsFor(rec: FoodRecord, q: Quantity): Resolved {
   // 4. A part: a slice (the usual size first) or a piece.
   if (unit === 'slice') {
     const slices = rows.filter((r) => r.unit === 'slice')
-    for (const size of ['medium', undefined, 'large', 'small'] as const) {
+    // The usual slice first. A table that lists only a small or thin slice (whole-wheat bread: 24 g) is not "a slice": that would understate it.
+    for (const size of ['medium', undefined, 'large'] as const) {
       const row = slices.find((r) => r.size === size)
       if (row) return { grams: r1(count * row.grams), basis: 'usda_measure', row }
     }

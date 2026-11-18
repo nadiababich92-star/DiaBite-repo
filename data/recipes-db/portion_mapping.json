@@ -1,7 +1,7 @@
 {
  "meta": {
   "source": "USDA FoodData Central, SR Legacy and Foundation Foods household measures; matched by name and nutrients by scripts/map-portions.py",
-  "rule": "distance <= 0.10 and name overlap >= 0.6, plus the matches the owner accepted one by one (accepted_by: owner)"
+  "rule": "distance <= 0.10 and name overlap >= 0.6 (the first 186), plus links applied by scripts/apply-portion-links.py: a row the owner marked yes in data/recipes-db/usda-links.csv, or one the rule accepts (distance <= 0.25, name overlap >= 0.6, no modifier of another food, few unexplained words)"
  },
  "foods": {
   "ing:chicken_breast": {
@@ -2249,6 +2249,864 @@
     }
    ],
    "accepted_by": "owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)"
+  },
+  "ing:almond_milk": {
+   "fdc_id": "2705409",
+   "usda_name": "Almond milk, unsweetened (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 244.0
+    },
+    {
+     "label": "1 fl oz",
+     "grams": 30.5
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:almonds": {
+   "fdc_id": "2707485",
+   "usda_name": "Almonds, NFS (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 oz",
+     "grams": 28.4
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:apple": {
+   "fdc_id": "2709215",
+   "usda_name": "Apple, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 medium",
+     "grams": 200.0
+    },
+    {
+     "label": "1 small",
+     "grams": 165.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
+  },
+  "ing:asparagus": {
+   "fdc_id": "2709767",
+   "usda_name": "Asparagus, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 135.0
+    },
+    {
+     "label": "1 piece",
+     "grams": 4.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:avocado": {
+   "fdc_id": "2709223",
+   "usda_name": "Avocado, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 fruit",
+     "grams": 150.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 150.0
+    },
+    {
+     "label": "1 slice",
+     "grams": 15.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
+  },
+  "ing:beet": {
+   "fdc_id": "2709770",
+   "usda_name": "Beets, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 135.0
+    },
+    {
+     "label": "1 whole",
+     "grams": 80.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:bell_pepper": {
+   "fdc_id": "2709800",
+   "usda_name": "Peppers, sweet, green, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 regular",
+     "grams": 120.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 150.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
+  },
+  "ing:blackberries": {
+   "fdc_id": "2709273",
+   "usda_name": "Blackberries, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 blackberry",
+     "grams": 5.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 150.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:brussels_sprouts": {
+   "fdc_id": "2709772",
+   "usda_name": "Brussels sprouts, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 90.0
+    },
+    {
+     "label": "1 sprout",
+     "grams": 20.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:cauliflower": {
+   "fdc_id": "2709777",
+   "usda_name": "Cauliflower, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 piece",
+     "grams": 13.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 110.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:celery": {
+   "fdc_id": "2709778",
+   "usda_name": "Celery, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 piece",
+     "grams": 4.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 120.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:cottage_cheese": {
+   "fdc_id": "2705756",
+   "usda_name": "Cheese, cottage, low fat (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 226.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:cream_cheese": {
+   "fdc_id": "2705760",
+   "usda_name": "Cream cheese, regular, plain (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 tablespoon",
+     "grams": 15.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 240.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:eggplant": {
+   "fdc_id": "2709785",
+   "usda_name": "Eggplant, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 80.0
+    },
+    {
+     "label": "1 whole",
+     "grams": 500.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:fennel": {
+   "fdc_id": "169385",
+   "usda_name": "Fennel, bulb, raw",
+   "measures": [
+    {
+     "label": "bulb",
+     "grams": 234.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:ghee": {
+   "fdc_id": "2710168",
+   "usda_name": "Ghee, clarified butter (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 tablespoon",
+     "grams": 14.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 224.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:grapefruit": {
+   "fdc_id": "2709165",
+   "usda_name": "Grapefruit, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 180.0
+    },
+    {
+     "label": "1 fruit",
+     "grams": 308.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:guacamole": {
+   "fdc_id": "2709308",
+   "usda_name": "Guacamole with tomatoes (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 tablespoon",
+     "grams": 15.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:hazelnuts": {
+   "fdc_id": "2707502",
+   "usda_name": "Hazelnuts (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 135.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:heavy_cream": {
+   "fdc_id": "2705597",
+   "usda_name": "Cream, heavy (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 240.0
+    },
+    {
+     "label": "1 fl oz",
+     "grams": 30.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:kiwi": {
+   "fdc_id": "2709239",
+   "usda_name": "Kiwi fruit, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 fruit",
+     "grams": 75.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 180.0
+    },
+    {
+     "label": "1 slice",
+     "grams": 7.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:kohlrabi": {
+   "fdc_id": "2709788",
+   "usda_name": "Kohlrabi, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 slice",
+     "grams": 15.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 135.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:lime": {
+   "fdc_id": "2709170",
+   "usda_name": "Lime, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 fruit",
+     "grams": 65.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 200.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:macadamia": {
+   "fdc_id": "2707503",
+   "usda_name": "Macadamia nuts (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 132.0
+    },
+    {
+     "label": "1 oz",
+     "grams": 28.4
+    },
+    {
+     "label": "1 nut",
+     "grams": 2.5
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:mango": {
+   "fdc_id": "2709242",
+   "usda_name": "Mango, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 165.0
+    },
+    {
+     "label": "1 mango",
+     "grams": 210.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:orange": {
+   "fdc_id": "2709171",
+   "usda_name": "Orange, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 fruit",
+     "grams": 154.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 180.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
+  },
+  "ing:peach": {
+   "fdc_id": "2709249",
+   "usda_name": "Peach, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 155.0
+    },
+    {
+     "label": "1 fruit",
+     "grams": 150.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
+  },
+  "ing:peanut_butter": {
+   "fdc_id": "2707537",
+   "usda_name": "Peanut butter (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 tablespoon",
+     "grams": 16.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
+  },
+  "ing:plum": {
+   "fdc_id": "2709265",
+   "usda_name": "Plum, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 155.0
+    },
+    {
+     "label": "1 fruit",
+     "grams": 75.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:pork_rinds": {
+   "fdc_id": "2705902",
+   "usda_name": "Pork skin rinds (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 rind",
+     "grams": 1.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 30.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:potato_boiled": {
+   "fdc_id": "2709388",
+   "usda_name": "Potato, boiled, from fresh, peel not eaten, no added fat (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 small",
+     "grams": 130.0
+    },
+    {
+     "label": "1 large",
+     "grams": 300.0
+    },
+    {
+     "label": "1 medium",
+     "grams": 170.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:rye_bread": {
+   "fdc_id": "2707755",
+   "usda_name": "Bread, rye (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 large or thick slice",
+     "grams": 43.0
+    },
+    {
+     "label": "1 medium or regular slice",
+     "grams": 32.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
+  },
+  "ing:red_cabbage": {
+   "fdc_id": "2709775",
+   "usda_name": "Cabbage, red, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 90.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:sweet_potato_roasted": {
+   "fdc_id": "168483",
+   "usda_name": "Sweet potato, cooked, baked in skin, flesh, without salt",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 200.0
+    },
+    {
+     "label": "large",
+     "grams": 180.0
+    },
+    {
+     "label": "small",
+     "grams": 60.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:sweet_potato": {
+   "fdc_id": "168483",
+   "usda_name": "Sweet potato, cooked, baked in skin, flesh, without salt",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 200.0
+    },
+    {
+     "label": "large",
+     "grams": 180.0
+    },
+    {
+     "label": "small",
+     "grams": 60.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:swiss_cheese": {
+   "fdc_id": "2705735",
+   "usda_name": "Cheese, Swiss (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup, NFS",
+     "grams": 108.0
+    },
+    {
+     "label": "1 slice",
+     "grams": 21.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:tomato": {
+   "fdc_id": "2709719",
+   "usda_name": "Tomatoes, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 slice",
+     "grams": 20.0
+    },
+    {
+     "label": "1 whole",
+     "grams": 125.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
+  },
+  "ing:sugar_white": {
+   "fdc_id": "2710258",
+   "usda_name": "Sugar, white, granulated or lump (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 teaspoon",
+     "grams": 4.2
+    },
+    {
+     "label": "1 cup",
+     "grams": 200.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "ing:whole_grain_bread": {
+   "fdc_id": "2707709",
+   "usda_name": "Bread, whole wheat (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 small or thin/very thin slice",
+     "grams": 24.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "seed:almonds": {
+   "fdc_id": "2707485",
+   "usda_name": "Almonds, NFS (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 oz",
+     "grams": 28.4
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "seed:apple": {
+   "fdc_id": "2709215",
+   "usda_name": "Apple, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 medium",
+     "grams": 200.0
+    },
+    {
+     "label": "1 small",
+     "grams": 165.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
+  },
+  "seed:avocado": {
+   "fdc_id": "2709223",
+   "usda_name": "Avocado, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 fruit",
+     "grams": 150.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 150.0
+    },
+    {
+     "label": "1 slice",
+     "grams": 15.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
+  },
+  "seed:banana": {
+   "fdc_id": "2709224",
+   "usda_name": "Banana, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 banana",
+     "grams": 126.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 150.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
+  },
+  "seed:bellpepper": {
+   "fdc_id": "2709800",
+   "usda_name": "Peppers, sweet, green, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 regular",
+     "grams": 120.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 150.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
+  },
+  "seed:cauliflower": {
+   "fdc_id": "2709777",
+   "usda_name": "Cauliflower, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 piece",
+     "grams": 13.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 110.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "seed:dates": {
+   "fdc_id": "2709203",
+   "usda_name": "Date (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 160.0
+    },
+    {
+     "label": "1 date",
+     "grams": 8.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "seed:eggplant": {
+   "fdc_id": "2709785",
+   "usda_name": "Eggplant, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 80.0
+    },
+    {
+     "label": "1 whole",
+     "grams": 500.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "seed:honey": {
+   "fdc_id": "2710281",
+   "usda_name": "Honey (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 tablespoon",
+     "grams": 20.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 320.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "seed:kiwi": {
+   "fdc_id": "2709239",
+   "usda_name": "Kiwi fruit, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 fruit",
+     "grams": 75.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 180.0
+    },
+    {
+     "label": "1 slice",
+     "grams": 7.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "seed:mango": {
+   "fdc_id": "2709242",
+   "usda_name": "Mango, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 165.0
+    },
+    {
+     "label": "1 mango",
+     "grams": 210.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "seed:orange": {
+   "fdc_id": "2709171",
+   "usda_name": "Orange, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 fruit",
+     "grams": 154.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 180.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
+  },
+  "seed:peach": {
+   "fdc_id": "2709249",
+   "usda_name": "Peach, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 155.0
+    },
+    {
+     "label": "1 fruit",
+     "grams": 150.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
+  },
+  "seed:pearl-barley": {
+   "fdc_id": "170285",
+   "usda_name": "Barley, pearled, cooked",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 157.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "seed:plum": {
+   "fdc_id": "2709265",
+   "usda_name": "Plum, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 155.0
+    },
+    {
+     "label": "1 fruit",
+     "grams": 75.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "seed:raisins": {
+   "fdc_id": "2709212",
+   "usda_name": "Raisins (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 raisin",
+     "grams": 0.5
+    },
+    {
+     "label": "1 cup",
+     "grams": 160.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "seed:tomato": {
+   "fdc_id": "2709719",
+   "usda_name": "Tomatoes, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 slice",
+     "grams": 20.0
+    },
+    {
+     "label": "1 whole",
+     "grams": 125.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
+  },
+  "seed:watermelon": {
+   "fdc_id": "2709270",
+   "usda_name": "Watermelon, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 155.0
+    }
+   ],
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+  },
+  "seed:bread-rye": {
+   "fdc_id": "2707755",
+   "usda_name": "Bread, rye (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 large or thick slice",
+     "grams": 43.0
+    },
+    {
+     "label": "1 medium or regular slice",
+     "grams": 32.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-18"
   }
  }
 }

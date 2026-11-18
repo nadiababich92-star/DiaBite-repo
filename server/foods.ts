@@ -90,6 +90,12 @@ const INGREDIENT_PORTION_G: Record<string, number> = {
   chili_powder: 3, paprika: 2, turmeric: 3, cinnamon: 3, nutmeg: 2, cayenne: 2, red_pepper_flakes: 2, garlic_powder: 3, onion_powder: 2, curry_powder: 2,
   dried_dill: 1, dried_rosemary: 1, mustard_seed: 2,
   parsley: 4, rosemary: 2, thyme: 1, ginger: 2,
+  // Added 18 November (worklist 20/US measures, the owner's yes to the default-portion list in docs/specs/quantity-defaults.md): the household
+  // amount a person says, from USDA's own rows (survey tables, "foods as eaten"): one medium apple, one orange, a peach, one regular pepper,
+  // one tomato, half an avocado, a cup of cucumber and of strawberries; meat and fish by the exact ounce (4 oz cooked chicken or turkey, 3 oz
+  // cooked salmon, shrimp or beef). A stated amount still wins.
+  apple: 200, orange: 154, peach: 150, bell_pepper: 120, tomato: 125, avocado: 75, cucumber: 120, strawberries: 150,
+  chicken_breast: 113, turkey_breast: 113, salmon: 85, shrimp: 85, beef_sirloin: 85,
 }
 
 const ALIASES: Record<string, string[]> = {
@@ -439,7 +445,9 @@ export function readPortion(label: string, grams: number, recordName: string): P
     const unit = (w === 'tablespoon' ? 'tbsp' : w === 'teaspoon' ? 'tsp' : w) as PortionRow['unit']
     return row(unit, w, qualifierOf(m[2]), w === 'tablespoon' ? 'tbsp' : w === 'teaspoon' ? 'tsp' : w)
   }
-  if ((m = /^(\w+)$/.exec(low)) && (WHOLE_WORDS.has(m[1]) || recordName.toLowerCase().split(/[^a-z]+/).filter(Boolean).map(stemWord).includes(stemWord(m[1])))) {
+  // "One of it": a "regular", a "fruit", or the food's own word ("1 banana"). Not a whole turkey breast (1,769 g) or a whole pineapple:
+  // a "typical" item that weighs more than 600 g is a different kind of "whole", and no one means it by "a medium".
+  if ((m = /^(\w+)$/.exec(low)) && grams <= 600 && (WHOLE_WORDS.has(m[1]) || recordName.toLowerCase().split(/[^a-z]+/).filter(Boolean).map(stemWord).includes(stemWord(m[1])))) {
     return row('whole', m[1], '', m[1])
   }
   return null

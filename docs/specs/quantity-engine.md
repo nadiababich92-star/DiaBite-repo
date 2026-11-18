@@ -69,7 +69,7 @@ Rows come from `readPortion` (`quantity-labels-and-links.md`): each usable row i
 
 **Rule 3: volumes** (`cup`, `tbsp`, `tsp`, `fl oz`). If the record has a row for that unit, `grams = count × row.grams`, basis `usda_measure`. Otherwise take the **nearest** volume row of the same food (the unit whose size is closest to the one asked for; USDA rounds each row, so the closest unit carries the least error; a tie goes to the first of `cup`, `tbsp`, `tsp`, `fl oz`), and compute `grams = count × (ratio[requested] / ratio[source]) × row.grams`; basis `usda_measure`, and the item carries `via: "<source unit>"` (informational: it is in the trace and nowhere on screen). A record with no volume row at all: `needs`.
 
-**Rule 4: counted parts** (`slice`, `piece`). The row with that unit; for `slice`, prefer size `medium`, then no size, then `large`, then `small` (a person who says "a slice" means the usual one). `grams = count × row.grams`, `usda_measure`. No row: `needs`.
+**Rule 4: counted parts** (`slice`, `piece`). The row with that unit; for `slice`, prefer size `medium`, then no size, then `large`; **never `small`** (a table that lists only a small or thin slice, like whole-wheat bread's 24 g, is not "a slice", and using it would understate the portion: the answer is `needs`). `grams = count × row.grams`, `usda_measure`. No row: `needs`.
 
 **Rule 5: one item** (`small`, `medium`, `large`, `whole`).
 - `small` or `large`: the row of the same size only; no such row: `needs` (a typical size is not a small one).
