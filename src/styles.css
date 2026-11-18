@@ -1073,7 +1073,7 @@ body:has(.landing) { background: #0a1812; }
 .summary-days th[scope='row'] { white-space: nowrap; color: var(--text); font-size: 14px; }
 .summary-footer { margin-top: 24px; font-size: 13px; color: var(--text-dim); }
 
-@page { size: auto; margin: 16mm; }
+@page { size: auto; margin: 16mm; @bottom-right { content: 'Page ' counter(page) ' of ' counter(pages); font-size: 9pt; color: #000; } }
 @media print {
   html, body { background: #fff !important; }
   .no-print { display: none !important; }
@@ -1087,5 +1087,5 @@ body:has(.landing) { background: #0a1812; }
   .summary-days thead { display: table-header-group; }
   .summary tr, .summary h2, .summary h3, .summary li { break-inside: avoid; }
   .summary h2, .summary h3, .summary h4 { break-after: avoid; }
-  .summary-footer { position: fixed; bottom: 0; left: 0; margin: 0; }
+  .summary-footer { margin: 16px 0 0; }
 }
