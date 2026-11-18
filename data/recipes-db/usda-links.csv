@@ -1,0 +1,451 @@
+﻿status,key,our_name,kind,group,fdc_id,usda_name,usda_dataset,distance,name_overlap,measures,accepted_by,our_kcal,our_carbs,our_protein,our_fat
+applied,ing:almond_butter,Almond butter,curated ingredient,nut,168588,"Nuts, almond butter, plain, without salt added",sr_legacy,0.02,1.0,tbsp 16 g; cup 250 g,rule: distance <= 0.10 and name overlap >= 0.6,614,19,21,56
+applied,ing:apple_cider_vinegar,Apple cider vinegar,curated ingredient,condiment,173469,"Vinegar, cider",sr_legacy,0.006,0.67,tbsp 14.9 g; cup 239 g; tsp 5 g,rule: distance <= 0.10 and name overlap >= 0.6,21,0.9,0,0
+applied,ing:applesauce,"Applesauce, unsweetened",curated ingredient,fruit,167772,"Applesauce, canned, unsweetened, with added ascorbic acid",sr_legacy,0.035,1.0,cup 244 g,rule: distance <= 0.10 and name overlap >= 0.6,42,11,0.2,0.1
+applied,ing:arugula,Arugula,curated ingredient,veg,169387,"Arugula, raw",sr_legacy,0.03,1.0,cup 10 g,rule: distance <= 0.10 and name overlap >= 0.6,25,3.7,2.6,0.7
+applied,ing:avocado_oil,Avocado oil,curated ingredient,fat,173573,"Oil, avocado",sr_legacy,0.0,1.0,tbsp 14 g; cup 218 g; tsp 4.5 g,rule: distance <= 0.10 and name overlap >= 0.6,884,0,0,100
+applied,ing:bacon,Bacon,curated ingredient,protein,167712,"Pork, cured, bacon, cooked, broiled, pan-fried or roasted, reduced sodium",sr_legacy,0.012,1.0,oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,541,1.4,37,42
+applied,ing:baking_powder,Baking powder,curated ingredient,pantry,172803,"Leavening agents, baking powder, double-acting, sodium aluminum sulfate",sr_legacy,0.011,1.0,tsp 4.6 g; tsp 2.3 g,rule: distance <= 0.10 and name overlap >= 0.6,53,28,0,0
+applied,ing:baking_soda,Baking soda,curated ingredient,pantry,175040,"Leavening agents, baking soda",sr_legacy,0.0,1.0,tsp 4.6 g; tsp 2.3 g,rule: distance <= 0.10 and name overlap >= 0.6,0,0,0,0
+applied,ing:balsamic_vinegar,Balsamic vinegar,curated ingredient,condiment,172241,"Vinegar, balsamic",sr_legacy,0.005,1.0,tbsp 16 g; cup 255 g; tsp 5.3 g,rule: distance <= 0.10 and name overlap >= 0.6,88,17,0.5,0
+applied,ing:beef_chuck,"Beef chuck roast, trimmed",curated ingredient,protein,168660,"Beef, chuck eye roast, boneless, America's Beef Roast, separable lean and fat, trimmed to 0"" fat, all grades, raw",sr_legacy,0.085,1.0,oz 113 g,rule: distance <= 0.10 and name overlap >= 0.6,180,0,20,11
+applied,ing:beef_sirloin,"Beef sirloin, trimmed",curated ingredient,protein,174763,"Beef, top sirloin, steak, separable lean only, trimmed to 1/8"" fat, choice, raw",sr_legacy,0.069,1.0,oz 113 g,rule: distance <= 0.10 and name overlap >= 0.6,130,0,22,4.5
+applied,ing:beef_tenderloin,Beef tenderloin,curated ingredient,protein,173990,"Beef, loin, tenderloin steak, boneless, separable lean and fat, trimmed to 0"" fat, select, raw",sr_legacy,0.026,1.0,oz 113 g,rule: distance <= 0.10 and name overlap >= 0.6,145,0,22,6
+applied,ing:black_beans,"Black beans, cooked",curated ingredient,legume,173735,"Beans, black, mature seeds, cooked, boiled, without salt",sr_legacy,0.018,1.0,cup 172 g,rule: distance <= 0.10 and name overlap >= 0.6,132,23.7,8.9,0.5
+applied,ing:blue_cheese,"Blue cheese, crumbled",curated ingredient,dairy,172175,"Cheese, blue",sr_legacy,0.036,0.67,oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,353,2.3,21,29
+applied,ing:blueberries,Blueberries,curated ingredient,fruit,2709275,"Blueberries, raw (USDA FNDDS, foods as eaten)",survey_fndds,0.131,1.0,cup 150 g,"owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)",57,14.5,0.7,0.3
+applied,ing:coffee,Brewed coffee / espresso,curated ingredient,drink,171890,"Beverages, coffee, brewed, prepared with tap water",sr_legacy,0.013,0.67,fl oz 29.6 g; fl oz 178 g,rule: distance <= 0.10 and name overlap >= 0.6,1,0,0.1,0
+applied,ing:brown_rice,"Brown rice, cooked",curated ingredient,grain,168875,"Rice, brown, medium-grain, cooked (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.037,1.0,cup 195 g,rule: distance <= 0.10 and name overlap >= 0.6,112,24,2.3,0.8
+applied,ing:buckwheat,"Buckwheat groats, cooked",curated ingredient,grain,170686,"Buckwheat groats, roasted, cooked",sr_legacy,0.016,1.0,cup 168 g,rule: distance <= 0.10 and name overlap >= 0.6,92,20,3.4,0.6
+applied,ing:bulgur,"Bulgur, cooked",curated ingredient,grain,170287,"Bulgur, cooked",sr_legacy,0.021,1.0,cup 182 g; tbsp 8.4 g,rule: distance <= 0.10 and name overlap >= 0.6,83,18.6,3.1,0.2
+applied,ing:butter,Butter,curated ingredient,dairy,173410,"Butter, salted",sr_legacy,0.03,1.0,tbsp 14.2 g; cup 227 g,rule: distance <= 0.10 and name overlap >= 0.6,717,0,0.9,81
+applied,ing:canned_salmon,Canned salmon,curated ingredient,seafood,174225,"Fish, salmon, pink, canned, without salt, solids with bone and liquid",sr_legacy,0.026,1.0,oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,140,0,20,6
+applied,ing:white_beans,"Cannellini beans, cooked",curated ingredient,legume,175203,"Beans, white, mature seeds, cooked, boiled, without salt",sr_legacy,0.023,0.67,cup 179 g; tbsp 11.2 g,rule: distance <= 0.10 and name overlap >= 0.6,139,25,9.7,0.4
+applied,ing:carrot,Carrot,curated ingredient,veg,170491,"Carrot juice, canned",sr_legacy,0.091,1.0,cup 236 g; fl oz 29.5 g,rule: distance <= 0.10 and name overlap >= 0.6,41,9.6,0.9,0.2
+applied,ing:cashews,Cashews,curated ingredient,nut,170162,"Nuts, cashew nuts, raw",sr_legacy,0.022,1.0,oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,553,30,18,44
+applied,ing:cayenne,Cayenne pepper,curated ingredient,spice,170932,"Spices, pepper, red or cayenne",sr_legacy,0.023,1.0,tsp 1.8 g; tbsp 5.3 g,rule: distance <= 0.10 and name overlap >= 0.6,318,57,12,17
+applied,ing:cheddar,Cheddar cheese,curated ingredient,dairy,173440,"Cheese, low-sodium, cheddar or colby",sr_legacy,0.205,1.0,oz 28.4 g,owner,403,1.3,23,33
+applied,ing:chia_seeds,Chia seeds,curated ingredient,seed,170554,"Seeds, chia seeds, dried",sr_legacy,0.038,1.0,oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,486,42,17,31
+applied,ing:chicken_breast,"Chicken breast, skinless",curated ingredient,protein,171077,"Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",sr_legacy,0.007,1.0,oz 113 g; piece 272 g,rule: distance <= 0.10 and name overlap >= 0.6,120,0,22.5,2.6
+applied,ing:chicken_broth,"Chicken broth, low sodium",curated ingredient,condiment,172888,"Soup, chicken broth, less/reduced sodium, ready to serve",sr_legacy,0.211,0.75,cup 240 g,owner,7,0.5,1,0.2
+applied,ing:chicken_thigh,"Chicken thigh, skinless boneless",curated ingredient,protein,173627,"Chicken, broilers or fryers, dark meat, thigh, meat only, raw",sr_legacy,0.007,1.0,oz 113 g,rule: distance <= 0.10 and name overlap >= 0.6,121,0,19.7,4.1
+applied,ing:chickpeas,"Chickpeas, cooked",curated ingredient,legume,173757,"Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, without salt",sr_legacy,0.023,1.0,cup 164 g,rule: distance <= 0.10 and name overlap >= 0.6,164,27,8.9,2.6
+applied,ing:chili_powder,Chili powder,curated ingredient,spice,171319,"Spices, chili powder",sr_legacy,0.029,1.0,tsp 2.7 g; tbsp 8 g,rule: distance <= 0.10 and name overlap >= 0.6,282,50,13.5,14
+applied,ing:clams,Clams,curated ingredient,seafood,174214,"Mollusks, clam, mixed species, raw",sr_legacy,0.041,1.0,oz 85 g; large 20 g; medium 14.5 g,rule: distance <= 0.10 and name overlap >= 0.6,86,3.6,15,1
+applied,ing:cocoa_powder,"Cocoa powder, unsweetened",curated ingredient,pantry,169593,"Cocoa, dry powder, unsweetened",sr_legacy,0.043,1.0,cup 86 g; tbsp 5.4 g,rule: distance <= 0.10 and name overlap >= 0.6,228,58,20,14
+applied,ing:coconut_milk,"Coconut milk, canned full-fat",curated ingredient,plant_milk,170173,"Nuts, coconut milk, canned (liquid expressed from grated meat and water)",sr_legacy,0.06,0.6,cup 226 g; tbsp 15 g,rule: distance <= 0.10 and name overlap >= 0.6,197,3,2,21
+applied,ing:coconut_oil,Coconut oil,curated ingredient,fat,172365,"Oil, industrial, coconut, confection fat, typical basis for ice cream coatings",sr_legacy,0.026,1.0,tbsp 13.6 g; cup 218 g; tsp 4.5 g,rule: distance <= 0.10 and name overlap >= 0.6,862,0,0,100
+applied,ing:corn_tortilla,Corn tortilla,curated ingredient,grain,175036,"Tortillas, ready-to-bake or -fry, corn",sr_legacy,0.025,1.0,oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,218,45,5.7,2.9
+applied,ing:cotija,Cotija cheese,curated ingredient,dairy,170898,"Cheese, mexican, queso cotija",sr_legacy,0.006,1.0,tsp 5 g,rule: distance <= 0.10 and name overlap >= 0.6,366,4,20,30
+applied,ing:crushed_tomatoes,"Crushed tomatoes, canned",curated ingredient,condiment,170501,"Tomatoes, crushed, canned",sr_legacy,0.061,1.0,cup 121 g,rule: distance <= 0.10 and name overlap >= 0.6,32,7,1.6,0.3
+applied,ing:cucumber,Cucumber,curated ingredient,veg,2709784,"Cucumber, raw (USDA FNDDS, foods as eaten)",survey_fndds,0.208,1.0,cup 120 g,"owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)",15,3.6,0.7,0.1
+applied,ing:curry_powder,Curry powder,curated ingredient,spice,170924,"Spices, curry powder",sr_legacy,0.059,1.0,tsp 2 g; tbsp 6.3 g,rule: distance <= 0.10 and name overlap >= 0.6,325,58,14,14
+applied,ing:dill_pickle,Dill pickles,curated ingredient,veg,168563,"Pickles, cucumber, dill, reduced sodium",sr_legacy,0.035,1.0,slice 7 g,rule: distance <= 0.10 and name overlap >= 0.6,12,2.4,0.5,0.2
+applied,ing:dried_dill,Dried dill,curated ingredient,spice,171322,"Spices, dill weed, dried",sr_legacy,0.014,1.0,tsp 1 g; tbsp 3.1 g,rule: distance <= 0.10 and name overlap >= 0.6,253,56,20,4.4
+applied,ing:dried_rosemary,Dried rosemary,curated ingredient,spice,171333,"Spices, rosemary, dried",sr_legacy,0.04,1.0,tsp 1.2 g; tbsp 3.3 g,rule: distance <= 0.10 and name overlap >= 0.6,331,64,5,15
+applied,ing:egg_noodles,"Egg noodles, cooked",curated ingredient,grain,168919,"Noodles, egg, cooked, enriched, with added salt",sr_legacy,0.024,1.0,cup 160 g,rule: distance <= 0.10 and name overlap >= 0.6,137,25,4.51,2.06
+applied,ing:egg_white,Egg whites,curated ingredient,egg,172183,"Egg, white, raw, fresh",sr_legacy,0.025,1.0,large 33 g; cup 243 g,rule: distance <= 0.10 and name overlap >= 0.6,52,0.7,11,0.2
+applied,ing:egg,"Egg, large (50 g each)",curated ingredient,egg,171287,"Egg, whole, raw, fresh",sr_legacy,0.008,0.25,large 50 g,"owner, 18 Nov: egg, bread, oats (go-ahead for worklist 66)",143,0.7,12.6,9.5
+applied,ing:olive_oil,Extra-virgin olive oil,curated ingredient,fat,167737,"Oil, corn, peanut, and olive",sr_legacy,0.0,0.5,tablespoon 14 g; teaspoon 4.5 g,owner,884,0,0,100
+applied,ing:fish_sauce,Fish sauce,curated ingredient,condiment,174531,"Sauce, fish, ready-to-serve",sr_legacy,0.087,1.0,tbsp 18 g,rule: distance <= 0.10 and name overlap >= 0.6,35,4,5,0
+applied,ing:flank_steak,Flank steak,curated ingredient,protein,169563,"Beef, flank, steak, separable lean and fat, trimmed to 0"" fat, all grades, raw",sr_legacy,0.068,1.0,oz 113 g,rule: distance <= 0.10 and name overlap >= 0.6,150,0,21,7
+applied,ing:flour_tortilla,"Flour tortilla, 8-inch",curated ingredient,grain,175037,"Tortillas, ready-to-bake or -fry, flour, refrigerated",sr_legacy,0.0,0.67,oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,306,49.4,8.2,7.99
+applied,ing:cilantro,Fresh cilantro,curated ingredient,herb,169997,"Coriander (cilantro) leaves, raw",sr_legacy,0.023,0.5,cup 4 g,owner,23,3.7,2.1,0.5
+applied,ing:ginger,Fresh ginger,curated ingredient,veg,169231,"Ginger root, raw",sr_legacy,0.036,0.5,tsp 2 g,owner,80,18,1.8,0.8
+applied,ing:parsley,Fresh parsley,curated ingredient,herb,170416,"Parsley, fresh",sr_legacy,0.018,1.0,tbsp 3.8 g,rule: distance <= 0.10 and name overlap >= 0.6,36,6.3,3,0.8
+applied,ing:rosemary,Fresh rosemary,curated ingredient,herb,173473,"Rosemary, fresh",sr_legacy,0.01,1.0,tsp 0.7 g; tbsp 1.7 g,rule: distance <= 0.10 and name overlap >= 0.6,131,20.7,3.3,5.9
+applied,ing:thyme,Fresh thyme,curated ingredient,herb,173470,"Thyme, fresh",sr_legacy,0.033,1.0,tsp 0.8 g; tsp 0.4 g,rule: distance <= 0.10 and name overlap >= 0.6,101,24,5.6,1.7
+applied,ing:garlic_powder,Garlic powder,curated ingredient,spice,171325,"Spices, garlic powder",sr_legacy,0.013,1.0,tsp 3.1 g; tbsp 9.7 g,rule: distance <= 0.10 and name overlap >= 0.6,331,72.7,16.5,0.7
+applied,ing:goat_cheese,Goat cheese,curated ingredient,dairy,173433,"Cheese, goat, semisoft type",sr_legacy,0.048,1.0,oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,364,0,22,30
+applied,ing:green_onion,Green onions (scallions),curated ingredient,veg,170005,"Onions, spring or scallions (includes tops and bulb), raw",sr_legacy,0.019,0.67,large 25 g,rule: distance <= 0.10 and name overlap >= 0.6,32,7.3,1.8,0.2
+applied,ing:green_peas,Green peas,curated ingredient,veg,170419,"Peas, green, raw",sr_legacy,0.036,1.0,cup 145 g,rule: distance <= 0.10 and name overlap >= 0.6,81,14,5.4,0.4
+applied,ing:ground_beef,Ground beef 90% lean,curated ingredient,protein,174030,"Beef, ground, 90% lean meat / 10% fat, raw",sr_legacy,0.0,1.0,oz 113 g,rule: distance <= 0.10 and name overlap >= 0.6,176,0,20,10
+applied,ing:bison,Ground bison,curated ingredient,protein,175293,"Bison, ground, grass-fed, raw",sr_legacy,0.058,1.0,oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,145,0,20,7
+applied,ing:cinnamon,Ground cinnamon,curated ingredient,spice,171320,"Spices, cinnamon, ground",sr_legacy,0.021,1.0,tsp 2.6 g; tbsp 7.8 g,rule: distance <= 0.10 and name overlap >= 0.6,247,81,4,1.2
+applied,ing:ground_lamb,Ground lamb,curated ingredient,protein,174370,"Lamb, ground, raw",sr_legacy,0.044,1.0,oz 28.4 g; oz 113 g,rule: distance <= 0.10 and name overlap >= 0.6,282,0,17,23
+applied,ing:nutmeg,Ground nutmeg,curated ingredient,spice,171326,"Spices, nutmeg, ground",sr_legacy,0.041,1.0,tsp 2.2 g; tbsp 7 g,rule: distance <= 0.10 and name overlap >= 0.6,525,49,6,36
+applied,ing:ground_pork,"Ground pork, lean",curated ingredient,protein,167895,"Pork, fresh, loin, country-style ribs, separable lean and fat, raw",sr_legacy,0.055,0.67,oz 113 g,rule: distance <= 0.10 and name overlap >= 0.6,185,0,19,12
+applied,ing:ground_turkey,Ground turkey 93% lean,curated ingredient,protein,172850,"Turkey, ground, 93% lean, 7% fat, raw",sr_legacy,0.044,1.0,oz 113 g,rule: distance <= 0.10 and name overlap >= 0.6,150,0,18.7,8
+applied,ing:turmeric,Ground turmeric,curated ingredient,spice,172231,"Spices, turmeric, ground",sr_legacy,0.019,1.0,tsp 3 g; tbsp 9.4 g,rule: distance <= 0.10 and name overlap >= 0.6,312,67,9.7,3.3
+applied,ing:ham,"Ham, lean",curated ingredient,protein,167871,"Pork, cured, ham, boneless, extra lean (approximately 5% fat), roasted",sr_legacy,0.082,1.0,cup 140 g; oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,145,1.5,21,6
+applied,ing:hearts_of_palm,Hearts of palm,curated ingredient,veg,168569,"Hearts of palm, canned",sr_legacy,0.017,1.0,cup 146 g; piece 33 g,rule: distance <= 0.10 and name overlap >= 0.6,28,4.6,2.5,0.6
+applied,ing:hemp_seeds,Hemp seeds,curated ingredient,seed,170148,"Seeds, hemp seed, hulled",sr_legacy,0.022,1.0,tbsp 30 g,rule: distance <= 0.10 and name overlap >= 0.6,553,8.7,32,49
+applied,ing:jicama,Jicama,curated ingredient,veg,170073,"Yambean (jicama), raw",sr_legacy,0.012,1.0,cup 130 g; large 1200 g; medium 659 g,rule: distance <= 0.10 and name overlap >= 0.6,38,8.8,0.7,0.1
+applied,ing:kidney_beans,"Kidney beans, cooked",curated ingredient,legume,173740,"Beans, kidney, all types, mature seeds, cooked, boiled, without salt",sr_legacy,0.003,1.0,cup 177 g; tbsp 11 g,rule: distance <= 0.10 and name overlap >= 0.6,127,22.8,8.7,0.5
+applied,ing:kimchi,Kimchi,curated ingredient,veg,170392,"Cabbage, kimchi",sr_legacy,0.0,1.0,cup 150 g,rule: distance <= 0.10 and name overlap >= 0.6,15,2.4,1.1,0.5
+applied,ing:lamb_leg,"Lamb leg, trimmed",curated ingredient,protein,172596,"Lamb, Australian, imported, fresh, shoulder, blade, separable lean only, trimmed to 1/8"" fat, raw",sr_legacy,0.08,0.67,oz 28.4 g; oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,160,0,20,9
+applied,ing:leek,Leek,curated ingredient,veg,169246,"Leeks, (bulb and lower leaf-portion), raw",sr_legacy,0.011,1.0,cup 89 g; slice 6 g,rule: distance <= 0.10 and name overlap >= 0.6,61,14,1.5,0.3
+applied,ing:lemon_juice,Lemon juice,curated ingredient,fruit,167747,"Lemon juice, raw",sr_legacy,0.03,1.0,cup 244 g; fl oz 30.5 g,rule: distance <= 0.10 and name overlap >= 0.6,22,6.9,0.4,0.2
+applied,ing:lentils,"Lentils, cooked",curated ingredient,legume,172421,"Lentils, mature seeds, cooked, boiled, without salt",sr_legacy,0.015,1.0,cup 198 g; tbsp 12.3 g,rule: distance <= 0.10 and name overlap >= 0.6,116,20,9,0.4
+applied,ing:lima_beans,"Lima beans, cooked",curated ingredient,legume,173802,"Lima beans, large, mature seeds, cooked, boiled, with salt",sr_legacy,0.008,1.0,cup 188 g,rule: distance <= 0.10 and name overlap >= 0.6,115,20.9,7.8,0.4
+applied,ing:lime_juice,Lime juice,curated ingredient,fruit,168156,"Lime juice, raw",sr_legacy,0.019,1.0,cup 242 g; fl oz 30.8 g,rule: distance <= 0.10 and name overlap >= 0.6,25,8.4,0.4,0.1
+applied,ing:milk,"Milk, 2%",curated ingredient,dairy,172205,"Milk, reduced fat, fluid, 2% milkfat, without added vitamin A and vitamin D",sr_legacy,0.007,1.0,cup 246 g,rule: distance <= 0.10 and name overlap >= 0.6,50,4.8,3.3,2
+applied,ing:mozzarella,"Mozzarella, part-skim",curated ingredient,dairy,170847,"Cheese, mozzarella, part skim milk",sr_legacy,0.062,1.0,oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,254,3,24,16
+applied,ing:bean_sprouts,Mung bean sprouts,curated ingredient,veg,169957,"Mung beans, mature seeds, sprouted, raw",sr_legacy,0.03,0.67,cup 104 g,rule: distance <= 0.10 and name overlap >= 0.6,30,6,3,0.2
+applied,ing:mushrooms,Mushrooms (cremini/white),curated ingredient,veg,169251,"Mushrooms, white, raw",sr_legacy,0.025,0.67,large 23 g; medium 18 g,rule: distance <= 0.10 and name overlap >= 0.6,22,3.3,3.1,0.3
+applied,ing:mussels,Mussels,curated ingredient,seafood,174216,"Mollusks, mussel, blue, raw",sr_legacy,0.024,1.0,cup 150 g; oz 28.4 g; large 20 g; medium 16 g,rule: distance <= 0.10 and name overlap >= 0.6,86,3.7,12,2.2
+applied,ing:mustard_seed,Mustard seeds,curated ingredient,spice,170929,"Spices, mustard seed, ground",sr_legacy,0.013,1.0,tsp 2 g; tbsp 6.3 g,rule: distance <= 0.10 and name overlap >= 0.6,508,28,26,36
+applied,ing:navy_beans,"Navy beans, cooked",curated ingredient,legume,173746,"Beans, navy, mature seeds, cooked, boiled, without salt",sr_legacy,0.012,1.0,cup 182 g,rule: distance <= 0.10 and name overlap >= 0.6,140,26,8.2,0.6
+applied,ing:new_potato,"New potatoes, boiled",curated ingredient,veg,170114,"Potatoes, boiled, cooked in skin, flesh, with salt",sr_legacy,0.016,0.67,cup 78 g,rule: distance <= 0.10 and name overlap >= 0.6,87,20,1.9,0.1
+applied,ing:oat_bran,"Oat bran, dry",curated ingredient,grain,168872,"Oat bran, raw",sr_legacy,0.025,0.67,cup 94 g,rule: distance <= 0.10 and name overlap >= 0.6,246,66,17,7
+applied,ing:oat_flour,Oat flour,curated ingredient,grain,169741,"Oat flour, partially debranned",sr_legacy,0.041,1.0,cup 104 g,rule: distance <= 0.10 and name overlap >= 0.6,404,66,15,9
+applied,ing:okra,Okra,curated ingredient,veg,169260,"Okra, raw",sr_legacy,0.02,1.0,cup 100 g,rule: distance <= 0.10 and name overlap >= 0.6,33,7.5,1.9,0.2
+applied,ing:onion_powder,Onion powder,curated ingredient,spice,171327,"Spices, onion powder",sr_legacy,0.056,1.0,tsp 2.4 g; tbsp 6.9 g,rule: distance <= 0.10 and name overlap >= 0.6,341,79,10,1
+applied,ing:oysters,Oysters,curated ingredient,seafood,171981,"Mollusks, oyster, eastern, canned",sr_legacy,0.037,1.0,oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,68,4,7,2.5
+applied,ing:paprika,Paprika,curated ingredient,spice,171329,"Spices, paprika",sr_legacy,0.019,1.0,tsp 2.3 g; tbsp 6.8 g,rule: distance <= 0.10 and name overlap >= 0.6,282,54,14,13
+applied,ing:parmesan,"Parmesan, grated",curated ingredient,dairy,173431,"Cheese, parmesan, shredded",sr_legacy,0.216,0.5,tbsp 5 g,owner,431,4,38,29
+applied,ing:pear,Pear,curated ingredient,fruit,173027,"Fruit cocktail, (peach and pineapple and pear and grape and cherry), canned, light syrup, solids and liquids",sr_legacy,0.015,1.0,cup 242 g,rule: distance <= 0.10 and name overlap >= 0.6,57,15,0.4,0.1
+applied,ing:barley,"Pearl barley, cooked",curated ingredient,grain,170285,"Barley, pearled, cooked",sr_legacy,0.035,0.67,cup 157 g,rule: distance <= 0.10 and name overlap >= 0.6,123,28,2.3,0.4
+applied,ing:pine_nuts,Pine nuts,curated ingredient,nut,170591,"Nuts, pine nuts, dried",sr_legacy,0.034,1.0,cup 135 g,rule: distance <= 0.10 and name overlap >= 0.6,673,13,14,68
+applied,ing:pinto_beans,"Pinto beans, cooked",curated ingredient,legume,173796,"Beans, pinto, mature seeds, cooked, boiled, with salt",sr_legacy,0.026,1.0,cup 171 g,rule: distance <= 0.10 and name overlap >= 0.6,143,26,9,0.6
+applied,ing:popcorn,"Popcorn, air-popped",curated ingredient,grain,167959,"Snacks, popcorn, air-popped",sr_legacy,0.016,1.0,cup 8 g; oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,387,78,13,4.5
+applied,ing:pork_chop,"Pork loin chop, trimmed",curated ingredient,protein,168302,"Pork, fresh, loin, center rib (chops or roasts), boneless, separable lean only, raw",sr_legacy,0.026,0.75,oz 113 g,rule: distance <= 0.10 and name overlap >= 0.6,150,0,22,6.5
+applied,ing:pork_tenderloin,Pork tenderloin,curated ingredient,protein,168312,"Pork, fresh, loin, tenderloin, separable lean and fat, raw",sr_legacy,0.025,1.0,oz 113 g,rule: distance <= 0.10 and name overlap >= 0.6,120,0,21,3.5
+applied,ing:pumpkin_puree,"Pumpkin puree, canned",curated ingredient,veg,168450,"Pumpkin, canned, without salt",sr_legacy,0.071,0.67,cup 245 g,rule: distance <= 0.10 and name overlap >= 0.6,34,8,1.1,0.1
+applied,ing:pumpkin_seeds,Pumpkin seeds (pepitas),curated ingredient,seed,170556,"Seeds, pumpkin and squash seed kernels, dried",sr_legacy,0.035,0.67,cup 129 g; oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,559,11,30,49
+applied,ing:quinoa,"Quinoa, cooked",curated ingredient,grain,168917,"Quinoa, cooked",sr_legacy,0.021,1.0,cup 185 g,rule: distance <= 0.10 and name overlap >= 0.6,120,21,4.4,1.9
+applied,ing:radish,Radishes,curated ingredient,veg,169276,"Radishes, raw",sr_legacy,0.007,1.0,slice 1 g,rule: distance <= 0.10 and name overlap >= 0.6,16,3.4,0.7,0.1
+applied,ing:trout,Rainbow trout fillet,curated ingredient,seafood,175154,"Fish, trout, rainbow, wild, raw",sr_legacy,0.035,0.67,oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,119,0,20,3.5
+applied,ing:red_lentils,"Red lentils, cooked",curated ingredient,legume,172421,"Lentils, mature seeds, cooked, boiled, without salt",sr_legacy,0.015,0.67,cup 198 g; tbsp 12.3 g,rule: distance <= 0.10 and name overlap >= 0.6,116,20,9,0.4
+applied,ing:red_pepper_flakes,Red pepper flakes,curated ingredient,spice,170932,"Spices, pepper, red or cayenne",sr_legacy,0.023,0.67,tsp 1.8 g; tbsp 5.3 g,rule: distance <= 0.10 and name overlap >= 0.6,318,57,12,17
+applied,ing:red_wine_vinegar,Red wine vinegar,curated ingredient,condiment,172240,"Vinegar, red wine",sr_legacy,0.019,1.0,tbsp 14.9 g; cup 239 g; tsp 5 g,rule: distance <= 0.10 and name overlap >= 0.6,19,0.3,0,0
+applied,ing:ricotta,"Ricotta, part-skim",curated ingredient,dairy,171248,"Cheese, ricotta, part skim milk",sr_legacy,0.075,1.0,cup 124 g; oz 28.4 g; cup 246 g,rule: distance <= 0.10 and name overlap >= 0.6,138,5,11,8
+applied,ing:rolled_oats,"Rolled oats, dry",curated ingredient,grain,173904,"Cereals, oats, regular and quick, not fortified, dry",sr_legacy,0.019,0.67,cup 81 g; cup 27 g,rule: distance <= 0.10 and name overlap >= 0.6,379,68,13,6.5
+applied,ing:sardines,"Sardines, canned in olive oil, drained",curated ingredient,seafood,175139,"Fish, sardine, Atlantic, canned in oil, drained solids with bone",sr_legacy,0.056,0.75,oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,208,0,25,11
+applied,ing:sauerkraut,Sauerkraut,curated ingredient,veg,169279,"Sauerkraut, canned, solids and liquids",sr_legacy,0.021,1.0,cup 142 g,rule: distance <= 0.10 and name overlap >= 0.6,19,4.3,0.9,0.1
+applied,ing:sea_bass,Sea bass fillet,curated ingredient,seafood,175142,"Fish, sea bass, mixed species, raw",sr_legacy,0.024,0.67,oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,97,0,18,2
+applied,ing:sesame_seeds,Sesame seeds,curated ingredient,seed,170150,"Seeds, sesame seeds, whole, dried",sr_legacy,0.041,1.0,cup 144 g; tbsp 9 g,rule: distance <= 0.10 and name overlap >= 0.6,573,23,18,50
+applied,ing:shrimp,"Shrimp, peeled",curated ingredient,seafood,175179,"Crustaceans, shrimp, raw",sr_legacy,0.008,0.5,oz 85 g,owner,85,0,20,0.5
+applied,ing:smoked_salmon,Smoked salmon,curated ingredient,seafood,171985,"Fish, salmon, chinook, smoked, (lox), regular",sr_legacy,0.02,1.0,oz 28.4 g; oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,117,0,18,4.3
+applied,ing:soba,"Soba (buckwheat) noodles, cooked",curated ingredient,grain,168907,"Noodles, japanese, soba, cooked",sr_legacy,0.01,0.75,cup 114 g,rule: distance <= 0.10 and name overlap >= 0.6,99,21.4,5.1,0.1
+applied,ing:sour_cream,Sour cream,curated ingredient,dairy,171257,"Cream, sour, cultured",sr_legacy,0.038,1.0,tbsp 12 g; cup 230 g,rule: distance <= 0.10 and name overlap >= 0.6,198,4.6,2.4,19
+applied,ing:spinach,Spinach,curated ingredient,veg,168463,"Spinach, cooked, boiled, drained, without salt",sr_legacy,0.1,1.0,cup 180 g,rule: distance <= 0.10 and name overlap >= 0.6,23,3.6,2.9,0.4
+applied,ing:split_peas,"Split peas, cooked",curated ingredient,legume,172429,"Peas, split, mature seeds, cooked, boiled, without salt",sr_legacy,0.013,1.0,cup 196 g; tbsp 12.2 g,rule: distance <= 0.10 and name overlap >= 0.6,118,21,8.3,0.4
+applied,ing:sriracha,Sriracha,curated ingredient,condiment,171186,"Sauce, hot chile, sriracha",sr_legacy,0.055,1.0,tsp 6.5 g,rule: distance <= 0.10 and name overlap >= 0.6,93,19,2,1
+applied,ing:strawberries,Strawberries,curated ingredient,fruit,2709283,"Strawberries, raw (USDA FNDDS, foods as eaten)",survey_fndds,0.18,1.0,cup 150 g,"owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)",32,7.7,0.7,0.3
+applied,ing:sun_dried_tomato,"Sun-dried tomatoes in oil, drained",curated ingredient,veg,169384,"Tomatoes, sun-dried, packed in oil, drained",sr_legacy,0.032,1.0,cup 110 g; piece 3 g,rule: distance <= 0.10 and name overlap >= 0.6,213,23,5,14
+applied,ing:sunflower_seeds,Sunflower seeds,curated ingredient,seed,170562,"Seeds, sunflower seed kernels, dried",sr_legacy,0.019,1.0,cup 140 g,rule: distance <= 0.10 and name overlap >= 0.6,584,20,21,51
+applied,ing:corn,Sweet corn kernels,curated ingredient,veg,169998,"Corn, sweet, yellow, raw",sr_legacy,0.042,0.67,cup 145 g,rule: distance <= 0.10 and name overlap >= 0.6,86,19,3.3,1.4
+applied,ing:swiss_chard,Swiss chard,curated ingredient,veg,169991,"Chard, swiss, raw",sr_legacy,0.008,1.0,cup 36 g,rule: distance <= 0.10 and name overlap >= 0.6,19,3.7,1.8,0.2
+applied,ing:tahini,Tahini,curated ingredient,nut,170189,"Seeds, sesame butter, tahini, from roasted and toasted kernels (most common type)",sr_legacy,0.013,1.0,tbsp 15 g; oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,595,21,17,54
+applied,ing:tamari,Tamari (gluten-free soy sauce),curated ingredient,condiment,174278,Soy sauce made from soy (tamari),sr_legacy,0.198,0.6,tbsp 18 g; tsp 6 g,owner,60,5,10,0
+applied,ing:tempeh,Tempeh,curated ingredient,legume,174272,Tempeh,sr_legacy,0.078,1.0,cup 166 g,rule: distance <= 0.10 and name overlap >= 0.6,192,8,20,11
+applied,ing:sesame_oil,Toasted sesame oil,curated ingredient,fat,171016,"Oil, sesame, salad or cooking",sr_legacy,0.0,0.67,tablespoon 13.6 g; cup 218 g; tsp 4.5 g,rule: distance <= 0.10 and name overlap >= 0.6,884,0,0,100
+applied,ing:tofu,"Tofu, extra-firm",curated ingredient,legume,172475,"Tofu, raw, firm, prepared with calcium sulfate",sr_legacy,0.091,0.67,cup 126 g,rule: distance <= 0.10 and name overlap >= 0.6,144,3,17,9
+applied,ing:tomatillo,Tomatillos,curated ingredient,veg,168566,"Tomatillos, raw",sr_legacy,0.027,1.0,medium 34 g,rule: distance <= 0.10 and name overlap >= 0.6,32,5.8,1,1
+applied,ing:tomato_paste,Tomato paste,curated ingredient,condiment,170459,"Tomato products, canned, paste, without salt added (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.019,1.0,cup 66 g; cup 262 g; tbsp 16 g,rule: distance <= 0.10 and name overlap >= 0.6,82,19,4.3,0.5
+applied,ing:tomato_sauce,"Tomato sauce, canned, no sugar added",curated ingredient,condiment,169074,"Tomato sauce, canned, no salt added",sr_legacy,0.069,0.8,cup 245 g,rule: distance <= 0.10 and name overlap >= 0.6,24,5.3,1.3,0.2
+applied,ing:tortilla_chips,"Tortilla chips, plain",curated ingredient,grain,167558,"Snacks, tortilla chips, plain, white corn, salted",sr_legacy,0.001,1.0,oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,472,67.8,7.1,20.7
+applied,ing:tuna_canned,"Tuna, canned in water",curated ingredient,seafood,171986,"Fish, tuna, light, canned in water, without salt, drained solids",sr_legacy,0.079,1.0,oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,116,0,26,1
+applied,ing:vanilla_extract,Vanilla extract,curated ingredient,pantry,173471,Vanilla extract,sr_legacy,0.044,1.0,tsp 4.2 g; tbsp 13 g; cup 208 g,rule: distance <= 0.10 and name overlap >= 0.6,288,12.7,0,0
+applied,ing:white_bread,White bread,curated ingredient,grain,174924,"Bread, white, commercially prepared (includes soft bread crumbs)",sr_legacy,0.142,1.0,slice 29 g; oz 28.4 g,"owner, 18 Nov: egg, bread, oats (go-ahead for worklist 66)",267,49.2,9.43,3.59
+applied,ing:white_rice,"White rice, long-grain, cooked",curated ingredient,grain,168878,"Rice, white, long-grain, regular, enriched, cooked",sr_legacy,0.02,1.0,cup 158 g,rule: distance <= 0.10 and name overlap >= 0.6,129,28,2.67,0.28
+applied,ing:white_wine_vinegar,White wine vinegar,curated ingredient,condiment,172240,"Vinegar, red wine",sr_legacy,0.019,0.67,tbsp 14.9 g; cup 239 g; tsp 5 g,rule: distance <= 0.10 and name overlap >= 0.6,19,0.3,0,0
+applied,ing:whole_wheat_english_muffin,Whole wheat English muffin,curated ingredient,grain,172761,"Muffins, English, wheat",sr_legacy,0.051,0.75,oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,220,45,9,2
+applied,ing:wild_rice,"Wild rice, cooked",curated ingredient,grain,168897,"Wild rice, cooked",sr_legacy,0.032,1.0,cup 164 g,rule: distance <= 0.10 and name overlap >= 0.6,101,21,4,0.3
+applied,ing:yellow_squash,Yellow summer squash,curated ingredient,veg,170487,"Squash, summer, all varieties, raw",sr_legacy,0.02,0.67,large 323 g; medium 196 g; slice 9.9 g,rule: distance <= 0.10 and name overlap >= 0.6,16,3.4,1.2,0.2
+applied,ing:zucchini,Zucchini,curated ingredient,veg,169291,"Squash, summer, zucchini, includes skin, raw",sr_legacy,0.012,1.0,large 323 g; medium 196 g,rule: distance <= 0.10 and name overlap >= 0.6,17,3.1,1.2,0.3
+applied,seed:rice-basmati,"Basmati rice, cooked",everyday food,grains,169708,"Rice, white, long-grain, parboiled, enriched, cooked",sr_legacy,0.099,0.67,cup 158 g,rule: distance <= 0.10 and name overlap >= 0.6,121.0,25.0,3.0,0.4
+applied,seed:blackbean,"Black beans, cooked",everyday food,legumes,173735,"Beans, black, mature seeds, cooked, boiled, without salt",sr_legacy,0.03,1.0,cup 172 g,rule: distance <= 0.10 and name overlap >= 0.6,132.0,24.0,8.9,0.5
+applied,seed:blueberry,Blueberries,everyday food,fruits,2709275,"Blueberries, raw (USDA FNDDS, foods as eaten)",survey_fndds,0.167,1.0,cup 150 g,"owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)",57.0,14.0,0.7,0.3
+applied,seed:rice-brown,"Brown rice, cooked",everyday food,grains,169704,"Rice, brown, long-grain, cooked (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.039,1.0,cup 202 g,rule: distance <= 0.10 and name overlap >= 0.6,123.0,26.0,2.7,1.0
+applied,seed:bulgur,"Bulgur, cooked",everyday food,grains,170287,"Bulgur, cooked",sr_legacy,0.042,1.0,cup 182 g; tbsp 8.4 g,rule: distance <= 0.10 and name overlap >= 0.6,83.0,19.0,3.1,0.2
+applied,seed:butter,Butter,everyday food,fats,173410,"Butter, salted",sr_legacy,0.026,1.0,tbsp 14.2 g; cup 227 g,rule: distance <= 0.10 and name overlap >= 0.6,717.0,0.1,0.9,81.0
+applied,seed:carrot-boil,"Carrot, boiled",everyday food,vegetables,169339,"Carrots, cooked, boiled, drained, with salt",sr_legacy,0.048,1.0,tbsp 9.7 g,rule: distance <= 0.10 and name overlap >= 0.6,35.0,8.0,0.8,0.2
+applied,seed:cashews,Cashews,everyday food,nuts,170162,"Nuts, cashew nuts, raw",sr_legacy,0.022,1.0,oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,553.0,30.0,18.0,44.0
+applied,seed:chia,Chia seeds,everyday food,nuts,170554,"Seeds, chia seeds, dried",sr_legacy,0.038,1.0,oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,486.0,42.0,17.0,31.0
+applied,seed:chickpeas,"Chickpeas, cooked",everyday food,legumes,173757,"Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, without salt",sr_legacy,0.023,1.0,cup 164 g,rule: distance <= 0.10 and name overlap >= 0.6,164.0,27.0,8.9,2.6
+applied,seed:cod,Cod,everyday food,protein,171955,"Fish, cod, Atlantic, raw",sr_legacy,0.021,1.0,oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,82.0,0.0,18.0,0.7
+applied,seed:cola,Cola,everyday food,drinks,174851,"Beverages, carbonated, cola, without caffeine",sr_legacy,0.062,1.0,fl oz 30.7 g,rule: distance <= 0.10 and name overlap >= 0.6,42.0,11.0,0.0,0.0
+applied,seed:cucumber,Cucumber,everyday food,vegetables,2709784,"Cucumber, raw (USDA FNDDS, foods as eaten)",survey_fndds,0.208,1.0,cup 120 g,"owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)",15.0,3.6,0.7,0.1
+applied,seed:darkchoc,"Dark chocolate, 70%",everyday food,sweets,170273,"Chocolate, dark, 70-85% cacao solids",sr_legacy,0.012,1.0,oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,598.0,46.0,7.8,43.0
+applied,seed:egg,Egg,everyday food,protein,171287,"Egg, whole, raw, fresh",sr_legacy,0.039,1.0,large 50 g,rule: distance <= 0.10 and name overlap >= 0.6,143.0,0.7,13.0,9.5
+applied,seed:grapes,Grapes,everyday food,fruits,174683,"Grapes, red or green (European type, such as Thompson seedless), raw",sr_legacy,0.026,1.0,cup 151 g,rule: distance <= 0.10 and name overlap >= 0.6,69.0,18.0,0.7,0.2
+applied,seed:greenpeas,Green peas,everyday food,legumes,170419,"Peas, green, raw",sr_legacy,0.036,1.0,cup 145 g,rule: distance <= 0.10 and name overlap >= 0.6,81.0,14.0,5.4,0.4
+applied,seed:kidneybean,"Kidney beans, cooked",everyday food,legumes,173740,"Beans, kidney, all types, mature seeds, cooked, boiled, without salt",sr_legacy,0.012,1.0,cup 177 g; tbsp 11 g,rule: distance <= 0.10 and name overlap >= 0.6,127.0,23.0,8.7,0.5
+applied,seed:beef,Lean beef,everyday food,protein,174752,"Beef, ground, 93% lean meat / 7% fat, patty, cooked, broiled",sr_legacy,0.047,1.0,oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,187.0,0.0,26.0,9.0
+applied,seed:lentils,"Lentils, cooked",everyday food,legumes,172421,"Lentils, mature seeds, cooked, boiled, without salt",sr_legacy,0.015,1.0,cup 198 g; tbsp 12.3 g,rule: distance <= 0.10 and name overlap >= 0.6,116.0,20.0,9.0,0.4
+applied,seed:mackerel,Mackerel,everyday food,protein,175119,"Fish, mackerel, Atlantic, raw",sr_legacy,0.029,1.0,oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,205.0,0.0,19.0,14.0
+applied,seed:milk,"Milk, 2%",everyday food,dairy,172205,"Milk, reduced fat, fluid, 2% milkfat, without added vitamin A and vitamin D",sr_legacy,0.365,1.0,cup 246 g,owner,52.0,4.7,2.9,2.5
+applied,seed:oats,"Oatmeal (rolled oats), cooked",everyday food,grains,173905,"Cereals, oats, regular and quick, unenriched, cooked with water",sr_legacy,0.02,0.5,cup 234 g,"owner, 18 Nov: egg, bread, oats (go-ahead for worklist 66)",71.0,12.0,2.5,1.5
+applied,seed:oliveoil,Olive oil,everyday food,fats,167737,"Oil, corn, peanut, and olive",sr_legacy,0.0,1.0,tablespoon 14 g; teaspoon 4.5 g,rule: distance <= 0.10 and name overlap >= 0.6,884.0,0.0,0.0,100.0
+applied,seed:orangejuice,Orange juice,everyday food,drinks,169098,"Orange juice, raw (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.04,1.0,cup 248 g; fl oz 31 g,rule: distance <= 0.10 and name overlap >= 0.6,45.0,10.0,0.7,0.2
+applied,seed:peanuts,Peanuts,everyday food,nuts,172430,"Peanuts, all types, raw",sr_legacy,0.021,1.0,oz 28.4 g; cup 146 g,rule: distance <= 0.10 and name overlap >= 0.6,567.0,16.0,26.0,49.0
+applied,seed:pear,Pear,everyday food,fruits,173027,"Fruit cocktail, (peach and pineapple and pear and grape and cherry), canned, light syrup, solids and liquids",sr_legacy,0.015,1.0,cup 242 g,rule: distance <= 0.10 and name overlap >= 0.6,57.0,15.0,0.4,0.1
+applied,seed:quinoa,"Quinoa, cooked",everyday food,grains,168917,"Quinoa, cooked",sr_legacy,0.021,1.0,cup 185 g,rule: distance <= 0.10 and name overlap >= 0.6,120.0,21.0,4.4,1.9
+applied,seed:salmon,Salmon,everyday food,protein,175167,"Fish, salmon, Atlantic, farmed, raw",sr_legacy,0.053,1.0,oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,208.0,0.0,20.0,13.0
+applied,seed:shrimp,Shrimp,everyday food,protein,175180,"Crustaceans, shrimp, cooked",sr_legacy,0.007,1.0,oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,99.0,0.2,24.0,0.3
+applied,seed:spinach,Spinach,everyday food,vegetables,168463,"Spinach, cooked, boiled, drained, without salt",sr_legacy,0.1,1.0,cup 180 g,rule: distance <= 0.10 and name overlap >= 0.6,23.0,3.6,2.9,0.4
+applied,seed:strawberry,Strawberries,everyday food,fruits,2709283,"Strawberries, raw (USDA FNDDS, foods as eaten)",survey_fndds,0.152,1.0,cup 150 g,"owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)",32.0,8.0,0.7,0.3
+applied,seed:sugar,Sugar,everyday food,sweets,169656,"Sugars, powdered",sr_legacy,0.007,1.0,tsp 2.5 g,rule: distance <= 0.10 and name overlap >= 0.6,387.0,100.0,0.0,0.0
+applied,seed:corn,"Sweet corn, boiled",everyday food,vegetables,168525,"Corn, sweet, yellow, cooked, boiled, drained, with salt",sr_legacy,0.004,1.0,cup 149 g,rule: distance <= 0.10 and name overlap >= 0.6,96.0,21.0,3.4,1.5
+applied,seed:sweetpotato,"Sweet potato, baked",everyday food,vegetables,168483,"Sweet potato, cooked, baked in skin, flesh, without salt",sr_legacy,0.034,1.0,cup 200 g; large 180 g; small 60 g,rule: distance <= 0.10 and name overlap >= 0.6,90.0,21.0,2.0,0.2
+applied,seed:tofu,Tofu,everyday food,protein,172476,"Tofu, raw, regular, prepared with calcium sulfate",sr_legacy,0.013,1.0,cup 124 g,rule: distance <= 0.10 and name overlap >= 0.6,76.0,1.9,8.1,4.8
+applied,seed:bread-white,White bread,everyday food,grains,174924,"Bread, white, commercially prepared (includes soft bread crumbs)",sr_legacy,0.07,1.0,slice 29 g; oz 28.4 g,rule: distance <= 0.10 and name overlap >= 0.6,265.0,49.0,9.0,3.2
+applied,seed:mushrooms,White mushrooms,everyday food,vegetables,169251,"Mushrooms, white, raw",sr_legacy,0.025,1.0,large 23 g; medium 18 g,rule: distance <= 0.10 and name overlap >= 0.6,22.0,3.3,3.1,0.3
+applied,seed:rice-white,"White rice, cooked",everyday food,grains,168878,"Rice, white, long-grain, regular, enriched, cooked",sr_legacy,0.016,1.0,cup 158 g,rule: distance <= 0.10 and name overlap >= 0.6,130.0,28.0,2.7,0.3
+applied,seed:zucchini,Zucchini,everyday food,vegetables,169291,"Squash, summer, zucchini, includes skin, raw",sr_legacy,0.012,1.0,large 323 g; medium 196 g,rule: distance <= 0.10 and name overlap >= 0.6,17.0,3.1,1.2,0.3
+candidate,ing:almond_flour,Almond flour,curated ingredient,nut,170567,"Nuts, almonds",sr_legacy,0.053,0.5,,,590,21,21,50
+candidate,ing:almond_milk,"Almond milk, unsweetened",curated ingredient,plant_milk,174832,"Beverages, almond milk, unsweetened, shelf stable",sr_legacy,0.289,1.0,cup 262 g,,15,0.6,0.6,1.2
+candidate,ing:almonds,Almonds,curated ingredient,nut,170567,"Nuts, almonds",sr_legacy,0.029,1.0,,,579,22,21,50
+candidate,ing:anchovies,"Anchovies, canned",curated ingredient,seafood,174183,"Fish, anchovy, european, canned in oil, drained solids",sr_legacy,0.033,1.0,,,210,0,29,10
+candidate,ing:apple,Apple,curated ingredient,fruit,171688,"Apples, raw, with skin (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.037,1.0,,,52,14,0.3,0.2
+candidate,ing:arrowroot,Arrowroot starch,curated ingredient,grain,170684,Arrowroot flour,sr_legacy,0.002,0.5,cup 128 g,,357,88,0.3,0.1
+candidate,ing:artichoke_hearts,"Artichoke hearts, canned in water",curated ingredient,veg,174561,"Soup, pea, green, canned, prepared with equal volume water",sr_legacy,0.684,0.5,fl oz 32.4 g,,47,10.5,3.3,0.2
+candidate,ing:asparagus,Asparagus,curated ingredient,veg,168390,"Asparagus, cooked, boiled, drained",sr_legacy,0.199,1.0,cup 90 g,,20,3.9,2.2,0.1
+candidate,ing:avocado,Avocado,curated ingredient,veg,171705,"Avocados, raw, all commercial varieties",sr_legacy,0.026,1.0,,,160,8.5,2,15
+candidate,ing:bagel,"Bagel, plain",curated ingredient,grain,174899,"Bagels, plain, enriched, with calcium propionate (includes onion, poppy, sesame)",sr_legacy,0.0,1.0,,,264,52.4,10.56,1.32
+candidate,ing:pesto,Basil pesto,curated ingredient,condiment,171580,"Sauce, pesto, ready-to-serve, shelf stable",sr_legacy,0.149,0.5,cup 61 g,,400,6,5,40
+candidate,ing:bay_leaf,Bay leaves,curated ingredient,spice,170917,"Spices, bay leaf",sr_legacy,0.006,0.5,,,313,75,7.6,8.4
+candidate,ing:beef_broth,"Beef broth, low sodium",curated ingredient,condiment,171179,"Soup, SWANSON, beef broth, lower sodium",sr_legacy,0.136,0.75,cup 213 g,,7,0.4,1.3,0.2
+candidate,ing:beet,Beets,curated ingredient,veg,168506,"Beets, cooked, boiled. drained, with salt",sr_legacy,0.094,1.0,,,43,9.6,1.6,0.2
+candidate,ing:bell_pepper,Bell pepper,curated ingredient,veg,169383,"Peppers, sweet, yellow, raw",sr_legacy,0.183,0.5,,,31,6,1,0.3
+candidate,ing:black_pepper,Black pepper,curated ingredient,spice,170931,"Spices, pepper, black",sr_legacy,0.052,1.0,,,251,64,10,3.3
+candidate,ing:black_eyed_peas,"Black-eyed peas, cooked",curated ingredient,legume,175257,"Peas, split, mature seeds, cooked, boiled, with salt",sr_legacy,0.134,0.5,cup 196 g,,116,20.8,7.7,0.5
+candidate,ing:blackberries,Blackberries,curated ingredient,fruit,168982,"Blackberries, wild, raw (Alaska Native)",sr_legacy,0.611,1.0,cup 157 g,,43,9.6,1.4,0.5
+candidate,ing:bone_broth,Bone broth,curated ingredient,condiment,171542,"Soup, chicken broth, canned, condensed",sr_legacy,0.844,0.5,,,35,0.5,8,0.3
+candidate,ing:green_tea,Brewed green tea,curated ingredient,drink,171910,"Beverages, tea, green, brewed, decaffeinated",sr_legacy,0.0,1.0,,,0,0,0,0
+candidate,ing:broccoli,Broccoli,curated ingredient,veg,168510,"Broccoli, cooked, boiled, drained, with salt",sr_legacy,0.256,1.0,,,34,6.6,2.8,0.4
+candidate,ing:brussels_sprouts,Brussels sprouts,curated ingredient,veg,169332,"Brussels sprouts, frozen, cooked, boiled, drained, with salt",sr_legacy,0.199,1.0,cup 155 g,,43,9,3.4,0.3
+candidate,ing:butter_lettuce,Butter lettuce,curated ingredient,veg,168429,"Lettuce, butterhead (includes boston and bibb types), raw",sr_legacy,0.029,0.5,,,13,2.2,1.4,0.2
+candidate,ing:butternut_squash,Butternut squash,curated ingredient,veg,169295,"Squash, winter, butternut, raw",sr_legacy,0.026,1.0,,,45,12,1,0.1
+candidate,ing:cajun_seasoning,Cajun seasoning,curated ingredient,spice,173476,"Seasoning mix, dry, chili, original",sr_legacy,0.315,0.5,tbsp 9 g,,300,55,10,8
+candidate,ing:canadian_bacon,Canadian bacon,curated ingredient,protein,167869,"Canadian bacon, unprepared",sr_legacy,0.29,1.0,oz 85 g,,110,1,20,2
+candidate,ing:capers,Capers,curated ingredient,veg,172238,"Capers, canned",sr_legacy,0.029,1.0,,,23,4.9,2.4,0.9
+candidate,ing:catfish,Catfish fillet,curated ingredient,seafood,174186,"Fish, catfish, channel, wild, raw",sr_legacy,0.084,0.5,oz 85 g,,95,0,16,3
+candidate,ing:cauliflower,Cauliflower,curated ingredient,veg,170398,"Cauliflower, frozen, unprepared",sr_legacy,0.136,1.0,,,25,5,1.9,0.3
+candidate,ing:cauliflower_rice,Cauliflower rice,curated ingredient,veg,170398,"Cauliflower, frozen, unprepared",sr_legacy,0.136,0.5,,,25,5,1.9,0.3
+candidate,ing:celery,Celery,curated ingredient,veg,169342,"Celery, cooked, boiled, drained, with salt",sr_legacy,0.307,1.0,,,16,3,0.7,0.2
+candidate,ing:cherries,"Cherries, pitted",curated ingredient,fruit,171719,"Cherries, sweet, raw",sr_legacy,0.014,0.5,,,63,16,1.1,0.2
+candidate,ing:cherry_tomato,Cherry tomatoes,curated ingredient,veg,170457,"Tomatoes, red, ripe, raw, year round average",sr_legacy,0.009,0.5,,,18,3.9,0.9,0.2
+candidate,ing:chicken_sausage,Chicken sausage,curated ingredient,protein,325992,"Sausage, turkey, breakfast links, mild, raw",foundation,0.388,0.5,,,170,2,15,11
+candidate,ing:chickpea_pasta,"Chickpea pasta, cooked",curated ingredient,grain,173757,"Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, without salt",sr_legacy,0.42,0.67,cup 164 g,,165,27,12,3
+candidate,ing:coconut_aminos,Coconut aminos,curated ingredient,condiment,168847,"Frozen novelties, ice type, pineapple-coconut",sr_legacy,1.209,0.5,,,90,22,0,0
+candidate,ing:coconut_flour,Coconut flour,curated ingredient,nut,169741,"Oat flour, partially debranned",sr_legacy,0.589,0.5,cup 104 g,,400,60,18,13
+candidate,ing:coconut_milk_light,"Coconut milk, canned light",curated ingredient,plant_milk,174116,"Beverages, coconut milk, sweetened, fortified with calcium, vitamins A, B12, D2",sr_legacy,1.445,0.5,cup 240 g,,68,2.5,0.7,6
+candidate,ing:coconut_shredded,"Coconut, unsweetened shredded",curated ingredient,nut,168586,"Nuts, coconut meat, dried (desiccated), sweetened, shredded",sr_legacy,2.27,0.67,,,660,24,7,65
+candidate,ing:cod,Cod fillet,curated ingredient,seafood,171955,"Fish, cod, Atlantic, raw",sr_legacy,0.021,0.5,oz 85 g,,82,0,18,0.7
+candidate,ing:coleslaw_mix,Coleslaw mix (cabbage & carrot),curated ingredient,veg,174932,"Cake, pudding-type, carrot, dry mix",sr_legacy,26.4,0.5,oz 28.4 g,,27,6,1.3,0.1
+candidate,ing:collard_greens,Collard greens,curated ingredient,veg,168523,"Collards, cooked, boiled, drained, with salt",sr_legacy,0.208,0.5,,,32,5.4,3,0.6
+candidate,ing:cottage_cheese,"Cottage cheese, low-fat",curated ingredient,dairy,328841,"Cheese, cottage, lowfat, 2% milkfat",foundation,0.002,0.5,,,84,4.3,11,2.3
+candidate,ing:cranberries,"Cranberries, fresh",curated ingredient,fruit,168117,"Cranberry juice, unsweetened",sr_legacy,0.03,0.5,cup 253 g; fl oz 31.6 g,,46,12,0.4,0.1
+candidate,ing:cream_cheese,Cream cheese,curated ingredient,dairy,173418,"Cheese, cream",sr_legacy,0.365,1.0,tbsp 14.5 g; cup 232 g; oz 28.4 g,,342,4,6,34
+candidate,ing:daikon,Daikon radish,curated ingredient,veg,170095,"Radish seeds, sprouted, raw",sr_legacy,2.605,0.5,cup 38 g,,18,4.1,0.6,0.1
+candidate,ing:dark_chocolate,Dark chocolate 85%,curated ingredient,pantry,169881,"Candies, chocolate covered, low sugar or low calorie",sr_legacy,0.365,0.5,,,600,30,12,46
+candidate,ing:deli_turkey,"Deli turkey breast, low sodium",curated ingredient,protein,173874,"Chicken breast, deli, rotisserie seasoned, sliced, prepackaged",sr_legacy,0.417,0.4,slice 12 g,,104,4,17,1.5
+candidate,ing:green_chiles,"Diced green chiles, canned",curated ingredient,condiment,168577,"Peppers, chili, green, canned",sr_legacy,0.128,0.5,cup 139 g,,20,4.5,0.8,0.1
+candidate,ing:diced_tomatoes,"Diced tomatoes, canned",curated ingredient,condiment,170052,"Tomatoes, red, ripe, canned, stewed",sr_legacy,0.388,0.67,cup 255 g,,24,5,1.2,0.2
+candidate,ing:dijon,Dijon mustard,curated ingredient,condiment,326698,"Mustard, prepared, yellow",foundation,0.222,0.5,,,66,5,4,3.3
+candidate,ing:oregano,Dried oregano,curated ingredient,spice,171328,"Spices, oregano, dried",sr_legacy,0.006,1.0,,,265,69,9,4.3
+candidate,ing:spice,Dried spices/herbs (generic),curated ingredient,spice,170938,"Spices, thyme, dried",sr_legacy,0.403,0.5,,,300,55,10,8
+candidate,ing:dried_thyme,Dried thyme,curated ingredient,spice,170938,"Spices, thyme, dried",sr_legacy,0.017,1.0,,,276,64,9,7.4
+candidate,ing:red_wine,Dry red wine (cooking),curated ingredient,pantry,173190,"Alcoholic beverage, wine, table, red",sr_legacy,0.025,0.5,fl oz 29.4 g,,85,2.6,0,0
+candidate,ing:white_wine,Dry white wine (cooking),curated ingredient,pantry,174837,"Alcoholic beverage, wine, table, white",sr_legacy,0.023,0.5,fl oz 29.4 g,,82,2.6,0,0
+candidate,ing:duck_breast,"Duck breast, skinless",curated ingredient,protein,174469,"Duck, wild, breast, meat only, raw",sr_legacy,0.246,1.0,,,135,0,20,5
+candidate,ing:eggplant,Eggplant,curated ingredient,veg,169352,"Eggplant, cooked, boiled, drained, with salt",sr_legacy,0.623,1.0,,,25,6,1,0.2
+candidate,ing:farro,"Farro (pearled spelt), cooked",curated ingredient,grain,169746,"Spelt, cooked",sr_legacy,0.19,0.5,cup 194 g,,130,26,5,1
+candidate,ing:fennel,Fennel bulb,curated ingredient,veg,169385,"Fennel, bulb, raw",sr_legacy,0.013,1.0,,,31,7.3,1.2,0.2
+candidate,ing:feta,Feta cheese,curated ingredient,dairy,171628,Ham and cheese loaf or roll,sr_legacy,0.225,0.5,,,264,4,14,21
+candidate,ing:basil,Fresh basil,curated ingredient,herb,172232,"Basil, fresh",sr_legacy,0.039,1.0,,,23,2.7,3.2,0.6
+candidate,ing:chives,Fresh chives,curated ingredient,herb,172232,"Basil, fresh",sr_legacy,0.59,0.5,,,30,4.4,3.3,0.7
+candidate,ing:dill,Fresh dill,curated ingredient,herb,172233,"Dill weed, fresh",sr_legacy,0.021,1.0,,,43,7,3.5,1.1
+candidate,ing:mint,Fresh mint,curated ingredient,herb,173475,"Spearmint, fresh",sr_legacy,0.014,0.5,tbsp 11.4 g,,44,8.4,3.3,0.7
+candidate,ing:oregano_fresh,Fresh oregano,curated ingredient,herb,173474,"Peppermint, fresh",sr_legacy,0.738,0.5,tbsp 3.2 g,,66,15,2.2,1.4
+candidate,ing:sage,Fresh sage,curated ingredient,herb,170935,"Spices, sage, ground",sr_legacy,0.019,0.5,tsp 0.7 g; tbsp 2 g,,315,60,10.6,12.7
+candidate,ing:garam_masala,Garam masala,curated ingredient,spice,171181,"SMART SOUP, Indian Bean Masala",sr_legacy,3.345,0.5,,,325,58,14,14
+candidate,ing:garlic,Garlic,curated ingredient,veg,171325,"Spices, garlic powder",sr_legacy,4.088,1.0,tsp 3.1 g; tbsp 9.7 g,,149,33,6.4,0.5
+candidate,ing:ghee,Ghee,curated ingredient,dairy,171314,"Butter, Clarified butter (ghee)",sr_legacy,0.0,1.0,,,900,0,0,100
+candidate,ing:grapefruit,Grapefruit,curated ingredient,fruit,174673,"Grapefruit, raw, pink and red, all areas",sr_legacy,0.027,1.0,,,42,10.7,0.8,0.1
+candidate,ing:greek_yogurt,"Greek yogurt, plain 2%",curated ingredient,dairy,170903,"Yogurt, Greek, plain, lowfat",sr_legacy,0.044,1.0,,,73,4,10,2
+candidate,ing:green_beans,Green beans,curated ingredient,veg,169961,"Beans, snap, green, raw",sr_legacy,0.021,1.0,,,31,7,1.8,0.2
+candidate,ing:cabbage,Green cabbage,curated ingredient,veg,169975,"Cabbage, raw",sr_legacy,0.007,0.5,,,25,5.8,1.3,0.1
+candidate,ing:grits,"Grits, cooked with water",curated ingredient,grain,171672,"Cereals, corn grits, yellow, regular and quick, enriched, cooked with water, without salt",sr_legacy,0.285,1.0,cup 233 g,,58,12.4,1.2,0.28
+candidate,ing:cardamom,Ground cardamom,curated ingredient,spice,170919,"Spices, cardamom",sr_legacy,0.072,0.5,,,311,68,11,7
+candidate,ing:ground_chicken,Ground chicken,curated ingredient,protein,171116,"Chicken, ground, raw",sr_legacy,0.046,1.0,,,143,0,17,8
+candidate,ing:coriander,Ground coriander,curated ingredient,spice,170922,"Spices, coriander seed",sr_legacy,0.044,0.5,tsp 1.8 g; tbsp 5 g,,298,55,12,18
+candidate,ing:cumin,Ground cumin,curated ingredient,spice,170923,"Spices, cumin seed",sr_legacy,0.028,0.5,,,375,44,18,22
+candidate,ing:flaxseed,Ground flaxseed,curated ingredient,seed,169414,"Seeds, flaxseed",sr_legacy,0.024,0.5,,,534,29,18,42
+candidate,ing:halibut,Halibut fillet,curated ingredient,seafood,169812,"Fish, halibut, cooked, with skin (Alaska Native)",sr_legacy,0.199,0.5,,,111,0,23,2.3
+candidate,ing:hamburger_bun,"Hamburger bun, white",curated ingredient,grain,174094,"Rolls, hamburger, whole grain white, calcium-fortified",sr_legacy,0.141,0.67,,,267,49.2,9.43,3.59
+candidate,ing:harissa,Harissa paste,curated ingredient,condiment,170459,"Tomato products, canned, paste, without salt added (Includes foods for USDA's Food Distribution Program)",sr_legacy,2.889,0.5,cup 66 g; cup 262 g; tbsp 16 g,,70,9,2,3
+candidate,ing:hazelnuts,Hazelnuts,curated ingredient,nut,170581,"Nuts, hazelnuts or filberts",sr_legacy,0.025,1.0,,,628,17,15,61
+candidate,ing:heavy_cream,Heavy cream,curated ingredient,dairy,170859,"Cream, fluid, heavy whipping",sr_legacy,0.314,1.0,tbsp 15 g; fl oz 29.8 g,,340,3,2,36
+candidate,ing:hot_sauce,Hot sauce (Tabasco/Frank's),curated ingredient,condiment,174527,"Sauce, ready-to-serve, pepper or hot",sr_legacy,0.048,0.4,tsp 4.7 g; tsp 1.2 g,,12,1.8,0.5,0.4
+candidate,ing:hummus,Hummus,curated ingredient,legume,172454,"Hummus, home prepared",sr_legacy,1.001,1.0,tablespoon 15 g; cup 246 g,,166,14,8,9.6
+candidate,ing:iceberg,Iceberg lettuce,curated ingredient,veg,169248,"Lettuce, iceberg (includes crisphead types), raw",sr_legacy,0.019,1.0,,,14,3,0.9,0.1
+candidate,ing:italian_seasoning,Italian seasoning,curated ingredient,spice,174913,"Bread, Italian",sr_legacy,0.745,0.5,oz 28.4 g; slice 29 g,,265,69,9,4.3
+candidate,ing:jalapeno,Jalapeño,curated ingredient,veg,173660,"Beverages, PEPSICO QUAKER, Gatorade, G performance O 2, ready-to-drink.",sr_legacy,0.519,0.5,fl oz 30.5 g; fl oz 244 g,,29,6.5,0.9,0.4
+candidate,ing:kale,Kale,curated ingredient,veg,169355,"Kale, cooked, boiled, drained, with salt",sr_legacy,0.919,1.0,cup 118 g,,49,8.8,4.3,0.9
+candidate,ing:kefir,"Kefir, plain",curated ingredient,dairy,170904,"Kefir, lowfat, plain, LIFEWAY",sr_legacy,0.358,1.0,cup 243 g,,41,4,3.3,1
+candidate,ing:kiwi,Kiwi,curated ingredient,fruit,172254,"Babyfood, GERBER, 3rd Foods, apple, mango and kiwi",sr_legacy,0.714,1.0,,,61,14.7,1.1,0.5
+candidate,ing:kohlrabi,Kohlrabi,curated ingredient,veg,168425,"Kohlrabi, cooked, boiled, drained, without salt",sr_legacy,0.166,1.0,,,27,6.2,1.7,0.1
+candidate,ing:lamb_chop,"Lamb loin chop, trimmed",curated ingredient,protein,173067,"Beef, top loin petite roast/filet, boneless, separable lean and fat, trimmed to 1/8"" fat, select, raw",sr_legacy,0.05,0.5,oz 113 g,,170,0,21,9.5
+candidate,ing:lemon,Lemon (with juice & zest),curated ingredient,fruit,167747,"Lemon juice, raw",sr_legacy,0.703,0.67,cup 244 g; fl oz 30.5 g,,29,9.3,1.1,0.3
+candidate,ing:lemongrass,Lemongrass,curated ingredient,herb,171184,"SMART SOUP, Vietnamese Carrot Lemongrass",sr_legacy,1.581,1.0,,,99,25,1.8,0.5
+candidate,ing:lime,Lime,curated ingredient,fruit,168155,"Limes, raw",sr_legacy,0.004,1.0,,,30,10.5,0.7,0.2
+candidate,ing:lobster,Lobster meat,curated ingredient,seafood,174209,"Crustaceans, lobster, northern, cooked, moist heat",sr_legacy,0.013,0.5,cup 145 g; oz 85 g,,89,0,19,0.9
+candidate,ing:low_carb_tortilla,Low-carb high-fiber tortilla,curated ingredient,grain,168863,"Snacks, tortilla chips, low fat, made with olestra, nacho cheese",sr_legacy,1.758,0.4,oz 28.4 g,,250,40,12,8
+candidate,ing:macadamia,Macadamia nuts,curated ingredient,nut,170178,"Nuts, macadamia nuts, raw",sr_legacy,0.027,1.0,,,718,14,8,76
+candidate,ing:mackerel,Mackerel fillet,curated ingredient,seafood,175119,"Fish, mackerel, Atlantic, raw",sr_legacy,0.029,0.5,oz 85 g,,205,0,19,14
+candidate,ing:mahi_mahi,Mahi-mahi fillet,curated ingredient,seafood,174478,"Emu, flat fillet, raw",sr_legacy,0.416,0.5,oz 85 g,,85,0,18.5,0.7
+candidate,ing:mango,Mango,curated ingredient,fruit,169910,"Mangos, raw",sr_legacy,0.015,1.0,,,60,15,0.8,0.4
+candidate,ing:marinara,"Marinara sauce, no sugar added",curated ingredient,condiment,332282,"Sauce, pasta, spaghetti/marinara, ready-to-serve",foundation,0.98,0.5,,,45,5,1.5,2.5
+candidate,ing:mayo,Mayonnaise (avocado oil),curated ingredient,fat,173573,"Oil, avocado",sr_legacy,0.545,0.67,tbsp 14 g; cup 218 g; tsp 4.5 g,,700,0,0,78
+candidate,ing:dates,Medjool dates (small amount),curated ingredient,fruit,168191,"Dates, medjool",sr_legacy,0.02,0.5,,,277,75,1.8,0.2
+candidate,ing:mixed_berries,"Mixed berries, frozen",curated ingredient,fruit,170142,"Vegetables, mixed, frozen, cooked, boiled, drained, with salt",sr_legacy,1.293,0.67,cup 91 g,,45,11,0.8,0.4
+candidate,ing:mixed_greens,Mixed salad greens,curated ingredient,veg,169085,"Vegetables, mixed (corn, lima beans, peas, green beans, carrots) canned, no salt added",sr_legacy,1.42,0.67,cup 182 g,,20,3.5,2,0.3
+candidate,ing:monk_fruit_sweetener,Monk fruit/erythritol sweetener,curated ingredient,pantry,171926,"Water, non-carbonated, bottles, natural fruit flavors, sweetened with low calorie sweetener",sr_legacy,0.051,0.5,fl oz 29.6 g,,0,0,0,0
+candidate,ing:napa_cabbage,Napa cabbage,curated ingredient,veg,169979,"Cabbage, chinese (pe-tsai), raw",sr_legacy,0.006,0.5,,,16,3.2,1.2,0.2
+candidate,ing:nutritional_yeast,Nutritional yeast,curated ingredient,condiment,175043,"Leavening agents, yeast, baker's, active dry",sr_legacy,0.891,0.5,tsp 4 g; tbsp 12 g,,325,35,50,5
+candidate,ing:olives,Olives (kalamata/green),curated ingredient,veg,332791,"Olives, green, Manzanilla, stuffed with pimiento",foundation,0.593,0.67,,,115,6,0.8,11
+candidate,ing:orange,Orange,curated ingredient,fruit,327501,"Oranges, raw, navels (Includes foods for USDA's Food Distribution Program)",foundation,0.037,1.0,,,47,12,0.9,0.1
+candidate,ing:french_fries_baked,"Oven fries, frozen shoestring, baked",curated ingredient,veg,169264,"Potatoes, french fried, all types, salt added in processing, frozen, home-prepared, oven heated",sr_legacy,0.002,0.6,,,158,25.6,2.75,5.48
+candidate,ing:plant_protein,"Pea protein powder, unsweetened",curated ingredient,supplement,173180,"Beverages, Protein powder whey based",sr_legacy,1.062,0.5,cup 32 g,,375,8,75,6
+candidate,ing:peach,Peach,curated ingredient,fruit,173186,"Beverages, V8 SPLASH Smoothies, Peach Mango",sr_legacy,0.44,1.0,,,39,9.5,0.9,0.3
+candidate,ing:peanut_butter,"Peanut butter, natural",curated ingredient,nut,172459,"Peanut butter, smooth, vitamin and mineral fortified",sr_legacy,0.113,0.67,tbsp 32 g; cup 258 g,,588,20,25,50
+candidate,ing:peanuts,"Peanuts, dry roasted",curated ingredient,nut,172433,"Peanuts, valencia, oil-roasted, with salt",sr_legacy,0.143,0.67,cup 144 g; oz 28.4 g,,567,16,26,49
+candidate,ing:pecans,Pecans,curated ingredient,nut,170182,"Nuts, pecans",sr_legacy,0.029,1.0,,,691,14,9,72
+candidate,ing:pineapple,Pineapple,curated ingredient,fruit,169124,"Pineapple, raw, all varieties",sr_legacy,0.029,1.0,,,50,13,0.5,0.1
+candidate,ing:pistachios,"Pistachios, shelled",curated ingredient,nut,170184,"Nuts, pistachio nuts, raw",sr_legacy,0.045,0.5,cup 123 g,,560,28,20,45
+candidate,ing:plum,Plum,curated ingredient,fruit,169949,"Plums, raw",sr_legacy,0.008,1.0,,,46,11.4,0.7,0.3
+candidate,ing:poblano,Poblano pepper,curated ingredient,veg,168547,"Peppers, sweet, red, frozen, chopped, unprepared",sr_legacy,0.093,0.5,,,20,4.6,1,0.1
+candidate,ing:pomegranate,Pomegranate arils,curated ingredient,fruit,169134,"Pomegranates, raw",sr_legacy,0.036,0.5,,,83,19,1.7,1.2
+candidate,ing:pork_shoulder,"Pork shoulder, trimmed",curated ingredient,protein,167888,"Pork, fresh, composite of trimmed retail cuts (leg, loin, shoulder, and spareribs), separable lean and fat, raw",sr_legacy,0.15,1.0,oz 28.4 g,,200,0,19,14
+candidate,ing:portobello,Portobello mushrooms,curated ingredient,veg,169255,"Mushrooms, portabella, raw",sr_legacy,0.026,0.5,,,22,3.9,2.1,0.4
+candidate,ing:potato_baked,"Potato, baked, flesh (russet)",curated ingredient,veg,168483,"Sweet potato, cooked, baked in skin, flesh, without salt",sr_legacy,0.106,0.75,cup 200 g; large 180 g; small 60 g,,93,21.5,1.95,0.1
+candidate,ing:potato_boiled,"Potato, boiled, peeled",curated ingredient,veg,168483,"Sweet potato, cooked, baked in skin, flesh, without salt",sr_legacy,0.106,0.67,cup 200 g; large 180 g; small 60 g,,93,21.5,1.95,0.1
+candidate,ing:rye_bread,Pumpernickel / whole rye bread,curated ingredient,grain,174920,"Bread, reduced-calorie, rye",sr_legacy,0.437,0.5,oz 28.4 g; slice 23 g,,250,47,8.7,3.1
+candidate,ing:pumpkin_pie_spice,Pumpkin pie spice,curated ingredient,spice,172787,"Pie, pumpkin, commercially prepared",sr_legacy,1.794,0.67,oz 28.4 g; slice 133 g,,342,74,4,5
+candidate,ing:maple_syrup,Pure maple syrup (small amount),curated ingredient,pantry,169661,"Syrups, maple",sr_legacy,0.034,0.4,tbsp 20 g; cup 315 g,,260,67,0,0
+candidate,ing:ranch_seasoning,Ranch seasoning (dry),curated ingredient,spice,173476,"Seasoning mix, dry, chili, original",sr_legacy,0.315,0.67,tbsp 9 g,,300,55,10,8
+candidate,ing:raspberries,Raspberries,curated ingredient,fruit,168209,"Raspberries, frozen, red, unsweetened",sr_legacy,0.176,1.0,,,52,12,1.2,0.7
+candidate,ing:red_cabbage,Red cabbage,curated ingredient,veg,168515,"Cabbage, red, cooked, boiled, drained, with salt",sr_legacy,0.185,1.0,,,31,7.4,1.4,0.2
+candidate,ing:enchilada_sauce,"Red enchilada sauce, no sugar added",curated ingredient,condiment,174074,"Sauce, enchilada, red, mild, ready to serve",sr_legacy,0.766,0.6,cup 56 g; cup 224 g,,40,5,1,2
+candidate,ing:lentil_pasta,"Red lentil pasta, cooked",curated ingredient,grain,168916,"Pasta, whole grain, 51% whole wheat, remaining unenriched semolina, cooked",sr_legacy,0.647,0.5,,,160,28,12,1.5
+candidate,ing:red_onion,Red onion,curated ingredient,veg,790577,"Onions, red, raw",foundation,0.221,1.0,,,40,9.3,1.1,0.1
+candidate,ing:refried_beans,"Refried beans, fat-free",curated ingredient,legume,172465,"Refried beans, canned, fat-free",sr_legacy,0.268,1.0,cup 231 g,,90,15,5.5,0.5
+candidate,ing:roasted_red_pepper,"Roasted red peppers, jarred",curated ingredient,veg,170515,"Peppers, sweet, red, cooked, boiled, drained, with salt",sr_legacy,0.178,0.75,tbsp 12 g,,30,6,1,0.3
+candidate,ing:romaine,Romaine lettuce,curated ingredient,veg,327923,"Lettuce, cos or romaine, raw",foundation,0.039,1.0,,,17,3.3,1.2,0.3
+candidate,ing:rotisserie_chicken,"Rotisserie chicken, skin removed",curated ingredient,protein,170749,"POPEYES, Fried Chicken, Mild, Drumstick, meat only, skin and breading removed",sr_legacy,0.243,0.75,,,160,0,23,7
+candidate,ing:salmon,Salmon fillet,curated ingredient,seafood,175167,"Fish, salmon, Atlantic, farmed, raw",sr_legacy,0.053,0.5,oz 85 g,,208,0,20,13
+candidate,ing:salsa_verde,Salsa verde,curated ingredient,condiment,171824,"Sauce, salsa, verde, ready-to-serve",sr_legacy,0.433,1.0,Tbsp 30 g,,30,6,1,0.5
+candidate,ing:salsa,"Salsa, no sugar added",curated ingredient,condiment,169613,"Frozen novelties, ice type, fruit, no sugar added",sr_legacy,0.781,0.67,,,36,7,1.5,0.2
+candidate,ing:scallops,Sea scallops,curated ingredient,seafood,169001,"Sea lion, Steller, kidney (Alaska Native)",sr_legacy,0.542,0.5,,,88,2,17,0.8
+candidate,ing:shallot,Shallot,curated ingredient,veg,170499,"Shallots, raw",sr_legacy,0.012,1.0,,,72,17,2.5,0.1
+candidate,ing:shiitake,Shiitake mushrooms,curated ingredient,veg,169242,"Mushrooms, shiitake, raw",sr_legacy,0.018,1.0,,,34,6.8,2.2,0.5
+candidate,ing:shirataki,Shirataki noodles,curated ingredient,veg,172925,"Soup, chicken noodle, dry, mix, prepared with water",sr_legacy,0.922,0.5,cup 245 g,,10,3,0,0
+candidate,ing:smoked_paprika,Smoked paprika,curated ingredient,spice,171329,"Spices, paprika",sr_legacy,0.019,0.5,tsp 2.3 g; tbsp 6.8 g,,282,54,14,13
+candidate,ing:soy_milk,"Soy milk, unsweetened",curated ingredient,plant_milk,173187,"Beverages, chocolate almond milk, unsweetened, shelf-stable, fortified with vitamin D2 and E",sr_legacy,1.113,0.67,cup 240 g,,33,1.2,2.9,1.8
+candidate,ing:soy_sauce,"Soy sauce, low sodium",curated ingredient,condiment,172473,"Soy sauce made from soy and wheat (shoyu), low sodium",sr_legacy,0.425,1.0,tbsp 14.2 g; tsp 4.5 g; cup 255 g,,53,5,8,0
+candidate,ing:spaghetti_squash,"Spaghetti squash, cooked",curated ingredient,veg,169298,"Squash, winter, spaghetti, raw",sr_legacy,0.036,0.67,,,31,7,0.6,0.6
+candidate,ing:sparkling_water,Sparkling water,curated ingredient,drink,173183,"Beverages, GEROLSTEINER BRUNNEN GmbH & Co. KG (Gerolsteiner), naturally sparkling, mineral bottled water",sr_legacy,0.0,1.0,,,0,0,0,0
+candidate,ing:ezekiel_bread,Sprouted grain bread (Ezekiel-style),curated ingredient,grain,171851,"Bread, wheat, sprouted, toasted",sr_legacy,0.983,0.4,,,235,44,12,1.5
+candidate,ing:squid,Squid (calamari),curated ingredient,seafood,174223,"Mollusks, squid, mixed species, raw",sr_legacy,0.049,0.5,oz 85 g,,92,3,16,1.4
+candidate,ing:star_anise,Star anise,curated ingredient,spice,171316,"Spices, anise seed",sr_legacy,0.029,0.5,,,337,50,18,16
+candidate,ing:steel_cut_oats,"Steel-cut oats, dry",curated ingredient,grain,173904,"Cereals, oats, regular and quick, not fortified, dry",sr_legacy,0.036,0.5,cup 81 g; cup 27 g,,375,67,13,6.5
+candidate,ing:stevia,Stevia (liquid),curated ingredient,pantry,171977,"Mollusks, clam, mixed species, canned, liquid",sr_legacy,0.21,0.5,oz 85 g; cup 240 g,,0,0,0,0
+candidate,ing:sugar_free_chocolate_chips,Stevia-sweetened dark chocolate chips,curated ingredient,pantry,170273,"Chocolate, dark, 70-85% cacao solids",sr_legacy,1.881,0.4,oz 28.4 g,,470,20,6,42
+candidate,ing:sweet_potato_roasted,"Sweet potato, baked/roasted",curated ingredient,veg,168482,"Sweet potato, raw, unprepared (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.033,0.67,,,86,20,1.6,0.1
+candidate,ing:sweet_potato,"Sweet potato, boiled/simmered",curated ingredient,veg,168482,"Sweet potato, raw, unprepared (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.033,0.5,,,86,20,1.6,0.1
+candidate,ing:swiss_cheese,Swiss cheese,curated ingredient,dairy,173419,"Cheese, edam",sr_legacy,0.169,0.5,oz 28.4 g,,380,1.5,27,28
+candidate,ing:swordfish,Swordfish steak,curated ingredient,seafood,167874,"Pork, cured, ham, steak, boneless, extra lean, unheated",sr_legacy,0.093,0.5,oz 28.4 g; slice 57 g,,121,0,20,4
+candidate,ing:taco_seasoning,"Taco seasoning, low sodium",curated ingredient,spice,172826,"Bread, white, commercially prepared, toasted, low sodium no salt",sr_legacy,0.634,0.5,oz 28.4 g; slice 23 g,,300,55,10,8
+candidate,ing:curry_paste,Thai curry paste (red/green),curated ingredient,condiment,169218,"Corn with red and green peppers, canned, solids and liquids",sr_legacy,1.697,0.4,cup 227 g,,95,12,2,4
+candidate,ing:tilapia,Tilapia fillet,curated ingredient,seafood,175176,"Fish, tilapia, raw",sr_legacy,0.004,0.5,,,96,0,20,1.7
+candidate,ing:tomato,Tomato,curated ingredient,veg,170458,"Tomato juice, canned, with salt added",sr_legacy,0.146,1.0,cup 243 g; fl oz 182 g,,18,3.9,0.9,0.2
+candidate,ing:turkey_bacon,Turkey bacon,curated ingredient,protein,174592,"Bacon, turkey, unprepared",sr_legacy,0.302,1.0,,,218,2,18,15
+candidate,ing:turkey_breast,"Turkey breast, skinless",curated ingredient,protein,171098,"Turkey, whole, breast, meat only, raw",sr_legacy,0.239,1.0,oz 113 g,,110,0,24,1
+candidate,ing:turkey_sausage,Turkey sausage,curated ingredient,protein,325992,"Sausage, turkey, breakfast links, mild, raw",foundation,0.458,1.0,,,155,2,15,10
+candidate,ing:gelatin,Unflavored gelatin,curated ingredient,pantry,169599,"Gelatins, dry powder, unsweetened",sr_legacy,0.04,0.5,,,335,0,85,0
+candidate,ing:vegetable_broth,"Vegetable broth, low sodium",curated ingredient,condiment,171180,"Soup, SWANSON, vegetable broth",sr_legacy,0.279,0.5,cup 220 g,,8,1.5,0.5,0.2
+candidate,ing:venison,Venison,curated ingredient,protein,167622,"Deer (venison), sitka, raw (Alaska Native)",sr_legacy,0.185,1.0,,,120,0,23,2.4
+candidate,ing:seaweed_salad,"Wakame seaweed, rehydrated",curated ingredient,veg,170496,"Seaweed, wakame, raw",sr_legacy,0.039,0.67,,,45,9,3,0.6
+candidate,ing:walnuts,Walnuts,curated ingredient,nut,170187,"Nuts, walnuts, english",sr_legacy,0.039,1.0,,,654,14,15,65
+candidate,ing:water,Water / ice,curated ingredient,drink,171922,"Beverages, water, bottled, non-carbonated, EVIAN",sr_legacy,0.0,0.5,fl oz 29.6 g,,0,0,0,0
+candidate,ing:water_chestnuts,"Water chestnuts, canned",curated ingredient,veg,173957,"Cherries, sweet, canned, water pack, solids and liquids",sr_legacy,0.153,0.67,,,50,12,0.9,0.1
+candidate,ing:whey_protein,"Whey protein powder, unsweetened",curated ingredient,supplement,173180,"Beverages, Protein powder whey based",sr_legacy,0.982,0.75,cup 32 g,,380,8,78,5
+candidate,ing:white_pasta,"White pasta, cooked al dente",curated ingredient,grain,169751,"Pasta, cooked, enriched, with added salt",sr_legacy,0.014,0.4,,,157,30.7,5.76,0.92
+candidate,ing:sugar_white,White sugar,curated ingredient,pantry,334247,"Sugars, granulated",foundation,0.04,0.5,,,401,99.6,0,0.32
+candidate,ing:whole_grain_crackers,Whole grain seed crackers,curated ingredient,grain,172749,"Crackers, whole-wheat",sr_legacy,0.138,0.5,oz 14.2 g,,420,66,10,14
+candidate,ing:whole_grain_bread,Whole wheat bread (100% whole wheat),curated ingredient,grain,335240,"Bread, whole-wheat, commercially prepared",foundation,0.058,1.0,,,250,43,12,3.5
+candidate,ing:whole_wheat_pasta,"Whole wheat pasta, cooked al dente",curated ingredient,grain,172024,"Pasta, whole grain, 51% whole wheat, remaining enriched semolina, cooked (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.819,0.67,,,124,26.5,5.3,0.5
+candidate,ing:whole_wheat_pita,Whole wheat pita,curated ingredient,grain,174916,"Bread, pita, whole-wheat",sr_legacy,0.348,1.0,,,266,55,10,2.6
+candidate,ing:yellow_mustard,Yellow mustard,curated ingredient,condiment,326698,"Mustard, prepared, yellow",foundation,0.266,1.0,,,60,5,4,3
+candidate,ing:onion,Yellow onion,curated ingredient,veg,790646,"Onions, yellow, raw",foundation,0.231,1.0,,,40,9.3,1.1,0.1
+candidate,seed:almonds,Almonds,everyday food,nuts,170567,"Nuts, almonds",sr_legacy,0.029,1.0,,,579.0,22.0,21.0,50.0
+candidate,seed:apple,Apple,everyday food,fruits,171688,"Apples, raw, with skin (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.037,1.0,,,52.0,14.0,0.3,0.2
+candidate,seed:avocado,Avocado,everyday food,vegetables,171705,"Avocados, raw, all commercial varieties",sr_legacy,0.075,1.0,,,160.0,9.0,2.0,15.0
+candidate,seed:banana,Banana,everyday food,fruits,173944,"Bananas, raw",sr_legacy,0.02,1.0,,,89.0,23.0,1.1,0.3
+candidate,seed:bellpepper,Bell pepper,everyday food,vegetables,169383,"Peppers, sweet, yellow, raw",sr_legacy,0.183,0.5,,,31.0,6.0,1.0,0.3
+candidate,seed:broccoli,Broccoli,everyday food,vegetables,168510,"Broccoli, cooked, boiled, drained, with salt",sr_legacy,0.194,1.0,,,34.0,7.0,2.8,0.4
+candidate,seed:buckwheat,"Buckwheat, cooked",everyday food,grains,170686,"Buckwheat groats, roasted, cooked",sr_legacy,0.437,1.0,cup 168 g,,110.0,20.0,3.8,1.1
+candidate,seed:carrot-raw,"Carrot, raw",everyday food,vegetables,325430,"Peaches, yellow, raw",foundation,0.061,0.5,,,41.0,10.0,0.9,0.2
+candidate,seed:cauliflower,Cauliflower,everyday food,vegetables,170398,"Cauliflower, frozen, unprepared",sr_legacy,0.136,1.0,,,25.0,5.0,1.9,0.3
+candidate,seed:chicken,Chicken breast,everyday food,protein,171477,"Chicken, broilers or fryers, breast, meat only, cooked, roasted",sr_legacy,0.009,1.0,,,165.0,0.0,31.0,3.6
+candidate,seed:cottage,"Cottage cheese, 5%",everyday food,dairy,172180,"Cheese, cottage, creamed, with fruit",sr_legacy,1.122,1.0,oz 113 g,,121.0,3.0,17.0,5.0
+candidate,seed:couscous,"Couscous, cooked",everyday food,grains,169700,"Couscous, cooked",sr_legacy,0.026,1.0,,,112.0,23.0,3.8,0.2
+candidate,seed:dates,Dates,everyday food,fruits,171726,"Dates, deglet noor",sr_legacy,0.02,1.0,,,282.0,75.0,2.5,0.4
+candidate,seed:pasta-durum,"Durum wheat pasta, al dente",everyday food,grains,168916,"Pasta, whole grain, 51% whole wheat, remaining unenriched semolina, cooked",sr_legacy,0.226,0.4,,,158.0,31.0,5.8,0.9
+candidate,seed:eggplant,Eggplant,everyday food,vegetables,169352,"Eggplant, cooked, boiled, drained, with salt",sr_legacy,0.623,1.0,,,25.0,6.0,1.0,0.2
+candidate,seed:flax,Flaxseed,everyday food,nuts,169414,"Seeds, flaxseed",sr_legacy,0.024,1.0,,,534.0,29.0,18.0,42.0
+candidate,seed:greekyogurt,"Greek yogurt, 2%",everyday food,dairy,170903,"Yogurt, Greek, plain, lowfat",sr_legacy,0.04,1.0,,,73.0,3.9,10.0,2.0
+candidate,seed:greenbeans,Green beans,everyday food,vegetables,169961,"Beans, snap, green, raw",sr_legacy,0.054,1.0,,,31.0,7.0,1.8,0.1
+candidate,seed:cabbage,Green cabbage,everyday food,vegetables,169975,"Cabbage, raw",sr_legacy,0.04,0.5,,,25.0,6.0,1.3,0.1
+candidate,seed:cheese,Hard cheese,everyday food,dairy,173419,"Cheese, edam",sr_legacy,0.06,0.5,oz 28.4 g,,364.0,1.3,25.0,29.0
+candidate,seed:honey,Honey,everyday food,sweets,171046,"Dressing, honey mustard, fat-free",sr_legacy,1.722,1.0,,,304.0,82.0,0.3,0.0
+candidate,seed:oats-instant,Instant oatmeal,everyday food,grains,171662,"Cereals, oats, instant, fortified, plain, prepared with water (boiling water added or microwaved)",sr_legacy,0.051,0.5,,,68.0,12.0,2.4,1.4
+candidate,seed:kefir,"Kefir, 1%",everyday food,dairy,170904,"Kefir, lowfat, plain, LIFEWAY",sr_legacy,0.499,1.0,cup 243 g,,40.0,4.0,3.0,1.0
+candidate,seed:kiwi,Kiwi,everyday food,fruits,172254,"Babyfood, GERBER, 3rd Foods, apple, mango and kiwi",sr_legacy,0.731,1.0,,,61.0,15.0,1.1,0.5
+candidate,seed:lettuce,Leaf lettuce,everyday food,vegetables,169249,"Lettuce, green leaf, raw",sr_legacy,0.036,1.0,,,15.0,2.9,1.4,0.2
+candidate,seed:mango,Mango,everyday food,fruits,169910,"Mangos, raw",sr_legacy,0.015,1.0,,,60.0,15.0,0.8,0.4
+candidate,seed:potato-mash,Mashed potato,everyday food,vegetables,170699,"Fast foods, potato, mashed",sr_legacy,0.258,1.0,cup 242 g,,88.0,15.0,2.0,2.5
+candidate,seed:milkchoc,Milk chocolate,everyday food,sweets,167587,"Candies, milk chocolate",sr_legacy,0.025,1.0,,,535.0,59.0,7.6,30.0
+candidate,seed:onion,Onion,everyday food,vegetables,790646,"Onions, yellow, raw",foundation,0.2,1.0,,,40.0,9.0,1.1,0.1
+candidate,seed:orange,Orange,everyday food,fruits,327501,"Oranges, raw, navels (Includes foods for USDA's Food Distribution Program)",foundation,0.037,1.0,,,47.0,12.0,0.9,0.1
+candidate,seed:peach,Peach,everyday food,fruits,171352,"Babyfood, juice, apple and peach",sr_legacy,0.45,1.0,fl oz 31.2 g,,39.0,10.0,0.9,0.3
+candidate,seed:pearl-barley,"Pearl barley, cooked",everyday food,grains,170285,"Barley, pearled, cooked",sr_legacy,0.155,0.67,cup 157 g,,123.0,25.0,2.3,0.4
+candidate,seed:yogurt,Plain yogurt,everyday food,dairy,171284,"Yogurt, plain, whole milk",sr_legacy,0.032,1.0,,,61.0,4.7,3.5,3.3
+candidate,seed:plum,Plum,everyday food,fruits,169949,"Plums, raw",sr_legacy,0.045,1.0,,,46.0,11.0,0.7,0.3
+candidate,seed:potato-boil,"Potato, boiled",everyday food,vegetables,168483,"Sweet potato, cooked, baked in skin, flesh, without salt",sr_legacy,0.123,1.0,cup 200 g; large 180 g; small 60 g,,87.0,20.0,1.9,0.1
+candidate,seed:pumpkin,"Pumpkin, roasted",everyday food,vegetables,170101,"Onions, frozen, chopped, cooked, boiled, drained, with salt",sr_legacy,0.077,0.5,,,26.0,6.0,1.0,0.1
+candidate,seed:raisins,Raisins,everyday food,fruits,168165,"Raisins, dark, seedless (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.152,1.0,,,299.0,79.0,3.1,0.5
+candidate,seed:raspberry,Raspberries,everyday food,fruits,168209,"Raspberries, frozen, red, unsweetened",sr_legacy,0.176,1.0,,,52.0,12.0,1.2,0.7
+candidate,seed:bread-sprout,Sprouted grain bread,everyday food,grains,168013,"Bread, multi-grain (includes whole-grain)",sr_legacy,0.659,0.67,oz 28.4 g,,230.0,40.0,11.0,3.5
+candidate,seed:tomato,Tomato,everyday food,vegetables,170458,"Tomato juice, canned, with salt added",sr_legacy,0.146,1.0,cup 243 g; fl oz 182 g,,18.0,3.9,0.9,0.2
+candidate,seed:turkey,Turkey breast,everyday food,protein,174516,"Turkey, retail parts, breast, meat only, cooked, roasted",sr_legacy,0.115,1.0,oz 85 g,,135.0,0.0,29.0,1.7
+candidate,seed:walnuts,Walnuts,everyday food,nuts,170187,"Nuts, walnuts, english",sr_legacy,0.039,1.0,,,654.0,14.0,15.0,65.0
+candidate,seed:watermelon,Watermelon,everyday food,fruits,169407,"Seeds, watermelon seed kernels, dried",sr_legacy,39.055,1.0,cup 108 g; oz 28.4 g,,30.0,8.0,0.6,0.2
+candidate,seed:bread-rye,Whole grain rye bread,everyday food,grains,174094,"Rolls, hamburger, whole grain white, calcium-fortified",sr_legacy,0.205,0.5,,,250.0,45.0,8.5,3.3
+candidate,seed:pasta-whole,Whole wheat pasta,everyday food,grains,168910,"Pasta, whole-wheat, cooked (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.207,1.0,,,149.0,30.0,6.0,1.1
+none,ing:banana,Banana (small amount),curated ingredient,fruit,,,,,,,,89,23,1.1,0.3
+none,ing:bok_choy,Bok choy,curated ingredient,veg,,,,,,,,13,2.2,1.5,0.2
+none,ing:broccolini,Broccolini,curated ingredient,veg,,,,,,,,35,6.5,3,0.5
+none,ing:chili_crisp,Chili crisp (small amount),curated ingredient,condiment,,,,,,,,500,10,5,50
+none,ing:five_spice,Chinese five-spice,curated ingredient,spice,,,,,,,,300,55,10,8
+none,ing:chipotle_adobo,Chipotle peppers in adobo,curated ingredient,condiment,,,,,,,,70,14,2,1
+none,ing:collagen,Collagen peptides,curated ingredient,supplement,,,,,,,,360,0,90,0
+none,ing:crab,"Crab meat, lump",curated ingredient,seafood,,,,,,,,84,0,18,1
+none,ing:edamame,"Edamame, shelled, cooked",curated ingredient,legume,,,,,,,,121,9,12,5
+none,ing:everything_seasoning,Everything bagel seasoning,curated ingredient,spice,,,,,,,,350,30,15,20
+none,ing:gochujang,Gochujang (small amount),curated ingredient,condiment,,,,,,,,200,45,4,1
+none,ing:guacamole,Guacamole,curated ingredient,veg,,,,,,,,150,8.5,2,13
+none,ing:honey,Honey (small amount),curated ingredient,pantry,,,,,,,,304,82,0.3,0
+none,ing:nori,Nori seaweed sheets,curated ingredient,veg,,,,,,,,35,5,6,0.3
+none,ing:old_bay,Old Bay seasoning,curated ingredient,spice,,,,,,,,300,55,10,8
+none,ing:pepper_jack,Pepper jack cheese,curated ingredient,dairy,,,,,,,,380,1.5,24,30
+none,ing:pickled_jalapeno,Pickled jalapeños,curated ingredient,veg,,,,,,,,28,4.7,0.9,0.9
+none,ing:pico_de_gallo,Pico de gallo,curated ingredient,condiment,,,,,,,,20,4.5,0.9,0.2
+none,ing:pork_rinds,"Pork rinds, crushed",curated ingredient,protein,,,,,,,,544,0,61,31
+none,ing:prosciutto,Prosciutto,curated ingredient,protein,,,,,,,,250,0,26,16
+none,ing:psyllium,Psyllium husk,curated ingredient,grain,,,,,,,,42,90,1.5,0
+none,ing:snapper,Red snapper fillet,curated ingredient,seafood,,,,,,,,100,0,20,1.3
+none,ing:rice_vinegar,"Rice vinegar, unseasoned",curated ingredient,condiment,,,,,,,,18,0.5,0,0
+none,ing:salt,Salt,curated ingredient,spice,,,,,,,,0,0,0,0
+none,ing:snap_peas,Sugar snap peas,curated ingredient,veg,,,,,,,,42,7.5,2.8,0.2
+none,ing:sumac,Sumac,curated ingredient,spice,,,,,,,,300,55,10,8
+none,ing:tuna_steak,Tuna steak (ahi),curated ingredient,seafood,,,,,,,,109,0,24,1
+none,ing:turnip,"Turnip (GI of swede/rutabaga, closest tested)",curated ingredient,veg,,,,,,,,28,6.4,0.9,0.1
+none,ing:miso,White miso paste,curated ingredient,condiment,,,,,,,,199,26,12,6
+none,ing:zaatar,Za'atar,curated ingredient,spice,,,,,,,,300,55,10,8
+none,ing:zucchini_noodles,Zucchini noodles (zoodles),curated ingredient,veg,,,,,,,,17,3.1,1.2,0.3
+none,seed:feta,Feta,everyday food,dairy,,,,,,,,264.0,4.1,14.0,21.0
