@@ -492,7 +492,7 @@ const USDA_ALIASES: Record<string, string[]> = {
   'usda:2705824': ['filet mignon', 'filet', 'tenderloin steak', 'beef tenderloin', 'grilled steak'], // Beef, steak, NFS
   'usda:2707155': ['eggs over easy', 'egg over easy', 'over easy eggs', 'over easy', 'eggs sunny side up', 'sunny side up eggs', 'eggs over medium', 'eggs over hard'], // Egg, whole, fried
   'usda:2705878': ['country ham', 'ham slice', 'ham steak'], // Ham
-  'usda:2707003': ['crispy chicken sandwich', 'fried chicken sandwich', 'chicken sandwich', 'chicken fillet sandwich', 'spicy chicken sandwich'], // Chicken fillet sandwich, fried, from fast food
+  'usda:2707003': ['crispy chicken sandwich', 'fried chicken sandwich', 'chicken sandwich', 'chicken fillet sandwich', 'spicy chicken sandwich', 'chick-fil-a sandwich'], // Chicken fillet sandwich, fried, from fast food
   'usda:2705894': ['baby back ribs', 'pork ribs', 'barbecue ribs', 'spare ribs', 'ribs'], // Pork, ribs
   // From the 300 familiar dishes of 27 October and a dietitian's own list (3 November 2026): each was asked about or
   // counted as a different food. The plain survey record is the one people mean; naming a variant still finds it.
