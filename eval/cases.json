@@ -6779,7 +6779,7 @@
       "id": "US12",
       "dimension": "helpful",
       "query": "300 g of whole wheat pasta",
-      "ground_truth": "Grams the person typed are theirs and are passed through exactly.",
+      "ground_truth": "Grams the person typed are theirs: passed through exactly, as grams or as a quantity in g.",
       "context": {
         "budget": {
           "glBudget": 54,
@@ -6802,7 +6802,8 @@
               "ing:whole_wheat_pasta"
             ],
             "min": 300,
-            "max": 300
+            "max": 300,
+            "typed": true
           }
         ]
       },

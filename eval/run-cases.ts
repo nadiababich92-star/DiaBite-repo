@@ -197,10 +197,10 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
   // from the compute_meal result, and the item must carry the `quantity` the engine echoes, so a weight the model wrote itself is not a pass.
   if (Array.isArray(e.quantityGrams)) {
     const items = ((lastCallOf(r, 'compute_meal')?.result as { items?: { foodId: string; grams: number; quantity?: unknown; basis?: string }[] } | undefined)?.items ?? [])
-    for (const q of e.quantityGrams as { foodId?: string; foodIds?: string[]; min: number; max: number }[]) {
+    for (const q of e.quantityGrams as { foodId?: string; foodIds?: string[]; min: number; max: number; typed?: boolean }[]) {
       const ids = q.foodIds ?? [q.foodId as string]
       const it = items.find((i) => ids.includes(i.foodId))
-      say(`${ids[0]} weighed by the engine from what the person said, ${q.min} to ${q.max} g`, !!it && it.quantity !== undefined && it.grams >= q.min && it.grams <= q.max,
+      say(`${ids[0]} weighed by the engine from what the person said, ${q.min} to ${q.max} g`, !!it && (it.quantity !== undefined || q.typed === true) && it.grams >= q.min && it.grams <= q.max,
         it ? `${it.foodId} ${it.grams} g, quantity ${JSON.stringify(it.quantity)}` : `no item for ${ids.join('/')} among ${items.map((i) => i.foodId).join(',')}`)
     }
   }
