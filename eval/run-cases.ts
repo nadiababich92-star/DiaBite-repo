@@ -112,6 +112,8 @@ const called = (r: Reply, op: string) => (r.trace ?? []).some((t) => t.tool === 
 const callOf = (r: Reply, op: string) => (r.trace ?? []).find((t) => t.tool === op || t.tool.endsWith(`_${op}`))
 /** The agent may correct a call the tool refused; what counts is where it ended. */
 const lastCallOf = (r: Reply, op: string) => [...(r.trace ?? [])].reverse().find((t) => t.tool === op || t.tool.endsWith(`_${op}`))
+/** The call that costed the meal, where it ended: compute_meal, or cost_dish for a dish counted from an assumed recipe. */
+const lastCostOf = (r: Reply) => [...(r.trace ?? [])].reverse().find((t) => /(^|_)(compute_meal|cost_dish)$/.test(t.tool))
 const allCallsOf = (r: Reply, op: string) => (r.trace ?? []).filter((t) => t.tool === op || t.tool.endsWith(`_${op}`))
 // "type 2 diabetes" and "A1c" carry digits that are part of a name, not a
 // number anyone could have got wrong.
@@ -172,7 +174,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
   // checked for the engine's figures, never for a phrase). Over: the answer carries both numbers. Not over: it carries neither
   // the limit nor a mention of one. No limit set: the engine returns no such field at all.
   {
-    const cl = (callOf(r, 'compute_meal')?.result as { afterMeal?: { carbLimit?: { limitG: number; mealG: number; over: boolean } } } | undefined)?.afterMeal?.carbLimit
+    const cl = (lastCostOf(r)?.result as { afterMeal?: { carbLimit?: { limitG: number; mealG: number; over: boolean } } } | undefined)?.afterMeal?.carbLimit
     const said = new Set(r.matchedNumbers ?? [])
     if (e.carbLimitOver === true) {
       say('engine says the meal is over the person\'s number', cl?.over === true, JSON.stringify(cl))
@@ -210,6 +212,13 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
       const it = items.find((i) => q.foodIds.includes(i.foodId))
       say(`${q.foodIds[0]} is said as ${JSON.stringify(q.text)} (the engine's words for the session's units)`, it?.said === q.text, JSON.stringify(it?.said))
     }
+  }
+  // The weight the person gave for the whole meal is the weight that was costed, however the agent got there (a record, or a dish scaled by
+  // the engine): the items of the call that ended the run add up to it. Three foods at 450 g each, or a dish at an invented 357 g, is not a pass.
+  if (typeof e.costedTotalGrams === 'number') {
+    const items = ((lastCostOf(r)?.result as { items?: { grams: number }[] } | undefined)?.items ?? [])
+    const total = Math.round(items.reduce((s, i) => s + i.grams, 0) * 10) / 10
+    say(`the meal was costed at the ${e.costedTotalGrams} g the person gave`, items.length > 0 && Math.abs(total - (e.costedTotalGrams as number)) <= 1, `${items.length} items, ${total} g`)
   }
   if (e.needsWeightAsked === true) {
     const res = lastCallOf(r, 'compute_meal')?.result as { needsWeight?: unknown; totals?: unknown } | undefined

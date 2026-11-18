@@ -6148,11 +6148,11 @@
       },
       "expect": {
         "toolsCalled": [
-          "resolve_foods",
-          "compute_meal"
+          "resolve_foods"
         ],
         "verified": true,
-        "carbLimitOver": true
+        "carbLimitOver": true,
+        "costedTotalGrams": 450
       },
       "judge": "rubric",
       "tags": [

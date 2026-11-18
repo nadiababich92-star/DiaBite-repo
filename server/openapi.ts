@@ -123,6 +123,7 @@ export function openApiSpec() {
             'Set `gramsStated: true` on an ingredient only when the person gave that amount. ' +
             'If the person ate other foods with the dish (a salad, a banana, a glass of juice), put those in the SAME ingredients ' +
             'list with their own weights, so one call counts the whole plate and nothing they named is left out. ' +
+            'When the person said what the whole dish weighs ("a 450 g burrito bowl"), pass it as `totalGrams` and the engine scales the assumed ingredients until they add up to it; when they said how many portions ("two bowls"), pass `servings` and give the ingredients for ONE portion, and the engine multiplies. Never scale or multiply weights yourself, and never pass both. ' +
             'The result always has `assumed: true`: it is an estimate from a typical recipe, not a record of the meal.',
           requestBody: {
             required: true,
@@ -134,6 +135,8 @@ export function openApiSpec() {
                   properties: {
                     sessionId: { type: 'string', description: 'The session id you were given, passed through unchanged.' },
                     dish: { type: 'string', description: 'The dish as the person named it, the same text you sent to resolve_foods.' },
+                    totalGrams: { type: 'number', description: 'The weight of the whole dish, only when the person said it. The engine scales the ingredients to add up to it.' },
+                    servings: { type: 'number', description: 'How many portions of the dish, only when the person said so (the ingredients are for one portion). The engine multiplies.' },
                     ingredients: {
                       type: 'array',
                       description: 'The ingredients of the dish, and also every other food the person ate with it, each with its own weight for one portion.',
@@ -158,7 +161,7 @@ export function openApiSpec() {
           responses: {
             '200': {
               description:
-                'Everything compute_meal returns, plus `assumed: true`, `dish`, `ingredients` (what was counted, with `assumedGrams`), and `unresolved` (what was not counted and why). `afterMeal.fits` is the engine\u2019s comparison; with `assumed: true` it is conditional. On a wrong call the body has an `error` to read and fix.',
+                'Everything compute_meal returns, plus `assumed: true`, `dish`, `ingredients` (what was counted, with `assumedGrams`, already scaled when the person said a weight or portions), `scaled` (how: `by`, `factor`) and `unresolved` (what was not counted and why). `afterMeal.fits` is the engine\u2019s comparison; with `assumed: true` it is conditional. On a wrong call the body has an `error` to read and fix.',
             },
           },
         },

@@ -10,7 +10,7 @@ import { embed, type VectorStore } from './embeddings'
 import { resolvePhrases, sameFamily, sameFood } from './resolve'
 import type {
   Alternative, AlternativesRequest, ComputeMealResponse, CostDishRequest, DayBudget, DayStateResponse,
-  DishIngredientResult, MealItemInput, MealItemResult, MealTotals, UnresolvedIngredient,
+  DishIngredientResult, DishScale, MealItemInput, MealItemResult, MealTotals, UnresolvedIngredient,
 } from './contract'
 
 export const FORMULA =
@@ -142,6 +142,26 @@ export function uninvertPhrase(phrase: string): string {
   const parts = phrase.split(',').map((p) => p.trim())
   if (parts.length !== 2 || !parts[0] || !PREPARED.test(parts[1].toLowerCase())) return phrase
   return `${parts[1]} ${parts[0]}`
+}
+
+/**
+ * The amount the person said, applied to a dish the model costed from a typical recipe (docs/specs/quantity-agent.md).
+ * `totalGrams`: the person gave the weight of the whole dish, so the assumed ingredients are scaled until they add up to it
+ * (an amount the person stated for one ingredient stays as it is and counts toward the total). `servings`: the ingredients are for
+ * one portion and the dish is multiplied. The model never multiplies or scales; it sends words and one portion.
+ */
+export function scaleDish(req: CostDishRequest): { req: CostDishRequest; scaled?: DishScale } | { error: string } {
+  const { totalGrams, servings } = req
+  if (totalGrams === undefined && servings === undefined) return { req }
+  if (totalGrams !== undefined && servings !== undefined) return { error: 'give totalGrams or servings, not both.' }
+  const stated = req.ingredients.filter((i) => i.gramsStated === true).reduce((s, i) => s + i.grams, 0)
+  const assumed = req.ingredients.filter((i) => i.gramsStated !== true).reduce((s, i) => s + i.grams, 0)
+  if (assumed <= 0) return { req }
+  const factor = totalGrams !== undefined ? (totalGrams - stated) / assumed : (servings as number)
+  if (!(factor > 0)) return { error: `totalGrams ${totalGrams} is no more than the ${Math.round(stated)} g the person stated for single ingredients; leave those out of the dish or ask what the dish weighs.` }
+  const ingredients = req.ingredients.map((i) => (i.gramsStated === true ? i : { ...i, grams: r1(i.grams * factor) }))
+  const f = Math.round(factor * 1000) / 1000
+  return { req: { ...req, ingredients }, scaled: totalGrams !== undefined ? { by: 'totalGrams', factor: f, totalG: totalGrams } : { by: 'servings', factor: f, servings } }
 }
 
 export async function planDish(store: VectorStore, req: CostDishRequest): Promise<{

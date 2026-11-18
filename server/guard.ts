@@ -217,7 +217,7 @@ export const MAX_DISH_INGREDIENTS = 20
 export const MIN_DISH_GRAMS = 40
 export const MAX_DISH_GRAMS = 1500
 export function validateDish(body: unknown): string | null {
-  const b = body as { dish?: unknown; ingredients?: unknown } | null
+  const b = body as { dish?: unknown; ingredients?: unknown; totalGrams?: unknown; servings?: unknown } | null
   if (!b || typeof b !== 'object') return 'the request must be { dish, ingredients }.'
   if (typeof b.dish !== 'string' || b.dish.trim().length < 1 || b.dish.length > 80) return 'dish must be the name of the dish, up to 80 characters.'
   if (!Array.isArray(b.ingredients) || b.ingredients.length < 1 || b.ingredients.length > MAX_DISH_INGREDIENTS) {
@@ -236,6 +236,10 @@ export function validateDish(body: unknown): string | null {
     total += g
   }
   if (total < MIN_DISH_GRAMS || total > MAX_DISH_GRAMS) return `the whole portion must weigh between ${MIN_DISH_GRAMS} and ${MAX_DISH_GRAMS} grams; this one is ${Math.round(total)}.`
+  // What the person said about the whole dish: its weight, or how many portions. One or the other; the engine does the scaling.
+  if (b.totalGrams !== undefined && b.servings !== undefined) return 'give totalGrams or servings, not both.'
+  if (b.totalGrams !== undefined && !(typeof b.totalGrams === 'number' && Number.isFinite(b.totalGrams) && b.totalGrams >= MIN_DISH_GRAMS && b.totalGrams <= 3000)) return `totalGrams must be the weight of the whole dish the person said, between ${MIN_DISH_GRAMS} and 3000.`
+  if (b.servings !== undefined && !(typeof b.servings === 'number' && Number.isFinite(b.servings) && b.servings >= 0.25 && b.servings <= 10)) return 'servings must be the number of portions the person said, between 0.25 and 10.'
   return null
 }
 

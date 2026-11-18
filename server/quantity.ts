@@ -47,6 +47,18 @@ export function quantityError(q: unknown, foodId: string): string | null {
   return null
 }
 
+/**
+ * One amount per item. The same weight said twice ("450 g" sent as both `grams` and a `quantity` in grams) is one amount, not two, and
+ * the redundant `grams` is dropped; two different amounts, or any two of grams, servings and quantity, are a mistake the agent corrects.
+ * Returns the error text, or null when the item has one amount or none.
+ */
+export function settleAmount(it: { foodId: string; grams?: number; servings?: number; quantity?: unknown }): string | null {
+  const q = it.quantity as { count?: unknown; unit?: unknown } | undefined
+  if (it.grams !== undefined && it.servings === undefined && q && q.unit === 'g' && q.count === it.grams) delete it.grams
+  if ([it.grams, it.servings, it.quantity].filter((v) => v !== undefined).length > 1) return `give exactly one of grams, servings, quantity for ${it.foodId}`
+  return null
+}
+
 /** The plain household rows of a record (a qualified row, "cup, chopped", is never used here), in the order USDA lists them. */
 function plainRows(rec: FoodRecord): PortionRow[] {
   return (rec.portions ?? []).map((p) => readPortion(p.label, p.grams, rec.name)).filter((r): r is PortionRow => r !== null && r.qualifier === '')

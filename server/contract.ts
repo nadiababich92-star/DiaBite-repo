@@ -200,8 +200,15 @@ export interface CostDishRequest {
   /** The dish as the person named it, the same text that was sent to resolve_foods. */
   dish: string
   ingredients: CostDishIngredient[]
+  /** The weight of the WHOLE dish when the person said it ("a 450 g bowl"): the engine scales the assumed ingredients so they add up to it. */
+  totalGrams?: number
+  /** How many portions of the dish, when the person said so ("two bowls"): the ingredients are for one portion and the engine multiplies them. */
+  servings?: number
   sessionId?: string
 }
+
+/** What the engine did to the model's ingredient weights to honour the amount the person said. */
+export interface DishScale { by: 'totalGrams' | 'servings'; factor: number; totalG?: number; servings?: number }
 
 export type UnresolvedReason = 'unknown' | 'ambiguous' | 'not_an_ingredient'
 
@@ -227,6 +234,8 @@ export interface CostDishResponse extends Partial<ComputeMealResponse> {
   dish: string
   ingredients: DishIngredientResult[]
   unresolved: UnresolvedIngredient[]
+  /** Present when the person said the dish's weight or its portions: the ingredient weights above are already scaled. */
+  scaled?: DishScale
   error?: string
 }
 

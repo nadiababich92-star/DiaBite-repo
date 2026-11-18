@@ -29,8 +29,8 @@ import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
-import { afterMealFor, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, withDayUnscored, withSaid } from './compute'
-import { needsWeightHint, quantityError, weightQuestion } from './quantity'
+import { afterMealFor, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, scaleDish, withDayUnscored, withSaid } from './compute'
+import { needsWeightHint, quantityError, settleAmount, weightQuestion } from './quantity'
 import { verify } from './verify'
 import { claimSession, getSession, noteResolution, putSession } from './sessions'
 import { bindSession, unbindSession } from './bind'
@@ -408,7 +408,8 @@ async function main() {
     // What the person said, as a count and a unit, is turned into grams here and not by the model (docs/specs/quantity-engine.md). Giving
     // two of grams, servings and quantity is a mistake; giving none still means the food's usual portion, as before.
     for (const it of body.items) {
-      if ([it.grams, it.servings, it.quantity].filter((v) => v !== undefined).length > 1) return res.json({ error: `give exactly one of grams, servings, quantity for ${it.foodId}` })
+      const conflict = settleAmount(it)
+      if (conflict) return res.json({ error: conflict })
       if (it.quantity !== undefined) { const e = quantityError(it.quantity, it.foodId); if (e) return res.json({ error: e }) }
     }
     // A burrito bowl record is the whole bowl, its rice and beans already in it. A person who says "a burrito bowl with rice and
@@ -485,7 +486,10 @@ async function main() {
     const bad = validateDish(body)
     if (bad) return res.json({ error: bad })
     try {
-      const plan = await planDish(store, body)
+      // The person's amount (the dish's weight, or how many portions) is applied here, not by the model.
+      const sc = scaleDish(body)
+      if ('error' in sc) return res.json({ error: sc.error })
+      const plan = await planDish(store, sc.req)
       if (plan.costed.length === 0) {
         return res.json({
           assumed: true, dish: body.dish, ingredients: [], unresolved: plan.unresolved,
@@ -514,6 +518,7 @@ async function main() {
         ...(top ? { driver: top } : {}),
         ...(day ? { dayState: day } : {}),
         assumed: true, dish: body.dish, ingredients: plan.ingredients, unresolved: plan.unresolved,
+        ...(sc.scaled ? { scaled: sc.scaled } : {}),
       }
       if (day && !('unknown' in day)) {
         const unknownFoods = (body.sessionId ? getSession(body.sessionId)?.unknownFoods : undefined) ?? []

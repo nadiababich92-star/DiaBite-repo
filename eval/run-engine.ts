@@ -31,8 +31,8 @@ import { resolvePhrases, withoutQuantity } from '../server/resolve'
 import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
-import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
-import { gramsFor, needsWeightHint, quantityError, saidText, weightQuestion, type Quantity } from '../server/quantity'
+import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, scaleDish, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
+import { gramsFor, needsWeightHint, quantityError, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
@@ -346,6 +346,35 @@ const dishMisses: string[] = []
   const p7 = await planDish(store, { dish: 'personal pizza', ingredients: [{ phrase: 'pizza crust', grams: 110 }, { phrase: 'pizza sauce', grams: 40 }, { phrase: 'mozzarella', grams: 50 }] })
   const m7 = computeMeal(p7.costed)
   if (p7.unresolved.length || !m7.items.some((it) => it.foodId === 'usda:2707600') || m7.totals.gl < 25) dishMisses.push(`    a pizza crust was left out or not counted: unresolved ${JSON.stringify(p7.unresolved)}, GL ${m7.totals.gl}`)
+  // 8. The amount the person said about the whole dish is applied by the engine (owner's decision, 18 November): a total weight scales the
+  // assumed ingredients until they add up to it; portions multiply them; a stated ingredient stays as it was. Never both, never nonsense.
+  {
+    const bowl = (extra: object, ings = [{ phrase: 'cooked white rice', grams: 158 }, { phrase: 'black beans, cooked', grams: 86 }, { phrase: 'chicken breast', grams: 113 }]) => ({ dish: 'chicken burrito bowl', ingredients: ings, ...extra })
+    const sum = (r: { req: { ingredients: { grams: number }[] } }) => Math.round(r.req.ingredients.reduce((s, i) => s + i.grams, 0) * 10) / 10
+    const a = scaleDish(bowl({ totalGrams: 450 })) as ReturnType<typeof scaleDish> & { req: never }
+    if ('error' in a || Math.abs(sum(a as never) - 450) > 0.3 || a.scaled?.by !== 'totalGrams' || a.scaled.totalG !== 450) dishMisses.push(`    a 450 g dish was not scaled to 450 g: ${JSON.stringify(a)}`)
+    else if (Math.abs(a.req.ingredients[0].grams / a.req.ingredients[1].grams - 158 / 86) > 0.05) dishMisses.push('    scaling to a total changed the proportions of the recipe')
+    const b = scaleDish(bowl({ servings: 2 }))
+    if ('error' in b || Math.abs(sum(b as never) - 714) > 0.3 || b.scaled?.by !== 'servings') dishMisses.push(`    two portions were not twice the dish: ${JSON.stringify(b)}`)
+    const c = scaleDish(bowl({}))
+    if ('error' in c || c.scaled !== undefined || sum(c as never) !== 357) dishMisses.push('    a dish with no amount was scaled')
+    // A stated ingredient is the person's and stays; the rest is scaled to fill the total.
+    const d = scaleDish(bowl({ totalGrams: 450 }, [{ phrase: 'cooked white rice', grams: 158, gramsStated: true }, { phrase: 'black beans, cooked', grams: 86 }, { phrase: 'chicken breast', grams: 113 }]))
+    if ('error' in d || d.req.ingredients[0].grams !== 158 || Math.abs(sum(d as never) - 450) > 0.3) dishMisses.push(`    a stated ingredient was scaled or the total missed: ${JSON.stringify(d)}`)
+    const e = scaleDish(bowl({ totalGrams: 150 }, [{ phrase: 'cooked white rice', grams: 158, gramsStated: true }, { phrase: 'chicken breast', grams: 113 }]))
+    if (!('error' in e)) dishMisses.push('    a total smaller than the stated ingredients was scaled anyway')
+    if (!('error' in scaleDish(bowl({ totalGrams: 450, servings: 2 })))) dishMisses.push('    totalGrams and servings together were accepted by scaleDish')
+    for (const [label, extra] of [['both', { totalGrams: 450, servings: 2 }], ['a 10 g total', { totalGrams: 10 }], ['a 4,000 g total', { totalGrams: 4000 }], ['0 servings', { servings: 0 }], ['11 servings', { servings: 11 }], ['a text total', { totalGrams: '450 g' }]] as [string, object][]) {
+      if (validateDish(bowl(extra)) === null) dishMisses.push(`    ${label} was accepted`)
+    }
+    for (const extra of [{ totalGrams: 450 }, { servings: 2 }, { servings: 0.5 }]) if (validateDish(bowl(extra)) !== null) dishMisses.push(`    ${JSON.stringify(extra)} was refused`)
+    // The scaled dish is what is costed: 450 g in, 450 g out.
+    if (!('error' in a)) {
+      const plan = await planDish(store, a.req)
+      const g = plan.costed.reduce((s, i) => s + (i.grams ?? 0), 0)
+      if (plan.costed.length < 3 || Math.abs(g - 450) > 0.3) dishMisses.push(`    the scaled dish did not cost 450 g of food: ${plan.costed.length} items, ${g} g`)
+    }
+  }
   // 10. The last-resort answer for an estimate is conditional, never a plain "fits".
   const meal10 = computeMeal(p2.costed)
   const trace10 = [{ tool: 'diabite_engine_cost_dish', input: {}, result: { ...meal10, assumed: true, dish: 'cholent', ingredients: p2.costed, unresolved: [], afterMeal: afterMealFor({ gl: 54, carbsG: 107, kcal: 1653 }, meal10.totals, [], []) } }] as never
@@ -1311,6 +1340,14 @@ hangMisses.forEach((m) => console.log(m))
   ] as [string, unknown, string][]) { const e = quantityError(q, 'ing:x'); if (!e || !e.includes(wantPart)) miss(`${what} was ${JSON.stringify(e)}`) }
   for (const q of [{ count: 100, unit: 'g' }, { count: 0.25, unit: 'cup' }, { count: 450, unit: 'g' }, { count: 5000, unit: 'g' }, { count: 100, unit: 'cup' }]) if (quantityError(q, 'ing:x') !== null) miss(`${JSON.stringify(q)} was refused`)
   for (const q of [{ count: 5001, unit: 'g' }, { count: 101, unit: 'cup' }, { count: 101, unit: 'oz' }]) if (quantityError(q, 'ing:x') === null) miss(`${JSON.stringify(q)} was accepted`)
+  // One amount per item. The same weight said twice is one amount (the agent sent "450 g" as grams and as a quantity: 6 of 12 first calls were refused);
+  // two different amounts, or any other pair, are still a mistake.
+  { const same = { foodId: 'x', grams: 450, quantity: { count: 450, unit: 'g' } } as { foodId: string; grams?: number; servings?: number; quantity?: unknown }
+    if (settleAmount(same) !== null || same.grams !== undefined) miss(`450 g said twice was refused or kept both: ${JSON.stringify(same)}`)
+    for (const [label, it] of [['450 g and 300 g', { foodId: 'x', grams: 450, quantity: { count: 300, unit: 'g' } }], ['grams and a cup', { foodId: 'x', grams: 158, quantity: { count: 1, unit: 'cup' } }], ['servings and grams', { foodId: 'x', grams: 100, servings: 1 }],
+      ['servings and a quantity', { foodId: 'x', servings: 1, quantity: { count: 1, unit: 'g' } }], ['grams, servings and the same quantity', { foodId: 'x', grams: 450, servings: 1, quantity: { count: 450, unit: 'g' } }]] as [string, { foodId: string }][]) {
+      if (settleAmount(it) === null) miss(`${label} was accepted`) }
+    for (const it of [{ foodId: 'x', grams: 100 }, { foodId: 'x', quantity: { count: 1, unit: 'cup' } }, { foodId: 'x' }]) if (settleAmount(it) !== null) miss(`${JSON.stringify(it)} was refused`) }
   // All or nothing: one item that cannot be weighed stops the whole meal, so a partial meal is never presented as whole.
   const mixed = planQuantities([{ foodId: 'ing:white_rice', quantity: { count: 1, unit: 'cup' } }, { foodId: 'ing:egg', quantity: { count: 1, unit: 'cup' } }])
   if (mixed.needs.length !== 1 || mixed.needs[0].foodId !== 'ing:egg' || !mixed.needs[0].units.includes('oz') || mixed.needs[0].why !== 'no USDA household measure for this food in cup') miss(`a meal with one unweighable item: ${JSON.stringify(mixed.needs)}`)
