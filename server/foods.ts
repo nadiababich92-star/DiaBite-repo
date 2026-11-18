@@ -212,8 +212,15 @@ function fromRow(r: FoodRow): FoodRecord {
     perServing: r.per_serving ?? undefined,
     source: r.source ?? undefined,
     verifiedAt: r.verified_at ?? undefined,
+    // The table has no column for household measures: they live in the files (portion_mapping.json and USDA's own tables). A record read from
+    // the table without them says every portion is "only a serving size", so a cup, a medium and a slice stop meaning anything, and the engine
+    // answered needsWeight for every food the day the catalogue came from the database (18 November).
+    portions: loadFoods().byId.get(r.id)?.portions,
   }
 }
+
+/** `fromRow`, for the test that proves a record read from the table keeps its household measures. */
+export const recordFromRow = (r: Parameters<typeof fromRow>[0]) => fromRow(r)
 
 /**
  * Take the catalogue from the database instead of the files in the image.

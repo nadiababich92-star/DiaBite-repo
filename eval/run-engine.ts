@@ -36,7 +36,7 @@ import { gramsFor, needsWeightHint, quantityError, saidText, type Quantity } fro
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
-import { GI_CROSSCHECKED_ON, getRecord, hasNoLoad, householdMeasure, householdPortion, readPortion, restaurantFaults, restaurantRecordsFrom, stepUnit, summary, type RestaurantRow } from '../server/foods'
+import { GI_CROSSCHECKED_ON, recordFromRow, getRecord, hasNoLoad, householdMeasure, householdPortion, readPortion, restaurantFaults, restaurantRecordsFrom, stepUnit, summary, type RestaurantRow } from '../server/foods'
 import { legacyHouseholdMeasure, legacyStepUnit } from './legacy-measure'
 import { countOf, countText, measureLabel, nudgeMeasure } from '../src/lib/measure'
 import { FigurePair } from '../src/components/FigurePair'
@@ -1341,6 +1341,24 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\ndefaults  ${dMisses.length === 0 ? 'ok' : 'WRONG'}  (${cases.engine.defaults.length} foods on the list)`)
   dMisses.forEach((m) => console.log(m))
   if (dMisses.length) process.exitCode = 1
+}
+
+// ── a record read from the database keeps its household measures ──────────
+// The table has no column for them, so a record built from a row had none and the engine answered "only a serving size" for every food the day
+// the catalogue came from the database (18 November 2026). The measures come from the files by id; this proves it for the foods that matter.
+{
+  const dbMisses: string[] = []
+  for (const id of ['seed:rice-white', 'ing:apple', 'seed:cucumber', 'ing:avocado', 'seed:egg']) {
+    const file = getRecord(id)
+    const fromTable = recordFromRow({ id, kind: file.kind, name: file.name, search_text: file.searchText, default_portion: file.defaultPortion } as Parameters<typeof recordFromRow>[0])
+    if (!file.portions?.length) dbMisses.push(`    ${id} has no household rows in the files, so there is nothing to carry`)
+    else if (JSON.stringify(fromTable.portions) !== JSON.stringify(file.portions)) dbMisses.push(`    ${id} read from a table row lost its household rows: ${JSON.stringify(fromTable.portions)}`)
+    const said = gramsFor(fromTable, { count: 1, unit: id === 'seed:rice-white' || id === 'seed:cucumber' ? 'cup' : id === 'seed:egg' ? 'large' : id === 'ing:apple' ? 'medium' : 'whole' })
+    if ('needs' in said) dbMisses.push(`    ${id} read from a table row cannot be weighed: ${said.needs}`)
+  }
+  console.log(`\nfromtable ${dbMisses.length === 0 ? 'ok' : 'WRONG'}`)
+  dbMisses.forEach((m) => console.log(m))
+  if (dbMisses.length) process.exitCode = 1
 }
 
 // ── reading USDA's household labels ───────────────────────────────────────
