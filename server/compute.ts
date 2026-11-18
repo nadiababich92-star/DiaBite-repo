@@ -260,7 +260,10 @@ export function afterMealFor(
     remaining: after,
     fits: partial ? (after.gl >= 0 ? null : false) : after.gl >= 0,
     ...(partial ? { partial: { unknownFoods, ...(unscored.length ? { unscored } : {}) } } : {}),
-    ...(carbLimit ? { carbLimit: { kind: carbLimit.kind, limitG: carbLimit.g, mealG: meal.carbs, over: meal.carbs > carbLimit.g } } : {}),
+    // Returned only when the meal is above the person's own number. A meal within it is not news, and a number the model can see is a number it
+    // may quote: the answer to "An apple" with a 60 g snack number said "It also stays under your 60 g snack target" about one time in six
+    // (18 November 2026). With no field there is nothing to quote, so the rule "say nothing" no longer depends on the model obeying it.
+    ...(carbLimit && meal.carbs > carbLimit.g ? { carbLimit: { kind: carbLimit.kind, limitG: carbLimit.g, mealG: meal.carbs, over: true as const } } : {}),
   }
 }
 

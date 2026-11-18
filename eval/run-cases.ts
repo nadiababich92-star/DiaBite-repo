@@ -179,8 +179,10 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
       say('the answer states the person\'s own number', !!cl && said.has(cl.limitG), `limit ${cl?.limitG} said ${[...said].join(',')}`)
     }
     if (e.carbLimitUnder === true) {
-      say('engine says the meal is not over the person\'s number', cl?.over === false, JSON.stringify(cl))
-      say('the answer does not raise a limit the meal is under', !!cl && !said.has(cl.limitG), `limit ${cl?.limitG} said ${[...said].join(',')}`)
+      // The engine returns no limit for a meal within the person's number; the number to look for is the one the case sent.
+      const set = c.context?.carbLimit?.g
+      say('engine returns no carbohydrate limit for a meal within the person\'s number', cl === undefined, JSON.stringify(cl))
+      say('the answer does not raise a limit the meal is under', set !== undefined && !said.has(set), `limit ${set} said ${[...said].join(',')}`)
     }
     const ex = (callOf(r, 'compute_meal')?.result as { excluded?: { name: string }[] } | undefined)?.excluded
     if (e.excludedReported === true) {

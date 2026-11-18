@@ -2020,8 +2020,9 @@ const carbMisses: string[] = []
 for (const c of cases.engine.carbLimit) {
   const after = afterMealFor(room(20), { gl: 5, carbs: c.mealCarbs, kcal: 100 }, [], [], c.kind ? { kind: c.kind, g: c.limitG as number } : undefined)
   const got = after.carbLimit
-  const ok = c.over === null ? got === undefined : got?.over === c.over && got.limitG === c.limitG && got.mealG === c.mealCarbs && got.kind === c.kind && after.fits === true
-  if (!ok) carbMisses.push(`    ${c.id.padEnd(26)} want over=${c.over} got ${JSON.stringify(got)} fits=${after.fits}`)
+  // Over: the field, with the engine's figures. Under, equal, or no number set: no field at all (18 November 2026), so the answer has no limit to quote.
+  const ok = c.over !== true ? got === undefined && after.fits === true : got?.over === true && got.limitG === c.limitG && got.mealG === c.mealCarbs && got.kind === c.kind && after.fits === true
+  if (!ok) carbMisses.push(`    ${c.id.padEnd(26)} want ${c.over === true ? 'the field' : 'no field'} got ${JSON.stringify(got)} fits=${after.fits}`)
 }
 console.log(`\ncarbLimit ${cases.engine.carbLimit.length - carbMisses.length}/${cases.engine.carbLimit.length}`)
 if (carbMisses.length) { console.log('  the engine compared the person\'s own carbohydrate number wrongly:'); carbMisses.forEach((m) => console.log(m)) }

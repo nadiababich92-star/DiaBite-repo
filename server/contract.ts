@@ -148,10 +148,11 @@ export interface ComputeMealResponse {
     /** Foods the user named that the database does not have; absent on a whole meal. */
     partial?: { unknownFoods: string[]; /** Branded items: carbohydrate counted, load not available. */ unscored?: string[] }
     /**
-     * Present only when the person set their own carbohydrate number for this meal or snack. `over` is the engine's
-     * comparison of `mealG` (the meal's total carbohydrate) with `limitG`; it does not change `fits`, which stays the load verdict.
+     * Present only when the person set their own carbohydrate number for this meal or snack **and the meal is above it**
+     * (`over` is then always true). `mealG` is the meal's total carbohydrate, `limitG` their number; it does not change `fits`,
+     * which stays the load verdict. A meal within their number carries no field at all, so there is nothing for an answer to quote.
      */
-    carbLimit?: { kind: 'meal' | 'snack'; limitG: number; mealG: number; over: boolean }
+    carbLimit?: { kind: 'meal' | 'snack'; limitG: number; mealG: number; over: true }
   }
   /**
    * The scored item with the largest glycemic load, named by the engine so the answer reads it
