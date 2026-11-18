@@ -61,7 +61,7 @@ export function openApiSpec() {
           operationId: 'compute_meal',
           summary: 'Compute the nutrition and glycemic load of a meal',
           description:
-            'Compute calories, carbohydrate, fibre, available carbohydrate, glycemic index and glycemic load for a set of portions. This is the only source of numbers for a meal. Give `grams` for ingredients and `servings` for recipes, using the ids from resolve_foods. With a session id the reply also carries `dayState` (the budget before the meal) and `afterMeal` — what is left once this meal is counted, and `fits`, which is the verdict. Nothing else has to be fetched or worked out after this call.',
+            'Compute calories, carbohydrate, fibre, available carbohydrate, glycemic index and glycemic load for a set of portions. This is the only source of numbers for a meal. Give each item the amount the person said as a `quantity` (a count and a unit, such as 1 cup, 4 oz, 1 medium, 2 default for two eggs): the engine finds the weight from USDA\u2019s own tables, so never turn a cup, a slice or a medium into grams yourself. Use `servings` for recipes and `grams` only when a tool gave you a weight. Use the ids from resolve_foods. If the reply is `needsWeight`, no number came back: ask the person the question in `hint` and stop. With a session id the reply also carries `dayState` (the budget before the meal) and `afterMeal` — what is left once this meal is counted, and `fits`, which is the verdict. Nothing else has to be fetched or worked out after this call.',
           requestBody: {
             required: true,
             content: {
@@ -81,8 +81,21 @@ export function openApiSpec() {
                         required: ['foodId'],
                         properties: {
                           foodId: { type: 'string', description: 'Id from resolve_foods, for example "seed:oats".' },
-                          grams: { type: 'number', description: 'Weight in grams. For ingredients.' },
+                          grams: { type: 'number', description: 'Weight in grams, only when a tool gave you one. Not for what the person said: use quantity.' },
                           servings: { type: 'number', description: 'Number of servings. For recipes.' },
+                          quantity: {
+                            type: 'object',
+                            required: ['count', 'unit'],
+                            description: 'What the person said, exactly as they said it. Give at most one of grams, servings, quantity. With none, the food\u2019s usual portion is used.',
+                            properties: {
+                              count: { type: 'number', description: 'How many, as the person said it: 1, 2, 0.5 for "half", 1.5.' },
+                              unit: {
+                                type: 'string',
+                                enum: ['g', 'oz', 'lb', 'cup', 'tbsp', 'tsp', 'fl oz', 'slice', 'piece', 'small', 'medium', 'large', 'whole', 'default'],
+                                description: '"default" for "two eggs" or "a banana" (the food\u2019s usual portion, multiplied by count); "whole" for one of it ("half an avocado" is count 0.5, unit whole); "g" only when they typed grams.',
+                              },
+                            },
+                          },
                         },
                       },
                     },

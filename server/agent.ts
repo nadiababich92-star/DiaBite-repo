@@ -306,6 +306,8 @@ export interface AskRequest {
   avoid?: AvoidList
   /** The person's own carbohydrate number for this meal or snack; parked with the day state, compared by the engine. */
   carbLimit?: { kind: 'meal' | 'snack'; g: number }
+  /** The person's units; parked with the day state so the engine says a weight in them. */
+  units?: 'imperial' | 'metric'
 }
 
 export interface ToolCallTrace {
@@ -581,11 +583,11 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
 /** Park the day state where only the engine can read it. */
 async function parkDayState(req: AskRequest): Promise<void> {
   if (!req.budget || !req.entries) { if (!ENGINE_URL) dropCarbLimit(req.sessionId); return }
-  if (!ENGINE_URL) { putSession(req.sessionId, req.budget, req.entries, req.avoid, req.carbLimit); return }
+  if (!ENGINE_URL) { putSession(req.sessionId, req.budget, req.entries, req.avoid, req.carbLimit, req.units); return }
   const r = await fetch(`${ENGINE_URL}/session/${encodeURIComponent(req.sessionId)}`, {
     method: 'PUT',
     headers: { 'content-type': 'application/json', ...(ENGINE_KEY ? { 'x-api-key': ENGINE_KEY } : {}) },
-    body: JSON.stringify({ budget: req.budget, entries: req.entries, avoid: req.avoid, carbLimit: req.carbLimit }),
+    body: JSON.stringify({ budget: req.budget, entries: req.entries, avoid: req.avoid, carbLimit: req.carbLimit, units: req.units }),
   })
   if (!r.ok) throw new Error(`could not park the day state: ${r.status} ${await r.text()}`)
 }

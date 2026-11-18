@@ -3804,6 +3804,618 @@
         },
         "hit": []
       }
+    ],
+    "quantity": [
+      {
+        "id": "rice-cup",
+        "foodId": "ing:white_rice",
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        },
+        "grams": 158,
+        "basis": "usda_measure",
+        "said_imperial": "1 cup (158 g)"
+      },
+      {
+        "id": "rice-2cup",
+        "foodId": "ing:white_rice",
+        "quantity": {
+          "count": 2,
+          "unit": "cup"
+        },
+        "grams": 316,
+        "basis": "usda_measure",
+        "said_imperial": "2 cups (316 g)"
+      },
+      {
+        "id": "rice-half",
+        "foodId": "ing:white_rice",
+        "quantity": {
+          "count": 0.5,
+          "unit": "cup"
+        },
+        "grams": 79,
+        "basis": "usda_measure",
+        "said_imperial": "1/2 cup (79 g)"
+      },
+      {
+        "id": "rice-1.5",
+        "foodId": "ing:white_rice",
+        "quantity": {
+          "count": 1.5,
+          "unit": "cup"
+        },
+        "grams": 237,
+        "basis": "usda_measure",
+        "said_imperial": "1 1/2 cups (237 g)"
+      },
+      {
+        "id": "brown-rice",
+        "foodId": "ing:brown_rice",
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        },
+        "grams": 195,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "beans-cup",
+        "foodId": "ing:black_beans",
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        },
+        "grams": 172,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "beans-half",
+        "foodId": "ing:black_beans",
+        "quantity": {
+          "count": 0.5,
+          "unit": "cup"
+        },
+        "grams": 86,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "lentils-cup",
+        "foodId": "ing:lentils",
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        },
+        "grams": 198,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "lentils-tbsp",
+        "foodId": "ing:lentils",
+        "quantity": {
+          "count": 1,
+          "unit": "tbsp"
+        },
+        "grams": 12.3,
+        "basis": "usda_measure",
+        "said_imperial": "1 tbsp (12 g)"
+      },
+      {
+        "id": "lentils-3tsp",
+        "foodId": "ing:lentils",
+        "quantity": {
+          "count": 3,
+          "unit": "tsp"
+        },
+        "grams": 12.3,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "milk-cup",
+        "foodId": "ing:milk",
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        },
+        "grams": 246,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "milk-8floz",
+        "foodId": "ing:milk",
+        "quantity": {
+          "count": 8,
+          "unit": "fl oz"
+        },
+        "grams": 246,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "milk-tbsp",
+        "foodId": "ing:milk",
+        "quantity": {
+          "count": 1,
+          "unit": "tbsp"
+        },
+        "grams": 15.4,
+        "basis": "usda_measure",
+        "said_imperial": "1 tbsp (15 g)"
+      },
+      {
+        "id": "milk-tsp",
+        "foodId": "ing:milk",
+        "quantity": {
+          "count": 1,
+          "unit": "tsp"
+        },
+        "grams": 5.1,
+        "basis": "usda_measure",
+        "said_imperial": "1 tsp (5.1 g)"
+      },
+      {
+        "id": "butter-tbsp",
+        "foodId": "ing:butter",
+        "quantity": {
+          "count": 1,
+          "unit": "tbsp"
+        },
+        "grams": 14.2,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "butter-2tbsp",
+        "foodId": "ing:butter",
+        "quantity": {
+          "count": 2,
+          "unit": "tbsp"
+        },
+        "grams": 28.4,
+        "basis": "usda_measure",
+        "said_imperial": "2 tbsp (28 g)"
+      },
+      {
+        "id": "butter-cup",
+        "foodId": "ing:butter",
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        },
+        "grams": 227,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "butter-tsp",
+        "foodId": "ing:butter",
+        "quantity": {
+          "count": 1,
+          "unit": "tsp"
+        },
+        "grams": 4.7,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "almondbutter-2tbsp",
+        "foodId": "ing:almond_butter",
+        "quantity": {
+          "count": 2,
+          "unit": "tbsp"
+        },
+        "grams": 32,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "almondbutter-tsp",
+        "foodId": "ing:almond_butter",
+        "quantity": {
+          "count": 1,
+          "unit": "tsp"
+        },
+        "grams": 5.3,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "carrot-cup",
+        "foodId": "ing:carrot",
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        },
+        "grams": 236,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "carrot-tbsp",
+        "foodId": "ing:carrot",
+        "quantity": {
+          "count": 1,
+          "unit": "tbsp"
+        },
+        "grams": 14.8,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "bread-slice",
+        "foodId": "ing:white_bread",
+        "quantity": {
+          "count": 1,
+          "unit": "slice"
+        },
+        "grams": 29,
+        "basis": "usda_measure",
+        "said_imperial": "1 slice (29 g)"
+      },
+      {
+        "id": "bread-2slice",
+        "foodId": "ing:white_bread",
+        "quantity": {
+          "count": 2,
+          "unit": "slice"
+        },
+        "grams": 58,
+        "basis": "usda_measure",
+        "said_imperial": "2 slices (58 g)"
+      },
+      {
+        "id": "egg-large",
+        "foodId": "ing:egg",
+        "quantity": {
+          "count": 1,
+          "unit": "large"
+        },
+        "grams": 50,
+        "basis": "usda_measure",
+        "said_imperial": "1 large (50 g)"
+      },
+      {
+        "id": "egg-2large",
+        "foodId": "ing:egg",
+        "quantity": {
+          "count": 2,
+          "unit": "large"
+        },
+        "grams": 100,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "eggwhite-large",
+        "foodId": "ing:egg_white",
+        "quantity": {
+          "count": 1,
+          "unit": "large"
+        },
+        "grams": 33,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "eggwhite-cup",
+        "foodId": "ing:egg_white",
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        },
+        "grams": 243,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "greenonion-large",
+        "foodId": "ing:green_onion",
+        "quantity": {
+          "count": 1,
+          "unit": "large"
+        },
+        "grams": 25,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "oj-cup",
+        "foodId": "seed:orangejuice",
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        },
+        "grams": 248,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "oj-8floz",
+        "foodId": "seed:orangejuice",
+        "quantity": {
+          "count": 8,
+          "unit": "fl oz"
+        },
+        "grams": 248,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "oj-1floz",
+        "foodId": "seed:orangejuice",
+        "quantity": {
+          "count": 1,
+          "unit": "fl oz"
+        },
+        "grams": 31,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "sweetpotato-cup",
+        "foodId": "seed:sweetpotato",
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        },
+        "grams": 200,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "sweetpotato-large",
+        "foodId": "seed:sweetpotato",
+        "quantity": {
+          "count": 1,
+          "unit": "large"
+        },
+        "grams": 180,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "sweetpotato-small",
+        "foodId": "seed:sweetpotato",
+        "quantity": {
+          "count": 1,
+          "unit": "small"
+        },
+        "grams": 60,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "grapes-cup",
+        "foodId": "seed:grapes",
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        },
+        "grams": 151,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "cucumber-cup",
+        "foodId": "seed:cucumber",
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        },
+        "grams": 120,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "strawberry-cup",
+        "foodId": "seed:strawberry",
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        },
+        "grams": 150,
+        "basis": "usda_measure"
+      },
+      {
+        "id": "blueberry-twothirds",
+        "foodId": "seed:blueberry",
+        "quantity": {
+          "count": 0.6667,
+          "unit": "cup"
+        },
+        "grams": 100,
+        "basis": "usda_measure",
+        "said_imperial": "2/3 cup (100 g)"
+      },
+      {
+        "id": "chicken-4oz",
+        "foodId": "ing:chicken_breast",
+        "quantity": {
+          "count": 4,
+          "unit": "oz"
+        },
+        "grams": 113.4,
+        "basis": "exact_conversion",
+        "said_imperial": "4 oz (113 g)"
+      },
+      {
+        "id": "chicken-3oz",
+        "foodId": "ing:chicken_breast",
+        "quantity": {
+          "count": 3,
+          "unit": "oz"
+        },
+        "grams": 85.0,
+        "basis": "exact_conversion",
+        "said_imperial": "3 oz (85 g)"
+      },
+      {
+        "id": "chicken-1oz",
+        "foodId": "ing:chicken_breast",
+        "quantity": {
+          "count": 1,
+          "unit": "oz"
+        },
+        "grams": 28.3,
+        "basis": "exact_conversion",
+        "said_imperial": "1 oz (28 g)"
+      },
+      {
+        "id": "chicken-8oz",
+        "foodId": "ing:chicken_breast",
+        "quantity": {
+          "count": 8,
+          "unit": "oz"
+        },
+        "grams": 226.8,
+        "basis": "exact_conversion",
+        "said_imperial": "8 oz (227 g)"
+      },
+      {
+        "id": "salmon-6oz",
+        "foodId": "seed:salmon",
+        "quantity": {
+          "count": 6,
+          "unit": "oz"
+        },
+        "grams": 170.1,
+        "basis": "exact_conversion",
+        "said_imperial": "6 oz (170 g)"
+      },
+      {
+        "id": "chicken-1lb",
+        "foodId": "ing:chicken_breast",
+        "quantity": {
+          "count": 1,
+          "unit": "lb"
+        },
+        "grams": 453.6,
+        "basis": "exact_conversion",
+        "said_imperial": "16 oz (454 g)"
+      },
+      {
+        "id": "chicken-halflb",
+        "foodId": "ing:chicken_breast",
+        "quantity": {
+          "count": 0.5,
+          "unit": "lb"
+        },
+        "grams": 226.8,
+        "basis": "exact_conversion",
+        "said_imperial": "8 oz (227 g)"
+      },
+      {
+        "id": "rice-300g",
+        "foodId": "ing:white_rice",
+        "quantity": {
+          "count": 300,
+          "unit": "g"
+        },
+        "grams": 300,
+        "basis": "stated",
+        "said_imperial": "300 g"
+      },
+      {
+        "id": "rice-default",
+        "foodId": "ing:white_rice",
+        "quantity": {
+          "count": 1,
+          "unit": "default"
+        },
+        "grams": 158,
+        "basis": "default"
+      },
+      {
+        "id": "egg-2default",
+        "foodId": "ing:egg",
+        "quantity": {
+          "count": 2,
+          "unit": "default"
+        },
+        "grams": 100,
+        "basis": "default"
+      },
+      {
+        "id": "bread-default",
+        "foodId": "ing:white_bread",
+        "quantity": {
+          "count": 1,
+          "unit": "default"
+        },
+        "grams": 29,
+        "basis": "default"
+      },
+      {
+        "id": "egg-cup",
+        "foodId": "ing:egg",
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        },
+        "needs": true
+      },
+      {
+        "id": "chicken-cup",
+        "foodId": "ing:chicken_breast",
+        "quantity": {
+          "count": 1,
+          "unit": "cup"
+        },
+        "needs": true
+      },
+      {
+        "id": "chicken-slice",
+        "foodId": "ing:chicken_breast",
+        "quantity": {
+          "count": 1,
+          "unit": "slice"
+        },
+        "needs": true
+      },
+      {
+        "id": "egg-medium",
+        "foodId": "ing:egg",
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        },
+        "needs": true
+      },
+      {
+        "id": "egg-whole",
+        "foodId": "ing:egg",
+        "quantity": {
+          "count": 1,
+          "unit": "whole"
+        },
+        "needs": true
+      },
+      {
+        "id": "sweetpotato-medium",
+        "foodId": "seed:sweetpotato",
+        "quantity": {
+          "count": 1,
+          "unit": "medium"
+        },
+        "needs": true
+      },
+      {
+        "id": "egg-small",
+        "foodId": "ing:egg",
+        "quantity": {
+          "count": 1,
+          "unit": "small"
+        },
+        "needs": true
+      },
+      {
+        "id": "rice-large",
+        "foodId": "ing:white_rice",
+        "quantity": {
+          "count": 1,
+          "unit": "large"
+        },
+        "needs": true
+      },
+      {
+        "id": "rice-slice",
+        "foodId": "ing:white_rice",
+        "quantity": {
+          "count": 1,
+          "unit": "slice"
+        },
+        "needs": true
+      },
+      {
+        "id": "rice-piece",
+        "foodId": "ing:white_rice",
+        "quantity": {
+          "count": 1,
+          "unit": "piece"
+        },
+        "needs": true
+      }
     ]
   },
   "agent": [

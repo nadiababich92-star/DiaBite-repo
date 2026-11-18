@@ -29,7 +29,8 @@ import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
-import { afterMealFor, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, withDayUnscored } from './compute'
+import { afterMealFor, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, withDayUnscored, withSaid } from './compute'
+import { needsWeightHint, quantityError } from './quantity'
 import { verify } from './verify'
 import { claimSession, getSession, noteResolution, putSession } from './sessions'
 import { bindSession, unbindSession } from './bind'
@@ -37,7 +38,7 @@ import { openApiSpec } from './openapi'
 import { ask, SessionNotYours, SignInRequired, type AskRequest } from './agent'
 import { personOf, signInRequired } from './auth'
 import { createHash, timingSafeEqual } from 'node:crypto'
-import { RateLimited, addressKey, chargeDelete, chargeRecompute, originAllowed, sourceTag, validCarbLimit, validSessionId, validateAsk, validateDish, validateRecompute } from './guard'
+import { RateLimited, addressKey, chargeDelete, chargeRecompute, originAllowed, sourceTag, validCarbLimit, validSessionId, validUnits, validateAsk, validateDish, validateRecompute } from './guard'
 import type {
   AlternativesRequest, ComputeMealRequest, CostDishRequest, DayStateRequest, ResolveRequest, VerifyRequest,
 } from './contract'
@@ -195,11 +196,12 @@ async function main() {
 
   /** The client parks the day's budget and log here, then hands the agent only the id. */
   app.put('/session/:id', (req, res) => {
-    const { budget, entries, avoid, carbLimit } = req.body ?? {}
+    const { budget, entries, avoid, carbLimit, units } = req.body ?? {}
     if (!validSessionId(req.params.id)) return res.status(400).json({ error: 'invalid session id' })
     if (!budget || !Array.isArray(entries) || entries.length > 100) return res.status(400).json({ error: 'budget and at most 100 entries required' })
     if (carbLimit !== undefined && !validCarbLimit(carbLimit)) return res.status(400).json({ error: 'invalid carbLimit' })
-    putSession(req.params.id, budget, entries, avoid, carbLimit)
+    if (units !== undefined && !validUnits(units)) return res.status(400).json({ error: 'invalid units' })
+    putSession(req.params.id, budget, entries, avoid, carbLimit, units)
     res.json({ ok: true, sessionId: req.params.id, entries: entries.length })
   })
 
@@ -395,11 +397,17 @@ async function main() {
     if (!sess) return res.json({ error: NOT_BOUND })
     if (body) body.sessionId = sess.id
     if (!Array.isArray(body?.items) || body.items.length === 0) {
-      return res.json({ error: 'items must be a non-empty list of { foodId, grams } — call resolve_foods first to get the ids.' })
+      return res.json({ error: 'items must be a non-empty list of { foodId, grams | servings | quantity } — call resolve_foods first to get the ids.' })
     }
     const bad = body.items.find((it) => (it.grams !== undefined && !(it.grams > 0)) || (it.servings !== undefined && !(it.servings > 0)))
     if (bad) {
       return res.json({ error: `grams and servings must be positive numbers; ${bad.foodId} had none. Use the defaultPortion from resolve_foods when the user gave no amount.` })
+    }
+    // What the person said, as a count and a unit, is turned into grams here and not by the model (docs/specs/quantity-engine.md). Giving
+    // two of grams, servings and quantity is a mistake; giving none still means the food's usual portion, as before.
+    for (const it of body.items) {
+      if ([it.grams, it.servings, it.quantity].filter((v) => v !== undefined).length > 1) return res.json({ error: `give exactly one of grams, servings, quantity for ${it.foodId}` })
+      if (it.quantity !== undefined) { const e = quantityError(it.quantity, it.foodId); if (e) return res.json({ error: e }) }
     }
     // A burrito bowl record is the whole bowl, its rice and beans already in it. A person who says "a burrito bowl with rice and
     // beans" is telling what is in the bowl, not that they ate a bowl and a portion of each beside it: the same words came out as
@@ -410,7 +418,12 @@ async function main() {
       return res.json({ error: 'A burrito bowl record is the whole bowl, with its rice and beans already in it, so it cannot be counted beside them. When the person listed what is in the bowl, cost those foods alone and leave the bowl record out; when they did not, cost the bowl record alone.' })
     }
     try {
-      const meal = computeMeal(body.items)
+      const units = body.sessionId ? getSession(body.sessionId)?.units : undefined
+      const plan = planQuantities(body.items)
+      // A measure that cannot honestly be turned into grams: nothing is costed and no number comes back, so the agent asks.
+      if (plan.needs.length > 0) return res.json({ needsWeight: plan.needs, hint: needsWeightHint(plan.needs[0].name, units) })
+      const costed = computeMeal(plan.items)
+      const meal = { ...costed, items: withSaid(costed.items, plan, units) }
       const day = dayStateFor(body.sessionId)
       const top = driverOf(meal.items)
       const out: Record<string, unknown> = {

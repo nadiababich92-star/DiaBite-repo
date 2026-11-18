@@ -31,7 +31,8 @@ import { resolvePhrases } from '../server/resolve'
 import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
-import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, uninvertPhrase, withDayUnscored } from '../server/compute'
+import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
+import { gramsFor, needsWeightHint, quantityError, saidText, type Quantity } from '../server/quantity'
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
@@ -88,6 +89,7 @@ import type { VerifyRequest } from '../server/contract'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const TARGET = Number(process.env.RESOLVE_TARGET ?? 90)
 
+interface QuantityCase { id: string; foodId: string; quantity: Quantity; grams?: number; basis?: string; said_imperial?: string; needs?: boolean; why?: string }
 interface ResolveCase { phrase: string; expect: string[]; tags: string[]; notBranded?: boolean }
 interface ClarifyCase { phrase: string; band: string; why: string; offers?: string[] }
 interface AnswerCase { id: string; text: string; verdict: string | null; next?: string; why?: string; costed?: boolean }
@@ -96,7 +98,7 @@ interface GateCase { phrase: string; rule: string | null }
 interface VerifyCase { id: string; answer: string; toolResults: unknown[]; ok: boolean }
 
 const cases = JSON.parse(readFileSync(join(ROOT, 'eval', 'cases.json'), 'utf8')) as {
-  engine: { resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[]; answer: AnswerCase[]; portion: { id: string; grams: number }[]; partial: PartialCase[]; branded: { id: string; foodId: string; grams: number }[]; excludedIn: { id: string; items: { foodId: string; name: string }[]; avoid: Record<string, string[]>; hit: string[] }[]; excludeSearch: { id: string; typed: string; name: string; hit: boolean }[]; carbLimit: { id: string; kind: 'meal' | 'snack' | null; limitG: number | null; mealCarbs: number; over: boolean | null }[]; avoidWords: { id: string; word: string; text: string; hit: boolean }[] }
+  engine: { quantity: QuantityCase[]; resolve: ResolveCase[]; clarify: ClarifyCase[]; verify: VerifyCase[]; gate: GateCase[]; answer: AnswerCase[]; portion: { id: string; grams: number }[]; partial: PartialCase[]; branded: { id: string; foodId: string; grams: number }[]; excludedIn: { id: string; items: { foodId: string; name: string }[]; avoid: Record<string, string[]>; hit: string[] }[]; excludeSearch: { id: string; typed: string; name: string; hit: boolean }[]; carbLimit: { id: string; kind: 'meal' | 'snack' | null; limitG: number | null; mealCarbs: number; over: boolean | null }[]; avoidWords: { id: string; word: string; text: string; hit: boolean }[] }
 }
 
 const t0 = Date.now()
@@ -1258,6 +1260,63 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\nmapped    ${mapMisses.length === 0 ? 'ok' : 'WRONG'}  (${keys.length} foods)`)
   mapMisses.forEach((m) => console.log(m))
   if (mapMisses.length) process.exitCode = 1
+}
+
+// ── a person's measure, turned into grams by the engine ───────────────────
+// docs/specs/quantity-engine.md and quantity-evals.md. "A medium apple" was counted at 100 g and "a cup of rice" at 180 g because the model
+// estimated the weight; here the engine finds it from the food's own USDA row or from exact constants, or says it cannot. The expected
+// grams in eval/cases.json are read from the USDA row by hand, never computed by the code under test.
+{
+  const qMisses: string[] = []
+  const miss = (m: string) => qMisses.push(`    ${m}`)
+  for (const c of cases.engine.quantity) {
+    const rec = getRecord(c.foodId)
+    const got = gramsFor(rec, c.quantity)
+    if (c.needs) { if (!('needs' in got)) miss(`${c.id}: wanted needs, got ${JSON.stringify(got)}`); else if (c.why && got.needs !== c.why) miss(`${c.id}: why ${got.needs}`); continue }
+    if ('needs' in got) { miss(`${c.id}: wanted ${c.grams} g, got needs: ${got.needs}`); continue }
+    if (got.grams !== c.grams || got.basis !== c.basis) miss(`${c.id}: ${c.quantity.count} ${c.quantity.unit} of ${c.foodId} gave ${got.grams} g (${got.basis}), wanted ${c.grams} g (${c.basis})`)
+    const said = saidText({ grams: got.grams ?? 0, basis: got.basis, quantity: c.quantity, row: got.row, rec, units: 'imperial' })
+    if (c.said_imperial !== undefined && said !== c.said_imperial) miss(`${c.id}: said ${JSON.stringify(said)}, wanted ${JSON.stringify(c.said_imperial)}`)
+    const metric = saidText({ grams: got.grams ?? 0, basis: got.basis, quantity: c.quantity, row: got.row, rec, units: 'metric' })
+    const none = saidText({ grams: got.grams ?? 0, basis: got.basis, quantity: c.quantity, row: got.row, rec, units: undefined })
+    const gtxt = `${(got.grams ?? 0) >= 10 ? Math.round(got.grams ?? 0) : got.grams} g`
+    if (metric !== gtxt || none !== gtxt) miss(`${c.id}: metric or no units said ${JSON.stringify(metric)}/${JSON.stringify(none)}, wanted ${JSON.stringify(gtxt)}`)
+  }
+  // A recipe is counted by serving; a branded item has only a serving, so only exact weights and its default are honest.
+  const recipe = loadFoods().records.find((r) => r.kind === 'recipe'), branded = loadFoods().records.find((r) => r.kind === 'branded')
+  if (recipe) {
+    const two = gramsFor(recipe, { count: 2, unit: 'default' }); const cup = gramsFor(recipe, { count: 1, unit: 'cup' })
+    if (!('servings' in two) || two.servings !== 2) miss(`a recipe at 2 default gave ${JSON.stringify(two)}, wanted servings 2`)
+    if (!('needs' in cup) || cup.needs !== 'a recipe is counted by serving') miss(`a recipe in cups gave ${JSON.stringify(cup)}`)
+  }
+  if (branded) {
+    const cup = gramsFor(branded, { count: 1, unit: 'cup' }); const oz = gramsFor(branded, { count: 2, unit: 'oz' }); const def = gramsFor(branded, { count: 1, unit: 'default' })
+    if (!('needs' in cup)) miss(`a branded item in cups gave ${JSON.stringify(cup)}, wanted needs`)
+    if (!('grams' in oz) || oz.grams !== 56.7) miss(`a branded item at 2 oz gave ${JSON.stringify(oz)}`)
+    if (!('grams' in def) || def.grams !== branded.defaultPortion) miss(`a branded item at default gave ${JSON.stringify(def)}`)
+  }
+  // The model's mistakes are answered, not obeyed.
+  for (const [what, q, wantPart] of [
+    ['zero', { count: 0, unit: 'cup' }, 'positive number up to 100'], ['negative', { count: -1, unit: 'cup' }, 'positive number up to 100'], ['101', { count: 101, unit: 'cup' }, 'positive number up to 100'],
+    ['NaN', { count: NaN, unit: 'cup' }, 'positive number up to 100'], ['Infinity', { count: Infinity, unit: 'cup' }, 'positive number up to 100'], ['a string count', { count: '2', unit: 'cup' }, 'positive number up to 100'],
+    ['handful', { count: 1, unit: 'handful' }, 'unit must be one of'], ['bowl', { count: 1, unit: 'bowl' }, 'unit must be one of'], ['cups', { count: 1, unit: 'cups' }, 'unit must be one of'], ['empty unit', { count: 1, unit: '' }, 'unit must be one of'], ['null unit', { count: 1, unit: null }, 'unit must be one of'],
+  ] as [string, unknown, string][]) { const e = quantityError(q, 'ing:x'); if (!e || !e.includes(wantPart)) miss(`${what} was ${JSON.stringify(e)}`) }
+  for (const q of [{ count: 100, unit: 'g' }, { count: 0.25, unit: 'cup' }]) if (quantityError(q, 'ing:x') !== null) miss(`${JSON.stringify(q)} was refused`)
+  // All or nothing: one item that cannot be weighed stops the whole meal, so a partial meal is never presented as whole.
+  const mixed = planQuantities([{ foodId: 'ing:white_rice', quantity: { count: 1, unit: 'cup' } }, { foodId: 'ing:egg', quantity: { count: 1, unit: 'cup' } }])
+  if (mixed.needs.length !== 1 || mixed.needs[0].foodId !== 'ing:egg' || !mixed.needs[0].units.includes('oz') || mixed.needs[0].why !== 'no USDA household measure for this food in cup') miss(`a meal with one unweighable item: ${JSON.stringify(mixed.needs)}`)
+  const hintI = needsWeightHint('Egg', 'imperial'), hintM = needsWeightHint('Egg', 'metric'), hintN = needsWeightHint('Egg', undefined)
+  if (!hintI.includes('"About how many ounces or cups of Egg?"') || !hintM.includes('"About how many grams of Egg?"') || hintN !== hintM) miss(`the question in the session's units: ${hintI} | ${hintM} | ${hintN}`)
+  // The reply says the weight in the session's units, from the engine.
+  const plan = planQuantities([{ foodId: 'ing:white_rice', quantity: { count: 1, unit: 'cup' } }, { foodId: 'ing:white_bread', grams: 29 }])
+  const costed = computeMeal(plan.items)
+  const imp = withSaid(costed.items, plan, 'imperial'), met = withSaid(costed.items, plan, 'metric')
+  if (imp[0].said !== '1 cup (158 g)' || imp[0].basis !== 'usda_measure' || imp[0].quantity?.unit !== 'cup') miss(`imperial said ${JSON.stringify([imp[0].said, imp[0].basis])}`)
+  if (met[0].said !== '158 g') miss(`metric said ${JSON.stringify(met[0].said)}`)
+  if (imp[1].said !== undefined || imp[1].basis !== undefined) miss('an item given as grams carries a said or a basis')
+  console.log(`\nquantity  ${qMisses.length === 0 ? 'ok' : 'WRONG'}  (${cases.engine.quantity.length} conversions)`)
+  qMisses.forEach((m) => console.log(m))
+  if (qMisses.length) process.exitCode = 1
 }
 
 // ── reading USDA's household labels ───────────────────────────────────────

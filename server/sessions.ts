@@ -31,6 +31,8 @@ export interface SessionState {
   avoid?: AvoidList
   /** The person's own carbohydrate number for this meal or snack, parked with the day; the engine compares, the model only reads. */
   carbLimit?: CarbLimit
+  /** The person's units (feet and pounds, or metric), parked with the day: a display preference the engine uses to say a weight. Memory only. */
+  units?: 'imperial' | 'metric'
   /**
    * Phrases of this turn's meal that resolve_foods could not find. A meal
    * costed without them is understated, and the engine, not the model, is what
@@ -64,10 +66,10 @@ function sweep(now = Date.now()) {
 }
 
 export function putSession(
-  id: string, budget: DayBudget, entries: MealItemInput[], avoid?: AvoidList, carbLimit?: CarbLimit,
+  id: string, budget: DayBudget, entries: MealItemInput[], avoid?: AvoidList, carbLimit?: CarbLimit, units?: 'imperial' | 'metric',
 ): SessionState {
   sweep()
-  const state: SessionState = { budget, entries, avoid, carbLimit, unknownFoods: [], storedAt: Date.now() }
+  const state: SessionState = { budget, entries, avoid, carbLimit, ...(units ? { units } : {}), unknownFoods: [], storedAt: Date.now() }
   setBounded(store, id, state)
   return state
 }

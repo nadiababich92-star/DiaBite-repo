@@ -4,7 +4,8 @@
  */
 import { availableCarbs, dayGlLevel, glLevel, glycemicLoad, nutrientsFor } from '../src/lib/glycemic'
 import { isAvoided, type AvoidList } from './avoid'
-import { asFood, getRecord, hasNoLoad, householdMeasure, loadFoods, stepUnit, summary } from './foods'
+import { asFood, getRecord, hasNoLoad, householdMeasure, loadFoods, stepUnit, summary, type PortionRow } from './foods'
+import { gramsFor, saidText, unitsFor } from './quantity'
 import { embed, type VectorStore } from './embeddings'
 import { resolvePhrases, sameFamily, sameFood } from './resolve'
 import type {
@@ -80,6 +81,39 @@ const withMeasure = (r: MealItemResult): MealItemResult => {
   const m = r.grams > 0 ? householdMeasure(rows, r.grams) : null
   const step = r.grams > 0 ? stepUnit(rows, r.grams) : null
   return { ...r, ...(m ? { measure: m } : {}), ...(step ? { stepUnit: step } : {}) }
+}
+
+export interface QuantityPlan {
+  /** The items with every `quantity` turned into grams (or servings for a recipe). */
+  items: MealItemInput[]
+  /** Per original item: what the person said and how it was weighed; absent for an item given as grams or servings. */
+  meta: ({ quantity: NonNullable<MealItemInput['quantity']>; basis: NonNullable<MealItemResult['basis']>; row?: PortionRow } | undefined)[]
+  /** Items that could not honestly be weighed: the meal is not costed. */
+  needs: NonNullable<import('./contract').NeedsWeightResponse['needsWeight']>
+}
+
+/** Turn what the person said into weights, from the food's own USDA table or exact constants; nothing is guessed (server/quantity.ts). */
+export function planQuantities(items: MealItemInput[]): QuantityPlan {
+  const out: QuantityPlan = { items: [], meta: [], needs: [] }
+  for (const it of items) {
+    if (!it.quantity) { out.items.push(it); out.meta.push(undefined); continue }
+    const rec = getRecord(it.foodId)
+    const r = gramsFor(rec, it.quantity)
+    if ('needs' in r) { out.needs.push({ foodId: it.foodId, name: rec.name, quantity: it.quantity, units: unitsFor(rec), why: r.needs }); out.items.push(it); out.meta.push(undefined); continue }
+    out.items.push(r.servings !== undefined ? { foodId: it.foodId, servings: r.servings } : { foodId: it.foodId, grams: r.grams })
+    out.meta.push({ quantity: it.quantity, basis: r.basis, row: r.row })
+  }
+  return out
+}
+
+/** Attach to each result what the person said, how it was weighed and the words for it (in the session's units). */
+export function withSaid(results: MealItemResult[], plan: QuantityPlan, units: 'imperial' | 'metric' | undefined): MealItemResult[] {
+  return results.map((r, i) => {
+    const m = plan.meta[i]
+    if (!m) return r
+    const said = r.servings !== undefined && r.grams === 0 ? undefined : saidText({ grams: r.grams, basis: m.basis, quantity: m.quantity, row: m.row, rec: getRecord(r.foodId), units })
+    return { ...r, quantity: m.quantity, basis: m.basis, ...(said ? { said } : {}) }
+  })
 }
 
 export function computeMeal(items: MealItemInput[]): ComputeMealResponse {

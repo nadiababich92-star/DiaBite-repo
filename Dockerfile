@@ -44,6 +44,7 @@ COPY agent/prompts ./agent/prompts
 COPY src/types.ts ./src/types.ts
 COPY src/lib/glycemic.ts ./src/lib/glycemic.ts
 COPY src/lib/profile.ts ./src/lib/profile.ts
+COPY src/lib/measure.ts ./src/lib/measure.ts
 # Shared with the browser: the allergen and eating-pattern rules the engine
 # filters suggestions with. Copying files one by one keeps the image small and
 # makes a forgotten one a crash at boot rather than a wrong answer later.

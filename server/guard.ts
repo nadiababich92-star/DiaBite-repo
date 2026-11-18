@@ -64,8 +64,12 @@ export function validateAsk(body: unknown): Invalid | null {
   }
   if (b.avoid !== undefined && !validAvoid(b.avoid)) return { field: 'avoid' }
   if (b.carbLimit !== undefined && !validCarbLimit(b.carbLimit)) return { field: 'carbLimit' }
+  if (b.units !== undefined && !validUnits(b.units)) return { field: 'units' }
   return null
 }
+
+/** The person's units: one of two words. */
+export function validUnits(v: unknown): boolean { return v === 'imperial' || v === 'metric' }
 
 /** The person's own carbohydrate number for the thing they are about to eat: a meal or a snack, 10 to 150 g. */
 export function validCarbLimit(v: unknown): boolean {

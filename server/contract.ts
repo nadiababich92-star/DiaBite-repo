@@ -80,6 +80,17 @@ export interface MealItemInput {
   grams?: number
   /** For recipes. Defaults to 1. */
   servings?: number
+  /**
+   * What the person said, as a count and a unit ("1 cup", "4 oz", "1 medium"). The engine finds the weight (server/quantity.ts); the model never does.
+   * Exactly one of `grams`, `servings`, `quantity` per item on `compute_meal`.
+   */
+  quantity?: { count: number; unit: 'g' | 'oz' | 'lb' | 'cup' | 'tbsp' | 'tsp' | 'fl oz' | 'slice' | 'piece' | 'small' | 'medium' | 'large' | 'whole' | 'default' }
+}
+
+/** Answered instead of a meal when a measure cannot honestly be turned into grams: no numbers, the agent asks. */
+export interface NeedsWeightResponse {
+  needsWeight: { foodId: string; name: string; quantity: NonNullable<MealItemInput['quantity']>; units: string[]; why: string }[]
+  hint: string
 }
 
 export interface MealItemResult extends Nutrients {
@@ -100,6 +111,10 @@ export interface MealItemResult extends Nutrients {
   loadAvailable: boolean
   /** The grams said as a household measure the record's own USDA table lists ("1 cup"), when they match one; absent otherwise. */
   measure?: { count: number; unit: string; text: string }
+  /** For an item the person gave as a measure: what they said, the words to say its weight, and how the weight was got. */
+  quantity?: NonNullable<MealItemInput['quantity']>
+  said?: string
+  basis?: 'usda_measure' | 'exact_conversion' | 'typical' | 'default' | 'stated'
   /** The unit the portion editor steps this food in, and what one weighs ("cup", 158): the record's own table, a unit that is at least half of this weight. Absent when no unit fits; the editor then steps in grams. */
   stepUnit?: { unit: string; unitGrams: number }
 }

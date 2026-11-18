@@ -67,7 +67,7 @@ Rows come from `readPortion` (`quantity-labels-and-links.md`): each usable row i
 
 **Rule 2: `default`.** `record.defaultPortion × count`, basis `default`. For a `recipe` record (counted by serving) this is a number of servings and the item is costed with `servings: count` instead.
 
-**Rule 3: volumes** (`cup`, `tbsp`, `tsp`, `fl oz`). If the record has a row for that unit, `grams = count × row.grams`, basis `usda_measure`. Otherwise take the first available source row in the order `cup`, `tbsp`, `tsp`, `fl oz`, and compute `grams = count × (ratio[requested] / ratio[source]) × row.grams`; basis `usda_measure`, and the item carries `via: "<source unit>"` (informational: it is in the trace and nowhere on screen). A record with no volume row at all: `needs`.
+**Rule 3: volumes** (`cup`, `tbsp`, `tsp`, `fl oz`). If the record has a row for that unit, `grams = count × row.grams`, basis `usda_measure`. Otherwise take the **nearest** volume row of the same food (the unit whose size is closest to the one asked for; USDA rounds each row, so the closest unit carries the least error; a tie goes to the first of `cup`, `tbsp`, `tsp`, `fl oz`), and compute `grams = count × (ratio[requested] / ratio[source]) × row.grams`; basis `usda_measure`, and the item carries `via: "<source unit>"` (informational: it is in the trace and nowhere on screen). A record with no volume row at all: `needs`.
 
 **Rule 4: counted parts** (`slice`, `piece`). The row with that unit; for `slice`, prefer size `medium`, then no size, then `large`, then `small` (a person who says "a slice" means the usual one). `grams = count × row.grams`, `usda_measure`. No row: `needs`.
 
@@ -114,7 +114,7 @@ Order of work in the route, before today's checks:
 
 | Condition | `error` |
 |---|---|
-| none of `grams`, `servings`, `quantity` on an item, or two or more | `"give exactly one of grams, servings, quantity for <foodId>"` |
+| two or more of `grams`, `servings`, `quantity` on an item | `"give exactly one of grams, servings, quantity for <foodId>"` (**none** is still allowed and means the food's usual portion, as before: the engine must keep answering a prompt that has not been republished yet) |
 | `quantity.count` not a finite number, `<= 0`, or `> 100` | `"quantity.count must be a positive number up to 100 for <foodId>"` |
 | `quantity.unit` not in `QUANTITY_UNITS` | `"unit must be one of: g, oz, lb, cup, tbsp, tsp, fl oz, slice, piece, small, medium, large, whole, default"` |
 | `foodId` unknown | the existing unknown-food error |
