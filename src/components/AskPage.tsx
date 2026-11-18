@@ -9,7 +9,7 @@ import { nextStep, type TourStep } from '../lib/tour'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type Milestone } from '../lib/nudge'
 import { askAgent, avoidOf, budgetOf, engineId, lastMealCall, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type CarbLimitResult, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
 import { FigurePair, type CarbFigures } from './FigurePair'
-import { measureLabel, nudgeMeasure } from '../lib/measure'
+import { measureLabel, nudgeMeasure, ouncesText } from '../lib/measure'
 import { dayLabel, eaten, mealForNow, noLoadNote, portionText, viewEntry } from '../lib/diary'
 import { swapNamedIn, type SwapOffer } from '../lib/swap'
 import { MEAL_LABELS } from '../lib/menu'
@@ -194,6 +194,8 @@ function PortionEditor({ lines, grams, units, busy, error, onNudge, assumed, rem
           const unit = l.servings ? (value === 1 ? 'serving' : 'servings') : 'g'
           // On US units, a food with a measure in its own table is moved by that measure and shows it beside the grams.
           const said = units === 'imperial' && !l.servings ? measureLabel(value, l.measureUnit) : null
+          // No measure for this food: the weight in ounces, beside the grams (US units only; the grams are what is counted).
+          const oz = units === 'imperial' && !l.servings && !said ? ouncesText(value) : null
           const gone = removed.includes(i)
           return (
             <li key={`${l.foodId}-${i}`} className={gone ? 'removed' : undefined}>
@@ -207,7 +209,7 @@ function PortionEditor({ lines, grams, units, busy, error, onNudge, assumed, rem
               ) : (
                 <span className="stepper">
                   <button className="step" aria-label={`Less ${l.name}`} onClick={() => onNudge(i, -1)}>−</button>
-                  <span className="step-v" aria-live="polite">{said ? `${said} · ${value} ${unit}` : `${value} ${unit}`}</span>
+                  <span className="step-v" aria-live="polite">{said ? `${said} · ${value} ${unit}` : oz ? `${oz} · ${value} ${unit}` : `${value} ${unit}`}</span>
                   <button className="step" aria-label={`More ${l.name}`} onClick={() => onNudge(i, 1)}>+</button>
                   {assumed && <button className="step remove-step" aria-label={`Remove ${l.name}`} onClick={() => onRemove(i)}>×</button>}
                 </span>
@@ -343,7 +345,7 @@ function ReceiptView({ r, units }: { r: Receipt; units?: 'imperial' | 'metric' }
       <div className="receipt-head"><span>food · portion</span><span>available carbs (g) · GI · GL</span></div>
       {r.lines.map((l) => (
         <div className="receipt-line" key={l.foodId + l.portion}>
-          <span>{l.name} <em>{portionText(l.portion, l.measure, units)}</em>{r.assumed?.assumedFoodIds.includes(l.foodId) && <> <span className="pill none assumed">assumed</span></>}</span>
+          <span>{l.name} <em>{portionText(l.portion, l.measure, units, l.servings ? undefined : l.grams)}</em>{r.assumed?.assumedFoodIds.includes(l.foodId) && <> <span className="pill none assumed">assumed</span></>}</span>
           <span>{l.availableCarbs.toFixed(1)} · {l.gi ?? '—'} · <b>{l.gl === null ? '—' : l.gl.toFixed(1)}</b></span>
         </div>
       ))}

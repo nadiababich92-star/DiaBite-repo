@@ -55,3 +55,18 @@ export function measureLabel(grams: number, m: MeasureUnit | undefined): string 
   const c = countOf(grams, m)
   return c === null ? null : countText(c, m.unit)
 }
+
+const GRAMS_PER_OUNCE = 28.3495
+const GRAMS_PER_POUND = 453.592
+
+/**
+ * A weight said in ounces, for a person on US units, when the food has no household measure in its own USDA table. It only restates
+ * the engine's grams, the way feet and inches restate centimetres: the grams stay beside it and are what is counted. One decimal under
+ * ten ounces ("1.9 oz"), whole ounces after that, pounds from two (32 oz). Under 10 g it is null: a pinch of spice is not a number of ounces.
+ */
+export function ouncesText(grams: number): string | null {
+  if (!(grams >= 10)) return null
+  const oz = grams / GRAMS_PER_OUNCE
+  if (oz >= 32) return `${Math.round((grams / GRAMS_PER_POUND) * 10) / 10} lb`
+  return `${oz < 10 ? Math.round(oz * 10) / 10 : Math.round(oz)} oz`
+}

@@ -1,6 +1,7 @@
 /** One place that knows how to read a diary entry, whether it was hand-logged or agent-logged. */
 import { getFood } from '../data/foods'
 import { availableCarbs, breadUnits, glycemicLoad, nutrientsFor, CARBS_PER_BREAD_UNIT } from './glycemic'
+import { ouncesText } from './measure'
 import type { DiaryEntry, MealType, Nutrients } from '../types'
 
 export interface EntryView {
@@ -15,14 +16,21 @@ export interface EntryView {
   breadUnits: number
   /** The household measure kept with the entry ("1 cup"), when the engine found one. */
   measure?: string
+  /** The weight, when the portion is a weight (not "2 servings"): what the ounces are said from. */
+  grams?: number
 }
 
 /**
  * How a portion is said: a person who chose feet and pounds sees the household measure first with the grams beside it
- * ("1 cup (158 g)"), everyone else, and any portion with no measure, sees the grams. The measure is the engine's, not worked out here.
+ * ("1 cup (158 g)"); where the food has no measure and the portion is a weight (`grams`), the weight in ounces ("1.9 oz (55 g)");
+ * everyone else sees the grams. The measure is the engine's, not worked out here; the ounces only restate the grams.
  */
-export const portionText = (portion: string, measure: string | undefined, units: 'imperial' | 'metric' | undefined): string =>
-  units === 'imperial' && measure ? `${measure} (${portion})` : portion
+export const portionText = (portion: string, measure: string | undefined, units: 'imperial' | 'metric' | undefined, grams?: number): string => {
+  if (units !== 'imperial') return portion
+  if (measure) return `${measure} (${portion})`
+  const oz = grams === undefined ? null : ouncesText(grams)
+  return oz ? `${oz} (${portion})` : portion
+}
 
 export function viewEntry(e: DiaryEntry): EntryView {
   if (e.snapshot) {
@@ -34,6 +42,7 @@ export function viewEntry(e: DiaryEntry): EntryView {
       availableCarbs: s.availableCarbs, gi: s.gi, gl: s.gl, loadAvailable: s.loadAvailable !== false,
       breadUnits: s.availableCarbs / CARBS_PER_BREAD_UNIT,
       ...(s.measure ? { measure: s.measure } : {}),
+      ...(s.servings ? {} : { grams: e.grams }),
     }
   }
   const food = getFood(e.foodId)
@@ -42,7 +51,7 @@ export function viewEntry(e: DiaryEntry): EntryView {
     portion: `${e.grams} g`,
     nutrients: nutrientsFor(food, e.grams),
     availableCarbs: availableCarbs(food, e.grams), gi: food.gi,
-    gl: glycemicLoad(food, e.grams), loadAvailable: true, breadUnits: breadUnits(food, e.grams),
+    gl: glycemicLoad(food, e.grams), loadAvailable: true, breadUnits: breadUnits(food, e.grams), grams: e.grams,
   }
 }
 

@@ -2183,6 +2183,72 @@
     }
    ],
    "accepted_by": "owner, 18 Nov: egg, bread, oats (go-ahead for worklist 66)"
+  },
+  "seed:cucumber": {
+   "fdc_id": "2709784",
+   "usda_name": "Cucumber, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 120.0
+    }
+   ],
+   "accepted_by": "owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)"
+  },
+  "ing:cucumber": {
+   "fdc_id": "2709784",
+   "usda_name": "Cucumber, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 120.0
+    }
+   ],
+   "accepted_by": "owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)"
+  },
+  "seed:strawberry": {
+   "fdc_id": "2709283",
+   "usda_name": "Strawberries, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 150.0
+    }
+   ],
+   "accepted_by": "owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)"
+  },
+  "ing:strawberries": {
+   "fdc_id": "2709283",
+   "usda_name": "Strawberries, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 150.0
+    }
+   ],
+   "accepted_by": "owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)"
+  },
+  "seed:blueberry": {
+   "fdc_id": "2709275",
+   "usda_name": "Blueberries, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 150.0
+    }
+   ],
+   "accepted_by": "owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)"
+  },
+  "ing:blueberries": {
+   "fdc_id": "2709275",
+   "usda_name": "Blueberries, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 150.0
+    }
+   ],
+   "accepted_by": "owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)"
   }
  }
 }

@@ -70,6 +70,7 @@ import { buildReport, reportMarkdown, type AccountInput, type ReportInput } from
 import { CONSENT_VERSION } from '../src/lib/syncCore'
 import { addDays, dayLabel, gramStep, mealForNow, noLoadNote, nudgeGrams, portionText, recentEntries, viewEntry } from '../src/lib/diary'
 import { sumNutrients } from '../src/lib/glycemic'
+import { ouncesText } from '../src/lib/measure'
 import { buildSummary } from '../src/lib/clinicianSummary'
 import { calculateTargets, cmToFtIn, DEFAULT_PROFILE, ftInToCm, kgToLb, lbToKg, weightUsed } from '../src/lib/profile'
 import { HeightWeight, UnitsSwitch } from '../src/components/BodyUnits'
@@ -1213,6 +1214,18 @@ hangMisses.forEach((m) => console.log(m))
   ]
   const want2 = ['1 cup (158 g)', '158 g', '158 g', '158 g']
   said2.forEach(([what, got], i) => { if (got !== want2[i]) measureMisses.push(`    ${what}: ${JSON.stringify(got)}, wanted ${JSON.stringify(want2[i])}`) })
+  // A person on US units whose food has no household measure sees the weight in ounces beside the grams (worklist A, 18 November 2026):
+  // it only restates the engine's grams, so it is never said for a portion that is not a weight, under 10 g, or to anyone on metric.
+  const oz: [string, string | null, string | null][] = [
+    ['55 g', ouncesText(55), '1.9 oz'], ['one ounce', ouncesText(28.35), '1 oz'], ['four ounces', ouncesText(113), '4 oz'],
+    ['under ten ounces, one decimal', ouncesText(250), '8.8 oz'], ['ten ounces and over, whole', ouncesText(300), '11 oz'],
+    ['two pounds and over, pounds', ouncesText(1000), '2.2 lb'], ['10 g is the least said in ounces', ouncesText(10), '0.4 oz'], ['a pinch is not ounces', ouncesText(9.9), null],
+    ['imperial, no measure, a weight', portionText('55 g', undefined, 'imperial', 55), '1.9 oz (55 g)'],
+    ['imperial, a measure beats ounces', portionText('158 g', '1 cup', 'imperial', 158), '1 cup (158 g)'],
+    ['metric is grams', portionText('55 g', undefined, 'metric', 55), '55 g'], ['no units chosen is grams', portionText('55 g', undefined, undefined, 55), '55 g'],
+    ['servings are not a weight', portionText('2 servings', undefined, 'imperial'), '2 servings'], ['a pinch stays in grams', portionText('5 g', undefined, 'imperial', 5), '5 g'],
+  ]
+  for (const [what, got, want] of oz) if (got !== want) measureMisses.push(`    ounces, ${what}: ${JSON.stringify(got)}, wanted ${JSON.stringify(want)}`)
   console.log(`\nmeasure   ${measureMisses.length === 0 ? 'ok' : 'WRONG'}`)
   measureMisses.forEach((m) => console.log(m))
   if (measureMisses.length) process.exitCode = 1
@@ -1236,6 +1249,11 @@ hangMisses.forEach((m) => console.log(m))
   const cup = beans?.portions?.find((p) => /^(1 )?cup$/i.test(p.label.trim()))
   const said = beans && cup ? householdMeasure(beans.portions, cup.grams)?.text : undefined
   if (said !== '1 cup') mapMisses.push(`    black beans at one cup (${cup?.grams} g) say ${JSON.stringify(said)}, wanted "1 cup"`)
+  // Fruit and vegetables whose default portion is one USDA cup say so (worklist B, 18 November 2026): their portions are the default, not a guess.
+  for (const [id, grams, want] of [['seed:cucumber', 120, '1 cup'], ['seed:strawberry', 150, '1 cup'], ['seed:blueberry', 100, '2/3 cup'], ['ing:blueberries', 150, '1 cup']] as const) {
+    const got = householdMeasure(byId.get(id)?.portions, grams)?.text
+    if (got !== want) mapMisses.push(`    ${id} at ${grams} g says ${JSON.stringify(got)}, wanted ${JSON.stringify(want)}`)
+  }
   console.log(`\nmapped    ${mapMisses.length === 0 ? 'ok' : 'WRONG'}  (${keys.length} foods)`)
   mapMisses.forEach((m) => console.log(m))
   if (mapMisses.length) process.exitCode = 1
