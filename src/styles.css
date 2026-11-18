@@ -62,7 +62,7 @@
  * a cream card on the dark page redefines the tokens for everything inside it, so its text, fields, pills and
  * keys are the Paper ones without a second set of rules. */
 :root[data-theme='paper'],
-:root[data-theme='tape'] :is(.card:not(.ask-hero), .answer, .day, .chips-col .chip-btn, .ask-form, .tour-tip, .modal) {
+:root[data-theme='tape'] :is(.card:not(.ask-hero), .answer, .day, .chips-col .chip-btn, .ask-form, .tour-tip, .modal, .summary-root) {
   --bg: #f1ece0;
   --bg-top: #f8f4e9;
   --bg-bottom: #eee8d8;
@@ -113,7 +113,7 @@
   --logo-tick: #0e5a3c;
   color-scheme: light;
 }
-:root[data-theme='tape'] :is(.card:not(.ask-hero), .answer, .day, .chips-col .chip-btn, .ask-form, .tour-tip, .modal) {
+:root[data-theme='tape'] :is(.card:not(.ask-hero), .answer, .day, .chips-col .chip-btn, .ask-form, .tour-tip, .modal, .summary-root) {
   color: var(--text);
   --fx-slip: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.5));
   --fx-raised: 0 14px 22px -12px rgba(0, 0, 0, 0.65);
@@ -1044,3 +1044,48 @@ body:has(.landing) { background: #0a1812; }
 /* "This is a Meal / Snack": which of the person's two carbohydrate numbers the answer is compared with. */
 .kind-switch { align-items: center; gap: 8px; margin: 0 0 12px; }
 .kind-switch .chip-btn { padding: 8px 16px; text-align: center; }
+
+/* ── Clinician summary: a document, always Paper (docs/design.md, "Clinician summary") ── */
+.summary-root { background: var(--bg); color: var(--text); min-height: 100vh; }
+.summary-bar, .summary { max-width: 920px; margin: 0 auto; }
+.summary-bar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: flex-end; justify-content: space-between; padding: 12px 16px; background: var(--bg); border-bottom: 1px solid var(--border); }
+.summary-bar .row button[aria-pressed='true'] { background: var(--accent-soft); border: 2px solid var(--accent); }
+.summary-name { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--text-dim); flex: 1 1 220px; max-width: 340px; }
+.summary { padding: 16px 16px 40px; }
+.summary h1 { font-size: 24px; margin: 8px 0 4px; outline: none; }
+.summary h2 { font-size: 18px; margin: 24px 0 8px; }
+.summary h3 { font-size: 16px; margin: 16px 0 4px; }
+.summary h4 { font-size: 14px; margin: 8px 0 2px; color: var(--text-dim); font-weight: 600; }
+.summary p { margin: 8px 0; }
+.summary ul { margin: 0 0 8px; padding-left: 20px; }
+.summary-blank { display: inline-block; width: 18em; max-width: 60%; border-bottom: 1px solid var(--text); vertical-align: baseline; }
+.summary caption { text-align: left; font-size: 13px; color: var(--text-dim); padding: 0 0 6px; }
+.summary-scroll { overflow-x: auto; }
+.summary-days { font-size: 13px; }
+.summary-days th, .summary-days td { padding: 6px; }
+.summary table:not(.summary-days) th:nth-child(2) { text-align: right; }
+.summary-days td, .summary-days tfoot th + td { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.summary-days thead tr:first-child th:not(:first-child):not(:last-child) { text-align: right; }
+.summary-days td:last-child { text-align: left; font-family: var(--font); white-space: normal; min-width: 150px; }
+.summary-days tfoot th, .summary-days tfoot td { border-top: 2px solid var(--border); }
+.summary-days .summary-target th, .summary-days .summary-target td { color: var(--text-dim); font-weight: 400; }
+.summary-days .summary-gap td { text-align: left; font-family: var(--font); color: var(--text-dim); font-style: italic; }
+.summary-days th[scope='row'] { white-space: nowrap; color: var(--text); font-size: 14px; }
+.summary-footer { margin-top: 24px; font-size: 13px; color: var(--text-dim); }
+
+@page { size: auto; margin: 16mm; }
+@media print {
+  html, body { background: #fff !important; }
+  .no-print { display: none !important; }
+  .summary-root, .summary { background: #fff; color: #000; min-height: 0; }
+  .summary { padding: 0; max-width: none; }
+  .summary caption, .summary h4, .summary-footer, .summary-days .summary-target th, .summary-days .summary-target td, .summary-days .summary-gap td { color: #000; }
+  .summary-scroll { overflow: visible; }
+  .summary-days { font-size: 10.5px; }
+  .summary-days th, .summary-days td { padding: 4px; }
+  .summary-days td:last-child { min-width: 0; }
+  .summary-days thead { display: table-header-group; }
+  .summary tr, .summary h2, .summary h3, .summary li { break-inside: avoid; }
+  .summary h2, .summary h3, .summary h4 { break-after: avoid; }
+  .summary-footer { position: fixed; bottom: 0; left: 0; margin: 0; }
+}

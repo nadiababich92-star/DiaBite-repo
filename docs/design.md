@@ -311,14 +311,14 @@ The landing has a band **"Where the numbers come from"** (2 November 2026), betw
 
 ### Clinician summary
 
-A document, not a screen of the product: the page a person prints, or saves as PDF, to show a dietitian or doctor (Settings, "Summary for my clinician"; `docs/specs/clinician-summary-screen.md`). Added 18 November 2026; **the CSS for it is not written until this entry is agreed**.
+A document, not a screen of the product: the page a person prints, or saves as PDF, to show a dietitian or doctor (Settings, "Summary for my clinician"; `docs/specs/clinician-summary-screen.md`). Added 18 November 2026; the CSS follows this entry, in the last block of `src/styles.css`.
 
 - **Always Paper.** On screen the page takes the Paper tokens in both looks, the way a slip does (`.summary` joins the slip selectors at the top of `src/styles.css`), so what is on the screen is what is on the paper. It is not a card on the dark page.
 - **Rendered alone.** No masthead, banner or tab bar: `App` returns the page instead of the app. The top bar (period 7 / 14 / 28 days, the optional name, Print, Close) is `.no-print` and sticky; everything else prints.
 - **Numbers are mono and tabular** (`.num`), as everywhere. The serif is not used: this page is a record, not the product speaking.
 - **A word, not a colour.** A figure over its target prints `over` in bold beside the number; under it, `not over`; a load that is incomplete because a food has none prints `not complete`. Protein, fibre and fat have no word (they are floors or have no ceiling in the Diary). Nothing is amber or red, and a black-and-white printer loses nothing (accessibility rule 3). No ring, streak, score or praise (rule 4 of the philosophy).
 - **Tables are tables.** Real `<table>`, `<caption>`, `th scope`; on a phone the days table scrolls sideways inside its wrapper and keeps its type size. Touch targets in the bar are 44px, focus ring 2px `--accent`.
-- **Print.** `@page` margin 16mm; black on white, no shadows or backgrounds; table rows and headings do not split across pages and the header row repeats; a fixed footer "DiaBite · diabite.pro · printed <date>". If a print value is not in the tokens (pure black and white), it is added to this file with its dark counterpart before it is used.
+- **Print.** `@page` margin 16mm; black on white, no shadows or backgrounds; table rows and headings do not split across pages and the header row repeats; a fixed footer "DiaBite · diabite.pro · printed <date>". Print is pure black (`#000`) on white (`#fff`), declared once in the print block of `src/styles.css`: a printer has no looks, so these two are the only values outside the tokens, and they have no dark counterpart because nothing prints dark.
 - **What it may say.** Fixed copy, plus figures the Diary already computes. It prints no email, no age, weight or height, no kidney, pregnancy, allergen or comorbidity, no consent record, and none of the sentences that explain why a target changed.
 
 ### Logo and wordmark

@@ -47,6 +47,12 @@ export default function App() {
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   // "Summary for my clinician": a printable page that replaces the app while it is open, so only it prints.
   const [summaryOpen, setSummaryOpen] = useState(false)
+  // Closing the page puts the focus back on the button that opened it.
+  const summaryWasOpen = useRef(false)
+  useEffect(() => {
+    if (summaryWasOpen.current && !summaryOpen) document.getElementById('open-clinician-summary')?.focus()
+    summaryWasOpen.current = summaryOpen
+  }, [summaryOpen])
   // The first sentence of the disclaimer is always shown; the rest opens on a tap.
   const [disclaimerOpen, setDisclaimerOpen] = useState(false)
   // Onboarding is the first screen until it has been completed once (PRD A4);

@@ -68,7 +68,9 @@ import type { DiaryEntry, Dish } from '../src/types'
 import { RATING_ONLY } from '../src/lib/feedbackCopy'
 import { buildReport, reportMarkdown, type AccountInput, type ReportInput } from '../src/lib/report'
 import { CONSENT_VERSION } from '../src/lib/syncCore'
-import { addDays, dayLabel, gramStep, mealForNow, noLoadNote, nudgeGrams, portionText, recentEntries } from '../src/lib/diary'
+import { addDays, dayLabel, gramStep, mealForNow, noLoadNote, nudgeGrams, portionText, recentEntries, viewEntry } from '../src/lib/diary'
+import { sumNutrients } from '../src/lib/glycemic'
+import { buildSummary } from '../src/lib/clinicianSummary'
 import { calculateTargets, cmToFtIn, DEFAULT_PROFILE, ftInToCm, kgToLb, lbToKg, weightUsed } from '../src/lib/profile'
 import { HeightWeight, UnitsSwitch } from '../src/components/BodyUnits'
 import { focusesHeadingOnOpen } from '../src/components/Onboarding'
@@ -933,6 +935,121 @@ const accountMisses: string[] = []
   ok('no connection is "network"', problemOf({ name: 'AuthRetryableFetchError', status: 0 }) === 'network')
 }
 console.log(`\naccount   ${accountMisses.length === 0 ? 'ok' : 'WRONG'}`)
+
+// ── Summary for my clinician: the page's content is Diary arithmetic, and says no more about a person than was approved ──
+// docs/specs/clinician-summary-evals.md. Every figure compared against is computed here from viewEntry, not typed in.
+const summaryMisses: string[] = []
+{
+  const ok = (name: string, cond: boolean) => { if (!cond) summaryMisses.push(`    ${name}`) }
+  type Meal = 'breakfast' | 'lunch' | 'dinner' | 'snack'
+  const day = (n: number) => `2026-10-${String(n).padStart(2, '0')}`
+  const today = day(20)
+  const food = (id: string, date: string, meal: Meal, foodId: string, grams: number, over: Record<string, unknown> = {}) => ({ id, date, meal, foodId, grams, ...over })
+  const snap = (id: string, date: string, meal: Meal, o: Record<string, unknown>, over: Record<string, unknown> = {}) => ({ id, date, meal, foodId: 'branded:1', grams: 30,
+    snapshot: { name: 'Item', kcal: 100, carbs: 20, fiber: 1, protein: 2, fat: 3, availableCarbs: 19, gi: 50, gl: 4, loadAvailable: true, ...o }, ...over })
+  const profile = { ...DEFAULT_PROFILE, onboarded: true, condition: 't2' as const, insulin: 'none' as const, meds: ['metformin', 'glp1'] as ('metformin' | 'glp1')[],
+    age: 61, weightKg: 83.7, heightCm: 171, mealCarbsG: 45, snackCarbsG: 0, dailyCarbsG: 0, kidney: 'ckd' as const, pregnantOrBreastfeeding: false,
+    allergens: ['peanuts'] as 'peanuts'[], comorbidities: ['htn'] as 'htn'[] }
+  const targets = calculateTargets(profile)
+  const diary = [
+    food('t1', day(20), 'lunch', 'egg', 110), food('t2', day(20), 'dinner', 'rice-white', 400),
+    food('a1', day(19), 'breakfast', 'egg', 110), food('a2', day(19), 'lunch', 'egg', 110), food('a3', day(19), 'dinner', 'egg', 110),
+    food('p1', day(19), 'snack', 'rice-white', 400, { planned: true }), food('p2', day(19), 'snack', 'egg', 110, { planned: true }), food('p3', day(21), 'lunch', 'egg', 110, { planned: true }),
+    snap('n1', day(18), 'lunch', { loadAvailable: false, gl: 0, gi: null, name: 'Packaged bar' }), food('n2', day(18), 'breakfast', 'egg', 110),
+    snap('e1', day(15), 'lunch', { assumed: true, gl: 3, name: 'Assumed-recipe dish' }),
+    ...[1, 2, 3, 4, 5].map((i) => food(`o${i}`, day(14), i % 2 ? 'lunch' : 'dinner', 'rice-white', 400)),
+    food('x1', day(13), 'lunch', 'egg', 110),
+  ]
+  const s7 = buildSummary(diary, profile, targets, today, 7)
+  const byDate = (sm: typeof s7, d: string) => sm.days.find((x) => x.date === d)
+  const week = weekSummary(diary, targets.glBudget, today)
+
+  // 1. The same as the Diary: each figure equals what the Diary's own functions give for the same entries.
+  let same = s7.days.length === 5
+  for (const d of s7.days) {
+    const entries = eaten(diary).filter((e) => e.date === d.date)
+    const views = entries.map(viewEntry)
+    const n = sumNutrients(views.map((v) => v.nutrients))
+    const used = week.days.find((w) => w.date === d.date)?.used
+    same = same && d.kcal === Math.round(n.kcal) && d.carbs === Math.round(n.carbs) && d.fiber === Math.round(n.fiber) && d.protein === Math.round(n.protein) && d.fat === Math.round(n.fat) && d.gl === used
+    const items = d.meals.flatMap((m) => m.items)
+    same = same && items.length === entries.length && Math.abs(items.reduce((sum, i) => sum + i.carbs, 0) - n.carbs) <= 0.1 * items.length
+  }
+  ok('1 every figure of a day equals the Diary\'s own sum of the same entries (total carbohydrate, GL as the week rounds it), and the items add up to the day', same)
+
+  // 2. Planned is absent.
+  const itemNames = s7.days.flatMap((d) => d.meals.flatMap((m) => m.items.map((i) => `${d.date}|${m.meal}|${i.name}`)))
+  const without = buildSummary(diary.filter((e) => !('planned' in e)), profile, targets, today, 7)
+  ok('2 planned meals are not in the days, the meals or the totals, and do not change a day', !s7.days.some((d) => d.date === day(21)) && !s7.notLogged.some((r) => r.from <= day(21) && r.to >= day(21))
+    && JSON.stringify(s7) === JSON.stringify(without) && itemNames.length > 0 && !itemNames.some((n) => n.startsWith(`${day(19)}|snack|`)))
+
+  // 3. A food with no load is never "not over".
+  const d18 = byDate(s7, day(18))!, d14 = byDate(s7, day(14))!, d19 = byDate(s7, day(19))!
+  ok('3 a day with a food that has no load is "not complete" even under the budget, and over is over', d18.noLoadFoods === 1 && d18.gl <= targets.glBudget && d18.glVerdict === 'not complete'
+    && d14.glVerdict === 'over' && d19.glVerdict === 'not over' && s7.days.every((d) => d.noLoadFoods > 0 || d.glVerdict !== 'not complete'))
+
+  // 4. Marks.
+  ok('4 estimate and slot counts are what the entries say', byDate(s7, day(15))!.estimate && byDate(s7, day(15))!.meals[0].items[0].estimate && s7.days.filter((d) => d.estimate).length === 1
+    && d19.slots === 3 && byDate(s7, day(15))!.slots === 1 && d18.slots === 2)
+
+  // 5. The period.
+  const periodOk = ([7, 14, 28] as const).every((p) => { const sm = buildSummary(diary, profile, targets, today, p); return sm.periodDays === p && sm.to === today && sm.from === addDays(today, -(p - 1)) })
+  const s14 = buildSummary(diary, profile, targets, today, 14)
+  ok('5 the period is 7, 14 or 28 calendar days ending today; an entry just outside is left out', periodOk && !byDate(s7, day(13)) && !!byDate(s14, day(13)))
+  const cover = (sm: ReturnType<typeof buildSummary>) => [...sm.days.map((d) => d.date), ...sm.notLogged.flatMap((r) => { const out: string[] = []; for (let d = r.from; d <= r.to; d = addDays(d, 1)) out.push(d); return out })].sort()
+  const savedTz = process.env.TZ
+  const coverProblems: string[] = []
+  for (const tz of ['America/Los_Angeles', 'Europe/Warsaw', 'Pacific/Auckland']) {
+    process.env.TZ = tz
+    for (const t of ['2026-03-08', '2026-03-29', '2026-10-25', '2026-11-01', '2026-11-02']) {
+      for (const p of [7, 14, 28] as const) {
+        const sm = buildSummary([food('c', addDays(t, -1), 'lunch', 'egg', 110)], profile, targets, t, p)
+        const dates = cover(sm)
+        const want = Array.from({ length: p }, (_, i) => addDays(t, -(p - 1) + i))
+        if (dates.join() !== want.join()) coverProblems.push(`${tz} ${t} ${p}`)
+      }
+    }
+  }
+  if (savedTz === undefined) delete process.env.TZ; else process.env.TZ = savedTz
+  ok('5 across a month boundary and the clock changes, in three zones, days and gaps cover the period exactly once', coverProblems.length === 0 && (console.log(coverProblems.slice(0, 2).join(' | ')), true))
+
+  // 6. Not logged is not zero.
+  const raws = s7.days.map((d) => { const v = eaten(diary).filter((e) => e.date === d.date).map(viewEntry); const n = sumNutrients(v.map((x) => x.nutrients)); return { ...n, gl: v.reduce((sum, x) => sum + x.gl, 0) } })
+  const meanOf = (f: (r: (typeof raws)[number]) => number) => raws.reduce((sum, r) => sum + f(r), 0) / raws.length
+  const empty = buildSummary([], profile, targets, today, 7)
+  ok('6 days with nothing logged are one run, not rows of zeros, and the averages are over the logged days only', s7.loggedDays === 5 && s7.days.length === 5 && JSON.stringify(s7.notLogged) === JSON.stringify([{ from: day(16), to: day(17) }])
+    && s7.averages?.kcal === Math.round(meanOf((r) => r.kcal)) && s7.averages?.carbs === Math.round(meanOf((r) => r.carbs)) && s7.averages?.gl === Math.round(meanOf((r) => r.gl) * 10) / 10
+    && empty.loggedDays === 0 && empty.days.length === 0 && empty.averages === null && JSON.stringify(empty.notLogged) === JSON.stringify([{ from: empty.from, to: today }]))
+
+  // 7. The profile minimum: only what the owner approved leaves, and nothing that explains a target.
+  const json = JSON.stringify(s7)
+  const forbiddenKeys = ['"age"', '"sex"', '"weightKg"', '"heightCm"', '"activity"', '"kidney"', '"pregnant', '"allergens"', '"comorbidities"', '"email"', '"consent"', '"constraints"', '"reason"']
+  const forbiddenWords = ['83.7', 'kidney', 'ckd', 'pregnan', 'peanut', 'blood pressure']
+  const basal = buildSummary(diary, { ...profile, insulin: 'basal' }, targets, today, 7), pump = buildSummary(diary, { ...profile, insulin: 'mealtime_or_pump' }, targets, today, 7)
+  ok('7 the summary has exactly the approved keys, and says nothing of age, weight, kidney, pregnancy, allergens, comorbidities, email or why a target changed',
+    Object.keys(s7).sort().join() === 'about,averages,days,from,loggedDays,notLogged,periodDays,printedOn,targets,to'
+    && Object.keys(s7.about).sort().join() === 'condition,insulin,medicines'
+    && targets.constraints.length > 0 && forbiddenKeys.every((k) => !json.includes(k)) && forbiddenWords.every((w) => !json.toLowerCase().includes(w))
+    && targets.constraints.every((c) => !json.includes(c.reason)))
+  ok('7 insulin is "takes insulin" or "does not take insulin" and never the type; medicines are classes, not brands',
+    s7.about.insulin === 'does not take insulin' && basal.about.insulin === 'takes insulin' && pump.about.insulin === 'takes insulin'
+    && !/basal|pump|mealtime|lantus|ozempic|jardiance/i.test(JSON.stringify([basal.about, pump.about, s7.about])) && s7.about.medicines.join() === 'Metformin,GLP-1 or dual agonist')
+
+  // 8. Whose target.
+  const own = buildSummary(diary, { ...profile, dailyCarbsG: 120 }, calculateTargets({ ...profile, dailyCarbsG: 120 }), today, 7)
+  ok('8 the carbohydrate target says whose it is: the person\'s own number, or DiaBite\'s calculation', own.targets.carbsSetBy === 'person' && own.targets.carbsG === 120 && s7.targets.carbsSetBy === 'diabite'
+    && s7.targets.mealCarbsG === 45 && s7.targets.snackCarbsG === null)
+
+  // 9. Verdicts compare the unrounded sum, strictly; only carbohydrate and energy have one.
+  const one = (carbs: number, kcal: number) => [snap('v', today, 'lunch', { carbs, kcal, fiber: 0, protein: 0, fat: 0, availableCarbs: carbs, gl: 1 })]
+  const tg = { ...targets, carbsG: 100, kcal: 500 }
+  const above = buildSummary(one(100.3, 500.4), profile, tg, today, 7).days[0], at = buildSummary(one(100, 500), profile, tg, today, 7).days[0]
+  ok('9 over is the unrounded sum strictly above the target (100.3 against 100 is over, 100 is not); protein, fibre and fat have no verdict',
+    above.carbs === 100 && above.carbsVerdict === 'over' && above.kcalVerdict === 'over' && at.carbsVerdict === 'not over' && at.kcalVerdict === 'not over'
+    && !['proteinVerdict', 'fiberVerdict', 'fatVerdict'].some((k) => k in above))
+}
+console.log(`\nclinician summary  ${summaryMisses.length === 0 ? 'ok' : 'WRONG'}`)
+if (summaryMisses.length) { console.log(summaryMisses.join('\n')); process.exitCode = 1 }
 accountMisses.forEach((m) => console.log(m))
 
 // ── hang ──────────────────────────────────────────────────────────────────

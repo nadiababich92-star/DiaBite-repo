@@ -44,7 +44,7 @@ export default function SettingsPage({ account, onFeedback, onHowItWorks, onGlIn
         <h2>For your clinician</h2>
         {/* DRAFT TO BE AGREED IN CHAT, not final copy. */}
         <p className="muted">A printable page of your last days of eating, with your targets beside them, to show a dietitian or doctor. It uses only what is on this device or in your account, and nothing is sent anywhere.</p>
-        <button className="ghost" onClick={onClinicianSummary}>Summary for my clinician</button>
+        <button id="open-clinician-summary" className="ghost" onClick={onClinicianSummary}>Summary for my clinician</button>
       </section>
 
       <section className="card">

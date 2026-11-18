@@ -208,6 +208,22 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
     const gone = await entries() === n - 1
     await b.ev(`(()=>{[...document.querySelectorAll('.diary-notice button')].find(x=>x.innerText.includes('Undo'))?.click()})()`); await sleep(300)
     check('M21', 'a deleted entry can be taken back', gone && await entries() === n, `${n} -> ${await entries()}`)
+
+    // Summary for my clinician (docs/specs/clinician-summary-evals.md): opens from Settings, alone, and says no more than was approved.
+    await tab('Settings')
+    check('M26', 'Settings has "For your clinician" and its button, for a person who is not signed in', /For your clinician/.test(await text()) && await b.ev(`!!document.getElementById('open-clinician-summary')`), (await text()).slice(0, 160))
+    await b.ev(`document.getElementById('open-clinician-summary').click()`); await sleep(400)
+    const page = await b.ev(`({ title: document.title, h1: document.querySelector('article h1')?.innerText ?? '', tabs: !!document.querySelector('[role=tab]'), mast: !!document.querySelector('.masthead'), pressed: [...document.querySelectorAll('[aria-label=Period] [aria-pressed=true]')].map(x => x.innerText.trim()), lis: document.querySelectorAll('article .summary-meals li').length, rows: document.querySelectorAll('article .summary-days tbody tr').length })`)
+    check('M27', 'the summary opens alone (no tabs, no masthead) with 7 days pressed, and lists the day\'s meals', page.h1 === 'DiaBite summary' && !page.tabs && !page.mast && page.pressed.join() === '7 days' && page.lis >= 1, JSON.stringify(page))
+    await b.ev(`[...document.querySelectorAll('[aria-label=Period] button')].find(x => x.innerText.trim() === '14 days').click()`); await sleep(300)
+    check('M28', 'choosing 14 days moves the pressed button and the period line', await b.ev(`[...document.querySelectorAll('[aria-label=Period] [aria-pressed=true]')].map(x => x.innerText.trim()).join() === '14 days' && /14 days\\./.test(document.querySelector('article').innerText)`), '')
+    await b.ev(`(() => { const el = document.querySelector('.summary-name input'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(el, '<img src=x onerror=window.__xss=1>'); el.dispatchEvent(new Event('input', { bubbles: true })) })()`); await sleep(300)
+    const named = await b.ev(`({ xss: window.__xss === undefined, text: document.querySelector('.summary-name-line')?.innerText ?? '', imgs: document.querySelectorAll('article img').length, title: document.title })`)
+    check('M29', 'a name typed with markup is text, runs nothing, and is not in the page title', named.xss && named.imgs === 0 && named.text.includes('<img src=x') && !named.title.includes('img'), JSON.stringify(named))
+    const art = await b.ev(`document.querySelector('article').innerText`)
+    check('M30', 'the page names no age, weight, height, kidney or pregnancy', !/\b(age|years old|weight|height|kidney|pregnan)/i.test(art), art.slice(0, 200))
+    await b.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }); await b.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }); await sleep(400)
+    check('M31', 'Escape closes the summary, the app is back on Settings, and focus is on the button that opened it', await b.ev(`!document.querySelector('article') && /For your clinician/.test(document.body.innerText) && document.activeElement?.id === 'open-clinician-summary'`), await b.ev(`document.activeElement?.tagName + '#' + document.activeElement?.id`))
   }
   check('M12', 'no script error or console error on the page', errors.length === 0, errors.slice(0, 3).join(' | '))
 } finally { await b.close() }
