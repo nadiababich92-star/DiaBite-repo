@@ -11,10 +11,12 @@ interface Props {
   onHowItWorks: () => void
   /** Opens "What are GI and GL?". */
   onGlInfo: () => void
+  /** Opens "Summary for my clinician", a printable page of the person's own diary. */
+  onClinicianSummary: () => void
 }
 
 /** The app's own settings: how it looks, the account, help. The person's health answers stay in Profile. */
-export default function SettingsPage({ account, onFeedback, onHowItWorks, onGlInfo }: Props) {
+export default function SettingsPage({ account, onFeedback, onHowItWorks, onGlInfo, onClinicianSummary }: Props) {
   const [theme, setTheme] = useState<ThemeChoice>(loadTheme)
   const choose = (c: ThemeChoice) => { setTheme(c); saveTheme(c) }
 
@@ -37,6 +39,13 @@ export default function SettingsPage({ account, onFeedback, onHowItWorks, onGlIn
       </section>
 
       {account}
+
+      <section className="card">
+        <h2>For your clinician</h2>
+        {/* DRAFT TO BE AGREED IN CHAT, not final copy. */}
+        <p className="muted">A printable page of your last days of eating, with your targets beside them, to show a dietitian or doctor. It uses only what is on this device or in your account, and nothing is sent anywhere.</p>
+        <button className="ghost" onClick={onClinicianSummary}>Summary for my clinician</button>
+      </section>
 
       <section className="card">
         <h2>Help</h2>

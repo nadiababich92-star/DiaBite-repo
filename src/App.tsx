@@ -6,6 +6,7 @@ import FeedbackModal from './components/FeedbackModal'
 import ImportPrompt from './components/ImportPrompt'
 import Logo, { Wordmark } from './components/Logo'
 import SettingsPage from './components/SettingsPage'
+import ClinicianSummary from './components/ClinicianSummary'
 import SignIn from './components/SignIn'
 import Landing from './components/Landing'
 import HowItWorks from './components/HowItWorks'
@@ -44,6 +45,8 @@ export default function App() {
   const [logTarget, setLogTarget] = useState<{ date: string; meal: MealType } | null>(null)
   useEffect(() => { if (tab !== 'ask') setLogTarget(null) }, [tab])
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+  // "Summary for my clinician": a printable page that replaces the app while it is open, so only it prints.
+  const [summaryOpen, setSummaryOpen] = useState(false)
   // The first sentence of the disclaimer is always shown; the rest opens on a tap.
   const [disclaimerOpen, setDisclaimerOpen] = useState(false)
   // Onboarding is the first screen until it has been completed once (PRD A4);
@@ -207,6 +210,8 @@ export default function App() {
     )
   }
 
+  if (summaryOpen) return <ClinicianSummary diary={diary} profile={profile} targets={targets} onClose={() => setSummaryOpen(false)} />
+
   return (
     <GlHelpContext.Provider value={() => setGlOpen(true)}>
     <div className="app">
@@ -270,6 +275,7 @@ export default function App() {
           onFeedback={() => setFeedbackOpen(true)}
           onHowItWorks={() => setHowOpen(true)}
           onGlInfo={() => setGlOpen(true)}
+          onClinicianSummary={() => setSummaryOpen(true)}
           account={<>
             {auth.status === 'signedIn' && auth.userId && <AccountBlock userId={auth.userId} email={auth.email} />}
             {auth.status === 'signedOut' && !signInRequired && supabaseConfigured && (

@@ -309,6 +309,18 @@ Shown to a signed-out visitor when sign-in is required. **Always the dark page, 
 
 The landing has a band **"Where the numbers come from"** (2 November 2026), between the promise and the fine print, on the same dark band as "How the tape gets printed": a serif name per source (`--lp-text`), one line of what is taken from it (`--lp-dim`, 17 px), and a link to `docs/data-sources.md`. Its sources are `LANDING.sources` and must be named in that document; the University of Sydney database is not named, because its permission is an open item.
 
+### Clinician summary
+
+A document, not a screen of the product: the page a person prints, or saves as PDF, to show a dietitian or doctor (Settings, "Summary for my clinician"; `docs/specs/clinician-summary-screen.md`). Added 18 November 2026; **the CSS for it is not written until this entry is agreed**.
+
+- **Always Paper.** On screen the page takes the Paper tokens in both looks, the way a slip does (`.summary` joins the slip selectors at the top of `src/styles.css`), so what is on the screen is what is on the paper. It is not a card on the dark page.
+- **Rendered alone.** No masthead, banner or tab bar: `App` returns the page instead of the app. The top bar (period 7 / 14 / 28 days, the optional name, Print, Close) is `.no-print` and sticky; everything else prints.
+- **Numbers are mono and tabular** (`.num`), as everywhere. The serif is not used: this page is a record, not the product speaking.
+- **A word, not a colour.** A figure over its target prints `over` in bold beside the number; under it, `not over`; a load that is incomplete because a food has none prints `not complete`. Protein, fibre and fat have no word (they are floors or have no ceiling in the Diary). Nothing is amber or red, and a black-and-white printer loses nothing (accessibility rule 3). No ring, streak, score or praise (rule 4 of the philosophy).
+- **Tables are tables.** Real `<table>`, `<caption>`, `th scope`; on a phone the days table scrolls sideways inside its wrapper and keeps its type size. Touch targets in the bar are 44px, focus ring 2px `--accent`.
+- **Print.** `@page` margin 16mm; black on white, no shadows or backgrounds; table rows and headings do not split across pages and the header row repeats; a fixed footer "DiaBite · diabite.pro · printed <date>". If a print value is not in the tokens (pure black and white), it is added to this file with its dark counterpart before it is used.
+- **What it may say.** Fixed copy, plus figures the Diary already computes. It prints no email, no age, weight or height, no kidney, pregnancy, allergen or comorbidity, no consent record, and none of the sentences that explain why a target changed.
+
 ### Logo and wordmark
 The mark is a **stamp** (chosen by the owner on 21 October 2026 from seven directions, https://claude.ai/artifact/FijYoKhe1B9izkBwLP1kQU): a ring with a bite out of its top-right corner and a tick, the way the product stamps FITS on a receipt. The ring takes `--text`, the tick the marker colour on the dark page and Paper's green on Paper (`--logo-tick`). It stays a ring and a tick at 16px, which is why it is the favicon. The earlier mark, a receipt with a bite and a highlighted line, remains as the slip in the product itself. The wordmark is **Dia** and a marker-highlighted **Bite** in the serif.
 
