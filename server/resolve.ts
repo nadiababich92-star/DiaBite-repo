@@ -156,10 +156,13 @@ const plainName = (name: string) =>
  */
 const COUNT_WORD = /^(a|an|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|half|couple|pair)\b\s*(of\s+)?/i
 const AMOUNT = /^\s*\d+(?:[.,]\d+)?\s*(?!%)(g|gram|grams|kg|oz|ounces?|lb|ml|l|cups?|tbsp|tablespoons?|tsp|teaspoons?|slices?|pieces?|servings?|portions?|bowls?|plates?|glass(?:es)?)?\b\s*(of\s+)?/i
+// "A medium apple" is an apple of a size the person said, not a food called "medium apple" (the agent sent it whole and the engine said it
+// did not have it, 18 November). The size is the quantity's business now (`quantity: { unit: 'medium' }`), so it is not part of the food.
+const SIZE_WORD = /^(?:small|medium|large|extra[- ]large|big|little)\s+(?=\S)/i
 export function withoutQuantity(phrase: string): string {
   let out = phrase.trim()
   for (let i = 0; i < 3; i++) {
-    const next = out.replace(AMOUNT, '').replace(COUNT_WORD, '').trim()
+    const next = out.replace(AMOUNT, '').replace(COUNT_WORD, '').replace(SIZE_WORD, '').trim()
     if (next === out || next === '') break
     out = next
   }

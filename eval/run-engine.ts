@@ -27,7 +27,7 @@ import { carbsWithoutLoad, loadFoods } from '../server/foods'
 import { embed, loadOrBuildIndex, openStore, type VectorStore } from '../server/embeddings'
 import { readTextHashes, staleIds } from '../server/index-hash'
 import { tmpdir } from 'node:os'
-import { resolvePhrases } from '../server/resolve'
+import { resolvePhrases, withoutQuantity } from '../server/resolve'
 import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
@@ -1289,12 +1289,19 @@ hangMisses.forEach((m) => console.log(m))
     const two = gramsFor(recipe, { count: 2, unit: 'default' }); const cup = gramsFor(recipe, { count: 1, unit: 'cup' })
     if (!('servings' in two) || two.servings !== 2) miss(`a recipe at 2 default gave ${JSON.stringify(two)}, wanted servings 2`)
     if (!('needs' in cup) || cup.needs !== 'a recipe is counted by serving') miss(`a recipe in cups gave ${JSON.stringify(cup)}`)
+    const oz4 = gramsFor(recipe, { count: 4, unit: 'oz' })
+    if (!('needs' in oz4) || oz4.needs !== 'a recipe is counted by serving') miss(`a recipe at 4 oz gave ${JSON.stringify(oz4)}, wanted needs (it has no weight to convert)`)
   }
   if (branded) {
     const cup = gramsFor(branded, { count: 1, unit: 'cup' }); const oz = gramsFor(branded, { count: 2, unit: 'oz' }); const def = gramsFor(branded, { count: 1, unit: 'default' })
     if (!('needs' in cup)) miss(`a branded item in cups gave ${JSON.stringify(cup)}, wanted needs`)
     if (!('grams' in oz) || oz.grams !== 56.7) miss(`a branded item at 2 oz gave ${JSON.stringify(oz)}`)
     if (!('grams' in def) || def.grams !== branded.defaultPortion) miss(`a branded item at default gave ${JSON.stringify(def)}`)
+  }
+  // The size is the amount's, not the food's: the resolver must be given "apple", not "medium apple" (which the live engine called unknown).
+  for (const [phrase, want] of [['a medium apple', 'apple'], ['medium apple', 'apple'], ['2 large eggs', 'eggs'], ['small banana', 'banana'], ['a large apple', 'apple'], ['1 cup rice', 'rice'], ['large fries', 'fries']] as [string, string][]) {
+    const got = withoutQuantity(phrase)
+    if (got !== want) miss(`withoutQuantity(${JSON.stringify(phrase)}) is ${JSON.stringify(got)}, wanted ${JSON.stringify(want)}`)
   }
   // The model's mistakes are answered, not obeyed.
   for (const [what, q, wantPart] of [
@@ -1315,6 +1322,9 @@ hangMisses.forEach((m) => console.log(m))
   if (imp[0].said !== '1 cup (158 g)' || imp[0].basis !== 'usda_measure' || imp[0].quantity?.unit !== 'cup') miss(`imperial said ${JSON.stringify([imp[0].said, imp[0].basis])}`)
   if (met[0].said !== '158 g') miss(`metric said ${JSON.stringify(met[0].said)}`)
   if (imp[1].said !== undefined || imp[1].basis !== undefined) miss('an item given as grams carries a said or a basis')
+  // Said for a default portion never uses a fraction of a counted thing ("1/3 large"): a baked potato of 130 g is grams or ounces, not a third of a large one.
+  const oddly = loadFoods().records.filter((r) => r.portions?.length && /\b\d+\/\d+ (large|medium|small|slice|piece)/.test(saidText({ grams: r.defaultPortion, basis: 'default', quantity: { count: 1, unit: 'default' }, rec: r, units: 'imperial' })))
+  if (oddly.length) miss(`${oddly.length} default portions are said as a fraction of a counted thing, e.g. ${oddly.slice(0, 3).map((r) => r.id).join(', ')}`)
   console.log(`\nquantity  ${qMisses.length === 0 ? 'ok' : 'WRONG'}  (${cases.engine.quantity.length} conversions)`)
   qMisses.forEach((m) => console.log(m))
   if (qMisses.length) process.exitCode = 1

@@ -66,7 +66,9 @@ export function unitsFor(rec: FoodRecord): QuantityUnit[] {
 
 export function gramsFor(rec: FoodRecord, q: Quantity): Resolved {
   const { count, unit } = q
-  // 1. Weights: exact, for any food.
+  // A recipe is costed by serving, not by weight: four ounces of "Lemon Herb Grilled Chicken" was costed as a recipe at 0 g (18 November).
+  if (rec.kind === 'recipe' && unit !== 'default') return { needs: 'a recipe is counted by serving' }
+  // 1. Weights: exact, for any food that has a weight.
   if (unit === 'g') return { grams: r1(count), basis: 'stated' }
   if (unit === 'oz') return { grams: r1(count * GRAMS_PER_OUNCE), basis: 'exact_conversion' }
   if (unit === 'lb') return { grams: r1(count * GRAMS_PER_POUND), basis: 'exact_conversion' }
@@ -158,7 +160,8 @@ export function saidText(i: SaidInput): string {
   if (i.basis === 'exact_conversion') { const oz = ouncesText(i.grams); return oz ? `${oz} (${g})` : g }
   if (i.basis === 'default') {
     const m = householdMeasure(i.rec.portions, i.grams)
-    if (m) return `${m.text} (${g})`
+    // "1/3 large" is not something a person says; a fraction is for a cup or a spoon, a counted thing is a whole number of them.
+    if (m && (!['slice', 'piece', 'small', 'medium', 'large'].includes(m.unit) || Number.isInteger(m.count))) return `${m.text} (${g})`
     const oz = ouncesText(i.grams)
     return oz ? `${oz} (${g})` : g
   }
