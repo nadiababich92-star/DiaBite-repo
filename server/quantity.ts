@@ -40,8 +40,10 @@ export type Resolved =
 export function quantityError(q: unknown, foodId: string): string | null {
   const x = q as { count?: unknown; unit?: unknown } | null
   if (!x || typeof x !== 'object') return `quantity must be { count, unit } for ${foodId}`
-  if (typeof x.count !== 'number' || !Number.isFinite(x.count) || x.count <= 0 || x.count > 100) return `quantity.count must be a positive number up to 100 for ${foodId}`
   if (typeof x.unit !== 'string' || !(QUANTITY_UNITS as readonly string[]).includes(x.unit)) return `unit must be one of: ${QUANTITY_UNITS.join(', ')}`
+  // A typo guard: a hundred cups is a mistake, but 450 g is a bowl. Grams go up to what the diary accepts for one entry (5,000 g).
+  const most = x.unit === 'g' ? 5000 : 100
+  if (typeof x.count !== 'number' || !Number.isFinite(x.count) || x.count <= 0 || x.count > most) return `quantity.count must be a positive number up to ${most} for ${foodId}`
   return null
 }
 

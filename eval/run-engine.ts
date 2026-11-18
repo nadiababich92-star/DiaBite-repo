@@ -1309,7 +1309,8 @@ hangMisses.forEach((m) => console.log(m))
     ['NaN', { count: NaN, unit: 'cup' }, 'positive number up to 100'], ['Infinity', { count: Infinity, unit: 'cup' }, 'positive number up to 100'], ['a string count', { count: '2', unit: 'cup' }, 'positive number up to 100'],
     ['handful', { count: 1, unit: 'handful' }, 'unit must be one of'], ['bowl', { count: 1, unit: 'bowl' }, 'unit must be one of'], ['cups', { count: 1, unit: 'cups' }, 'unit must be one of'], ['empty unit', { count: 1, unit: '' }, 'unit must be one of'], ['null unit', { count: 1, unit: null }, 'unit must be one of'],
   ] as [string, unknown, string][]) { const e = quantityError(q, 'ing:x'); if (!e || !e.includes(wantPart)) miss(`${what} was ${JSON.stringify(e)}`) }
-  for (const q of [{ count: 100, unit: 'g' }, { count: 0.25, unit: 'cup' }]) if (quantityError(q, 'ing:x') !== null) miss(`${JSON.stringify(q)} was refused`)
+  for (const q of [{ count: 100, unit: 'g' }, { count: 0.25, unit: 'cup' }, { count: 450, unit: 'g' }, { count: 5000, unit: 'g' }, { count: 100, unit: 'cup' }]) if (quantityError(q, 'ing:x') !== null) miss(`${JSON.stringify(q)} was refused`)
+  for (const q of [{ count: 5001, unit: 'g' }, { count: 101, unit: 'cup' }, { count: 101, unit: 'oz' }]) if (quantityError(q, 'ing:x') === null) miss(`${JSON.stringify(q)} was accepted`)
   // All or nothing: one item that cannot be weighed stops the whole meal, so a partial meal is never presented as whole.
   const mixed = planQuantities([{ foodId: 'ing:white_rice', quantity: { count: 1, unit: 'cup' } }, { foodId: 'ing:egg', quantity: { count: 1, unit: 'cup' } }])
   if (mixed.needs.length !== 1 || mixed.needs[0].foodId !== 'ing:egg' || !mixed.needs[0].units.includes('oz') || mixed.needs[0].why !== 'no USDA household measure for this food in cup') miss(`a meal with one unweighable item: ${JSON.stringify(mixed.needs)}`)

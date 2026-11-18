@@ -115,7 +115,7 @@ Order of work in the route, before today's checks:
 | Condition | `error` |
 |---|---|
 | two or more of `grams`, `servings`, `quantity` on an item | `"give exactly one of grams, servings, quantity for <foodId>"` (**none** is still allowed and means the food's usual portion, as before: the engine must keep answering a prompt that has not been republished yet) |
-| `quantity.count` not a finite number, `<= 0`, or `> 100` | `"quantity.count must be a positive number up to 100 for <foodId>"` |
+| `quantity.count` not a finite number, `<= 0`, or above the most for its unit (**5,000 for `g`**, 100 for every other unit: 450 g is a bowl, a hundred cups is a typo) | `"quantity.count must be a positive number up to <most> for <foodId>"` |
 | `quantity.unit` not in `QUANTITY_UNITS` | `"unit must be one of: g, oz, lb, cup, tbsp, tsp, fl oz, slice, piece, small, medium, large, whole, default"` |
 | `foodId` unknown | the existing unknown-food error |
 

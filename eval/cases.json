@@ -6516,7 +6516,10 @@
           {
             "foodIds": [
               "seed:chicken",
-              "ing:chicken_breast"
+              "ing:chicken_breast",
+              "usda:2705969",
+              "usda:2705967",
+              "usda:2705970"
             ],
             "min": 110,
             "max": 117
