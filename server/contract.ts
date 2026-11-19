@@ -16,6 +16,8 @@ import type { Level } from '../src/lib/glycemic'
  */
 export type FoodKind = 'ingredient' | 'recipe' | 'branded' | 'unrated' | 'restaurant'
 
+import type { QuantityUnit } from './quantity'
+
 export interface FoodSummary {
   id: string
   kind: FoodKind
@@ -52,6 +54,11 @@ export interface ResolveRequest {
 export interface ResolveCandidate extends FoodSummary {
   /** Cosine similarity plus lexical boost, 0..1-ish. */
   score: number
+  /**
+   * The household units this food's USDA table can say an amount in, beyond the weights every food has ("whole", "medium", "cup", "slice"…).
+   * Absent means only weights and the usual portion. The agent reads it to tell "an avocado" (one whole) from "avocado" (the usual portion).
+   */
+  units?: QuantityUnit[]
 }
 
 export type Confidence = 'high' | 'medium' | 'low'

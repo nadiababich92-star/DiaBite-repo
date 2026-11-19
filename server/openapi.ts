@@ -31,7 +31,7 @@ export function openApiSpec() {
           operationId: 'resolve_foods',
           summary: 'Look up foods in the verified database, and read today\u2019s budget',
           description:
-            'Resolve the food phrases from the user\'s message to database records. Always call this first, and pass every food from the message in one call. For each phrase you get back: `confidence` (high / medium / low), `unknown` (true means the food is not in the database — say so plainly and never substitute a similar food), an optional `clarify` question to ask when the match is ambiguous, and `candidates`. Use `candidates[0].id` as the `foodId` for the other operations, and `candidates[0].defaultPortion` with `candidates[0].unit` (g for ingredients, serving for recipes) when the user gave no portion.',
+            'Resolve the food phrases from the user\'s message to database records. Always call this first, and pass every food from the message in one call. For each phrase you get back: `confidence` (high / medium / low), `unknown` (true means the food is not in the database — say so plainly and never substitute a similar food), an optional `clarify` question to ask when the match is ambiguous, and `candidates`. Use `candidates[0].id` as the `foodId` for the other operations, and `candidates[0].defaultPortion` with `candidates[0].unit` (g for ingredients, serving for recipes) when the user gave no portion. A candidate may carry `units`: the household units its USDA table can say an amount in (`whole`, `medium`, `cup`, `slice`…). "An avocado" or "a banana" is one `whole` when `whole` is listed; the plain name with no count is the `defaultPortion`.',
           requestBody: {
             required: true,
             content: {
@@ -104,7 +104,7 @@ export function openApiSpec() {
               },
             },
           },
-          responses: { '200': { description: 'Per-item numbers and totals, plus `dayState`, `afterMeal` and any `alternatives` when a session id was passed. A branded product has `loadAvailable: false` and `gl: null`: carbohydrate, fibre and calories are given, a glycemic load is not, and `afterMeal.partial.unscored` names it. `driver` is the scored item with the largest load.' } },
+          responses: { '200': { description: 'Per-item numbers and totals, plus `dayState`, `afterMeal` and any `alternatives` when a session id was passed. A branded product has `loadAvailable: false` and `gl: null`: carbohydrate, fibre and calories are given, a glycemic load is not, and `afterMeal.partial.unscored` names it. `driver` is the scored item with the largest load, and is present only when that load is at least 5: with no `driver`, nothing in the meal carries a notable load, and no food is named as driving it.' } },
         },
       },
 

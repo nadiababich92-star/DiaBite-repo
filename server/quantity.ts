@@ -78,6 +78,12 @@ export function unitsFor(rec: FoodRecord): QuantityUnit[] {
   return [...out]
 }
 
+/** `{ units }` for a candidate when the food can be said in more than weights and its usual portion; `{}` otherwise (so the reply stays small). */
+export function householdUnitsFor(rec: FoodRecord): { units?: QuantityUnit[] } {
+  const extra = unitsFor(rec).filter((u) => !['g', 'oz', 'lb', 'default'].includes(u))
+  return extra.length ? { units: extra } : {}
+}
+
 export function gramsFor(rec: FoodRecord, q: Quantity): Resolved {
   const { count, unit } = q
   // A recipe is costed by serving, not by weight: four ounces of "Lemon Herb Grilled Chicken" was costed as a recipe at 0 g (18 November).
@@ -155,6 +161,11 @@ export function countText(count: number): string {
   return String(Math.round(count * 100) / 100)
 }
 
+/** The food's own name as a person says it: "Avocado" -> "avocado", "Banana (small amount)" -> "banana". */
+const foodWord = (rec: FoodRecord): string => rec.name.split(/[,(]/)[0].trim().toLowerCase()
+/** USDA's word for a whole item; "fruit", "item" and "each" are not things a person says, so the food's own name stands for them. */
+const rowWord = (row: PortionRow, rec: FoodRecord): string => (['fruit', 'item', 'each'].includes(row.word) ? foodWord(rec) : row.word)
+
 const gramsText = (g: number) => `${g >= 10 ? Math.round(g) : Math.round(g * 10) / 10} g`
 const PLURAL = new Set(['cup', 'slice', 'piece'])
 
@@ -176,12 +187,15 @@ export function saidText(i: SaidInput): string {
     const m = householdMeasure(i.rec.portions, i.grams)
     // "1/3 large" is not something a person says; a fraction is for a cup or a spoon, a counted thing is a whole number of them.
     if (m && (!['slice', 'piece', 'small', 'medium', 'large'].includes(m.unit) || Number.isInteger(m.count))) return `${m.text} (${g})`
+    // The usual portion is one of the food's own USDA items ("1 banana = 126 g", "1 fruit = 150 g"): say it that way, not in ounces.
+    const item = plainRows(i.rec).find((r) => r.unit === 'whole' && Math.abs(r.grams - i.grams) / i.grams <= 0.02)
+    if (item) return `1 ${rowWord(item, i.rec)} (${g})`
     const oz = ouncesText(i.grams)
     return oz ? `${oz} (${g})` : g
   }
   // usda_measure or typical: the count said back, with the row's own word.
-  const word = i.row && i.row.unit === 'whole' ? i.row.word : i.row && ['small', 'medium', 'large', 'slice', 'piece'].includes(i.row.unit) ? i.row.word : i.quantity.unit
-  const plural = i.quantity.count > 1 && PLURAL.has(word) ? `${word}s` : word
+  const word = i.row && i.row.unit === 'whole' ? rowWord(i.row, i.rec) : i.row && ['small', 'medium', 'large', 'slice', 'piece'].includes(i.row.unit) ? i.row.word : i.quantity.unit
+  const plural = i.quantity.count > 1 && (PLURAL.has(word) || word === foodWord(i.rec)) ? `${word}s` : word
   return `${countText(i.quantity.count)} ${plural} (${g})`
 }
 

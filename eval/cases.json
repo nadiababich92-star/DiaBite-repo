@@ -4457,7 +4457,7 @@
         },
         "grams": 150,
         "basis": "typical",
-        "said_imperial": "1 fruit (150 g)"
+        "said_imperial": "1 peach (150 g)"
       },
       {
         "id": "L5-pepper-medium",
@@ -4490,7 +4490,7 @@
         },
         "grams": 75,
         "basis": "typical",
-        "said_imperial": "1/2 fruit (75 g)"
+        "said_imperial": "1/2 avocado (75 g)"
       },
       {
         "id": "L8-rye-slice",
@@ -6807,6 +6807,77 @@
             "min": 300,
             "max": 300,
             "typed": true
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US13",
+      "dimension": "helpful",
+      "query": "An avocado",
+      "ground_truth": "\"An avocado\" is one fruit, USDA's 150 g, not the usual portion of 75 g.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "seed:avocado",
+              "ing:avocado"
+            ],
+            "min": 140,
+            "max": 160
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US14",
+      "dimension": "helpful",
+      "query": "A banana",
+      "ground_truth": "A banana is one banana, USDA's 126 g, said as a banana and not in ounces.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "seed:banana"
+            ],
+            "min": 120,
+            "max": 132
           }
         ]
       },

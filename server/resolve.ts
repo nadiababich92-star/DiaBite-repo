@@ -6,6 +6,7 @@
  * verified data (low) instead of guessing.
  */
 import { loadFoods, summary, type FoodRecord } from './foods'
+import { householdUnitsFor } from './quantity'
 import { embed, type VectorStore } from './embeddings'
 import type { Confidence, ResolveCandidate, ResolvedPhrase } from './contract'
 
@@ -546,7 +547,7 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
         // Whatever is still tied keeps vector order too, which cases such as "energy drink" rely on.
         const tier = /^(seed|ing|rec):/.test(h.id) ? 0 : 1
         const nameHit = tier === 0 && (norm(plainName(rec.name)) === norm(phrase) || isNamed(phrase, rec.name))
-        return { ...summary(rec), score, rank: score - variant, nameHit, tier }
+        return { ...summary(rec), ...householdUnitsFor(rec), score, rank: score - variant, nameHit, tier }
       })
       .sort((a, b) => b.rank - a.rank || Number(b.nameHit) - Number(a.nameHit) || a.tier - b.tier)
       .map(({ rank: _rank, nameHit: _n, tier: _t, ...c }) => c)
@@ -563,7 +564,7 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
       const spelled = closestBySpelling(phrase, loadFoods().records)
       if (spelled) {
         confidence = 'medium'
-        cands = [{ ...summary(spelled), score: 0.62 },
+        cands = [{ ...summary(spelled), ...householdUnitsFor(spelled), score: 0.62 },
                  ...candidates.filter((c) => c.id !== spelled.id)].slice(0, topK)
         clarify = `Did you mean ${spelled.name}?`
       }

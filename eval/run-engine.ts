@@ -32,13 +32,13 @@ import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
 import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, scaleDish, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
-import { gramsFor, needsWeightHint, quantityError, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
+import { gramsFor, householdUnitsFor, needsWeightHint, quantityError, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
 import { GI_CROSSCHECKED_ON, recordFromRow, getRecord, hasNoLoad, householdMeasure, householdPortion, readPortion, restaurantFaults, restaurantRecordsFrom, stepUnit, summary, type RestaurantRow } from '../server/foods'
 import { legacyHouseholdMeasure, legacyStepUnit } from './legacy-measure'
-import { countOf, countText, measureLabel, nudgeMeasure } from '../src/lib/measure'
+import { countOf, countText, gramsShown, measureLabel, nudgeMeasure } from '../src/lib/measure'
 import { FigurePair } from '../src/components/FigurePair'
 import GlHelp, { GlHelpContext } from '../src/components/GlHelp'
 import { GI_GL_HOW, GI_GL_VIDEO, GI_GL_WORDS } from '../src/lib/glWords'
@@ -260,10 +260,15 @@ const brandedMisses: string[] = []
 }
 {
   // The engine names the driver, so the answer does not compare numbers itself.
-  const m = computeMeal([{ foodId: 'ing:apple', grams: 100 }, { foodId: 'ing:almonds', grams: 100 }])
+  const m = computeMeal([{ foodId: 'ing:apple', grams: 200 }, { foodId: 'ing:almonds', grams: 100 }])
   const d = driverOf(m.items)
   if (!d || !/apple/i.test(d.name)) brandedMisses.push(`    the driver of apple and almonds is ${d?.name}`)
   if (driverOf(computeMeal([{ foodId: 'branded:2529927', grams: 34 }]).items) !== undefined) brandedMisses.push('    a meal of branded products has a driver')
+  // A food drives the load only when its load is notable (owner's decision, 19 November): a chicken breast (0) and half an avocado (0.2) drive nothing.
+  for (const [what, items] of [['a chicken breast', [{ foodId: 'seed:chicken', grams: 113 }]], ['an avocado', [{ foodId: 'seed:avocado', grams: 150 }]], ['chicken and an avocado', [{ foodId: 'seed:chicken', grams: 113 }, { foodId: 'seed:avocado', grams: 150 }]]] as [string, { foodId: string; grams: number }[]][]) {
+    const dd = driverOf(computeMeal(items).items); if (dd !== undefined) brandedMisses.push(`    ${what} has a driver: ${dd.name} ${dd.gl}`)
+  }
+  { const rice = driverOf(computeMeal([{ foodId: 'seed:rice-white', grams: 158 }, { foodId: 'seed:chicken', grams: 113 }]).items); if (!rice || !/rice/i.test(rice.name)) brandedMisses.push(`    the driver of rice and chicken is ${rice?.name}`) }
 }
 {
   // The last-resort answer is written from tool results alone, and once said "it fits" with a load of
@@ -1348,6 +1353,32 @@ hangMisses.forEach((m) => console.log(m))
       ['servings and a quantity', { foodId: 'x', servings: 1, quantity: { count: 1, unit: 'g' } }], ['grams, servings and the same quantity', { foodId: 'x', grams: 450, servings: 1, quantity: { count: 450, unit: 'g' } }]] as [string, { foodId: string }][]) {
       if (settleAmount(it) === null) miss(`${label} was accepted`) }
     for (const it of [{ foodId: 'x', grams: 100 }, { foodId: 'x', quantity: { count: 1, unit: 'cup' } }, { foodId: 'x' }]) if (settleAmount(it) !== null) miss(`${JSON.stringify(it)} was refused`) }
+  // The editor shows the grams the way the receipt does: 113.4 is counted and shown as 113; under 10 g a decimal stays.
+  for (const [g, want] of [[113.4, 113], [126, 126], [9.96, 10], [4.5, 4.5], [0.3, 0.3], [10, 10], [450, 450], [28.3495, 28]] as [number, number][]) if (gramsShown(g) !== want) miss(`gramsShown(${g}) was ${gramsShown(g)}, wanted ${want}`)
+  // "An avocado" is one fruit, not the usual portion (screenshot of 19 November: 75 g, said as "1/2 cup"). The agent is told which units a food
+  // has, so it can send `whole`; the engine weighs it from USDA's own row and says the food's own word, never "1 fruit" and never ounces.
+  { const R = (id: string) => loadFoods().byId.get(id)!
+    const said = (id: string, q: Quantity, units: 'imperial' | 'metric' = 'imperial') => { const rec = R(id); const g = gramsFor(rec, q); return 'grams' in g && g.grams !== undefined ? { g: g.grams, basis: g.basis, text: saidText({ grams: g.grams, basis: g.basis, quantity: q, row: g.row, rec, units }) } : null }
+    for (const [what, got, want] of [
+      ['an avocado (whole)', said('seed:avocado', { count: 1, unit: 'whole' }), { g: 150, text: '1 avocado (150 g)', basis: 'typical' }],
+      ['half an avocado', said('seed:avocado', { count: 0.5, unit: 'whole' }), { g: 75, text: '1/2 avocado (75 g)', basis: 'typical' }],
+      ['a banana (whole)', said('seed:banana', { count: 1, unit: 'whole' }), { g: 126, text: '1 banana (126 g)', basis: 'typical' }],
+      ['two bananas', said('seed:banana', { count: 2, unit: 'whole' }), { g: 252, text: '2 bananas (252 g)', basis: 'typical' }],
+      ['a banana, usual portion', said('seed:banana', { count: 1, unit: 'default' }), { g: 126, text: '1 banana (126 g)', basis: 'default' }],
+      ['an apple (whole)', said('ing:apple', { count: 1, unit: 'whole' }), { g: 200, text: '1 medium (200 g)', basis: 'usda_measure' }],
+      ['a banana on a metric session', said('seed:banana', { count: 1, unit: 'whole' }, 'metric'), { g: 126, text: '126 g', basis: 'typical' }],
+    ] as [string, { g: number; basis: string; text: string } | null, { g: number; basis: string; text: string }][]) {
+      if (!got || got.g !== want.g || got.text !== want.text || got.basis !== want.basis) miss(`${what} was ${JSON.stringify(got)}, wanted ${JSON.stringify(want)}`)
+    }
+    if (/\boz\b|fruit/.test(said('seed:banana', { count: 1, unit: 'default' })?.text ?? '') || /\bfruit\b/.test(said('seed:avocado', { count: 1, unit: 'whole' })?.text ?? '')) miss('a banana or an avocado was said in ounces or as "1 fruit"')
+    // The agent reads the units from resolve_foods: whole for a fruit, nothing extra for an egg's weights, none for a recipe.
+    const hasWhole = (id: string) => householdUnitsFor(R(id)).units?.includes('whole') === true
+    if (!hasWhole('seed:avocado') || !hasWhole('seed:banana') || !hasWhole('ing:apple')) miss('a fruit does not list `whole` among its units')
+    if (hasWhole('seed:egg')) miss('an egg lists `whole`: "an egg" would be weighed as a fruit')
+    const recipe = loadFoods().records.find((r) => r.kind === 'recipe')!
+    if ('units' in householdUnitsFor(recipe)) miss('a recipe lists household units')
+    const res = await resolvePhrases(store, ['avocado'], 5)
+    if (!res[0]?.candidates[0]?.units?.includes('whole')) miss(`resolve_foods did not return the units for "avocado": ${JSON.stringify(res[0]?.candidates[0]?.units)}`) }
   // All or nothing: one item that cannot be weighed stops the whole meal, so a partial meal is never presented as whole.
   const mixed = planQuantities([{ foodId: 'ing:white_rice', quantity: { count: 1, unit: 'cup' } }, { foodId: 'ing:egg', quantity: { count: 1, unit: 'cup' } }])
   if (mixed.needs.length !== 1 || mixed.needs[0].foodId !== 'ing:egg' || !mixed.needs[0].units.includes('oz') || mixed.needs[0].why !== 'no USDA household measure for this food in cup') miss(`a meal with one unweighable item: ${JSON.stringify(mixed.needs)}`)

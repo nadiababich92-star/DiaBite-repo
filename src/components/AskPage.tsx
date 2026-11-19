@@ -9,7 +9,7 @@ import { nextStep, type TourStep } from '../lib/tour'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type Milestone } from '../lib/nudge'
 import { askAgent, avoidOf, budgetOf, engineId, lastMealCall, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type CarbLimitResult, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
 import { FigurePair, type CarbFigures } from './FigurePair'
-import { measureLabel, nudgeMeasure, ouncesText } from '../lib/measure'
+import { gramsShown, measureLabel, nudgeMeasure, ouncesText } from '../lib/measure'
 import { dayLabel, eaten, mealForNow, noLoadNote, portionText, viewEntry } from '../lib/diary'
 import { swapNamedIn, type SwapOffer } from '../lib/swap'
 import { MEAL_LABELS } from '../lib/menu'
@@ -197,6 +197,8 @@ function PortionEditor({ lines, grams, units, busy, error, onNudge, assumed, rem
           // No measure for this food: the weight in ounces, beside the grams (US units only; the grams are what is counted).
           const oz = units === 'imperial' && !l.servings && !said ? ouncesText(value) : null
           const gone = removed.includes(i)
+          // The same rounding as the receipt ("113 g"): the engine's 113.4 is counted, not shown.
+          const shown = l.servings ? value : gramsShown(value)
           return (
             <li key={`${l.foodId}-${i}`} className={gone ? 'removed' : undefined}>
               <span className="portion-name">
@@ -209,7 +211,7 @@ function PortionEditor({ lines, grams, units, busy, error, onNudge, assumed, rem
               ) : (
                 <span className="stepper">
                   <button className="step" aria-label={`Less ${l.name}`} onClick={() => onNudge(i, -1)}>−</button>
-                  <span className="step-v" aria-live="polite">{said ? `${said} · ${value} ${unit}` : oz ? `${oz} · ${value} ${unit}` : `${value} ${unit}`}</span>
+                  <span className="step-v" aria-live="polite">{said ? `${said} · ${shown} ${unit}` : oz ? `${oz} · ${shown} ${unit}` : `${shown} ${unit}`}</span>
                   <button className="step" aria-label={`More ${l.name}`} onClick={() => onNudge(i, 1)}>+</button>
                   {assumed && <button className="step remove-step" aria-label={`Remove ${l.name}`} onClick={() => onRemove(i)}>×</button>}
                 </span>

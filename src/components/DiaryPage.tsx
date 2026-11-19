@@ -256,11 +256,15 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
           <div className="recent" style={{ marginTop: sourceMeals.length > 0 ? 16 : 0 }}>
             <span className="label">Again, to {MEAL_LABELS[meal].toLowerCase()}</span>
             <div className="chips">
-              {recent.map((e) => (
-                <button key={e.id} className="chip-toggle" onClick={() => again(e)}>
-                  {viewEntry(e).name} <em>{viewEntry(e).portion}</em>
-                </button>
-              ))}
+              {recent.map((e) => {
+                const v = viewEntry(e)
+                // The same words as the entry itself ("1 cup (158 g)"), not grams alone.
+                return (
+                  <button key={e.id} className="chip-toggle" onClick={() => again(e)}>
+                    {v.name} <em>{portionText(v.portion, v.measure, units, v.grams, v.said)}</em>
+                  </button>
+                )
+              })}
             </div>
           </div>
         )}

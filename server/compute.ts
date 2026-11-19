@@ -333,10 +333,14 @@ export function excludedIn(items: { foodId: string; name: string }[], avoid?: Av
   return items.filter((it) => { const rec = byId.get(it.foodId); return !!rec && isAvoided(rec, only) }).map((it) => ({ foodId: it.foodId, name: it.name }))
 }
 
-/** The scored item with the largest load; none when no item has one (a meal of branded products). */
+/** Below this a food is not "driving" anything: a chicken breast (load 0) or half an avocado (0.2) drives no load (owner's decision, 19 November). */
+export const DRIVER_MIN_GL = 5
+
+/** The scored item with the largest load, when that load is at least DRIVER_MIN_GL; none when no item has one (branded products) or none is notable. */
 export function driverOf(items: MealItemResult[]): { foodId: string; name: string; gl: number } | undefined {
   const scored = items.filter((it) => it.gl !== null)
   if (!scored.length) return undefined
   const top = scored.reduce((a, b) => ((b.gl ?? 0) > (a.gl ?? 0) ? b : a))
+  if ((top.gl as number) < DRIVER_MIN_GL) return undefined
   return { foodId: top.foodId, name: top.name, gl: top.gl as number }
 }

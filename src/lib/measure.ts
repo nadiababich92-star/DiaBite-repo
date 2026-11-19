@@ -64,6 +64,9 @@ const GRAMS_PER_POUND = 453.592
  * the engine's grams, the way feet and inches restate centimetres: the grams stay beside it and are what is counted. One decimal under
  * ten ounces ("1.9 oz"), whole ounces after that, pounds from two (32 oz). Under 10 g it is null: a pinch of spice is not a number of ounces.
  */
+/** Grams as a person reads them: whole grams from 10 g up, one decimal below ("113.4" is shown as "113", "4.5" stays). The count itself is never rounded. */
+export const gramsShown = (g: number): number => (g >= 10 ? Math.round(g) : Math.round(g * 10) / 10)
+
 export function ouncesText(grams: number): string | null {
   if (!(grams >= 10)) return null
   const oz = grams / GRAMS_PER_OUNCE
