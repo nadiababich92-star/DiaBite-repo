@@ -49,7 +49,7 @@ def read_portion(label, grams, record_name):
     low = rest.lower()
     def qual(r):
         r = r.strip().lower()
-        r = re.sub(r'\((?:8 fl oz|nfs)\)', ' ', r)
+        r = re.sub(r'\((?:8 fl oz|nfs|yield after cooking)\)', ' ', r)
         r = re.sub(r'^,?\s*nfs\b', ' ', r)
         r = re.sub(r'^,\s*', ' ', r)
         if re.search(r'\(1 nlea serving\)', r): return 'nlea'
@@ -59,10 +59,19 @@ def read_portion(label, grams, record_name):
         return not ((u == 'oz' and not 27 <= grams <= 29.5) or (u == 'fl oz' and not 26 <= grams <= 34))
     mm = SLICE_RE.match(low)
     if mm: return ('slice', qual(mm.group(2)))
+    # as in server/foods.ts readPortion (19 November): a bacon slice, a pizza piece, a fast food order size
+    mm = re.match(r'^(small|medium|large|thin|thick)(?: or \w+)? slice\b(.*)$', low)
+    if mm: return ('slice', qual(mm.group(2)))
+    mm = re.match(r'^piece,? (small|medium|large) pizza\b(.*)$', low)
+    if mm: return ('slice', qual(mm.group(2)))
+    mm = re.match(r"^(small|medium|large|kid'?s?) (?:fast food )?(?:order|serving)\b(.*)$", low)
+    if mm and re.search(r'fast food|order', low): return ('small' if mm.group(1).startswith('kid') else mm.group(1), qual(mm.group(2)))
     mm = UNIT_RE.match(low)
     if mm:
         u = {'tablespoon': 'tbsp', 'teaspoon': 'tsp'}.get(mm.group(1), mm.group(1))
-        return (u, qual(mm.group(2))) if plausible(u) else None
+        q = qual(mm.group(2))
+        if q == 'cooked' and re.search(r'\bcooked\b', record_name, re.I): q = ''   # as in server/foods.ts readPortion
+        return (u, q) if plausible(u) else None
     mm = re.match(r'^(\w+)$', low)
     if mm and grams <= 600 and (mm.group(1) in WHOLE_WORDS or stem(mm.group(1)) in {stem(w) for w in re.split(r'[^a-z]+', record_name.lower()) if w}):
         return ('whole', '')

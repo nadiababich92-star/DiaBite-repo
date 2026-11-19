@@ -9,7 +9,7 @@ applied,ing:arugula,Arugula,curated ingredient,veg,169387,"Arugula, raw",sr_lega
 applied,ing:asparagus,Asparagus,curated ingredient,veg,2709767,"Asparagus, raw (USDA FNDDS, foods as eaten)",survey_fndds,0.011,1.0,,,,,1 cup 135 g; 1 piece 4 g,"rule: distance<=0.25, overlap>=0.6, no modifier of another food",20,3.9,2.2,0.1
 applied,ing:avocado,Avocado,curated ingredient,veg,2709223,"Avocado, raw (USDA FNDDS, foods as eaten)",survey_fndds,0.026,1.0,,yes,2709223,,1 fruit 150 g; 1 cup 150 g; 1 slice 15 g,"owner, 2026-11-18",160,8.5,2,15
 applied,ing:avocado_oil,Avocado oil,curated ingredient,fat,173573,"Oil, avocado",sr_legacy,0.0,1.0,,,,,tbsp 14 g; cup 218 g; tsp 4.5 g,rule: distance <= 0.10 and name overlap >= 0.6,884,0,0,100
-applied,ing:bacon,Bacon,curated ingredient,protein,167712,"Pork, cured, bacon, cooked, broiled, pan-fried or roasted, reduced sodium",sr_legacy,0.012,1.0,,,,,oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,541,1.4,37,42
+candidate,ing:bacon,Bacon,curated ingredient,protein,167712,"Pork, cured, bacon, cooked, broiled, pan-fried or roasted, reduced sodium",sr_legacy,0.012,1.0,,yes,2705885,,oz 85 g,rule: distance <= 0.10 and name overlap >= 0.6,541,1.4,37,42
 applied,ing:baking_powder,Baking powder,curated ingredient,pantry,172803,"Leavening agents, baking powder, double-acting, sodium aluminum sulfate",sr_legacy,0.011,1.0,,,,,tsp 4.6 g; tsp 2.3 g,rule: distance <= 0.10 and name overlap >= 0.6,53,28,0,0
 applied,ing:baking_soda,Baking soda,curated ingredient,pantry,175040,"Leavening agents, baking soda",sr_legacy,0.0,1.0,,,,,tsp 4.6 g; tsp 2.3 g,rule: distance <= 0.10 and name overlap >= 0.6,0,0,0,0
 applied,ing:balsamic_vinegar,Balsamic vinegar,curated ingredient,condiment,172241,"Vinegar, balsamic",sr_legacy,0.005,1.0,,,,,tbsp 16 g; cup 255 g; tsp 5.3 g,rule: distance <= 0.10 and name overlap >= 0.6,88,17,0.5,0
@@ -388,9 +388,9 @@ candidate,ing:walnuts,Walnuts,curated ingredient,nut,170594,"Nuts, walnuts, dry 
 candidate,ing:water,Water / ice,curated ingredient,drink,2710539,"Water, carbonated, plain",survey_fndds,0.0,0.5,,,,,1 fl oz 30 g,,0,0,0,0
 candidate,ing:water_chestnuts,"Water chestnuts, canned",curated ingredient,veg,173022,"Figs, canned, water pack, solids and liquids",sr_legacy,0.393,0.67,,,,,cup 248 g,,50,12,0.9,0.1
 candidate,ing:whey_protein,"Whey protein powder, unsweetened",curated ingredient,supplement,173180,"Beverages, Protein powder whey based",sr_legacy,0.982,0.75,,,,,cup 32 g,,380,8,78,5
-candidate,ing:white_pasta,"White pasta, cooked al dente",curated ingredient,grain,168900,"Pasta, gluten-free, corn, cooked",sr_legacy,0.895,0.4,,,,,cup 140 g,,157,30.7,5.76,0.92
+candidate,ing:white_pasta,"White pasta, cooked al dente",curated ingredient,grain,168900,"Pasta, gluten-free, corn, cooked",sr_legacy,0.895,0.4,,yes,2708357,,cup 140 g,,157,30.7,5.76,0.92
 candidate,ing:whole_grain_crackers,Whole grain seed crackers,curated ingredient,grain,172749,"Crackers, whole-wheat",sr_legacy,0.138,0.5,,,,,cracker 4.6 g,,420,66,10,14
-candidate,ing:whole_wheat_pasta,"Whole wheat pasta, cooked al dente",curated ingredient,grain,171668,"Cereals, whole wheat hot natural cereal, cooked with water, without salt",sr_legacy,1.639,0.5,,,,,cup 242 g; cup 182 g,,124,26.5,5.3,0.5
+candidate,ing:whole_wheat_pasta,"Whole wheat pasta, cooked al dente",curated ingredient,grain,171668,"Cereals, whole wheat hot natural cereal, cooked with water, without salt",sr_legacy,1.639,0.5,,yes,2708358,,cup 242 g; cup 182 g,,124,26.5,5.3,0.5
 candidate,ing:whole_wheat_pita,Whole wheat pita,curated ingredient,grain,2707735,"Bagel, whole wheat, with raisins",survey_fndds,0.546,0.67,,,,,1 large 131 g; 1 regular 105 g,,266,55,10,2.6
 candidate,ing:yellow_mustard,Yellow mustard,curated ingredient,condiment,2710085,Mustard,survey_fndds,0.399,0.5,,,,,1 tablespoon 15 g,,60,5,4,3
 candidate,ing:onion,Yellow onion,curated ingredient,veg,2710010,"Peppers and onions, cooked, no added fat",survey_fndds,0.194,0.5,,,,,1 cup 140 g,,40,9.3,1.1,0.1
@@ -400,7 +400,7 @@ candidate,seed:carrot-raw,"Carrot, raw",everyday food,vegetables,2709683,"Carrot
 candidate,seed:chicken,Chicken breast,everyday food,protein,2705956,"Chicken breast, baked, broiled, or roasted, skin not eaten, from raw",survey_fndds,0.072,1.0,,,,,1 large or thick slice 85 g,,165.0,0.0,31.0,3.6
 candidate,seed:cottage,"Cottage cheese, 5%",everyday food,dairy,2706812,"Chicken or turkey garden salad with bacon and cheese, chicken and/or turkey, bacon, cheese, lettuce and/or greens, tomato and/or carrots, other vegetables, no dressing",survey_fndds,0.602,0.5,,,,,1 salad 321 g; 1 cup 90 g,,121.0,3.0,17.0,5.0
 candidate,seed:couscous,"Couscous, cooked",everyday food,grains,168897,"Wild rice, cooked",sr_legacy,0.267,0.5,,,,,cup 164 g,,112.0,23.0,3.8,0.2
-candidate,seed:pasta-durum,"Durum wheat pasta, al dente",everyday food,grains,169721,"Wheat, durum",sr_legacy,4.322,0.4,,,,,cup 192 g,,158.0,31.0,5.8,0.9
+candidate,seed:pasta-durum,"Durum wheat pasta, al dente",everyday food,grains,169721,"Wheat, durum",sr_legacy,4.322,0.4,,yes,2708357,,cup 192 g,,158.0,31.0,5.8,0.9
 candidate,seed:flax,Flaxseed,everyday food,nuts,171442,"Oil, flaxseed, contains added sliced flaxseed",sr_legacy,3.968,1.0,,,,,tablespoon 13.7 g; cup 219 g,,534.0,29.0,18.0,42.0
 candidate,seed:greekyogurt,"Greek yogurt, 2%",everyday food,dairy,2705421,"Yogurt, Greek, NS as to type of milk, plain",survey_fndds,0.376,1.0,,,,,1 cup 245 g,,73.0,3.9,10.0,2.0
 candidate,seed:greenbeans,Green beans,everyday food,vegetables,169962,"Beans, snap, green, frozen, all styles, unprepared (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.167,1.0,,,,,cup 121 g,,31.0,7.0,1.8,0.1
@@ -419,7 +419,7 @@ candidate,seed:raspberry,Raspberries,everyday food,fruits,2709281,"Raspberries, 
 candidate,seed:bread-sprout,Sprouted grain bread,everyday food,grains,2707706,"Bread, whole grain white",survey_fndds,0.549,0.67,,,,,1 small or thin/very thin slice 24 g; 1 large or thick slice 43 g,,230.0,40.0,11.0,3.5
 candidate,seed:turkey,Turkey breast,everyday food,protein,2706105,"Turkey, light meat, skin not eaten",survey_fndds,0.156,0.5,,,,,1 large or thick slice 85 g,,135.0,0.0,29.0,1.7
 candidate,seed:walnuts,Walnuts,everyday food,nuts,170594,"Nuts, walnuts, dry roasted, with salt added",sr_legacy,0.406,1.0,,,,,oz 28 g,,654.0,14.0,15.0,65.0
-candidate,seed:pasta-whole,Whole wheat pasta,everyday food,grains,2708901,"Pasta, whole grain, with tomato-based sauce, seafood, and added vegetables, home recipe",survey_fndds,0.84,0.67,,,,,1 cup 250 g,,149.0,30.0,6.0,1.1
+candidate,seed:pasta-whole,Whole wheat pasta,everyday food,grains,2708901,"Pasta, whole grain, with tomato-based sauce, seafood, and added vegetables, home recipe",survey_fndds,0.84,0.67,,yes,2708358,,1 cup 250 g,,149.0,30.0,6.0,1.1
 none,ing:banana,Banana (small amount),curated ingredient,fruit,,,,,,,,,,,,89,23,1.1,0.3
 none,ing:bok_choy,Bok choy,curated ingredient,veg,,,,,,,,,,,,13,2.2,1.5,0.2
 none,ing:broccolini,Broccolini,curated ingredient,veg,,,,,,,,,,,,35,6.5,3,0.5

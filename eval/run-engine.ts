@@ -23,7 +23,7 @@
 import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import { carbsWithoutLoad, loadFoods } from '../server/foods'
+import { SPOONFUL, carbsWithoutLoad, loadFoods } from '../server/foods'
 import { embed, loadOrBuildIndex, openStore, type VectorStore } from '../server/embeddings'
 import { readTextHashes, staleIds } from '../server/index-hash'
 import { tmpdir } from 'node:os'
@@ -1395,7 +1395,27 @@ hangMisses.forEach((m) => console.log(m))
       if (!got || got.g !== want.g || got.text !== want.text || got.basis !== want.basis) miss(`${what} was ${JSON.stringify(got)}, wanted ${JSON.stringify(want)}`)
     }
     if (/\boz\b|fruit/.test(said('seed:banana', { count: 1, unit: 'default' })?.text ?? '') || /\bfruit\b/.test(said('seed:avocado', { count: 1, unit: 'whole' })?.text ?? '')) miss('a banana or an avocado was said in ounces or as "1 fruit"')
-    // The agent reads the units from resolve_foods: whole for a fruit, nothing extra for an egg's weights, none for a recipe.
+    // A count multiplies the usual portion only when the usual portion is one item (100-dish test: ten nuggets were 1,400 g, two strips of bacon 200 g).
+  { const R = (id: string) => loadFoods().byId.get(id)!
+    const asks = (id: string, q: Quantity) => 'needs' in gramsFor(R(id), q)
+    for (const [id, n] of [['usda:2706092', 10], ['usda:2705885', 2], ['ing:bacon', 2], ['usda:2708132', 5], ['ing:chicken_sausage', 2], ['branded:2529927', 3]] as [string, number][]) if (!asks(id, { count: n, unit: 'default' })) miss(`${n} x the usual portion of ${id} was costed: it is not one item`)
+    for (const [id, n, g] of [['seed:egg', 2, 100], ['ing:apple', 2, 400], ['seed:banana', 3, 378]] as [string, number, number][]) { const r = gramsFor(R(id), { count: n, unit: 'default' }); if (!('grams' in r) || r.grams !== g) miss(`${n} x the usual portion of ${id} (one item) was ${JSON.stringify(r)}, wanted ${g} g`) }
+    const said2 = (id: string, q: Quantity) => { const rec = R(id); const g = gramsFor(rec, q); return 'grams' in g && g.grams !== undefined ? `${g.grams} g | ${saidText({ grams: g.grams, basis: g.basis, quantity: q, row: g.row, rec, units: 'imperial' })}` : JSON.stringify(g) }
+    for (const [what, got, want] of [
+      ['ten nuggets', said2('usda:2706092', { count: 10, unit: 'whole' }), '160 g | 10 nuggets (160 g)'],
+      ['five crackers', said2('usda:2708146', { count: 5, unit: 'whole' }), '15 g | 5 crackers (15 g)'],
+      ['two strips of bacon', said2('usda:2705885', { count: 2, unit: 'slice' }), '16 g | 2 slices (16 g)'],
+      ['two strips of bacon (the curated Bacon)', said2('ing:bacon', { count: 2, unit: 'slice' }), '16 g | 2 slices (16 g)'],
+      ['two slices of pizza', said2('usda:2708614', { count: 2, unit: 'slice' }), '172 g | 2 slices (172 g)'],
+      ['a slice of thin crust pizza', said2('usda:2708615', { count: 1, unit: 'slice' }), '63 g | 1 slice (63 g)'],
+      ['a cup of spaghetti', said2('ing:white_pasta', { count: 1, unit: 'cup' }), '140 g | 1 cup (140 g)'],
+      ['two cups of spaghetti', said2('ing:white_pasta', { count: 2, unit: 'cup' }), '280 g | 2 cups (280 g)'],
+      ['a cup of whole wheat pasta', said2('ing:whole_wheat_pasta', { count: 1, unit: 'cup' }), '140 g | 1 cup (140 g)'],
+      ['a medium fries', said2('usda:2709462', { count: 1, unit: 'medium' }), '145 g | 1 medium (145 g)'],
+      ['a large fries', said2('usda:2709462', { count: 1, unit: 'large' }), '180 g | 1 large (180 g)'],
+      ['three cookies', said2('usda:2707899', { count: 3, unit: 'whole' }), '90 g | 3 medium (90 g)'],
+    ] as [string, string, string][]) if (got !== want) miss(`${what} was "${got}", wanted "${want}"`) }
+  // The agent reads the units from resolve_foods: whole for a fruit, nothing extra for an egg's weights, none for a recipe.
     const hasWhole = (id: string) => householdUnitsFor(R(id)).units?.includes('whole') === true
     if (!hasWhole('seed:avocado') || !hasWhole('seed:banana') || !hasWhole('ing:apple')) miss('a fruit does not list `whole` among its units')
     if (hasWhole('seed:egg')) miss('an egg lists `whole`: "an egg" would be weighed as a fruit')
@@ -1407,7 +1427,7 @@ hangMisses.forEach((m) => console.log(m))
   const mixed = planQuantities([{ foodId: 'ing:white_rice', quantity: { count: 1, unit: 'cup' } }, { foodId: 'ing:egg', quantity: { count: 1, unit: 'cup' } }])
   if (mixed.needs.length !== 1 || mixed.needs[0].foodId !== 'ing:egg' || !mixed.needs[0].units.includes('oz') || mixed.needs[0].why !== 'no USDA household measure for this food in cup') miss(`a meal with one unweighable item: ${JSON.stringify(mixed.needs)}`)
   const hintI = needsWeightHint('Egg', 'imperial'), hintM = needsWeightHint('Egg', 'metric'), hintN = needsWeightHint('Egg', undefined)
-  if (!hintI.includes('"About how many ounces or cups of Egg?"') || !hintM.includes('"About how many grams of Egg?"') || hintN !== hintM) miss(`the question in the session's units: ${hintI} | ${hintM} | ${hintN}`)
+  if (hintI !== 'About how many ounces or cups of Egg?' || hintM !== 'About how many grams of Egg?' || hintN !== hintM || /estimate|ask the person/i.test(hintI + hintM)) miss(`the question in the session's units: ${hintI} | ${hintM} | ${hintN}`)
   if (!weightQuestion('imperial').includes('About how many ounces or cups of <food>?') || !weightQuestion('metric').includes('About how many grams of <food>?') || weightQuestion(undefined) !== weightQuestion('metric')) miss('the weight question resolve_foods carries is not the owner\'s wording in the session\'s units')
   // The reply says the weight in the session's units, from the engine.
   const plan = planQuantities([{ foodId: 'ing:white_rice', quantity: { count: 1, unit: 'cup' } }, { foodId: 'ing:white_bread', grams: 29 }])
@@ -1440,7 +1460,13 @@ hangMisses.forEach((m) => console.log(m))
     if ('needs' in via) dMisses.push(`    ${c.foodId}: ${c.quantity!.count} ${c.quantity!.unit} is "${via.needs}", the default has no household measure`)
     else if (via.grams !== undefined && Math.abs(via.grams - rec.defaultPortion) / rec.defaultPortion > 0.03) dMisses.push(`    ${c.foodId}: ${c.quantity!.count} ${c.quantity!.unit} is ${via.grams} g, the default is ${rec.defaultPortion} g`)
   }
-  const drifted = Object.entries(baseline).filter(([id, g]) => !listed.has(id) && getRecord(id).defaultPortion !== g)
+  // The one deliberate exception, decided on 19 November after the 100-dish test: what is put on or in something (sugar, cream, butter, a dressing) is
+  // said by the spoonful. Those records may differ from the baseline, and every one of them must now be a spoonful (40 g or less).
+  const spoon = (id: string) => SPOONFUL.test(getRecord(id).name) && getRecord(id).kind !== 'recipe'
+  const spoonTooBig = Object.keys(baseline).filter((id) => spoon(id) && id.startsWith('usda:') && getRecord(id).defaultPortion > 40 && (getRecord(id).portions ?? []).some((p) => /^1 (tablespoon|teaspoon|fl oz)|^guideline amount (on regular|per sandwich)/i.test(p.label)))
+  if (spoonTooBig.length) dMisses.push(`    ${spoonTooBig.length} spoonful foods still default to more than a spoonful, e.g. ${spoonTooBig[0]} ${getRecord(spoonTooBig[0]).defaultPortion} g`)
+  for (const [id, want] of [['usda:2710260', 13.8], ['usda:2710212', 15], ['usda:2705594', 15], ['usda:2710155', 14], ['usda:2705614', 15]] as [string, number][]) if (getRecord(id).defaultPortion !== want) dMisses.push(`    ${id} defaults to ${getRecord(id).defaultPortion} g, wanted the spoonful ${want} g`)
+  const drifted = Object.entries(baseline).filter(([id, g]) => !listed.has(id) && getRecord(id).defaultPortion !== g && !spoon(id))
   if (drifted.length) dMisses.push(`    ${drifted.length} records off the list changed their default, e.g. ${drifted.slice(0, 3).map(([id, g]) => `${id} ${g} -> ${getRecord(id).defaultPortion}`).join(', ')}`)
   console.log(`\ndefaults  ${dMisses.length === 0 ? 'ok' : 'WRONG'}  (${cases.engine.defaults.length} foods on the list)`)
   dMisses.forEach((m) => console.log(m))

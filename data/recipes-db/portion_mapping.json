@@ -128,16 +128,6 @@
     }
    ]
   },
-  "ing:bacon": {
-   "fdc_id": "167712",
-   "usda_name": "Pork, cured, bacon, cooked, broiled, pan-fried or roasted, reduced sodium",
-   "measures": [
-    {
-     "label": "oz",
-     "grams": 85.0
-    }
-   ]
-  },
   "ing:ham": {
    "fdc_id": "167871",
    "usda_name": "Pork, cured, ham, boneless, extra lean (approximately 5% fat), roasted",
@@ -3107,6 +3097,65 @@
     }
    ],
    "accepted_by": "owner, 2026-11-18"
+  },
+  "ing:white_pasta": {
+   "fdc_id": "2708357",
+   "usda_name": "Pasta, cooked (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup, cooked",
+     "grams": 140.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-19"
+  },
+  "ing:whole_wheat_pasta": {
+   "fdc_id": "2708358",
+   "usda_name": "Pasta, whole grain, cooked (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup, cooked",
+     "grams": 140.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-19"
+  },
+  "seed:pasta-durum": {
+   "fdc_id": "2708357",
+   "usda_name": "Pasta, cooked (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup, cooked",
+     "grams": 140.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-19"
+  },
+  "seed:pasta-whole": {
+   "fdc_id": "2708358",
+   "usda_name": "Pasta, whole grain, cooked (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup, cooked",
+     "grams": 140.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-19"
+  },
+  "ing:bacon": {
+   "fdc_id": "2705885",
+   "usda_name": "Bacon, NS as to type of meat, cooked (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 medium slice (yield after cooking)",
+     "grams": 8.0
+    },
+    {
+     "label": "1 thin slice (yield after cooking)",
+     "grams": 5.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-19"
   }
  }
 }

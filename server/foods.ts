@@ -312,6 +312,9 @@ interface UsdaRow {
 /** Sweets are eaten by the piece or the pouch, never by the cup, and a piece can weigh 2 g. */
 const CONFECTIONERY = /^(candy|chewing gum|gum\b|lollipop|marshmallow|jelly bean)/i
 
+/** Foods said by the spoonful when nothing else is said: sweeteners, creams and creamers, butters and fats, sour cream, cream cheese, dressings. */
+export const SPOONFUL = /^(sugar\b(?!, (cane|beet)\b)|brown sugar|cream\b(?! of\b)|half and half|coffee creamer|creamer|whipped (cream|topping)|butter\b(?!milk|scotch|fly)|margarine|ghee|lard\b|shortening|sour cream|cream cheese|ranch|italian dressing|caesar dressing|thousand island|blue cheese dressing|french dressing|honey mustard|[a-z' -]*\bdressing\b(?!, bread))/i
+
 /** The portion a person would say, not the one a lab would weigh. */
 export function householdPortion(rows: { label: string; grams: number }[] | undefined, name = ''): number {
   if (CONFECTIONERY.test(name)) {
@@ -343,6 +346,17 @@ export function householdPortion(rows: { label: string; grams: number }[] | unde
   if (/^(barbecue sauce|ketchup|catsup|mayonnaise|salad dressing|tartar sauce|salsa|soy sauce|cheese sauce|syrup|honey|jelly|jam\b|preserves|mustard$)/i.test(name)) {
     const spoon = (rows ?? []).find((p) => /^guideline amount (on regular|per sandwich)|^1 tablespoon/i.test(p.label))
     if (spoon) return Math.round(spoon.grams)
+  }
+  // The same for what is put on or in something: sugar in coffee, cream, butter, sour cream, a dressing. USDA lists a cup first (butter 224 g, sugar
+  // 200 g, cream 240 g), and "oatmeal with brown sugar" and "coffee with cream" were costed with the cup (100-dish test, 19 November). The portion is a
+  // tablespoon, from the table's own tablespoon, guideline amount or teaspoon (three to the tablespoon) or fluid ounce (two).
+  if (SPOONFUL.test(name)) {
+    const r = rows ?? []
+    const tbsp = r.find((p) => /^1 tablespoon|^guideline amount (on regular|per sandwich)/i.test(p.label))
+    const tsp = r.find((p) => /^1 teaspoon/i.test(p.label))
+    const floz = r.find((p) => /^1 fl oz/i.test(p.label))
+    const g = tbsp?.grams ?? (tsp ? tsp.grams * 3 : floz ? floz.grams / 2 : undefined)
+    if (g && g >= 1) return Math.round(g * 10) / 10
   }
   if (/^gravy\b/i.test(name)) {
     const cup = (rows ?? []).find((p) => /^1 cup/i.test(p.label))
@@ -427,7 +441,7 @@ const stemWord = (w: string) => w.toLowerCase().replace(/ies$/, 'y').replace(/s$
 /** The qualifier of a unit row: what follows the unit word, with the harmless parts ("(8 fl oz)", "nfs") removed. */
 function qualifierOf(rest: string): string {
   let r = rest.trim().toLowerCase()
-  r = r.replace(/\((?:8 fl oz|nfs)\)/g, ' ').replace(/^,?\s*nfs\b/, ' ').replace(/^,\s*/, ' ')
+  r = r.replace(/\((?:8 fl oz|nfs|yield after cooking)\)/g, ' ').replace(/^,?\s*nfs\b/, ' ').replace(/^,\s*/, ' ')
   if (/\(1 nlea serving\)/.test(r)) return 'nlea'
   if (/\((?:no|with) ice\)/.test(r)) return 'ice'
   r = r.replace(/[()]/g, ' ').replace(/\s+/g, ' ').trim()
@@ -447,10 +461,22 @@ export function readPortion(label: string, grams: number, recordName: string): P
   if ((m = /^(medium or regular|large or thick|small or thin\/very thin) slice\b(.*)$/.exec(low))) {
     return row('slice', 'slice', qualifierOf(m[2]), 'slice', m[1].startsWith('medium') ? 'medium' : m[1].startsWith('large') ? 'large' : 'small')
   }
+  // 19 November, from the 100-dish test: the natural American phrasings were left unread because USDA qualifies them.
+  // A slice of bacon: "1 medium slice (yield after cooking)", "1 thin slice". A slice of pizza: "1 piece, medium pizza". A size of fries: "1 medium fast food order".
+  if ((m = /^(small|medium|large|thin|thick)(?: or \w+)? slice\b(.*)$/.exec(low))) {
+    return row('slice', 'slice', qualifierOf(m[2]), 'slice', m[1] === 'thin' ? 'small' : m[1] === 'thick' ? 'large' : (m[1] as 'small' | 'medium' | 'large'))
+  }
+  if ((m = /^piece,? (small|medium|large) pizza\b(.*)$/.exec(low))) return row('slice', 'slice', qualifierOf(m[2]), 'slice', m[1] as 'small' | 'medium' | 'large')
+  if ((m = /^(small|medium|large|kid'?s?) (?:fast food )?(?:order|serving)\b(.*)$/.exec(low)) && /fast food|order/.test(low)) {
+    const size = m[1].startsWith('kid') ? 'small' : (m[1] as 'small' | 'medium' | 'large')
+    return row(size, size, qualifierOf(m[2]), size)
+  }
   if ((m = /^(cup|tablespoon|tbsp|teaspoon|tsp|fl oz|oz|lb|slice|piece|medium|small|large)\b(.*)$/.exec(low))) {
     const w = m[1]
     const unit = (w === 'tablespoon' ? 'tbsp' : w === 'teaspoon' ? 'tsp' : w) as PortionRow['unit']
-    return row(unit, w, qualifierOf(m[2]), w === 'tablespoon' ? 'tbsp' : w === 'teaspoon' ? 'tsp' : w)
+    // "1 cup, cooked" on a record that is itself cooked ("Pasta, cooked") is just the cup; on a dry record it would be another food's weight.
+    const q = qualifierOf(m[2])
+    return row(unit, w, q === 'cooked' && /\bcooked\b/i.test(recordName) ? '' : q, w === 'tablespoon' ? 'tbsp' : w === 'teaspoon' ? 'tsp' : w)
   }
   // "One of it": a "regular", a "fruit", or the food's own word ("1 banana"). Not a whole turkey breast (1,769 g) or a whole pineapple:
   // a "typical" item that weighs more than 600 g is a different kind of "whole", and no one means it by "a medium".

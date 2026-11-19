@@ -6885,6 +6885,282 @@
       "tags": [
         "us-measures"
       ]
+    },
+    {
+      "id": "US15",
+      "dimension": "helpful",
+      "query": "Ten chicken nuggets",
+      "ground_truth": "Ten nuggets are ten of the nugget's own USDA weight (16 g), not ten usual portions.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "usda:2706092",
+              "usda:2706093",
+              "usda:2706094",
+              "usda:2706095",
+              "usda:2706096",
+              "usda:2706097"
+            ],
+            "min": 140,
+            "max": 180
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US16",
+      "dimension": "helpful",
+      "query": "Two strips of bacon",
+      "ground_truth": "Two slices of bacon, USDA's 8 g each.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "ing:bacon",
+              "usda:2705885",
+              "usda:2705886",
+              "usda:2705890"
+            ],
+            "min": 12,
+            "max": 20
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US17",
+      "dimension": "helpful",
+      "query": "Two slices of cheese pizza",
+      "ground_truth": "Two slices at the table's own slice weight, not two whole pizzas.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "usda:2708614",
+              "usda:2708615",
+              "usda:2708616",
+              "usda:2708618",
+              "usda:2708626",
+              "usda:2708627",
+              "usda:2708628",
+              "usda:2708632",
+              "usda:2708633",
+              "usda:2708634",
+              "usda:2708687",
+              "usda:2708688",
+              "usda:2708691",
+              "usda:2708692",
+              "usda:2708693",
+              "usda:2708694",
+              "usda:2708698"
+            ],
+            "min": 110,
+            "max": 260
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US18",
+      "dimension": "helpful",
+      "query": "A medium fries",
+      "ground_truth": "A medium order of fries, USDA's 145 g, not a weight asked for.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "usda:2709462",
+              "usda:2709465",
+              "usda:2709468"
+            ],
+            "min": 100,
+            "max": 170
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US19",
+      "dimension": "helpful",
+      "query": "A cup of spaghetti",
+      "ground_truth": "A cup of cooked pasta, USDA's 140 g, and no question about ounces.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "ing:white_pasta",
+              "seed:pasta-durum"
+            ],
+            "min": 125,
+            "max": 155
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US20",
+      "dimension": "helpful",
+      "query": "Oatmeal with brown sugar",
+      "ground_truth": "The sugar is a spoonful, not a cup.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "usda:2710260"
+            ],
+            "min": 5,
+            "max": 20
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
+    },
+    {
+      "id": "US21",
+      "dimension": "helpful",
+      "query": "Coffee with cream",
+      "ground_truth": "The cream is a spoonful, not a cup.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "units": "imperial"
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "ing:heavy_cream",
+              "usda:2705592",
+              "usda:2705593",
+              "usda:2705594",
+              "usda:2705597"
+            ],
+            "min": 5,
+            "max": 30
+          }
+        ]
+      },
+      "judge": "rubric",
+      "tags": [
+        "us-measures"
+      ]
     }
   ]
 }

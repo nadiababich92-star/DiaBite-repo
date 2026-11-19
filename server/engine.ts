@@ -30,7 +30,7 @@ import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
 import { afterMealFor, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, scaleDish, withDayUnscored, withSaid } from './compute'
-import { needsWeightHint, quantityError, settleAmount, weightQuestion } from './quantity'
+import { NEEDS_WEIGHT_INSTRUCTION, needsWeightHint, quantityError, settleAmount, weightQuestion } from './quantity'
 import { verify } from './verify'
 import { claimSession, getSession, noteResolution, putSession } from './sessions'
 import { bindSession, unbindSession } from './bind'
@@ -424,7 +424,7 @@ async function main() {
       const units = body.sessionId ? getSession(body.sessionId)?.units : undefined
       const plan = planQuantities(body.items)
       // A measure that cannot honestly be turned into grams: nothing is costed and no number comes back, so the agent asks.
-      if (plan.needs.length > 0) return res.json({ needsWeight: plan.needs, hint: needsWeightHint(plan.needs[0].name, units) })
+      if (plan.needs.length > 0) return res.json({ needsWeight: plan.needs, hint: needsWeightHint(plan.needs[0].name, units), instruction: NEEDS_WEIGHT_INSTRUCTION })
       const costed = computeMeal(plan.items)
       const meal = { ...costed, items: withSaid(costed.items, plan, units) }
       const day = dayStateFor(body.sessionId)

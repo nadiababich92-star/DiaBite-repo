@@ -64,6 +64,12 @@ function plainRows(rec: FoodRecord): PortionRow[] {
   return (rec.portions ?? []).map((p) => readPortion(p.label, p.grams, rec.name)).filter((r): r is PortionRow => r !== null && r.qualifier === '')
 }
 
+/** The usual portion is one item when USDA lists an item of that very weight (an egg 50 g, a banana 126 g, a medium apple 200 g, a slice of bread). */
+function defaultIsOneItem(rec: FoodRecord): boolean {
+  if (rec.defaultPortion <= 0) return false
+  return plainRows(rec).some((r) => ['whole', 'medium', 'large', 'small', 'slice', 'piece'].includes(r.unit) && Math.abs(r.grams - rec.defaultPortion) / rec.defaultPortion <= 0.03)
+}
+
 const largest = (rows: PortionRow[]) => rows.reduce((a, b) => (b.grams > a.grams ? b : a))
 
 /** Which units this record can be said in: what `gramsFor` would accept for one of it. Always includes the exact weights. */
@@ -95,6 +101,9 @@ export function gramsFor(rec: FoodRecord, q: Quantity): Resolved {
   // 2. The food's own usual portion, times the count. A recipe is counted by serving.
   if (unit === 'default') {
     if (rec.kind === 'recipe') return { servings: count, basis: 'default' }
+    // "Ten chicken nuggets" was 1,400 g, ten times a 140 g cup of them, and "two strips of bacon" 200 g (100-dish test, 19 November). A count
+    // multiplies the usual portion only when that portion is one item; otherwise the engine does not guess what one of them weighs.
+    if (count > 1 && !defaultIsOneItem(rec)) return { needs: 'the usual portion of this food is a serving, not one item, so a count of them has no weight here' }
     return { grams: r1(rec.defaultPortion * count), basis: 'default' }
   }
   if (rec.kind === 'recipe') return { needs: 'a recipe is counted by serving' }
@@ -168,6 +177,7 @@ const rowWord = (row: PortionRow, rec: FoodRecord): string => (['fruit', 'item',
 
 const gramsText = (g: number) => `${g >= 10 ? Math.round(g) : Math.round(g * 10) / 10} g`
 const PLURAL = new Set(['cup', 'slice', 'piece'])
+const pluralWord = (w: string, n: number) => (n > 1 ? (w.endsWith(' slice') ? w + 's' : w) : w)
 
 export interface SaidInput {
   grams: number
@@ -194,16 +204,19 @@ export function saidText(i: SaidInput): string {
     return oz ? `${oz} (${g})` : g
   }
   // usda_measure or typical: the count said back, with the row's own word.
-  const word = i.row && i.row.unit === 'whole' ? rowWord(i.row, i.rec) : i.row && ['small', 'medium', 'large', 'slice', 'piece'].includes(i.row.unit) ? i.row.word : i.quantity.unit
-  const plural = i.quantity.count > 1 && (PLURAL.has(word) || word === foodWord(i.rec)) ? `${word}s` : word
+  const word = i.row && i.row.unit === 'whole' ? rowWord(i.row, i.rec) : i.row && ['small', 'medium', 'large', 'slice', 'piece'].includes(i.row.unit) ? (i.row.unit !== 'slice' && /\bslice\b/i.test(i.row.label) ? `${i.row.word} slice` : i.row.word) : i.quantity.unit
+  const itemWord = !!i.row && i.row.unit === 'whole' && !['regular', 'whole', 'medium', 'large', 'small'].includes(word)
+  const plural = i.quantity.count > 1 && (PLURAL.has(word) || itemWord) ? `${word}s` : pluralWord(word, i.quantity.count)
   return `${countText(i.quantity.count)} ${plural} (${g})`
 }
 
 /** The question the agent asks when nothing honest can be said, in the session's units (the owner's wording). */
 export function needsWeightHint(foodName: string, units: 'imperial' | 'metric' | undefined): string {
-  const q = units === 'imperial' ? `About how many ounces or cups of ${foodName}?` : `About how many grams of ${foodName}?`
-  return `ask the person exactly: "${q}" Do not estimate.`
+  // Only the question: a hint that carried "Do not estimate." was copied into an answer (100-dish test, 19 November).
+  return units === 'imperial' ? `About how many ounces or cups of ${foodName}?` : `About how many grams of ${foodName}?`
 }
+/** What the agent is told to do with that question; it travels beside the hint, never inside it. */
+export const NEEDS_WEIGHT_INSTRUCTION = 'Ask the person this one question, exactly as the hint gives it, and nothing else. Do not estimate a weight.'
 
 /** The same question with <food> left for the agent to fill: `resolve_foods` carries it, so the agent can ask before any weight is tried. */
 export const weightQuestion = (units: 'imperial' | 'metric' | undefined): string =>
