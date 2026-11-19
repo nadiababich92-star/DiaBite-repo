@@ -70,7 +70,7 @@ def read_portion(label, grams, record_name):
     if mm:
         u = {'tablespoon': 'tbsp', 'teaspoon': 'tsp'}.get(mm.group(1), mm.group(1))
         q = qual(mm.group(2))
-        if q == 'cooked' and re.search(r'\bcooked\b', record_name, re.I): q = ''   # as in server/foods.ts readPortion
+        if q == 'cooked' and u == 'cup' and not re.search(r'\b(dry|raw|uncooked|mix)\b', record_name, re.I): q = ''   # as in server/foods.ts readPortion
         return (u, q) if plausible(u) else None
     mm = re.match(r'^(\w+)$', low)
     if mm and grams <= 600 and (mm.group(1) in WHOLE_WORDS or stem(mm.group(1)) in {stem(w) for w in re.split(r'[^a-z]+', record_name.lower()) if w}):

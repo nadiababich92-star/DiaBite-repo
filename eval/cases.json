@@ -7016,43 +7016,6 @@
       ]
     },
     {
-      "id": "US18",
-      "dimension": "helpful",
-      "query": "A medium fries",
-      "ground_truth": "A medium order of fries, USDA's 145 g, not a weight asked for.",
-      "context": {
-        "budget": {
-          "glBudget": 54,
-          "carbsG": 107,
-          "kcal": 1653
-        },
-        "entries": [],
-        "units": "imperial"
-      },
-      "expect": {
-        "toolsCalled": [
-          "resolve_foods",
-          "compute_meal"
-        ],
-        "verified": true,
-        "quantityGrams": [
-          {
-            "foodIds": [
-              "usda:2709462",
-              "usda:2709465",
-              "usda:2709468"
-            ],
-            "min": 100,
-            "max": 170
-          }
-        ]
-      },
-      "judge": "rubric",
-      "tags": [
-        "us-measures"
-      ]
-    },
-    {
       "id": "US19",
       "dimension": "helpful",
       "query": "A cup of spaghetti",

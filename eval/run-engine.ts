@@ -1409,6 +1409,7 @@ hangMisses.forEach((m) => console.log(m))
       ['two slices of pizza', said2('usda:2708614', { count: 2, unit: 'slice' }), '172 g | 2 slices (172 g)'],
       ['a slice of thin crust pizza', said2('usda:2708615', { count: 1, unit: 'slice' }), '63 g | 1 slice (63 g)'],
       ['a cup of spaghetti', said2('ing:white_pasta', { count: 1, unit: 'cup' }), '140 g | 1 cup (140 g)'],
+      ['a cup of spaghetti (the Durum wheat pasta the resolver ranks first)', said2('seed:pasta-durum', { count: 1, unit: 'cup' }), '140 g | 1 cup (140 g)'],
       ['two cups of spaghetti', said2('ing:white_pasta', { count: 2, unit: 'cup' }), '280 g | 2 cups (280 g)'],
       ['a cup of whole wheat pasta', said2('ing:whole_wheat_pasta', { count: 1, unit: 'cup' }), '140 g | 1 cup (140 g)'],
       ['a medium fries', said2('usda:2709462', { count: 1, unit: 'medium' }), '145 g | 1 medium (145 g)'],

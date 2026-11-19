@@ -474,9 +474,9 @@ export function readPortion(label: string, grams: number, recordName: string): P
   if ((m = /^(cup|tablespoon|tbsp|teaspoon|tsp|fl oz|oz|lb|slice|piece|medium|small|large)\b(.*)$/.exec(low))) {
     const w = m[1]
     const unit = (w === 'tablespoon' ? 'tbsp' : w === 'teaspoon' ? 'tsp' : w) as PortionRow['unit']
-    // "1 cup, cooked" on a record that is itself cooked ("Pasta, cooked") is just the cup; on a dry record it would be another food's weight.
+    // "1 cup, cooked" on a record that is cooked ("Pasta, cooked", "Durum wheat pasta, al dente") is just the cup; on a dry, raw or mix record it would be another food's weight.
     const q = qualifierOf(m[2])
-    return row(unit, w, q === 'cooked' && /\bcooked\b/i.test(recordName) ? '' : q, w === 'tablespoon' ? 'tbsp' : w === 'teaspoon' ? 'tsp' : w)
+    return row(unit, w, q === 'cooked' && unit === 'cup' && !/\b(dry|raw|uncooked|mix)\b/i.test(recordName) ? '' : q, w === 'tablespoon' ? 'tbsp' : w === 'teaspoon' ? 'tsp' : w)
   }
   // "One of it": a "regular", a "fruit", or the food's own word ("1 banana"). Not a whole turkey breast (1,769 g) or a whole pineapple:
   // a "typical" item that weighs more than 600 g is a different kind of "whole", and no one means it by "a medium".
