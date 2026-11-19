@@ -5,7 +5,7 @@
 import { availableCarbs, dayGlLevel, glLevel, glycemicLoad, nutrientsFor } from '../src/lib/glycemic'
 import { isAvoided, type AvoidList } from './avoid'
 import { asFood, getRecord, hasNoLoad, householdMeasure, loadFoods, stepUnit, summary, type PortionRow } from './foods'
-import { gramsFor, saidText, unitsFor } from './quantity'
+import { gramsFor, householdUnitsFor, saidText, unitsFor } from './quantity'
 import { embed, type VectorStore } from './embeddings'
 import { resolvePhrases, sameFamily, sameFood } from './resolve'
 import type {
@@ -80,7 +80,8 @@ const withMeasure = (r: MealItemResult): MealItemResult => {
   const rows = getRecord(r.foodId).portions
   const m = r.grams > 0 ? householdMeasure(rows, r.grams) : null
   const step = r.grams > 0 ? stepUnit(rows, r.grams) : null
-  return { ...r, ...(m ? { measure: m } : {}), ...(step ? { stepUnit: step } : {}) }
+  const { units } = householdUnitsFor(getRecord(r.foodId))
+  return { ...r, ...(m ? { measure: m } : {}), ...(step ? { stepUnit: step } : {}), ...(units ? { units } : {}) }
 }
 
 export interface QuantityPlan {
@@ -114,6 +115,25 @@ export function withSaid(results: MealItemResult[], plan: QuantityPlan, units: '
     const said = r.servings !== undefined && r.grams === 0 ? undefined : saidText({ grams: r.grams, basis: m.basis, quantity: m.quantity, row: m.row, rec: getRecord(r.foodId), units })
     return { ...r, quantity: m.quantity, basis: m.basis, ...(said ? { said } : {}) }
   })
+}
+
+/** The person's own amount (they typed it or moved it): the words keep the unit they used, and the basis says it is theirs, not an assumption. */
+export function markTheirs(it: MealItemResult, units: 'imperial' | 'metric' | undefined): MealItemResult {
+  const said = it.said ?? saidText({ grams: it.grams, basis: 'stated', quantity: { count: it.grams, unit: 'g' }, rec: getRecord(it.foodId), units })
+  return { ...it, basis: 'stated', said }
+}
+
+/**
+ * The same meal costed again with amounts the person changed (POST /meal/recompute): what they typed as a count and a unit is turned into grams here, by
+ * the function compute_meal uses; an amount that cannot honestly be weighed refuses the whole call (nothing is costed), naming the item; an amount marked
+ * `theirs` comes back `stated`, and every other item keeps the basis the engine gave it.
+ */
+export function recountMeal(items: MealItemInput[], units: 'imperial' | 'metric' | undefined):
+  { refused: QuantityPlan['needs'][number] } | { meal: ComputeMealResponse } {
+  const plan = planQuantities(items)
+  if (plan.needs.length > 0) return { refused: plan.needs[0] }
+  const costed = computeMeal(plan.items)
+  return { meal: { ...costed, items: withSaid(costed.items, plan, units).map((it, i) => (items[i].theirs ? markTheirs(it, units) : it)) } }
 }
 
 export function computeMeal(items: MealItemInput[]): ComputeMealResponse {

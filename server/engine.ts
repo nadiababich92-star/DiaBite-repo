@@ -29,7 +29,7 @@ import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
-import { afterMealFor, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, scaleDish, withDayUnscored, withSaid } from './compute'
+import { afterMealFor, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, withDayUnscored, withSaid } from './compute'
 import { NEEDS_WEIGHT_INSTRUCTION, needsWeightHint, quantityError, settleAmount, weightQuestion } from './quantity'
 import { verify } from './verify'
 import { claimSession, getSession, noteResolution, putSession } from './sessions'
@@ -40,7 +40,7 @@ import { personOf, signInRequired } from './auth'
 import { createHash, timingSafeEqual } from 'node:crypto'
 import { RateLimited, addressKey, chargeDelete, chargeRecompute, originAllowed, sourceTag, validCarbLimit, validSessionId, validUnits, validateAsk, validateDish, validateRecompute } from './guard'
 import type {
-  AlternativesRequest, ComputeMealRequest, CostDishRequest, DayStateRequest, ResolveRequest, VerifyRequest,
+  AlternativesRequest, ComputeMealRequest, CostDishRequest, DayStateRequest, MealItemInput, ResolveRequest, VerifyRequest,
 } from './contract'
 
 const PORT = Number(process.env.PORT ?? 8787)
@@ -337,7 +337,7 @@ async function main() {
   app.post('/meal/recompute', async (req, res) => {
     const bad = validateRecompute(req.body)
     if (bad) return res.status(400).json({ error: 'invalid_request', field: bad.field })
-    const body = req.body as { sessionId: string; items: { foodId: string; grams?: number; servings?: number }[] }
+    const body = req.body as { sessionId: string; items: MealItemInput[] }
     const trusted = keyMatches(req.get('x-api-key'))
     if (!trusted) {
       const person = await personOf(req)
@@ -349,7 +349,15 @@ async function main() {
       if (wait) { res.set('Retry-After', String(wait)); return res.status(429).json({ error: 'rate_limited', scope: 'ip', retryAfterSec: wait }) }
     }
     try {
-      const meal = computeMeal(body.items)
+      // What the person typed, as a count and a unit, is turned into grams here, by the same function compute_meal uses; the browser converts nothing.
+      // This route is not model-facing, so an amount that cannot honestly be weighed is a 400 that names the food, the reason and the units it can be said in.
+      const units = body.sessionId ? getSession(body.sessionId)?.units : undefined
+      const counted = recountMeal(body.items, units)
+      if ('refused' in counted) {
+        const n = counted.refused
+        return res.status(400).json({ error: 'invalid_request', field: 'items.quantity', foodId: n.foodId, why: n.why, units: n.units })
+      }
+      const meal = counted.meal
       const day = dayStateFor(body.sessionId)
       const top = driverOf(meal.items)
       const out: Record<string, unknown> = { ...meal, ...(top ? { driver: top } : {}) }

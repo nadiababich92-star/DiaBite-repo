@@ -13,6 +13,7 @@
  */
 import { createHash } from 'node:crypto'
 import { ALLERGEN_PATTERNS, AVOIDED_PATTERNS, PATTERN_PATTERNS } from '../src/lib/dietary'
+import { quantityError } from './quantity'
 
 const num = (name: string, fallback: number): number => {
   const v = Number(process.env[name])
@@ -196,13 +197,17 @@ export function validateRecompute(body: unknown): Invalid | null {
   if (!b || typeof b !== 'object') return { field: 'body' }
   if (!validSessionId(b.sessionId)) return { field: 'sessionId' }
   if (!Array.isArray(b.items) || b.items.length < 1 || b.items.length > MAX_RECOMPUTE_ITEMS) return { field: 'items' }
-  for (const it of b.items as { foodId?: unknown; grams?: unknown; servings?: unknown }[]) {
+  for (const it of b.items as { foodId?: unknown; grams?: unknown; servings?: unknown; quantity?: unknown; theirs?: unknown }[]) {
     if (!it || typeof it !== 'object') return { field: 'items' }
     if (typeof it.foodId !== 'string' || it.foodId.length < 1 || it.foodId.length > 80 || !/^[\w:.\-]+$/.test(it.foodId)) return { field: 'items.foodId' }
-    const g = it.grams, sv = it.servings
-    if ((g === undefined) === (sv === undefined)) return { field: 'items.grams' } // exactly one of the two
+    const g = it.grams, sv = it.servings, q = it.quantity
+    if ([g, sv, q].filter((v) => v !== undefined).length !== 1) return { field: 'items.grams' } // exactly one of the three
     if (g !== undefined && !(typeof g === 'number' && Number.isFinite(g) && g >= 1 && g <= 3000)) return { field: 'items.grams' }
     if (sv !== undefined && !(typeof sv === 'number' && Number.isFinite(sv) && sv >= 0.1 && sv <= 20)) return { field: 'items.servings' }
+    // What the person typed, as a count and a unit: the engine turns it into grams; the bounds are the ones compute_meal has.
+    if (q !== undefined && quantityError(q, it.foodId) !== null) return { field: 'items.quantity' }
+    // `theirs` says an amount is the person's own: a boolean, and never on a recipe counted by serving (it has no weight to own).
+    if (it.theirs !== undefined && (typeof it.theirs !== 'boolean' || sv !== undefined)) return { field: 'items.theirs' }
   }
   return null
 }

@@ -31,7 +31,7 @@ import { resolvePhrases, withoutQuantity } from '../server/resolve'
 import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
-import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, scaleDish, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
+import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
 import { gramsFor, householdUnitsFor, needsWeightHint, quantityError, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
@@ -83,7 +83,7 @@ import { swapNamedIn } from '../src/lib/swap'
 import { describeDish, toDishes, type RawRecipe } from '../src/lib/recipes'
 import { CATEGORY_LABELS, getFood } from '../src/data/foods'
 import { dropCarbLimit, getSession, noteResolution, putSession } from '../server/sessions'
-import { validateDish } from '../server/guard'
+import { validateDish, validateRecompute } from '../server/guard'
 import type { VerifyRequest } from '../server/contract'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -413,6 +413,70 @@ const breadMisses: string[] = []
 }
 console.log(`bread gi  ${breadMisses.length === 0 ? 'ok' : 'WRONG'}`)
 breadMisses.forEach((m) => console.log(m))
+
+// ── correcting a weight on the receipt (docs/specs/recorrect-evals.md, RC1 to RC10) ─────────────────────────────────
+// POST /meal/recompute takes what the person typed as a count and a unit, the engine weighs it, and an amount the person changed comes back
+// `stated` while every line they left alone keeps the basis it had. The checks read the result's fields, never wording.
+const recorrectMisses: string[] = []
+{
+  const miss = (m: string) => recorrectMisses.push(`    ${m}`)
+  type It = { foodId: string; grams?: number; servings?: number; quantity?: { count: number; unit: string }; theirs?: boolean }
+  const recount = (items: It[], units: 'imperial' | 'metric' | undefined = 'imperial') => recountMeal(items as never, units)
+  const mealOf = (items: It[], units: 'imperial' | 'metric' | undefined = 'imperial') => { const r = recount(items, units); return 'meal' in r ? r.meal : null }
+  // RC1, RC2: what they typed, weighed by the engine; theirs makes it stated and the words keep their unit
+  const a = mealOf([{ foodId: 'seed:apple', quantity: { count: 120, unit: 'g' }, theirs: true }])?.items[0]
+  if (!a || a.grams !== 120 || a.basis !== 'stated' || a.said !== '120 g') miss(`RC1 120 g: ${JSON.stringify([a?.grams, a?.basis, a?.said])}`)
+  const oz = mealOf([{ foodId: 'seed:chicken', quantity: { count: 3, unit: 'oz' }, theirs: true }])?.items[0]
+  if (!oz || oz.grams !== 85 || oz.basis !== 'stated' || oz.said !== '3 oz (85 g)') miss(`RC2 3 oz imperial: ${JSON.stringify([oz?.grams, oz?.basis, oz?.said])}`)
+  const ozM = mealOf([{ foodId: 'seed:chicken', quantity: { count: 3, unit: 'oz' }, theirs: true }], 'metric')?.items[0]
+  if (!ozM || ozM.grams !== 85 || ozM.said !== '85 g') miss(`RC2 3 oz metric: ${JSON.stringify([ozM?.grams, ozM?.said])}`)
+  // RC3: a line sent without theirs keeps the basis the engine gave it
+  const rice = mealOf([{ foodId: 'seed:rice-white', quantity: { count: 1, unit: 'cup' } }])?.items[0]
+  if (!rice || rice.grams !== 158 || rice.basis !== 'usda_measure' || rice.said !== '1 cup (158 g)') miss(`RC3 a cup of rice: ${JSON.stringify([rice?.grams, rice?.basis, rice?.said])}`)
+  // RC4: the defect closed. One line corrected, one left alone with the quantity it had: the left-alone line is still an assumption and still says so.
+  const two = mealOf([{ foodId: 'seed:apple', quantity: { count: 120, unit: 'g' }, theirs: true }, { foodId: 'seed:banana', quantity: { count: 1, unit: 'whole' } }])?.items
+  if (!two || two[0].basis !== 'stated' || two[1].basis !== 'typical' || two[1].said !== '1 banana (126 g)') miss(`RC4 the untouched banana: ${JSON.stringify(two?.map((i) => [i.basis, i.said]))}`)
+  const bare = mealOf([{ foodId: 'seed:banana', grams: 126 }])?.items[0]
+  if (!bare || bare.basis !== undefined || bare.said !== undefined) miss(`RC4 bare grams (an old client) must stay as before: ${JSON.stringify([bare?.basis, bare?.said])}`)
+  // RC5: an amount that cannot honestly be weighed refuses the call, naming the food, the reason and the units
+  const noCup = recount([{ foodId: 'ing:egg', quantity: { count: 1, unit: 'cup' } }])
+  if (!('refused' in noCup) || noCup.refused.foodId !== 'ing:egg' || !/no USDA household measure/.test(noCup.refused.why) || !noCup.refused.units.includes('g')) miss(`RC5 a cup of egg: ${JSON.stringify(noCup).slice(0, 200)}`)
+  const recipeOz = recount([{ foodId: 'rec:DB-1148', quantity: { count: 4, unit: 'oz' } }])
+  if (!('refused' in recipeOz)) miss('RC5 four ounces of a recipe was costed')
+  // RC6: what is refused before anything is costed, and what passes
+  const bad: [string, unknown][] = [
+    ['grams and quantity', { grams: 100, quantity: { count: 100, unit: 'g' } }], ['servings and quantity', { servings: 1, quantity: { count: 1, unit: 'g' } }], ['no amount', {}],
+    ['quantity 0 g', { quantity: { count: 0, unit: 'g' } }], ['quantity -1 g', { quantity: { count: -1, unit: 'g' } }], ['a text count', { quantity: { count: 'a', unit: 'g' } }],
+    ['5001 g', { quantity: { count: 5001, unit: 'g' } }], ['101 cups', { quantity: { count: 101, unit: 'cup' } }], ['an unknown unit', { quantity: { count: 1, unit: 'stone' } }],
+    ['theirs as text', { quantity: { count: 1, unit: 'cup' }, theirs: 'yes' }], ['theirs with servings', { servings: 1, theirs: true }],
+  ]
+  const field = (b: unknown) => validateRecompute({ sessionId: 'abc123', items: [{ foodId: 'seed:apple', ...(b as object) }] })?.field
+  for (const [what, b] of bad) { const f = field(b); const want = what.includes('theirs') ? 'items.theirs' : what.includes('and quantity') || what === 'no amount' ? 'items.grams' : 'items.quantity'; if (f !== want) miss(`RC6 ${what}: field ${f}, wanted ${want}`) }
+  for (const ok of [{ quantity: { count: 450, unit: 'g' } }, { quantity: { count: 5000, unit: 'g' } }, { quantity: { count: 0.25, unit: 'cup' }, theirs: true }, { quantity: { count: 100, unit: 'cup' } }, { grams: 100, theirs: true }, { servings: 2 }]) if (field(ok) !== undefined) miss(`RC6 ${JSON.stringify(ok)} was refused: ${field(ok)}`)
+  if (validateRecompute({ sessionId: 'abc123', items: Array.from({ length: 21 }, () => ({ foodId: 'seed:apple', grams: 100 })) })?.field !== 'items') miss('RC6 21 items were accepted')
+  // RC7: a branded and an unrated item corrected stay carbohydrate only, and a partial meal has no verdict
+  const bu = mealOf([{ foodId: 'branded:2529927', quantity: { count: 40, unit: 'g' }, theirs: true }, { foodId: 'usda:2708614', quantity: { count: 150, unit: 'g' }, theirs: true }])
+  if (!bu || bu.items.some((i) => i.gl !== null)) miss(`RC7 a corrected branded or unrated item has a load: ${JSON.stringify(bu?.items.map((i) => i.gl))}`)
+  else {
+    const day = afterMealFor({ gl: 54, carbsG: 107, kcal: 1653 }, bu.totals, [], bu.items.filter((i) => !i.loadAvailable).map((i) => i.name))
+    if (day.fits === true) miss('RC7 a meal of corrected branded and unrated foods fits')
+    const part = afterMealFor({ gl: 54, carbsG: 107, kcal: 1653 }, bu.totals, ['dragon fruit'], [])
+    if (part.fits !== null) miss(`RC7 a meal with an unknown food has fits ${part.fits}`)
+  }
+  // RC8: a dish counted from an assumed recipe, one ingredient corrected in grams: that one is stated, the rest are untouched, the totals are the engine's
+  const dish = mealOf([{ foodId: 'seed:rice-white', grams: 150, theirs: true }, { foodId: 'seed:chicken', grams: 110 }])
+  if (!dish || dish.items[0].basis !== 'stated' || dish.items[1].basis !== undefined || Math.abs(dish.totals.gl - computeMeal([{ foodId: 'seed:rice-white', grams: 150 }, { foodId: 'seed:chicken', grams: 110 }]).totals.gl) > 0.05) miss(`RC8 an ingredient of a dish: ${JSON.stringify(dish?.items.map((i) => i.basis))}`)
+  // RC10: the units the food can be said in travel on every item, and a recipe has none
+  const un = mealOf([{ foodId: 'seed:avocado', grams: 150 }, { foodId: 'rec:DB-1148', servings: 1 }])?.items
+  if (!un || !un[0].units?.includes('whole') || un[1].units !== undefined) miss(`RC10 units: ${JSON.stringify(un?.map((i) => i.units))}`)
+  const cm = computeMeal([{ foodId: 'seed:avocado', grams: 150 }]).items[0]
+  if (!cm.units?.includes('whole')) miss('RC10 a compute_meal item carries no units')
+  // The total is the engine's: the same amounts typed or sent as grams cost the same
+  const t1 = mealOf([{ foodId: 'seed:rice-white', quantity: { count: 1, unit: 'cup' }, theirs: true }])?.totals.gl, t2 = computeMeal([{ foodId: 'seed:rice-white', grams: 158 }]).totals.gl
+  if (t1 !== t2) miss(`a cup of rice typed costs ${t1}, as grams ${t2}`)
+}
+console.log(`recorrect ${recorrectMisses.length === 0 ? 'ok' : 'WRONG'}`)
+recorrectMisses.forEach((m) => console.log(m))
 // First-run tips: which one to show, in what order, and that the copy never holds a figure.
 {
   const bits: string[] = []
@@ -2591,5 +2655,6 @@ if (imageMisses.length) { console.log('the image is missing a data file the engi
 if (brandedMisses.length) { console.log('a branded product was given a load, or the layer is the wrong size'); process.exit(1) }
 if (dishMisses.length) { console.log('a dish was costed wrongly: see cost-dish above'); process.exit(1) }
 if (breadMisses.length) { console.log('the bread family has a wrong glycemic index: see bread gi above'); process.exit(1) }
+if (recorrectMisses.length) { console.log('correcting a weight is wrong: see recorrect above'); process.exit(1) }
 if (storedMisses.length) { console.log('stored data was trusted'); process.exit(1) }
 if (catalogueMisses.length) { console.log('a food with carbohydrate and no glycemic index is in the catalogue'); process.exit(1) }

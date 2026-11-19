@@ -168,6 +168,19 @@ async function httpSuite() {
     const rcKeyed = await rc({ sessionId: 'rc-1', items: [{ foodId: 'seed:rice-white', grams: 180 }] }, { 'x-api-key': KEY })
     check('R7', 'a caller with the engine key is exempt from the limit', rcKeyed.status === 200, String(rcKeyed.status))
 
+    // Correcting a weight (docs/specs/recorrect-evals.md, RC9): a request with a typed quantity is counted against the same limit and refused the same ways.
+    const qItem = (extra: object) => ({ sessionId: 'rc-1', items: [{ foodId: 'seed:rice-white', quantity: { count: 1, unit: 'cup' }, ...extra }] })
+    const qOver = await rc(qItem({}))
+    check('RC9a', 'a request with a quantity is counted against the same per-address limit: 429 past it', qOver.status === 429 && Number(qOver.retry) > 0, JSON.stringify([qOver.status, qOver.retry]))
+    const qOk = await rc(qItem({}), { 'x-api-key': KEY })
+    check('RC9b', 'a quantity is weighed by the engine: a cup of rice is 158 g, a USDA measure, the person\'s change not marked', qOk.status === 200 && qOk.json.items?.[0]?.grams === 158 && qOk.json.items[0].basis === 'usda_measure', JSON.stringify([qOk.status, qOk.json.items?.[0]?.grams, qOk.json.items?.[0]?.basis]))
+    const qMine = await rc(qItem({ quantity: { count: 3, unit: 'oz' }, theirs: true }), { 'x-api-key': KEY })
+    check('RC9c', 'an amount marked theirs comes back stated', qMine.status === 200 && qMine.json.items?.[0]?.basis === 'stated' && qMine.json.items[0].grams === 85, JSON.stringify([qMine.status, qMine.json.items?.[0]?.basis, qMine.json.items?.[0]?.grams]))
+    const qNeeds = await rc({ sessionId: 'rc-1', items: [{ foodId: 'ing:egg', quantity: { count: 1, unit: 'cup' } }] }, { 'x-api-key': KEY })
+    check('RC9d', 'an amount the engine cannot weigh is a 400 that names the food and the reason, never a guess', qNeeds.status === 400 && qNeeds.json.field === 'items.quantity' && qNeeds.json.foodId === 'ing:egg' && typeof qNeeds.json.why === 'string' && Array.isArray(qNeeds.json.units), JSON.stringify([qNeeds.status, qNeeds.json]))
+    const qSrv = await rc({ sessionId: 'rc-1', items: [{ foodId: 'rec:DB-1148', servings: 1, theirs: true }] }, { 'x-api-key': KEY })
+    check('RC9e', 'theirs on a recipe counted by serving is refused: 400, field items.theirs', qSrv.status === 400 && qSrv.json.field === 'items.theirs', JSON.stringify([qSrv.status, qSrv.json]))
+
     const huge = await fetch(`${BASE}/agent/ask`, {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ ...meal('a5c'), pad: 'x'.repeat(40_000) }),
@@ -421,6 +434,9 @@ async function authSuite() {
     const rcAnon = await fetch(`${BASE}/meal/recompute`, { method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ sessionId: 'rc-s', items: [{ foodId: 'seed:egg', grams: 50 }] }) })
     check('S13b', 'with required sign-in, /meal/recompute without a token is 401', rcAnon.status === 401, String(rcAnon.status))
+    const rcAnonQ = await fetch(`${BASE}/meal/recompute`, { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ sessionId: 'rc-s', items: [{ foodId: 'seed:egg', quantity: { count: 2, unit: 'default' }, theirs: true }] }) })
+    check('S13q', 'with required sign-in, a recompute with a quantity and theirs is 401 too: the new fields do not open the wall', rcAnonQ.status === 401, String(rcAnonQ.status))
     const rcSigned = await fetch(`${BASE}/meal/recompute`, { method: 'POST', headers: { 'content-type': 'application/json', ...(await bearer(uid(9))) },
       body: JSON.stringify({ sessionId: 'rc-s', items: [{ foodId: 'seed:egg', grams: 50 }] }) })
     check('S13c', 'and with a valid token it answers', rcSigned.status === 200, String(rcSigned.status))

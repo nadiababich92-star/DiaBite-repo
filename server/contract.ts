@@ -92,6 +92,8 @@ export interface MealItemInput {
    * Exactly one of `grams`, `servings`, `quantity` per item on `compute_meal`.
    */
   quantity?: { count: number; unit: 'g' | 'oz' | 'lb' | 'cup' | 'tbsp' | 'tsp' | 'fl oz' | 'slice' | 'piece' | 'small' | 'medium' | 'large' | 'whole' | 'default' }
+  /** Only on `/meal/recompute`: this amount is the person's own (they typed or moved it), so the item comes back with `basis: 'stated'`. */
+  theirs?: boolean
 }
 
 /** Answered instead of a meal when a measure cannot honestly be turned into grams: no numbers, the agent asks. */
@@ -124,6 +126,8 @@ export interface MealItemResult extends Nutrients {
   basis?: 'usda_measure' | 'exact_conversion' | 'typical' | 'default' | 'stated'
   /** The unit the portion editor steps this food in, and what one weighs ("cup", 158): the record's own table, a unit that is at least half of this weight. Absent when no unit fits; the editor then steps in grams. */
   stepUnit?: { unit: string; unitGrams: number }
+  /** The household units this food can be said in beyond weights and its usual portion (`whole`, `medium`, `cup`, `slice`…); absent when it has none. */
+  units?: NonNullable<MealItemInput['quantity']>['unit'][]
 }
 
 export interface MealTotals extends Nutrients {
