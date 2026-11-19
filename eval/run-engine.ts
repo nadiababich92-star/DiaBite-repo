@@ -389,6 +389,30 @@ const dishMisses: string[] = []
   if (!/can't judge/.test(templatedAnswer(trace10b) ?? '')) dishMisses.push('    the last-resort answer for a partial estimate does not say it cannot judge')
 }
 console.log(`\ncost-dish ${dishMisses.length === 0 ? 'ok' : 'WRONG'}`)
+
+// ── the bread family's glycemic index ───────────────────────────────────────
+// 19 November 2026: whole wheat toast was GI 96 and "Turkey sandwich on white" 36, both from the GI matcher taking the wrong table entry
+// (a single non-ISO measurement; a gluten-free bread). data/foods-usda/fix_bread_gi.py corrected 21 breads and recomputed 120 dishes; these
+// cases keep them corrected, and read the value the engine loads, not the file.
+const breadMisses: string[] = []
+{
+  const gi = (id: string) => loadFoods().byId.get(id)?.gi
+  for (const [id, want] of [['usda:2707598', 72], ['usda:2707710', 71], ['usda:2707709', 71], ['usda:2706981', 69]] as [string, number][]) if (gi(id) !== want) breadMisses.push(`    ${id} has GI ${gi(id)}, wanted ${want}`)
+  const rs = loadFoods().records
+  const g96 = rs.filter((r) => r.gi === 96); if (g96.length) breadMisses.push(`    ${g96.length} records still have GI 96, e.g. ${g96[0].name}`)
+  const surveyGi = rs.filter((r) => r.id.startsWith('usda:') && r.kind === 'ingredient' && r.gi !== null)
+  // A sandwich or burger on white bread is as high as white bread (72) less a little for what is inside, never half of it.
+  const onWhite = surveyGi.filter((r) => /on white|white bun|white bread/i.test(r.name) && /sandwich|burger|sub|hot dog|toast/i.test(r.name))
+  const low = onWhite.filter((r) => (r.gi as number) < 55)
+  if (onWhite.length < 80 || low.length) breadMisses.push(`    ${low.length} of ${onWhite.length} "on white" sandwiches are under GI 55, e.g. ${low[0]?.name} ${low[0]?.gi}`)
+  const ww = surveyGi.filter((r) => /^bread, .*whole.?wheat|^bread, whole.?wheat/i.test(r.name))
+  const off = ww.filter((r) => (r.gi as number) > 80 || (r.gi as number) < 50)
+  if (ww.length < 10 || off.length) breadMisses.push(`    ${off.length} of ${ww.length} whole wheat breads are outside GI 50 to 80, e.g. ${off[0]?.name} ${off[0]?.gi}`)
+  const why = loadFoods().byId.get('usda:2707598')?.source ?? ''
+  if (!/corrected 19 November 2026/.test(why)) breadMisses.push('    a corrected bread does not say it was corrected, or why')
+}
+console.log(`bread gi  ${breadMisses.length === 0 ? 'ok' : 'WRONG'}`)
+breadMisses.forEach((m) => console.log(m))
 // First-run tips: which one to show, in what order, and that the copy never holds a figure.
 {
   const bits: string[] = []
@@ -2539,5 +2563,6 @@ if (hangMisses.length) { console.log('the hang retry misbehaved'); process.exit(
 if (imageMisses.length) { console.log('the image is missing a data file the engine reads'); process.exit(1) }
 if (brandedMisses.length) { console.log('a branded product was given a load, or the layer is the wrong size'); process.exit(1) }
 if (dishMisses.length) { console.log('a dish was costed wrongly: see cost-dish above'); process.exit(1) }
+if (breadMisses.length) { console.log('the bread family has a wrong glycemic index: see bread gi above'); process.exit(1) }
 if (storedMisses.length) { console.log('stored data was trusted'); process.exit(1) }
 if (catalogueMisses.length) { console.log('a food with carbohydrate and no glycemic index is in the catalogue'); process.exit(1) }
