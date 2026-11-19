@@ -5776,7 +5776,7 @@
     {
       "id": "H16",
       "dimension": "helpful",
-      "query": "A pack of Oreos",
+      "query": "34 g of Oreos",
       "ground_truth": "Carbohydrate from the label, load not available, no 'fits'.",
       "context": {
         "budget": {
