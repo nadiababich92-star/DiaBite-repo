@@ -532,7 +532,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
             const q = typed[at]
             setTyped((t) => { const n = { ...t }; delete n[at]; return n })
             setMine((m) => m.filter((x) => x !== at))
-            setRefusal({ index: at, count: String(q.count), unit: q.unit, message: `No USDA measure for ${baseLines[at].name} in ${unitLabel(q.unit)}. Try grams${profile.units === 'imperial' ? ' or ounces' : ''}.` })
+            setRefusal({ index: at, count: String(q.count), unit: q.unit, message: e.kind === 'out_of_range' ? `${q.count} ${unitLabel(q.unit)} of ${baseLines[at].name} is too much to count. Try a smaller number${q.unit === 'g' ? '' : ', or another unit'}.` : `No USDA measure for ${baseLines[at].name} in ${unitLabel(q.unit)}. Try grams${profile.units === 'imperial' ? ' or ounces' : ''}.` })
             setFieldFor(at)
           }
           setRecalcError('')

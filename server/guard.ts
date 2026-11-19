@@ -42,7 +42,7 @@ export const MAX_KEYS = 10_000
 
 // ── Size and shape ────────────────────────────────────────────────────────
 
-export type Invalid = { field: string }
+export type Invalid = { field: string; foodId?: string; why?: string }
 
 const finite = (v: unknown) => typeof v === 'number' && Number.isFinite(v)
 
@@ -205,7 +205,7 @@ export function validateRecompute(body: unknown): Invalid | null {
     if (g !== undefined && !(typeof g === 'number' && Number.isFinite(g) && g >= 1 && g <= 3000)) return { field: 'items.grams' }
     if (sv !== undefined && !(typeof sv === 'number' && Number.isFinite(sv) && sv >= 0.1 && sv <= 20)) return { field: 'items.servings' }
     // What the person typed, as a count and a unit: the engine turns it into grams; the bounds are the ones compute_meal has.
-    if (q !== undefined && quantityError(q, it.foodId) !== null) return { field: 'items.quantity' }
+    if (q !== undefined) { const why = quantityError(q, it.foodId); if (why !== null) return { field: 'items.quantity', foodId: it.foodId, why } }
     // `theirs` says an amount is the person's own: a boolean, and never on a recipe counted by serving (it has no weight to own).
     if (it.theirs !== undefined && (typeof it.theirs !== 'boolean' || sv !== undefined)) return { field: 'items.theirs' }
   }

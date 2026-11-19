@@ -455,6 +455,7 @@ const recorrectMisses: string[] = []
   const field = (b: unknown) => validateRecompute({ sessionId: 'abc123', items: [{ foodId: 'seed:apple', ...(b as object) }] })?.field
   for (const [what, b] of bad) { const f = field(b); const want = what.includes('theirs') ? 'items.theirs' : what.includes('and quantity') || what === 'no amount' ? 'items.grams' : 'items.quantity'; if (f !== want) miss(`RC6 ${what}: field ${f}, wanted ${want}`) }
   for (const ok of [{ quantity: { count: 450, unit: 'g' } }, { quantity: { count: 5000, unit: 'g' } }, { quantity: { count: 0.25, unit: 'cup' }, theirs: true }, { quantity: { count: 100, unit: 'cup' } }, { grams: 100, theirs: true }, { servings: 2 }]) if (field(ok) !== undefined) miss(`RC6 ${JSON.stringify(ok)} was refused: ${field(ok)}`)
+  { const v = validateRecompute({ sessionId: 'abc123', items: [{ foodId: 'seed:apple', quantity: { count: 120, unit: 'medium' } }] }); if (v?.field !== 'items.quantity' || v.foodId !== 'seed:apple' || typeof v.why !== 'string') miss(`RC6 an out-of-range quantity must name the food and the reason: ${JSON.stringify(v)}`) }
   if (validateRecompute({ sessionId: 'abc123', items: Array.from({ length: 21 }, () => ({ foodId: 'seed:apple', grams: 100 })) })?.field !== 'items') miss('RC6 21 items were accepted')
   // RC7: a branded and an unrated item corrected stay carbohydrate only, and a partial meal has no verdict
   const bu = mealOf([{ foodId: 'branded:2529927', quantity: { count: 40, unit: 'g' }, theirs: true }, { foodId: 'usda:2708614', quantity: { count: 150, unit: 'g' }, theirs: true }])
@@ -494,6 +495,9 @@ const recorrectMisses: string[] = []
   const opts = (h: string) => [...h.matchAll(/<option value="([^"]+)"/g)].map((m) => m[1])
   if (!/<form class="weight-edit"/.test(s2i) || !s2i.includes('Weight of Apple') || !/<input[^>]*inputMode="decimal"/.test(s2i) || !/>Done</.test(s2i) || !/>Cancel</.test(s2i)) miss(`S2 the field: ${s2i.slice(0, 300)}`)
   if (opts(s2i).join(',') !== 'g,oz,medium,whole') miss(`S2 imperial units: ${opts(s2i)}`)
+  if (!/<option value="oz" selected/.test(s2i)) miss('S2 a line in "1 medium" must start the field on ounces, not on mediums')
+  const cupLine = line({ foodId: 'seed:rice-white', name: 'White rice, cooked', quantity: { count: 1, unit: 'cup' }, units: ['cup', 'tbsp'], said: '1 cup (158 g)', basis: 'usda_measure' })
+  if (!/<option value="cup" selected/.test(editor([cupLine], edit({ fieldFor: 0 }))) || !/value="1"/.test(editor([cupLine], edit({ fieldFor: 0 })))) miss('S2 a line in "1 cup" must start the field on cups with 1')
   if (opts(editor([apple], edit({ fieldFor: 0 }), 'metric')).join(',') !== 'g') miss('S2 a metric session must offer grams only')
   if (opts(editor([apple], edit({ fieldFor: 0 }), 'imperial', { dish: 'x', assumedFoodIds: ['seed:apple'] } as never)).join(',') !== 'g') miss('S2 an ingredient of an assumed dish must offer grams only')
   // S3: whose weight it is

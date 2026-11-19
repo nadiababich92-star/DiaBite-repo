@@ -336,7 +336,8 @@ async function main() {
    */
   app.post('/meal/recompute', async (req, res) => {
     const bad = validateRecompute(req.body)
-    if (bad) return res.status(400).json({ error: 'invalid_request', field: bad.field })
+    // A typed amount that is out of range names the food and the reason, as one the engine cannot weigh does, so the screen can say what to change.
+    if (bad) return res.status(400).json({ error: 'invalid_request', field: bad.field, ...(bad.why ? { kind: 'out_of_range', foodId: bad.foodId, why: bad.why } : {}) })
     const body = req.body as { sessionId: string; items: MealItemInput[] }
     const trusted = keyMatches(req.get('x-api-key'))
     if (!trusted) {
@@ -355,7 +356,7 @@ async function main() {
       const counted = recountMeal(body.items, units)
       if ('refused' in counted) {
         const n = counted.refused
-        return res.status(400).json({ error: 'invalid_request', field: 'items.quantity', foodId: n.foodId, why: n.why, units: n.units })
+        return res.status(400).json({ error: 'invalid_request', field: 'items.quantity', kind: 'no_measure', foodId: n.foodId, why: n.why, units: n.units })
       }
       const meal = counted.meal
       const day = dayStateFor(body.sessionId)

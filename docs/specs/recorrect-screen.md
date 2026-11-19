@@ -64,14 +64,14 @@ The row today: name, then `[−] value [+]` with the value `.step-v` ("1 medium 
     1. `g` (always);
     2. `oz`, **only when `units === 'imperial'`**;
     3. the food's household units from `line.units`, **only when imperial**, at most two, the unit the line is shown in first (`cup`, `tbsp`, `tsp`, `fl oz`, `slice`, `piece`, `small`, `medium`, `large`, `whole`; `whole` is labelled "whole"). A metric session offers `g` only.
-    The **default** is the line's current unit: its `quantity.unit` when it has one and it is offered, else `oz` for imperial, else `g`. The field starts with the line's current count in that unit when the unit is the line's own (`1` for "1 medium"), else empty.
+    The **default** (changed on 19 November 2026 after the first live check: typing `120` into a field that started on "medium" was 120 mediums): the line's own unit only when it is a **volume** unit (`cup`, `tbsp`, `tsp`, `fl oz`), with its count (`1` for "1 cup"); for a count of items (`medium`, `whole`, `slice`, `piece`, `small`, `large`) or no unit, `oz` on imperial and `g` on metric, with the field empty.
   - A **recipe counted by serving** (`l.servings`) keeps the stepper and has **no field** in this change (the engine does not accept `theirs` with servings).
   - An **ingredient of an assumed recipe** (`assumed` set) gets the same field with **grams only** (no select): the dish's ingredients have no household unit; the card stays **Estimate**.
 - **Commit.** `setTyped(t => ({ ...t, [i]: { count, unit } }))`, `setMine(m => m.includes(i) ? m : [...m, i])`, close the field, `setLogged(false)`; the existing 0.4 s settle then calls `recomputeMeal`. One request per commit, never per keystroke.
 - **The error line.** When the engine answers `400` with `field: 'items.quantity'` and `why`, `recomputeMeal` throws a `QuantityRefused` (new class with `foodId`, `why`, `units`). The recalc effect catches it, **removes that line's `typed` and `mine` entry**, reopens that line's field with the text still in it, and shows under the field, in the existing `.muted` error style, exactly:
   - `No USDA measure for {name} in {unit}. Try grams or ounces.` (imperial)
   - `No USDA measure for {name} in {unit}. Try grams.` (metric)
-  The card keeps the last numbers; nothing is recounted. Other errors keep their existing messages (rate limit, signed out, "Couldn't count that again. Your original answer is unchanged.").
+  A number out of range for its unit (`kind: 'out_of_range'`, for example 120 mediums) is said as: `{count} {unit} of {name} is too much to count. Try a smaller number, or another unit.` (grams: `Try a smaller number.`). The card keeps the last numbers; nothing is recounted. Other errors keep their existing messages (rate limit, signed out, "Couldn't count that again. Your original answer is unchanged.").
 
 ## 3. The mark
 

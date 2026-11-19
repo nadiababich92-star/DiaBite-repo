@@ -87,7 +87,8 @@ export class RateLimitedError extends Error {
 
 /** The engine could not weigh the amount the person typed for that food (docs/specs/recorrect-engine.md): which food, why, and the units it can be said in. */
 export class QuantityRefused extends Error {
-  constructor(public foodId: string, public why: string, public units: string[]) { super('quantity_refused') }
+  /** `no_measure`: that food has no such measure in USDA's tables. `out_of_range`: the number is too large for that unit. */
+  constructor(public foodId: string, public why: string, public units: string[], public kind: 'no_measure' | 'out_of_range' = 'no_measure') { super('quantity_refused') }
 }
 
 /** One line of a meal sent to be counted again: exactly one of grams, servings or quantity; `theirs` marks an amount the person changed. */
@@ -364,8 +365,8 @@ export async function recomputeMeal(
   }
   if (res.status === 403) throw new Error('This meal was calculated before you signed in. Ask about it again to change the portions.')
   if (res.status === 400) {
-    const body = await res.json().catch(() => ({})) as { field?: string; foodId?: string; why?: string; units?: string[] }
-    if (body.field === 'items.quantity' && typeof body.why === 'string') throw new QuantityRefused(String(body.foodId ?? ''), body.why, Array.isArray(body.units) ? body.units : [])
+    const body = await res.json().catch(() => ({})) as { field?: string; foodId?: string; why?: string; units?: string[]; kind?: string }
+    if (body.field === 'items.quantity' && typeof body.why === 'string') throw new QuantityRefused(String(body.foodId ?? ''), body.why, Array.isArray(body.units) ? body.units : [], body.kind === 'out_of_range' ? 'out_of_range' : 'no_measure')
   }
   if (!res.ok) throw new Error(`Recalculation failed (${res.status})`)
   const m = (await res.json()) as MealResult

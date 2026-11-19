@@ -93,7 +93,8 @@ The reply is the existing `compute_meal`-shaped object (`items`, `totals`, `form
 | Status | Body | When |
 |---|---|---|
 | 400 | `{ error: 'invalid_request', field }` | any validation in section 1 |
-| 400 | `{ error: 'invalid_request', field: 'items.quantity', foodId, why, units }` | the engine cannot weigh that quantity for that food |
+| 400 | `{ error: 'invalid_request', field: 'items.quantity', kind: 'no_measure', foodId, why, units }` | the engine cannot weigh that quantity for that food |
+| 400 | `{ error: 'invalid_request', field: 'items.quantity', kind: 'out_of_range', foodId, why }` | the count is out of range for its unit (`quantityError`'s text is `why`) |
 | 400 | `{ error: 'invalid_request', field: 'items.foodId' }` | a food this build cannot cost (unchanged) |
 | 401 / 403 / 429 | unchanged | signed out; session not this person's; rate limit with `Retry-After` |
 

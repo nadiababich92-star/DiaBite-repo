@@ -29,7 +29,8 @@ export function weightUnits(o: { imperial: boolean; assumed: boolean; lineUnits?
   const first = o.current && own.includes(o.current.unit) ? [o.current.unit] : []
   const household = [...first, ...own.filter((u) => !first.includes(u))].slice(0, 2)
   const options = ['g', 'oz', ...household]
-  const cur = o.current && options.includes(o.current.unit) ? o.current : null
+  // A volume unit the person already used (1 cup) is the start; a count of items ("1 medium") is not: "120" typed there is grams or ounces, not 120 mediums.
+  const cur = o.current && ['cup', 'tbsp', 'tsp', 'fl oz'].includes(o.current.unit) && options.includes(o.current.unit) ? o.current : null
   return { options, start: cur ? cur.unit : 'oz', count: cur ? String(cur.count) : '' }
 }
 

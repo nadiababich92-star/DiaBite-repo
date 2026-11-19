@@ -228,10 +228,12 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
   const appleBtn = `[...document.querySelectorAll('.portions li')].find(li => /apple/i.test(li.innerText))?.querySelector('.weight-btn')`
   const hadButton = await A.b.ev(`!!(${appleBtn})`)
   await A.b.ev(`(${appleBtn})?.click()`); await sleep(400)
+  await A.b.ev(`(()=>{const s=document.querySelector('.weight-edit select'); s.value='g'; s.dispatchEvent(new Event('change',{bubbles:true}))})()`); await sleep(200)
+  await A.b.ev(`document.querySelector('.weight-edit input')?.focus(); document.querySelector('.weight-edit input')?.select()`)
   await A.b.send('Input.insertText', { text: '120' })
   await A.b.ev(`[...document.querySelectorAll('.weight-edit button')].find(x=>x.innerText.trim()==='Done')?.click()`)
   for (let i = 0; i < 40; i++) { await sleep(500); if (await A.b.ev(`!!document.querySelector('.card.answer.recalc')`)) break }
-  const mine = await A.b.ev(`[...document.querySelectorAll('.portions li')].filter(li => /your weight/.test(li.innerText)).map(li => li.innerText.replace(/\n+/g, ' ').slice(0, 80))`)
+  const mine = await A.b.ev(`[...document.querySelectorAll('.portions li')].filter(li => /your weight/.test(li.innerText)).map(li => li.innerText.replace(/\\n+/g, ' ').slice(0, 80))`)
   const recalcShown = await A.b.ev(`!!document.querySelector('.card.answer.recalc')`)
   check('W20', 'device A: tap the apple\'s weight, type 120, Done: the meal is counted again and the line says "your weight"', hadButton && recalcShown && Array.isArray(mine) && mine.length === 1 && /apple/i.test(mine[0]), JSON.stringify([hadButton, recalcShown, mine]))
   const weightsLine = await A.b.ev(`document.querySelector('.recalc .weights-used')?.innerText ?? ''`)
