@@ -174,6 +174,25 @@ function RecalcCard({ rc, onBack, note, was, countBy }: { rc: Recalc; onBack: ()
   )
 }
 
+/** What the person typed for one line: the count and the unit, exactly as typed. The browser converts nothing; the engine turns it into grams. */
+export interface TypedQuantity { count: number; unit: string }
+
+/** What the portion editor needs to let a weight be typed: the state AskPage keeps (docs/specs/recorrect-screen.md). Not read yet: Stage 4. */
+export interface WeightEdit {
+  typed: Record<number, TypedQuantity>
+  mine: number[]
+  fieldFor: number | null
+  setFieldFor: (i: number | null) => void
+}
+
+interface WeightFieldProps { line: ReceiptLine; units?: 'imperial' | 'metric'; assumed: boolean; error?: string; onCommit: (q: TypedQuantity) => void; onCancel: () => void }
+
+/** The number field and the unit select that replace a weight while it is being typed. Skeleton: it renders nothing until Stage 4. */
+export function WeightField(_props: WeightFieldProps): null { return null }
+
+/** The card's line "Weights I used", built from the engine's `basis` per line (never the agent's sentence). Skeleton: renders nothing until Stage 4. */
+export function WeightsUsed(_props: { lines: ReceiptLine[]; onEdit: (i: number) => void }): null { return null }
+
 /**
  * Each food's weight, with a step down and a step up. The engine does the sums when the weight settles.
  * For a dish counted from an assumed recipe it is the composition card: an ingredient can also be taken
@@ -182,6 +201,8 @@ function RecalcCard({ rc, onBack, note, was, countBy }: { rc: Recalc; onBack: ()
 function PortionEditor({ lines, grams, units, busy, error, onNudge, assumed, removed, onRemove, onReset }: {
   lines: ReceiptLine[]; grams: Record<number, number>; units?: 'imperial' | 'metric'; busy: boolean; error: string; onNudge: (i: number, dir: 1 | -1) => void
   assumed?: Receipt['assumed']; removed: number[]; onRemove: (i: number) => void; onReset: () => void
+  /** The state for typing a weight; read from Stage 4. */
+  weightEdit?: WeightEdit
 }) {
   const edited = Object.keys(grams).length > 0 || removed.length > 0
   return (
@@ -434,6 +455,10 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   const [grams, setGrams] = useState<Record<number, number>>({})
   // Ingredients of an assumed recipe the person took out (by line index).
   const [removed, setRemoved] = useState<number[]>([])
+  // Correcting a weight (docs/specs/recorrect-screen.md): what was typed on a line, which lines the person changed on this card, and which line has its field open.
+  const [typed, setTyped] = useState<Record<number, TypedQuantity>>({})
+  const [mine, setMine] = useState<number[]>([])
+  const [fieldFor, setFieldFor] = useState<number | null>(null)
   const [recalc, setRecalc] = useState<Recalc | null>(null)
   // A swap the person accepted from the Next line: which line of the meal it replaces, and by what (the engine's own numbers for it).
   const [swap, setSwap] = useState<{ index: number; id: string; name: string; unit: 'g' | 'serving'; portion: number; replaced: string } | null>(null)
@@ -502,7 +527,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     const from = (lastMealCall(reply?.trace)?.result as { alternativesFor?: { foodId: string; name: string } } | undefined)?.alternativesFor
     const index = from ? receipt.lines.findIndex((l) => l.foodId === from.foodId) : -1
     if (index < 0 || !from) return
-    setGrams({}); setRemoved([])
+    setGrams({}); setRemoved([]); setTyped({}); setMine([]); setFieldFor(null)
     setSwap({ index, id: alt.id, name: alt.name, unit: alt.unit, portion: alt.portion, replaced: from.name })
     setLogged(false)
   }
@@ -523,7 +548,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     setRemoved((r) => (r.includes(i) ? r.filter((x) => x !== i) : [...r, i]))
     setLogged(false)
   }
-  function resetRecipe() { setGrams({}); setRemoved([]); setSwap(null); setLogged(false) }
+  function resetRecipe() { setGrams({}); setRemoved([]); setTyped({}); setMine([]); setFieldFor(null); setSwap(null); setLogged(false) }
 
   // Let the weight settle for a moment, then ask the engine to count it again.
   useEffect(() => {
@@ -566,7 +591,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     abort.current?.abort()
     abort.current = new AbortController()
     setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(true); setLogged(false); setLogNote(''); setAsked(q); setReplyText('')
-    setEditing(true); setGrams({}); setRemoved([]); setSwap(null); setRecalc(null); setRecalcError('')
+    setEditing(true); setGrams({}); setRemoved([]); setTyped({}); setMine([]); setFieldFor(null); setSwap(null); setRecalc(null); setRecalcError('')
     const sid = fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId()
     setTurn(sid)
     try {
@@ -767,7 +792,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
       {reply && (
         <>
           <p className="muted asked">{asked}</p>
-          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setSwap(null); setRecalc(null) }} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The original answer is kept below.` : undefined} was={wasNow} countBy={profile.countBy} />}
+          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setTyped({}); setMine([]); setFieldFor(null); setSwap(null); setRecalc(null) }} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The original answer is kept below.` : undefined} was={wasNow} countBy={profile.countBy} />}
           {recalc && logBlock}
           <Fold when={!!recalc} title={swap ? 'Original answer, before the swap' : 'Original answer, before you changed a portion'}>
           <section className={`card answer tone-${tone}${recalc ? ' stale' : ''}`} role="status" aria-live="polite">
@@ -817,7 +842,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
 
           {editing && receipt && !receipt.carbsOnly && (
             <div ref={editorRef}>
-              <PortionEditor lines={baseLines} grams={grams} units={profile.units} busy={recalcBusy} error={recalcError} onNudge={nudge} assumed={receipt.assumed} removed={removed} onRemove={toggleRemoved} onReset={resetRecipe} />
+              <PortionEditor lines={baseLines} grams={grams} units={profile.units} busy={recalcBusy} error={recalcError} onNudge={nudge} assumed={receipt.assumed} removed={removed} onRemove={toggleRemoved} onReset={resetRecipe} weightEdit={{ typed, mine, fieldFor, setFieldFor }} />
             </div>
           )}
 

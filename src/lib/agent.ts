@@ -85,6 +85,20 @@ export class RateLimitedError extends Error {
   }
 }
 
+/** The engine could not weigh the amount the person typed for that food (docs/specs/recorrect-engine.md): which food, why, and the units it can be said in. */
+export class QuantityRefused extends Error {
+  constructor(public foodId: string, public why: string, public units: string[]) { super('quantity_refused') }
+}
+
+/** One line of a meal sent to be counted again: exactly one of grams, servings or quantity; `theirs` marks an amount the person changed. */
+export interface RecomputeItem {
+  foodId: string
+  grams?: number
+  servings?: number
+  quantity?: { count: number; unit: string }
+  theirs?: boolean
+}
+
 /** The engine wants a signed-in person and was not given a good token. */
 export class SignInRequiredError extends Error {
   constructor() { super('sign_in_required') }
@@ -153,6 +167,10 @@ export interface ReceiptLine {
   said?: string
   /** 'typical' when USDA lists only a regular or whole one and the engine used it: the receipt says so. */
   basis?: string
+  /** What the engine echoed for this line; sent again, unchanged, when the person did not touch it (docs/specs/recorrect-screen.md). */
+  quantity?: { count: number; unit: string }
+  /** The household units this food can be said in beyond weights (the engine's `units`): what the weight field offers. */
+  units?: string[]
   availableCarbs: number
   gi: number | null
   /** Null for a branded product: no glycemic index is published, so no load exists. */
@@ -197,6 +215,8 @@ interface MealResult {
     /** What the person said as a measure was turned into this weight by the engine: the words for it and how it was got. */
     said?: string
     basis?: string
+    quantity?: { count: number; unit: string }
+    units?: string[]
   }[]
   totals: { gl: number; carbs?: number; fiber?: number; availableCarbs?: number }
   /** The budget before this meal; compute_meal returns it when it was given a session. */
@@ -275,6 +295,7 @@ export function buildReceipt(m: MealResult, leftBefore: number | null, sources: 
     grams: it.grams, servings: it.servings, ...(it.measure?.text ? { measure: it.measure.text } : {}),
     ...(it.stepUnit ? { measureUnit: it.stepUnit } : {}),
     ...(it.said ? { said: it.said } : {}), ...(it.basis ? { basis: it.basis } : {}),
+    ...(it.quantity ? { quantity: it.quantity } : {}), ...(it.units?.length ? { units: it.units } : {}),
   }))
   return {
     lines, total: m.totals.gl, leftBefore,
@@ -324,7 +345,7 @@ const recomputeUrl = () => {
  */
 export async function recomputeMeal(
   sessionId: string,
-  items: { foodId: string; grams?: number; servings?: number }[],
+  items: RecomputeItem[],
   sources: Receipt['sources'],
   token?: string | null,
   signal?: AbortSignal,
@@ -342,6 +363,10 @@ export async function recomputeMeal(
     throw new RateLimitedError('ip', Number(body.retryAfterSec ?? res.headers.get('retry-after')) || 60)
   }
   if (res.status === 403) throw new Error('This meal was calculated before you signed in. Ask about it again to change the portions.')
+  if (res.status === 400) {
+    const body = await res.json().catch(() => ({})) as { field?: string; foodId?: string; why?: string; units?: string[] }
+    if (body.field === 'items.quantity' && typeof body.why === 'string') throw new QuantityRefused(String(body.foodId ?? ''), body.why, Array.isArray(body.units) ? body.units : [])
+  }
   if (!res.ok) throw new Error(`Recalculation failed (${res.status})`)
   const m = (await res.json()) as MealResult
   if (!m?.items || typeof m.totals?.gl !== 'number') throw new Error('Unexpected reply from the engine')

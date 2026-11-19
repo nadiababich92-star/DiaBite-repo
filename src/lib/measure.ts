@@ -12,6 +12,9 @@ const MOST: Record<string, number> = { cup: 8, tbsp: 4, tsp: 3, 'fl oz': 16, oz:
 const FRACTIONS: [number, string][] = [[0, ''], [1 / 4, '1/4'], [1 / 3, '1/3'], [1 / 2, '1/2'], [2 / 3, '2/3'], [3 / 4, '3/4']]
 const MAX_GRAMS = 1500
 
+/** The words a unit is shown with in the weight field's select (docs/specs/recorrect-screen.md). Labels only: nothing here converts a unit. */
+export const unitLabel = (unit: string): string => (unit === 'whole' ? 'whole' : unit)
+
 /** How many of the unit the grams are, when that is a whole number or one of the simple fractions; null when it is not. */
 export function countOf(grams: number, m: MeasureUnit): number | null {
   if (!(grams > 0) || !(m.unitGrams > 0)) return null

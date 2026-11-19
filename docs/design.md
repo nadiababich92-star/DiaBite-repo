@@ -298,6 +298,8 @@ with the verdict word taken from `fits`, and the original is dimmed under the la
 
 A measure the person typed is said back the way they said it, with the grams beside it (`1 medium (200 g)`); when USDA lists only a "regular" or "whole" for a food, the line says that word and carries the pill **typical size** (the same pill style as **assumed**). The engine writes the words; the screen prints them.
 
+The weight on a portion row is a button. Tapping it opens a number field and a unit (grams; on US units also ounces and the food's own measure, such as cup or medium); Enter or **Done** has the engine count the meal again, Esc or **Cancel** leaves it. A weight the person changed is theirs: the line says **your weight** (the pill style of **typical size**), and it leaves the card's line "Weights I used", which lists, from the engine's data and never the agent's sentence, the weights still assumed, each one tappable. When none is left the line is not shown. The browser converts no unit and computes no number.
+
 ### Plain-words link
 **What is GL?** sits under the main figure as an underlined link and opens a short
 dialog, drawn into `.app` so the rest of the page can go inert behind it.
