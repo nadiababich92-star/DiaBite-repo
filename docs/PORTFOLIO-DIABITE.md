@@ -49,7 +49,7 @@ DECISION 4 — A quick check first, a diary second. Why: a diabetes educator's f
 DECISION 5 — Three small agents instead of one. Why: different questions need different rules. A router sends each question to a meal specialist that can call the engine's tools, or to an advisor with no tools and no numbers. Cutting a meal turn from four tool calls to two took the 90th-percentile answer time from 26 seconds to under 9.
 
 05 Solution — "How it was built, sequenced to prove the unknowns first."
-1. The promise: an engine over 8,633 food records (USDA data, published glycemic-index tables, 2,000 recipes) and a verifier.
+1. The promise: an engine over 8,659 food records (USDA data, published glycemic-index tables, 2,000 recipes) and a verifier.
 2. The agents and the safety gate on Azure AI Foundry: a router, a meal specialist and an advisor, with the rules in front of all three.
 3. The product: Ask, Diary, a weekly Menu and Profile; email sign-in; a landing page; a dark "tape" look with cream slips; an accessibility pass.
 4. The proof: behavioural checks on the live agent after every change, a security review (row-level security tested with two accounts, headers graded A+), and the measured cost per question.
