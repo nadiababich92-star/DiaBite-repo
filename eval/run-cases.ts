@@ -216,9 +216,14 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
   // The weight the person gave for the whole meal is the weight that was costed, however the agent got there (a record, or a dish scaled by
   // the engine): the items of the call that ended the run add up to it. Three foods at 450 g each, or a dish at an invented 357 g, is not a pass.
   if (typeof e.costedTotalGrams === 'number') {
-    const items = ((lastCostOf(r)?.result as { items?: { grams: number }[] } | undefined)?.items ?? [])
+    const call = lastCostOf(r)
+    const res = call?.result as { items?: { grams: number }[]; scaled?: { by: string; totalG?: number }; unresolved?: unknown[] } | undefined
+    const items = res?.items ?? []
     const total = Math.round(items.reduce((s, i) => s + i.grams, 0) * 10) / 10
-    say(`the meal was costed at the ${e.costedTotalGrams} g the person gave`, items.length > 0 && Math.abs(total - (e.costedTotalGrams as number)) <= 1, `${items.length} items, ${total} g`)
+    // A dish counted from an assumed recipe is scaled to the weight over everything proposed; an ingredient the database could not find is left out
+    // and named (rule 3), so the found ones may add up to less. That is the engine saying what it did, not the weight being ignored.
+    const scaledToIt = res?.scaled?.by === 'totalGrams' && res.scaled.totalG === e.costedTotalGrams && (res.unresolved?.length ?? 0) > 0 && total > 0 && total <= (e.costedTotalGrams as number) + 1
+    say(`the meal was costed at the ${e.costedTotalGrams} g the person gave`, items.length > 0 && (Math.abs(total - (e.costedTotalGrams as number)) <= 1 || scaledToIt), `${items.length} items, ${total} g, scaled ${JSON.stringify(res?.scaled)}, unresolved ${res?.unresolved?.length ?? 0}`)
   }
   if (e.needsWeightAsked === true) {
     const res = lastCallOf(r, 'compute_meal')?.result as { needsWeight?: unknown; totals?: unknown } | undefined
@@ -325,7 +330,8 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
   // A count the user gave is a portion. "Two eggs" costed as one egg is a
   // wrong number that looks like a careful one.
   if (e.itemsAtLeast && typeof e.itemsAtLeast === 'object') {
-    const items = (callOf(r, 'compute_meal')?.input as { items?: { foodId: string; grams?: number; servings?: number }[] } | undefined)?.items ?? []
+    // What counts is the weight the engine costed (the result), not what the model sent: a quantity has no grams until the engine gives it some.
+    const items = (lastCallOf(r, 'compute_meal')?.result as { items?: { foodId: string; grams?: number; servings?: number }[] } | undefined)?.items ?? []
     for (const [foodId, min] of Object.entries(e.itemsAtLeast as Record<string, number>)) {
       // "a|b": either record is a right answer for the food (two curated eggs exist).
       const it = items.find((x) => foodId.split('|').includes(x.foodId))
