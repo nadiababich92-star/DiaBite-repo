@@ -7,9 +7,10 @@ import Tour from './Tour'
 import FeedbackNudge from './FeedbackNudge'
 import { nextStep, type TourStep } from '../lib/tour'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type Milestone } from '../lib/nudge'
-import { askAgent, avoidOf, budgetOf, engineId, lastMealCall, MAX_QUESTION, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type AgentResponse, type CarbLimitResult, type Receipt, type ReceiptLine, type Recalc, type TraceStep } from '../lib/agent'
+import { askAgent, avoidOf, budgetOf, engineId, lastMealCall, MAX_QUESTION, QuantityRefused, RateLimitedError, receiptFrom, recomputeMeal, SignInRequiredError, type RecomputeItem, type AgentResponse, type CarbLimitResult, type Receipt, type Recalc, type TraceStep } from '../lib/agent'
 import { FigurePair, type CarbFigures } from './FigurePair'
-import { gramsShown, measureLabel, nudgeMeasure, ouncesText } from '../lib/measure'
+import { nudgeMeasure, unitLabel } from '../lib/measure'
+import { PortionEditor, WeightsUsed, type TypedQuantity } from './WeightEditor'
 import { dayLabel, eaten, mealForNow, noLoadNote, portionText, viewEntry } from '../lib/diary'
 import { swapNamedIn, type SwapOffer } from '../lib/swap'
 import { MEAL_LABELS } from '../lib/menu'
@@ -133,7 +134,7 @@ function Fold({ when, title, children }: { when: boolean; title: string; childre
   return when ? <details className="was-original"><summary>{title}</summary>{children}</details> : <>{children}</>
 }
 
-function RecalcCard({ rc, onBack, note, was, countBy }: { rc: Recalc; onBack: () => void; note?: string; was?: { gl: number; after: number | null }; countBy: CountBy }) {
+function RecalcCard({ rc, onBack, note, was, countBy, weightsUsed }: { rc: Recalc; onBack: () => void; note?: string; was?: { gl: number; after: number | null }; countBy: CountBy; weightsUsed?: React.ReactNode }) {
   // A dish counted from an assumed recipe stays an estimate through every recalculation: never a plain "Fits".
   const tone = rc.assumed && rc.fits !== undefined ? 'estimate'
     : rc.fits === true ? 'good' : rc.fits === false ? 'bad' : rc.fits === null ? 'partial' : 'ask'
@@ -165,84 +166,12 @@ function RecalcCard({ rc, onBack, note, was, countBy }: { rc: Recalc; onBack: ()
           </>
         )}
         <p className="a-why">{note ?? 'Recalculated with your portions. The original answer is kept below.'}</p>
+        {weightsUsed}
       </div>
       <div className="verify-row">
         <span className="pill low">Calculated by the engine, nothing generated</span>
         {' '}<button className="link" onClick={onBack}>Back to the original</button>
       </div>
-    </section>
-  )
-}
-
-/** What the person typed for one line: the count and the unit, exactly as typed. The browser converts nothing; the engine turns it into grams. */
-export interface TypedQuantity { count: number; unit: string }
-
-/** What the portion editor needs to let a weight be typed: the state AskPage keeps (docs/specs/recorrect-screen.md). Not read yet: Stage 4. */
-export interface WeightEdit {
-  typed: Record<number, TypedQuantity>
-  mine: number[]
-  fieldFor: number | null
-  setFieldFor: (i: number | null) => void
-}
-
-interface WeightFieldProps { line: ReceiptLine; units?: 'imperial' | 'metric'; assumed: boolean; error?: string; onCommit: (q: TypedQuantity) => void; onCancel: () => void }
-
-/** The number field and the unit select that replace a weight while it is being typed. Skeleton: it renders nothing until Stage 4. */
-export function WeightField(_props: WeightFieldProps): null { return null }
-
-/** The card's line "Weights I used", built from the engine's `basis` per line (never the agent's sentence). Skeleton: renders nothing until Stage 4. */
-export function WeightsUsed(_props: { lines: ReceiptLine[]; onEdit: (i: number) => void }): null { return null }
-
-/**
- * Each food's weight, with a step down and a step up. The engine does the sums when the weight settles.
- * For a dish counted from an assumed recipe it is the composition card: an ingredient can also be taken
- * out and put back, and the whole thing reset to what the agent suggested.
- */
-function PortionEditor({ lines, grams, units, busy, error, onNudge, assumed, removed, onRemove, onReset }: {
-  lines: ReceiptLine[]; grams: Record<number, number>; units?: 'imperial' | 'metric'; busy: boolean; error: string; onNudge: (i: number, dir: 1 | -1) => void
-  assumed?: Receipt['assumed']; removed: number[]; onRemove: (i: number) => void; onReset: () => void
-  /** The state for typing a weight; read from Stage 4. */
-  weightEdit?: WeightEdit
-}) {
-  const edited = Object.keys(grams).length > 0 || removed.length > 0
-  return (
-    <section className="card portions">
-      <h2>{assumed ? "Not your recipe?" : 'Not what you ate?'}</h2>
-      <p className="muted">{assumed ? 'Change a gram or take an ingredient out and the engine counts it again.' : 'Change a portion and the engine counts it again.'}</p>
-      <ul className="portion-list">
-        {lines.map((l, i) => {
-          const value = grams[i] ?? l.servings ?? l.grams
-          const unit = l.servings ? (value === 1 ? 'serving' : 'servings') : 'g'
-          // On US units, a food with a measure in its own table is moved by that measure and shows it beside the grams.
-          const said = units === 'imperial' && !l.servings ? measureLabel(value, l.measureUnit) : null
-          // No measure for this food: the weight in ounces, beside the grams (US units only; the grams are what is counted).
-          const oz = units === 'imperial' && !l.servings && !said ? ouncesText(value) : null
-          const gone = removed.includes(i)
-          // The same rounding as the receipt ("113 g"): the engine's 113.4 is counted, not shown.
-          const shown = l.servings ? value : gramsShown(value)
-          return (
-            <li key={`${l.foodId}-${i}`} className={gone ? 'removed' : undefined}>
-              <span className="portion-name">
-                {l.name}
-                {assumed?.assumedFoodIds.includes(l.foodId) && <> <span className="pill none assumed">assumed</span></>}
-                {gone && <> <span className="pill none">left out</span></>}
-              </span>
-              {gone ? (
-                <button className="link" aria-label={`Put ${l.name} back`} onClick={() => onRemove(i)}>Put back</button>
-              ) : (
-                <span className="stepper">
-                  <button className="step" aria-label={`Less ${l.name}`} onClick={() => onNudge(i, -1)}>−</button>
-                  <span className="step-v" aria-live="polite">{said ? `${said} · ${shown} ${unit}` : oz ? `${oz} · ${shown} ${unit}` : `${shown} ${unit}`}</span>
-                  <button className="step" aria-label={`More ${l.name}`} onClick={() => onNudge(i, 1)}>+</button>
-                  {assumed && <button className="step remove-step" aria-label={`Remove ${l.name}`} onClick={() => onRemove(i)}>×</button>}
-                </span>
-              )}
-            </li>
-          )
-        })}
-      </ul>
-      {assumed && edited && <button className="link" onClick={onReset}>Reset to the suggestion</button>}
-      <p className="muted portion-state" role="status">{busy ? 'Counting again…' : error}</p>
     </section>
   )
 }
@@ -361,14 +290,14 @@ function answerHint(trace?: TraceStep[]): string {
   return 'Type your answer here'
 }
 
-function ReceiptView({ r, units }: { r: Receipt; units?: 'imperial' | 'metric' }) {
+function ReceiptView({ r, units, mineFlags }: { r: Receipt; units?: 'imperial' | 'metric'; mineFlags?: boolean[] }) {
   return (
     <div className="receipt">
       {r.assumed && <p className="receipt-note">Counted as a typical <strong>{r.assumed.dish}</strong>. Change anything that isn't yours.</p>}
       <div className="receipt-head"><span>food · portion</span><span>available carbs (g) · GI · GL</span></div>
-      {r.lines.map((l) => (
+      {r.lines.map((l, k) => (
         <div className="receipt-line" key={l.foodId + l.portion}>
-          <span>{l.name} <em>{l.said ?? portionText(l.portion, l.measure, units, l.servings ? undefined : l.grams)}</em>{l.basis === 'typical' && <> <span className="pill none typical">typical size</span></>}{r.assumed?.assumedFoodIds.includes(l.foodId) && <> <span className="pill none assumed">assumed</span></>}</span>
+          <span>{l.name} <em>{l.said ?? portionText(l.portion, l.measure, units, l.servings ? undefined : l.grams)}</em>{l.basis === 'typical' && <> <span className="pill none typical">typical size</span></>}{l.basis === 'stated' && mineFlags?.[k] && <> <span className="pill none mine">your weight</span></>}{r.assumed?.assumedFoodIds.includes(l.foodId) && <> <span className="pill none assumed">assumed</span></>}</span>
           <span>{l.availableCarbs.toFixed(1)} · {l.gi ?? '—'} · <b>{l.gl === null ? '—' : l.gl.toFixed(1)}</b></span>
         </div>
       ))}
@@ -459,6 +388,8 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   const [typed, setTyped] = useState<Record<number, TypedQuantity>>({})
   const [mine, setMine] = useState<number[]>([])
   const [fieldFor, setFieldFor] = useState<number | null>(null)
+  // The engine could not weigh what was typed for a line: what was typed, and the one line to say under the field.
+  const [refusal, setRefusal] = useState<{ index: number; count: string; unit: string; message: string } | null>(null)
   const [recalc, setRecalc] = useState<Recalc | null>(null)
   // A swap the person accepted from the Next line: which line of the meal it replaces, and by what (the engine's own numbers for it).
   const [swap, setSwap] = useState<{ index: number; id: string; name: string; unit: 'g' | 'serving'; portion: number; replaced: string } | null>(null)
@@ -517,10 +448,29 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     if (!receipt) return []
     if (!swap) return receipt.lines
     return receipt.lines.map((l, i) => i !== swap.index ? l : {
-      ...l, foodId: swap.id, name: swap.name,
+      ...l, foodId: swap.id, name: swap.name, quantity: undefined, units: undefined, said: undefined, basis: undefined,
       ...(swap.unit === 'serving' ? { servings: swap.portion, grams: 0 } : { servings: undefined, grams: swap.portion }),
     })
   }, [receipt, swap])
+
+  // The engine's lines of the recalculated card, put against the editor's lines: a line the person took out has none. And back: which editor line each card line is.
+  const baseIndexOfCard = useMemo(() => baseLines.map((_, i) => i).filter((i) => !removed.includes(i)), [baseLines, removed])
+  const alignedRecalc = useMemo(() => {
+    let k = 0
+    return baseLines.map((_, i) => (!recalc || removed.includes(i) ? undefined : recalc.receipt.lines[k++]))
+  }, [recalc, baseLines, removed])
+  const mineFlags = useMemo(() => baseIndexOfCard.map((i) => mine.includes(i)), [baseIndexOfCard, mine])
+
+  // A weight typed on a line: it is the person's from now on; the engine counts the meal again when the field closes (one request, not one per key).
+  function commitWeight(i: number, q: TypedQuantity) {
+    setTyped((t) => ({ ...t, [i]: q }))
+    setGrams((g) => { const n = { ...g }; delete n[i]; return n })
+    setMine((m) => (m.includes(i) ? m : [...m, i]))
+    setRefusal(null); setFieldFor(null); setLogged(false)
+  }
+  const cancelWeight = () => { setRefusal(null); setFieldFor(null) }
+  // A weight in the card's "Weights I used" line opens that line's field in the editor.
+  function editWeight(i: number) { setEditing(true); setFieldFor(i); requestAnimationFrame(() => bringIntoView(editorRef.current)) }
 
   function acceptSwap(alt: SwapOffer) {
     if (!receipt) return
@@ -535,12 +485,13 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   function nudge(i: number, dir: 1 | -1) {
     if (!receipt) return
     const l = baseLines[i]
-    const base = grams[i] ?? l.servings ?? l.grams
+    const base = grams[i] ?? (typed[i] ? alignedRecalc[i]?.grams : undefined) ?? l.servings ?? l.grams
     const measured = profile.units === 'imperial' && !l.servings && l.measureUnit ? nudgeMeasure(base, l.measureUnit, dir) : null
-    if (measured !== null) { setGrams((g) => ({ ...g, [i]: measured })); setLogged(false); return }
+    if (measured !== null) { setGrams((g) => ({ ...g, [i]: measured })); setTyped((t) => { const n = { ...t }; delete n[i]; return n }); setMine((m) => (m.includes(i) ? m : [...m, i])); setLogged(false); return }
     const step = l.servings ? 0.5 : Math.max(5, Math.round((base * 0.1) / 5) * 5)
     const next = l.servings ? Math.min(12, Math.max(0.5, base + dir * step)) : Math.min(1500, Math.max(5, base + dir * step))
     setGrams((g) => ({ ...g, [i]: Math.round(next * 100) / 100 }))
+    if (!l.servings) { setTyped((t) => { const n = { ...t }; delete n[i]; return n }); setMine((m) => (m.includes(i) ? m : [...m, i])) }
     setLogged(false)
   }
 
@@ -548,33 +499,50 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     setRemoved((r) => (r.includes(i) ? r.filter((x) => x !== i) : [...r, i]))
     setLogged(false)
   }
-  function resetRecipe() { setGrams({}); setRemoved([]); setTyped({}); setMine([]); setFieldFor(null); setSwap(null); setLogged(false) }
+  function resetRecipe() { setGrams({}); setRemoved([]); setTyped({}); setMine([]); setFieldFor(null); setRefusal(null); setSwap(null); setLogged(false) }
 
   // Let the weight settle for a moment, then ask the engine to count it again.
   useEffect(() => {
     if (!receipt || !turn) return
-    const changed = baseLines.some((l, i) => grams[i] !== undefined && grams[i] !== (l.servings ?? l.grams)) || removed.length > 0 || swap !== null
+    const changed = baseLines.some((l, i) => grams[i] !== undefined && grams[i] !== (l.servings ?? l.grams)) || removed.length > 0 || swap !== null || Object.keys(typed).length > 0
     if (!changed) { setRecalc(null); setRecalcError(''); return }
     if (removed.length >= baseLines.length) { setRecalc(null); setRecalcError('Keep at least one ingredient.'); return }
     const ctl = new AbortController()
     const timer = setTimeout(async () => {
       setRecalcBusy(true); setRecalcError('')
       try {
-        const items = baseLines.flatMap((l, i) => {
+        // What is sent for each line: what the person typed or moved is theirs; a line they left alone goes back as the amount it came with
+        // (its quantity, when the engine echoed one), so it comes back with the same basis and a weight that was assumed stays named as assumed.
+        const items: RecomputeItem[] = baseLines.flatMap((l, i): RecomputeItem[] => {
           if (removed.includes(i)) return []
-          const v = grams[i] ?? l.servings ?? l.grams
-          return [l.servings ? { foodId: l.foodId, servings: v } : { foodId: l.foodId, grams: v }]
+          if (typed[i]) return [{ foodId: l.foodId, quantity: typed[i], theirs: true }]
+          if (l.servings) return [{ foodId: l.foodId, servings: grams[i] ?? l.servings }]
+          const v = grams[i]
+          if (v !== undefined && v !== l.grams) return [{ foodId: l.foodId, grams: v, theirs: true }]
+          if (l.quantity) return [{ foodId: l.foodId, quantity: l.quantity }]
+          return [{ foodId: l.foodId, grams: l.grams }]
         })
         setRecalc(await recomputeMeal(turn, items, receipt.sources, await accessToken(), ctl.signal, receipt.assumed))
       } catch (e) {
         if ((e as Error).name === 'AbortError') return
-        if (e instanceof SignInRequiredError) onSessionEnded?.()
+        if (e instanceof QuantityRefused) {
+          // The engine has no honest weight for what was typed: nothing is recounted, the line goes back to what it was, and its field reopens with the text still in it.
+          const at = baseLines.findIndex((l, k) => typed[k] && l.foodId === e.foodId)
+          if (at >= 0) {
+            const q = typed[at]
+            setTyped((t) => { const n = { ...t }; delete n[at]; return n })
+            setMine((m) => m.filter((x) => x !== at))
+            setRefusal({ index: at, count: String(q.count), unit: q.unit, message: `No USDA measure for ${baseLines[at].name} in ${unitLabel(q.unit)}. Try grams${profile.units === 'imperial' ? ' or ounces' : ''}.` })
+            setFieldFor(at)
+          }
+          setRecalcError('')
+        } else if (e instanceof SignInRequiredError) onSessionEnded?.()
         else if (e instanceof RateLimitedError) setRecalcError('That is a lot of changes at once. Try again in a minute.')
         else setRecalcError("Couldn't count that again. Your original answer is unchanged.")
       } finally { setRecalcBusy(false) }
     }, 400)
     return () => { clearTimeout(timer); ctl.abort() }
-  }, [grams, removed, swap, baseLines, receipt, turn, onSessionEnded])
+  }, [grams, typed, removed, swap, baseLines, receipt, turn, onSessionEnded, profile.units])
 
   // Another day is another budget: an answer on screen was counted against the old one, so it is asked again for the new day.
   function pickDay(d: string) {
@@ -591,7 +559,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     abort.current?.abort()
     abort.current = new AbortController()
     setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(true); setLogged(false); setLogNote(''); setAsked(q); setReplyText('')
-    setEditing(true); setGrams({}); setRemoved([]); setTyped({}); setMine([]); setFieldFor(null); setSwap(null); setRecalc(null); setRecalcError('')
+    setEditing(true); setGrams({}); setRemoved([]); setTyped({}); setMine([]); setFieldFor(null); setRefusal(null); setSwap(null); setRecalc(null); setRecalcError('')
     const sid = fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId()
     setTurn(sid)
     try {
@@ -792,7 +760,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
       {reply && (
         <>
           <p className="muted asked">{asked}</p>
-          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setTyped({}); setMine([]); setFieldFor(null); setSwap(null); setRecalc(null) }} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The original answer is kept below.` : undefined} was={wasNow} countBy={profile.countBy} />}
+          {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setTyped({}); setMine([]); setFieldFor(null); setRefusal(null); setSwap(null); setRecalc(null) }} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The original answer is kept below.` : undefined} was={wasNow} countBy={profile.countBy} weightsUsed={<WeightsUsed lines={recalc.receipt.lines.map((line, k) => ({ line, index: baseIndexOfCard[k] }))} onEdit={editWeight} />} />}
           {recalc && logBlock}
           <Fold when={!!recalc} title={swap ? 'Original answer, before the swap' : 'Original answer, before you changed a portion'}>
           <section className={`card answer tone-${tone}${recalc ? ' stale' : ''}`} role="status" aria-live="polite">
@@ -842,14 +810,14 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
 
           {editing && receipt && !receipt.carbsOnly && (
             <div ref={editorRef}>
-              <PortionEditor lines={baseLines} grams={grams} units={profile.units} busy={recalcBusy} error={recalcError} onNudge={nudge} assumed={receipt.assumed} removed={removed} onRemove={toggleRemoved} onReset={resetRecipe} weightEdit={{ typed, mine, fieldFor, setFieldFor }} />
+              <PortionEditor lines={baseLines} grams={grams} units={profile.units} busy={recalcBusy} error={recalcError} onNudge={nudge} assumed={receipt.assumed} removed={removed} onRemove={toggleRemoved} onReset={resetRecipe} weightEdit={{ typed, mine, fieldFor, setFieldFor, aligned: alignedRecalc, commit: commitWeight, cancel: cancelWeight, refusal }} />
             </div>
           )}
 
           {showReceipt && active && (
             <section className="card" ref={receiptRef}>
               <h2>The receipt</h2>
-              <ReceiptView r={active} units={profile.units} />
+              <ReceiptView r={active} units={profile.units} mineFlags={recalc ? mineFlags : undefined} />
             </section>
           )}
 

@@ -2,7 +2,7 @@
 
 *Stage 2, from `docs/engineering/engineering-doc.md` (approved 19 November 2026). Companion specs: `recorrect-engine.md`, `recorrect-screen.md`. A feature is not finished until `npm run eval`, `npm run eval:abuse`, the rehearsal check and `npm run eval:agent` have run, and every case below is added in the same change as the code (CLAUDE.md, stage 5). **Mechanical checks read the tool result and the markup, never the wording of an answer** (rule 7).*
 
-**The ids are `RC1` to `RC10` for the engine block, `S1` to `S7` for the static render, `W19` for the rehearsal.** (`R1` to `R3` are already used by `eval/run-abuse.ts` for `/meal/recompute`; the plan's "R1 to R10" are renamed here to avoid the clash.)
+**The ids are `RC1` to `RC10` for the engine block, `S1` to `S7` for the static render, `W20` for the rehearsal (`W19` was already the feedback card).** (`R1` to `R3` are already used by `eval/run-abuse.ts` for `/meal/recompute`; the plan's "R1 to R10" are renamed here to avoid the clash.)
 
 ## 1. Engine block `recorrect` (`eval/run-engine.ts`)
 
@@ -51,7 +51,7 @@ Render `PortionEditor` and `RecalcCard` to markup with props, read the markup:
 
 ## 3. Rehearsal check (`eval/rehearsal.mjs`, throwaway account, the other W-checks' pattern)
 
-`W19`: sign in on a device, ask "a medium apple" on US units, open Portions, tap the weight, type `120` with unit `g`, press Enter; assert (a) the recalculated card appears with the figures changed, (b) the line says **your weight**, (c) the card has no "Weights I used" line, (d) **Log it**, open the Diary and read `120 g`; (e) no script error. A second pass: ask "an apple and a cup of rice", correct only the apple; assert the rice line keeps its `1 cup (158 g)` and the weights list still names the rice. The account is removed at the end.
+`W20`: sign in on a device, ask "a medium apple" on US units, open Portions, tap the weight, type `120` with unit `g`, press Enter; assert (a) the recalculated card appears with the figures changed, (b) the line says **your weight**, (c) the card has no "Weights I used" line, (d) **Log it**, open the Diary and read `120 g`; (e) no script error. A second pass: ask "an apple and a cup of rice", correct only the apple; assert the rice line keeps its `1 cup (158 g)` and the weights list still names the rice. The account is removed at the end.
 
 ## 4. Mutations (each must fail a named case)
 

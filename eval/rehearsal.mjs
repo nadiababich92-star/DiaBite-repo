@@ -221,6 +221,24 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
   const recipeRows = (await diaryRows()).filter((r) => String(r.food_id).startsWith('rec:'))
   const banner = /haven't been saved/.test(await A.text())
   check('W17g', 'device A: a meal with a recipe counted by servings is saved (its weight is the servings, not 0), and no "not saved" banner shows', recipeRows.length >= 1 && recipeRows.every((r) => Number(r.grams) > 0) && !banner, JSON.stringify([recipeRows.map((r) => [r.food_id, r.grams]), banner]))
+  // Correcting a weight on the receipt (docs/specs/recorrect-evals.md, W20): tap the weight, type a number, the engine counts the meal again; the changed line
+  // is the person's, the one left alone is still named as assumed, and the Diary keeps the corrected weight.
+  await tabA('Ask')
+  await askOn(A, 'A medium apple and a cup of cooked white rice')
+  const appleBtn = `[...document.querySelectorAll('.portions li')].find(li => /apple/i.test(li.innerText))?.querySelector('.weight-btn')`
+  const hadButton = await A.b.ev(`!!(${appleBtn})`)
+  await A.b.ev(`(${appleBtn})?.click()`); await sleep(400)
+  await A.b.send('Input.insertText', { text: '120' })
+  await A.b.ev(`[...document.querySelectorAll('.weight-edit button')].find(x=>x.innerText.trim()==='Done')?.click()`)
+  for (let i = 0; i < 40; i++) { await sleep(500); if (await A.b.ev(`!!document.querySelector('.card.answer.recalc')`)) break }
+  const mine = await A.b.ev(`[...document.querySelectorAll('.portions li')].filter(li => /your weight/.test(li.innerText)).map(li => li.innerText.replace(/\n+/g, ' ').slice(0, 80))`)
+  const recalcShown = await A.b.ev(`!!document.querySelector('.card.answer.recalc')`)
+  check('W20', 'device A: tap the apple\'s weight, type 120, Done: the meal is counted again and the line says "your weight"', hadButton && recalcShown && Array.isArray(mine) && mine.length === 1 && /apple/i.test(mine[0]), JSON.stringify([hadButton, recalcShown, mine]))
+  const weightsLine = await A.b.ev(`document.querySelector('.recalc .weights-used')?.innerText ?? ''`)
+  check('W20b', 'the card\'s "Weights I used" still names the rice, which was left alone, and no longer names the apple', /rice/i.test(weightsLine) && !/apple/i.test(weightsLine), JSON.stringify(weightsLine))
+  await exact(A, 'Log it'); await sleep(5000)
+  const corrected = (await diaryRows()).filter((r) => /apple/i.test(String(r.food_id)) && r.planned !== true)
+  check('W20c', 'Log it keeps the corrected weight: the diary row is 120 g, basis stated, said "120 g"', corrected.some((r) => Number(r.grams) === 120 && r.snapshot?.basis === 'stated' && /120 g/.test(String(r.snapshot?.said ?? ''))), JSON.stringify(corrected.map((r) => [r.food_id, r.grams, r.snapshot?.basis, r.snapshot?.said])))
 }
 
 // ── the account can be removed, and takes everything with it ────────────────

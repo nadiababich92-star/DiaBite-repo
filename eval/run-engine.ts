@@ -40,6 +40,8 @@ import { GI_CROSSCHECKED_ON, recordFromRow, getRecord, hasNoLoad, householdMeasu
 import { legacyHouseholdMeasure, legacyStepUnit } from './legacy-measure'
 import { countOf, countText, gramsShown, measureLabel, nudgeMeasure } from '../src/lib/measure'
 import { FigurePair } from '../src/components/FigurePair'
+import { PortionEditor, WeightsUsed } from '../src/components/WeightEditor'
+import type { ReceiptLine } from '../src/lib/agent'
 import GlHelp, { GlHelpContext } from '../src/components/GlHelp'
 import { GI_GL_HOW, GI_GL_VIDEO, GI_GL_WORDS } from '../src/lib/glWords'
 import { budgetOf, buildReceipt, receiptFrom } from '../src/lib/agent'
@@ -474,6 +476,51 @@ const recorrectMisses: string[] = []
   // The total is the engine's: the same amounts typed or sent as grams cost the same
   const t1 = mealOf([{ foodId: 'seed:rice-white', quantity: { count: 1, unit: 'cup' }, theirs: true }])?.totals.gl, t2 = computeMeal([{ foodId: 'seed:rice-white', grams: 158 }]).totals.gl
   if (t1 !== t2) miss(`a cup of rice typed costs ${t1}, as grams ${t2}`)
+}
+// ── S1 to S7: the screen that corrects a weight, rendered to markup and read (docs/specs/recorrect-evals.md) ─────────────────────────
+{
+  const miss = (m: string) => recorrectMisses.push(`    ${m}`)
+  const line = (o: Partial<ReceiptLine>): ReceiptLine => ({ foodId: 'seed:apple', name: 'Apple', portion: '200 g', availableCarbs: 23.2, gi: 36, gl: 8.4, kcal: 104, carbs: 28, fiber: 4.8, protein: 0.6, fat: 0.4, grams: 200, ...o })
+  const apple = line({ measure: '1 medium', measureUnit: { unit: 'medium', unitGrams: 200 }, quantity: { count: 1, unit: 'medium' }, units: ['whole', 'medium'], said: '1 medium (200 g)', basis: 'usda_measure' })
+  const noop = () => {}
+  const edit = (o: Record<string, unknown> = {}) => ({ typed: {}, mine: [], fieldFor: null, setFieldFor: noop, aligned: [] as (ReceiptLine | undefined)[], commit: noop, cancel: noop, refusal: null, ...o })
+  const editor = (lines: ReceiptLine[], we: object, units: 'imperial' | 'metric' = 'imperial', assumed?: never) =>
+    renderToStaticMarkup(createElement(PortionEditor, { lines, grams: {}, units, busy: false, error: '', onNudge: noop, assumed, removed: [], onRemove: noop, onReset: noop, weightEdit: we as never }))
+  // S1: the weight is a button that names the food and the weight
+  const s1 = editor([apple], edit())
+  if (!/<button[^>]*weight-btn[^>]*aria-label="Change the weight of Apple, now 1 medium, 200 grams"/.test(s1) && !/aria-label="Change the weight of Apple, now 1 medium, 200 grams"[^>]*>/.test(s1)) miss(`S1 the weight button: ${s1.slice(0, 400)}`)
+  // S2: the open field, its label, the select by units
+  const s2i = editor([apple], edit({ fieldFor: 0 }))
+  const opts = (h: string) => [...h.matchAll(/<option value="([^"]+)"/g)].map((m) => m[1])
+  if (!/<form class="weight-edit"/.test(s2i) || !s2i.includes('Weight of Apple') || !/<input[^>]*inputMode="decimal"/.test(s2i) || !/>Done</.test(s2i) || !/>Cancel</.test(s2i)) miss(`S2 the field: ${s2i.slice(0, 300)}`)
+  if (opts(s2i).join(',') !== 'g,oz,medium,whole') miss(`S2 imperial units: ${opts(s2i)}`)
+  if (opts(editor([apple], edit({ fieldFor: 0 }), 'metric')).join(',') !== 'g') miss('S2 a metric session must offer grams only')
+  if (opts(editor([apple], edit({ fieldFor: 0 }), 'imperial', { dish: 'x', assumedFoodIds: ['seed:apple'] } as never)).join(',') !== 'g') miss('S2 an ingredient of an assumed dish must offer grams only')
+  // S3: whose weight it is
+  const stated = line({ basis: 'stated', said: '120 g' })
+  const s3a = editor([apple], edit({ mine: [0], aligned: [stated] })), s3b = editor([apple], edit({ mine: [], aligned: [stated] })), s3c = editor([line({ basis: 'typical', said: '1 banana (126 g)' })], edit())
+  if (!/pill none mine">your weight</.test(s3a)) miss('S3 a changed line does not say your weight')
+  if (/your weight/.test(s3b)) miss('S3 a line the person did not change on this card says your weight')
+  if (!/pill none typical">typical size</.test(s3c) || /your weight/.test(s3c)) miss('S3 a typical line must say typical size and not your weight')
+  // S4, S5: the weights line is built from basis: assumed lines only, in order, each a button; none left, no line
+  const rows = (ls: ReceiptLine[]) => ls.map((l, index) => ({ line: l, index }))
+  const banana = line({ foodId: 'seed:banana', name: 'Banana', basis: 'typical', said: '1 banana (126 g)' }), rice = line({ foodId: 'seed:rice-white', name: 'White rice, cooked', basis: 'usda_measure', said: '1 cup (158 g)' })
+  const s4 = renderToStaticMarkup(createElement(WeightsUsed, { lines: rows([banana, line({ basis: 'stated', said: '120 g' }), rice, line({ foodId: 'x', name: 'Mystery' })]), onEdit: noop }))
+  if (!s4.includes('Weights I used:') || (s4.match(/<button/g) ?? []).length !== 2 || !s4.includes('>banana 1 banana (126 g)</button>') || !s4.includes('>white rice 1 cup (158 g)</button>') || s4.indexOf('banana') > s4.indexOf('white rice')) miss(`S4 the weights line: ${s4.slice(0, 400)}`)
+  if (/120 g|Mystery|mystery/.test(s4)) miss('S4/S5 a stated line or a line with no basis is listed')
+  if (renderToStaticMarkup(createElement(WeightsUsed, { lines: rows([line({ basis: 'stated', said: '120 g' })]), onEdit: noop })) !== '') miss('S4 with every weight the person\'s the line is still shown')
+  // S6: a recipe counted by serving keeps the stepper and has no field
+  const recipe = line({ foodId: 'rec:DB-1148', name: 'Spaghetti with Meat Sauce', servings: 1, grams: 0 })
+  const s6 = editor([recipe], edit({ fieldFor: 0 }))
+  if (/weight-btn|weight-edit/.test(s6) || !/class="step-v"/.test(s6)) miss(`S6 a recipe by serving: ${s6.slice(0, 300)}`)
+  // S7: the style rules use tokens only
+  const css = readFileSync(join(ROOT, 'src', 'styles.css'), 'utf8')
+  const block = css.slice(css.indexOf('/* Correcting a weight'), css.indexOf('.weights-used .weight-btn-inline'))
+  if (!block || /#[0-9a-fA-F]{3,8}\b/.test(block) || /--[a-z-]+\s*:/.test(block)) miss('S7 the correcting-a-weight styles contain a colour or define a custom property')
+  // RC4 (source): the recount never sends bare grams for a line the person left alone and the engine gave a quantity for
+  const ask = readFileSync(join(ROOT, 'src', 'components', 'AskPage.tsx'), 'utf8')
+  if (!ask.includes('if (l.quantity) return [{ foodId: l.foodId, quantity: l.quantity }]') || /\[l\.servings \? \{ foodId: l\.foodId, servings: v \} : \{ foodId: l\.foodId, grams: v \}\]/.test(ask)) miss('RC4 the recount sends bare grams for an untouched line')
+  if (/\b28\.3|\* ?28\b|GRAMS_PER_OUNCE/.test(ask + readFileSync(join(ROOT, 'src', 'components', 'WeightEditor.tsx'), 'utf8'))) miss('the browser converts a unit')
 }
 console.log(`recorrect ${recorrectMisses.length === 0 ? 'ok' : 'WRONG'}`)
 recorrectMisses.forEach((m) => console.log(m))

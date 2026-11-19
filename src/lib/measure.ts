@@ -15,6 +15,35 @@ const MAX_GRAMS = 1500
 /** The words a unit is shown with in the weight field's select (docs/specs/recorrect-screen.md). Labels only: nothing here converts a unit. */
 export const unitLabel = (unit: string): string => (unit === 'whole' ? 'whole' : unit)
 
+/** The household units a food's own table can offer in the weight field, in the order the select shows them. */
+const HOUSEHOLD = ['cup', 'tbsp', 'tsp', 'fl oz', 'slice', 'piece', 'small', 'medium', 'large', 'whole']
+
+/**
+ * The units the weight field offers for one line, and the one it starts on (docs/specs/recorrect-screen.md, section 2). Grams always; on US units
+ * also ounces and at most two of the food's own household units, the unit the line is already in first. A dish's ingredient is grams only: it has
+ * no household unit. This chooses what to show; the engine does every conversion.
+ */
+export function weightUnits(o: { imperial: boolean; assumed: boolean; lineUnits?: string[]; current?: { count: number; unit: string } }): { options: string[]; start: string; count: string } {
+  if (!o.imperial || o.assumed) return { options: ['g'], start: 'g', count: '' }
+  const own = (o.lineUnits ?? []).filter((u) => HOUSEHOLD.includes(u))
+  const first = o.current && own.includes(o.current.unit) ? [o.current.unit] : []
+  const household = [...first, ...own.filter((u) => !first.includes(u))].slice(0, 2)
+  const options = ['g', 'oz', ...household]
+  const cur = o.current && options.includes(o.current.unit) ? o.current : null
+  return { options, start: cur ? cur.unit : 'oz', count: cur ? String(cur.count) : '' }
+}
+
+/** What was typed in the weight field as a number: digits and one decimal point or comma; null for anything else (the engine checks the bounds). */
+export function typedNumber(text: string): number | null {
+  const t = text.trim().replace(',', '.')
+  if (!/^\d+(\.\d+)?$/.test(t)) return null
+  const n = Number(t)
+  return Number.isFinite(n) && n > 0 ? n : null
+}
+
+/** "Apple" or "Chicken breast, cooked" as it is said in a sentence: the head of the name, lower case. */
+export const foodHead = (name: string): string => name.split(/[,(]/)[0].trim().toLowerCase()
+
 /** How many of the unit the grams are, when that is a whole number or one of the simple fractions; null when it is not. */
 export function countOf(grams: number, m: MeasureUnit): number | null {
   if (!(grams > 0) || !(m.unitGrams > 0)) return null
