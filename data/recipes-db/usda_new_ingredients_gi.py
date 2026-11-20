@@ -61,6 +61,18 @@ def pool(tier):
 def hits(rx, ex, rows):
     r = re.compile('^(?:' + rx + ')', re.I); e = re.compile(ex, re.I) if ex else None
     return [x for x in rows if r.search(x['food']) and not (e and e.search(x['food'])) and x.get('gi') is not None]
+# names for the ingredients that need no GI search (meats, fats, a vinegar): a key and the name the menu prints
+NAMES = {
+ 'usda_ham_sliced': ('ham_deli_lean', 'Ham, deli sliced, 96% fat free'), 'usda_beef_cured': ('corned_beef', 'Corned beef, cooked'),
+ 'usda_pork_fresh': ('pork_fat_cooked', 'Pork fat, cooked'), 'usda_pork_sausage_link_patty': ('pork_sausage', 'Pork sausage, cooked'),
+ 'usda_salami_dry_or_hard': ('salami', 'Salami'), 'usda_pepperoni_beef_and_pork': ('pepperoni', 'Pepperoni'),
+ 'usda_roast_beef_deli_style': ('roast_beef_deli', 'Roast beef, deli sliced'), 'usda_vinegar_distilled': ('distilled_vinegar', 'Distilled vinegar'),
+ 'usda_animal_fat_bacon_grease': ('bacon_grease', 'Bacon grease'), 'usda_chicken_broiler': ('chicken_thigh_bbq_rotisserie', 'Chicken thigh, BBQ rotisserie, meat only'),
+ 'usda_chicken_broilers_or_fryers': ('chicken_giblets', 'Chicken giblets, simmered'), 'usda_tofu_soft': ('tofu_soft', 'Tofu, soft'),
+ 'usda_shortening_vegetable': ('vegetable_shortening', 'Vegetable shortening'), 'usda_rice_and_vermicelli_mix_rice_pilaf_flavo': ('rice_pilaf_mix', 'Rice and vermicelli mix, pilaf'),
+ 'usda_fat_chicken': ('chicken_fat', 'Chicken fat'), 'usda_turkey_whole': ('turkey_roasted', 'Turkey, roasted, meat only'),
+ 'usda_beef_round': ('beef_round_roast', 'Beef round, cooked, with fat'), 'usda_beef_ground': ('ground_beef_80', 'Ground beef 80% lean, cooked'),
+}
 out = {}
 for slug, v in new.items():
     if v['dishes'] <= 0: continue
@@ -84,7 +96,8 @@ for slug, v in new.items():
         else:
             base.update(gi=None, confidence='none', basis='no measurement and no estimate chosen', sample=[])
     else:
-        base.update(key=slug.replace('usda_', ''), display=v['name'].split(',')[0], group='protein', gi=0, confidence='definitional' if net <= 0.6 else 'CHECK', basis='no available carbohydrate: GI 0 by definition' if net <= 0.6 else 'unclassified', sample=[])
+        key2, disp2 = NAMES.get(slug, (slug.replace('usda_', ''), v['name'].split(',')[0]))
+        base.update(key=key2, display=disp2, group='protein', gi=0, confidence='definitional' if net <= 0.6 else 'CHECK', basis='no available carbohydrate: GI 0 by definition' if net <= 0.6 else 'unclassified', sample=[])
     out[slug] = base
 # Chosen by hand 20 November 2026 after reading what the pools returned: the first pass matched composites (cola for powdered sugar, carrot cake for flour), so
 # an ingredient is taken from a measurement only when the tested food IS that ingredient; a processed meat or cheese with under 11 g carbohydrate takes the

@@ -35,7 +35,7 @@ SAME = {
  'usda_soy_sauce_made_from_soy_and_wheat_shoyu': 'soy_sauce', 'usda_salt_table': 'salt', 'usda_tomatoes_red': 'tomato', 'usda_peppers_sweet': 'bell_pepper',
  'usda_mushrooms_canned': 'mushrooms', 'usda_potatoes_baked': 'potato_baked', 'usda_crustaceans_shrimp': 'shrimp', 'usda_crustaceans_crab': 'crab',
  'usda_fish_anchovy': 'anchovies', 'usda_fish_cod': 'cod', 'usda_soup_chicken_broth': 'chicken_broth', 'usda_soup_beef_broth_or_bouillon_canned': 'beef_broth',
- 'usda_sugars_powdered': 'sugar_white',
+ 'usda_sugars_powdered': 'sugar_white', 'usda_cabbage_chinese_pak_choi': 'bok_choy', 'usda_waterchestnuts_chinese': 'water_chestnuts',
 }
 NID = {'1008': 'kcal', '1003': 'protein', '1004': 'fat', '1005': 'carbs', '1079': 'fiber'}
 STOP = {'raw','cooked','with','and','without','added','salt','the','or','of','nfs','ns','as','to','type','includes','foods','for','usda','s','food','distribution','program','boiled','drained','enriched','regular','prepackaged','sliced','canned','whole','fresh','year','round','average','ingredient','ingredients','recipes','use','sandwich','sandwiches','on','in','a'}

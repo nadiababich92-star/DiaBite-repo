@@ -3856,5 +3856,455 @@ GI_SOURCE = {
   "evidence": "not measurable",
   "confidence": "none (placeholder)",
   "citation": "clinical convention"
+ },
+ "bologna": {
+  "gi": 15,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Bologna, meat and poultry (fdc 171637)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test; the carbohydrate is filler",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "american_cheese_reduced_fat": {
+  "gi": 15,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Cheese product, pasteurized process, American, reduced fat, fortified with vitamin D (fdc 173455)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "ham_deli_lean": {
+  "gi": 0,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Ham, sliced, pre-packaged, deli meat (96%fat free, water added) (fdc 173863)",
+  "checked": "2026-11-20",
+  "gi_source": "negligible carbohydrate (0.7 g net per 100 g): GI 0, as for our other meats, fish, eggs and fats",
+  "evidence": "n/a",
+  "confidence": "definitional",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "corned_beef": {
+  "gi": 0,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Beef, cured, corned beef, brisket, cooked (fdc 170200)",
+  "checked": "2026-11-20",
+  "gi_source": "no available carbohydrate: GI 0 by definition",
+  "evidence": "n/a",
+  "confidence": "definitional",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "pork_fat_cooked": {
+  "gi": 0,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Pork, fresh, separable fat, cooked (fdc 168221)",
+  "checked": "2026-11-20",
+  "gi_source": "no available carbohydrate: GI 0 by definition",
+  "evidence": "n/a",
+  "confidence": "definitional",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "pork_sausage": {
+  "gi": 15,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Pork sausage, link/patty, cooked, pan-fried (fdc 174578)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "frankfurter_beef": {
+  "gi": 15,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Frankfurter, beef, unheated (fdc 173862)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "frankfurter": {
+  "gi": 15,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Frankfurter, meat and poultry, unheated (fdc 173875)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "frankfurter_low_sodium": {
+  "gi": 15,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Frankfurter, low sodium (fdc 168131)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "frankfurter_turkey": {
+  "gi": 15,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Frankfurter, turkey (fdc 171625)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "frankfurter_meatless": {
+  "gi": 15,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Frankfurter, meatless (fdc 169887)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "salami": {
+  "gi": 0,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Salami, dry or hard, pork, beef (fdc 174582)",
+  "checked": "2026-11-20",
+  "gi_source": "negligible carbohydrate (0.7 g net per 100 g): GI 0, as for our other meats, fish, eggs and fats",
+  "evidence": "n/a",
+  "confidence": "definitional",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "pepperoni": {
+  "gi": 15,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Pepperoni, beef and pork, sliced (fdc 174575)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "ketchup": {
+  "gi": 50,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Catsup (fdc 168556)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE, no measurement of ketchup in the pooled sources: a sugar-sweetened tomato sauce, between sucrose (62) and tomato (23)",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "roast_beef_deli": {
+  "gi": 0,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Roast beef, deli style, prepackaged, sliced (fdc 174570)",
+  "checked": "2026-11-20",
+  "gi_source": "no available carbohydrate: GI 0 by definition",
+  "evidence": "n/a",
+  "confidence": "definitional",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "hazelnut_spread": {
+  "gi": 39,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Chocolate-flavored hazelnut spread (fdc 168000)",
+  "checked": "2026-11-20",
+  "gi_source": "median of 6 ISO-compliant tests, range 25-57",
+  "evidence": "measured or equivalent food",
+  "confidence": "high",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "peanut_butter_reduced_fat": {
+  "gi": 14,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Peanut butter, smooth, reduced fat (fdc 172458)",
+  "checked": "2026-11-20",
+  "gi_source": "equivalent food: our peanut butter (International Tables); the reduced-fat kind carries more sugar",
+  "evidence": "measured or equivalent food",
+  "confidence": "medium",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "luncheon_meat": {
+  "gi": 15,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Luncheon meat, pork with ham, minced, canned, includes Spam (Hormel) (fdc 172951)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "pie_crust": {
+  "gi": 55,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Pie crust, standard-type, frozen, ready-to-bake, enriched, baked (fdc 175025)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: baked wheat pastry; no measurement of a plain crust in the pooled sources (Danish pastry 59)",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "pasta_sauce": {
+  "gi": 23,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Sauce, pasta, spaghetti/marinara, ready-to-serve (fdc 171192)",
+  "checked": "2026-11-20",
+  "gi_source": "one measurement (commercial tomato and vegetable pasta sauce, 23)",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "italian_dressing": {
+  "gi": 15,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Salad dressing, italian dressing, commercial, regular (fdc 171019)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "green_beans_frozen": {
+  "gi": 15,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Beans, snap, yellow, frozen, cooked, boiled, drained, without salt (fdc 169326)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test (non-starchy vegetable)",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "black_beans_canned": {
+  "gi": 30,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Beans, black turtle, mature seeds, canned (fdc 175188)",
+  "checked": "2026-11-20",
+  "gi_source": "equivalent food: our black beans (International Tables)",
+  "evidence": "measured or equivalent food",
+  "confidence": "medium",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "sweet_relish": {
+  "gi": 50,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Pickle relish, sweet (fdc 168561)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE, no measurement: a sweet pickle in sugar syrup: between sucrose (65) and cucumber pickles (placeholder 15)",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "sweet_pickles": {
+  "gi": 50,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Pickles, cucumber, sweet (includes bread and butter pickles) (fdc 169378)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE, no measurement: a sweet pickle in sugar syrup: between sucrose (65) and cucumber pickles (placeholder 15)",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "distilled_vinegar": {
+  "gi": 0,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Vinegar, distilled (fdc 172237)",
+  "checked": "2026-11-20",
+  "gi_source": "no available carbohydrate: GI 0 by definition",
+  "evidence": "n/a",
+  "confidence": "definitional",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "bacon_grease": {
+  "gi": 0,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Animal fat, bacon grease (fdc 172345)",
+  "checked": "2026-11-20",
+  "gi_source": "no available carbohydrate: GI 0 by definition",
+  "evidence": "n/a",
+  "confidence": "definitional",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "marshmallows": {
+  "gi": 64,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Candies, marshmallows (fdc 167995)",
+  "checked": "2026-11-20",
+  "gi_source": "median of 2 ISO-compliant tests, range 62-67",
+  "evidence": "measured or equivalent food",
+  "confidence": "high",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "maraschino_cherries": {
+  "gi": 35,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Maraschino cherries, canned, drained (fdc 167766)",
+  "checked": "2026-11-20",
+  "gi_source": "median of 4 tests of cherries (ISO and method deviations), range 22-63",
+  "evidence": "measured or equivalent food",
+  "confidence": "medium",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "chicken_thigh_bbq_rotisserie": {
+  "gi": 0,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Chicken, broiler, rotisserie, BBQ, thigh, meat only (fdc 171118)",
+  "checked": "2026-11-20",
+  "gi_source": "no available carbohydrate: GI 0 by definition",
+  "evidence": "n/a",
+  "confidence": "definitional",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "bread_crumbs": {
+  "gi": 72,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Bread, crumbs, dry, grated, plain (fdc 174928)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE, no measurement: white bread (International Tables, median 72); dried crumbs are not measured",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "cream_of_mushroom_soup": {
+  "gi": 50,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Soup, cream of mushroom, canned, condensed (fdc 171155)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: a starch-thickened condensed soup; no measurement of this soup alone in the pooled sources",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "white_rice_raw": {
+  "gi": 73,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Rice, white, long-grain, regular, raw, enriched (fdc 168877)",
+  "checked": "2026-11-20",
+  "gi_source": "equivalent food: our white rice, cooked (the dry weight carries the same GI once cooked)",
+  "evidence": "measured or equivalent food",
+  "confidence": "medium",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "chicken_giblets": {
+  "gi": 0,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Chicken, broilers or fryers, giblets, cooked, simmered (fdc 171455)",
+  "checked": "2026-11-20",
+  "gi_source": "no available carbohydrate: GI 0 by definition",
+  "evidence": "n/a",
+  "confidence": "definitional",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "dry_milk_nonfat": {
+  "gi": 27,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Milk, dry, nonfat, regular, without added vitamin A and vitamin D (fdc 170877)",
+  "checked": "2026-11-20",
+  "gi_source": "equivalent food: our milk (reconstituted milk powder has the same lactose-to-protein balance)",
+  "evidence": "measured or equivalent food",
+  "confidence": "medium",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "pasta_dry": {
+  "gi": 49,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Pasta, dry, enriched (fdc 169736)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE, no measurement: white pasta cooked al dente (our own ingredient, International Tables); the dry weight is costed the same way",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "white_flour": {
+  "gi": 72,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Wheat flour, white, all-purpose, enriched, bleached (fdc 168894)",
+  "checked": "2026-11-20",
+  "gi_source": "equivalent food: white bread (International Tables, median 72); the table's 20 is for raw flour, and these dishes cook it",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "tofu_soft": {
+  "gi": 0,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Tofu, soft, prepared with calcium sulfate and magnesium chloride (nigari) (fdc 172449)",
+  "checked": "2026-11-20",
+  "gi_source": "negligible carbohydrate (1.0 g net per 100 g): GI 0, as for our other meats, fish, eggs and fats",
+  "evidence": "n/a",
+  "confidence": "definitional",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "vegetable_shortening": {
+  "gi": 0,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Shortening, vegetable, household, composite (fdc 173584)",
+  "checked": "2026-11-20",
+  "gi_source": "no available carbohydrate: GI 0 by definition",
+  "evidence": "n/a",
+  "confidence": "definitional",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "rice_pilaf_mix": {
+  "gi": 73,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Rice and vermicelli mix, rice pilaf flavor, unprepared (fdc 168951)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: white rice and wheat vermicelli, cooked",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "raisins": {
+  "gi": 55,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Raisins, dark, seedless (Includes foods for USDA's Food Distribution Program) (fdc 168165)",
+  "checked": "2026-11-20",
+  "gi_source": "median of 5 ISO-compliant tests, range 49-61",
+  "evidence": "measured or equivalent food",
+  "confidence": "high",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "bbq_sauce": {
+  "gi": 50,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Sauce, barbecue (fdc 174523)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE: the same as ketchup, a sugar-sweetened tomato sauce",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "chicken_fat": {
+  "gi": 0,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Fat, chicken (fdc 173564)",
+  "checked": "2026-11-20",
+  "gi_source": "no available carbohydrate: GI 0 by definition",
+  "evidence": "n/a",
+  "confidence": "definitional",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "turkey_roasted": {
+  "gi": 0,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Turkey, whole, meat only, cooked, roasted (fdc 171481)",
+  "checked": "2026-11-20",
+  "gi_source": "no available carbohydrate: GI 0 by definition",
+  "evidence": "n/a",
+  "confidence": "definitional",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "bouillon_dry": {
+  "gi": 15,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Soup, bouillon cubes and granules, low sodium, dry (fdc 171613)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE, no measurement: the conventional placeholder: used in grams as a seasoning",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "stuffing_mix": {
+  "gi": 75,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Bread, stuffing, dry mix (fdc 174930)",
+  "checked": "2026-11-20",
+  "gi_source": "one measurement (Paxo stuffing, 75); no other in the pooled sources",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "jalapeno_raw": {
+  "gi": 15,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Peppers, jalapeno, raw (fdc 168576)",
+  "checked": "2026-11-20",
+  "gi_source": "ESTIMATE, no measurement: the conventional placeholder for non-starchy vegetables",
+  "evidence": "estimate",
+  "confidence": "low",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "beef_round_roast": {
+  "gi": 0,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Beef, round, full cut, separable lean and fat, trimmed to 1/8\" fat, choice, cooked, broiled (fdc 168695)",
+  "checked": "2026-11-20",
+  "gi_source": "no available carbohydrate: GI 0 by definition",
+  "evidence": "n/a",
+  "confidence": "definitional",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "ground_beef_80": {
+  "gi": 0,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Beef, ground, 80% lean meat / 20% fat, crumbles, cooked, pan-browned (fdc 171799)",
+  "checked": "2026-11-20",
+  "gi_source": "no available carbohydrate: GI 0 by definition",
+  "evidence": "n/a",
+  "confidence": "definitional",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
+ },
+ "baked_beans": {
+  "gi": 47,
+  "nutrients_source": "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov; Beans, baked, canned, with pork and sweet sauce (fdc 173732)",
+  "checked": "2026-11-20",
+  "gi_source": "median of 5 ISO-compliant tests, range 40-57",
+  "evidence": "measured or equivalent food",
+  "confidence": "high",
+  "citation": "Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke J. International tables of glycemic index and glycemic load values 2021. Am J Clin Nutr 2021;114(5):1625-32. doi:10.1093/ajcn/nqab233 / University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
  }
 }

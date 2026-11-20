@@ -18,6 +18,7 @@ CIT_INTL = ("Atkinson FS, Brand-Miller JC, Foster-Powell K, Buyken AE, Goletzke 
 CIT_SYD  = "University of Sydney GI database, glycemicindex.com/gi-search (accessed 2026-09-16)"
 CIT_USDA = "USDA FoodData Central (SR Legacy / Foundation Foods), fdc.nal.usda.gov"
 
+NEW = json.load(open(os.path.join(os.path.dirname(__file__), "new_ingredient_provenance.json")))
 prov = json.load(open(os.path.join(os.path.dirname(__file__), "gi_provenance.json")))
 by = {p["key"]: p for p in prov}
 out = {}
@@ -25,7 +26,11 @@ for key, v in ING.items():
     name, kcal, p_, f_, c_, fib, gi, group = v
     rec = {"gi": gi, "nutrients_source": CIT_USDA, "checked": "2026-09-26"}
     p = by.get(key)
-    if gi == 0 and group in ("protein", "seafood", "egg", "dairy", "fat", "drink", "spice", "pantry", "condiment", "veg") and c_ - fib <= 0.6:
+    if key in NEW:   # added 20 November 2026 for the USDA dish recipes: provenance chosen by hand, see data/recipes-db/usda_new_ingredients_gi.py
+        n = NEW[key]
+        rec.update(gi_source=n["basis"], evidence="estimate" if n["confidence"] == "low" else ("n/a" if n["confidence"] == "definitional" else "measured or equivalent food"),
+                   confidence=n["confidence"], citation=CIT_INTL + " / " + CIT_SYD, nutrients_source=CIT_USDA + "; " + n["usda_name"] + " (fdc " + str(n["usda_fdc_id"]) + ")", checked=n["checked"])
+    elif gi == 0 and group in ("protein", "seafood", "egg", "dairy", "fat", "drink", "spice", "pantry", "condiment", "veg") and c_ - fib <= 0.6:
         rec.update(gi_source="No available carbohydrate — GI is 0 by definition (protein / fat / water)",
                    evidence="n/a", confidence="definitional", citation="ISO 26642:2010")
     elif p and p["iso"] and p["iso"]["n"] >= 2:

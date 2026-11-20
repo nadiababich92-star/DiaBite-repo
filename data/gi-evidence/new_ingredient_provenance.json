@@ -1,0 +1,402 @@
+{
+ "bologna": {
+  "gi": 15,
+  "confidence": "low",
+  "basis": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test; the carbohydrate is filler",
+  "usda_fdc_id": "171637",
+  "usda_name": "Bologna, meat and poultry",
+  "checked": "2026-11-20"
+ },
+ "american_cheese_reduced_fat": {
+  "gi": 15,
+  "confidence": "low",
+  "basis": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "usda_fdc_id": "173455",
+  "usda_name": "Cheese product, pasteurized process, American, reduced fat, fortified with vitamin D",
+  "checked": "2026-11-20"
+ },
+ "ham_deli_lean": {
+  "gi": 0,
+  "confidence": "definitional",
+  "basis": "negligible carbohydrate (0.7 g net per 100 g): GI 0, as for our other meats, fish, eggs and fats",
+  "usda_fdc_id": "173863",
+  "usda_name": "Ham, sliced, pre-packaged, deli meat (96%fat free, water added)",
+  "checked": "2026-11-20"
+ },
+ "corned_beef": {
+  "gi": 0,
+  "confidence": "definitional",
+  "basis": "no available carbohydrate: GI 0 by definition",
+  "usda_fdc_id": "170200",
+  "usda_name": "Beef, cured, corned beef, brisket, cooked",
+  "checked": "2026-11-20"
+ },
+ "pork_fat_cooked": {
+  "gi": 0,
+  "confidence": "definitional",
+  "basis": "no available carbohydrate: GI 0 by definition",
+  "usda_fdc_id": "168221",
+  "usda_name": "Pork, fresh, separable fat, cooked",
+  "checked": "2026-11-20"
+ },
+ "pork_sausage": {
+  "gi": 15,
+  "confidence": "low",
+  "basis": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "usda_fdc_id": "174578",
+  "usda_name": "Pork sausage, link/patty, cooked, pan-fried",
+  "checked": "2026-11-20"
+ },
+ "frankfurter_beef": {
+  "gi": 15,
+  "confidence": "low",
+  "basis": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "usda_fdc_id": "173862",
+  "usda_name": "Frankfurter, beef, unheated",
+  "checked": "2026-11-20"
+ },
+ "frankfurter": {
+  "gi": 15,
+  "confidence": "low",
+  "basis": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "usda_fdc_id": "173875",
+  "usda_name": "Frankfurter, meat and poultry, unheated",
+  "checked": "2026-11-20"
+ },
+ "frankfurter_low_sodium": {
+  "gi": 15,
+  "confidence": "low",
+  "basis": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "usda_fdc_id": "168131",
+  "usda_name": "Frankfurter, low sodium",
+  "checked": "2026-11-20"
+ },
+ "frankfurter_turkey": {
+  "gi": 15,
+  "confidence": "low",
+  "basis": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "usda_fdc_id": "171625",
+  "usda_name": "Frankfurter, turkey",
+  "checked": "2026-11-20"
+ },
+ "frankfurter_meatless": {
+  "gi": 15,
+  "confidence": "low",
+  "basis": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "usda_fdc_id": "169887",
+  "usda_name": "Frankfurter, meatless",
+  "checked": "2026-11-20"
+ },
+ "salami": {
+  "gi": 0,
+  "confidence": "definitional",
+  "basis": "negligible carbohydrate (0.7 g net per 100 g): GI 0, as for our other meats, fish, eggs and fats",
+  "usda_fdc_id": "174582",
+  "usda_name": "Salami, dry or hard, pork, beef",
+  "checked": "2026-11-20"
+ },
+ "pepperoni": {
+  "gi": 15,
+  "confidence": "low",
+  "basis": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "usda_fdc_id": "174575",
+  "usda_name": "Pepperoni, beef and pork, sliced",
+  "checked": "2026-11-20"
+ },
+ "ketchup": {
+  "gi": 50,
+  "confidence": "low",
+  "basis": "ESTIMATE, no measurement of ketchup in the pooled sources: a sugar-sweetened tomato sauce, between sucrose (62) and tomato (23)",
+  "usda_fdc_id": "168556",
+  "usda_name": "Catsup",
+  "checked": "2026-11-20"
+ },
+ "roast_beef_deli": {
+  "gi": 0,
+  "confidence": "definitional",
+  "basis": "no available carbohydrate: GI 0 by definition",
+  "usda_fdc_id": "174570",
+  "usda_name": "Roast beef, deli style, prepackaged, sliced",
+  "checked": "2026-11-20"
+ },
+ "hazelnut_spread": {
+  "gi": 39,
+  "confidence": "high",
+  "basis": "median of 6 ISO-compliant tests, range 25-57",
+  "usda_fdc_id": "168000",
+  "usda_name": "Chocolate-flavored hazelnut spread",
+  "checked": "2026-11-20"
+ },
+ "peanut_butter_reduced_fat": {
+  "gi": 14,
+  "confidence": "medium",
+  "basis": "equivalent food: our peanut butter (International Tables); the reduced-fat kind carries more sugar",
+  "usda_fdc_id": "172458",
+  "usda_name": "Peanut butter, smooth, reduced fat",
+  "checked": "2026-11-20"
+ },
+ "luncheon_meat": {
+  "gi": 15,
+  "confidence": "low",
+  "basis": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "usda_fdc_id": "172951",
+  "usda_name": "Luncheon meat, pork with ham, minced, canned, includes Spam (Hormel)",
+  "checked": "2026-11-20"
+ },
+ "pie_crust": {
+  "gi": 55,
+  "confidence": "low",
+  "basis": "ESTIMATE: baked wheat pastry; no measurement of a plain crust in the pooled sources (Danish pastry 59)",
+  "usda_fdc_id": "175025",
+  "usda_name": "Pie crust, standard-type, frozen, ready-to-bake, enriched, baked",
+  "checked": "2026-11-20"
+ },
+ "pasta_sauce": {
+  "gi": 23,
+  "confidence": "low",
+  "basis": "one measurement (commercial tomato and vegetable pasta sauce, 23)",
+  "usda_fdc_id": "171192",
+  "usda_name": "Sauce, pasta, spaghetti/marinara, ready-to-serve",
+  "checked": "2026-11-20"
+ },
+ "italian_dressing": {
+  "gi": 15,
+  "confidence": "low",
+  "basis": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test",
+  "usda_fdc_id": "171019",
+  "usda_name": "Salad dressing, italian dressing, commercial, regular",
+  "checked": "2026-11-20"
+ },
+ "green_beans_frozen": {
+  "gi": 15,
+  "confidence": "low",
+  "basis": "ESTIMATE: the conventional placeholder (15) for a food with too little carbohydrate to test (non-starchy vegetable)",
+  "usda_fdc_id": "169326",
+  "usda_name": "Beans, snap, yellow, frozen, cooked, boiled, drained, without salt",
+  "checked": "2026-11-20"
+ },
+ "black_beans_canned": {
+  "gi": 30,
+  "confidence": "medium",
+  "basis": "equivalent food: our black beans (International Tables)",
+  "usda_fdc_id": "175188",
+  "usda_name": "Beans, black turtle, mature seeds, canned",
+  "checked": "2026-11-20"
+ },
+ "sweet_relish": {
+  "gi": 50,
+  "confidence": "low",
+  "basis": "ESTIMATE, no measurement: a sweet pickle in sugar syrup: between sucrose (65) and cucumber pickles (placeholder 15)",
+  "usda_fdc_id": "168561",
+  "usda_name": "Pickle relish, sweet",
+  "checked": "2026-11-20"
+ },
+ "sweet_pickles": {
+  "gi": 50,
+  "confidence": "low",
+  "basis": "ESTIMATE, no measurement: a sweet pickle in sugar syrup: between sucrose (65) and cucumber pickles (placeholder 15)",
+  "usda_fdc_id": "169378",
+  "usda_name": "Pickles, cucumber, sweet (includes bread and butter pickles)",
+  "checked": "2026-11-20"
+ },
+ "distilled_vinegar": {
+  "gi": 0,
+  "confidence": "definitional",
+  "basis": "no available carbohydrate: GI 0 by definition",
+  "usda_fdc_id": "172237",
+  "usda_name": "Vinegar, distilled",
+  "checked": "2026-11-20"
+ },
+ "bacon_grease": {
+  "gi": 0,
+  "confidence": "definitional",
+  "basis": "no available carbohydrate: GI 0 by definition",
+  "usda_fdc_id": "172345",
+  "usda_name": "Animal fat, bacon grease",
+  "checked": "2026-11-20"
+ },
+ "marshmallows": {
+  "gi": 64,
+  "confidence": "high",
+  "basis": "median of 2 ISO-compliant tests, range 62-67",
+  "usda_fdc_id": "167995",
+  "usda_name": "Candies, marshmallows",
+  "checked": "2026-11-20"
+ },
+ "maraschino_cherries": {
+  "gi": 35,
+  "confidence": "medium",
+  "basis": "median of 4 tests of cherries (ISO and method deviations), range 22-63",
+  "usda_fdc_id": "167766",
+  "usda_name": "Maraschino cherries, canned, drained",
+  "checked": "2026-11-20"
+ },
+ "chicken_thigh_bbq_rotisserie": {
+  "gi": 0,
+  "confidence": "definitional",
+  "basis": "no available carbohydrate: GI 0 by definition",
+  "usda_fdc_id": "171118",
+  "usda_name": "Chicken, broiler, rotisserie, BBQ, thigh, meat only",
+  "checked": "2026-11-20"
+ },
+ "bread_crumbs": {
+  "gi": 72,
+  "confidence": "low",
+  "basis": "ESTIMATE, no measurement: white bread (International Tables, median 72); dried crumbs are not measured",
+  "usda_fdc_id": "174928",
+  "usda_name": "Bread, crumbs, dry, grated, plain",
+  "checked": "2026-11-20"
+ },
+ "cream_of_mushroom_soup": {
+  "gi": 50,
+  "confidence": "low",
+  "basis": "ESTIMATE: a starch-thickened condensed soup; no measurement of this soup alone in the pooled sources",
+  "usda_fdc_id": "171155",
+  "usda_name": "Soup, cream of mushroom, canned, condensed",
+  "checked": "2026-11-20"
+ },
+ "white_rice_raw": {
+  "gi": 73,
+  "confidence": "medium",
+  "basis": "equivalent food: our white rice, cooked (the dry weight carries the same GI once cooked)",
+  "usda_fdc_id": "168877",
+  "usda_name": "Rice, white, long-grain, regular, raw, enriched",
+  "checked": "2026-11-20"
+ },
+ "chicken_giblets": {
+  "gi": 0,
+  "confidence": "definitional",
+  "basis": "no available carbohydrate: GI 0 by definition",
+  "usda_fdc_id": "171455",
+  "usda_name": "Chicken, broilers or fryers, giblets, cooked, simmered",
+  "checked": "2026-11-20"
+ },
+ "dry_milk_nonfat": {
+  "gi": 27,
+  "confidence": "medium",
+  "basis": "equivalent food: our milk (reconstituted milk powder has the same lactose-to-protein balance)",
+  "usda_fdc_id": "170877",
+  "usda_name": "Milk, dry, nonfat, regular, without added vitamin A and vitamin D",
+  "checked": "2026-11-20"
+ },
+ "pasta_dry": {
+  "gi": 49,
+  "confidence": "low",
+  "basis": "ESTIMATE, no measurement: white pasta cooked al dente (our own ingredient, International Tables); the dry weight is costed the same way",
+  "usda_fdc_id": "169736",
+  "usda_name": "Pasta, dry, enriched",
+  "checked": "2026-11-20"
+ },
+ "white_flour": {
+  "gi": 72,
+  "confidence": "low",
+  "basis": "equivalent food: white bread (International Tables, median 72); the table's 20 is for raw flour, and these dishes cook it",
+  "usda_fdc_id": "168894",
+  "usda_name": "Wheat flour, white, all-purpose, enriched, bleached",
+  "checked": "2026-11-20"
+ },
+ "tofu_soft": {
+  "gi": 0,
+  "confidence": "definitional",
+  "basis": "negligible carbohydrate (1.0 g net per 100 g): GI 0, as for our other meats, fish, eggs and fats",
+  "usda_fdc_id": "172449",
+  "usda_name": "Tofu, soft, prepared with calcium sulfate and magnesium chloride (nigari)",
+  "checked": "2026-11-20"
+ },
+ "vegetable_shortening": {
+  "gi": 0,
+  "confidence": "definitional",
+  "basis": "no available carbohydrate: GI 0 by definition",
+  "usda_fdc_id": "173584",
+  "usda_name": "Shortening, vegetable, household, composite",
+  "checked": "2026-11-20"
+ },
+ "rice_pilaf_mix": {
+  "gi": 73,
+  "confidence": "low",
+  "basis": "ESTIMATE: white rice and wheat vermicelli, cooked",
+  "usda_fdc_id": "168951",
+  "usda_name": "Rice and vermicelli mix, rice pilaf flavor, unprepared",
+  "checked": "2026-11-20"
+ },
+ "raisins": {
+  "gi": 55,
+  "confidence": "high",
+  "basis": "median of 5 ISO-compliant tests, range 49-61",
+  "usda_fdc_id": "168165",
+  "usda_name": "Raisins, dark, seedless (Includes foods for USDA's Food Distribution Program)",
+  "checked": "2026-11-20"
+ },
+ "bbq_sauce": {
+  "gi": 50,
+  "confidence": "low",
+  "basis": "ESTIMATE: the same as ketchup, a sugar-sweetened tomato sauce",
+  "usda_fdc_id": "174523",
+  "usda_name": "Sauce, barbecue",
+  "checked": "2026-11-20"
+ },
+ "chicken_fat": {
+  "gi": 0,
+  "confidence": "definitional",
+  "basis": "no available carbohydrate: GI 0 by definition",
+  "usda_fdc_id": "173564",
+  "usda_name": "Fat, chicken",
+  "checked": "2026-11-20"
+ },
+ "turkey_roasted": {
+  "gi": 0,
+  "confidence": "definitional",
+  "basis": "no available carbohydrate: GI 0 by definition",
+  "usda_fdc_id": "171481",
+  "usda_name": "Turkey, whole, meat only, cooked, roasted",
+  "checked": "2026-11-20"
+ },
+ "bouillon_dry": {
+  "gi": 15,
+  "confidence": "low",
+  "basis": "ESTIMATE, no measurement: the conventional placeholder: used in grams as a seasoning",
+  "usda_fdc_id": "171613",
+  "usda_name": "Soup, bouillon cubes and granules, low sodium, dry",
+  "checked": "2026-11-20"
+ },
+ "stuffing_mix": {
+  "gi": 75,
+  "confidence": "low",
+  "basis": "one measurement (Paxo stuffing, 75); no other in the pooled sources",
+  "usda_fdc_id": "174930",
+  "usda_name": "Bread, stuffing, dry mix",
+  "checked": "2026-11-20"
+ },
+ "jalapeno_raw": {
+  "gi": 15,
+  "confidence": "low",
+  "basis": "ESTIMATE, no measurement: the conventional placeholder for non-starchy vegetables",
+  "usda_fdc_id": "168576",
+  "usda_name": "Peppers, jalapeno, raw",
+  "checked": "2026-11-20"
+ },
+ "beef_round_roast": {
+  "gi": 0,
+  "confidence": "definitional",
+  "basis": "no available carbohydrate: GI 0 by definition",
+  "usda_fdc_id": "168695",
+  "usda_name": "Beef, round, full cut, separable lean and fat, trimmed to 1/8\" fat, choice, cooked, broiled",
+  "checked": "2026-11-20"
+ },
+ "ground_beef_80": {
+  "gi": 0,
+  "confidence": "definitional",
+  "basis": "no available carbohydrate: GI 0 by definition",
+  "usda_fdc_id": "171799",
+  "usda_name": "Beef, ground, 80% lean meat / 20% fat, crumbles, cooked, pan-browned",
+  "checked": "2026-11-20"
+ },
+ "baked_beans": {
+  "gi": 47,
+  "confidence": "high",
+  "basis": "median of 5 ISO-compliant tests, range 40-57",
+  "usda_fdc_id": "173732",
+  "usda_name": "Beans, baked, canned, with pork and sweet sauce",
+  "checked": "2026-11-20"
+ }
+}

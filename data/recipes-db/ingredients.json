@@ -4730,5 +4730,655 @@
    "fiber": 3
   },
   "gi": 15
+ },
+ {
+  "id": "bologna",
+  "name": "Bologna",
+  "group": "protein",
+  "per100": {
+   "kcal": 281,
+   "protein": 10.3,
+   "fat": 23.8,
+   "carbs": 6.3,
+   "fiber": 0
+  },
+  "gi": 15
+ },
+ {
+  "id": "american_cheese_reduced_fat",
+  "name": "American cheese, processed, reduced fat",
+  "group": "dairy",
+  "per100": {
+   "kcal": 240,
+   "protein": 17.6,
+   "fat": 14.1,
+   "carbs": 10.6,
+   "fiber": 0
+  },
+  "gi": 15
+ },
+ {
+  "id": "ham_deli_lean",
+  "name": "Ham, deli sliced, 96% fat free",
+  "group": "protein",
+  "per100": {
+   "kcal": 107,
+   "protein": 16.9,
+   "fat": 4,
+   "carbs": 0.7,
+   "fiber": 0
+  },
+  "gi": 0
+ },
+ {
+  "id": "corned_beef",
+  "name": "Corned beef, cooked",
+  "group": "protein",
+  "per100": {
+   "kcal": 251,
+   "protein": 18.2,
+   "fat": 19,
+   "carbs": 0.5,
+   "fiber": 0
+  },
+  "gi": 0
+ },
+ {
+  "id": "pork_fat_cooked",
+  "name": "Pork fat, cooked",
+  "group": "protein",
+  "per100": {
+   "kcal": 626,
+   "protein": 7.1,
+   "fat": 66.1,
+   "carbs": 0,
+   "fiber": 0
+  },
+  "gi": 0
+ },
+ {
+  "id": "pork_sausage",
+  "name": "Pork sausage, cooked",
+  "group": "protein",
+  "per100": {
+   "kcal": 325,
+   "protein": 18.5,
+   "fat": 27.2,
+   "carbs": 1.4,
+   "fiber": 0
+  },
+  "gi": 15
+ },
+ {
+  "id": "frankfurter_beef",
+  "name": "Frankfurter, beef",
+  "group": "protein",
+  "per100": {
+   "kcal": 315,
+   "protein": 11.7,
+   "fat": 28.1,
+   "carbs": 3,
+   "fiber": 0
+  },
+  "gi": 15
+ },
+ {
+  "id": "frankfurter",
+  "name": "Frankfurter, beef and pork",
+  "group": "protein",
+  "per100": {
+   "kcal": 277,
+   "protein": 9.7,
+   "fat": 24.2,
+   "carbs": 5,
+   "fiber": 0
+  },
+  "gi": 15
+ },
+ {
+  "id": "frankfurter_low_sodium",
+  "name": "Frankfurter, low sodium",
+  "group": "protein",
+  "per100": {
+   "kcal": 312,
+   "protein": 12,
+   "fat": 28.5,
+   "carbs": 1.8,
+   "fiber": 0
+  },
+  "gi": 15
+ },
+ {
+  "id": "frankfurter_turkey",
+  "name": "Frankfurter, turkey",
+  "group": "protein",
+  "per100": {
+   "kcal": 223,
+   "protein": 12.2,
+   "fat": 17.3,
+   "carbs": 3.8,
+   "fiber": 0
+  },
+  "gi": 15
+ },
+ {
+  "id": "frankfurter_meatless",
+  "name": "Frankfurter, meatless",
+  "group": "pantry",
+  "per100": {
+   "kcal": 233,
+   "protein": 19.6,
+   "fat": 13.7,
+   "carbs": 7.7,
+   "fiber": 3.9
+  },
+  "gi": 15
+ },
+ {
+  "id": "salami",
+  "name": "Salami",
+  "group": "protein",
+  "per100": {
+   "kcal": 378,
+   "protein": 21.1,
+   "fat": 31.6,
+   "carbs": 0.7,
+   "fiber": 0
+  },
+  "gi": 0
+ },
+ {
+  "id": "pepperoni",
+  "name": "Pepperoni",
+  "group": "protein",
+  "per100": {
+   "kcal": 504,
+   "protein": 19.2,
+   "fat": 46.3,
+   "carbs": 1.2,
+   "fiber": 0
+  },
+  "gi": 15
+ },
+ {
+  "id": "ketchup",
+  "name": "Ketchup",
+  "group": "condiment",
+  "per100": {
+   "kcal": 101,
+   "protein": 1,
+   "fat": 0.1,
+   "carbs": 27.4,
+   "fiber": 0.3
+  },
+  "gi": 50
+ },
+ {
+  "id": "roast_beef_deli",
+  "name": "Roast beef, deli sliced",
+  "group": "protein",
+  "per100": {
+   "kcal": 115,
+   "protein": 18.6,
+   "fat": 3.7,
+   "carbs": 0.6,
+   "fiber": 0
+  },
+  "gi": 0
+ },
+ {
+  "id": "hazelnut_spread",
+  "name": "Chocolate hazelnut spread",
+  "group": "pantry",
+  "per100": {
+   "kcal": 539,
+   "protein": 5.4,
+   "fat": 29.7,
+   "carbs": 62.4,
+   "fiber": 5.4
+  },
+  "gi": 39
+ },
+ {
+  "id": "peanut_butter_reduced_fat",
+  "name": "Peanut butter, reduced fat",
+  "group": "nut",
+  "per100": {
+   "kcal": 520,
+   "protein": 25.9,
+   "fat": 34,
+   "carbs": 35.6,
+   "fiber": 5.2
+  },
+  "gi": 14
+ },
+ {
+  "id": "luncheon_meat",
+  "name": "Luncheon meat, canned",
+  "group": "protein",
+  "per100": {
+   "kcal": 315,
+   "protein": 13.4,
+   "fat": 26.6,
+   "carbs": 4.6,
+   "fiber": 0
+  },
+  "gi": 15
+ },
+ {
+  "id": "pie_crust",
+  "name": "Pie crust, ready-to-bake",
+  "group": "grain",
+  "per100": {
+   "kcal": 508,
+   "protein": 6.5,
+   "fat": 28.6,
+   "carbs": 56.2,
+   "fiber": 3.3
+  },
+  "gi": 55
+ },
+ {
+  "id": "pasta_sauce",
+  "name": "Pasta sauce, marinara",
+  "group": "condiment",
+  "per100": {
+   "kcal": 50,
+   "protein": 1.4,
+   "fat": 1.6,
+   "carbs": 7.4,
+   "fiber": 1.8
+  },
+  "gi": 23
+ },
+ {
+  "id": "italian_dressing",
+  "name": "Italian dressing",
+  "group": "condiment",
+  "per100": {
+   "kcal": 240,
+   "protein": 0.4,
+   "fat": 21.1,
+   "carbs": 12.1,
+   "fiber": 0
+  },
+  "gi": 15
+ },
+ {
+  "id": "green_beans_frozen",
+  "name": "Green beans, frozen, cooked",
+  "group": "veg",
+  "per100": {
+   "kcal": 28,
+   "protein": 1.5,
+   "fat": 0.2,
+   "carbs": 6.5,
+   "fiber": 3
+  },
+  "gi": 15
+ },
+ {
+  "id": "black_beans_canned",
+  "name": "Black beans, canned",
+  "group": "legume",
+  "per100": {
+   "kcal": 91,
+   "protein": 6,
+   "fat": 0.3,
+   "carbs": 16.6,
+   "fiber": 6.9
+  },
+  "gi": 30
+ },
+ {
+  "id": "sweet_relish",
+  "name": "Sweet pickle relish",
+  "group": "condiment",
+  "per100": {
+   "kcal": 130,
+   "protein": 0.4,
+   "fat": 0.5,
+   "carbs": 35.1,
+   "fiber": 1.1
+  },
+  "gi": 50
+ },
+ {
+  "id": "sweet_pickles",
+  "name": "Sweet pickles (bread and butter)",
+  "group": "condiment",
+  "per100": {
+   "kcal": 91,
+   "protein": 0.6,
+   "fat": 0.4,
+   "carbs": 21.1,
+   "fiber": 1
+  },
+  "gi": 50
+ },
+ {
+  "id": "distilled_vinegar",
+  "name": "Distilled vinegar",
+  "group": "condiment",
+  "per100": {
+   "kcal": 18,
+   "protein": 0,
+   "fat": 0,
+   "carbs": 0,
+   "fiber": 0
+  },
+  "gi": 0
+ },
+ {
+  "id": "bacon_grease",
+  "name": "Bacon grease",
+  "group": "protein",
+  "per100": {
+   "kcal": 897,
+   "protein": 0,
+   "fat": 99.5,
+   "carbs": 0,
+   "fiber": 0
+  },
+  "gi": 0
+ },
+ {
+  "id": "marshmallows",
+  "name": "Marshmallows",
+  "group": "pantry",
+  "per100": {
+   "kcal": 318,
+   "protein": 1.8,
+   "fat": 0.2,
+   "carbs": 81.3,
+   "fiber": 0.1
+  },
+  "gi": 64
+ },
+ {
+  "id": "maraschino_cherries",
+  "name": "Maraschino cherries",
+  "group": "fruit",
+  "per100": {
+   "kcal": 165,
+   "protein": 0.2,
+   "fat": 0.2,
+   "carbs": 42,
+   "fiber": 3.2
+  },
+  "gi": 35
+ },
+ {
+  "id": "chicken_thigh_bbq_rotisserie",
+  "name": "Chicken thigh, BBQ rotisserie, meat only",
+  "group": "protein",
+  "per100": {
+   "kcal": 193,
+   "protein": 24.1,
+   "fat": 10.7,
+   "carbs": 0,
+   "fiber": 0
+  },
+  "gi": 0
+ },
+ {
+  "id": "bread_crumbs",
+  "name": "Bread crumbs, dry",
+  "group": "grain",
+  "per100": {
+   "kcal": 395,
+   "protein": 13.3,
+   "fat": 5.3,
+   "carbs": 72,
+   "fiber": 4.5
+  },
+  "gi": 72
+ },
+ {
+  "id": "cream_of_mushroom_soup",
+  "name": "Cream of mushroom soup, condensed",
+  "group": "pantry",
+  "per100": {
+   "kcal": 79,
+   "protein": 1.4,
+   "fat": 5.3,
+   "carbs": 6.8,
+   "fiber": 0.7
+  },
+  "gi": 50
+ },
+ {
+  "id": "white_rice_raw",
+  "name": "White rice, long-grain, raw",
+  "group": "grain",
+  "per100": {
+   "kcal": 365,
+   "protein": 7.1,
+   "fat": 0.7,
+   "carbs": 80,
+   "fiber": 1.3
+  },
+  "gi": 73
+ },
+ {
+  "id": "chicken_giblets",
+  "name": "Chicken giblets, simmered",
+  "group": "protein",
+  "per100": {
+   "kcal": 157,
+   "protein": 27.1,
+   "fat": 4.5,
+   "carbs": 0,
+   "fiber": 0
+  },
+  "gi": 0
+ },
+ {
+  "id": "dry_milk_nonfat",
+  "name": "Dry milk, nonfat",
+  "group": "dairy",
+  "per100": {
+   "kcal": 362,
+   "protein": 36.2,
+   "fat": 0.8,
+   "carbs": 52,
+   "fiber": 0
+  },
+  "gi": 27
+ },
+ {
+  "id": "pasta_dry",
+  "name": "Pasta, dry",
+  "group": "grain",
+  "per100": {
+   "kcal": 371,
+   "protein": 13,
+   "fat": 1.5,
+   "carbs": 74.7,
+   "fiber": 3.2
+  },
+  "gi": 49
+ },
+ {
+  "id": "white_flour",
+  "name": "White flour, all-purpose",
+  "group": "grain",
+  "per100": {
+   "kcal": 364,
+   "protein": 10.3,
+   "fat": 1,
+   "carbs": 76.3,
+   "fiber": 2.7
+  },
+  "gi": 72
+ },
+ {
+  "id": "tofu_soft",
+  "name": "Tofu, soft",
+  "group": "legume",
+  "per100": {
+   "kcal": 61,
+   "protein": 7.2,
+   "fat": 3.7,
+   "carbs": 1.2,
+   "fiber": 0.2
+  },
+  "gi": 0
+ },
+ {
+  "id": "vegetable_shortening",
+  "name": "Vegetable shortening",
+  "group": "fat",
+  "per100": {
+   "kcal": 884,
+   "protein": 0,
+   "fat": 100,
+   "carbs": 0,
+   "fiber": 0
+  },
+  "gi": 0
+ },
+ {
+  "id": "rice_pilaf_mix",
+  "name": "Rice and vermicelli mix, pilaf",
+  "group": "protein",
+  "per100": {
+   "kcal": 359,
+   "protein": 10.4,
+   "fat": 1.4,
+   "carbs": 76.3,
+   "fiber": 1.2
+  },
+  "gi": 73
+ },
+ {
+  "id": "raisins",
+  "name": "Raisins",
+  "group": "fruit",
+  "per100": {
+   "kcal": 299,
+   "protein": 3.3,
+   "fat": 0.2,
+   "carbs": 79.3,
+   "fiber": 4.5
+  },
+  "gi": 55
+ },
+ {
+  "id": "bbq_sauce",
+  "name": "Barbecue sauce",
+  "group": "condiment",
+  "per100": {
+   "kcal": 172,
+   "protein": 0.8,
+   "fat": 0.6,
+   "carbs": 40.8,
+   "fiber": 0.9
+  },
+  "gi": 50
+ },
+ {
+  "id": "chicken_fat",
+  "name": "Chicken fat",
+  "group": "protein",
+  "per100": {
+   "kcal": 900,
+   "protein": 0,
+   "fat": 99.8,
+   "carbs": 0,
+   "fiber": 0
+  },
+  "gi": 0
+ },
+ {
+  "id": "turkey_roasted",
+  "name": "Turkey, roasted, meat only",
+  "group": "protein",
+  "per100": {
+   "kcal": 159,
+   "protein": 29.1,
+   "fat": 3.8,
+   "carbs": 0,
+   "fiber": 0
+  },
+  "gi": 0
+ },
+ {
+  "id": "bouillon_dry",
+  "name": "Bouillon, dry",
+  "group": "pantry",
+  "per100": {
+   "kcal": 438,
+   "protein": 16.7,
+   "fat": 13.9,
+   "carbs": 64.9,
+   "fiber": 0.2
+  },
+  "gi": 15
+ },
+ {
+  "id": "stuffing_mix",
+  "name": "Bread stuffing, dry mix",
+  "group": "grain",
+  "per100": {
+   "kcal": 386,
+   "protein": 11,
+   "fat": 3.4,
+   "carbs": 76.2,
+   "fiber": 3.2
+  },
+  "gi": 75
+ },
+ {
+  "id": "jalapeno_raw",
+  "name": "Jalapeno pepper, raw",
+  "group": "veg",
+  "per100": {
+   "kcal": 29,
+   "protein": 0.9,
+   "fat": 0.4,
+   "carbs": 6.5,
+   "fiber": 2.8
+  },
+  "gi": 15
+ },
+ {
+  "id": "beef_round_roast",
+  "name": "Beef round, cooked, with fat",
+  "group": "protein",
+  "per100": {
+   "kcal": 235,
+   "protein": 27.5,
+   "fat": 13,
+   "carbs": 0,
+   "fiber": 0
+  },
+  "gi": 0
+ },
+ {
+  "id": "ground_beef_80",
+  "name": "Ground beef 80% lean, cooked",
+  "group": "protein",
+  "per100": {
+   "kcal": 272,
+   "protein": 27,
+   "fat": 17.4,
+   "carbs": 0,
+   "fiber": 0
+  },
+  "gi": 0
+ },
+ {
+  "id": "baked_beans",
+  "name": "Baked beans, canned, with pork",
+  "group": "legume",
+  "per100": {
+   "kcal": 105,
+   "protein": 4.5,
+   "fat": 0.9,
+   "carbs": 21.6,
+   "fiber": 4.4
+  },
+  "gi": 47
  }
 ]

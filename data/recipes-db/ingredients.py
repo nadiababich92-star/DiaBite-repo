@@ -389,15 +389,68 @@ ING = {
 "sumac":("Sumac",300,10,8,55,25,15,"spice"),
 "star_anise":("Star anise",337,18,16,50,15,15,"spice"),
 "chili_crisp":("Chili crisp (small amount)",500,5,50,10,3,15,"condiment"),
+# ── Added 20 November 2026 for the USDA dish recipes (data/recipes-db/usda_dish_recipes.py): nutrients from USDA FoodData Central (SR Legacy),
+#    GI and its provenance in data/gi-evidence/new_ingredient_provenance.json; a GI marked "estimate" there is the closest tested food, low confidence. ──
+"bologna":("Bologna",281,10.3,23.8,6.3,0,15,"protein"),
+"american_cheese_reduced_fat":("American cheese, processed, reduced fat",240,17.6,14.1,10.6,0,15,"dairy"),
+"ham_deli_lean":("Ham, deli sliced, 96% fat free",107,16.9,4,0.7,0,0,"protein"),
+"corned_beef":("Corned beef, cooked",251,18.2,19,0.5,0,0,"protein"),
+"pork_fat_cooked":("Pork fat, cooked",626,7.1,66.1,0,0,0,"protein"),
+"pork_sausage":("Pork sausage, cooked",325,18.5,27.2,1.4,0,15,"protein"),
+"frankfurter_beef":("Frankfurter, beef",315,11.7,28.1,3,0,15,"protein"),
+"frankfurter":("Frankfurter, beef and pork",277,9.7,24.2,5,0,15,"protein"),
+"frankfurter_low_sodium":("Frankfurter, low sodium",312,12,28.5,1.8,0,15,"protein"),
+"frankfurter_turkey":("Frankfurter, turkey",223,12.2,17.3,3.8,0,15,"protein"),
+"frankfurter_meatless":("Frankfurter, meatless",233,19.6,13.7,7.7,3.9,15,"pantry"),
+"salami":("Salami",378,21.1,31.6,0.7,0,0,"protein"),
+"pepperoni":("Pepperoni",504,19.2,46.3,1.2,0,15,"protein"),
+"ketchup":("Ketchup",101,1,0.1,27.4,0.3,50,"condiment"),
+"roast_beef_deli":("Roast beef, deli sliced",115,18.6,3.7,0.6,0,0,"protein"),
+"hazelnut_spread":("Chocolate hazelnut spread",539,5.4,29.7,62.4,5.4,39,"pantry"),
+"peanut_butter_reduced_fat":("Peanut butter, reduced fat",520,25.9,34,35.6,5.2,14,"nut"),
+"luncheon_meat":("Luncheon meat, canned",315,13.4,26.6,4.6,0,15,"protein"),
+"pie_crust":("Pie crust, ready-to-bake",508,6.5,28.6,56.2,3.3,55,"grain"),
+"pasta_sauce":("Pasta sauce, marinara",50,1.4,1.6,7.4,1.8,23,"condiment"),
+"italian_dressing":("Italian dressing",240,0.4,21.1,12.1,0,15,"condiment"),
+"green_beans_frozen":("Green beans, frozen, cooked",28,1.5,0.2,6.5,3,15,"veg"),
+"black_beans_canned":("Black beans, canned",91,6,0.3,16.6,6.9,30,"legume"),
+"sweet_relish":("Sweet pickle relish",130,0.4,0.5,35.1,1.1,50,"condiment"),
+"sweet_pickles":("Sweet pickles (bread and butter)",91,0.6,0.4,21.1,1,50,"condiment"),
+"distilled_vinegar":("Distilled vinegar",18,0,0,0,0,0,"condiment"),
+"bacon_grease":("Bacon grease",897,0,99.5,0,0,0,"protein"),
+"marshmallows":("Marshmallows",318,1.8,0.2,81.3,0.1,64,"pantry"),
+"maraschino_cherries":("Maraschino cherries",165,0.2,0.2,42,3.2,35,"fruit"),
+"chicken_thigh_bbq_rotisserie":("Chicken thigh, BBQ rotisserie, meat only",193,24.1,10.7,0,0,0,"protein"),
+"bread_crumbs":("Bread crumbs, dry",395,13.3,5.3,72,4.5,72,"grain"),
+"cream_of_mushroom_soup":("Cream of mushroom soup, condensed",79,1.4,5.3,6.8,0.7,50,"pantry"),
+"white_rice_raw":("White rice, long-grain, raw",365,7.1,0.7,80,1.3,73,"grain"),
+"chicken_giblets":("Chicken giblets, simmered",157,27.1,4.5,0,0,0,"protein"),
+"dry_milk_nonfat":("Dry milk, nonfat",362,36.2,0.8,52,0,27,"dairy"),
+"pasta_dry":("Pasta, dry",371,13,1.5,74.7,3.2,49,"grain"),
+"white_flour":("White flour, all-purpose",364,10.3,1,76.3,2.7,72,"grain"),
+"tofu_soft":("Tofu, soft",61,7.2,3.7,1.2,0.2,0,"legume"),
+"vegetable_shortening":("Vegetable shortening",884,0,100,0,0,0,"fat"),
+"rice_pilaf_mix":("Rice and vermicelli mix, pilaf",359,10.4,1.4,76.3,1.2,73,"protein"),
+"raisins":("Raisins",299,3.3,0.2,79.3,4.5,55,"fruit"),
+"bbq_sauce":("Barbecue sauce",172,0.8,0.6,40.8,0.9,50,"condiment"),
+"chicken_fat":("Chicken fat",900,0,99.8,0,0,0,"protein"),
+"turkey_roasted":("Turkey, roasted, meat only",159,29.1,3.8,0,0,0,"protein"),
+"bouillon_dry":("Bouillon, dry",438,16.7,13.9,64.9,0.2,15,"pantry"),
+"stuffing_mix":("Bread stuffing, dry mix",386,11,3.4,76.2,3.2,75,"grain"),
+"jalapeno_raw":("Jalapeno pepper, raw",29,0.9,0.4,6.5,2.8,15,"veg"),
+"beef_round_roast":("Beef round, cooked, with fat",235,27.5,13,0,0,0,"protein"),
+"ground_beef_80":("Ground beef 80% lean, cooked",272,27,17.4,0,0,0,"protein"),
+"baked_beans":("Baked beans, canned, with pork",105,4.5,0.9,21.6,4.4,47,"legume"),
 }
 
 # Dietary classification helpers (used by build.py to auto-tag recipes)
 MEAT = {k for k,v in ING.items() if v[7]=="protein" and k!="pork_rinds"} | {"pork_rinds"}
 FISH = {k for k,v in ING.items() if v[7]=="seafood"} | {"fish_sauce","anchovies"}
-DAIRY = {k for k,v in ING.items() if v[7]=="dairy"} | {"whey_protein"}
+DAIRY = {k for k,v in ING.items() if v[7]=="dairy"} | {"whey_protein","cream_of_mushroom_soup"}
 EGG = {"egg","egg_white","mayo","egg_noodles"}
 GLUTEN = {"white_bread","hamburger_bun","flour_tortilla","white_pasta","egg_noodles","bagel","whole_wheat_pasta","whole_grain_bread","rye_bread","whole_wheat_pita","whole_wheat_english_muffin",
           "farro","barley","bulgur","soy_sauce","whole_grain_crackers","low_carb_tortilla","soba","rolled_oats",
-          "steel_cut_oats","oat_flour","oat_bran","miso","gochujang"}
+          "steel_cut_oats","oat_flour","oat_bran","miso","gochujang",
+          "white_flour","bread_crumbs","stuffing_mix","pie_crust","pasta_dry","rice_pilaf_mix","cream_of_mushroom_soup","frankfurter_meatless"}
 NUTS = {"almonds","walnuts","pecans","pistachios","cashews","macadamia","hazelnuts","pine_nuts","almond_butter",
-        "almond_flour","almond_milk","peanuts","peanut_butter","pesto"}
+        "almond_flour","almond_milk","peanuts","peanut_butter","pesto","hazelnut_spread","peanut_butter_reduced_fat"}
