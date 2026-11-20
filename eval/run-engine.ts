@@ -416,6 +416,27 @@ const breadMisses: string[] = []
 console.log(`bread gi  ${breadMisses.length === 0 ? 'ok' : 'WRONG'}`)
 breadMisses.forEach((m) => console.log(m))
 
+// ── the staples' glycemic index: plain cooked pasta, plain cooked white rice, flour tortilla ──────────────────────────────
+// 20 November 2026: cooked pasta was GI 71 (a barley pasta) or 28 (a protein-enriched brand), white rice 47 to 50 (basmati, quick-cooking), flour
+// tortilla 52 (barley). data/foods-usda/fix_staple_gi.py set them to DiaBite's own 49, 73 and 34 and recomputed 184 dishes. Brown rice (78, an ISO
+// measurement) and the other rices are deliberately untouched.
+const stapleMisses: string[] = []
+{
+  const gi = (id: string) => loadFoods().byId.get(id)?.gi
+  for (const [id, want] of [['usda:2708357', 49],
+    ['usda:2708403', 73], ['usda:2708408', 73], ['usda:2710788', 73], ['usda:2707824', 34],
+    ['usda:2708409', 78]] as [string, number][]) if (gi(id) !== want) stapleMisses.push(`    ${id} has GI ${gi(id)}, wanted ${want}`)
+  const rs = loadFoods().records
+  // A plain-pasta dish cannot sit far below its pasta: lasagna with meat was 27 on the barley match.
+  const lasagna = rs.filter((r) => r.id.startsWith('usda:') && /^lasagna with (meat|chicken)/i.test(r.name) && r.gi !== null && !/canned|restaurant/i.test(r.name))
+  const lowLasagna = lasagna.filter((r) => (r.gi as number) < 40)
+  if (lasagna.length < 2 || lowLasagna.length) stapleMisses.push(`    ${lowLasagna.length} of ${lasagna.length} home lasagnas are under GI 40, e.g. ${lowLasagna[0]?.name} ${lowLasagna[0]?.gi}`)
+  const why = loadFoods().byId.get('usda:2708357')?.source ?? ''
+  if (!/corrected 20 November 2026/.test(why)) stapleMisses.push('    a corrected staple does not say it was corrected, or why')
+}
+console.log(`staples gi ${stapleMisses.length === 0 ? 'ok' : 'WRONG'}`)
+stapleMisses.forEach((m) => console.log(m))
+
 // ── correcting a weight on the receipt (docs/specs/recorrect-evals.md, RC1 to RC10) ─────────────────────────────────
 // POST /meal/recompute takes what the person typed as a count and a unit, the engine weighs it, and an amount the person changed comes back
 // `stated` while every line they left alone keeps the basis it had. The checks read the result's fields, never wording.
@@ -2713,6 +2734,7 @@ if (imageMisses.length) { console.log('the image is missing a data file the engi
 if (brandedMisses.length) { console.log('a branded product was given a load, or the layer is the wrong size'); process.exit(1) }
 if (dishMisses.length) { console.log('a dish was costed wrongly: see cost-dish above'); process.exit(1) }
 if (breadMisses.length) { console.log('the bread family has a wrong glycemic index: see bread gi above'); process.exit(1) }
+if (stapleMisses.length) { console.log('a staple has a wrong glycemic index: see staples gi above'); process.exit(1) }
 if (recorrectMisses.length) { console.log('correcting a weight is wrong: see recorrect above'); process.exit(1) }
 if (storedMisses.length) { console.log('stored data was trusted'); process.exit(1) }
 if (catalogueMisses.length) { console.log('a food with carbohydrate and no glycemic index is in the catalogue'); process.exit(1) }
