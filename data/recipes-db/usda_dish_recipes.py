@@ -28,6 +28,15 @@ GENERIC = {  # survey code -> (our ingredient, what the label says)
     '75510000': 'olives', '75511100': 'dill_pickle', '75115000': 'mushrooms', '22400100': 'pork_shoulder', '22101010': 'pork_chop',
     '42200500': 'almond_butter',
 }
+# A USDA record whose name is not ours but which is the same food with the same nutrients (checked by hand 20 November 2026: kcal within 25 and
+# carbohydrate within a few grams of our record), so it is not a new ingredient.
+SAME = {
+ 'usda_salad_dressing_mayonnaise': 'mayo', 'usda_egg_whole': 'egg', 'usda_carrots_cooked': 'carrot', 'usda_refried_beans_canned': 'refried_beans',
+ 'usda_soy_sauce_made_from_soy_and_wheat_shoyu': 'soy_sauce', 'usda_salt_table': 'salt', 'usda_tomatoes_red': 'tomato', 'usda_peppers_sweet': 'bell_pepper',
+ 'usda_mushrooms_canned': 'mushrooms', 'usda_potatoes_baked': 'potato_baked', 'usda_crustaceans_shrimp': 'shrimp', 'usda_crustaceans_crab': 'crab',
+ 'usda_fish_anchovy': 'anchovies', 'usda_fish_cod': 'cod', 'usda_soup_chicken_broth': 'chicken_broth', 'usda_soup_beef_broth_or_bouillon_canned': 'beef_broth',
+ 'usda_sugars_powdered': 'sugar_white',
+}
 NID = {'1008': 'kcal', '1003': 'protein', '1004': 'fat', '1005': 'carbs', '1079': 'fiber'}
 STOP = {'raw','cooked','with','and','without','added','salt','the','or','of','nfs','ns','as','to','type','includes','foods','for','usda','s','food','distribution','program','boiled','drained','enriched','regular','prepackaged','sliced','canned','whole','fresh','year','round','average','ingredient','ingredients','recipes','use','sandwich','sandwiches','on','in','a'}
 words = lambda s: set(re.findall(r'[a-z]+', s.lower())) - STOP
@@ -72,6 +81,7 @@ def main():
                 notes.append(f'{row["sr_description"]} counted as {ING[key][0].lower()}')
             else:
                 why = f'no nutrient data for "{row["sr_description"]}"'; break
+            key = SAME.get(key, key)
             ing[key] = ing.get(key, 0) + g
         if why is None and subs > MAX_SUB_CARBS_G: why = f'the substituted ingredients would add {subs:.1f} g carbohydrate'
         if why: left.append((d['name'], why)); continue
