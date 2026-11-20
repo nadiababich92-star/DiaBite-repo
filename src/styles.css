@@ -776,7 +776,7 @@ button.danger:disabled { opacity: 0.45; cursor: not-allowed; }
 .weight-edit select { flex: 0 0 auto; min-width: 84px; }
 .weight-error { flex: 1 1 100%; margin: 0; }
 .weights-used { display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px; }
-.weights-used .weight-btn-inline { font-size: 14px; min-width: 0; }
+.weights-used .weight-btn-inline { font-size: 14px; min-width: 0; padding: 0; }
 .receipt-note { font-size: 14px; line-height: 1.5; margin: 0 0 8px; color: var(--text-dim); }
 
 /* Onboarding: where you are, as a bar. */

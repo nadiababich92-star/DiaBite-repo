@@ -1510,10 +1510,17 @@ hangMisses.forEach((m) => console.log(m))
       if (!got || got.g !== want.g || got.text !== want.text || got.basis !== want.basis) miss(`${what} was ${JSON.stringify(got)}, wanted ${JSON.stringify(want)}`)
     }
     if (/\boz\b|fruit/.test(said('seed:banana', { count: 1, unit: 'default' })?.text ?? '') || /\bfruit\b/.test(said('seed:avocado', { count: 1, unit: 'whole' })?.text ?? '')) miss('a banana or an avocado was said in ounces or as "1 fruit"')
-    // A count multiplies the usual portion only when the usual portion is one item (100-dish test: ten nuggets were 1,400 g, two strips of bacon 200 g).
+    type FoodRecordLike = unknown
+  // A count multiplies the usual portion only when the usual portion is one item (100-dish test: ten nuggets were 1,400 g, two strips of bacon 200 g).
   { const R = (id: string) => loadFoods().byId.get(id)!
     const asks = (id: string, q: Quantity) => 'needs' in gramsFor(R(id), q)
     for (const [id, n] of [['usda:2706092', 10], ['usda:2705885', 2], ['ing:bacon', 2], ['usda:2708132', 5], ['ing:chicken_sausage', 2], ['branded:2529927', 3]] as [string, number][]) if (!asks(id, { count: n, unit: 'default' })) miss(`${n} x the usual portion of ${id} was costed: it is not one item`)
+    // Natural counts that were costed before must still be: two hard candies (30 g), two pancakes (100 g), two hot dogs only as whole (114 g, the table's "1 regular").
+    const named = (name: string) => loadFoods().records.find((r) => r.id.startsWith('usda:') && r.name === name)!
+    for (const [what, rec, q, g] of [['two hard candies', named('Candy, hard'), { count: 2, unit: 'default' }, 30], ['two pancakes', named('Pancakes'), { count: 2, unit: 'default' }, 100], ['two hot dogs as whole', named('Hot dog, beef'), { count: 2, unit: 'whole' }, 114]] as [string, FoodRecordLike, Quantity, number][]) {
+      const r = gramsFor(rec as never, q); if (!('grams' in r) || r.grams !== g) miss(`${what} was ${JSON.stringify(r)}, wanted ${g} g`)
+    }
+    if (!('needs' in gramsFor(named('Hot dog, beef') as never, { count: 2, unit: 'default' }))) miss('two hot dogs at the usual portion (a cup of sliced, 150 g) was costed: it is not one item')
     for (const [id, n, g] of [['seed:egg', 2, 100], ['ing:apple', 2, 400], ['seed:banana', 3, 378]] as [string, number, number][]) { const r = gramsFor(R(id), { count: n, unit: 'default' }); if (!('grams' in r) || r.grams !== g) miss(`${n} x the usual portion of ${id} (one item) was ${JSON.stringify(r)}, wanted ${g} g`) }
     const said2 = (id: string, q: Quantity) => { const rec = R(id); const g = gramsFor(rec, q); return 'grams' in g && g.grams !== undefined ? `${g.grams} g | ${saidText({ grams: g.grams, basis: g.basis, quantity: q, row: g.row, rec, units: 'imperial' })}` : JSON.stringify(g) }
     for (const [what, got, want] of [

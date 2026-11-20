@@ -312,6 +312,9 @@ interface UsdaRow {
 /** Sweets are eaten by the piece or the pouch, never by the cup, and a piece can weigh 2 g. */
 const CONFECTIONERY = /^(candy|chewing gum|gum\b|lollipop|marshmallow|jelly bean)/i
 
+/** Names whose usual portion is one piece by the rule in `householdPortion` (a candy, a slice of pizza, a piece of cornbread), not a row of the table. */
+export const ONE_PIECE_DEFAULT = (name: string): boolean => CONFECTIONERY.test(name) || /^pizza\b(?!\s+rolls)|^cornbread, made from home recipe/i.test(name)
+
 /** Foods said by the spoonful when nothing else is said: sweeteners, creams and creamers, butters and fats, sour cream, cream cheese, dressings. */
 export const SPOONFUL = /^(sugar\b(?!, (cane|beet)\b)|brown sugar|cream\b(?! of\b)|half and half|coffee creamer|creamer|whipped (cream|topping)|butter\b(?!milk|scotch|fly)|margarine|ghee|lard\b|shortening|sour cream|cream cheese|ranch|italian dressing|caesar dressing|thousand island|blue cheese dressing|french dressing|honey mustard|[a-z' -]*\bdressing\b(?!, bread))/i
 

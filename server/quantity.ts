@@ -9,7 +9,7 @@
  * Pure: no I/O, no clock.
  */
 import { ouncesText } from '../src/lib/measure'
-import { householdMeasure, readPortion, type FoodRecord, type PortionRow } from './foods'
+import { householdMeasure, ONE_PIECE_DEFAULT, readPortion, type FoodRecord, type PortionRow } from './foods'
 
 export const QUANTITY_UNITS = [
   'g', 'oz', 'lb',
@@ -64,10 +64,19 @@ function plainRows(rec: FoodRecord): PortionRow[] {
   return (rec.portions ?? []).map((p) => readPortion(p.label, p.grams, rec.name)).filter((r): r is PortionRow => r !== null && r.qualifier === '')
 }
 
-/** The usual portion is one item when USDA lists an item of that very weight (an egg 50 g, a banana 126 g, a medium apple 200 g, a slice of bread). */
+/** A row that is a measure of volume, weight or packaging, not one of the thing: "1 cup", "1 oz", "1 pouch", "guideline amount…". */
+const NOT_AN_ITEM = /^(?:\d+(?:\.\d+)?(?:\/\d+)?\s+)?(?:cups?|tablespoons?|tbsp|teaspoons?|tsp|fl oz|oz|ounces?|lbs?|pounds?|servings?|guideline|packages?|pouch|containers?|bags?|boxe?s?|bowls?|plates?|scoops?|sleeves?|cartons?|cans?|bottles?|packets?|cubic|surface|dry|yield)/i
+
+/**
+ * The usual portion is one item when USDA lists a row of that very weight that is an item (an egg 50 g, a banana 126 g, a pancake 50 g, a hot dog 150 g;
+ * qualified rows count here, only the weight and the noun matter), or the record's default is one piece by `householdPortion`'s own rule (a candy, a slice of
+ * pizza). A cupful of nuggets (140 g) is not: ten nuggets were 1,400 g, two strips of bacon 200 g (100-dish test, 19 November). "Two pancakes" and
+ * "two hard candies" must keep working.
+ */
 function defaultIsOneItem(rec: FoodRecord): boolean {
   if (rec.defaultPortion <= 0) return false
-  return plainRows(rec).some((r) => ['whole', 'medium', 'large', 'small', 'slice', 'piece'].includes(r.unit) && Math.abs(r.grams - rec.defaultPortion) / rec.defaultPortion <= 0.03)
+  if (ONE_PIECE_DEFAULT(rec.name)) return true
+  return (rec.portions ?? []).some((p) => !NOT_AN_ITEM.test(String(p.label).trim()) && Math.abs(p.grams - rec.defaultPortion) / rec.defaultPortion <= 0.03)
 }
 
 const largest = (rows: PortionRow[]) => rows.reduce((a, b) => (b.grams > a.grams ? b : a))
