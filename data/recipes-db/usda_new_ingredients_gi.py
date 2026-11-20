@@ -118,7 +118,7 @@ for slug, (gi, conf, basis) in OVER.items():
 for v in out.values():
     if v['confidence'] == 'CHECK' or v['gi'] is None:
         net = max(0, v['per100']['carbs'] - v['per100']['fiber'])
-        v.update(gi=0, confidence='definitional', basis='negligible carbohydrate (%.1f g per 100 g): GI 0, as for our other meats, fish, eggs and fats' % net) if net < 2 else v.update(gi=15, confidence='low', basis='ESTIMATE: ' + PH)
+        v.update(gi=0, confidence='definitional', basis='negligible carbohydrate (%.1f g net per 100 g): GI 0, as for our other meats, fish, eggs and fats' % net) if net <= 1 else v.update(gi=15, confidence='low', basis='ESTIMATE: ' + PH)
 json.dump(out, open(os.path.join(HERE, 'drafts', 'usda-new-ingredients-gi.json'), 'w'), indent=1)
 import collections
 print(len(out), dict(collections.Counter(v['confidence'] for v in out.values())))
