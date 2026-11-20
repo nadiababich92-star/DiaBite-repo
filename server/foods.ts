@@ -592,6 +592,9 @@ const USDA_ALIASES: Record<string, string[]> = {
   'usda:2710359': ['gummy bears', 'gummy bear', 'gummies', 'gummy candy', 'gummy worms'],      // Candy, gummy (no GI: carbohydrate only)
   'usda:2706071': ['buffalo wings', 'buffalo wing', 'hot wings'],            // Chicken wings with sauce, from fast food / restaurant
   'usda:2705848': ['pot roast'],                                          // Beef, pot roast
+  // 20 November 2026: both lost their computed GI (a missing ingredient made it unreliable) and were then outranked by a neighbour.
+  'usda:2707139': ['clam chowder', 'new england clam chowder'],              // Soup, New England clam chowder (carbohydrate only)
+  'usda:2708607': ['fajita vegetables', 'grilled fajita vegetables'],     // Fajita, vegetable (carbohydrate only)
   'usda:2706979': ['blt', 'blt sandwich', 'bacon lettuce tomato sandwich'], // Bacon, lettuce, tomato sandwich on white
   // "Pepperoni pizza" matched twelve survey pizzas and nine brands within a hair of each other, so the agent asked
   // 'stuffed crust or Tombstone?'. The plain restaurant or fast-food pizza is the one people mean; a crust, a freezer
@@ -702,7 +705,7 @@ function usdaRecords(): FoodRecord[] {
       searchText: `${name}. ${r.name}. ${r.category}.${USDA_ALIASES[`usda:${r.fdc_id}`] ? ` ${USDA_ALIASES[`usda:${r.fdc_id}`].join(', ')}.` : ''}`,
       per100: { kcal: r.per100.kcal, protein: r.per100.protein, fat: r.per100.fat, carbs: r.per100.carbs, fiber: r.per100.fiber },
       source: unrated
-        ? 'USDA FoodData Central, Survey (FNDDS): nutrients only. No glycemic index is assigned to this food, so no glycemic load is computed.'
+        ? `USDA FoodData Central, Survey (FNDDS): nutrients only. No glycemic index is assigned to this food, so no glycemic load is computed.${/withdrawn \d/.test(r.gi_basis ?? '') ? ` ${r.gi_basis!.slice(r.gi_basis!.indexOf('withdrawn'))}.` : ''}`
         : `USDA FoodData Central, Survey (FNDDS)${r.gi_basis ? `; glycemic index ${r.gi_basis}` : ''}.`,
     })
   }

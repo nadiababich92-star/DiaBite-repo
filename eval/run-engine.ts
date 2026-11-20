@@ -219,7 +219,7 @@ const brandedMisses: string[] = []
   if (all.some((r) => r.gi !== null)) brandedMisses.push('    a branded record has a glycemic index')
   // The second kind that may hold carbohydrate without a GI: an everyday USDA food nobody has assigned one to.
   const unrated = records.filter((r) => r.kind === 'unrated')
-  if (unrated.length < 500 || unrated.length > 1200) brandedMisses.push(`    ${unrated.length} unrated records, expected 500 to 1,200`)
+  if (unrated.length < 500 || unrated.length > 1700) brandedMisses.push(`    ${unrated.length} unrated records, expected 500 to 1,700`)
   if (unrated.some((r) => r.gi !== null || !r.id.startsWith('usda:'))) brandedMisses.push('    an unrated record has a glycemic index or is not a USDA survey food')
   if (records.some((r) => r.kind !== 'branded' && r.kind !== 'unrated' && carbsWithoutLoad(r))) brandedMisses.push('    a record that is neither branded nor unrated has carbohydrate and no GI')
   // The failure that once went live for an hour: two slices of pepperoni pizza with a glycemic load of zero.
@@ -406,7 +406,7 @@ const breadMisses: string[] = []
   // A sandwich or burger on white bread is as high as white bread (72) less a little for what is inside, never half of it.
   const onWhite = surveyGi.filter((r) => /on white|white bun|white bread/i.test(r.name) && /sandwich|burger|sub|hot dog|toast/i.test(r.name))
   const low = onWhite.filter((r) => (r.gi as number) < 55)
-  if (onWhite.length < 80 || low.length) breadMisses.push(`    ${low.length} of ${onWhite.length} "on white" sandwiches are under GI 55, e.g. ${low[0]?.name} ${low[0]?.gi}`)
+  if (onWhite.length < 70 || low.length) breadMisses.push(`    ${low.length} of ${onWhite.length} "on white" sandwiches are under GI 55, e.g. ${low[0]?.name} ${low[0]?.gi}`)
   const ww = surveyGi.filter((r) => /^bread, .*whole.?wheat|^bread, whole.?wheat/i.test(r.name))
   const off = ww.filter((r) => (r.gi as number) > 80 || (r.gi as number) < 50)
   if (ww.length < 10 || off.length) breadMisses.push(`    ${off.length} of ${ww.length} whole wheat breads are outside GI 50 to 80, e.g. ${off[0]?.name} ${off[0]?.gi}`)
@@ -436,6 +436,31 @@ const stapleMisses: string[] = []
 }
 console.log(`staples gi ${stapleMisses.length === 0 ? 'ok' : 'WRONG'}`)
 stapleMisses.forEach((m) => console.log(m))
+
+// ── a computed dish GI must cover the dish; sushi has its measured value ─────────────────────────────────────────────────
+// 20 November 2026: a dish's GI is the carbohydrate-weighted mean of its USDA ingredients, and an ingredient with no SR record was skipped, so a
+// peanut butter sandwich on wheat bread (bread missing) was GI 14 from the peanut butter alone. data/foods-usda/fix_coverage_gi.py withdrew the GI of
+// the 457 dishes whose sourced ingredients hold under 80% of their carbohydrate (they are `unrated`: carbohydrate costed, no load, never "fits"),
+// and set sushi, built on glutinous rice (94), to the measured 48.
+const coverageMisses: string[] = []
+{
+  const by = loadFoods().byId
+  const sushi = by.get('usda:2708963')
+  if (sushi?.gi !== 48 || sushi.kind !== 'ingredient') coverageMisses.push(`    sushi roll, salmon is ${sushi?.kind} GI ${sushi?.gi}, wanted an ingredient at 48`)
+  for (const id of ['usda:2707551', 'usda:2707550']) {
+    const r = by.get(id)
+    if (r && r.gi !== null && (r.name.includes('on wheat') || r.gi < 40)) coverageMisses.push(`    ${r.name} still has GI ${r.gi} from a recipe with a missing ingredient`)
+  }
+  const wheat = by.get('usda:2707551')
+  if (wheat && wheat.kind !== 'unrated') coverageMisses.push(`    the peanut butter sandwich on wheat is ${wheat.kind}, wanted unrated`)
+  const why = wheat?.source ?? ''
+  if (!/withdrawn 20 November 2026/.test(why)) coverageMisses.push('    a dish whose GI was withdrawn does not say so, or why')
+  const rs = loadFoods().records.filter((r) => r.id.startsWith('usda:') && /withdrawn 20 November 2026/.test(r.source ?? ''))
+  const priced = rs.filter((r) => r.gi !== null)
+  if (rs.length < 450 || priced.length) coverageMisses.push(`    ${rs.length} withdrawn dishes (wanted 450 or more), ${priced.length} of them still rated`)
+}
+console.log(`coverage  ${coverageMisses.length === 0 ? 'ok' : 'WRONG'}`)
+coverageMisses.forEach((m) => console.log(m))
 
 // ── correcting a weight on the receipt (docs/specs/recorrect-evals.md, RC1 to RC10) ─────────────────────────────────
 // POST /meal/recompute takes what the person typed as a count and a unit, the engine weighs it, and an amount the person changed comes back
@@ -2734,6 +2759,7 @@ if (imageMisses.length) { console.log('the image is missing a data file the engi
 if (brandedMisses.length) { console.log('a branded product was given a load, or the layer is the wrong size'); process.exit(1) }
 if (dishMisses.length) { console.log('a dish was costed wrongly: see cost-dish above'); process.exit(1) }
 if (breadMisses.length) { console.log('the bread family has a wrong glycemic index: see bread gi above'); process.exit(1) }
+if (coverageMisses.length) { console.log('a computed dish glycemic index does not cover the dish: see coverage above'); process.exit(1) }
 if (stapleMisses.length) { console.log('a staple has a wrong glycemic index: see staples gi above'); process.exit(1) }
 if (recorrectMisses.length) { console.log('correcting a weight is wrong: see recorrect above'); process.exit(1) }
 if (storedMisses.length) { console.log('stored data was trusted'); process.exit(1) }
