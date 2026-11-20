@@ -75,7 +75,7 @@ Ordered by what changes the first-week outcome the most for the least build. Siz
 
 ### A. Prove it in public (S to M; this is the difference, make it visible)
 
-1. **Publish the test.** A page, "How we test", with the hundred-meal test of 19 November: what we asked, what came back right, what came back wrong, what we changed (breads, counts, spoonfuls, measures), with the date and the version. No competitor has anything like it. Needs: the owner's yes on publishing failures. *S.*
+1. **Prepare "How we test" now, publish it later (the owner decided on 20 November 2026: publish when everything is good).** A page with the method (a hundred American phrasings asked of the live system, the number always computed by the engine, never by the model), the kinds of errors found and fixed (breads, counts, spoonfuls, measures), the date and the version, and one sentence that says numbers are traced to tools and accuracy is not claimed. No raw list of failing meals. No competitor has anything like it. **Publishing waits for a gate the owner has still to confirm.** Proposed gate: (a) the open findings of the 19 November test are closed or explained (the yogurt cup, the product substitutions such as a muffin counted as an oat muffin, the fries record, mixed dishes); (b) a full agent run with no failure that is not explained, twice in a row, on the shipped version; (c) the cheese-sandwich benchmark (item 2) done; (d) a clinician has read the summary or the owner has chosen to publish without one; (e) the wording checked once for any claim it should not make. Until then it can be shown to a dietitian or an investor by a private link. *S now, S to publish.*
 2. **Run the outside benchmark.** The independent reviewer of an AI carb counter used a cheese sandwich as the test that photo apps fail. Run the same kind of test (weighed bread, cheese, ham; typed in household measures) on DiaBite and publish the result, including what it takes to get it right. *S.*
 3. **Put the assumption on the receipt, in words.** The one-tap correction exists; make the weights line the first thing a first-time user sees on their first answer, with one sentence saying why. *S.*
 
@@ -106,7 +106,7 @@ Glycemic Snap (features, price, the Pro tier), Logi, CalEye, Carb Manager (glyce
 
 ## 6. Decisions for the owner
 
-1. **Publish "How we test"** with the failures in it? (A1; recommended: yes.)
+1. **"How we test": decided, publish later.** Confirm the gate in A1 (the five conditions), or change it. (A1.)
 2. **A free first answer without signing in?** (B4; recommended: yes, with the existing limits.)
 3. **Photo as identification only, never as the weight?** (B6; recommended: later, after A and B4, and only if the position is the one you want: "the photo says what, you say how much".)
 4. **Barcode and label, computed by the engine?** (B5; recommended: yes, as parity.)
