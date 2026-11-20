@@ -88,6 +88,14 @@ def main():
         for k in ing:
             if k in new: new[k]['dishes'] += 1
         recipes.append({'fdc_id': d['fdc_id'], 'name': d['name'], 'cat': d['cat'], 'ing': [[k, round(v)] for k, v in ing.items()], 'notes': sorted(set(notes)), 'usda_gi': d['gi']})
+    # the new ingredients got their final keys in usda_new_ingredients_gi.py; translate the working slugs (a no-op before that file exists)
+    gj = os.path.join(HERE, 'drafts', 'usda-new-ingredients-gi.json')
+    final = {slug: v['key'] for slug, v in json.load(open(gj)).items()} if os.path.exists(gj) else {}
+    for r in recipes:
+        merged = collections.OrderedDict()
+        for k, g in r['ing']:
+            k = final.get(k, k); merged[k] = merged.get(k, 0) + g
+        r['ing'] = [[k, g] for k, g in merged.items()]
     json.dump(recipes, open(os.path.join(HERE, 'drafts', 'usda-dishes-recipes.json'), 'w'), indent=1)
     json.dump(new, open(os.path.join(HERE, 'drafts', 'usda-new-ingredients.json'), 'w'), indent=1)
     print(f'{len(recipes)} dishes buildable, {len(left)} left out, {len(new)} new ingredients')

@@ -10,7 +10,7 @@ agent that day. If a beat stops working, this file is wrong and should be re-run
 
 What changed since the first demo, and so what this one shows: sign-in by email and a diary that follows you across devices;
 first-run tips; a week view with in-range days; a dish the database lacks is counted from typical ingredients and labelled an
-estimate; 8,659 foods and 2,000 recipes; a weekly menu and shopping list.
+estimate; 8,794 foods and 2,085 recipes; a weekly menu and shopping list.
 
 ---
 
@@ -22,7 +22,7 @@ estimate; 8,659 foods and 2,000 recipes; a weekly menu and shopping list.
 1. Run `bash scripts/demo-limits.sh on` the morning of a live room (one Wi-Fi would use up 30 asks in 10 minutes),
    and `off` afterwards. Skip it for a recording.
 2. `https://diabite.pro/health` must say
-   `"records":8659`. A smaller number means the database did not load and answers will be wrong in a way that
+   `"records":8794`. A smaller number means the database did not load and answers will be wrong in a way that
    looks right.
 3. **Use a clean browser profile (a guest window), signed in as the demo person, and stop at the first screen of the setup.**
    The tips are remembered in the browser, so a profile that has already seen them will not show them, and a

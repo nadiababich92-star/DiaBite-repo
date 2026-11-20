@@ -462,6 +462,33 @@ const coverageMisses: string[] = []
 console.log(`coverage  ${coverageMisses.length === 0 ? 'ok' : 'WRONG'}`)
 coverageMisses.forEach((m) => console.log(m))
 
+// ── the recipes made from USDA's own survey dishes (data/recipes-db/usda_dish_batch.py) ───────────────────────────────────
+// 20 November 2026: 85 dishes whose ingredients and weights are USDA's. A dish is in only if our ingredients, summed, reproduce USDA's energy and net
+// carbohydrate per 100 g of the dish; this keeps that true, reading the files the engine loads and the dish's own USDA record.
+const usdaDishMisses: string[] = []
+{
+  const root = join(dirname(fileURLToPath(import.meta.url)), '..') + '/'
+  const ing = new Map((JSON.parse(readFileSync(root + 'data/recipes-db/ingredients.json', 'utf8')) as { id: string; per100: { kcal: number; carbs: number; fiber: number } }[]).map((i) => [i.id, i]))
+  const usda = new Map((JSON.parse(readFileSync(root + 'data/foods-usda/foods_usda.json', 'utf8')).foods as { fdc_id: string; per100: { kcal: number; carbs: number; fiber: number } }[]).map((f) => [String(f.fdc_id), f.per100]))
+  const batch = readFileSync(root + 'data/recipes-db/recipes_20.jsonl', 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l) as { name: string; source: string; ing: [string, number][]; steps: string[]; servings: number })
+  if (batch.length < 80) usdaDishMisses.push(`    ${batch.length} USDA dishes, expected 80 or more`)
+  for (const r of batch) {
+    const unknown = r.ing.filter(([k]) => !ing.has(k)).map(([k]) => k)
+    if (unknown.length) { usdaDishMisses.push(`    ${r.name}: unknown ingredient ${unknown.join(', ')}`); continue }
+    if (r.steps.length < 2 || r.servings < 1) usdaDishMisses.push(`    ${r.name}: needs two steps and a serving`)
+    const p = usda.get(r.source.match(/USDA FNDDS (\d+)/)?.[1] ?? '')
+    if (!p) { usdaDishMisses.push(`    ${r.name}: its USDA record is missing`); continue }
+    const grams = r.ing.reduce((a, [, g]) => a + g, 0)
+    const kcal = (r.ing.reduce((a, [k, g]) => a + ing.get(k)!.per100.kcal * g, 0) / grams)
+    const carbs = (r.ing.reduce((a, [k, g]) => a + (ing.get(k)!.per100.carbs - ing.get(k)!.per100.fiber) * g, 0) / grams)
+    const uc = p.carbs - p.fiber
+    if (Math.abs(kcal - p.kcal) / Math.max(p.kcal, 1) > 0.2) usdaDishMisses.push(`    ${r.name}: ${kcal.toFixed(0)} kcal per 100 g, USDA says ${p.kcal}`)
+    else if (Math.abs(carbs - uc) > Math.max(3, 0.2 * uc)) usdaDishMisses.push(`    ${r.name}: ${carbs.toFixed(0)} g net carbohydrate per 100 g, USDA says ${uc.toFixed(0)}`)
+  }
+}
+console.log(`usda dish ${usdaDishMisses.length === 0 ? 'ok' : 'WRONG'}`)
+usdaDishMisses.forEach((m) => console.log(m))
+
 // ── correcting a weight on the receipt (docs/specs/recorrect-evals.md, RC1 to RC10) ─────────────────────────────────
 // POST /meal/recompute takes what the person typed as a count and a unit, the engine weighs it, and an amount the person changed comes back
 // `stated` while every line they left alone keeps the basis it had. The checks read the result's fields, never wording.
@@ -2759,6 +2786,7 @@ if (imageMisses.length) { console.log('the image is missing a data file the engi
 if (brandedMisses.length) { console.log('a branded product was given a load, or the layer is the wrong size'); process.exit(1) }
 if (dishMisses.length) { console.log('a dish was costed wrongly: see cost-dish above'); process.exit(1) }
 if (breadMisses.length) { console.log('the bread family has a wrong glycemic index: see bread gi above'); process.exit(1) }
+if (usdaDishMisses.length) { console.log('a USDA dish recipe does not reproduce USDA: see usda dish above'); process.exit(1) }
 if (coverageMisses.length) { console.log('a computed dish glycemic index does not cover the dish: see coverage above'); process.exit(1) }
 if (stapleMisses.length) { console.log('a staple has a wrong glycemic index: see staples gi above'); process.exit(1) }
 if (recorrectMisses.length) { console.log('correcting a weight is wrong: see recorrect above'); process.exit(1) }
