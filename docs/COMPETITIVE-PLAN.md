@@ -95,6 +95,10 @@ Ordered by what changes the first-week outcome the most for the least build. Siz
 
 10. **A free tier that shows the difference** (the first answers, the correction, the receipt) and a paid tier for what a habit needs (the diary history, the menu, the summary). The market spans free, $4.99 a month and $39.99 to $59.99 a year; $9.99 a month is above all of it, and the case for it has to be verification and the dietitian lane, not the feature list. The annual price is still undecided (WORKLIST №40). *Decision.*
 
+### D2. Keep growing the menu (the owner's addition, 20 November 2026: "this is our advantage too")
+
+12. **Replenish the weekly menu and treat it as a differentiator.** No direct competitor plans a week with every number computed: the leaders score a plate you already have, and the recipe apps do not know glycemic load. DiaBite has 2,000 recipes (1,662 in the menu), each with its glycemic load computed from its own ingredients, a planned week, a shopping list, and "I ate this" into a diary. The plan: add recipes in batches (American dishes first, the ones the 19 November test showed people actually say), keep each recipe's glycemic index computed from its ingredients and never typed, and add menu-side checks (the week stays in range, nothing the person excludes, no repeats inside a week). Constraints already decided: recipes and texts grow **without a clinical reading** until there is money for a dietitian (the owner's earlier decision), and every recipe name must resolve cleanly to its own record (the pitfalls with names are in the batch notes). Needs from the owner: which cuisines or conditions next, and whether a menu preview belongs in the free first answer (it does not, today: the menu stays behind sign-in). *M per batch, repeating.*
+
 ### E. What to stop and what to refuse
 
 11. **Do not build** a glucose curve, an estimated A1C, an insulin or dose feature, or a "score" that is not a property of the food. Say so on the site as a list: "what DiaBite will not do, and why". *S, copy only.*
