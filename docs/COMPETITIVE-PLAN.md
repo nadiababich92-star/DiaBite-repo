@@ -107,9 +107,9 @@ Glycemic Snap (features, price, the Pro tier), Logi, CalEye, Carb Manager (glyce
 ## 6. Decisions for the owner
 
 1. **"How we test": decided, publish later.** Confirm the gate in A1 (the five conditions), or change it. (A1.)
-2. **A free first answer without signing in?** (B4; recommended: yes, with the existing limits.)
-3. **Photo as identification only, never as the weight?** (B6; recommended: later, after A and B4, and only if the position is the one you want: "the photo says what, you say how much".)
-4. **Barcode and label, computed by the engine?** (B5; recommended: yes, as parity.)
+2. **A free first answer without signing in: decided yes, 20 November 2026**, with the existing limits. (B4.) Needs a security plan before any build: the wall exists for cost and abuse.
+3. **Photo as identification only, never as the weight: decided, later, 20 November 2026.** Not before A and B4, and only if the position still holds: "the photo says what, you say how much". (B6.)
+4. **Barcode and label, computed by the engine: decided yes, "needed anyway", 20 November 2026.** (B5.)
 5. **The price shape:** free tier plus one paid tier, and the annual price. (D10; WORKLIST №40.)
 6. **Which dietitian reads the summary first?** (C8; WORKLIST №39 and №60.)
 
