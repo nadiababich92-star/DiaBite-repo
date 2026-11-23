@@ -48,9 +48,10 @@ import { PortionEditor, WeightsUsed } from '../src/components/WeightEditor'
 import type { ReceiptLine } from '../src/lib/agent'
 import GlHelp, { GlHelpContext } from '../src/components/GlHelp'
 import { GI_GL_HOW, GI_GL_VIDEO, GI_GL_WORDS } from '../src/lib/glWords'
-import { budgetOf, buildReceipt, receiptFrom } from '../src/lib/agent'
+import { budgetOf, buildReceipt, receiptFrom, requestHeaders, SignInRequiredError } from '../src/lib/agent'
+import { deviceId } from '../src/lib/device'
 import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
-import { looksLikeCode, looksLikeEmail, problemOf } from '../src/lib/authCore'
+import { accessOf, looksLikeCode, looksLikeEmail, problemOf, signInReasonOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
 import { boldSegments } from '../src/lib/answer'
 import { applyTheme, lookOf, pinThemeColor } from '../src/lib/theme'
@@ -80,7 +81,7 @@ import { addDays, dayLabel, gramStep, mealForNow, noLoadNote, nudgeGrams, portio
 import { sumNutrients } from '../src/lib/glycemic'
 import { ouncesText } from '../src/lib/measure'
 import { buildSummary } from '../src/lib/clinicianSummary'
-import { calculateTargets, cmToFtIn, DEFAULT_PROFILE, ftInToCm, kgToLb, lbToKg, weightUsed } from '../src/lib/profile'
+import { ANON_DISCLOSURE, ANON_PROFILE, calculateTargets, cmToFtIn, DAILY_CARBS_MAX, DAILY_CARBS_MIN, DEFAULT_PROFILE, exitReason, ftInToCm, kgToLb, lbToKg, weightUsed } from '../src/lib/profile'
 import { HeightWeight, UnitsSwitch } from '../src/components/BodyUnits'
 import { focusesHeadingOnOpen } from '../src/components/Onboarding'
 import { lockCount, lockPage } from '../src/lib/pageLock'
@@ -641,6 +642,43 @@ recorrectMisses.forEach((m) => console.log(m))
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) { console.log('the first-run tips misbehave: see tour above'); process.exit(1) }
 }
+// A free first answer without signing in, the scaffold (docs/specs/anon-evals.md, AN5; the device id, the access words and the request headers
+// of docs/specs/anon-screen.md). The engine's counters and the screens are the next steps and have their own checks.
+{
+  const bits: string[] = []
+  // AN5: the neutral profile.
+  if (exitReason(ANON_PROFILE) !== null) bits.push('AN5 the neutral profile is turned away')
+  const differs = (Object.keys(DEFAULT_PROFILE) as (keyof typeof DEFAULT_PROFILE)[]).filter((k) => JSON.stringify(DEFAULT_PROFILE[k]) !== JSON.stringify(ANON_PROFILE[k])).sort().join()
+  if (differs !== 'carbApproach,condition,goal,onboarded') bits.push(`AN5 the neutral profile differs from the default in: ${differs}`)
+  if (ANON_PROFILE.condition !== 't2' || ANON_PROFILE.carbApproach !== 'moderate' || ANON_PROFILE.goal !== 'maintain' || ANON_PROFILE.onboarded !== true) bits.push('AN5 a neutral value is wrong')
+  if (ANON_PROFILE.units !== 'imperial' || ANON_PROFILE.insulin !== 'none' || ANON_PROFILE.pregnantOrBreastfeeding || ANON_PROFILE.meds.length) bits.push('AN5 the neutral profile carries insulin, pregnancy, medicines or metric units')
+  const t = calculateTargets(ANON_PROFILE)
+  if (!(t.carbsG >= DAILY_CARBS_MIN && t.carbsG <= DAILY_CARBS_MAX) || !(t.glBudget > 0)) bits.push(`AN5 the neutral targets are out of bounds: carbs ${t.carbsG}, glycemic load ${t.glBudget}`)
+  if (ANON_DISCLOSURE !== '') bits.push('AN5 the disclosure line is set before the owner said yes')
+  // The device id: random, stable within a page load, never a constant, a version-4 shape.
+  const id = deviceId()
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) bits.push(`the device id is not a UUID: ${id}`)
+  if (deviceId() !== id) bits.push('the device id changed inside one page load')
+  if (id === 'anon') bits.push('the device id is the old constant')
+  // The access words from /health: an engine that does not say it offers no free answers.
+  const acc = (h: object | null) => JSON.stringify(accessOf(h))
+  if (acc({ signIn: true, freeAnswers: 3 }) !== '{"required":true,"freeAnswers":3}') bits.push(`access of a full /health: ${acc({ signIn: true, freeAnswers: 3 })}`)
+  for (const bad of [undefined, null, 0, -1, 2.5, '3', NaN]) if (accessOf({ signIn: true, freeAnswers: bad }).freeAnswers !== 0) bits.push(`access took ${String(bad)} as free answers`)
+  if (accessOf({ freeAnswers: 3 }).required !== false || accessOf(null).required !== false) bits.push('access said sign-in is required when /health did not say so')
+  // The 401 reason: only the two known words, and only a positive wait.
+  if (JSON.stringify(signInReasonOf({ reason: 'free_limit', retryAfterSec: 3600.2 })) !== '{"reason":"free_limit","retryAfterSec":3601}') bits.push('the 401 reason or the wait is wrong')
+  if (JSON.stringify(signInReasonOf({ reason: 'whatever', retryAfterSec: -4 })) !== '{}' || JSON.stringify(signInReasonOf(null)) !== '{}') bits.push('an unknown 401 reason or a negative wait was kept')
+  const err = new SignInRequiredError({ reason: 'anonymous_off' })
+  if (err.message !== 'sign_in_required' || err.reason !== 'anonymous_off' || new SignInRequiredError().reason !== undefined) bits.push('SignInRequiredError lost its message or its reason')
+  // The request headers: a token and nothing else, or the device id and no token.
+  const withToken = requestHeaders('tok'), signedOut = requestHeaders(null)
+  if (withToken.authorization !== 'Bearer tok' || 'x-diabite-device' in withToken) bits.push('a signed-in request carries the device header, or lost its token')
+  if (signedOut['x-diabite-device'] !== id || 'authorization' in signedOut) bits.push('a signed-out request lacks the device header, or carries a token')
+  console.log(`\nanon      ${bits.length === 0 ? 'ok' : 'WRONG'}  (the scaffold)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
 // Watching the test users and hearing from them: when the feedback card is asked, and what the weekly report counts.
 {
   const bits: string[] = []

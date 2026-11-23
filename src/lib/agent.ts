@@ -10,6 +10,8 @@
  */
 import type { DiaryEntry, Profile, Targets } from '../types'
 import { renewSession } from './session'
+import { deviceId } from './device'
+import { signInReasonOf, type SignInReason } from './authCore'
 
 /** Dev: proxied by Vite to the Container App (see vite.config.ts). Prod: set VITE_AGENT_URL. */
 export const AGENT_URL = import.meta.env?.VITE_AGENT_URL ?? '/agent'
@@ -107,7 +109,29 @@ export interface RecomputeItem {
 
 /** The engine wants a signed-in person and was not given a good token. */
 export class SignInRequiredError extends Error {
-  constructor() { super('sign_in_required') }
+  /** Set only for a signed-out visitor: `free_limit` (the free answers are used) or `anonymous_off` (the feature was switched off). */
+  readonly reason?: SignInReason
+  /** Seconds until another free answer, when the engine says. */
+  readonly retryAfterSec?: number
+  constructor(why: { reason?: SignInReason; retryAfterSec?: number } = {}) {
+    super('sign_in_required')
+    this.reason = why.reason
+    this.retryAfterSec = why.retryAfterSec
+  }
+}
+
+/**
+ * The headers of a request to the engine. A person with an access token sends the token and nothing else; a signed-out
+ * visitor sends the random device id the engine counts free answers by (docs/specs/anon-screen.md, section 4).
+ */
+export function requestHeaders(token?: string | null): Record<string, string> {
+  return { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : { 'x-diabite-device': deviceId() }) }
+}
+
+/** The 401 of the engine as an error: the body, when it is JSON, says why. */
+async function signInRequired(res: Response): Promise<SignInRequiredError> {
+  const body = await res.json().catch(() => null) as { reason?: unknown; retryAfterSec?: unknown } | null
+  return new SignInRequiredError(signInReasonOf(body))
 }
 
 /** Longest question the engine accepts; the input stops there rather than failing late. */
@@ -139,11 +163,11 @@ export async function askAgent(req: AgentRequest, signal?: AbortSignal, token?: 
 async function askOnce(req: AgentRequest, signal: AbortSignal, token?: string | null, renewed = false): Promise<AgentResponse> {
   const res = await fetch(AGENT_URL, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
+    headers: requestHeaders(token),
     body: JSON.stringify(req),
     signal,
   })
-  if (res.status === 401) throw new SignInRequiredError()
+  if (res.status === 401) throw await signInRequired(res)
   // The id belongs to someone else, or was used before this person signed in: start a new session, once.
   if (res.status === 403 && !renewed) return askOnce({ ...req, sessionId: renewSession() }, signal, token, true)
   if (res.status === 404) throw new Error('The agent is not reachable — is the engine deployed?')
@@ -376,11 +400,11 @@ export async function recomputeMeal(
 ): Promise<Recalc> {
   const res = await fetch(recomputeUrl(), {
     method: 'POST',
-    headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
+    headers: requestHeaders(token),
     body: JSON.stringify({ sessionId, items }),
     signal,
   })
-  if (res.status === 401) throw new SignInRequiredError()
+  if (res.status === 401) throw await signInRequired(res)
   if (res.status === 429) {
     const body = await res.json().catch(() => ({})) as { retryAfterSec?: number }
     throw new RateLimitedError('ip', Number(body.retryAfterSec ?? res.headers.get('retry-after')) || 60)

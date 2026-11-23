@@ -363,6 +363,19 @@ export const DEFAULT_PROFILE: Profile = {
   onboarded: false,
 }
 
+/**
+ * The profile a signed-out visitor's first answers are counted against (docs/specs/anon-screen.md, section 4): the app's own
+ * default with three fields set to the neutral values of a typical adult. The targets come from the same formulas as everyone's,
+ * so the glycemic-load budget is not invented. Never stored, never sent to a server as a profile.
+ */
+export const ANON_PROFILE: Profile = { ...DEFAULT_PROFILE, condition: 't2', carbApproach: 'moderate', goal: 'maintain', onboarded: true }
+
+/**
+ * An optional line of disclosure under the signed-out banner. Empty until the owner says yes; the text proposed for it is
+ * "For adults. Not for mealtime insulin or pregnancy. Not medical advice." Changing it is this one string.
+ */
+export const ANON_DISCLOSURE = ''
+
 // ── imperial ↔ metric, for the screens (storage stays metric) ────────────
 // Whole inches first, then feet and the rest: rounding the remainder alone gave "5 ft 12 in" for 182.5 cm.
 export const cmToFtIn = (cm: number) => { const total = Math.round(cm / 2.54); return { ft: Math.floor(total / 12), in: total % 12 } }

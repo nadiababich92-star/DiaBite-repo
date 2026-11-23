@@ -17,4 +17,21 @@ export function problemOf(e: { status?: number; code?: string; name?: string; me
 
 
 /** The length is Supabase's setting (6 to 10 digits), not ours: accept what it can send. */
+/** What the engine says about access, from GET /health: whether sign-in is required and how many free answers a signed-out visitor may have. */
+export interface Access { required: boolean | null; freeAnswers: number }
+
+/** Anything but a whole number above zero is no free answers: the engine that does not say it does not offer it. */
+export function accessOf(health: { signIn?: unknown; freeAnswers?: unknown } | null | undefined): Access {
+  const n = health?.freeAnswers
+  return { required: health?.signIn === true, freeAnswers: typeof n === 'number' && Number.isInteger(n) && n > 0 ? n : 0 }
+}
+
+/** The 401 body of an anonymous request: why the person is asked to sign in, and when another free answer comes. Unknown words are no reason. */
+export type SignInReason = 'free_limit' | 'anonymous_off'
+export function signInReasonOf(body: { reason?: unknown; retryAfterSec?: unknown } | null | undefined): { reason?: SignInReason; retryAfterSec?: number } {
+  const reason = body?.reason === 'free_limit' || body?.reason === 'anonymous_off' ? body.reason : undefined
+  const wait = typeof body?.retryAfterSec === 'number' && body.retryAfterSec > 0 ? Math.ceil(body.retryAfterSec) : undefined
+  return { ...(reason ? { reason } : {}), ...(wait ? { retryAfterSec: wait } : {}) }
+}
+
 export const looksLikeCode = (c: string) => /^\d{6,10}$/.test(c)

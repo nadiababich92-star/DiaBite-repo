@@ -35,20 +35,23 @@ export function useAuth(): AuthState {
  * Does this deployment make people sign in? Asked of the engine, so turning
  * REQUIRE_SIGN_IN on or off is one revision and no new build. `null` while unknown.
  */
-export function useSignInRequired(): boolean | null {
-  const [required, setRequired] = useState<boolean | null>(supabase ? null : false)
+export function useAccess(): Access {
+  const [access, setAccess] = useState<Access>({ required: supabase ? null : false, freeAnswers: 0 })
   useEffect(() => {
     if (!supabase) return
     let live = true
     fetch(healthUrl())
-      .then((r) => r.json() as Promise<{ signIn?: boolean }>)
-      // If the engine cannot be reached nothing else works either; the wall is the safe side.
-      .then((h) => { if (live) setRequired(h.signIn === true) })
-      .catch(() => { if (live) setRequired(true) })
+      .then((r) => r.json() as Promise<{ signIn?: boolean; freeAnswers?: number }>)
+      .then((h) => { if (live) setAccess(accessOf(h)) })
+      // If the engine cannot be reached nothing else works either; the wall is the safe side, with no free answers.
+      .catch(() => { if (live) setAccess({ required: true, freeAnswers: 0 }) })
     return () => { live = false }
   }, [])
-  return required
+  return access
 }
+
+/** The older name, kept for the one place that asks only whether sign-in is required. */
+export const useSignInRequired = (): boolean | null => useAccess().required
 
 /** The engine's /health, whatever the agent URL looks like in this build (/agent/ask, /agent, or absolute). */
 export function engineUrl(path: '/health' | '/account'): string {
@@ -58,9 +61,9 @@ export function engineUrl(path: '/health' | '/account'): string {
 }
 const healthUrl = () => engineUrl('/health')
 
-export { looksLikeCode, looksLikeEmail, problemOf } from './authCore'
-export type { SignInProblem } from './authCore'
-import { looksLikeCode, looksLikeEmail, problemOf, type SignInProblem } from './authCore'
+export { accessOf, looksLikeCode, looksLikeEmail, problemOf, signInReasonOf } from './authCore'
+export type { Access, SignInProblem, SignInReason } from './authCore'
+import { accessOf, looksLikeCode, looksLikeEmail, problemOf, type Access, type SignInProblem } from './authCore'
 
 export async function sendLink(email: string): Promise<SignInProblem | null> {
   if (!supabase) return 'unavailable'
