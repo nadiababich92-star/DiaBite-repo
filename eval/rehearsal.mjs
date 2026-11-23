@@ -35,6 +35,8 @@ check('W0', 'a throwaway account exists and signs in', !!uid && !!session.access
 // The throwaway account must not outlive a failed run (W9 tests the app's own delete; this is the net under it, and a 404 is fine).
 const cleanup = () => admin(`/auth/v1/admin/users/${uid}`, { method: 'DELETE' }).catch(() => {})
 process.on('unhandledRejection', async (e) => { console.error(e); await cleanup(); process.exit(1) })
+// A failed top-level await is an uncaught exception, not an unhandled rejection: the account goes either way.
+process.on('uncaughtException', async (e) => { console.error(e); await cleanup(); process.exit(1) })
 const stored = JSON.stringify({ ...session, expires_at: Math.floor(Date.now() / 1000) + session.expires_in })
 const rows = async (table) => (await (await admin(`/rest/v1/${table}?user_id=eq.${uid}&select=*`)).json())
 
@@ -210,10 +212,14 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
   // Logging for yesterday from an answer: an eaten entry on yesterday.
   await tabA('Ask')
   await askOn(A, 'Two eggs and a slice of rye bread')
-  await exact(A, 'Yesterday'); await sleep(300)
-  await exact(A, 'Log it'); await sleep(4500)
-  const yest = (await diaryRows()).filter((r) => r.day === iso(-1) && r.planned !== true)
-  check('W17f', 'device A: logging an answer for Yesterday writes an eaten entry on yesterday', yest.length >= 1, JSON.stringify(yest.map((r) => [r.day, r.planned])))
+  // Choosing another day with an answer on screen asks the question again for that day (docs/design.md, 2 November): wait for the new answer before logging it.
+  await exact(A, 'Yesterday'); await sleep(1500)
+  for (let i = 0; i < 120 && !(await A.b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.trim()==='Log it' && !x.disabled)`)); i++) await sleep(500)
+  const beforeLog = await A.b.ev(`({ pressed: document.querySelector('.day-picker [aria-pressed="true"]')?.innerText ?? null, buttons: [...document.querySelectorAll('.act-bar button')].map((x) => x.innerText.trim() + (x.disabled ? ' (disabled)' : '')), head: (document.querySelector('.card.answer')?.innerText ?? '').slice(0, 80) })`)
+  const clicked = await exact(A, 'Log it'); await sleep(4500)
+  const all = await diaryRows()
+  const yest = all.filter((r) => r.day === iso(-1) && r.planned !== true)
+  check('W17f', 'device A: logging an answer for Yesterday writes an eaten entry on yesterday', yest.length >= 1, JSON.stringify({ yesterday: iso(-1), clicked, beforeLog, rows: all.slice(-6).map((r) => [r.day, r.planned, r.food_id]) }))
   // A recipe counted by servings (garlic bread) has a weight of 0 in the answer; the diary table refuses 0 and the whole save with it.
   await tabA('Ask')
   await askOn(A, 'Whole wheat spaghetti with tomato sauce, garlic bread and a glass of water')
@@ -228,7 +234,8 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
   const appleBtn = `[...document.querySelectorAll('.portions li')].find(li => /apple/i.test(li.innerText))?.querySelector('.weight-btn')`
   const hadButton = await A.b.ev(`!!(${appleBtn})`)
   await A.b.ev(`(${appleBtn})?.click()`); await sleep(400)
-  await A.b.ev(`(()=>{const s=document.querySelector('.weight-edit select'); s.value='g'; s.dispatchEvent(new Event('change',{bubbles:true}))})()`); await sleep(200)
+  // An answer that is a question first has no editor: the check below then fails with what it saw, instead of the script crashing.
+  await A.b.ev(`(()=>{const s=document.querySelector('.weight-edit select'); if(!s) return; s.value='g'; s.dispatchEvent(new Event('change',{bubbles:true}))})()`); await sleep(200)
   await A.b.ev(`document.querySelector('.weight-edit input')?.focus(); document.querySelector('.weight-edit input')?.select()`)
   await A.b.send('Input.insertText', { text: '120' })
   await A.b.ev(`[...document.querySelectorAll('.weight-edit button')].find(x=>x.innerText.trim()==='Done')?.click()`)
