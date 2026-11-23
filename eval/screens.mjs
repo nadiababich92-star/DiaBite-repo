@@ -207,12 +207,13 @@ try {
         const cols = [...document.querySelectorAll('.card.answer .fig-pair')].slice(0, 1).flatMap((p) => [...p.querySelectorAll(':scope > .fig-card')].map((f) => { const c = getComputedStyle(f); return { bg: clear(c.backgroundColor), top: c.borderTopWidth, left: c.borderLeftWidth } }))
         return { accent, keys, links, cols }
       })()`
+      // Earlier steps leave the panels open: press Calculation twice and read it in both states, whichever it starts in.
       const before = await b.ev(read)
       await click('Calculation'); await sleep(500)
-      const opened = await b.ev(read)
+      const flipped = await b.ev(read)
       await click('Calculation'); await sleep(500)
-      const closed = await b.ev(read)
       const calc = (r) => r.links.find((k) => k.name === 'Calculation')
+      const [opened, closed] = calc(before)?.open ? [before, flipped] : [flipped, before]
       const quiet = (k) => k.cls === 'act-link' && k.color === before.accent && /underline/.test(k.line) && k.h >= 44 && k.border === '0px'
       const linksOk = before.links.length >= 2 && before.links.every(quiet) && before.links.every((k) => k.caret !== null)
       const stateOk = calc(opened)?.open && calc(opened).weight === '600' && calc(opened).caret !== 'none' && !calc(closed)?.open && calc(closed).weight === '400' && calc(closed).caret === 'none'
