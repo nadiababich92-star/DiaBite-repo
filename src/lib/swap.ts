@@ -1,5 +1,14 @@
 /** One swap the engine offered for the heaviest food of the meal, as `find_alternatives` returned it. */
-export interface SwapOffer { id: string; name: string; unit: 'g' | 'serving'; portion: number }
+export interface SwapOffer {
+  id: string
+  name: string
+  unit: 'g' | 'serving'
+  portion: number
+  /** 'portion' is less of the food being replaced (docs/specs/swaps-engine.md). Absent means 'swap', which is what an older engine sends. */
+  kind?: 'swap' | 'portion'
+  /** The engine's own phrase for the option with its weight, e.g. "half the banana (59 g)". The agent repeats it; nothing here composes it. */
+  label?: string
+}
 
 /** "Zucchini, raw" is "zucchini": the way a sentence would name it. */
 const plainName = (name: string) => name.replace(/\s*\(.*?\)/g, '').split(',')[0].trim().toLowerCase()
@@ -9,6 +18,15 @@ const plainName = (name: string) => name.replace(/\s*\(.*?\)/g, '').split(',')[0
  * of them it means; the food, its weight and every number come from the engine's result, and a Next line that names
  * none of them gets no button.
  */
+/**
+ * A smaller portion the Next line talks about ("have half the banana (59 g)"), picked out of the alternatives the engine returned.
+ * It is read by the engine's `label`, the fraction word or the grams, not by the food's name: a portion is the replaced food, which the
+ * rule in `swapNamedIn` would drop. Docs/specs/swaps-screen.md, section 2. Not built yet: it names nothing until Stage 4.
+ */
+export function portionNamedIn(_next: string | undefined, _meal: { alternatives?: SwapOffer[]; alternativesFor?: { foodId: string; name: string } } | undefined): SwapOffer | undefined {
+  return undefined
+}
+
 export function swapNamedIn(next: string | undefined, meal: { alternatives?: SwapOffer[]; alternativesFor?: { foodId: string; name: string } } | undefined): SwapOffer | undefined {
   if (!next || !meal?.alternativesFor || !meal.alternatives?.length) return undefined
   const said = next.toLowerCase()
@@ -18,5 +36,5 @@ export function swapNamedIn(next: string | undefined, meal: { alternatives?: Swa
     .map((a) => ({ a, at: said.lastIndexOf(plainName(a.name)), n: plainName(a.name) }))
     .filter((x) => x.n.length > 2 && x.at >= 0 && !replaced.includes(x.n) && !x.n.includes(replaced))
     .sort((x, y) => y.at - x.at)
-  return named[0]?.a
+  return named[0]?.a ?? portionNamedIn(next, meal)
 }

@@ -13,7 +13,7 @@ import { nudgeMeasure, unitLabel } from '../lib/measure'
 import { PortionEditor, WeightsUsed, type TypedQuantity } from './WeightEditor'
 import { dayLabel, eaten, mealForNow, noLoadNote, portionText, viewEntry } from '../lib/diary'
 import { swapNamedIn, type SwapOffer } from '../lib/swap'
-import { MEAL_LABELS } from '../lib/menu'
+import { MEAL_LABELS, menuHidden } from '../lib/menu'
 import DayPicker from './DayPicker'
 import { loadNudge, saveNudge } from '../lib/storage'
 import { useToday } from '../lib/useToday'
@@ -60,6 +60,14 @@ function readFresh(): boolean {
 
 /** The agent answers in light markdown: **bold** and line breaks. Nothing else is rendered. */
 /** The verdict, as a mark you can read before you read anything. */
+/**
+ * What to tell the engine about smaller portions: `false` for a person whose profile hides the weekly menu (an eating-disorder history, kidney
+ * disease), nothing for everyone else. Docs/specs/swaps-screen.md, section 3; it goes into the ask request in Stage 4, not yet.
+ */
+export function portionSwapsFor(profile: Profile): false | undefined {
+  return menuHidden(profile) ? false : undefined
+}
+
 export function StatusDot({ tone }: { tone: string | null }) {
   const path =
     tone === 'good' ? 'M20 6L9 17l-5-5' :

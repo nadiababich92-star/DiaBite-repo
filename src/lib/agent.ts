@@ -29,6 +29,11 @@ export interface AgentRequest {
   carbLimit?: { kind: 'meal' | 'snack'; g: number }
   /** The person's units; parked with the day so the engine says a weight in them ("1 cup (158 g)" or "158 g"). */
   units?: 'imperial' | 'metric'
+  /**
+   * Set only when the person's profile hides the weekly menu: the engine then offers no smaller portion as a swap. Parked with the day, in
+   * memory, and never named after the condition (docs/specs/swaps-engine.md, section 6). Not sent yet.
+   */
+  portionSwaps?: false
 }
 
 export interface TraceStep {
@@ -205,7 +210,24 @@ export interface Receipt {
   sources: { text: string; verified: boolean }[]
 }
 
+/** One swap the engine returned for the heaviest item, as `compute_meal` carries it (docs/specs/swaps-engine.md, section 5). */
+export interface AlternativeResult {
+  id: string; name: string; unit?: 'g' | 'serving'; portion: number; gl: number; kcal: number
+  /** 'swap' is a different food; 'portion' is less of the same food. Absent from an older engine. */
+  kind?: 'swap' | 'portion'
+  /** Load saved against the item being replaced; `fitsMeal` is true when the meal fits the day after it, null when the engine was not told the meal. */
+  gain?: number
+  fitsMeal?: boolean | null
+  /** The engine's phrase for it, with its weight. */
+  label?: string
+  grams?: number; servings?: number
+  /** Portions only: the food it is less of, and the fraction. */
+  portionOf?: string; fraction?: number
+}
+
 interface MealResult {
+  alternatives?: AlternativeResult[]
+  alternativesFor?: { foodId: string; name: string; grams: number }
   items: {
     foodId: string; name: string; grams: number; servings?: number
     kcal: number; carbs: number; fiber: number; protein: number; fat: number
