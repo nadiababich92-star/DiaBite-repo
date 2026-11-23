@@ -7128,7 +7128,7 @@
     {
       "id": "SWA1",
       "dimension": "helpful",
-      "query": "A bowl of oatmeal",
+      "query": "234 g of cooked oatmeal",
       "ground_truth": "Does not fit; the swap offered is worth making and the best the engine found; never a baked breakfast cake.",
       "context": {
         "budget": {
