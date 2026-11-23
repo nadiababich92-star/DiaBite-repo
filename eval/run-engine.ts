@@ -429,7 +429,9 @@ const stapleMisses: string[] = []
   const gi = (id: string) => loadFoods().byId.get(id)?.gi
   for (const [id, want] of [['usda:2708357', 49],
     ['usda:2708403', 73], ['usda:2708408', 73], ['usda:2710788', 73], ['usda:2707824', 34],
-    ['usda:2708409', 78]] as [string, number][]) if (gi(id) !== want) stapleMisses.push(`    ${id} has GI ${gi(id)}, wanted ${want}`)
+    ['usda:2708409', 78],
+    // 23 November 2026: chocolate syrup took a tofu-based frozen dessert (115); the median of five measured chocolate drinks is 52, and the drinks computed from it follow.
+    ['usda:2710276', 52], ['usda:2705475', 52], ['usda:2710445', 52]] as [string, number][]) if (gi(id) !== want) stapleMisses.push(`    ${id} has GI ${gi(id)}, wanted ${want}`)
   const rs = loadFoods().records
   // A plain-pasta dish cannot sit far below its pasta: lasagna with meat was 27 on the barley match.
   const lasagna = rs.filter((r) => r.id.startsWith('usda:') && /^lasagna with (meat|chicken)/i.test(r.name) && r.gi !== null && !/canned|restaurant/i.test(r.name))
