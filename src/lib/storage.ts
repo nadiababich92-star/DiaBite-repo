@@ -1,6 +1,6 @@
 import type { DiaryEntry, Profile } from '../types'
 import { FOODS } from '../data/foods'
-import { DAILY_CARBS_MAX, DAILY_CARBS_MIN, DEFAULT_PROFILE, MEAL_CARBS_MAX, MEAL_CARBS_MIN } from './profile'
+import { DAILY_CARBS_MAX, DAILY_CARBS_MIN, DEFAULT_PROFILE, DEFERRED_ORDER, MEAL_CARBS_MAX, MEAL_CARBS_MIN } from './profile'
 
 const PROFILE_KEY = 'diabite.profile.v1'
 const DIARY_KEY = 'diabite.diary.v1'
@@ -72,6 +72,8 @@ export function sanitizeProfile(stored: unknown): Profile {
     if (typeof v !== 'number' || v < MEAL_CARBS_MIN || v > MEAL_CARBS_MAX) out[k] = 0
   }
   if (typeof out.dailyCarbsG !== 'number' || out.dailyCarbsG < DAILY_CARBS_MIN || out.dailyCarbsG > DAILY_CARBS_MAX) out.dailyCarbsG = 0
+  // Only the four known step ids, once each, in the order they are asked. A profile saved before the short onboarding has none: [].
+  out.deferred = DEFERRED_ORDER.filter((s) => Array.isArray(out.deferred) && (out.deferred as unknown[]).includes(s))
   return out as unknown as Profile
 }
 

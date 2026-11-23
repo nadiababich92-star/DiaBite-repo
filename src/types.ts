@@ -137,6 +137,8 @@ export type Goal = 'lose' | 'maintain' | 'gain'
 export type CarbApproach = 'moderate' | 'low' | 'verylow'
 /** Which way of counting the person is used to: it only decides which figures come first. Both are always shown. */
 export type CountBy = 'gl' | 'carbs'
+/** An onboarding step the short onboarding left for later (docs/specs/first-session-profile-and-defaults.md). */
+export type DeferredStep = 'medicines' | 'diagnosis' | 'conditions' | 'day'
 
 export interface Profile {
   sex: Sex
@@ -175,6 +177,8 @@ export interface Profile {
   showBreadUnits: boolean
   /** The disclaimer was acknowledged and onboarding finished (PRD A4). */
   onboarded: boolean
+  /** Onboarding steps the person has not answered yet, because the short onboarding left them for later. Empty for everyone who did the full onboarding. */
+  deferred: DeferredStep[]
 }
 
 /** Computed daily targets. */

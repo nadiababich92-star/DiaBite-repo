@@ -14,6 +14,9 @@ export interface AnswerRow {
   step: 2 | 3
 }
 
+/** What a row says for a step the short onboarding has not asked yet. */
+export const NOT_ASKED = 'Not asked yet'
+
 /** The onboarding answers that have no field of their own on the profile, as one line each. */
 export function answerRows(p: Profile): AnswerRow[] {
   const meds = p.meds.map((m) => short(MED_LABELS[m]))
@@ -29,10 +32,13 @@ export function answerRows(p: Profile): AnswerRow[] {
     ...p.avoided.map((a) => `no ${AVOIDED_LABELS[a].split(' (')[0].toLowerCase()}`),
   ]
 
+  // A step the short onboarding left for later was not answered: its empty fields are not "none", and the row says so.
+  const deferred = p.deferred ?? []
+  const asked = (step: 'medicines' | 'conditions', text: string) => (deferred.includes(step) ? NOT_ASKED : text)
   return [
-    { id: 'medicines', title: 'Medicines', text: medicines, step: 2 },
-    { id: 'conditions', title: 'Kidneys and other conditions', text: `${kidneys}; ${others}`, step: 3 },
-    { id: 'eating', title: 'How you eat', text: eating.length === 0 ? 'No preference' : eating.join(', '), step: 3 },
-    { id: 'allergies', title: 'Allergies', text: p.allergens.length === 0 ? 'None' : p.allergens.map((a) => ALLERGEN_LABELS[a]).join(', '), step: 3 },
+    { id: 'medicines', title: 'Medicines', text: asked('medicines', medicines), step: 2 },
+    { id: 'conditions', title: 'Kidneys and other conditions', text: asked('conditions', `${kidneys}; ${others}`), step: 3 },
+    { id: 'eating', title: 'How you eat', text: asked('conditions', eating.length === 0 ? 'No preference' : eating.join(', ')), step: 3 },
+    { id: 'allergies', title: 'Allergies', text: asked('conditions', p.allergens.length === 0 ? 'None' : p.allergens.map((a) => ALLERGEN_LABELS[a]).join(', ')), step: 3 },
   ]
 }

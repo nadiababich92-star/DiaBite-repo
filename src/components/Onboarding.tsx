@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ACTIVITY_LABELS, ALLERGEN_LABELS, CARB_APPROACH_LABELS, COMORBIDITY_LABELS, CONDITION_LABELS, COUNT_BY_LABELS,
   EXIT_COPY, GOAL_LABELS, INSULIN_LABELS, KIDNEY_LABELS, MED_LABELS,
-  calculateTargets, carbApproachBlocked, cmToFtIn, exitReason, ftInToCm, kgToLb, lbToKg,
+  calculateTargets, carbApproachReason, cmToFtIn, exitReason, ftInToCm, kgToLb, lbToKg,
 } from '../lib/profile'
 import { AVOIDED_LABELS, PATTERN_LABELS, type Avoided } from '../lib/dietary'
 import GiGlExplainer from './GiGlExplainer'
@@ -61,7 +61,7 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
 
   const exit = exitReason(p)
   const targets = useMemo(() => calculateTargets(p), [p])
-  const blocked = carbApproachBlocked(p, p.carbApproach)
+  const blocked = carbApproachReason(p, p.carbApproach)
 
   // A blocked approach must not silently survive to the targets screen. An
   // effect, not a set-state in the render body: that only stopped looping
@@ -114,7 +114,7 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
   const next = () => (last ? agreed && onDone({ ...p, onboarded: true }, askConsent ? consented : undefined) : setStep(step + 1))
 
   /** Saving one step: a medicine that blocks the carbohydrate approach the person already has changes it to moderate, as the last step does. */
-  const save = () => onDone({ ...p, onboarded: true, carbApproach: carbApproachBlocked(p, p.carbApproach) ? 'moderate' : p.carbApproach })
+  const save = () => onDone({ ...p, onboarded: true, carbApproach: carbApproachReason(p, p.carbApproach) ? 'moderate' : p.carbApproach })
 
   const { ft, in: inch } = cmToFtIn(p.heightCm)
   const imperial = p.units === 'imperial'
@@ -384,7 +384,7 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
                 <h3>Carbohydrate approach</h3>
                 <div className="chips-col">
                   {APPROACHES.map((a) => {
-                    const why = carbApproachBlocked(p, a)
+                    const why = carbApproachReason(p, a)
                     return (
                       <button key={a} className={`chip-btn${p.carbApproach === a ? ' on' : ''}`}
                         aria-pressed={p.carbApproach === a} disabled={!!why}

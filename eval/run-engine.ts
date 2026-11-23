@@ -90,7 +90,7 @@ import { addDays, dayLabel, gramStep, mealForNow, noLoadNote, nudgeGrams, portio
 import { sumNutrients } from '../src/lib/glycemic'
 import { ouncesText } from '../src/lib/measure'
 import { buildSummary } from '../src/lib/clinicianSummary'
-import { ANON_DISCLOSURE, ANON_PROFILE, calculateTargets, cmToFtIn, DAILY_CARBS_MAX, DAILY_CARBS_MIN, DEFAULT_PROFILE, exitReason, ftInToCm, kgToLb, lbToKg, weightUsed } from '../src/lib/profile'
+import { ANON_DISCLOSURE, ANON_PROFILE, answered, calculateTargets, carbApproachBlocked, carbApproachReason, cmToFtIn, DAILY_CARBS_MAX, DAILY_CARBS_MIN, DEFAULT_PROFILE, DEFERRED_ORDER, exitReason, ftInToCm, kgToLb, lbToKg, MEDICINES_FIRST, nextDeferred, shortStart, STEP_OF_FIELD, weightUsed } from '../src/lib/profile'
 import { HeightWeight, UnitsSwitch } from '../src/components/BodyUnits'
 import { focusesHeadingOnOpen } from '../src/components/Onboarding'
 import { lockCount, lockPage } from '../src/lib/pageLock'
@@ -894,6 +894,55 @@ recorrectMisses.forEach((m) => console.log(m))
   const css = readFileSync(join(here, '../src/styles.css'), 'utf8')
   if (!/^\.recipe-more summary::after \{[^}]*content: ''[^}]*currentColor/m.test(css) || !/^\.recipe-more\[open\] > summary::after \{ transform: rotate\(180deg\); \}/m.test(css)) bits.push('a folded card shows no caret, or it does not turn when open')
   console.log(`\nnav       ${bits.length === 0 ? 'ok' : 'WRONG'}  (the home-screen card, the caret)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// The first session, the profile after a short onboarding (docs/specs/first-session-evals.md, OB1 to OB4): pure logic, no screen yet.
+{
+  const bits: string[] = []
+  const p = shortStart(DEFAULT_PROFILE)
+  // OB1: the safety exits read the short screen's answers the same way as the full onboarding's.
+  for (const [over, want] of [[{ age: 17 }, 'minor'], [{ pregnantOrBreastfeeding: true }, 'pregnancy'], [{ insulin: 'mealtime_or_pump' }, 'mealtime_insulin'], [{ age: 40, insulin: 'none' }, null], [{ age: 40, insulin: 'basal' }, null]] as const) {
+    const short = exitReason({ ...p, ...over } as never), full = exitReason({ ...DEFAULT_PROFILE, ...over } as never)
+    if (short !== want || short !== full) bits.push(`OB1 ${JSON.stringify(over)}: short ${short}, full ${full}, wanted ${want}`)
+  }
+  if (exitReason(p) !== null) bits.push('OB1 the short profile itself is turned away')
+  // OB2: the cautious values, and the lock on the lower approaches until the medicines are answered.
+  const want = { carbApproach: 'moderate', condition: 'unsure', goal: 'maintain', countBy: 'gl', kidney: 'none', mealCarbsG: 0, dailyCarbsG: 0, onboarded: false }
+  for (const [k, v] of Object.entries(want)) if ((p as Record<string, unknown>)[k] !== v) bits.push(`OB2 ${k} is ${JSON.stringify((p as Record<string, unknown>)[k])}, wanted ${JSON.stringify(v)}`)
+  if (p.meds.length || p.comorbidities.length || p.allergens.length) bits.push('OB2 the short profile carries medicines, conditions or allergens')
+  if (p.deferred.join() !== 'medicines,diagnosis,conditions,day') bits.push(`OB2 deferred is ${p.deferred.join()}`)
+  if (carbApproachReason(p, 'low') !== MEDICINES_FIRST || carbApproachReason(p, 'verylow') !== MEDICINES_FIRST) bits.push('OB2 a lower approach is not locked while the medicines are not answered')
+  if (carbApproachReason(p, 'moderate') !== null) bits.push('OB2 moderate is locked')
+  const t = calculateTargets(p)
+  if (!(Number.isFinite(t.glBudget) && t.glBudget > 0)) bits.push(`OB2 the glycemic budget is ${t.glBudget}`)
+  if (!t.constraints.some((c) => c.id === 'conservative-default')) bits.push('OB2 the cautious constraint for an unconfirmed diagnosis is missing')
+  if (DEFAULT_PROFILE.deferred.length !== 0) bits.push('OB2 the default profile defers something: a full onboarding would be shown a card')
+  // OB3: the order, the next question, answering, and reading what was stored.
+  if (DEFERRED_ORDER.join() !== 'medicines,diagnosis,conditions,day') bits.push('OB3 the order changed')
+  let q = p
+  const seen: (string | null)[] = [nextDeferred(q)]
+  for (const step of DEFERRED_ORDER) { q = answered(q, step); seen.push(nextDeferred(q)) }
+  if (seen.join() !== 'medicines,diagnosis,conditions,day,') bits.push(`OB3 the next questions were ${seen.join()}`)
+  if (answered(q, 'medicines') !== q) bits.push('OB3 answering a step that is not deferred changed the profile')
+  if (sanitizeProfile({ ...p, deferred: ['day', 'x', 'day', 'medicines'] }).deferred.join() !== 'medicines,day') bits.push('OB3 stored steps are not kept once each, known only, in order')
+  if (sanitizeProfile({}).deferred.length !== 0 || sanitizeProfile({ ...DEFAULT_PROFILE, deferred: undefined }).deferred.length !== 0 || sanitizeProfile({ deferred: 'day' }).deferred.length !== 0) bits.push('OB3 a profile with no list, or a non-list, does not read as nothing deferred')
+  if (STEP_OF_FIELD.goal !== 'day' || STEP_OF_FIELD.condition !== 'diagnosis' || STEP_OF_FIELD.meds !== 'medicines' || STEP_OF_FIELD.kidney !== 'conditions') bits.push('OB3 a field belongs to the wrong step')
+  // OB4: once the medicines are answered, the usual reasons apply, and no other.
+  const sg = answered({ ...p, meds: ['sglt2'], age: 40 }, 'medicines')
+  if (carbApproachReason(sg, 'verylow') !== carbApproachBlocked(sg, 'verylow') || carbApproachReason(sg, 'verylow') === MEDICINES_FIRST || !carbApproachReason(sg, 'verylow')) bits.push('OB4 with an SGLT2 inhibitor the reason is not the SGLT2 one')
+  if (carbApproachReason(sg, 'moderate') !== null) bits.push('OB4 moderate is locked after the medicines')
+  const none = answered({ ...p, meds: [], age: 40 }, 'medicines')
+  if (carbApproachReason(none, 'verylow') !== null || carbApproachReason(none, 'low') !== null) bits.push('OB4 with no medicine, a 40-year-old is still locked out of the lower approaches')
+  // What reads the fields not asked: the Profile's answer rows and the clinician's page say "not asked", never "none".
+  const rows = answerRows(p).map((r) => r.text)
+  if (!rows.every((r) => r === 'Not asked yet')) bits.push(`the answer rows of a short profile say: ${rows.join(' | ')}`)
+  if (answerRows(DEFAULT_PROFILE).some((r) => r.text === 'Not asked yet')) bits.push('a full profile\'s answers say "Not asked yet"')
+  const sum = buildSummary([], p, calculateTargets(p), '2026-11-23', 7)
+  if (sum.about.medicines.join() !== 'not asked yet') bits.push(`the clinician summary says of medicines not asked: ${JSON.stringify(sum.about.medicines)}`)
+  if (buildSummary([], DEFAULT_PROFILE, calculateTargets(DEFAULT_PROFILE), '2026-11-23', 7).about.medicines.includes('not asked yet')) bits.push('the clinician summary says a full profile was not asked about medicines')
+  console.log(`\nfirst run ${bits.length === 0 ? 'ok' : 'WRONG'}  (the short profile, OB1 to OB4)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }

@@ -1,5 +1,5 @@
 import type {
-  Activity, Allergen, CarbApproach, Comorbidity, Condition, Constraint, CountBy, Insulin, Kidney, Med,
+  Activity, Allergen, CarbApproach, Comorbidity, Condition, Constraint, CountBy, DeferredStep, Insulin, Kidney, Med,
   Profile, Targets,
 } from '../types'
 
@@ -166,6 +166,62 @@ export function carbApproachBlocked(p: Profile, a: CarbApproach): string | null 
   if (p.comorbidities.includes('brittle')) return 'Not with blood sugar that already swings hard — cutting carbohydrate this far makes the swings harder to predict, not easier.'
   if (p.age >= 65) return 'Not recommended over 65 — protein and micronutrient intake usually suffer.'
   return null
+}
+
+// ── The short onboarding (docs/specs/first-session-profile-and-defaults.md) ────────────────────────────────────
+
+/** The steps the short onboarding leaves for later, in the order the person is asked them. */
+export const DEFERRED_ORDER: readonly DeferredStep[] = ['medicines', 'diagnosis', 'conditions', 'day']
+/** Each deferred step's number in the full onboarding (the `only` mode opens it on its own). */
+export const STEP_OF: Record<DeferredStep, 1 | 2 | 3 | 4> = { diagnosis: 1, medicines: 2, conditions: 3, day: 4 }
+export const DEFERRED_LABEL: Record<DeferredStep, string> = {
+  medicines: 'Medicines', diagnosis: 'Diagnosis', conditions: 'Kidneys and other conditions', day: 'Your day',
+}
+
+/**
+ * The cautious values for everything the short onboarding does not ask (not DEFAULT_PROFILE's, which are condition ir, goal lose,
+ * approach low). The fields set to "none" here are not claims: while a step is deferred the screens say "Not asked yet", and the
+ * carbohydrate approach stays moderate until the medicines are answered (`carbApproachReason`). The diagnosis is "unsure" by the
+ * owner's decision of 23 November 2026; the anonymous plan's neutral profile keeps type 2.
+ */
+export function shortStart(p: Profile): Profile {
+  return {
+    ...p,
+    condition: 'unsure',
+    goal: 'maintain',
+    carbApproach: 'moderate',
+    countBy: 'gl',
+    insulin: 'none', meds: [], kidney: 'none', comorbidities: [], allergens: [], avoided: [], pattern: 'none',
+    mealCarbsG: 0, snackCarbsG: 0, dailyCarbsG: 0,
+    onboarded: false,
+    deferred: [...DEFERRED_ORDER],
+  }
+}
+
+/** Remove a step from `deferred` once the person has answered it (saved the step, or changed one of its fields on the Profile). */
+export const answered = (p: Profile, step: DeferredStep): Profile =>
+  p.deferred.includes(step) ? { ...p, deferred: p.deferred.filter((s) => s !== step) } : p
+
+/** The next question to offer: the first not yet answered, in DEFERRED_ORDER, or null. */
+export const nextDeferred = (p: Profile): DeferredStep | null => DEFERRED_ORDER.find((s) => p.deferred.includes(s)) ?? null
+
+/** Which deferred step a profile field belongs to, for the Profile's inline controls. */
+export const STEP_OF_FIELD: Partial<Record<keyof Profile, DeferredStep>> = {
+  insulin: 'medicines', meds: 'medicines',
+  condition: 'diagnosis',
+  kidney: 'conditions', comorbidities: 'conditions', allergens: 'conditions', avoided: 'conditions', pattern: 'conditions',
+  goal: 'day', carbApproach: 'day', countBy: 'day', mealCarbsG: 'day', snackCarbsG: 'day', dailyCarbsG: 'day',
+}
+
+export const MEDICINES_FIRST = 'Answer the medicines question first: some medicines make a lower-carbohydrate day unsafe.'
+
+/**
+ * Why an approach is not available: no medicines on the profile is not the same as taking none, so while the medicines step is
+ * deferred only the moderate approach is offered. Otherwise the reasons of `carbApproachBlocked`, unchanged.
+ */
+export function carbApproachReason(p: Profile, a: CarbApproach): string | null {
+  if (a !== 'moderate' && (p.deferred ?? []).includes('medicines')) return MEDICINES_FIRST
+  return carbApproachBlocked(p, a)
 }
 
 const BMI = (p: Profile) => p.weightKg / (p.heightCm / 100) ** 2
@@ -361,6 +417,7 @@ export const DEFAULT_PROFILE: Profile = {
   units: 'imperial',
   showBreadUnits: false,
   onboarded: false,
+  deferred: [],
 }
 
 /**

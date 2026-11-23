@@ -117,6 +117,9 @@ export const dayName = (iso: string): string => {
   return new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 }
 
+/** What the page prints for the medicines while the short onboarding has not asked them: "Medicines: not asked yet." */
+export const NOT_ASKED_MEDICINES = 'not asked yet'
+
 export function buildSummary(
   diary: DiaryEntry[],
   profile: Profile,
@@ -194,7 +197,8 @@ export function buildSummary(
     about: {
       condition: CONDITION_TEXT[profile.condition],
       insulin: profile.insulin === 'none' ? 'does not take insulin' : 'takes insulin',
-      medicines: [...new Set(profile.meds)].map((m) => MEDICINE_TEXT[m]),
+      // The short onboarding left the medicines for later: the page says they were not asked, never that none is taken.
+      medicines: (profile.deferred ?? []).includes('medicines') ? [NOT_ASKED_MEDICINES] : [...new Set(profile.meds)].map((m) => MEDICINE_TEXT[m]),
     },
     targets: {
       kcal: targets.kcal, carbsG: targets.carbsG, proteinG: targets.proteinG, fatG: targets.fatG, fiberG: targets.fiberG, glBudget: targets.glBudget,
