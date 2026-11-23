@@ -84,9 +84,19 @@ await A.b.send('Input.insertText', { text: 'Two eggs and a slice of rye bread' }
 await A.click('Check this meal')
 for (let i = 0; i < 90; i++) { await sleep(500); if (!(await A.b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break }
 await sleep(800)
+// The first session after the first answer (docs/specs/first-session-after-answer.md): the defaults line and What next before the log,
+// What next gone and the card for the next question after it. Read from the page, by the keys' own names.
+const keys = () => A.b.ev(`[...document.querySelectorAll('button')].map(x=>x.innerText.trim())`)
+let t22 = await A.text(), k22 = await keys()
+check('W22a', 'device A, short onboarding: the defaults line with its two keys, and What next under the first receipt', /cautious defaults/.test(t22) && k22.includes('Make it yours') && k22.includes('Where the numbers come from') && /Log it to count it toward today/.test(t22) && k22.includes('Open the Diary') && !/Two minutes more, and the numbers/.test(t22), JSON.stringify({ keys: k22.slice(0, 30), text: t22.slice(0, 200) }))
 console.log('   log:', await A.click('Log it')); await sleep(4000)
 const d1 = await rows('diary_entries')
 check('W4', 'device A: a logged meal reaches the server (one row per food)', d1.length >= 2, `${d1.length} rows`)
+t22 = await A.text(); k22 = await keys()
+const region22 = await A.b.ev(`document.querySelector('section.nudge[role=region]')?.getAttribute('aria-label') ?? null`)
+check('W22b', 'device A, after the first meal: What next is gone, and the card for Medicines shows with Answer now and Later, once a session', !/Log it to count it toward today/.test(t22) && region22 === 'Two minutes more, and the numbers become yours' && /Classes only, never doses/.test(t22) && k22.includes('Answer now') && k22.includes('Later') && (await A.b.ev(`sessionStorage.getItem('diabite.deferredShown')`)) === '1', JSON.stringify({ region22, keys: k22.slice(-12) }))
+await A.click('Later'); await sleep(400)
+check('W22c', 'device A: Later hides the card', !(await A.b.ev(`!!document.querySelector('section.nudge[role=region]')`)), '')
 
 // ── device B: the same person, a fresh browser ──────────────────────────────
 const B = await device(9702, 'B')
