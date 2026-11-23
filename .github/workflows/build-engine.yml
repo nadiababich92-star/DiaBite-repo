@@ -24,7 +24,13 @@ on:
       - 'index.html'
       - 'vite.config.ts'
       - 'tsconfig.json'
+      # Every data file the Dockerfile copies into the image: a commit that changes only one of them must still build
+      # (a change to the household measures, portion_mapping.json, once produced no run and the old image stayed live).
       - 'data/foods-usda/foods_usda.json'
+      - 'data/foods-usda/branded_common.json'
+      - 'data/foods-usda/restaurant_items.json'
+      - 'data/recipes-db/portion_mapping.json'
+      - 'data/recipes-db/gi_crosscheck.json'
       - 'data/recipes-db/ingredients.json'
       - 'data/recipes-db/recipes_db.json'
       - 'data/recipes-db/embeddings.bin'
