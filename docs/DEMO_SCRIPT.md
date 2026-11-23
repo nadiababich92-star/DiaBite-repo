@@ -10,7 +10,7 @@ agent that day. If a beat stops working, this file is wrong and should be re-run
 
 What changed since the first demo, and so what this one shows: sign-in by email and a diary that follows you across devices;
 first-run tips; a week view with in-range days; a dish the database lacks is counted from typical ingredients and labelled an
-estimate; 8,794 foods and 2,103 recipes; a weekly menu and shopping list.
+estimate; 8,812 foods and 2,103 recipes; a weekly menu and shopping list.
 
 ---
 

@@ -83,7 +83,7 @@ src/
 server/
   engine.ts            the engine as an HTTP service (npm run server, port 8787)
   contract.ts          request/response shapes for every tool
-  foods.ts             unified index: 363 ingredients + 86 everyday foods + 2,000 recipes
+  foods.ts             unified index: 414 ingredients + 86 everyday foods + 2,103 recipes + USDA survey, branded and restaurant foods (8,812 records)
   embeddings.ts        local sentence embeddings + in-memory vector store (swap for pgvector/Qdrant)
   resolve.ts           resolve_foods: phrases -> records with a confidence band
   compute.ts           compute_meal, get_day_state, find_alternatives
