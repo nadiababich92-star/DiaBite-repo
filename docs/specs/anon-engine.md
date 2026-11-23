@@ -1,6 +1,6 @@
 # Spec — A free first answer without signing in: what the engine does
 
-*Stage 2, from `docs/engineering/engineering-doc.md` (approved 20 November 2026). Companion specs: `anon-screen.md` (what the screen sends and prints), `anon-evals.md` (the cases and how to turn it on). Read `server/guard.ts` and `server/agent.ts` first: the windows, the daily ceiling, `answer()` and the order of its steps are not redefined here.*
+*Stage 2, from `docs/engineering/anon-first-answer.md` (approved 20 November 2026). Companion specs: `anon-screen.md` (what the screen sends and prints), `anon-evals.md` (the cases and how to turn it on). Read `server/guard.ts` and `server/agent.ts` first: the windows, the daily ceiling, `answer()` and the order of its steps are not redefined here.*
 
 **No migration, no new table, no new route, no prompt change, nothing stored about a person.** Counters live in the engine's memory and reset at a restart, as every limit in `server/guard.ts` does. **The feature is off until `ANON_FREE_ANSWERS` is set above 0**, so deploying the code changes nothing.
 

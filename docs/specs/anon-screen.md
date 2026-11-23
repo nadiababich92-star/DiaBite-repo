@@ -1,6 +1,6 @@
 # Spec — A free first answer without signing in: what the screen does
 
-*Stage 2, from `docs/engineering/engineering-doc.md` (approved 20 November 2026). Companion specs: `anon-engine.md`, `anon-evals.md`. Read `docs/design.md` (and apply `/design-system`) before any UI code: **no new colour, size or font.***
+*Stage 2, from `docs/engineering/anon-first-answer.md` (approved 20 November 2026). Companion specs: `anon-engine.md`, `anon-evals.md`. Read `docs/design.md` (and apply `/design-system`) before any UI code: **no new colour, size or font.***
 
 **No migration, nothing stored on a server, no prompt change.** The browser keeps one random device id and nothing else new.
 

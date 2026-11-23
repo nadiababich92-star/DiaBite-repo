@@ -1,6 +1,6 @@
 # Spec — A free first answer without signing in: the checks that prove it
 
-*Stage 2, from `docs/engineering/engineering-doc.md` (approved 20 November 2026). Companion specs: `anon-engine.md`, `anon-screen.md`. A feature is not finished until `npm run eval`, `npm run eval:abuse`, the rehearsal check and `npm run eval:agent` have run and every case below is added in the same change (CLAUDE.md, stage 5). **Mechanical checks read status codes, fields and counters, never the wording of an answer** (rule 7).*
+*Stage 2, from `docs/engineering/anon-first-answer.md` (approved 20 November 2026). Companion specs: `anon-engine.md`, `anon-screen.md`. A feature is not finished until `npm run eval`, `npm run eval:abuse`, the rehearsal check and `npm run eval:agent` have run and every case below is added in the same change (CLAUDE.md, stage 5). **Mechanical checks read status codes, fields and counters, never the wording of an answer** (rule 7).*
 
 **Ids:** `AN1` to `AN5` for the engine block, `ANA` to `ANE` for the abuse suite (no model, no money), `S` renders `AS1` to `AS7`, `W21` for the rehearsal (`W20` is the weight correction).
 
