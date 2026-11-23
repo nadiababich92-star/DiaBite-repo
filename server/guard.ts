@@ -20,6 +20,14 @@ const num = (name: string, fallback: number): number => {
   return Number.isFinite(v) && v > 0 ? v : fallback
 }
 
+/** A setting where 0 is a real value, not "unset": a feature switch that means off. */
+const numOrZero = (name: string, fallback: number): number => {
+  const raw = process.env[name]
+  if (raw === undefined || raw.trim() === '') return fallback
+  const v = Number(raw)
+  return Number.isInteger(v) && v >= 0 ? v : fallback
+}
+
 /** Read per call, not at import, so the abuse suite can set them tiny. */
 export function limits() {
   return {
@@ -32,8 +40,17 @@ export function limits() {
     userDay: num('ASK_USER_DAY', 200),
     deletePerDay: num('ACCOUNT_DELETE_DAY', 5),
     recomputeMin: num('RECOMPUTE_MIN', 60),
+    // A free first answer without signing in (docs/specs/anon-engine.md, section 1). Off at 0.
+    anonFreeAnswers: numOrZero('ANON_FREE_ANSWERS', 0),
+    anonModelCallsDay: num('ANON_MODEL_CALLS_DAY', 10),
+    anonAddressAnswersDay: num('ANON_ADDRESS_ANSWERS_DAY', 10),
+    anonDailyCeiling: num('ASK_ANON_DAILY_CEILING', 150),
+    recomputeAnonMin: num('RECOMPUTE_ANON_MIN', 20),
   }
 }
+
+/** How many verdict answers a signed-out visitor may have in 24 hours; 0 means the feature is off. Read per call. */
+export const freeAnswers = (): number => limits().anonFreeAnswers
 
 export const MAX_MESSAGE = 500
 export const MAX_SESSION_ID = 64
@@ -124,14 +141,30 @@ class Windows {
     return 0
   }
 
+  /** Seconds to wait if `key` already has `max` hits inside `windowMs`; 0 if not. Records nothing. */
+  peek(key: string, max: number, windowMs: number, now: number): number {
+    const kept = (this.hits.get(key) ?? []).filter((t) => now - t < windowMs)
+    return kept.length >= max ? Math.max(1, Math.ceil((kept[0] + windowMs - now) / 1000)) : 0
+  }
+
+  /** Adds a hit to `key`, bounded like take(). */
+  record(key: string, now: number): void {
+    const kept = this.hits.get(key) ?? []
+    kept.push(now)
+    this.hits.delete(key)
+    this.hits.set(key, kept)
+    while (this.hits.size > MAX_KEYS) this.hits.delete(this.hits.keys().next().value as string)
+  }
+
   size() { return this.hits.size }
   clear() { this.hits.clear() }
 }
 
 const windows = new Windows()
 let ceiling = { day: '', used: 0 }
+let anonCeiling = { day: '', used: 0 }
 
-export type Scope = 'ip' | 'session' | 'daily' | 'user'
+export type Scope = 'ip' | 'session' | 'daily' | 'user' | 'anon_daily'
 export class RateLimited extends Error {
   constructor(public scope: Scope, public retryAfterSec: number) {
     super(`rate_limited:${scope}`)
@@ -173,6 +206,60 @@ export function chargeTurn(clientKey: string | undefined, sessionId: string, now
   if (waitSession) throw new RateLimited('session', waitSession)
 
   ceiling.used++
+}
+
+// ── A free first answer without signing in (docs/specs/anon-engine.md) ───
+
+/** The anonymous visitor: the device the browser says it is, and the address the request came from. */
+export interface AnonKey { device: string | undefined; address: string | undefined }
+
+/** A version-4 UUID from the x-diabite-device header, hashed; undefined for anything else. The raw id is never kept or logged. */
+export function deviceKeyOf(header: unknown): string | undefined {
+  if (typeof header !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(header)) return undefined
+  return createHash('sha256').update(SALT + header.toLowerCase()).digest('hex').slice(0, 16)
+}
+
+/** Thrown by `chargeAnon`; the route turns it into 401. */
+export class SignInNeeded extends Error {
+  constructor(public reason: 'free_limit' | 'anonymous_off', public retryAfterSec?: number) { super(`sign_in_needed:${reason}`) }
+}
+
+/** One visitor's key: a device, or, with no valid device header, every such visitor on an address shares one allowance, so omitting the header never gives more than sending one. */
+const anonDevice = (key: AnonKey) => key.device ?? `nodev:${key.address ?? 'none'}`
+
+/**
+ * Charge one model turn to an anonymous visitor, or throw. Called after the safety gate, before the router. The verdict allowance is
+ * peeked here and recorded by `countFreeAnswer` once an answer costs a meal; the model-call cap is taken now, so idle spending stops.
+ */
+export function chargeAnon(key: AnonKey, now = Date.now()): void {
+  const L = limits()
+  if (L.anonFreeAnswers === 0) throw new SignInNeeded('anonymous_off')
+  if (L.off) return
+  const today = new Date(now).toISOString().slice(0, 10)
+  if (anonCeiling.day !== today) anonCeiling = { day: today, used: 0 }
+  if (anonCeiling.used >= L.anonDailyCeiling) throw new RateLimited('anon_daily', secondsToMidnight(now))
+  const device = anonDevice(key)
+  const wait = Math.max(
+    windows.peek(`an:ans:${device}`, L.anonFreeAnswers, DAY, now),
+    windows.peek(`an:addr:${key.address ?? 'none'}`, L.anonAddressAnswersDay, DAY, now),
+  )
+  if (wait) throw new SignInNeeded('free_limit', wait)
+  const callWait = windows.take(`an:calls:${device}`, L.anonModelCallsDay, DAY, now)
+  if (callWait) throw new SignInNeeded('free_limit', callWait)
+  anonCeiling.used++
+}
+
+/** Record one verdict answer for the visitor, after the answer was built. */
+export function countFreeAnswer(key: AnonKey, now = Date.now()): void {
+  if (limits().off) return
+  windows.record(`an:ans:${anonDevice(key)}`, now)
+  windows.record(`an:addr:${key.address ?? 'none'}`, now)
+}
+
+/** Seconds to wait before this address may recompute a portion again without an account; 0 if it may. */
+export function chargeRecomputeAnon(address: string, now = Date.now()): number {
+  const L = limits()
+  return L.off ? 0 : windows.take(`rca:${address}`, L.recomputeAnonMin, MIN, now)
 }
 
 /** Seconds to wait before this person may delete an account again; 0 if they may. */
@@ -255,8 +342,8 @@ export const sourceTag = (key: string | undefined) =>
   key ? createHash('sha256').update(SALT + key).digest('hex').slice(0, 8) : 'unknown'
 
 /** Test hooks for `npm run eval:abuse`. */
-export const _state = () => ({ keys: windows.size(), ceilingUsed: ceiling.used })
-export const _reset = () => { windows.clear(); ceiling = { day: '', used: 0 } }
+export const _state = () => ({ keys: windows.size(), ceilingUsed: ceiling.used, anonCeilingUsed: anonCeiling.used })
+export const _reset = () => { windows.clear(); ceiling = { day: '', used: 0 }; anonCeiling = { day: '', used: 0 } }
 
 // ── CORS ──────────────────────────────────────────────────────────────────
 

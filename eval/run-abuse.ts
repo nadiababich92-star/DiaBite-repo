@@ -502,6 +502,91 @@ async function authSuite() {
   } finally { off.kill(); stub.close() }
 }
 
+/** A random version-4 UUID, the shape the browser's device id has. */
+const deviceUuid = () => crypto.randomUUID()
+
+/**
+ * A free first answer without signing in (docs/specs/anon-evals.md, ANA to ANF): who is let through when there is no account.
+ * The model is unreachable, so a turn that passes the limits ends 502; the counters that move on a verdict answer
+ * (costed meal) are covered by the engine block (AN2), which has no model either.
+ */
+async function anonSuite() {
+  const child = start({
+    REQUIRE_SIGN_IN: 'on', ANON_FREE_ANSWERS: '2', ANON_MODEL_CALLS_DAY: '3', ANON_ADDRESS_ANSWERS_DAY: '5', ASK_ANON_DAILY_CEILING: '50', RECOMPUTE_ANON_MIN: '3',
+    ASK_IP_10MIN: '1000', ASK_IP_DAY: '1000', ASK_SESSION_HOUR: '1000', ASK_DAILY_CEILING: '1000', RECOMPUTE_MIN: '1000',
+  })
+  try {
+    await waitReady()
+    const h = await (await fetch(`${BASE}/health`)).json() as Record<string, unknown>
+    check('AND', '/health has freeAnswers 2 and signIn true, and nothing else new', h.freeAnswers === 2 && h.signIn === true && Object.keys(h).sort().join() === 'freeAnswers,ok,records,signIn', JSON.stringify(h))
+
+    const dev = deviceUuid()
+    const withDev = { 'x-diabite-device': dev }
+    const first = await ask(meal('an-1'), withDev)
+    const noDev = await ask(meal('an-2'))
+    check('ANA', 'an anonymous ask with a device id is admitted, and so is one without the header', ADMITTED.has(first.status) && ADMITTED.has(noDev.status), `${first.status} ${noDev.status}`)
+    const second = await ask(meal('an-3'), withDev)
+    const third = await ask(meal('an-4'), withDev)
+    check('ANA2', 'three model turns from one device are admitted', [first, second, third].every((r) => ADMITTED.has(r.status)), [first, second, third].map((r) => r.status).join())
+
+    const over = await ask(meal('an-5'), withDev)
+    check('ANB', 'past the model-call cap: 401 sign_in_required, reason free_limit, a positive retryAfterSec, Retry-After set, and no other field',
+      over.status === 401 && over.json.error === 'sign_in_required' && over.json.reason === 'free_limit' && Number(over.json.retryAfterSec) > 0
+        && Number(over.headers.get('retry-after')) > 0 && Object.keys(over.json).sort().join() === 'error,reason,retryAfterSec', JSON.stringify([over.status, over.json]))
+    const dosing = await ask(meal('an-6', 'how many units of insulin should I take before pasta'), withDev)
+    const red = await ask(meal('an-7', 'my glucose is 320 and I am vomiting'), withDev)
+    check('ANA3', 'a dosing phrase and a red flag are still answered by the rule, after the device is over its cap',
+      dosing.status === 200 && dosing.json.blockedRule === 'dosing' && red.status === 200 && red.json.blockedRule === 'red_flag', JSON.stringify([dosing.status, dosing.json.blockedRule, red.status, red.json.blockedRule]))
+    const another = await ask(meal('an-8'), { 'x-diabite-device': deviceUuid() })
+    check('ANA4', 'another device on the same address is not turned away by the first one', ADMITTED.has(another.status), String(another.status))
+    const bad = await ask(meal('an-9'), { 'x-diabite-device': 'not-a-device-id' })
+    check('ANA5', 'a malformed device id is the address-only visitor: admitted, and not given a fresh allowance', ADMITTED.has(bad.status), String(bad.status))
+
+    const rc = (headers: Record<string, string> = {}) => fetch(`${BASE}/meal/recompute`, { method: 'POST', headers: { 'content-type': 'application/json', ...headers },
+      body: JSON.stringify({ sessionId: 'an-rc', items: [{ foodId: 'seed:egg', grams: 50 }] }) })
+    const noHeader = await rc()
+    const noHeaderBody = await noHeader.json() as Record<string, unknown>
+    check('ANC1', '/meal/recompute with no token and no device header is 401 anonymous_off', noHeader.status === 401 && noHeaderBody.reason === 'anonymous_off', JSON.stringify([noHeader.status, noHeaderBody]))
+    const rcDev = { 'x-diabite-device': deviceUuid() }
+    const ok1 = await rc(rcDev), ok2 = await rc(rcDev), ok3 = await rc(rcDev)
+    check('ANC2', 'with a device id it answers 200 while free answers are on', [ok1, ok2, ok3].every((r) => r.status === 200), [ok1, ok2, ok3].map((r) => r.status).join())
+    const limited = await rc(rcDev)
+    check('ANC3', 'past RECOMPUTE_ANON_MIN: 429 with Retry-After', limited.status === 429 && Number(limited.headers.get('retry-after')) > 0, `${limited.status} ${limited.headers.get('retry-after')}`)
+    const keyed = await rc({ 'x-api-key': KEY })
+    check('ANC4', 'a request with the engine key is exempt from the anonymous recompute limit', keyed.status === 200, String(keyed.status))
+
+    const keyedAsks = await Promise.all(Array.from({ length: 20 }, (_, i) => ask(meal(`an-k${i}`), { 'x-api-key': KEY, 'x-diabite-device': dev })))
+    check('ANE', 'the engine key is exempt from every anonymous limit (twenty keyed requests, none refused with 401 or 429)', keyedAsks.every((r) => ADMITTED.has(r.status)), keyedAsks.map((r) => r.status).join())
+  } finally { child.kill() }
+
+  // The ceiling of the day, in its own pass: anonymous turns are a sub-limit of the global one.
+  const ceil = start({
+    REQUIRE_SIGN_IN: 'on', ANON_FREE_ANSWERS: '2', ANON_MODEL_CALLS_DAY: '100', ANON_ADDRESS_ANSWERS_DAY: '100', ASK_ANON_DAILY_CEILING: '2', RECOMPUTE_ANON_MIN: '3',
+    ASK_IP_10MIN: '1000', ASK_IP_DAY: '1000', ASK_SESSION_HOUR: '1000', ASK_DAILY_CEILING: '1000',
+  })
+  try {
+    await waitReady()
+    const a = await ask(meal('ce-1'), { 'x-diabite-device': deviceUuid() })
+    const b = await ask(meal('ce-2'), { 'x-diabite-device': deviceUuid() })
+    const c = await ask(meal('ce-3'), { 'x-diabite-device': deviceUuid() })
+    check('ANE2', 'past the anonymous ceiling of the day: 429 scope anon_daily with Retry-After; the first two were admitted',
+      ADMITTED.has(a.status) && ADMITTED.has(b.status) && c.status === 429 && c.json.scope === 'anon_daily' && Number(c.headers.get('retry-after')) > 0, JSON.stringify([a.status, b.status, c.status, c.json]))
+    const keyed = await ask(meal('ce-4'), { 'x-api-key': KEY })
+    check('ANE3', 'a keyed caller still passes the anonymous ceiling', ADMITTED.has(keyed.status), String(keyed.status))
+  } finally { ceil.kill() }
+
+  // The feature off: the default.
+  const offChild = start({ REQUIRE_SIGN_IN: 'on', ASK_IP_10MIN: '1000', ASK_IP_DAY: '1000', ASK_SESSION_HOUR: '1000', ASK_DAILY_CEILING: '1000' })
+  try {
+    await waitReady()
+    const h = await (await fetch(`${BASE}/health`)).json() as Record<string, unknown>
+    const r = await ask(meal('of-1'), { 'x-diabite-device': deviceUuid() })
+    const gate = await ask(meal('of-2', 'how many units of insulin should I take before pasta'), { 'x-diabite-device': deviceUuid() })
+    check('ANF', 'with ANON_FREE_ANSWERS unset: /health says freeAnswers 0, an anonymous ask is 401 anonymous_off, and the safety gate still answers',
+      h.freeAnswers === 0 && r.status === 401 && r.json.reason === 'anonymous_off' && gate.status === 200 && gate.json.blockedRule === 'dosing', JSON.stringify([h, r.status, r.json, gate.status]))
+  } finally { offChild.kill() }
+}
+
 function memorySuite() {
   // ── bounded memory, in process ─────────────────────────────────────────
   _reset()
@@ -546,6 +631,7 @@ async function main() {
   memorySuite()
   await httpSuite()
   await authSuite()
+  await anonSuite()
   console.log(failed ? `\n${failed} FAILED` : '\nall abuse checks passed')
   process.exit(failed ? 1 : 0)
 }

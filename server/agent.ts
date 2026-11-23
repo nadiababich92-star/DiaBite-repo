@@ -38,7 +38,7 @@ import OpenAI from 'openai'
 import { openApiSpec } from './openapi'
 import { normalise, safetyGate } from './safety'
 import { bindSession } from './bind'
-import { chargeTurn } from './guard'
+import { chargeAnon, chargeTurn, countFreeAnswer, SignInNeeded, type AnonKey } from './guard'
 import { verify, verdictConflict } from './verify'
 import type { AvoidList } from './avoid'
 import { claimSession, dropCarbLimit, lastTurnOf, previousResponseFor, putSession, rememberResponse, rememberTurn } from './sessions'
@@ -432,7 +432,7 @@ function traceOf(output: unknown[] | undefined): ToolCallTrace[] {
  * name or email". That is true only while this line carries the browser's random session id and nothing
  * that names an account: never add a user id, email or IP here.
  */
-function logTurn(req: AskRequest, res: AskResponse, ms: number): void {
+function logTurn(req: AskRequest, res: AskResponse, ms: number, anon = false): void {
   const resolve = res.trace.find((t) => t.tool.endsWith('resolve_foods'))?.result as
     | { results?: { confidence?: string; unknown?: boolean; clarify?: string }[] }
     | undefined
@@ -441,6 +441,7 @@ function logTurn(req: AskRequest, res: AskResponse, ms: number): void {
     evt: 'turn',
     at: new Date().toISOString(),
     session: req.sessionId,
+    ...(anon ? { anon: true } : {}),
     ...(LOG_QUESTIONS ? { question: req.message } : { questionLength: req.message.length }),
     ms,
     ...(res.timing ? { timing: res.timing } : {}),
@@ -789,11 +790,29 @@ export interface AskContext {
   person?: { sub: string } | null
   /** REQUIRE_SIGN_IN: a model turn needs a person (the gate does not). */
   requireSignIn?: boolean
+  /** A signed-out visitor: the device the browser says it is and the address. Set by the route only for a request with no key and no person. */
+  anon?: AnonKey
 }
+
+/** A caller with no key and no person, on a deployment that makes people sign in: the visitor the free first answers are for. */
+const isAnonymous = (ctx: AskContext): boolean => !!ctx.requireSignIn && !ctx.trusted && !ctx.person
 
 /** A model turn was attempted without signing in. The engine turns this into 401. */
 export class SignInRequired extends Error {
-  constructor() { super('sign_in_required') }
+  /** `free_limit`: the visitor's free answers are used (and `retryAfterSec` says when another comes); `anonymous_off`: free answers are off, or this needs a person. */
+  constructor(public reason: 'free_limit' | 'anonymous_off' = 'anonymous_off', public retryAfterSec?: number) { super('sign_in_required') }
+}
+
+/**
+ * Did the engine cost a meal in this turn? A verdict, a partial verdict and an assumed-recipe estimate all count; a question,
+ * advice and a refusal do not. Read from the tool results, never from the answer's words.
+ */
+export function countsAsFreeAnswer(trace: ToolCallTrace[]): boolean {
+  return trace.some((t) => {
+    if (!t.tool.endsWith('compute_meal') && !t.tool.endsWith('cost_dish')) return false
+    const r = t.result as { totals?: unknown; error?: unknown; needsWeight?: unknown } | null
+    return !!r && typeof r === 'object' && !!r.totals && typeof r.totals === 'object' && !r.error && !r.needsWeight
+  })
 }
 
 /** The session id belongs to someone else, or was used before this person signed in. */
@@ -821,7 +840,10 @@ export async function ask(req: AskRequest, ctx: AskContext = {}): Promise<AskRes
   const started = Date.now()
   req = { ...req, message: withoutSessionTag(req.message) || '?' }
   const res = await answer(req, ctx)
-  logTurn(req, res, Date.now() - started)
+  // A visitor's free answer is counted once the answer exists, and only when a meal was costed: a question, advice and a refusal are free.
+  const anonymous = isAnonymous(ctx)
+  if (anonymous && ctx.anon && countsAsFreeAnswer(res.trace)) countFreeAnswer(ctx.anon)
+  logTurn(req, res, Date.now() - started, anonymous)
   return res
 }
 
@@ -894,7 +916,13 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   // After the gate, before the router: a refusal costs nothing and is never
   // withheld, and the router is itself a model call. Throws RateLimited.
   // The gate above needs no token; everything below spends a model turn and does.
-  if (ctx.requireSignIn && !ctx.trusted && !ctx.person) throw new SignInRequired()
+  const anonymous = isAnonymous(ctx)
+  if (anonymous) {
+    // No device or address: an old caller, which keeps today's behaviour. Otherwise the visitor is charged now and counted after the answer.
+    if (!ctx.anon) throw new SignInRequired('anonymous_off')
+    try { chargeAnon(ctx.anon) }
+    catch (e) { if (e instanceof SignInNeeded) throw new SignInRequired(e.reason, e.retryAfterSec); throw e }
+  }
   if (!ctx.trusted && claimSession(req.sessionId, ctx.person?.sub) === 'denied') throw new SessionNotYours()
   if (!ctx.trusted) chargeTurn(ctx.clientKey, req.sessionId, undefined, ctx.person?.sub)
 
@@ -927,7 +955,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   // Advisory turns carry what this person has said they like; meal turns do
   // not, because their answer is arithmetic and a preference cannot change a
   // number.
-  const recalled = role === 'advisor' ? await recallPreferences(req.sessionId, req.message) : ''
+  const recalled = role === 'advisor' && !anonymous ? await recallPreferences(req.sessionId, req.message) : ''
   let input = role === 'meal' ? mealInput : `${mealInput}${recalled}`
 
   const trace: ToolCallTrace[] = []
@@ -1020,7 +1048,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   rememberTurn(req.sessionId, role, askedSomething(trace, answer))
   // Food preferences only, and only from advisory turns — the ones without a
   // diary, a budget or a number in them.
-  if (role === 'advisor' && answer && !withheld) rememberPreferences(req.sessionId, req.message, answer)
+  if (role === 'advisor' && !anonymous && answer && !withheld) rememberPreferences(req.sessionId, req.message, answer)
 
   return {
     answer, blocked: false,

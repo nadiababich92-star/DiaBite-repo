@@ -50,6 +50,8 @@ import GlHelp, { GlHelpContext } from '../src/components/GlHelp'
 import { GI_GL_HOW, GI_GL_VIDEO, GI_GL_WORDS } from '../src/lib/glWords'
 import { budgetOf, buildReceipt, receiptFrom, requestHeaders, SignInRequiredError } from '../src/lib/agent'
 import { deviceId } from '../src/lib/device'
+import { chargeAnon, chargeTurn, countFreeAnswer, deviceKeyOf, RateLimited, SignInNeeded, _reset as resetGuard } from '../server/guard'
+import { countsAsFreeAnswer } from '../server/agent'
 import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
 import { accessOf, looksLikeCode, looksLikeEmail, problemOf, signInReasonOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
@@ -674,6 +676,68 @@ recorrectMisses.forEach((m) => console.log(m))
   const withToken = requestHeaders('tok'), signedOut = requestHeaders(null)
   if (withToken.authorization !== 'Bearer tok' || 'x-diabite-device' in withToken) bits.push('a signed-in request carries the device header, or lost its token')
   if (signedOut['x-diabite-device'] !== id || 'authorization' in signedOut) bits.push('a signed-out request lacks the device header, or carries a token')
+  // ── the engine's side (docs/specs/anon-evals.md, AN1 to AN4, AN6, AN7): the functions, with tiny settings and no model ──
+  {
+    const env = (o: Record<string, string>) => { for (const k of ['ANON_FREE_ANSWERS', 'ANON_MODEL_CALLS_DAY', 'ANON_ADDRESS_ANSWERS_DAY', 'ASK_ANON_DAILY_CEILING', 'ASK_DAILY_CEILING', 'ASK_IP_10MIN', 'ASK_IP_DAY', 'ASK_SESSION_HOUR']) delete process.env[k]; Object.assign(process.env, o) }
+    const needs = (f: () => void): SignInNeeded | RateLimited | null => { try { f(); return null } catch (e) { if (e instanceof SignInNeeded || e instanceof RateLimited) return e; throw e } }
+    const reasonOf = (e: unknown) => (e instanceof SignInNeeded ? e.reason : e instanceof RateLimited ? e.scope : 'none')
+    const t0 = Date.parse('2026-11-23T10:00:00Z')
+    const dev = (n: string) => deviceKeyOf(`0000000${n}-0000-4000-8000-000000000000`)
+    // AN1: what counts as a free answer
+    const totals = { totals: { gl: 7 } }
+    const call = (tool: string, result: unknown) => ({ tool, input: {}, result })
+    if (!countsAsFreeAnswer([call('diabite_engine_compute_meal', totals)])) bits.push('AN1 a costed meal does not count')
+    if (!countsAsFreeAnswer([call('diabite_engine_cost_dish', totals)])) bits.push('AN1 a dish estimate does not count')
+    if (!countsAsFreeAnswer([call('diabite_engine_compute_meal', { ...totals, afterMeal: { fits: null } })])) bits.push('AN1 a partial meal does not count')
+    for (const [what, trace] of [['needsWeight', [call('x_compute_meal', { totals: {}, needsWeight: true })]], ['an error', [call('x_compute_meal', { error: 'bad' })]], ['resolve only', [call('x_resolve_foods', { results: [] })]], ['an empty trace', []]] as const) {
+      if (countsAsFreeAnswer(trace as never)) bits.push(`AN1 ${what} counts as a free answer`)
+    }
+    // AN6: the device key
+    const id4 = '3f2a9c1e-5b7d-4e8a-9c21-7d4e5f6a8b90'
+    const k1 = deviceKeyOf(id4)
+    if (!k1 || !/^[0-9a-f]{16}$/.test(k1) || k1 === id4 || deviceKeyOf(id4) !== k1) bits.push(`AN6 the device key is ${k1}`)
+    for (const bad of ['3f2a9c1e-5b7d-1e8a-9c21-7d4e5f6a8b90', 'x'.repeat(35), [id4], undefined, 12]) if (deviceKeyOf(bad) !== undefined) bits.push(`AN6 ${JSON.stringify(bad)} gave a key`)
+    // AN2: three verdict answers, then the fourth is turned away; the model-call cap; the address; no device
+    env({ ANON_FREE_ANSWERS: '3', ANON_MODEL_CALLS_DAY: '10', ANON_ADDRESS_ANSWERS_DAY: '100' }); resetGuard()
+    const A = { device: dev('1'), address: '203.0.113.1' }
+    for (let i = 0; i < 3; i++) { const e = needs(() => chargeAnon(A, t0 + i)); if (e) bits.push(`AN2 answer ${i + 1} was refused: ${reasonOf(e)}`); countFreeAnswer(A, t0 + i) }
+    const fourth = needs(() => chargeAnon(A, t0 + 10))
+    if (!(fourth instanceof SignInNeeded) || fourth.reason !== 'free_limit' || !((fourth.retryAfterSec ?? 0) > 0)) bits.push(`AN2 the fourth answer was not refused with a wait: ${reasonOf(fourth)}`)
+    env({ ANON_FREE_ANSWERS: '3', ANON_MODEL_CALLS_DAY: '10', ANON_ADDRESS_ANSWERS_DAY: '100' }); resetGuard()
+    const B = { device: dev('2'), address: '203.0.113.2' }
+    let admitted = 0
+    for (let i = 0; i < 10; i++) if (!needs(() => chargeAnon(B, t0 + i))) admitted++
+    const eleventh = needs(() => chargeAnon(B, t0 + 20))
+    if (admitted !== 10 || !(eleventh instanceof SignInNeeded) || eleventh.reason !== 'free_limit') bits.push(`AN2 the model-call cap: ${admitted} admitted, the eleventh ${reasonOf(eleventh)}`)
+    env({ ANON_FREE_ANSWERS: '9', ANON_MODEL_CALLS_DAY: '50', ANON_ADDRESS_ANSWERS_DAY: '3' }); resetGuard()
+    for (const n of ['3', '4', '5']) { const k = { device: dev(n), address: '203.0.113.3' }; chargeAnon(k, t0); countFreeAnswer(k, t0) }
+    const other = needs(() => chargeAnon({ device: dev('6'), address: '203.0.113.3' }, t0 + 5))
+    if (!(other instanceof SignInNeeded) || other.reason !== 'free_limit') bits.push(`AN2 a fourth device on an address with three answers: ${reasonOf(other)}`)
+    env({ ANON_FREE_ANSWERS: '2', ANON_MODEL_CALLS_DAY: '50', ANON_ADDRESS_ANSWERS_DAY: '50' }); resetGuard()
+    const none = { device: undefined, address: '203.0.113.4' }
+    for (let i = 0; i < 2; i++) { chargeAnon(none, t0 + i); countFreeAnswer(none, t0 + i) }
+    const sameVisitor = needs(() => chargeAnon({ device: undefined, address: '203.0.113.4' }, t0 + 5))
+    const sent = needs(() => chargeAnon({ device: dev('7'), address: '203.0.113.4' }, t0 + 6))
+    if (!(sameVisitor instanceof SignInNeeded)) bits.push('AN2 two callers with no device id on one address are not the same visitor')
+    if (sent) bits.push('AN2 a sent device id was refused because address-only visitors used theirs (it must have its own allowance)')
+    // AN7: the allowance resets after a rolling 24 hours
+    const later = needs(() => chargeAnon(none, t0 + 24 * 3600_000 + 1000))
+    if (later) bits.push(`AN7 the allowance did not reset after 24 hours: ${reasonOf(later)}`)
+    // AN3: off is off, and nothing is touched
+    env({}); resetGuard()
+    const off = needs(() => chargeAnon(A, t0))
+    if (!(off instanceof SignInNeeded) || off.reason !== 'anonymous_off') bits.push(`AN3 with ANON_FREE_ANSWERS unset: ${reasonOf(off)}`)
+    env({ ANON_FREE_ANSWERS: '0' }); resetGuard()
+    if (reasonOf(needs(() => chargeAnon(A, t0))) !== 'anonymous_off') bits.push('AN3 with ANON_FREE_ANSWERS=0 the feature is not off')
+    // AN4: the anonymous ceiling is inside the global one
+    env({ ANON_FREE_ANSWERS: '9', ANON_MODEL_CALLS_DAY: '50', ANON_ADDRESS_ANSWERS_DAY: '50', ASK_DAILY_CEILING: '3', ASK_ANON_DAILY_CEILING: '2', ASK_IP_10MIN: '100', ASK_IP_DAY: '100', ASK_SESSION_HOUR: '100' }); resetGuard()
+    const ok1 = needs(() => chargeAnon({ device: dev('8'), address: '203.0.113.5' }, t0)), ok2 = needs(() => chargeAnon({ device: dev('9'), address: '203.0.113.5' }, t0 + 1))
+    const third = needs(() => chargeAnon({ device: dev('a'), address: '203.0.113.5' }, t0 + 2))
+    if (ok1 || ok2 || !(third instanceof RateLimited) || third.scope !== 'anon_daily') bits.push(`AN4 the anonymous ceiling: ${reasonOf(ok1)} ${reasonOf(ok2)} ${reasonOf(third)}`)
+    const signedIn = needs(() => chargeTurn('203.0.113.9', 'an4-s', t0 + 3, '00000000-0000-4000-8000-000000000001'))
+    if (signedIn) bits.push(`AN4 a signed-in turn was refused while only the anonymous ceiling was used: ${reasonOf(signedIn)}`)
+    env({}); resetGuard()
+  }
   console.log(`\nanon      ${bits.length === 0 ? 'ok' : 'WRONG'}  (the scaffold)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1

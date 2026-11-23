@@ -38,7 +38,7 @@ import { openApiSpec } from './openapi'
 import { ask, SessionNotYours, SignInRequired, type AskRequest } from './agent'
 import { personOf, signInRequired } from './auth'
 import { createHash, timingSafeEqual } from 'node:crypto'
-import { RateLimited, addressKey, chargeDelete, chargeRecompute, originAllowed, sourceTag, validCarbLimit, validSessionId, validUnits, validateAsk, validateDish, validateRecompute } from './guard'
+import { RateLimited, addressKey, chargeDelete, chargeRecompute, chargeRecomputeAnon, deviceKeyOf, freeAnswers, originAllowed, sourceTag, validCarbLimit, validSessionId, validUnits, validateAsk, validateDish, validateRecompute } from './guard'
 import type {
   AlternativesRequest, ComputeMealRequest, CostDishRequest, DayStateRequest, MealItemInput, ResolveRequest, VerifyRequest,
 } from './contract'
@@ -124,7 +124,7 @@ async function main() {
     })
   }
 
-  app.get('/health', (_req, res) => res.json({ ok: true, records: records.length, signIn: signInRequired() }))
+  app.get('/health', (_req, res) => res.json({ ok: true, records: records.length, signIn: signInRequired(), freeAnswers: freeAnswers() }))
 
   app.get('/openapi.json', (_req, res) => res.json(openApiSpec()))
 
@@ -140,9 +140,17 @@ async function main() {
     // exempt from the rate limits, never from the size caps above.
     const trusted = keyMatches(req.get('x-api-key'))
     const person = trusted ? null : await personOf(req)
-    try { res.json(await ask(body, { clientKey: trusted ? undefined : addressKey(req.ip), trusted, person, requireSignIn: signInRequired() })) }
+    // A visitor with no key and no account: the device the browser says it is (a random id, hashed here; never logged raw) and the address.
+    const anon = !trusted && !person ? { device: deviceKeyOf(req.get('x-diabite-device')), address: addressKey(req.ip) } : undefined
+    try { res.json(await ask(body, { clientKey: trusted ? undefined : addressKey(req.ip), trusted, person, requireSignIn: signInRequired(), anon })) }
     catch (e) {
-      if (e instanceof SignInRequired) return res.status(401).json({ error: 'sign_in_required' })
+      if (e instanceof SignInRequired) {
+        if (e.reason === 'free_limit') {
+          console.warn(JSON.stringify({ evt: 'free_limit', source: sourceTag(addressKey(req.ip)), retryAfterSec: e.retryAfterSec }))
+          if (e.retryAfterSec) res.set('Retry-After', String(e.retryAfterSec))
+        }
+        return res.status(401).json({ error: 'sign_in_required', reason: e.reason, ...(e.retryAfterSec ? { retryAfterSec: e.retryAfterSec } : {}) })
+      }
       if (e instanceof SessionNotYours) return res.status(403).json({ error: 'session_not_yours' })
       if (e instanceof RateLimited) {
         console.warn(JSON.stringify({ evt: 'rate_limited', scope: e.scope, source: sourceTag(addressKey(req.ip)), retryAfterSec: e.retryAfterSec }))
@@ -343,7 +351,12 @@ async function main() {
     const trusted = keyMatches(req.get('x-api-key'))
     if (!trusted) {
       const person = await personOf(req)
-      if (signInRequired() && !person) return res.status(401).json({ error: 'sign_in_required' })
+      if (signInRequired() && !person) {
+        // Free answers on: a visitor may correct a portion, with a device id and a per-address limit. Off, or no valid device id: sign in.
+        if (freeAnswers() === 0 || !deviceKeyOf(req.get('x-diabite-device'))) return res.status(401).json({ error: 'sign_in_required', reason: 'anonymous_off' })
+        const anonWait = chargeRecomputeAnon(addressKey(req.ip) ?? 'none')
+        if (anonWait) { res.set('Retry-After', String(anonWait)); return res.status(429).json({ error: 'rate_limited', scope: 'ip', retryAfterSec: anonWait }) }
+      }
       // The day parked under a session id is its owner's: another person, or no one, gets a refusal.
       if (claimSession(body.sessionId, person?.sub) === 'denied') return res.status(403).json({ error: 'session_not_yours' })
       const key = addressKey(req.ip)
