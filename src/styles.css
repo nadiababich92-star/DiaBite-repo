@@ -323,10 +323,10 @@ tr:last-child td { border-bottom: none; }
 .meal-carbs { margin: -4px 0 12px; font-size: 14px; }
 /* Both ways of counting side by side, one colour each: the load in the lime marker, carbohydrate in blue. The one the
    person said they use is on the left. A card's top edge and its big figure carry its colour; the words say what it is. */
-.fig-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 12px; }
-.fig-card { min-width: 0; display: flex; flex-direction: column; gap: 2px; border-radius: 12px; border-top: 3px solid; padding: 10px 12px 12px; }
-.fig-card.gl { background: var(--accent-soft); border-color: var(--accent); }
-.fig-card.carb { background: var(--carb-soft); border-color: var(--carb-edge); }
+/* Two flat columns with a 1px rule between them (docs/design.md, "The three figures"); the colour is in the highlight behind each big figure. */
+.fig-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 0 0 12px; }
+.fig-card { min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 4px 12px 6px 0; }
+.fig-card + .fig-card { border-left: 1px solid var(--border); padding-left: 14px; padding-right: 0; }
 .fig-card .fig-title { margin: 0; }
 .fig-card .fig-big { margin: 4px 0 0; font-family: var(--mono); font-size: 32px; font-weight: 500; line-height: 1.2; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; color: var(--text); }
 .fig-card .fig-big .num { padding: 0 6px; border-radius: 6px; }
@@ -343,8 +343,15 @@ tr:last-child td { border-bottom: none; }
    answer never pushes them out of reach. On a wide screen the bar is at the top, so they sit at the bottom edge. */
 .act-bar { position: sticky; z-index: 10; bottom: calc(max(4px, env(safe-area-inset-bottom)) + 65px); padding: 10px 0; margin: 0 0 6px; background: var(--bg); align-items: center; flex-wrap: nowrap; gap: 8px; }
 .act-bar button { padding-left: 14px; padding-right: 14px; white-space: nowrap; }
-/* A key whose panel is open is drawn pressed in, read from aria-expanded so the look and the state cannot disagree (docs/design.md, Buttons). */
-.act-bar button.ghost[aria-expanded='true'] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); box-shadow: none; transform: translateY(3px); margin-bottom: 0; }
+.act-bar button.act-link { padding-left: 8px; padding-right: 8px; }
+/* Quiet links under an answer (docs/design.md, Buttons): underlined accent text, 44px tall by padding. One that opens a panel has a caret;
+   while its panel is open the caret turns and the label goes to 600, read from aria-expanded so the look and the state cannot disagree. */
+button.act-link { font: inherit; font-weight: 400; cursor: pointer; background: none; border: none; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; min-height: 44px; padding: 10px 8px; display: inline-flex; align-items: center; gap: 6px; }
+button.act-link:hover:not(:disabled) { text-decoration-thickness: 2px; }
+button.act-link:disabled { color: var(--text-dim); text-decoration: none; cursor: default; }
+.act-link-caret { flex: none; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid currentColor; }
+button.act-link[aria-expanded='true'] { font-weight: 600; }
+button.act-link[aria-expanded='true'] .act-link-caret { transform: rotate(180deg); }
 @media (min-width: 760px) { .act-bar { bottom: 8px; } }
 /* The original answer, folded once a swap or a new portion has replaced it at the top. */
 .was-original { margin: 0 0 12px; }
@@ -490,8 +497,8 @@ tr:last-child td { border-bottom: none; }
   .fig-v { font-size: 18px; }
   .fig-lead .fig-v { font-size: 48px; }
   /* The two figure cards share a phone's width: tighter type so a number and its unit stay on one line. */
-  .fig-pair { gap: 8px; }
-  .fig-card { padding: 10px 10px 12px; }
+  .fig-card { padding: 4px 10px 6px 0; }
+  .fig-card + .fig-card { padding-left: 12px; padding-right: 0; }
   .fig-card .fig-title { font-size: 12px; letter-spacing: 0.02em; }
   .fig-card .fig-big { font-size: 28px; white-space: nowrap; }
   .fig-card .fig-big .num { padding: 0 4px; }
@@ -1055,6 +1062,7 @@ body:has(.landing) { background: #0a1812; }
 .lp-sources a:hover { color: var(--lp-cream); }
 .answer-text .a-swap { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 10px 0 0; }
 .answer-text .a-swap button { min-height: 44px; }
+.answer-text .a-swap button.act-link { padding-left: 0; }
 /* The day chip under the budget bar (docs/design.md, "The day, under the budget"): a chip-toggle with a caret, the picker under it. */
 .ask-hero .ask-budget { margin-top: 18px; }
 .ask-hero.compact .ask-budget { margin-top: 12px; }

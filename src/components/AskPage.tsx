@@ -240,7 +240,7 @@ function Answer({ text, reply, onSwap, swapState, countBy }: {
           const done = swapState?.accepted === offer.id
           return (
             <div className="a-swap">
-              <button className="ghost" onClick={() => onSwap(offer)} disabled={(done && !swapState?.failed) || !!swapState?.busy}>
+              <button type="button" className="act-link" onClick={() => onSwap(offer)} disabled={(done && !swapState?.failed) || !!swapState?.busy}>
                 {swapState?.busy && done ? 'Counting again…' : swapState?.failed && done ? 'Try the swap again' : done ? 'Swap accepted' : 'Accept the swap'}
               </button>
               {done && !swapState?.busy && !swapState?.failed && <span className="muted">The new count is above.</span>}
@@ -652,8 +652,9 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
           ? <button className="primary" data-tour="log" onClick={anonymous.onSignIn}>Sign in to log this</button>
           : <button className="primary" data-tour="log" onClick={logIt} disabled={logged}>{logged ? (logDay && logDay > today ? 'Planned' : 'Logged') : logDay && logDay > today ? 'Plan it' : active?.partial || active?.unscored ? 'Log what was counted' : 'Log it'}</button>}
         {/* No label changes with state: the open state is aria-expanded, and the panel itself being on screen. */}
-        <button className="ghost" data-tour="calc" aria-expanded={showReceipt} aria-controls={showReceipt ? receiptId : undefined} onClick={() => setShowReceipt((v) => !v)}>{BUTTONS.calculation}</button>
-        {!receipt.carbsOnly && <button className="ghost" aria-expanded={editing} aria-controls={editing ? editorId : undefined} onClick={() => setEditing((v) => !v)}>{receipt.assumed ? BUTTONS.recipe : BUTTONS.portions}</button>}
+        {/* Log it is the one key; the two that open a panel are quiet links with a caret (docs/design.md, Buttons). */}
+        <button type="button" className="act-link" data-tour="calc" aria-expanded={showReceipt} aria-controls={showReceipt ? receiptId : undefined} onClick={() => setShowReceipt((v) => !v)}>{BUTTONS.calculation}<span className="act-link-caret" aria-hidden="true" /></button>
+        {!receipt.carbsOnly && <button type="button" className="act-link" aria-expanded={editing} aria-controls={editing ? editorId : undefined} onClick={() => setEditing((v) => !v)}>{receipt.assumed ? BUTTONS.recipe : BUTTONS.portions}<span className="act-link-caret" aria-hidden="true" /></button>}
       </div>
       {/* What next, under the first receipt until the first meal is logged (docs/specs/first-session-after-answer.md, section 3). */}
       {showWhatNext({ signedIn: !anonymous, hasReceipt: true, eatenCount: counted.length }) && onOpenDiary && !logged && (

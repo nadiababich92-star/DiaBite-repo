@@ -850,9 +850,23 @@ recorrectMisses.forEach((m) => console.log(m))
   if (/\{(showReceipt|editing) \?[^}]*(BUTTONS|'Calculation'|'Portions'|'Recipe')/.test(askSrc)) bits.push('AK2 a button label depends on whether its panel is open')
   const cssSrc = readFileSync(join(here, '../src/styles.css'), 'utf8')
   if (/tone-change|dot-change|with a change/i.test(cssSrc)) bits.push('AK2 the style sheet still names the change tone')
-  // An open panel shows on its key (docs/design.md, Buttons): one rule on aria-expanded, in tokens only.
-  const pressed = cssSrc.split('\n').find((l) => l.startsWith(".act-bar button.ghost[aria-expanded='true']"))
-  if (!pressed || !/border-color: var\(--accent\)/.test(pressed) || !/color: var\(--accent\)/.test(pressed) || /#[0-9a-f]{3,8}\b/i.test(pressed)) bits.push('AK2 the key of an open panel is not drawn pressed by a token-only rule on aria-expanded')
+  // Under an answer, Log it is the one key; Calculation, Portions/Recipe and Accept the swap are quiet links (docs/design.md, Buttons,
+  // docs/engineering/lighter-surfaces.md 5.3). An open panel shows on its link by weight 600 and a turned caret, one rule each on aria-expanded.
+  const cssLine = (start: string) => cssSrc.split('\n').find((l) => l.startsWith(start))
+  const linkRule = cssLine('button.act-link {')
+  if (!linkRule || !/color: var\(--accent\)/.test(linkRule) || !/text-decoration: underline/.test(linkRule) || !/min-height: 44px/.test(linkRule) || !/font-weight: 400/.test(linkRule) || /#[0-9a-f]{3,8}\b/i.test(linkRule)) bits.push('AK2 a quiet link is not underlined accent text, 44px tall, weight 400, in tokens only')
+  if (!/font-weight: 600/.test(cssLine("button.act-link[aria-expanded='true'] {") ?? '')) bits.push('AK2 an open panel does not set its link to weight 600')
+  if (!/rotate\(180deg\)/.test(cssLine("button.act-link[aria-expanded='true'] .act-link-caret") ?? '')) bits.push("AK2 an open panel does not turn its link's caret")
+  const actBar = askSrc.slice(askSrc.indexOf('<div className="row act-bar">'), askSrc.indexOf('</div>', askSrc.indexOf('<div className="row act-bar">')))
+  const panelLinks = actBar.match(/<button [^>]*aria-expanded=\{[^>]*>/g) ?? []
+  if (panelLinks.length !== 2 || panelLinks.some((b) => !b.includes('className="act-link"'))) bits.push(`AK2 Calculation and Portions are not both quiet links (${panelLinks.length} panel buttons in the act bar)`)
+  if (panelLinks.some((b) => !actBar.slice(actBar.indexOf(b)).split('</button>')[0].includes('act-link-caret'))) bits.push('AK2 a link that opens a panel has no caret')
+  if (/className="ghost"/.test(actBar)) bits.push('AK2 the act bar still holds an outlined key')
+  if (!/<button [^>]*className="act-link"[^>]*onClick=\{\(\) => onSwap\(offer\)\}/.test(askSrc)) bits.push('AK2 Accept the swap is not a quiet link')
+  // The figure pair is two flat columns: no fill and no coloured top edge on either, a 1px rule between them (lighter-surfaces 5.3).
+  const figRules = cssSrc.split('\n').filter((l) => /^\s*\.fig-card(\.gl|\.carb)?( \+ \.fig-card)? \{/.test(l))
+  if (figRules.length === 0 || figRules.some((l) => /background|border-top/.test(l))) bits.push('AK2 a figure column still has a fill or a coloured top edge')
+  if (!figRules.some((l) => /^\.fig-card \+ \.fig-card \{[^}]*border-left: 1px solid var\(--border\)/.test(l))) bits.push('AK2 the two figure columns have no 1px rule between them')
   // AK3: the day chip reads the day the way every other place names it; a day beyond yesterday or tomorrow is a date, not a word.
   const t0 = '2026-11-23'
   for (const [d, want] of [[t0, 'Today'], ['2026-11-22', 'Yesterday'], ['2026-11-24', 'Tomorrow'], ['2026-12-06', dayLabel('2026-12-06', t0)], ['2026-11-15', dayLabel('2026-11-15', t0)]] as const) {

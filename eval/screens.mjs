@@ -178,7 +178,7 @@ try {
         const tabStyle = tab ? getComputedStyle(tab) : null
         const markerProbe = document.createElement('span'); markerProbe.style.background = 'var(--marker)'; document.body.appendChild(markerProbe)
         const marker = getComputedStyle(markerProbe).backgroundColor; markerProbe.remove()
-        const opaque = (el) => !!el && !/rgba\(0, 0, 0, 0\)|transparent/.test(getComputedStyle(el).backgroundColor)
+        const opaque = (el) => !!el && !/rgba\\(0, 0, 0, 0\\)|transparent/.test(getComputedStyle(el).backgroundColor)
         return {
           shadowed: [...shadowed('.card:not(.answer)'), ...shadowed('button.primary'), ...shadowed('button.ghost'), ...shadowed('nav.tabs'), ...shadowed('input:not([type=checkbox]):not([type=radio]), select, textarea')],
           slipFilter: slip ? getComputedStyle(slip).filter : 'no slip',
@@ -193,22 +193,33 @@ try {
       console.log(`  ${ok ? 'PASS' : 'FAIL'}  flat surfaces, one slip: no shadows, the slip keeps its own, no grain or glow, the highlights stay, the tab is underlined (${size.name})${ok ? '' : '  → ' + JSON.stringify(flat)}`)
       if (!ok) process.exitCode = 1
     }
-    // A key whose panel is open is drawn pressed (docs/design.md, Buttons): its border is the accent, and closing the panel changes the look.
+    // Under an answer, Log it is the one key; Calculation and Portions are quiet links: underlined accent text, 44px, weight 400, with a caret
+    // that turns and weight 600 while its panel is open (docs/design.md, Buttons; docs/engineering/lighter-surfaces.md 5.3). The figures are two
+    // flat columns with a 1px rule between them.
     {
       const read = `(() => {
         const probe = document.createElement('span'); probe.style.color = 'var(--accent)'; document.querySelector('.act-bar')?.appendChild(probe)
         const accent = probe ? getComputedStyle(probe).color : ''; probe.remove()
-        const keys = [...document.querySelectorAll('.act-bar button.ghost[aria-expanded]')].map((k) => { const c = getComputedStyle(k); return { name: k.innerText.trim(), open: k.getAttribute('aria-expanded') === 'true', border: c.borderTopColor, shadow: c.boxShadow } })
-        return { accent, keys }
+        const clear = (c) => /rgba\\(0, 0, 0, 0\\)|transparent/.test(c)
+        const all = [...document.querySelectorAll('.act-bar button')]
+        const keys = all.filter((k) => !clear(getComputedStyle(k).backgroundColor) || getComputedStyle(k).backgroundImage !== 'none').map((k) => k.innerText.trim())
+        const links = all.filter((k) => k.hasAttribute('aria-expanded')).map((k) => { const c = getComputedStyle(k), car = k.querySelector('.act-link-caret'); return { name: k.innerText.trim(), cls: k.className, open: k.getAttribute('aria-expanded') === 'true', color: c.color, line: c.textDecorationLine, weight: c.fontWeight, h: Math.round(k.getBoundingClientRect().height), border: c.borderTopWidth, caret: car ? getComputedStyle(car).transform : null } })
+        const cols = [...document.querySelectorAll('.card.answer .fig-pair')].slice(0, 1).flatMap((p) => [...p.querySelectorAll(':scope > .fig-card')].map((f) => { const c = getComputedStyle(f); return { bg: clear(c.backgroundColor), top: c.borderTopWidth, left: c.borderLeftWidth } }))
+        return { accent, keys, links, cols }
       })()`
       const before = await b.ev(read)
-      const open = before.keys.filter((k) => k.open)
       await click('Calculation'); await sleep(500)
-      const after = await b.ev(read)
-      const calcNow = after.keys.find((k) => k.name === 'Calculation'), calcBefore = before.keys.find((k) => k.name === 'Calculation')
+      const opened = await b.ev(read)
       await click('Calculation'); await sleep(500)
-      const ok = open.length > 0 && open.every((k) => k.border === before.accent && k.shadow === 'none') && calcBefore?.open && calcNow && !calcNow.open && calcNow.border !== before.accent
-      console.log(`  ${ok ? 'PASS' : 'FAIL'}  an open panel's key is drawn pressed, a closed one is not (${size.name})${ok ? '' : '  → ' + JSON.stringify({ before, after })}`)
+      const closed = await b.ev(read)
+      const calc = (r) => r.links.find((k) => k.name === 'Calculation')
+      const quiet = (k) => k.cls === 'act-link' && k.color === before.accent && /underline/.test(k.line) && k.h >= 44 && k.border === '0px'
+      const linksOk = before.links.length >= 2 && before.links.every(quiet) && before.links.every((k) => k.caret !== null)
+      const stateOk = calc(opened)?.open && calc(opened).weight === '600' && calc(opened).caret !== 'none' && !calc(closed)?.open && calc(closed).weight === '400' && calc(closed).caret === 'none'
+      const keyOk = before.keys.length === 1 && /^(Log it|Log what was counted|Plan it|Logged|Planned|Sign in to log this)$/.test(before.keys[0])
+      const colsOk = before.cols.length === 2 && before.cols.every((c) => c.bg && c.top === '0px') && before.cols[1].left === '1px'
+      const ok = linksOk && stateOk && keyOk && colsOk
+      console.log(`  ${ok ? 'PASS' : 'FAIL'}  the answer card: Log it the one key, Calculation and Portions quiet links that show an open panel by weight and caret, the figures two flat columns (${size.name})${ok ? '' : '  → ' + JSON.stringify({ before, opened, closed })}`)
       if (!ok) process.exitCode = 1
     }
     if (process.env.PLAN === '1') {
