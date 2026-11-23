@@ -243,6 +243,73 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
   check('W20c', 'Log it keeps the corrected weight: the diary row is 120 g, basis stated, said "120 g"', corrected.some((r) => Number(r.grams) === 120 && r.snapshot?.basis === 'stated' && /120 g/.test(String(r.snapshot?.said ?? ''))), JSON.stringify(corrected.map((r) => [r.food_id, r.grams, r.snapshot?.basis, r.snapshot?.said])))
 }
 
+// ── a visitor with no account (docs/specs/anon-evals.md, W21): free answers, the limit, the locked tabs. Skipped while /health says freeAnswers is 0. ─────
+{
+  const health = await (await fetch(`${APP}/health`)).json().catch(() => ({}))
+  const free = Number(health.freeAnswers ?? 0)
+  if (!(free > 0)) console.log('SKIP  W21  a visitor with no account: /health says freeAnswers is 0, so the feature is off')
+  else {
+    const C = await launch({ port: 9703, width: 390, height: 844, dpr: 1 })
+    const errs = []
+    C.on('Runtime.exceptionThrown', (p) => errs.push(p.exceptionDetails?.exception?.description?.slice(0, 160) ?? 'exception'))
+    await C.send('Page.navigate', { url: APP }); await sleep(2500)
+    // A fresh browser: nothing stored, no account. The session id says test, so the weekly report counts these as tests.
+    await C.ev(`localStorage.clear(); sessionStorage.clear(); localStorage.setItem('diabite.session', 'test-rehearsal-anon-' + crypto.randomUUID())`)
+    await C.send('Page.reload'); await sleep(3500)
+    const text = () => C.ev('document.body.innerText')
+    const press = (label) => C.ev(`(()=>{const e=[...document.querySelectorAll('button')].find(x=>x.innerText.trim()===${JSON.stringify(label)}); if(!e) return 'NO'; e.click(); return 'ok'})()`)
+    const askAnon = async (q) => {
+      await C.ev(`(()=>{const i=document.querySelector('input[type=text]'); i.focus(); i.select()})()`)
+      await C.send('Input.insertText', { text: q })
+      await press('Check this meal')
+      for (let i = 0; i < 120; i++) { await sleep(500); if (i > 3 && !(await C.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`))) break }
+      await sleep(800)
+      return C.ev(`[...document.querySelectorAll('button')].some(x=>/alculation/.test(x.innerText))`)
+    }
+    let t = await text()
+    check('W21a', 'a visitor sees the landing page with the key "Ask a question"', /Ask a question/.test(t) && !/Try DiaBite/.test(t), t.slice(0, 120))
+    await press('Ask a question'); await sleep(1200)
+    t = await text()
+    const picker = await C.ev(`!!document.querySelector('.day-picker')`)
+    check('W21b', 'the Ask screen opens with the banner "Counting for a typical adult." and no day picker', /Counting for a typical adult\./.test(t) && !picker, JSON.stringify([t.slice(0, 80), picker]))
+    // An answer that costs a meal (a question first does not count): ask until one does, up to three tries.
+    let costed = false
+    for (let k = 0; k < 3 && !costed; k++) costed = await askAnon('A medium apple and a cup of cooked white rice')
+    t = await text()
+    const logKey = await C.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.trim()==='Sign in to log this')`)
+    const logIt = await C.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.trim()==='Log it')`)
+    check('W21c', 'a visitor gets the whole answer with its receipt, and the log key reads "Sign in to log this" (no "Log it")', costed && logKey && !logIt, JSON.stringify([costed, logKey, logIt]))
+    // Correcting a weight needs no sign-in: the engine counts the meal again for a visitor with a device id.
+    const appleBtn = `[...document.querySelectorAll('.portions li')].find(li => /apple/i.test(li.innerText))?.querySelector('.weight-btn')`
+    await C.ev(`(${appleBtn})?.click()`); await sleep(400)
+    await C.ev(`(()=>{const s=document.querySelector('.weight-edit select'); if(s){s.value='g'; s.dispatchEvent(new Event('change',{bubbles:true}))}})()`); await sleep(200)
+    await C.ev(`document.querySelector('.weight-edit input')?.focus(); document.querySelector('.weight-edit input')?.select()`)
+    await C.send('Input.insertText', { text: '120' })
+    await C.ev(`[...document.querySelectorAll('.weight-edit button')].find(x=>x.innerText.trim()==='Done')?.click()`)
+    for (let i = 0; i < 40; i++) { await sleep(500); if (await C.ev(`!!document.querySelector('.card.answer.recalc')`)) break }
+    const recalc = await C.ev(`!!document.querySelector('.card.answer.recalc')`)
+    check('W21d', 'a weight corrected by a visitor is counted again, with no sign-in prompt', recalc && !/Sign in with your email to keep going/.test(await text()), JSON.stringify(recalc))
+    // The rest of the free answers, then one more: the limit card, with the question still in the box.
+    for (let n = 1; n < free; n++) { let ok = false; for (let k = 0; k < 3 && !ok; k++) ok = await askAnon(`${n + 1} slices of whole wheat toast`) }
+    t = await text()
+    const underLast = /free answer for today/.test(t)
+    check('W21e', 'the last free answer is followed by the limit card', underLast, t.slice(-200))
+    await askAnon('a bowl of oatmeal'); await sleep(1500)
+    t = await text()
+    const kept = await C.ev(`document.querySelector('input[type=text]')?.value ?? ''`)
+    check('W21f', 'one more question past the limit: the limit card stands in place of an answer and the question stays in the box', /free answer for today/.test(t) && /oatmeal/.test(kept), JSON.stringify([t.slice(-160), kept]))
+    // The device id persists: after a reload the limit still stands.
+    await C.send('Page.reload'); await sleep(3500)
+    await askAnon('a bowl of oatmeal'); await sleep(1500)
+    check('W21g', 'after a reload the limit still stands (the device id persisted)', /free answer for today/.test(await text()), (await text()).slice(-160))
+    await C.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('Diary'))?.click()`); await sleep(800)
+    t = await text()
+    check('W21h', 'the Diary tab shows the sign-in card and no diary behind it', /Sign in to keep a diary/.test(t) && !/Add food|Planned/.test(t), t.slice(0, 160))
+    check('W21i', 'no script error on the visitor\'s browser', errs.length === 0, JSON.stringify(errs.slice(0, 2)))
+    await C.close()
+  }
+}
+
 // ── the account can be removed, and takes everything with it ────────────────
 await A.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('Profile'))?.click()`); await sleep(800)
 const del = await fetch(`${APP}/account`, { method: 'DELETE', headers: { authorization: `Bearer ${session.access_token}` } })
