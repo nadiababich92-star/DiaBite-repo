@@ -15,7 +15,10 @@ import { GlHelpContext } from './components/GlHelp'
 import Onboarding from './components/Onboarding'
 import MenuPage from './components/MenuPage'
 import ProfilePage from './components/ProfilePage'
-import { ANON_PROFILE, answered, calculateTargets, CARB_APPROACH_LABELS, DEFERRED_ORDER, shortStart, STEP_OF } from './lib/profile'
+import { ANON_PROFILE, answered, calculateTargets, CARB_APPROACH_LABELS, DEFERRED_ORDER, nextDeferred, shortStart, STEP_OF } from './lib/profile'
+import DeferredCard from './components/DeferredCard'
+import { showDefaultsLine, showDeferredCard } from './lib/firstSession'
+import { eaten } from './lib/diary'
 import { signOutAndClear, useAccess, useAuth } from './lib/auth'
 import { SignInCard } from './components/SignInCard'
 import { SIGN_IN_CARDS } from './lib/anon'
@@ -41,6 +44,8 @@ type AccountState = 'none' | 'loading' | 'ready' | 'failed'
 
 /** A visitor with no account has no diary, and nothing here is saved for them. */
 const NO_DIARY: DiaryEntry[] = []
+const DEFERRED_SHOWN_KEY = 'diabite.deferredShown'
+const markDeferredShown = () => { try { sessionStorage.setItem(DEFERRED_SHOWN_KEY, '1') } catch { /* private mode: once per page load */ } }
 const ANON_KEY = 'diabite.anon'
 
 export default function App() {
@@ -85,6 +90,11 @@ export default function App() {
   })
   const [howOpen, setHowOpen] = useState(false)
   const [glOpen, setGlOpen] = useState(false)
+  // The card for the next question the short onboarding left for later (docs/specs/first-session-after-answer.md, section 4):
+  // at most once a session. The flag is read once per page load, so a card on screen stays until it is answered or put off;
+  // "Later" hides it until the next load, and the next load is a new session only when the tab was closed.
+  const [deferredShownBefore] = useState<boolean>(() => { try { return sessionStorage.getItem(DEFERRED_SHOWN_KEY) === '1' } catch { return false } })
+  const [deferredLater, setDeferredLater] = useState(false)
 
   // The account: loaded once per sign-in, then kept in step by useAccountSync.
   const [account, setAccount] = useState<AccountState>('none')
@@ -243,6 +253,17 @@ export default function App() {
     )
   }
 
+  // After a short onboarding: the defaults line on Ask, and the card for the next question on Ask and Diary.
+  const next = nextDeferred(profile)
+  const defaultsLine = !anonMode && showDefaultsLine({ signedIn: true }, profile.deferred?.length ?? 0)
+  const deferredCard = !anonMode && next !== null && showDeferredCard({
+    signedIn: true, hasReceipt: false, eatenCount: eaten(diary).length, next,
+    cardShownThisSession: deferredShownBefore, dismissedThisVisit: deferredLater,
+    blocked: feedbackOpen || waiting > 0 || howOpen || glOpen,
+  })
+    ? <DeferredCard step={next} onShown={markDeferredShown} onAnswer={() => { setYouNote(''); setEditStep(STEP_OF[next]) }} onLater={() => setDeferredLater(true)} />
+    : null
+
   if (!anonMode && summaryOpen) return <ClinicianSummary diary={diary} profile={profile} targets={targets} onClose={() => setSummaryOpen(false)} />
 
   return (
@@ -282,13 +303,19 @@ export default function App() {
           onLog={(added) => setDiary((d) => [...d, ...added])} onOpenDiary={() => setTab('diary')} onSessionEnded={sessionEnded}
           logTarget={logTarget} onClearTarget={() => setLogTarget(null)}
           tourSeen={tourSeen} onTourSeen={(s) => { setTourSeen(s); saveTour(s) }} tourSuspended={feedbackOpen || waiting > 0 || howOpen || glOpen}
+          firstSession={anonMode ? undefined : {
+            line: defaultsLine,
+            onMakeItYours: () => { if (next) { setYouNote(''); setEditStep(STEP_OF[next]) } },
+            onOpenProfile: () => setTab('profile'),
+            card: deferredCard,
+          }}
         />
       )}
       {anonMode && tab === 'diary' && <SignInCard {...SIGN_IN_CARDS.diary} onSignIn={() => setSigningIn(true)} />}
       {anonMode && tab === 'menu' && <SignInCard {...SIGN_IN_CARDS.menu} onSignIn={() => setSigningIn(true)} />}
       {anonMode && tab === 'profile' && <SignInCard {...SIGN_IN_CARDS.profile} onSignIn={() => setSigningIn(true)} />}
       {!anonMode && tab === 'diary' && (
-        <DiaryPage targets={targets} diary={diary} onChange={setDiary} onAsk={(target) => { setLogTarget(target ?? null); setTab('ask') }} showBreadUnits={profile.showBreadUnits} units={profile.units} />
+        <DiaryPage targets={targets} diary={diary} onChange={setDiary} onAsk={(target) => { setLogTarget(target ?? null); setTab('ask') }} showBreadUnits={profile.showBreadUnits} units={profile.units} topCard={deferredCard} />
       )}
       {!anonMode && tab === 'menu' && (
         <MenuPage

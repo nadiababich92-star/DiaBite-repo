@@ -94,6 +94,9 @@ import { buildSummary } from '../src/lib/clinicianSummary'
 import { ANON_DISCLOSURE, ANON_PROFILE, answered, calculateTargets, carbApproachBlocked, carbApproachReason, cmToFtIn, DAILY_CARBS_MAX, DAILY_CARBS_MIN, DEFAULT_PROFILE, DEFERRED_ORDER, exitReason, ftInToCm, kgToLb, lbToKg, MEDICINES_FIRST, nextDeferred, shortStart, STEP_OF_FIELD, weightUsed } from '../src/lib/profile'
 import { HeightWeight, UnitsSwitch } from '../src/components/BodyUnits'
 import Onboarding, { focusesHeadingOnOpen } from '../src/components/Onboarding'
+import DiaryPage from '../src/components/DiaryPage'
+import DeferredCard, { deferredCardCopy } from '../src/components/DeferredCard'
+import { DEFAULTS_LINE, showDefaultsLine, showDeferredCard, showWhatNext, WHAT_NEXT } from '../src/lib/firstSession'
 import { lockCount, lockPage } from '../src/lib/pageLock'
 import { answerRows } from '../src/lib/answers'
 import { swapNamedIn } from '../src/lib/swap'
@@ -944,6 +947,42 @@ recorrectMisses.forEach((m) => console.log(m))
   if (sum.about.medicines.join() !== 'not asked yet') bits.push(`the clinician summary says of medicines not asked: ${JSON.stringify(sum.about.medicines)}`)
   if (buildSummary([], DEFAULT_PROFILE, calculateTargets(DEFAULT_PROFILE), '2026-11-23', 7).about.medicines.includes('not asked yet')) bits.push('the clinician summary says a full profile was not asked about medicines')
   console.log(`\nfirst run ${bits.length === 0 ? 'ok' : 'WRONG'}  (the short profile, OB1 to OB4)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// The first session after the first answer (docs/specs/first-session-evals.md, OB7 and OB8): the rules, the card's words, its render.
+{
+  const bits: string[] = []
+  // OB7: "What next" only under a receipt, signed in, before the first eaten meal; the defaults line only while a step waits.
+  if (!showWhatNext({ signedIn: true, hasReceipt: true, eatenCount: 0 })) bits.push('OB7 What next is hidden under the first receipt')
+  if (showWhatNext({ signedIn: true, hasReceipt: false, eatenCount: 0 })) bits.push('OB7 What next shows with no receipt')
+  if (showWhatNext({ signedIn: true, hasReceipt: true, eatenCount: 1 })) bits.push('OB7 What next shows after one eaten meal')
+  if (showWhatNext({ signedIn: false, hasReceipt: true, eatenCount: 0 })) bits.push('OB7 What next shows to a visitor who is not signed in')
+  if (!showDefaultsLine({ signedIn: true }, 3)) bits.push('OB7 the defaults line is hidden with three steps left')
+  if (showDefaultsLine({ signedIn: true }, 0)) bits.push('OB7 the defaults line shows with nothing left')
+  if (showDefaultsLine({ signedIn: false }, 3)) bits.push('OB7 the defaults line shows to a visitor who is not signed in')
+  // OB8: the card shows in one state, and each single change hides it.
+  const base = { signedIn: true, hasReceipt: false, eatenCount: 1, next: 'medicines' as const, cardShownThisSession: false, dismissedThisVisit: false, blocked: false }
+  if (!showDeferredCard(base)) bits.push('OB8 the card is hidden after the first eaten meal')
+  for (const [what, c] of [['not signed in', { signedIn: false }], ['nothing left', { next: null }], ['no meal eaten', { eatenCount: 0 }], ['shown this session', { cardShownThisSession: true }], ['put off', { dismissedThisVisit: true }], ['another card open', { blocked: true }]] as const) {
+    if (showDeferredCard({ ...base, ...c })) bits.push(`OB8 the card shows when ${what}`)
+  }
+  // The card's words hold no figure, and each step renders its own body with both buttons, a named region and nothing else.
+  for (const t of deferredCardCopy()) if (/\d/.test(t)) bits.push(`the deferred card's words hold a figure: "${t}"`)
+  if ([DEFAULTS_LINE, WHAT_NEXT].some((t) => /\d/.test(t))) bits.push('the defaults line or What next holds a figure')
+  const bodies = new Set<string>()
+  for (const step of DEFERRED_ORDER) {
+    const html = renderToStaticMarkup(createElement(DeferredCard, { step, onAnswer: () => {}, onLater: () => {} }))
+    if (!html.includes('role="region"') || !html.includes('aria-label="Two minutes more, and the numbers become yours"')) bits.push(`the ${step} card is not a named region`)
+    if (!/<button[^>]*class="primary"[^>]*>Answer now<\/button>/.test(html) || !/<button[^>]*class="link"[^>]*>Later<\/button>/.test(html)) bits.push(`the ${step} card lacks Answer now or Later`)
+    bodies.add(html.replace(/.*<p class="muted">|<\/p>.*/g, ''))
+  }
+  if (bodies.size !== DEFERRED_ORDER.length) bits.push('two steps share a card body')
+  // The Diary shows the card first, above the day.
+  const diaryHtml = renderToStaticMarkup(createElement(DiaryPage, { targets: calculateTargets(DEFAULT_PROFILE), diary: [], onChange: () => {}, topCard: createElement(DeferredCard, { step: 'diagnosis', onAnswer: () => {}, onLater: () => {} }) }))
+  if (!(diaryHtml.indexOf('Two minutes more') >= 0 && diaryHtml.indexOf('Two minutes more') < diaryHtml.indexOf('day-nav'))) bits.push('the Diary does not show the card above the day')
+  console.log(`\nafter ans ${bits.length === 0 ? 'ok' : 'WRONG'}  (the first session after the first answer, OB7 and OB8)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }

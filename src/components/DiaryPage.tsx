@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import GlHelp from './GlHelp'
 import { sumNutrients } from '../lib/glycemic'
 import { MEAL_LABELS, MEAL_ORDER } from '../lib/menu'
@@ -18,11 +18,13 @@ interface Props {
   showBreadUnits?: boolean
   /** The person's units: imperial shows a household measure first, with the grams beside it. */
   units?: 'imperial' | 'metric'
+  /** The card for the next question the short onboarding left for later, when it is due (App decides): shown at the top. */
+  topCard?: ReactNode
 }
 
 const newId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 
-export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUnits = false, units }: Props) {
+export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUnits = false, units, topCard }: Props) {
   // The day on show follows the calendar until the person moves to another one.
   const today = useToday()
   const [picked, setPicked] = useState<string | null>(null)
@@ -113,6 +115,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
 
   return (
     <>
+      {topCard}
       <section className="card">
         <div className="day-nav">
           <button className="ghost step-day" aria-label="The day before" onClick={() => setPicked(addDays(date, -1))}>‹</button>

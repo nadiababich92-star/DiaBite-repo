@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import GlHelp from './GlHelp'
 import { boldSegments, isLabelled, parseMeal } from '../lib/answer'
 import { sessionId } from '../lib/session'
@@ -19,6 +19,7 @@ import DayPicker from './DayPicker'
 import { SignInCard } from './SignInCard'
 import { AnonBanner } from './AnonBanner'
 import { LIMIT_BODY, limitTitle, retryLine } from '../lib/anon'
+import { DEFAULTS_LINE, showWhatNext, WHAT_NEXT } from '../lib/firstSession'
 import { ANON_DISCLOSURE } from '../lib/profile'
 import { loadNudge, saveNudge } from '../lib/storage'
 import { useToday } from '../lib/useToday'
@@ -47,6 +48,12 @@ interface Props {
    * `onSignIn` opens the sign-in screen; `onOff` is for the engine saying free answers were switched off; `freeAnswers` is how many it allows a day.
    */
   anonymous?: { onSignIn: () => void; onOff: () => void; freeAnswers: number }
+  /**
+   * After a short onboarding (docs/specs/first-session-after-answer.md): `line` shows the defaults line under the budget bar, with
+   * `onMakeItYours` (the next question) and `onOpenProfile` (where the numbers come from); `card` is the card for the next question
+   * when App says it is due, shown at the end of the page and never with a tip or the feedback card.
+   */
+  firstSession?: { line: boolean; onMakeItYours: () => void; onOpenProfile: () => void; card: ReactNode }
 }
 
 const SAMPLES = [
@@ -343,7 +350,7 @@ function summarize(step: TraceStep): string {
   }
 }
 
-export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, logTarget, onClearTarget, onSessionEnded, tourSeen, onTourSeen, tourSuspended, anonymous }: Props) {
+export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, logTarget, onClearTarget, onSessionEnded, tourSeen, onTourSeen, tourSuspended, anonymous, firstSession }: Props) {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -647,6 +654,10 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
         <button className="ghost" data-tour="calc" aria-expanded={showReceipt} aria-controls={showReceipt ? receiptId : undefined} onClick={() => setShowReceipt((v) => !v)}>{BUTTONS.calculation}</button>
         {!receipt.carbsOnly && <button className="ghost" aria-expanded={editing} aria-controls={editing ? editorId : undefined} onClick={() => setEditing((v) => !v)}>{receipt.assumed ? BUTTONS.recipe : BUTTONS.portions}</button>}
       </div>
+      {/* What next, under the first receipt until the first meal is logged (docs/specs/first-session-after-answer.md, section 3). */}
+      {showWhatNext({ signedIn: !anonymous, hasReceipt: true, eatenCount: counted.length }) && onOpenDiary && !logged && (
+        <p className="muted what-next">{WHAT_NEXT}{' '}<button type="button" className="link" onClick={onOpenDiary}>Open the Diary</button></p>
+      )}
     </>
   ) : null
 
@@ -669,6 +680,12 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
           <span style={{ width: `${Math.min(100, Math.max(0, ((targets.glBudget - left) / Math.max(1, targets.glBudget)) * 100))}%` }} />
         </div>
         {anonymous && <AnonBanner onMakeItYours={anonymous.onSignIn} disclosure={ANON_DISCLOSURE} />}
+        {!anonymous && firstSession?.line && (
+          <p className="anon-banner">{DEFAULTS_LINE}{' '}
+            <button type="button" className="link anon-make" onClick={firstSession.onMakeItYours}>Make it yours</button>{' · '}
+            <button type="button" className="link anon-make" onClick={firstSession.onOpenProfile}>Where the numbers come from</button>
+          </p>
+        )}
         {!anonymous && <div className="ask-day" ref={dayPick}>
           <DayPicker value={day} today={today} onChange={pickDay} />
           {day !== today && <p className="muted ask-day-note">The verdict is for {dayLabel(day, today)}: it counts what was eaten on that day.</p>}
@@ -845,6 +862,8 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
         <SignInCard className="anon-limit" title={limitTitle(anonymous.freeAnswers)} body={LIMIT_BODY} onSignIn={anonymous.onSignIn} />
       )}
       {/* After everything else: the question box stays first on the screen, and the card is met on the way down, never in front of an answer. */}
+      {/* The card for the next question: never together with the feedback card or a tip. */}
+      {!anonymous && !card && !tipShowing && firstSession?.card}
       {!anonymous && card && <FeedbackNudge milestone={card} onAsked={cardAsked} onClose={cardClosed} />}
       {!anonymous && <Tour seen={tourSeen} onSeen={onTourSeen} ctx={{ hasReply: !!reply, hasReceipt: !!receipt, assumed: !!receipt?.assumed, busy, suspended: tourSuspended }} />}
     </div>

@@ -1094,6 +1094,9 @@ body:has(.landing) { background: #0a1812; }
 /* The first answers, signed out (docs/design.md, "The first answers, signed out"): only existing tokens, no new value. */
 .anon-banner { margin: 0 0 12px; font-size: 14px; line-height: 1.4; color: var(--text-dim); }
 .anon-banner .anon-make { color: var(--accent); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; padding: 2px 4px; }
+/* What next, under the first receipt (docs/design.md, "After the first answer"): the defaults line's size and link, under the key row. */
+.what-next { margin: 8px 0 0; font-size: 14px; line-height: 1.4; }
+.what-next .link { color: var(--accent); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; padding: 2px 4px; }
 .anon-note { margin: 0 0 12px; }
 .signin-card, .anon-limit { margin-top: 12px; }
 .signin-card h2, .anon-limit h2 { margin-top: 0; }
