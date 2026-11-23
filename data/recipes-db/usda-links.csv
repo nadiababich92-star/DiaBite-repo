@@ -247,10 +247,10 @@ candidate,ing:almond_flour,Almond flour,curated ingredient,nut,2707485,"Almonds,
 candidate,ing:anchovies,"Anchovies, canned",curated ingredient,seafood,174183,"Fish, anchovy, european, canned in oil, drained solids",sr_legacy,0.033,1.0,,,,,anchovy 4 g; anchovies 20 g,,210,0,29,10
 candidate,ing:arrowroot,Arrowroot starch,curated ingredient,grain,170684,Arrowroot flour,sr_legacy,0.002,0.5,,,,,cup 128 g,,357,88,0.3,0.1
 candidate,ing:artichoke_hearts,"Artichoke hearts, canned in water",curated ingredient,veg,174561,"Soup, pea, green, canned, prepared with equal volume water",sr_legacy,0.684,0.5,,,,,fl oz 32.4 g,,47,10.5,3.3,0.2
-candidate,ing:bagel,"Bagel, plain",curated ingredient,grain,174899,"Bagels, plain, enriched, with calcium propionate (includes onion, poppy, sesame)",sr_legacy,0.0,1.0,,,,,bagel 99 g,,264,52.4,10.56,1.32
+candidate,ing:bagel,"Bagel, plain",curated ingredient,grain,174899,"Bagels, plain, enriched, with calcium propionate (includes onion, poppy, sesame)",sr_legacy,0.0,1.0,,yes,,,bagel 99 g,,264,52.4,10.56,1.32
 candidate,ing:pesto,Basil pesto,curated ingredient,condiment,171580,"Sauce, pesto, ready-to-serve, shelf stable",sr_legacy,0.149,0.5,,,,,cup 61 g,,400,6,5,40
 candidate,ing:bay_leaf,Bay leaves,curated ingredient,spice,2706621,Stuffed grape leaves with beef and rice,survey_fndds,2.221,0.5,,,,,1 cup 162 g,,313,75,7.6,8.4
-candidate,ing:beef_broth,"Beef broth, low sodium",curated ingredient,condiment,171179,"Soup, SWANSON, beef broth, lower sodium",sr_legacy,0.136,0.75,,,,,cup 213 g,,7,0.4,1.3,0.2
+candidate,ing:beef_broth,"Beef broth, low sodium",curated ingredient,condiment,171179,"Soup, SWANSON, beef broth, lower sodium",sr_legacy,0.136,0.75,,yes,,,cup 213 g,,7,0.4,1.3,0.2
 candidate,ing:black_pepper,Black pepper,curated ingredient,spice,2707765,"Bread, black, toasted",survey_fndds,0.357,0.5,,,,,1 medium or regular slice 25 g; 1 small or thin/very thin slice 22 g,,251,64,10,3.3
 candidate,ing:black_eyed_peas,"Black-eyed peas, cooked",curated ingredient,legume,175257,"Peas, split, mature seeds, cooked, boiled, with salt",sr_legacy,0.134,0.5,,,,,cup 196 g,,116,20.8,7.7,0.5
 candidate,ing:bone_broth,Bone broth,curated ingredient,condiment,174551,"Soup, chicken broth, canned, prepared with equal volume water",sr_legacy,1.337,0.5,,,,,cup (8 fl oz) 244 g,,35,0.5,8,0.3
@@ -261,8 +261,8 @@ candidate,ing:butternut_squash,Butternut squash,curated ingredient,veg,2709694,"
 candidate,ing:cajun_seasoning,Cajun seasoning,curated ingredient,spice,173476,"Seasoning mix, dry, chili, original",sr_legacy,0.315,0.5,,,,,tbsp 9 g,,300,55,10,8
 candidate,ing:canadian_bacon,Canadian bacon,curated ingredient,protein,2705884,"Canadian bacon, cooked",survey_fndds,1.163,1.0,,,,,1 slice 23 g,,110,1,20,2
 candidate,ing:catfish,Catfish fillet,curated ingredient,seafood,2706239,"Fish, catfish, steamed",survey_fndds,2.281,0.5,,,,,1 cup 135 g,,95,0,16,3
-candidate,ing:cauliflower_rice,Cauliflower rice,curated ingredient,veg,2709777,"Cauliflower, raw",survey_fndds,0.019,0.5,,,,,1 piece 13 g; 1 cup 110 g,,25,5,1.9,0.3
-candidate,ing:cherries,"Cherries, pitted",curated ingredient,fruit,171719,"Cherries, sweet, raw",sr_legacy,0.014,0.5,,,,,cherry 8.2 g,,63,16,1.1,0.2
+candidate,ing:cauliflower_rice,Cauliflower rice,curated ingredient,veg,2709777,"Cauliflower, raw",survey_fndds,0.019,0.5,,yes,,,1 piece 13 g; 1 cup 110 g,,25,5,1.9,0.3
+candidate,ing:cherries,"Cherries, pitted",curated ingredient,fruit,171719,"Cherries, sweet, raw",sr_legacy,0.014,0.5,,yes,,,cherry 8.2 g,,63,16,1.1,0.2
 candidate,ing:cherry_tomato,Cherry tomatoes,curated ingredient,veg,170050,"Tomatoes, red, ripe, cooked",sr_legacy,0.069,0.5,,,,,cup 240 g; medium 246 g,,18,3.9,0.9,0.2
 candidate,ing:chicken_sausage,Chicken sausage,curated ingredient,protein,172943,"Honey roll sausage, beef",sr_legacy,0.391,0.5,,,,,oz 28.4 g,,170,2,15,11
 candidate,ing:chickpea_pasta,"Chickpea pasta, cooked",curated ingredient,grain,173757,"Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, without salt",sr_legacy,0.42,0.67,,,,,cup 164 g,,165,27,12,3
@@ -272,7 +272,7 @@ candidate,ing:coconut_milk_light,"Coconut milk, canned light",curated ingredient
 candidate,ing:coconut_shredded,"Coconut, unsweetened shredded",curated ingredient,nut,2707572,"Coconut water, unsweetened",survey_fndds,3.765,0.67,,,,,1 fl oz (NFS) 30 g,,660,24,7,65
 candidate,ing:cod,Cod fillet,curated ingredient,seafood,2706245,"Fish, cod, steamed",survey_fndds,0.193,0.5,,,,,1 cup 135 g,,82,0,18,0.7
 candidate,ing:coleslaw_mix,Coleslaw mix (cabbage & carrot),curated ingredient,veg,174932,"Cake, pudding-type, carrot, dry mix",sr_legacy,26.4,0.5,,,,,oz 28.4 g,,27,6,1.3,0.1
-candidate,ing:collard_greens,Collard greens,curated ingredient,veg,2709576,"Collards, raw",survey_fndds,0.014,0.5,,,,,1 cup 36 g,,32,5.4,3,0.6
+candidate,ing:collard_greens,Collard greens,curated ingredient,veg,2709576,"Collards, raw",survey_fndds,0.014,0.5,,yes,,,1 cup 36 g,,32,5.4,3,0.6
 candidate,ing:crab,"Crab meat, lump",curated ingredient,seafood,2706568,Imitation crab meat,survey_fndds,3.888,0.67,,,,,1 cup 135 g,,84,0,18,1
 candidate,ing:cranberries,"Cranberries, fresh",curated ingredient,fruit,168117,"Cranberry juice, unsweetened",sr_legacy,0.03,0.5,,,,,cup 253 g; fl oz 31.6 g,,46,12,0.4,0.1
 candidate,ing:daikon,Daikon radish,curated ingredient,veg,2709803,Radish,survey_fndds,0.217,0.5,,,,,1 slice 1 g; 1 cup 115 g; 1 whole 5 g,,18,4.1,0.6,0.1
@@ -290,7 +290,7 @@ candidate,ing:duck_breast,"Duck breast, skinless",curated ingredient,protein,172
 candidate,ing:edamame,"Edamame, shelled, cooked",curated ingredient,legume,2707436,"Edamame, cooked",survey_fndds,0.752,0.67,,,,,1 cup 160 g,,121,9,12,5
 candidate,ing:farro,"Farro (pearled spelt), cooked",curated ingredient,grain,169746,"Spelt, cooked",sr_legacy,0.19,0.5,,,,,cup 194 g,,130,26,5,1
 candidate,ing:feta,Feta cheese,curated ingredient,dairy,171246,"Cheese, neufchatel",sr_legacy,0.555,0.5,,,,,oz 28.4 g,,264,4,14,21
-candidate,ing:basil,Fresh basil,curated ingredient,herb,2709780,"Basil, raw",survey_fndds,0.039,0.5,,,,,1 cup 24 g; 1 tablespoon 3 g,,23,2.7,3.2,0.6
+candidate,ing:basil,Fresh basil,curated ingredient,herb,2709780,"Basil, raw",survey_fndds,0.039,0.5,,yes,,,1 cup 24 g; 1 tablespoon 3 g,,23,2.7,3.2,0.6
 candidate,ing:chives,Fresh chives,curated ingredient,herb,2709781,"Chives, raw",survey_fndds,0.029,0.5,,,,,1 tablespoon 3 g,,30,4.4,3.3,0.7
 candidate,ing:dill,Fresh dill,curated ingredient,herb,173475,"Spearmint, fresh",sr_legacy,0.408,0.5,,,,,tbsp 11.4 g,,43,7,3.5,1.1
 candidate,ing:mint,Fresh mint,curated ingredient,herb,173475,"Spearmint, fresh",sr_legacy,0.014,0.5,,,,,tbsp 11.4 g,,44,8.4,3.3,0.7
@@ -298,7 +298,7 @@ candidate,ing:oregano_fresh,Fresh oregano,curated ingredient,herb,173474,"Pepper
 candidate,ing:sage,Fresh sage,curated ingredient,herb,170935,"Spices, sage, ground",sr_legacy,0.019,0.5,,,,,tsp 0.7 g; tbsp 2 g,,315,60,10.6,12.7
 candidate,ing:garlic,Garlic,curated ingredient,veg,2709786,"Garlic, raw",survey_fndds,0.26,1.0,,,,,1 cup 135 g; 1 teaspoon 5 g,,149,33,6.4,0.5
 candidate,ing:greek_yogurt,"Greek yogurt, plain 2%",curated ingredient,dairy,2705421,"Yogurt, Greek, NS as to type of milk, plain",survey_fndds,0.396,1.0,,yes,,,1 cup 245 g,,73,4,10,2
-candidate,ing:green_beans,Green beans,curated ingredient,veg,169962,"Beans, snap, green, frozen, all styles, unprepared (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.134,1.0,,,,,cup 121 g,,31,7,1.8,0.2
+candidate,ing:green_beans,Green beans,curated ingredient,veg,169962,"Beans, snap, green, frozen, all styles, unprepared (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.134,1.0,,yes,,,cup 121 g,,31,7,1.8,0.2
 candidate,ing:cabbage,Green cabbage,curated ingredient,veg,2710124,"Baby Toddler green beans, Stage 1",survey_fndds,0.058,0.5,,,,,1 tablespoon 15 g,,25,5.8,1.3,0.1
 candidate,ing:grits,"Grits, cooked with water",curated ingredient,grain,171672,"Cereals, corn grits, yellow, regular and quick, enriched, cooked with water, without salt",sr_legacy,0.285,1.0,,,,,cup 233 g,,58,12.4,1.2,0.28
 candidate,ing:cardamom,Ground cardamom,curated ingredient,spice,172231,"Spices, turmeric, ground",sr_legacy,0.672,0.5,,,,,tsp 3 g; tbsp 9.4 g,,311,68,11,7
@@ -337,15 +337,15 @@ candidate,ing:pecans,Pecans,curated ingredient,nut,169424,"Nuts, pecans, dry roa
 candidate,ing:pepper_jack,Pepper jack cheese,curated ingredient,dairy,2705713,"Cheese, Colby Jack",survey_fndds,0.295,0.67,,,,,1 slice 21 g,,380,1.5,24,30
 candidate,ing:pico_de_gallo,Pico de gallo,curated ingredient,condiment,2709737,"Salsa, pico de gallo",survey_fndds,0.318,1.0,,,,,1 cup 240 g,,20,4.5,0.9,0.2
 candidate,ing:pineapple,Pineapple,curated ingredient,fruit,174670,"Fruit salad, (peach and pear and apricot and pineapple and cherry), canned, juice pack, solids and liquids",sr_legacy,0.031,1.0,,,,,cup 249 g,,50,13,0.5,0.1
-candidate,ing:pistachios,"Pistachios, shelled",curated ingredient,nut,170184,"Nuts, pistachio nuts, raw",sr_legacy,0.045,0.5,,,,,cup 123 g,,560,28,20,45
+candidate,ing:pistachios,"Pistachios, shelled",curated ingredient,nut,170184,"Nuts, pistachio nuts, raw",sr_legacy,0.045,0.5,,yes,,,cup 123 g,,560,28,20,45
 candidate,ing:poblano,Poblano pepper,curated ingredient,veg,170107,"Peppers, hot chili, red, canned, excluding seeds, solids and liquids",sr_legacy,0.158,0.5,,,,,pepper 73 g,,20,4.6,1,0.1
-candidate,ing:pomegranate,Pomegranate arils,curated ingredient,fruit,2709267,"Pomegranate, raw",survey_fndds,0.036,0.5,,,,,1 cup 175 g; 1 fruit 250 g,,83,19,1.7,1.2
+candidate,ing:pomegranate,Pomegranate arils,curated ingredient,fruit,2709267,"Pomegranate, raw",survey_fndds,0.036,0.5,,yes,,,1 cup 175 g; 1 fruit 250 g,,83,19,1.7,1.2
 candidate,ing:pork_shoulder,"Pork shoulder, trimmed",curated ingredient,protein,167888,"Pork, fresh, composite of trimmed retail cuts (leg, loin, shoulder, and spareribs), separable lean and fat, raw",sr_legacy,0.15,1.0,,,,,oz 28.4 g; lb 453.6 g,,200,0,19,14
 candidate,ing:portobello,Portobello mushrooms,curated ingredient,veg,169254,"Mushrooms, canned, drained solids",sr_legacy,0.426,0.5,,,,,cup 156 g; large 16 g; medium 12 g,,22,3.9,2.1,0.4
 candidate,ing:potato_baked,"Potato, baked, flesh (russet)",curated ingredient,veg,168483,"Sweet potato, cooked, baked in skin, flesh, without salt",sr_legacy,0.106,0.75,,,,,cup 200 g; large 180 g; small 60 g,,93,21.5,1.95,0.1
 candidate,ing:prosciutto,Prosciutto,curated ingredient,protein,2705879,"Ham, prosciutto",survey_fndds,0.829,1.0,,,,,1 cup 56 g,,250,0,26,16
 candidate,ing:pumpkin_pie_spice,Pumpkin pie spice,curated ingredient,spice,172787,"Pie, pumpkin, commercially prepared",sr_legacy,1.794,0.67,,,,,oz 28.4 g; slice 133 g,,342,74,4,5
-candidate,ing:maple_syrup,Pure maple syrup (small amount),curated ingredient,pantry,169661,"Syrups, maple",sr_legacy,0.034,0.4,,,,,tbsp 20 g; cup 315 g,,260,67,0,0
+candidate,ing:maple_syrup,Pure maple syrup (small amount),curated ingredient,pantry,169661,"Syrups, maple",sr_legacy,0.034,0.4,,yes,,,tbsp 20 g; cup 315 g,,260,67,0,0
 candidate,ing:ranch_seasoning,Ranch seasoning (dry),curated ingredient,spice,173476,"Seasoning mix, dry, chili, original",sr_legacy,0.315,0.67,,,,,tbsp 9 g,,300,55,10,8
 candidate,ing:raspberries,Raspberries,curated ingredient,fruit,2709281,"Raspberries, raw",survey_fndds,0.404,1.0,,,,,1 cup 150 g,,52,12,1.2,0.7
 candidate,ing:enchilada_sauce,"Red enchilada sauce, no sugar added",curated ingredient,condiment,2709741,"Enchilada sauce, red",survey_fndds,0.766,0.6,,,,,1 tablespoon 16 g,,40,5,1,2
@@ -394,30 +394,30 @@ candidate,ing:whole_wheat_pasta,"Whole wheat pasta, cooked al dente",curated ing
 candidate,ing:whole_wheat_pita,Whole wheat pita,curated ingredient,grain,2707735,"Bagel, whole wheat, with raisins",survey_fndds,0.546,0.67,,,,,1 large 131 g; 1 regular 105 g,,266,55,10,2.6
 candidate,ing:yellow_mustard,Yellow mustard,curated ingredient,condiment,2710085,Mustard,survey_fndds,0.399,0.5,,,,,1 tablespoon 15 g,,60,5,4,3
 candidate,ing:onion,Yellow onion,curated ingredient,veg,2710010,"Peppers and onions, cooked, no added fat",survey_fndds,0.194,0.5,,,,,1 cup 140 g,,40,9.3,1.1,0.1
-candidate,seed:broccoli,Broccoli,everyday food,vegetables,2709645,"Broccoli, fresh, cooked, no added fat",survey_fndds,0.305,1.0,,,,,1 piece 10 g; 1 cup 155 g,,34.0,7.0,2.8,0.4
-candidate,seed:buckwheat,"Buckwheat, cooked",everyday food,grains,170686,"Buckwheat groats, roasted, cooked",sr_legacy,0.437,1.0,,,,,cup 168 g,,110.0,20.0,3.8,1.1
+candidate,seed:broccoli,Broccoli,everyday food,vegetables,2709645,"Broccoli, fresh, cooked, no added fat",survey_fndds,0.305,1.0,,yes,,,1 piece 10 g; 1 cup 155 g,,34.0,7.0,2.8,0.4
+candidate,seed:buckwheat,"Buckwheat, cooked",everyday food,grains,170686,"Buckwheat groats, roasted, cooked",sr_legacy,0.437,1.0,,yes,,,cup 168 g,,110.0,20.0,3.8,1.1
 candidate,seed:carrot-raw,"Carrot, raw",everyday food,vegetables,2709683,"Carrot juice, 100%",survey_fndds,0.13,0.5,,,,,1 fl oz (NFS) 30 g,,41.0,10.0,0.9,0.2
-candidate,seed:chicken,Chicken breast,everyday food,protein,2705956,"Chicken breast, baked, broiled, or roasted, skin not eaten, from raw",survey_fndds,0.072,1.0,,,,,1 large or thick slice 85 g,,165.0,0.0,31.0,3.6
+candidate,seed:chicken,Chicken breast,everyday food,protein,2705956,"Chicken breast, baked, broiled, or roasted, skin not eaten, from raw",survey_fndds,0.072,1.0,,yes,,,1 large or thick slice 85 g,,165.0,0.0,31.0,3.6
 candidate,seed:cottage,"Cottage cheese, 5%",everyday food,dairy,2706812,"Chicken or turkey garden salad with bacon and cheese, chicken and/or turkey, bacon, cheese, lettuce and/or greens, tomato and/or carrots, other vegetables, no dressing",survey_fndds,0.602,0.5,,,,,1 salad 321 g; 1 cup 90 g,,121.0,3.0,17.0,5.0
 candidate,seed:couscous,"Couscous, cooked",everyday food,grains,168897,"Wild rice, cooked",sr_legacy,0.267,0.5,,,,,cup 164 g,,112.0,23.0,3.8,0.2
 candidate,seed:pasta-durum,"Durum wheat pasta, al dente",everyday food,grains,169721,"Wheat, durum",sr_legacy,4.322,0.4,,yes,2708357,,cup 192 g,,158.0,31.0,5.8,0.9
 candidate,seed:flax,Flaxseed,everyday food,nuts,171442,"Oil, flaxseed, contains added sliced flaxseed",sr_legacy,3.968,1.0,,,,,tablespoon 13.7 g; cup 219 g,,534.0,29.0,18.0,42.0
 candidate,seed:greekyogurt,"Greek yogurt, 2%",everyday food,dairy,2705421,"Yogurt, Greek, NS as to type of milk, plain",survey_fndds,0.376,1.0,,yes,,,1 cup 245 g,,73.0,3.9,10.0,2.0
-candidate,seed:greenbeans,Green beans,everyday food,vegetables,169962,"Beans, snap, green, frozen, all styles, unprepared (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.167,1.0,,,,,cup 121 g,,31.0,7.0,1.8,0.1
+candidate,seed:greenbeans,Green beans,everyday food,vegetables,169962,"Beans, snap, green, frozen, all styles, unprepared (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.167,1.0,,yes,,,cup 121 g,,31.0,7.0,1.8,0.1
 candidate,seed:cabbage,Green cabbage,everyday food,vegetables,2710124,"Baby Toddler green beans, Stage 1",survey_fndds,0.092,0.5,,,,,1 tablespoon 15 g,,25.0,6.0,1.3,0.1
 candidate,seed:cheese,Hard cheese,everyday food,dairy,173419,"Cheese, edam",sr_legacy,0.06,0.5,,,,,oz 28.4 g,,364.0,1.3,25.0,29.0
-candidate,seed:oats-instant,Instant oatmeal,everyday food,grains,171675,"Cereals, oats, regular and quick and instant, unenriched, cooked with water (includes boiling and microwaving), with salt",sr_legacy,0.131,0.5,,,,,cup 234 g; cup 175 g,,68.0,12.0,2.4,1.4
-candidate,seed:kefir,"Kefir, 1%",everyday food,dairy,170904,"Kefir, lowfat, plain, LIFEWAY",sr_legacy,0.499,1.0,,,,,cup 243 g,,40.0,4.0,3.0,1.0
+candidate,seed:oats-instant,Instant oatmeal,everyday food,grains,171675,"Cereals, oats, regular and quick and instant, unenriched, cooked with water (includes boiling and microwaving), with salt",sr_legacy,0.131,0.5,,yes,,,cup 234 g; cup 175 g,,68.0,12.0,2.4,1.4
+candidate,seed:kefir,"Kefir, 1%",everyday food,dairy,170904,"Kefir, lowfat, plain, LIFEWAY",sr_legacy,0.499,1.0,,yes,,,cup 243 g,,40.0,4.0,3.0,1.0
 candidate,seed:lettuce,Leaf lettuce,everyday food,vegetables,2709790,"Lettuce, Boston, raw",survey_fndds,0.35,0.5,,,,,1 cup 25 g,,15.0,2.9,1.4,0.2
-candidate,seed:potato-mash,Mashed potato,everyday food,vegetables,2709493,"Potato, mashed, from fast food",survey_fndds,0.258,1.0,,,,,1 cup 250 g,,88.0,15.0,2.0,2.5
+candidate,seed:potato-mash,Mashed potato,everyday food,vegetables,2709493,"Potato, mashed, from fast food",survey_fndds,0.258,1.0,,yes,,,1 cup 250 g,,88.0,15.0,2.0,2.5
 candidate,seed:milkchoc,Milk chocolate,everyday food,sweets,169637,"Candies, milk chocolate coated coffee beans",sr_legacy,0.221,1.0,,,,,oz 28.4 g,,535.0,59.0,7.6,30.0
 candidate,seed:onion,Onion,everyday food,vegetables,2710010,"Peppers and onions, cooked, no added fat",survey_fndds,0.164,1.0,,,,,1 cup 140 g,,40.0,9.0,1.1,0.1
 candidate,seed:yogurt,Plain yogurt,everyday food,dairy,171284,"Yogurt, plain, whole milk",sr_legacy,0.032,1.0,,yes,,,cup (8 fl oz) 245 g,,61.0,4.7,3.5,3.3
 candidate,seed:potato-boil,"Potato, boiled",everyday food,vegetables,168483,"Sweet potato, cooked, baked in skin, flesh, without salt",sr_legacy,0.123,1.0,,,,,cup 200 g; large 180 g; small 60 g,,87.0,20.0,1.9,0.1
 candidate,seed:pumpkin,"Pumpkin, roasted",everyday food,vegetables,170109,"Peppers, sweet, green, cooked, boiled, drained, with salt",sr_legacy,0.078,0.5,,,,,tbsp 11.6 g; pepper 73 g,,26.0,6.0,1.0,0.1
-candidate,seed:raspberry,Raspberries,everyday food,fruits,2709281,"Raspberries, raw",survey_fndds,0.404,1.0,,,,,1 cup 150 g,,52.0,12.0,1.2,0.7
+candidate,seed:raspberry,Raspberries,everyday food,fruits,2709281,"Raspberries, raw",survey_fndds,0.404,1.0,,yes,,,1 cup 150 g,,52.0,12.0,1.2,0.7
 candidate,seed:bread-sprout,Sprouted grain bread,everyday food,grains,2707706,"Bread, whole grain white",survey_fndds,0.549,0.67,,,,,1 small or thin/very thin slice 24 g; 1 large or thick slice 43 g,,230.0,40.0,11.0,3.5
-candidate,seed:turkey,Turkey breast,everyday food,protein,2706105,"Turkey, light meat, skin not eaten",survey_fndds,0.156,0.5,,,,,1 large or thick slice 85 g,,135.0,0.0,29.0,1.7
+candidate,seed:turkey,Turkey breast,everyday food,protein,2706105,"Turkey, light meat, skin not eaten",survey_fndds,0.156,0.5,,yes,,,1 large or thick slice 85 g,,135.0,0.0,29.0,1.7
 candidate,seed:walnuts,Walnuts,everyday food,nuts,170594,"Nuts, walnuts, dry roasted, with salt added",sr_legacy,0.406,1.0,,,,,oz 28 g,,654.0,14.0,15.0,65.0
 candidate,seed:pasta-whole,Whole wheat pasta,everyday food,grains,2708901,"Pasta, whole grain, with tomato-based sauce, seafood, and added vegetables, home recipe",survey_fndds,0.84,0.67,,yes,2708358,,1 cup 250 g,,149.0,30.0,6.0,1.1
 none,ing:banana,Banana (small amount),curated ingredient,fruit,,,,,,,,,,,,89,23,1.1,0.3

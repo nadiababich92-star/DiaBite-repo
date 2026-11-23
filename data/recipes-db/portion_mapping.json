@@ -3189,6 +3189,247 @@
     }
    ],
    "accepted_by": "owner, 2026-11-23"
+  },
+  "ing:bagel": {
+   "fdc_id": "174899",
+   "usda_name": "Bagels, plain, enriched, with calcium propionate (includes onion, poppy, sesame)",
+   "measures": [
+    {
+     "label": "bagel",
+     "grams": 99.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "ing:beef_broth": {
+   "fdc_id": "171179",
+   "usda_name": "Soup, SWANSON, beef broth, lower sodium",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 213.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "ing:cauliflower_rice": {
+   "fdc_id": "2709777",
+   "usda_name": "Cauliflower, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 piece",
+     "grams": 13.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 110.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "ing:cherries": {
+   "fdc_id": "171719",
+   "usda_name": "Cherries, sweet, raw",
+   "measures": [
+    {
+     "label": "cherry",
+     "grams": 8.2
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "ing:collard_greens": {
+   "fdc_id": "2709576",
+   "usda_name": "Collards, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 36.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "ing:basil": {
+   "fdc_id": "2709780",
+   "usda_name": "Basil, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 24.0
+    },
+    {
+     "label": "1 tablespoon",
+     "grams": 3.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "ing:green_beans": {
+   "fdc_id": "169962",
+   "usda_name": "Beans, snap, green, frozen, all styles, unprepared (Includes foods for USDA's Food Distribution Program)",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 121.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "ing:pistachios": {
+   "fdc_id": "170184",
+   "usda_name": "Nuts, pistachio nuts, raw",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 123.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "ing:pomegranate": {
+   "fdc_id": "2709267",
+   "usda_name": "Pomegranate, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 175.0
+    },
+    {
+     "label": "1 fruit",
+     "grams": 250.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "ing:maple_syrup": {
+   "fdc_id": "169661",
+   "usda_name": "Syrups, maple",
+   "measures": [
+    {
+     "label": "tbsp",
+     "grams": 20.0
+    },
+    {
+     "label": "cup",
+     "grams": 315.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "seed:broccoli": {
+   "fdc_id": "2709645",
+   "usda_name": "Broccoli, fresh, cooked, no added fat (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 piece",
+     "grams": 10.0
+    },
+    {
+     "label": "1 cup",
+     "grams": 155.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "seed:buckwheat": {
+   "fdc_id": "170686",
+   "usda_name": "Buckwheat groats, roasted, cooked",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 168.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "seed:chicken": {
+   "fdc_id": "2705956",
+   "usda_name": "Chicken breast, baked, broiled, or roasted, skin not eaten, from raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 large or thick slice",
+     "grams": 85.0
+    },
+    {
+     "label": "1 medium slice",
+     "grams": 60.0
+    },
+    {
+     "label": "1 small or thin slice",
+     "grams": 30.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "seed:greenbeans": {
+   "fdc_id": "169962",
+   "usda_name": "Beans, snap, green, frozen, all styles, unprepared (Includes foods for USDA's Food Distribution Program)",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 121.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "seed:oats-instant": {
+   "fdc_id": "171675",
+   "usda_name": "Cereals, oats, regular and quick and instant, unenriched, cooked with water (includes boiling and microwaving), with salt",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 234.0
+    },
+    {
+     "label": "cup",
+     "grams": 175.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "seed:kefir": {
+   "fdc_id": "170904",
+   "usda_name": "Kefir, lowfat, plain, LIFEWAY",
+   "measures": [
+    {
+     "label": "cup",
+     "grams": 243.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "seed:potato-mash": {
+   "fdc_id": "2709493",
+   "usda_name": "Potato, mashed, from fast food (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 250.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "seed:raspberry": {
+   "fdc_id": "2709281",
+   "usda_name": "Raspberries, raw (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 cup",
+     "grams": 150.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
+  },
+  "seed:turkey": {
+   "fdc_id": "2706105",
+   "usda_name": "Turkey, light meat, skin not eaten (USDA FNDDS, foods as eaten)",
+   "measures": [
+    {
+     "label": "1 large or thick slice",
+     "grams": 85.0
+    }
+   ],
+   "accepted_by": "owner, 2026-11-23"
   }
  }
 }
