@@ -33,7 +33,7 @@ import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
 import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
 import { alternativesForMeal, findAlternatives, SWAP_ENERGY_BAND, SWAP_MIN_GAIN, SWAP_MIN_GAIN_SHARE } from '../server/compute'
-import { ALLOWED, mayReplace, potatoKind, swapClass } from '../server/roles'
+import { ALLOWED, mayReplace, potatoKind, standInsFor, swapClass } from '../server/roles'
 import { validateAsk } from '../server/guard'
 import { getSession, putSession } from '../server/sessions'
 import { gramsFor, householdUnitsFor, needsWeightHint, quantityError, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
@@ -2353,7 +2353,7 @@ hangMisses.forEach((m) => console.log(m))
     const { gl, it, alts } = await run(id, undefined, Math.round(0.6 * (first.gl as number) * 10) / 10)
     for (const a of alts) {
       if (!(a.gain > 0 && (a.fitsMeal === true || (a.gain >= SWAP_MIN_GAIN && a.gain >= SWAP_MIN_GAIN_SHARE * gl)))) miss(`SW2 "${phrase}": ${a.label} gain ${a.gain} is not worth making`)
-      if (a.change === 'swap' && Math.abs(a.kcal - it.kcal) > SWAP_ENERGY_BAND * it.kcal + 1e-6) miss(`SW3 "${phrase}": ${a.label} is ${a.kcal} kcal against ${it.kcal}`)
+      if (a.change === 'swap' && !(standInsFor(rec).includes(a.id) && a.kcal <= it.kcal + 1e-6) && Math.abs(a.kcal - it.kcal) > SWAP_ENERGY_BAND * it.kcal + 1e-6) miss(`SW3 "${phrase}": ${a.label} is ${a.kcal} kcal against ${it.kcal}`)
       if (a.change === 'portion' && Math.abs(a.kcal - it.kcal * (a.fraction ?? 1)) > 0.2) miss(`SW3 "${phrase}": the portion ${a.label} is ${a.kcal} kcal, not ${(it.kcal * (a.fraction ?? 1)).toFixed(1)}`)
       if (a.change === 'swap') {
         const cls = swapClass(getRecord(a.id)), from = swapClass(rec)
@@ -2502,6 +2502,39 @@ hangMisses.forEach((m) => console.log(m))
     const agentSrc = readFileSync(join(ROOT, 'server', 'agent.ts'), 'utf8')
     const logBody = agentSrc.slice(agentSrc.indexOf('function logTurn'), agentSrc.indexOf('function logTurn') + 1800)
     if (/portionSwaps/.test(logBody)) miss('SW15 logTurn mentions portionSwaps')
+  }
+  // SW17: the vegetable stand-ins (#87): cauliflower rice for rice, zoodles or squash for pasta, past the energy band, never more energy than the food, only for a cooked grain.
+  {
+    const find = async (phrase: string, remaining: number, avoid?: object) => {
+      const id = await idOf(phrase)
+      if (!id) { miss(`SW17 "${phrase}" did not resolve`); return null }
+      const r = await run(id, undefined, remaining, { allowPortion: false, avoid })
+      return { id, ...r }
+    }
+    const rice = await find('white rice', 1000)
+    if (rice) {
+      const cr = rice.alts.concat(await findAlternatives(store, { foodId: rice.id, grams: rice.it.grams, maxGL: 1000, mealGL: rice.gl, remainingGL: 0.05, topK: 12 }, undefined, { allowPortion: false })).find((a) => a.id === 'ing:cauliflower_rice')
+      if (!cr) miss('SW17 cauliflower rice is not offered for white rice')
+      else {
+        if (cr.kcal > (rice.it.kcal as number)) miss(`SW17 the stand-in holds ${cr.kcal} kcal against ${rice.it.kcal}`)
+        if (cr.change !== 'swap' || !(cr.gain > 0)) miss('SW17 the stand-in is not a swap with a gain')
+        if (Math.abs(cr.kcal - (rice.it.kcal as number)) <= SWAP_ENERGY_BAND * (rice.it.kcal as number)) miss('SW17 the case does not test the band: the stand-in is inside it')
+      }
+    }
+    const pasta = await find('cooked pasta', 1000)
+    if (pasta) {
+      const all = await findAlternatives(store, { foodId: pasta.id, grams: pasta.it.grams, maxGL: 1000, mealGL: pasta.gl, remainingGL: 0.05, topK: 12 }, undefined, { allowPortion: false })
+      if (!all.some((a) => ['ing:zucchini_noodles', 'ing:spaghetti_squash', 'ing:shirataki'].includes(a.id))) miss('SW17 no vegetable noodles are offered for pasta')
+      // Left out by hand, a stand-in is not offered.
+      const without = await findAlternatives(store, { foodId: pasta.id, grams: pasta.it.grams, maxGL: 1000, mealGL: pasta.gl, remainingGL: 0.05, topK: 12 }, { words: ['zucchini', 'squash', 'shirataki'] }, { allowPortion: false })
+      if (without.some((a) => ['ing:zucchini_noodles', 'ing:spaghetti_squash', 'ing:shirataki'].includes(a.id))) miss('SW17 a stand-in the person left out is offered')
+    }
+    // Only a cooked grain has stand-ins: a potato, rice pudding and rice noodles' pairs are the table's own.
+    for (const phrase of ['baked potato', 'oatmeal', 'white bread']) {
+      const id = await idOf(phrase)
+      if (id && standInsFor(getRecord(id)).length) miss(`SW17 "${phrase}" has stand-ins`)
+    }
+    if (standInsFor({ kind: 'ingredient', name: 'Rice pudding', category: 'sweets' }).length) miss('SW17 rice pudding has stand-ins')
   }
   // SW16: the noise a starch collects from the survey layer (#88): the same potato cooked another way, a vegetable nobody serves in its place.
   {

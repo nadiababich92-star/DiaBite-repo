@@ -5,7 +5,7 @@
 import { availableCarbs, dayGlLevel, glLevel, glycemicLoad, nutrientsFor } from '../src/lib/glycemic'
 import { isAvoided, type AvoidList } from './avoid'
 import { asFood, getRecord, hasNoLoad, householdMeasure, loadFoods, stepUnit, summary, type PortionRow } from './foods'
-import { mayReplace, potatoKind, swapClass } from './roles'
+import { mayReplace, potatoKind, standInsFor, swapClass } from './roles'
 import { gramsFor, householdUnitsFor, saidText, unitsFor } from './quantity'
 import { embed, type VectorStore } from './embeddings'
 import { resolvePhrases, sameFamily, sameFood } from './resolve'
@@ -349,6 +349,9 @@ export async function findAlternatives(
   }
 
   const anchorClass = swapClass(anchor)
+  // The vegetable stand-ins for this food go first, so the pool of twelve cannot cut them off; they are judged by the same rules below.
+  const standIns = new Set(standInsFor(anchor))
+  for (const id of [...standIns].reverse()) if (byId.has(id) && filter(id) && !hits.some((h) => h.id === id)) hits.unshift({ id, score: 0 })
   const survivors: Alternative[] = []
   for (const h of hits) {
     // Same reason as in resolve: the store may know an id this build does not.
@@ -374,7 +377,8 @@ export async function findAlternatives(
     if ((anchorClass === 'starch' || anchorClass === 'cooked-grain') && recClass === 'veg' && rec.id.startsWith('usda:')) continue
     // A survey record that is a prepared dish ("pasta, whole grain, with tomato sauce and poultry") is not a swap for a plain food, only for another dish.
     if (rec.id.startsWith('usda:') && COMPOSITE.test(rec.name) && !COMPOSITE.test(anchor.name)) continue
-    if (Math.abs(c.kcal - anchorKcal) > SWAP_ENERGY_BAND * anchorKcal) continue
+    // A stand-in may hold far less energy (cauliflower rice for rice) but never more than the food it replaces.
+    if (!(standIns.has(rec.id) && c.kcal <= anchorKcal) && Math.abs(c.kcal - anchorKcal) > SWAP_ENERGY_BAND * anchorKcal) continue
     const gain = r1(anchorGL - c.gl)
     const fitsMeal = fits(gain)
     if (!worth(gain, fitsMeal)) continue

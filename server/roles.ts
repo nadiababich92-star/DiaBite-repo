@@ -102,3 +102,16 @@ export function potatoKind(name: string): 'white' | 'sweet' | null {
   if (/\b(sweet potato(es)?|yams?)\b/i.test(name)) return 'sweet'
   return /\bpotato(es)?\b/i.test(name) ? 'white' : null
 }
+
+/**
+ * Vegetable stand-ins a dietitian would name for a starch: cauliflower rice for rice, zoodles or spaghetti squash for pasta. They hold a fraction of the
+ * energy of what they replace, so the energy band of a swap would drop them; and they are not always among the nearest neighbours by meaning. A pair
+ * here is offered, never beyond it: each id is a curated record, and the swap still has to be worth making, within the day and free of what the person
+ * avoids. A stand-in never holds more energy than the food it replaces. docs/specs/swaps-engine.md, section 3, and clinical question 34.
+ */
+const STAND_INS: { anchor: RegExp; not?: RegExp; ids: string[] }[] = [
+  { anchor: /\brice\b/i, not: /noodle|pudding|cake|cracker|vermicelli|cereal|paper|milk/i, ids: ['ing:cauliflower_rice'] },
+  { anchor: /\b(pasta|spaghetti|macaroni|noodles?|linguine|fettuccine|penne)\b/i, not: /salad|soup/i, ids: ['ing:zucchini_noodles', 'ing:spaghetti_squash', 'ing:shirataki'] },
+]
+export const standInsFor = (rec: Pick<FoodRecord, 'kind' | 'name' | 'category' | 'wweia'>): string[] =>
+  swapClass(rec) === 'cooked-grain' ? STAND_INS.filter((p) => p.anchor.test(rec.name) && !(p.not && p.not.test(rec.name))).flatMap((p) => p.ids) : []

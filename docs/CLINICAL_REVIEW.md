@@ -263,6 +263,13 @@ heaviest item: a different food, or less of the same food, never a prohibition.
 > **Q35.** "The same amount of food" is read as the same energy, within 30%.
 > Is that how a dietitian would judge a swap (porridge for a breakfast of about
 > the same size), or should it be the same carbohydrate, or the same weight?
+> **Q36.** One exception to Q35, added on 23 November: for rice and for pasta the
+> engine offers a vegetable stand-in even though it holds far less energy
+> (cauliflower rice, about 40 kcal, for 158 g of rice, about 205 kcal; zucchini
+> noodles, shirataki or spaghetti squash for pasta). It never offers one with more
+> energy, and only these named pairs. Is it right to offer a swap that removes
+> most of the meal's energy, or should it come with a line about replacing it
+> (protein, fat), or not be offered at all?
 
 ## What we will do with your answers
 
