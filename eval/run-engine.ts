@@ -92,7 +92,7 @@ import { ouncesText } from '../src/lib/measure'
 import { buildSummary } from '../src/lib/clinicianSummary'
 import { ANON_DISCLOSURE, ANON_PROFILE, answered, calculateTargets, carbApproachBlocked, carbApproachReason, cmToFtIn, DAILY_CARBS_MAX, DAILY_CARBS_MIN, DEFAULT_PROFILE, DEFERRED_ORDER, exitReason, ftInToCm, kgToLb, lbToKg, MEDICINES_FIRST, nextDeferred, shortStart, STEP_OF_FIELD, weightUsed } from '../src/lib/profile'
 import { HeightWeight, UnitsSwitch } from '../src/components/BodyUnits'
-import { focusesHeadingOnOpen } from '../src/components/Onboarding'
+import Onboarding, { focusesHeadingOnOpen } from '../src/components/Onboarding'
 import { lockCount, lockPage } from '../src/lib/pageLock'
 import { answerRows } from '../src/lib/answers'
 import { swapNamedIn } from '../src/lib/swap'
@@ -943,6 +943,26 @@ recorrectMisses.forEach((m) => console.log(m))
   if (sum.about.medicines.join() !== 'not asked yet') bits.push(`the clinician summary says of medicines not asked: ${JSON.stringify(sum.about.medicines)}`)
   if (buildSummary([], DEFAULT_PROFILE, calculateTargets(DEFAULT_PROFILE), '2026-11-23', 7).about.medicines.includes('not asked yet')) bits.push('the clinician summary says a full profile was not asked about medicines')
   console.log(`\nfirst run ${bits.length === 0 ? 'ok' : 'WRONG'}  (the short profile, OB1 to OB4)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// The short onboarding's screen, "Before we start" (docs/specs/first-session-onboarding-screen.md): a static render of both modes.
+{
+  const bits: string[] = []
+  const noop = () => {}
+  const short = renderToStaticMarkup(createElement(Onboarding, { initial: shortStart(DEFAULT_PROFILE), onDone: noop, askConsent: true, mode: 'short' }))
+  const full = renderToStaticMarkup(createElement(Onboarding, { initial: DEFAULT_PROFILE, onDone: noop, askConsent: true }))
+  if (!short.includes('<h2>Before we start</h2>') || short.includes('onb-progress')) bits.push('the short screen lacks its heading or shows a progress bar')
+  if (!/<button class="primary"[^>]*disabled=""[^>]*>Start using DiaBite<\/button>/.test(short)) bits.push('Start using DiaBite is not disabled before the consent and the acknowledgement')
+  for (const [what, needle] of [['the consent', 'I agree that DiaBite keeps this about me'], ['age', '<span>Age</span>'], ['insulin', '<h3>Insulin</h3>'], ['the pregnancy question', 'pregnant, planning a pregnancy, or breastfeeding'], ['height', 'Height'], ['activity', 'Activity'], ['the disordered-eating box', 'I have a history of disordered eating'], ['the acknowledgement', 'must never be used to calculate insulin doses'], ['the line under the key', 'Two minutes more after your first answer will make the numbers yours.']] as const) {
+    if (!short.includes(needle)) bits.push(`the short screen lacks ${what}`)
+  }
+  for (const later of ['Which of these describes you?', 'Tablets and injections', 'Kidneys', 'Carbohydrate approach']) if (short.includes(later)) bits.push(`the short screen asks "${later}", which is for later`)
+  if (/Back<\/button>|>Continue</.test(short)) bits.push('the short screen has Back or Continue')
+  if (/budget left/.test(short)) bits.push('the short screen promises no "budget left", which the Ask screen still shows')
+  if (!full.includes('First, the numbers the formula needs') || !full.includes('onb-progress')) bits.push('the full onboarding changed')
+  console.log(`\nshort onb ${bits.length === 0 ? 'ok' : 'WRONG'}  (Before we start)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }
@@ -2597,20 +2617,25 @@ hangMisses.forEach((m) => console.log(m))
   const misses: string[] = []
   const want = (label: string, got: unknown, expected: unknown) => { if (JSON.stringify(got) !== JSON.stringify(expected)) misses.push(`    ${label}: ${JSON.stringify(got)}, wanted ${JSON.stringify(expected)}`) }
   const none = answerRows({ ...DEFAULT_PROFILE, insulin: 'none', meds: [], kidney: 'none', comorbidities: [], pattern: 'none', avoided: [], allergens: [] })
-  want('four rows', none.map((r) => r.id), ['medicines', 'conditions', 'eating', 'allergies'])
-  want('steps', none.map((r) => r.step), [2, 3, 3, 3])
-  want('nothing taken', none[0].text, 'Nothing for glucose')
-  want('no preference', none[2].text, 'No preference')
-  want('no allergies', none[3].text, 'None')
+  // Six rows since the short onboarding (23 November 2026): the two it leaves for later, Diagnosis and Your day, joined the four. Read by id, not by place.
+  const row = (rows: ReturnType<typeof answerRows>, id: string) => rows.find((r) => r.id === id)?.text
+  want('six rows', none.map((r) => r.id), ['diagnosis', 'medicines', 'conditions', 'eating', 'allergies', 'day'])
+  want('steps', none.map((r) => r.step), [1, 2, 3, 3, 3, 4])
+  want('nothing taken', row(none, 'medicines'), 'Nothing for glucose')
+  want('no preference', row(none, 'eating'), 'No preference')
+  want('no allergies', row(none, 'allergies'), 'None')
+  want('diagnosis', row(answerRows({ ...DEFAULT_PROFILE, condition: 't2' }), 'diagnosis'), 'Type 2 diabetes')
+  want('your day', row(answerRows({ ...DEFAULT_PROFILE, goal: 'maintain', carbApproach: 'moderate', countBy: 'carbs' }), 'day'), 'Maintain weight; moderate carbs; counting carbohydrate')
   const some = answerRows({ ...DEFAULT_PROFILE, insulin: 'none', meds: ['metformin', 'sglt2'], kidney: 'ckd', comorbidities: ['htn', 'gout'], pattern: 'vegetarian', avoided: ['pork'], allergens: ['shellfish', 'milk'] })
-  want('tablets without insulin', some[0].text, 'Metformin, SGLT2 inhibitor, no insulin')
-  want('kidneys and conditions', some[1].text, 'I have chronic kidney disease; High blood pressure, Gout')
-  want('how you eat', some[2].text, 'Vegetarian, no pork')
-  want('allergies', some[3].text, 'Shellfish, Milk')
+  want('tablets without insulin', row(some, 'medicines'), 'Metformin, SGLT2 inhibitor, no insulin')
+  want('kidneys and conditions', row(some, 'conditions'), 'I have chronic kidney disease; High blood pressure, Gout')
+  want('how you eat', row(some, 'eating'), 'Vegetarian, no pork')
+  want('allergies', row(some, 'allergies'), 'Shellfish, Milk')
   const basal = answerRows({ ...DEFAULT_PROFILE, insulin: 'basal', meds: [] })
-  want('basal insulin', basal[0].text, 'Long-acting once a day')
+  want('basal insulin', row(basal, 'medicines'), 'Long-acting once a day')
   // A brand name or an example in brackets never reaches the one-line summary.
-  if (answerRows({ ...DEFAULT_PROFILE, meds: ['sulfonylurea', 'glp1'] })[0].text.includes('(')) misses.push('    a summary carries an example in brackets')
+  if ((row(answerRows({ ...DEFAULT_PROFILE, meds: ['sulfonylurea', 'glp1'] }), 'medicines') ?? '').includes('(')) misses.push('    a summary carries an example in brackets')
+  if ((row(answerRows({ ...DEFAULT_PROFILE, condition: 'ir' }), 'diagnosis') ?? '').includes('(')) misses.push('    the diagnosis carries an example in brackets')
   console.log(`\nanswers   ${misses.length === 0 ? 'ok' : 'WRONG'}`)
   misses.forEach((m) => console.log(m))
   if (misses.length) process.exitCode = 1

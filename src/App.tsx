@@ -15,7 +15,7 @@ import { GlHelpContext } from './components/GlHelp'
 import Onboarding from './components/Onboarding'
 import MenuPage from './components/MenuPage'
 import ProfilePage from './components/ProfilePage'
-import { ANON_PROFILE, calculateTargets, CARB_APPROACH_LABELS } from './lib/profile'
+import { ANON_PROFILE, answered, calculateTargets, CARB_APPROACH_LABELS, DEFERRED_ORDER, shortStart, STEP_OF } from './lib/profile'
 import { signOutAndClear, useAccess, useAuth } from './lib/auth'
 import { SignInCard } from './components/SignInCard'
 import { SIGN_IN_CARDS } from './lib/anon'
@@ -70,8 +70,8 @@ export default function App() {
   // Onboarding is the first screen until it has been completed once (PRD A4);
   // afterwards it can be reopened from the profile tab.
   const [onboarding, setOnboarding] = useState(false)
-  // One onboarding step opened from "Your answers" in Profile (2 Medicines, 3 Conditions), and the line that says what saving it did.
-  const [editStep, setEditStep] = useState<2 | 3 | null>(null)
+  // One onboarding step opened from "Your answers" in Profile (1 Diagnosis, 2 Medicines, 3 Conditions, 4 Your day), and the line that says what saving it did.
+  const [editStep, setEditStep] = useState<1 | 2 | 3 | 4 | null>(null)
   const [youNote, setYouNote] = useState('')
   useEffect(() => { if (tab !== 'profile') setYouNote('') }, [tab])
   const [profile, setProfile] = useState<Profile>(loadProfile)
@@ -214,11 +214,19 @@ export default function App() {
         </header>
         <main>
         <Onboarding
-          initial={profile}
+          // A person who has never finished onboarding gets the short one (docs/specs/first-session-onboarding-screen.md): one screen, the rest
+          // later. "Redo onboarding" and one step from "Your answers" are the full flow, as before.
+          mode={!profile.onboarded && editStep === null && !onboarding ? 'short' : 'full'}
+          initial={!profile.onboarded && editStep === null && !onboarding ? shortStart(profile) : profile}
           only={editStep ?? undefined}
           askConsent={editStep === null && auth.status === 'signedIn' && !serverHasProfile}
           onDone={(p, consented) => {
             if (consented) { setConsent({ at: new Date().toISOString(), version: CONSENT_VERSION }); setServerHasProfile(true) }
+            // Saving one step answers it: a step the short onboarding left for later stops being "Not asked yet".
+            const step = editStep !== null ? DEFERRED_ORDER.find((d) => STEP_OF[d] === editStep) : undefined
+            if (step) p = answered(p, step)
+            // Redoing the whole onboarding answers every step.
+            if (editStep === null && onboarding) p = { ...p, deferred: [] }
             if (editStep !== null) {
               // Saving one step says what it did, and what it had to change besides: a medicine can rule out the carbohydrate approach the person had.
               setYouNote(p.carbApproach !== profile.carbApproach

@@ -1,4 +1,4 @@
-import { ALLERGEN_LABELS, COMORBIDITY_LABELS, INSULIN_LABELS, KIDNEY_LABELS, MED_LABELS } from './profile'
+import { ALLERGEN_LABELS, CARB_APPROACH_LABELS, COMORBIDITY_LABELS, CONDITION_LABELS, COUNT_BY_LABELS, GOAL_LABELS, INSULIN_LABELS, KIDNEY_LABELS, MED_LABELS } from './profile'
 import { AVOIDED_LABELS, PATTERN_LABELS } from './dietary'
 import type { Profile } from '../types'
 
@@ -6,12 +6,12 @@ import type { Profile } from '../types'
 const short = (label: string) => label.split(' (')[0]
 
 export interface AnswerRow {
-  id: 'medicines' | 'conditions' | 'eating' | 'allergies'
+  id: 'diagnosis' | 'medicines' | 'conditions' | 'eating' | 'allergies' | 'day'
   title: string
   /** What the person said, in a line. */
   text: string
-  /** The onboarding step that holds the answer: 2 is Medicines, 3 is Conditions. */
-  step: 2 | 3
+  /** The onboarding step that holds the answer: 1 Diagnosis, 2 Medicines, 3 Conditions, 4 Your day. */
+  step: 1 | 2 | 3 | 4
 }
 
 /** What a row says for a step the short onboarding has not asked yet. */
@@ -34,11 +34,15 @@ export function answerRows(p: Profile): AnswerRow[] {
 
   // A step the short onboarding left for later was not answered: its empty fields are not "none", and the row says so.
   const deferred = p.deferred ?? []
-  const asked = (step: 'medicines' | 'conditions', text: string) => (deferred.includes(step) ? NOT_ASKED : text)
+  const asked = (step: 'diagnosis' | 'medicines' | 'conditions' | 'day', text: string) => (deferred.includes(step) ? NOT_ASKED : text)
+  const approach = p.carbApproach === 'moderate' ? 'moderate carbs' : short(CARB_APPROACH_LABELS[p.carbApproach]).toLowerCase()
+  const day = `${GOAL_LABELS[p.goal]}; ${approach}; counting ${COUNT_BY_LABELS[p.countBy].split(',')[0].toLowerCase()}`
   return [
+    { id: 'diagnosis', title: 'Diagnosis', text: asked('diagnosis', short(CONDITION_LABELS[p.condition])), step: 1 },
     { id: 'medicines', title: 'Medicines', text: asked('medicines', medicines), step: 2 },
     { id: 'conditions', title: 'Kidneys and other conditions', text: asked('conditions', `${kidneys}; ${others}`), step: 3 },
     { id: 'eating', title: 'How you eat', text: asked('conditions', eating.length === 0 ? 'No preference' : eating.join(', ')), step: 3 },
     { id: 'allergies', title: 'Allergies', text: asked('conditions', p.allergens.length === 0 ? 'None' : p.allergens.map((a) => ALLERGEN_LABELS[a]).join(', ')), step: 3 },
+    { id: 'day', title: 'Your day', text: asked('day', day), step: 4 },
   ]
 }

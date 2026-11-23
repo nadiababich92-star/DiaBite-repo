@@ -10,8 +10,9 @@ import {
   COUNT_BY_LABELS,
   GOAL_LABELS,
   weightUsed,
+  answered, carbApproachReason, STEP_OF_FIELD,
 } from '../lib/profile'
-import { answerRows } from '../lib/answers'
+import { answerRows, NOT_ASKED } from '../lib/answers'
 import GiGlExplainer from './GiGlExplainer'
 import { HeightWeight, UnitsSwitch } from './BodyUnits'
 import MealCarbsLimit from './MealCarbsLimit'
@@ -23,8 +24,8 @@ interface Props {
   onChange: (p: Profile) => void
   /** Reopens the onboarding flow, where the medical answers live. */
   onRedoOnboarding: () => void
-  /** Opens one onboarding step on its own: 2 Medicines, 3 Conditions. */
-  onEditAnswers: (step: 2 | 3) => void
+  /** Opens one onboarding step on its own: 1 Diagnosis, 2 Medicines, 3 Conditions, 4 Your day. */
+  onEditAnswers: (step: 1 | 2 | 3 | 4) => void
   /** What saving one step just did, shown at the top. */
   note?: string
 }
@@ -32,8 +33,13 @@ interface Props {
 export default function ProfilePage({ profile, targets, onChange, onRedoOnboarding, onEditAnswers, note }: Props) {
   const [query, setQuery] = useState('')
 
-  const set = <K extends keyof Profile>(key: K, value: Profile[K]) =>
-    onChange({ ...profile, [key]: value })
+  // Changing a field here answers the step it belongs to (docs/specs/first-session-profile-and-defaults.md, section 4): choosing a goal is
+  // answering "Your day", so the person is not asked again for what they just set.
+  const set = <K extends keyof Profile>(key: K, value: Profile[K]) => {
+    const next = { ...profile, [key]: value }
+    const step = STEP_OF_FIELD[key]
+    onChange(step ? answered(next, step) : next)
+  }
 
   const excluded = new Set(profile.excludedFoodIds)
   // The recipes' ingredients are in a separate file, fetched the first time the box is used.
@@ -113,9 +119,11 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
               value={profile.carbApproach}
               onChange={(e) => set('carbApproach', e.target.value as CarbApproach)}
             >
-              {Object.entries(CARB_APPROACH_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
-              ))}
+              {/* The same rule as onboarding: a lower approach is closed while the medicines are not answered, or when a medicine rules it out. */}
+              {Object.entries(CARB_APPROACH_LABELS).map(([k, v]) => {
+                const why = carbApproachReason(profile, k as CarbApproach)
+                return <option key={k} value={k} disabled={!!why && profile.carbApproach !== k}>{why ? `${v}: ${why}` : v}</option>
+              })}
             </select>
           </label>
           <label className="field">
@@ -217,7 +225,8 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
                 <b>{r.title}</b>
                 <span className="muted">{r.text}</span>
               </div>
-              <button className="ghost" aria-label={`Edit ${r.title.toLowerCase()}`} onClick={() => onEditAnswers(r.step)}>Edit</button>
+              {/* A step not asked yet is answered, not edited. */}
+              <button className="ghost" aria-label={`${r.text === NOT_ASKED ? 'Answer' : 'Edit'} ${r.title.toLowerCase()}`} onClick={() => onEditAnswers(r.step)}>{r.text === NOT_ASKED ? 'Answer' : 'Edit'}</button>
             </li>
           ))}
         </ul>

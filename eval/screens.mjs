@@ -82,11 +82,24 @@ try {
       // first device: onboarding with consent (the same steps as the rehearsal)
       await b.ev(`window.__setNum = (labelText, v) => { const el = [...document.querySelectorAll('label.field')].find(l => l.innerText.trim().startsWith(labelText))?.querySelector('input'); if (!el) return; const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(el, String(v)); el.dispatchEvent(new Event('input', { bubbles: true })) }; window.__check = (txt) => { const c = document.querySelector('input[aria-label="' + txt + '"]') ?? [...document.querySelectorAll('label')].find(l => l.innerText.includes(txt))?.querySelector('input'); if (c && !c.checked) c.click() }`)
       await shot('onboarding')
+      // The short onboarding (docs/specs/first-session-onboarding-screen.md): one screen. An age under 18 is an exit, and "Change my age" comes back here.
+      {
+        const headings = () => b.ev(`[...document.querySelectorAll('.onb-card h2')].map((h) => h.innerText.trim()).join('|')`)
+        const start = () => b.ev(`[...document.querySelectorAll('button')].find(x=>x.innerText.trim()==='Start using DiaBite')?.disabled ?? null`)
+        const first = await headings(), lockedAtFirst = await start()
+        await b.ev(`__setNum('Age', 17)`); await sleep(500)
+        const exitText = await b.ev(`document.querySelector('.onb-exit')?.innerText ?? ''`)
+        await shot('onboarding-exit-minor')
+        await click('Change my age'); await sleep(500)
+        const back = await headings()
+        const noProgress = await b.ev(`!document.querySelector('.onb-progress')`)
+        const ok = /Before we start/.test(first) && lockedAtFirst === true && /not for us to answer/i.test(exitText) && /Before we start/.test(back) && noProgress
+        console.log(`  ${ok ? 'PASS' : 'FAIL'}  the short onboarding: one screen, Start locked, an under-18 exit that comes back (${size.name})${ok ? '' : '  → ' + JSON.stringify({ first, lockedAtFirst, exitText: exitText.slice(0, 80), back, noProgress })}`)
+        if (!ok) process.exitCode = 1
+      }
       await b.ev(`__check('I agree that DiaBite keeps this about me')`)
-      await b.ev(`__setNum('Age', 52)`); await click('Continue'); await sleep(700)
-      await click('Type 2 diabetes'); await click('Continue'); await sleep(700)
-      await click('Continue'); await sleep(700); await shot('onboarding-diet'); await b.ev(`[...document.querySelectorAll('h3')].find(h=>h.innerText.startsWith('Meats'))?.scrollIntoView({block:'center'})`); await sleep(500); await shot('onboarding-diet-meats'); await click('Continue'); await sleep(700)
-      // the last step needs its box ticked before the button works; try until the ask screen is open
+      await b.ev(`__setNum('Age', 52)`); await sleep(500)
+      // the acknowledgement needs ticking before the key works; try until the ask screen is open
       for (let i = 0; i < 8; i++) {
         await b.ev(`__check('I understand this is not medical advice')`); await sleep(300)
         await click('Start using DiaBite'); await sleep(1800)

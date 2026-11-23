@@ -19,8 +19,13 @@ interface Props {
   askConsent?: boolean
   /** Present when an existing user reopened onboarding from the profile tab. */
   onCancel?: () => void
-  /** Edit one step only (2 Medicines, 3 Conditions): no progress, no Back, Save and Cancel. The rules, exits included, are the same. */
+  /** Edit one step only (1 Diagnosis, 2 Medicines, 3 Conditions, 4 Your day): no progress, no Back, Save and Cancel. The rules, exits included, are the same. */
   only?: number
+  /**
+   * 'short' for a new account: one screen, "Before we start", with safety and the five numbers; the rest is asked later, one step at a time
+   * (docs/specs/first-session-onboarding-screen.md). 'full' (the default) is the five steps, for "Redo onboarding".
+   */
+  mode?: 'short' | 'full'
 }
 
 const STEPS = ['You', 'Diagnosis', 'Medicines', 'Conditions', 'Your day'] as const
@@ -49,17 +54,24 @@ function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
 }
 
-export default function Onboarding({ initial, onDone, askConsent, onCancel, only }: Props) {
+export default function Onboarding({ initial, onDone, askConsent, onCancel, only, mode = 'full' }: Props) {
   const [p, setP] = useState<Profile>({ ...initial, onboarded: false })
   const [step, setStep] = useState(only ?? 0)
-  // Editing one step, an answer that sends the person back (an exit screen's "Change that answer") stays on that step.
-  const go = (n: number) => setStep(only ?? n)
+  const short = mode === 'short' && only === undefined
+  // Editing one step, an answer that sends the person back (an exit screen's "Change that answer") stays on that step; the short
+  // onboarding has one screen, and every answer that can send a person away is on it.
+  const go = (n: number) => setStep(only ?? (short ? 0 : n))
   const [agreed, setAgreed] = useState(false)
   const [consented, setConsented] = useState(false)
 
   const set = <K extends keyof Profile>(key: K, value: Profile[K]) => setP((prev) => ({ ...prev, [key]: value }))
 
   const exit = exitReason(p)
+  // "Change my age" has nothing to clear: the age is a number the person types again. So the exit screen steps aside for these very
+  // answers (the key below stays locked while they stand) and comes back if a new answer is still an exit.
+  const exitKey = exit ? `${exit}:${p.age}:${p.insulin}:${p.pregnantOrBreastfeeding}:${p.condition}` : null
+  const [setAside, setSetAside] = useState<string | null>(null)
+  const showExit = !!exit && exitKey !== setAside
   const targets = useMemo(() => calculateTargets(p), [p])
   const blocked = carbApproachReason(p, p.carbApproach)
 
@@ -76,7 +88,7 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
    * and the person is stuck with no way to correct a mis-tap.
    */
   function changeAnswer() {
-    if (exit === 'minor') { go(0); return }
+    if (exit === 'minor') { setSetAside(exitKey); go(0); return }
     if (exit === 'pregnancy') {
       setP((prev) => ({
         ...prev,
@@ -119,9 +131,132 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
   const { ft, in: inch } = cmToFtIn(p.heightCm)
   const imperial = p.units === 'imperial'
 
+  // The pieces the first screen of the short onboarding shares with the full one, so the two cannot drift apart.
+  const consentBlock = askConsent ? (
+        <div className="consent">
+          <h2>What DiaBite keeps</h2>
+          <ul>
+            <li>Your email address.</li>
+            <li>Your answers about yourself: age, sex, height, weight, activity, diagnosis, the classes of medicine you take, kidney status, other conditions, allergies and how you eat.</li>
+            <li>What you log in your diary, and the meals you plan.</li>
+            <li>What you type into Ask, kept for 30 days to improve DiaBite, and not tied to your name or email.</li>
+          </ul>
+          <p className="muted">
+            It is stored in Ireland. You can export it or delete it all, at any time, from Settings.
+            DiaBite never asks for a medicine dose and never sells your data.
+          </p>
+          <label className="check-row onb-flag">
+            <input type="checkbox" checked={consented} aria-label="I agree that DiaBite keeps this about me"
+              onChange={(e) => setConsented(e.target.checked)} />
+            <span>I agree that DiaBite keeps this about me</span>
+          </label>
+        </div>
+  ) : null
+  const sexAgeFields = (
+      <div className="grid">
+        <label className="field">
+          <span>Sex assigned at birth <em>used only for the energy formula</em></span>
+          <select value={p.sex} onChange={(e) => set('sex', e.target.value as Sex)}>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="unspecified">Prefer not to say</option>
+          </select>
+        </label>
+        <label className="field">
+          <span>Age</span>
+          <input type="number" inputMode="numeric" min={1} max={110} value={p.age}
+            onChange={(e) => set('age', Number(e.target.value))} />
+        </label>
+      </div>
+  )
+  const bodyFields = (
+    <>
+      <div className="row onb-units">
+        <span className="muted">Units</span>
+        <button className={`ghost${imperial ? ' on' : ''}`} onClick={() => set('units', 'imperial')}>ft / lb</button>
+        <button className={`ghost${imperial ? '' : ' on'}`} onClick={() => set('units', 'metric')}>cm / kg</button>
+      </div>
+
+      <div className="grid">
+        {imperial ? (
+          <>
+            <label className="field">
+              <span>Height</span>
+              <div className="row onb-height">
+                <input type="number" inputMode="numeric" min={3} max={7} value={ft} aria-label="Feet"
+                  onChange={(e) => set('heightCm', ftInToCm(Number(e.target.value), inch))} />
+                <span className="muted">ft</span>
+                <input type="number" inputMode="numeric" min={0} max={11} value={inch} aria-label="Inches"
+                  onChange={(e) => set('heightCm', ftInToCm(ft, Number(e.target.value)))} />
+                <span className="muted">in</span>
+              </div>
+            </label>
+            <label className="field">
+              <span>Weight, lb</span>
+              <input type="number" inputMode="decimal" min={80} max={660} value={kgToLb(p.weightKg)}
+                onChange={(e) => set('weightKg', lbToKg(Number(e.target.value)))} />
+            </label>
+          </>
+        ) : (
+          <>
+            <label className="field">
+              <span>Height, cm</span>
+              <input type="number" inputMode="decimal" min={120} max={220} value={p.heightCm}
+                onChange={(e) => set('heightCm', Number(e.target.value))} />
+            </label>
+            <label className="field">
+              <span>Weight, kg</span>
+              <input type="number" inputMode="decimal" min={35} max={300} step={0.5} value={p.weightKg}
+                onChange={(e) => set('weightKg', Number(e.target.value))} />
+            </label>
+          </>
+        )}
+        <label className="field">
+          <span>Activity</span>
+          <select value={p.activity} onChange={(e) => set('activity', e.target.value as Activity)}>
+            {(Object.keys(ACTIVITY_LABELS) as Activity[]).map((a) => (
+              <option key={a} value={a}>{ACTIVITY_LABELS[a]}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+    </>
+  )
+  const insulinField = (
+    <>
+      <h3>Insulin</h3>
+      <div className="chips-col">
+        {INSULINS.map((i) => (
+          <button key={i} className={`chip-btn${p.insulin === i ? ' on' : ''}`}
+            aria-pressed={p.insulin === i} onClick={() => set('insulin', i)}>
+            {INSULIN_LABELS[i]}
+          </button>
+        ))}
+      </div>
+    </>
+  )
+  const pregnancyField = p.sex !== 'male' && p.age <= 50 ? (
+        <label className="check-row onb-flag">
+          <input type="checkbox" checked={p.pregnantOrBreastfeeding}
+            aria-label="Pregnant, planning a pregnancy, or breastfeeding"
+            onChange={(e) => set('pregnantOrBreastfeeding', e.target.checked)} />
+          <span>I'm pregnant, planning a pregnancy, or breastfeeding</span>
+        </label>
+  ) : null
+  const ackField = (
+      <label className="check-row onb-flag">
+        <input type="checkbox" checked={agreed} aria-label="I understand this is not medical advice"
+          onChange={(e) => setAgreed(e.target.checked)} />
+        <span>
+          I understand DiaBite is a reference tool, not medical advice, and that its numbers
+          must never be used to calculate insulin doses.
+        </span>
+      </label>
+  )
+
   return (
     <div className="onb">
-      {only === undefined ? (
+      {short ? null : only === undefined ? (
         <div className="onb-progress" role="progressbar" aria-label="Onboarding progress" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1} aria-valuetext={`Step ${step + 1} of ${STEPS.length}: ${STEPS[step]}`}>
           <div className="onb-bars" aria-hidden="true">
             {STEPS.map((s, i) => <i key={s} className={i <= step ? 'on' : ''} />)}
@@ -132,10 +267,10 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
         <div className="onb-progress"><p className="onb-where"><b>Editing your answers</b> <span>{STEPS[only]}</span></p></div>
       )}
 
-      <p className="sr-only" role="status" aria-live="polite">{only === undefined ? `Step ${step + 1} of ${STEPS.length}: ${STEPS[step]}` : `Editing your answers: ${STEPS[step]}`}</p>
+      <p className="sr-only" role="status" aria-live="polite">{short ? '' : only === undefined ? `Step ${step + 1} of ${STEPS.length}: ${STEPS[step]}` : `Editing your answers: ${STEPS[step]}`}</p>
 
       <section className="card onb-card" ref={card}>
-        {exit ? (
+        {showExit && exit ? (
           <div className="onb-exit">
             <p className="eyebrow-line">This one is not for us to answer</p>
             <h2>{EXIT_COPY[exit].title}</h2>
@@ -151,99 +286,40 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
               {onCancel && <button className="link" onClick={onCancel}>Leave onboarding</button>}
             </div>
           </div>
+        ) : short ? (
+          <>
+            {consentBlock}
+            <h2>Before we start</h2>
+            <p className="muted">A few answers first. They tell us whether DiaBite is the right tool for you, and give its formula the numbers it needs. Everything else can wait until after your first answer.</p>
+            {sexAgeFields}
+            {insulinField}
+            <p className="muted" style={{ marginTop: 0 }}>Classes only, never doses.</p>
+            {pregnancyField}
+            {bodyFields}
+            <label className="check-row onb-flag">
+              <input type="checkbox" checked={p.comorbidities.includes('eatingDisorder')} aria-label="I have a history of disordered eating"
+                onChange={(e) => set('comorbidities', e.target.checked ? [...new Set([...p.comorbidities, 'eatingDisorder' as Comorbidity])] : p.comorbidities.filter((c) => c !== 'eatingDisorder'))} />
+              <span>I have a history of disordered eating <em className="muted">Optional. If you tick it, DiaBite will not suggest a calorie deficit or a weekly menu.</em></span>
+            </label>
+            {ackField}
+            <div className="row onb-actions">
+              <button className="primary" onClick={() => onDone({ ...p, onboarded: true }, askConsent ? consented : undefined)}
+                disabled={!!exit || !agreed || (!!askConsent && !consented)}>Start using DiaBite</button>
+            </div>
+            <p className="muted">Two minutes more after your first answer will make the numbers yours.</p>
+          </>
         ) : (
           <>
             {step === 0 && (
               <>
-                {askConsent && (
-                  <div className="consent">
-                    <h2>What DiaBite keeps</h2>
-                    <ul>
-                      <li>Your email address.</li>
-                      <li>Your answers about yourself: age, sex, height, weight, activity, diagnosis, the classes of medicine you take, kidney status, other conditions, allergies and how you eat.</li>
-                      <li>What you log in your diary, and the meals you plan.</li>
-                      <li>What you type into Ask, kept for 30 days to improve DiaBite, and not tied to your name or email.</li>
-                    </ul>
-                    <p className="muted">
-                      It is stored in Ireland. You can export it or delete it all, at any time, from Settings.
-                      DiaBite never asks for a medicine dose and never sells your data.
-                    </p>
-                    <label className="check-row onb-flag">
-                      <input type="checkbox" checked={consented} aria-label="I agree that DiaBite keeps this about me"
-                        onChange={(e) => setConsented(e.target.checked)} />
-                      <span>I agree that DiaBite keeps this about me</span>
-                    </label>
-                  </div>
-                )}
+                {consentBlock}
                 <h2>First, the numbers the formula needs</h2>
                 <p className="muted">
                   They set your daily targets with the Mifflin-St Jeor equation. You can change them any time.
                 </p>
-                <div className="grid">
-                  <label className="field">
-                    <span>Sex assigned at birth <em>used only for the energy formula</em></span>
-                    <select value={p.sex} onChange={(e) => set('sex', e.target.value as Sex)}>
-                      <option value="female">Female</option>
-                      <option value="male">Male</option>
-                      <option value="unspecified">Prefer not to say</option>
-                    </select>
-                  </label>
-                  <label className="field">
-                    <span>Age</span>
-                    <input type="number" inputMode="numeric" min={1} max={110} value={p.age}
-                      onChange={(e) => set('age', Number(e.target.value))} />
-                  </label>
-                </div>
+                {sexAgeFields}
 
-                <div className="row onb-units">
-                  <span className="muted">Units</span>
-                  <button className={`ghost${imperial ? ' on' : ''}`} onClick={() => set('units', 'imperial')}>ft / lb</button>
-                  <button className={`ghost${imperial ? '' : ' on'}`} onClick={() => set('units', 'metric')}>cm / kg</button>
-                </div>
-
-                <div className="grid">
-                  {imperial ? (
-                    <>
-                      <label className="field">
-                        <span>Height</span>
-                        <div className="row onb-height">
-                          <input type="number" inputMode="numeric" min={3} max={7} value={ft} aria-label="Feet"
-                            onChange={(e) => set('heightCm', ftInToCm(Number(e.target.value), inch))} />
-                          <span className="muted">ft</span>
-                          <input type="number" inputMode="numeric" min={0} max={11} value={inch} aria-label="Inches"
-                            onChange={(e) => set('heightCm', ftInToCm(ft, Number(e.target.value)))} />
-                          <span className="muted">in</span>
-                        </div>
-                      </label>
-                      <label className="field">
-                        <span>Weight, lb</span>
-                        <input type="number" inputMode="decimal" min={80} max={660} value={kgToLb(p.weightKg)}
-                          onChange={(e) => set('weightKg', lbToKg(Number(e.target.value)))} />
-                      </label>
-                    </>
-                  ) : (
-                    <>
-                      <label className="field">
-                        <span>Height, cm</span>
-                        <input type="number" inputMode="decimal" min={120} max={220} value={p.heightCm}
-                          onChange={(e) => set('heightCm', Number(e.target.value))} />
-                      </label>
-                      <label className="field">
-                        <span>Weight, kg</span>
-                        <input type="number" inputMode="decimal" min={35} max={300} step={0.5} value={p.weightKg}
-                          onChange={(e) => set('weightKg', Number(e.target.value))} />
-                      </label>
-                    </>
-                  )}
-                  <label className="field">
-                    <span>Activity</span>
-                    <select value={p.activity} onChange={(e) => set('activity', e.target.value as Activity)}>
-                      {(Object.keys(ACTIVITY_LABELS) as Activity[]).map((a) => (
-                        <option key={a} value={a}>{ACTIVITY_LABELS[a]}</option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
+                {bodyFields}
               </>
             )}
 
@@ -273,15 +349,7 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
                   diagnosis does.
                 </p>
 
-                <h3>Insulin</h3>
-                <div className="chips-col">
-                  {INSULINS.map((i) => (
-                    <button key={i} className={`chip-btn${p.insulin === i ? ' on' : ''}`}
-                      aria-pressed={p.insulin === i} onClick={() => set('insulin', i)}>
-                      {INSULIN_LABELS[i]}
-                    </button>
-                  ))}
-                </div>
+                {insulinField}
 
                 <h3>Tablets and injections</h3>
                 <div className="chips-col">
@@ -294,14 +362,7 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
                   ))}
                 </div>
 
-                {p.sex !== 'male' && p.age <= 50 && (
-                  <label className="check-row onb-flag">
-                    <input type="checkbox" checked={p.pregnantOrBreastfeeding}
-                      aria-label="Pregnant, planning a pregnancy, or breastfeeding"
-                      onChange={(e) => set('pregnantOrBreastfeeding', e.target.checked)} />
-                    <span>I'm pregnant, planning a pregnancy, or breastfeeding</span>
-                  </label>
-                )}
+                {pregnancyField}
               </>
             )}
 
@@ -440,14 +501,7 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
                   </>
                 )}
 
-                <label className="check-row onb-flag">
-                  <input type="checkbox" checked={agreed} aria-label="I understand this is not medical advice"
-                    onChange={(e) => setAgreed(e.target.checked)} />
-                  <span>
-                    I understand DiaBite is a reference tool, not medical advice, and that its numbers
-                    must never be used to calculate insulin doses.
-                  </span>
-                </label>
+                {only === undefined && ackField}
               </>
             )}
 
