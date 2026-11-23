@@ -244,6 +244,26 @@ are the largest.
 > population with a switch. Would that change the numbers, or only the
 > wording?
 
+## I. Three questions about swaps
+
+The numbers below are the owner's first choices (23 November 2026), made before
+a clinician has seen them. The numbering continues from the addendum
+(Q21 to Q32). When a meal does not fit the day, the app offers one change for the
+heaviest item: a different food, or less of the same food, never a prohibition.
+
+> **Q33.** Is "half the banana" acceptable advice for a person with type 2
+> diabetes who is not restricting? The engine computes the smaller portion's
+> load; the question is whether it should be offered at all, and whether it
+> should be hidden for anyone beyond the people we already hide the weekly menu
+> from (a history of disordered eating, kidney disease).
+> **Q34.** A swap is shown when it makes the meal fit, or saves at least 5 units
+> of glycemic load **and** a quarter of the item's load. Are 5 and 25% the right
+> size of a change to be worth saying, or should the floor be higher (so that
+> fewer, clearer swaps are offered) or lower?
+> **Q35.** "The same amount of food" is read as the same energy, within 30%.
+> Is that how a dietitian would judge a swap (porridge for a breakfast of about
+> the same size), or should it be the same carbohydrate, or the same weight?
+
 ## What we will do with your answers
 
 Anything you flag becomes a change in the code, a test case in the evaluation
