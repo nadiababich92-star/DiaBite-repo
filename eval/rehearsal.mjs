@@ -198,7 +198,8 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
     const waitForAnswer = async () => { for (let i = 0; i < 90; i++) { await sleep(500); if (!(await dev.b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break } await sleep(800) }
     await waitForAnswer()
     // The agent sometimes asks a question first ("which yogurt?") and there is no receipt to log or plan: ask again, up to twice.
-    for (let k = 0; k < 2 && !(await dev.b.ev(`!!document.querySelector('.day-picker')`)); k++) {
+    // A receipt is on screen when its log key is (the day picker used to be read here; since commit 2 of Ask it hides behind the day chip).
+    for (let k = 0; k < 2 && !(await dev.b.ev(`!!document.querySelector('.act-bar [data-tour="log"]')`)); k++) {
       await dev.b.ev(`[...document.querySelectorAll('button')].find(x => x.innerText.trim().startsWith('Ask something else'))?.click()`); await sleep(500)
       await dev.b.ev(`(()=>{const i=document.querySelector('input[type=text]'); i.focus(); i.select()})()`)
       await dev.b.send('Input.insertText', { text: q })
@@ -206,9 +207,11 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
     }
   }
   const diaryRows = async () => rows('diary_entries')
-  // A: choose Tomorrow at the top, ask, "Plan it". (The day is chosen first: it is the day the verdict is counted for.)
+  // The day is chosen on the day chip under the budget: open it, press the day (it closes itself).
+  const pickDay = async (dev, label) => { await dev.b.ev(`document.querySelector('.day-chip')?.getAttribute('aria-expanded') === 'true' || document.querySelector('.day-chip')?.click()`); await sleep(300); return dev.b.ev(`(()=>{const e=[...document.querySelectorAll('.day-chip-panel button')].find(x=>x.innerText.trim()===${JSON.stringify(label)}); if(!e) return 'NO'; e.click(); return 'ok'})()`) }
+  // A: choose Tomorrow on the day chip, ask, "Plan it". (The day is chosen first: it is the day the verdict is counted for.)
   await tabA('Ask')
-  await exact(A, 'Tomorrow'); await sleep(300)
+  await pickDay(A, 'Tomorrow'); await sleep(300)
   await askOn(A, 'A cup of plain greek yogurt')
   const planLabel = await A.b.ev(`[...document.querySelectorAll('button.primary')].map(x=>x.innerText.trim()).join('|')`)
   await exact(A, 'Plan it'); await sleep(4500)
@@ -238,9 +241,9 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
   await tabA('Ask')
   await askOn(A, 'Two eggs and a slice of rye bread')
   // Choosing another day with an answer on screen asks the question again for that day (docs/design.md, 2 November): wait for the new answer before logging it.
-  await exact(A, 'Yesterday'); await sleep(1500)
+  await pickDay(A, 'Yesterday'); await sleep(1500)
   for (let i = 0; i < 120 && !(await A.b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.trim()==='Log it' && !x.disabled)`)); i++) await sleep(500)
-  const beforeLog = await A.b.ev(`({ pressed: document.querySelector('.day-picker [aria-pressed="true"]')?.innerText ?? null, buttons: [...document.querySelectorAll('.act-bar button')].map((x) => x.innerText.trim() + (x.disabled ? ' (disabled)' : '')), head: (document.querySelector('.card.answer')?.innerText ?? '').slice(0, 80) })`)
+  const beforeLog = await A.b.ev(`({ pressed: document.querySelector('.day-chip')?.innerText.trim() ?? null, buttons: [...document.querySelectorAll('.act-bar button')].map((x) => x.innerText.trim() + (x.disabled ? ' (disabled)' : '')), head: (document.querySelector('.card.answer')?.innerText ?? '').slice(0, 80) })`)
   const clicked = await exact(A, 'Log it'); await sleep(4500)
   const all = await diaryRows()
   const yest = all.filter((r) => r.day === iso(-1) && r.planned !== true)
@@ -304,7 +307,7 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
     check('W21a', 'a visitor sees the landing page with the key "Ask a question"', /Ask a question/.test(t) && !/Try DiaBite/.test(t), t.slice(0, 120))
     await press('Ask a question'); await sleep(1200)
     t = await text()
-    const picker = await C.ev(`!!document.querySelector('.day-picker')`)
+    const picker = await C.ev(`!!document.querySelector('.day-picker, .day-chip')`)
     check('W21b', 'the Ask screen opens with the banner "Counting for a typical adult." and no day picker', /Counting for a typical adult\./.test(t) && !picker, JSON.stringify([t.slice(0, 80), picker]))
     // An answer that costs a meal (a question first does not count): ask until one does, up to three tries.
     let costed = false
