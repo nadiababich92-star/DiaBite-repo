@@ -238,6 +238,7 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
   await askOn(A, 'A medium apple and a cup of cooked white rice')
   const appleBtn = `[...document.querySelectorAll('.portions li')].find(li => /apple/i.test(li.innerText))?.querySelector('.weight-btn')`
   const hadButton = await A.b.ev(`!!(${appleBtn})`)
+  const seenAnswer = await A.b.ev(`(document.querySelector('.card.answer')?.innerText ?? 'no answer card').replace(/\\n+/g, ' | ').slice(0, 160)`)
   await A.b.ev(`(${appleBtn})?.click()`); await sleep(400)
   // An answer that is a question first has no editor: the check below then fails with what it saw, instead of the script crashing.
   await A.b.ev(`(()=>{const s=document.querySelector('.weight-edit select'); if(!s) return; s.value='g'; s.dispatchEvent(new Event('change',{bubbles:true}))})()`); await sleep(200)
@@ -247,12 +248,13 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
   for (let i = 0; i < 40; i++) { await sleep(500); if (await A.b.ev(`!!document.querySelector('.card.answer.recalc')`)) break }
   const mine = await A.b.ev(`[...document.querySelectorAll('.portions li')].filter(li => /your weight/.test(li.innerText)).map(li => li.innerText.replace(/\\n+/g, ' ').slice(0, 80))`)
   const recalcShown = await A.b.ev(`!!document.querySelector('.card.answer.recalc')`)
-  check('W20', 'device A: tap the apple\'s weight, type 120, Done: the meal is counted again and the line says "your weight"', hadButton && recalcShown && Array.isArray(mine) && mine.length === 1 && /apple/i.test(mine[0]), JSON.stringify([hadButton, recalcShown, mine]))
+  check('W20', 'device A: tap the apple\'s weight, type 120, Done: the meal is counted again and the line says "your weight"', hadButton && recalcShown && Array.isArray(mine) && mine.length === 1 && /apple/i.test(mine[0]), JSON.stringify([hadButton, recalcShown, mine, seenAnswer]))
   const weightsLine = await A.b.ev(`document.querySelector('.recalc .weights-used')?.innerText ?? ''`)
   check('W20b', 'the card\'s "Weights I used" still names the rice, which was left alone, and no longer names the apple', /rice/i.test(weightsLine) && !/apple/i.test(weightsLine), JSON.stringify(weightsLine))
-  await exact(A, 'Log it'); await sleep(5000)
+  const logButtons20 = await A.b.ev(`[...document.querySelectorAll('.act-bar button.primary')].map((x) => x.innerText.trim() + (x.disabled ? ' (disabled)' : ''))`)
+  const clicked20 = await exact(A, 'Log it'); await sleep(5000)
   const corrected = (await diaryRows()).filter((r) => /apple/i.test(String(r.food_id)) && r.planned !== true)
-  check('W20c', 'Log it keeps the corrected weight: the diary row is 120 g, basis stated, said "120 g"', corrected.some((r) => Number(r.grams) === 120 && r.snapshot?.basis === 'stated' && /120 g/.test(String(r.snapshot?.said ?? ''))), JSON.stringify(corrected.map((r) => [r.food_id, r.grams, r.snapshot?.basis, r.snapshot?.said])))
+  check('W20c', 'Log it keeps the corrected weight: the diary row is 120 g, basis stated, said "120 g"', corrected.some((r) => Number(r.grams) === 120 && r.snapshot?.basis === 'stated' && /120 g/.test(String(r.snapshot?.said ?? ''))), JSON.stringify({ corrected: corrected.map((r) => [r.food_id, r.grams, r.snapshot?.basis, r.snapshot?.said]), logButtons20, clicked20, last: (await diaryRows()).slice(-4).map((r) => [r.food_id, r.grams, r.planned]) }))
 }
 
 // ── a visitor with no account (docs/specs/anon-evals.md, W21): free answers, the limit, the locked tabs. Skipped while /health says freeAnswers is 0. ─────
