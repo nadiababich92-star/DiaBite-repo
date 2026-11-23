@@ -33,7 +33,7 @@ import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
 import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
 import { alternativesForMeal, findAlternatives, SWAP_ENERGY_BAND, SWAP_MIN_GAIN, SWAP_MIN_GAIN_SHARE } from '../server/compute'
-import { ALLOWED, mayReplace, swapClass } from '../server/roles'
+import { ALLOWED, mayReplace, potatoKind, swapClass } from '../server/roles'
 import { validateAsk } from '../server/guard'
 import { getSession, putSession } from '../server/sessions'
 import { gramsFor, householdUnitsFor, needsWeightHint, quantityError, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
@@ -2502,6 +2502,27 @@ hangMisses.forEach((m) => console.log(m))
     const agentSrc = readFileSync(join(ROOT, 'server', 'agent.ts'), 'utf8')
     const logBody = agentSrc.slice(agentSrc.indexOf('function logTurn'), agentSrc.indexOf('function logTurn') + 1800)
     if (/portionSwaps/.test(logBody)) miss('SW15 logTurn mentions portionSwaps')
+  }
+  // SW16: the noise a starch collects from the survey layer (#88): the same potato cooked another way, a vegetable nobody serves in its place.
+  {
+    let checked = 0
+    for (const phrase of ['baked potato', 'a baked potato with skin', 'boiled potato', 'mashed potatoes', 'sweet potato', 'white rice', 'spaghetti']) {
+      const id = await idOf(phrase)
+      if (!id) continue
+      const rec = getRecord(id)
+      const cls = swapClass(rec)
+      const alts = await findAlternatives(store, { foodId: id, grams: rec.defaultPortion, maxGL: 1000, mealGL: 40, remainingGL: 0.05, topK: 5 })
+      checked++
+      for (const a of alts) {
+        if (a.change !== 'swap') continue
+        const got = getRecord(a.id)
+        const ak = potatoKind(rec.name)
+        if (ak && potatoKind(got.name) === ak) miss(`SW16 "${phrase}": ${a.label} is the same potato cooked another way`)
+        if ((cls === 'starch' || cls === 'cooked-grain') && swapClass(got) === 'veg' && a.id.startsWith('usda:')) miss(`SW16 "${phrase}": ${a.label} is a survey vegetable offered for a starch`)
+      }
+    }
+    if (checked < 5) miss(`SW16 only ${checked} of the 7 starch anchors resolved`)
+    if (potatoKind('Potato, canned') !== 'white' || potatoKind('Sweet potato, baked') !== 'sweet' || potatoKind('Potato salad') !== 'white' || potatoKind('Rice') !== null) miss('SW16 potatoKind is wrong')
   }
   console.log(`\nswaps     ${misses.length === 0 ? 'ok' : 'WRONG'}  (${withLoad} anchors with a load)`)
   misses.forEach((m) => console.log(m))

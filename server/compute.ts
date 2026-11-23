@@ -5,7 +5,7 @@
 import { availableCarbs, dayGlLevel, glLevel, glycemicLoad, nutrientsFor } from '../src/lib/glycemic'
 import { isAvoided, type AvoidList } from './avoid'
 import { asFood, getRecord, hasNoLoad, householdMeasure, loadFoods, stepUnit, summary, type PortionRow } from './foods'
-import { mayReplace, swapClass } from './roles'
+import { mayReplace, potatoKind, swapClass } from './roles'
 import { gramsFor, householdUnitsFor, saidText, unitsFor } from './quantity'
 import { embed, type VectorStore } from './embeddings'
 import { resolvePhrases, sameFamily, sameFood } from './resolve'
@@ -365,7 +365,13 @@ export async function findAlternatives(
     const c = costAt(rec.id, q)
     if (!c || c.gl > req.maxGL) continue
     // The same kind of food, and about the same amount of it.
-    if (!mayReplace(anchorClass, swapClass(rec))) continue
+    const recClass = swapClass(rec)
+    if (!mayReplace(anchorClass, recClass)) continue
+    // A potato is not swapped for another way of cooking the same potato (canned, mashed, baked), and a survey vegetable nobody orders in place of
+    // a starch (burdock, parsnips) is not offered for one: the vegetable that replaces a potato or rice is one of our own.
+    const ap = potatoKind(anchor.name)
+    if (ap && potatoKind(rec.name) === ap) continue
+    if ((anchorClass === 'starch' || anchorClass === 'cooked-grain') && recClass === 'veg' && rec.id.startsWith('usda:')) continue
     // A survey record that is a prepared dish ("pasta, whole grain, with tomato sauce and poultry") is not a swap for a plain food, only for another dish.
     if (rec.id.startsWith('usda:') && COMPOSITE.test(rec.name) && !COMPOSITE.test(anchor.name)) continue
     if (Math.abs(c.kcal - anchorKcal) > SWAP_ENERGY_BAND * anchorKcal) continue

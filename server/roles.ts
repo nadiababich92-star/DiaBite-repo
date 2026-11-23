@@ -93,3 +93,12 @@ export const ALLOWED: Record<SwapClass, SwapClass[]> = {
 }
 
 export const mayReplace = (anchor: SwapClass, candidate: SwapClass): boolean => candidate !== 'other' && ALLOWED[anchor].includes(candidate)
+
+/**
+ * Which potato a name is, when it is one: "Potato, canned" for "Potato, baked" is the same food in another tin, not a swap. A sweet potato is
+ * a different food from a white one. Anything that is not a potato is null.
+ */
+export function potatoKind(name: string): 'white' | 'sweet' | null {
+  if (/\b(sweet potato(es)?|yams?)\b/i.test(name)) return 'sweet'
+  return /\bpotato(es)?\b/i.test(name) ? 'white' : null
+}
