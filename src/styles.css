@@ -841,7 +841,11 @@ button.step-day:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; 
 .menu-meal .name { font-family: var(--serif); font-weight: 600; font-size: 18px; letter-spacing: -0.01em; line-height: 1.25; }
 .menu-nums { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .menu-meal .ingredients { font-size: 14px; color: var(--text-dim); margin: 8px 0 4px; }
-.recipe-more summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--accent); min-height: 44px; display: flex; align-items: center; }
+.recipe-more summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--accent); min-height: 44px; display: flex; align-items: center; list-style: none; }
+/* A flex summary loses the browser's own marker, so the card did not look like it opens: a caret in the text colour, turned when open. */
+.recipe-more summary::-webkit-details-marker { display: none; }
+.recipe-more summary::after { content: ''; flex: none; margin-left: 8px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid currentColor; }
+.recipe-more[open] > summary::after { transform: rotate(180deg); }
 .recipe-more .recipe { margin: 0 0 8px; font-size: 14px; color: var(--text-dim); font-style: italic; }
 .menu-actions { gap: 12px; margin-top: 6px; }
 .menu-added { margin: 6px 0 0; font-size: 14px; }

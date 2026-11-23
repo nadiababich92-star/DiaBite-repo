@@ -874,6 +874,30 @@ recorrectMisses.forEach((m) => console.log(m))
   if (bits.length) process.exitCode = 1
 }
 
+// Navigation (docs/engineering/navigation.md): the home-screen card lives in Settings, inside Help, for a person and a visitor alike; Profile no longer holds it;
+// a folded card shows a caret. Static renders and the source; npm run screens reads the live page.
+{
+  const bits: string[] = []
+  const here = dirname(fileURLToPath(import.meta.url))
+  const noop = () => {}
+  const props = { account: null, onFeedback: noop, onHowItWorks: noop, onGlInfo: noop, onClinicianSummary: noop }
+  for (const [who, extra] of [['a person', {}], ['a visitor', { anonymous: { onSignIn: noop } }]] as const) {
+    const html = renderToStaticMarkup(createElement(SettingsPage, { ...props, ...extra }))
+    const help = html.slice(html.indexOf('<h2>Help</h2>'))
+    if (!/<details class="recipe-more"><summary>Put DiaBite on your home screen<\/summary>/.test(help)) bits.push(`Settings for ${who} has no home-screen card inside Help`)
+    if (!(help.indexOf('How it works') < help.indexOf('Put DiaBite on your home screen'))) bits.push(`Settings for ${who}: the card is not under the Help keys`)
+    for (const h of ['iPhone or iPad', 'Android', 'Computer']) if (!help.includes(`<h3>${h}</h3>`)) bits.push(`Settings for ${who}: the card lacks "${h}"`)
+  }
+  if (/home screen/i.test(readFileSync(join(here, '../src/components/ProfilePage.tsx'), 'utf8'))) bits.push('Profile still names the home screen')
+  const how = readFileSync(join(here, '../src/components/HowItWorks.tsx'), 'utf8')
+  if (!how.includes('<dd>Your answers about yourself, your daily targets and the foods you leave out.</dd>') || !how.includes('and help, including how to put DiaBite on your home screen.</dd>')) bits.push('How it works still says the card is in Profile')
+  const css = readFileSync(join(here, '../src/styles.css'), 'utf8')
+  if (!/^\.recipe-more summary::after \{[^}]*content: ''[^}]*currentColor/m.test(css) || !/^\.recipe-more\[open\] > summary::after \{ transform: rotate\(180deg\); \}/m.test(css)) bits.push('a folded card shows no caret, or it does not turn when open')
+  console.log(`\nnav       ${bits.length === 0 ? 'ok' : 'WRONG'}  (the home-screen card, the caret)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
 // Watching the test users and hearing from them: when the feedback card is asked, and what the weekly report counts.
 {
   const bits: string[] = []

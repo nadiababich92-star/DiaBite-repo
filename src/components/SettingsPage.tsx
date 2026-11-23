@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { loadTheme, saveTheme } from '../lib/theme'
 import type { ThemeChoice } from '../lib/theme'
+import { HomeScreenCard } from './HomeScreenCard'
 
 interface Props {
   /** The account: what a signed-in person can do with their data, or the way in for someone who is not. */
@@ -62,6 +63,7 @@ export default function SettingsPage({ account, onFeedback, onHowItWorks, onGlIn
           <button className="ghost" onClick={onGlInfo}>What are GI and GL?</button>
           {!anonymous && <button className="ghost" onClick={onFeedback}>Send feedback</button>}
         </div>
+        <HomeScreenCard />
       </section>
     </>
   )

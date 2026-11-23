@@ -177,8 +177,27 @@ try {
       await b.ev(`document.querySelector('.plan-inline')?.scrollIntoView({block:'center'})`); await sleep(400)
       await shot('menu-plan')
     }
+    // The Menu's recipe disclosure shows a caret too (the same class).
+    const menuCaret = await b.ev(`(() => { const s = document.querySelector('.menu-meal .recipe-more summary'); return s ? getComputedStyle(s, '::after').borderTopStyle : 'no recipe' })()`)
     await tab('Profile'); await shot('you')
+    const profileHome = await b.ev(`/home screen/i.test(document.querySelector('main')?.innerText ?? '')`)
     await tab('Settings'); await shot('settings')
+    // The home-screen card (docs/engineering/navigation.md): in Settings, inside Help, with a caret; opened, its three lists; never in Profile.
+    {
+      const nav = await b.ev(`(() => {
+        const help = [...document.querySelectorAll('section.card')].find((c) => c.querySelector('h2')?.innerText.trim() === 'Help')
+        const det = help?.querySelector('details.recipe-more'), sum = det?.querySelector('summary')
+        const caret = sum ? getComputedStyle(sum, '::after') : null
+        if (det) det.open = true
+        const heads = det ? [...det.querySelectorAll('h3')].map((h) => h.innerText.trim()) : []
+        if (det) det.open = false
+        return { inHelp: !!det, summary: sum?.innerText.trim() ?? null, caret: caret ? caret.content + ' ' + caret.borderTopStyle : null, heads }
+      })()`)
+      const ok = nav.inHelp && nav.summary === 'Put DiaBite on your home screen' && nav.caret && !/^none/.test(nav.caret) && /solid/.test(nav.caret)
+        && nav.heads.join('|') === 'iPhone or iPad|Android|Computer' && !profileHome && (menuCaret === 'solid' || menuCaret === 'no recipe')
+      console.log(`  ${ok ? 'PASS' : 'FAIL'}  the home-screen card is in Settings > Help with a caret, not in Profile; the Menu's recipe shows a caret (${size.name})${ok ? '' : '  → ' + JSON.stringify({ nav, profileHome, menuCaret })}`)
+      if (!ok) process.exitCode = 1
+    }
     if (process.env.TOUR === '1') { await click('How it works'); await sleep(700); await shot('how-it-works'); await click('Close') }
     if (errs.length) console.log('  script errors:', errs.slice(0, 2))
     await b.close()
