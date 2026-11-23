@@ -7190,7 +7190,7 @@
     {
       "id": "SWA3",
       "dimension": "helpful",
-      "query": "A glass of orange juice",
+      "query": "8 oz of orange juice",
       "ground_truth": "Does not fit and nothing is worth swapping: no swap is offered and the answer invents none.",
       "context": {
         "budget": {

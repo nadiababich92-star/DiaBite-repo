@@ -56,7 +56,7 @@ And one **style** key, not gating (the existing `style: true` mechanism): `nextN
 |---|---|---|
 | SW-A1 | `234 g of cooked oatmeal`; `budget {glBudget: 10, carbsG: 40, kcal: 600}`, `entries: []` | tools `resolve_foods`, `compute_meal`; `verified: true`; `alternativesWorthy`; `alternativesFirstIsBest`; no returned alternative of class baked (read through `name`: none contains `muffin`, `cups`, `bar`); style `nextNamesFirst` |
 | SW-A2 | `A large banana`; same budget | `verified: true`; `alternativesWorthy`; `alternativesHavePortion`; style `nextNamesFirst` |
-| SW-A3 | the anchor found by the engine block (`SW11b`): the first phrase of the `ANCHORS` list whose `alternativesForMeal` returns an empty list with a meal that does **not** fit; written into the case when the block is run | `verified: true`; `noAlternatives`; the answer carries `afterMeal.remaining` and names no change (style) |
+| SW-A3 | `8 oz of orange juice` (GL 11.8; found by the engine: with 3 or 5 left `alternativesForMeal` returns no swap and no smaller portion; "a glass" has no weight, so the agent would ask) with `glBudget 3` | `verified: true`; `noAlternatives`; the answer carries `afterMeal.remaining` and names no change (style) |
 | SW-A4 | `A banana` with `avoid { words: ['cherr'] }`; budget `glBudget 8` | `verified: true`; no alternative's name contains "almond"; `alternativesWorthy` |
 
 The existing cases that must still pass: `alternativesReturned` + `alternativesGramsPassed` (H3 family), the "a meal that fits returns no alternatives and the Next action says none is needed" case, and the whole of the current set.

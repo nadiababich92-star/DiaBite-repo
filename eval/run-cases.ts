@@ -67,10 +67,11 @@ function fieldQuestions(): Case[] {
 }
 
 const only = process.env.ONLY // "cases" or "field"
+const ids = process.env.IDS?.split(',').map((x) => x.trim()).filter(Boolean)   // IDS=H5,CL1 reruns just those cases
 const runnable = [
   ...(only === 'field' ? [] : cases.filter((c) => !c.query.startsWith('<'))),
   ...(only === 'cases' ? [] : fieldQuestions()),
-]
+].filter((c) => !ids || ids.includes(c.id))
 
 /** Tool definitions for the evaluators, derived from the spec so they cannot drift. */
 function toolDefinitions() {
@@ -317,6 +318,11 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
       const m = joined.exec(answer)
       const stated = m?.[1] ?? m?.[2]
       if (stated === undefined) continue
+      // A smaller portion the engine offered ("three quarters of the oatmeal (176 g)") is a sentence about the offer, not a claim about what was costed:
+      // when the stated weight is the weight of an alternative the call returned (and not the costed one), it is read from the result, not the sentence.
+      const offered = ((callOf(r, 'compute_meal')?.result as { alternatives?: { change?: string; grams?: number; portion?: number; unit?: string }[] } | undefined)?.alternatives ?? [])
+        .filter((a) => a.change === 'portion').map((a) => Math.round(a.grams ?? (a.unit === 'g' ? a.portion ?? 0 : 0)))
+      if (offered.includes(Math.round(Number(stated))) && Math.abs(Number(stated) - grams) >= 0.5) continue
       // "eggs 55 g each" against 110 g costed is two eggs, stated correctly.
       const each = new RegExp(`${esc}[^.;]{0,20}?${stated}\\s*g\\s+each`, 'i').test(answer)
       const n = Number(stated)
