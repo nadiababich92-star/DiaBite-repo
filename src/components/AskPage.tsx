@@ -15,6 +15,10 @@ import { dayLabel, eaten, mealForNow, noLoadNote, portionText, viewEntry } from 
 import { swapNamedIn, type SwapOffer } from '../lib/swap'
 import { MEAL_LABELS, menuHidden } from '../lib/menu'
 import DayPicker from './DayPicker'
+import { SignInCard } from './SignInCard'
+import { AnonBanner } from './AnonBanner'
+import { LIMIT_BODY, limitTitle, retryLine } from '../lib/anon'
+import { ANON_DISCLOSURE } from '../lib/profile'
 import { loadNudge, saveNudge } from '../lib/storage'
 import { useToday } from '../lib/useToday'
 import { isDemo } from '../lib/demo'
@@ -37,6 +41,11 @@ interface Props {
   tourSeen: readonly TourStep[]
   onTourSeen: (seen: TourStep[]) => void
   tourSuspended: boolean
+  /**
+   * A visitor with no account (docs/specs/anon-screen.md): the banner, no day picker, no tips or feedback card, **Sign in to log this**, and the limit card.
+   * `onSignIn` opens the sign-in screen; `onOff` is for the engine saying free answers were switched off; `freeAnswers` is how many it allows a day.
+   */
+  anonymous?: { onSignIn: () => void; onOff: () => void; freeAnswers: number }
 }
 
 const SAMPLES = [
@@ -369,13 +378,16 @@ function summarize(step: TraceStep): string {
   }
 }
 
-export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, logTarget, onClearTarget, onSessionEnded, tourSeen, onTourSeen, tourSuspended }: Props) {
+export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, logTarget, onClearTarget, onSessionEnded, tourSeen, onTourSeen, tourSuspended, anonymous }: Props) {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   // Set when the engine says "not now". Never locks the button: the safety rules
   // still answer while a limit is on, so only the server may decide who waits.
-  const [limited, setLimited] = useState<{ scope: 'ip' | 'session' | 'daily' | 'user'; minutes: number } | null>(null)
+  const [limited, setLimited] = useState<{ scope: 'ip' | 'session' | 'daily' | 'user' | 'anon_daily'; minutes: number } | null>(null)
+  // A visitor's free answers are used: set when the engine says so (with when another comes), and shown instead of an answer. `anonCount` counts the costed answers this page has shown, to put the same card under the last free one.
+  const [freeLimit, setFreeLimit] = useState<{ retryAfterSec?: number } | null>(null)
+  const [anonCount, setAnonCount] = useState(0)
   const [reply, setReply] = useState<AgentResponse | null>(null)
   const [asked, setAsked] = useState('')
   // The answer to a question the agent asked, typed right under it rather than in the box above the screen.
@@ -544,13 +556,13 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
             setFieldFor(at)
           }
           setRecalcError('')
-        } else if (e instanceof SignInRequiredError) onSessionEnded?.()
+        } else if (e instanceof SignInRequiredError) { if (anonymous) anonymous.onOff(); else onSessionEnded?.() }
         else if (e instanceof RateLimitedError) setRecalcError('That is a lot of changes at once. Try again in a minute.')
         else setRecalcError("Couldn't count that again. Your original answer is unchanged.")
       } finally { setRecalcBusy(false) }
     }, 400)
     return () => { clearTimeout(timer); ctl.abort() }
-  }, [grams, typed, removed, swap, baseLines, receipt, turn, onSessionEnded, profile.units])
+  }, [grams, typed, removed, swap, baseLines, receipt, turn, onSessionEnded, profile.units, anonymous])
 
   // Another day is another budget: an answer on screen was counted against the old one, so it is asked again for the new day.
   function pickDay(d: string) {
@@ -566,7 +578,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     const forDay = opts.day ?? day
     abort.current?.abort()
     abort.current = new AbortController()
-    setBusy(true); setError(null); setLimited(null); setReply(null); setShowReceipt(true); setLogged(false); setLogNote(''); setAsked(q); setReplyText('')
+    setBusy(true); setError(null); setLimited(null); setFreeLimit(null); setReply(null); setShowReceipt(true); setLogged(false); setLogNote(''); setAsked(q); setReplyText('')
     setEditing(true); setGrams({}); setRemoved([]); setTyped({}); setMine([]); setFieldFor(null); setRefusal(null); setSwap(null); setRecalc(null); setRecalcError('')
     const sid = fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId()
     setTurn(sid)
@@ -584,11 +596,14 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
           : { foodId: engineId(e), grams: e.grams })),
       }, abort.current.signal, await accessToken())
       setReply(res)
+      if (anonymous && lastMealCall(res.trace)) setAnonCount((n) => n + 1)
       // Lab 3.2: keep every successful exchange as evaluation data.
       if (!isDemo) setSaved(saveResponse(q, res))
     } catch (e) {
       if (e instanceof SignInRequiredError) {
-        onSessionEnded?.()
+        // A visitor whose free answers are used sees the card in place of an answer; one whose free answers were switched off goes back to the landing page.
+        if (anonymous) { if (e.reason === 'free_limit') setFreeLimit({ retryAfterSec: e.retryAfterSec }); else anonymous.onOff() }
+        else onSessionEnded?.()
       } else if (e instanceof RateLimitedError) {
         setLimited({ scope: e.scope, minutes: Math.max(1, Math.ceil(e.retryAfterSec / 60)) })
       } else if ((e as Error).name !== 'AbortError') setError((e as Error).message)
@@ -654,12 +669,14 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   // recalculated card, so the person does not scroll past the original answer to reach it.
   const logBlock = receipt ? (
     <>
-      <p className="muted log-day">
+      {!anonymous && <p className="muted log-day">
         Adding to {dayLabel(day, today)}.{' '}
         <button type="button" className="link" onClick={() => { dayPick.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }); dayPick.current?.querySelector('button')?.focus({ preventScroll: true }) }}>Change day</button>
-      </p>
+      </p>}
       <div className="row act-bar">
-        <button className="primary" data-tour="log" onClick={logIt} disabled={logged}>{logged ? (logDay && logDay > today ? 'Planned' : 'Logged') : logDay && logDay > today ? 'Plan it' : active?.partial || active?.unscored ? 'Log what was counted' : 'Log it'}</button>
+        {anonymous
+          ? <button className="primary" data-tour="log" onClick={anonymous.onSignIn}>Sign in to log this</button>
+          : <button className="primary" data-tour="log" onClick={logIt} disabled={logged}>{logged ? (logDay && logDay > today ? 'Planned' : 'Logged') : logDay && logDay > today ? 'Plan it' : active?.partial || active?.unscored ? 'Log what was counted' : 'Log it'}</button>}
         <button className="ghost" data-tour="calc" onClick={() => setShowReceipt((v) => !v)}>{showReceipt ? 'Hide calculation' : 'Calculation'}</button>
         {!receipt.carbsOnly && <button className="ghost" aria-expanded={editing} onClick={() => setEditing((v) => !v)}>{editing ? 'Done' : receipt.assumed ? 'Recipe' : 'Portions'}</button>}
       </div>
@@ -684,10 +701,11 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
              aria-label={`${Math.round(Math.max(0, targets.glBudget - left) * 10) / 10} of ${targets.glBudget} glycemic load used ${dayWord}`}>
           <span style={{ width: `${Math.min(100, Math.max(0, ((targets.glBudget - left) / Math.max(1, targets.glBudget)) * 100))}%` }} />
         </div>
-        <div className="ask-day" ref={dayPick}>
+        {anonymous && <AnonBanner onMakeItYours={anonymous.onSignIn} disclosure={ANON_DISCLOSURE} />}
+        {!anonymous && <div className="ask-day" ref={dayPick}>
           <DayPicker value={day} today={today} onChange={pickDay} />
           {day !== today && <p className="muted ask-day-note">The verdict is for {dayLabel(day, today)}: it counts what was eaten on that day.</p>}
-        </div>
+        </div>}
         <h2 className="ask-title">What are you about to eat?</h2>
         {!isDemo && <div className="row lab-row">
           {saved > 0 && <button className="ghost" onClick={downloadResponses}>Download Responses</button>}
@@ -749,7 +767,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
         <section className="card tone-blocked" role="status">
           <div className="eyebrow-line">A short pause</div>
           <p style={{ margin: 0 }}>
-            {limited.scope === 'daily'
+            {limited.scope === 'daily' || limited.scope === 'anon_daily'
               ? 'DiaBite has reached its limit for today and will be back tomorrow. Dosing and safety questions still work.'
               : limited.scope === 'user'
               ? `You've asked a lot of questions today. Try again in about ${limited.minutes} ${limited.minutes === 1 ? 'minute' : 'minutes'}.`
@@ -854,9 +872,16 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
         </>
       )}
       </div>
+      {anonymous && freeLimit && (
+        <SignInCard className="anon-limit" title={limitTitle(anonymous.freeAnswers)} body={LIMIT_BODY} line={retryLine(freeLimit.retryAfterSec) ?? undefined} onSignIn={anonymous.onSignIn} />
+      )}
+      {/* The last free answer says so, under the answer: the same card, with no wait to name (the engine only says when another comes once it refuses). */}
+      {anonymous && !freeLimit && reply && receipt && anonCount >= anonymous.freeAnswers && !busy && (
+        <SignInCard className="anon-limit" title={limitTitle(anonymous.freeAnswers)} body={LIMIT_BODY} onSignIn={anonymous.onSignIn} />
+      )}
       {/* After everything else: the question box stays first on the screen, and the card is met on the way down, never in front of an answer. */}
-      {card && <FeedbackNudge milestone={card} onAsked={cardAsked} onClose={cardClosed} />}
-      <Tour seen={tourSeen} onSeen={onTourSeen} ctx={{ hasReply: !!reply, hasReceipt: !!receipt, assumed: !!receipt?.assumed, busy, suspended: tourSuspended }} />
+      {!anonymous && card && <FeedbackNudge milestone={card} onAsked={cardAsked} onClose={cardClosed} />}
+      {!anonymous && <Tour seen={tourSeen} onSeen={onTourSeen} ctx={{ hasReply: !!reply, hasReceipt: !!receipt, assumed: !!receipt?.assumed, busy, suspended: tourSuspended }} />}
     </div>
   )
 }

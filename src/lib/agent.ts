@@ -87,7 +87,7 @@ export function avoidOf(p: Profile): AgentRequest['avoid'] {
 
 /** The engine said "not now": over a limit, with how long to wait. Not an agent answer. */
 export class RateLimitedError extends Error {
-  constructor(public scope: 'ip' | 'session' | 'daily' | 'user', public retryAfterSec: number) {
+  constructor(public scope: 'ip' | 'session' | 'daily' | 'user' | 'anon_daily', public retryAfterSec: number) {
     super('rate_limited')
   }
 }
@@ -172,7 +172,7 @@ async function askOnce(req: AgentRequest, signal: AbortSignal, token?: string | 
   if (res.status === 403 && !renewed) return askOnce({ ...req, sessionId: renewSession() }, signal, token, true)
   if (res.status === 404) throw new Error('The agent is not reachable — is the engine deployed?')
   if (res.status === 429) {
-    const body = await res.json().catch(() => ({})) as { scope?: 'ip' | 'session' | 'daily' | 'user'; retryAfterSec?: number }
+    const body = await res.json().catch(() => ({})) as { scope?: 'ip' | 'session' | 'daily' | 'user' | 'anon_daily'; retryAfterSec?: number }
     const wait = Number(body.retryAfterSec ?? res.headers.get('retry-after')) || 60
     throw new RateLimitedError(body.scope ?? 'ip', wait)
   }

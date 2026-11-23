@@ -2,10 +2,17 @@ import { useEffect } from 'react'
 import Logo, { Wordmark } from './Logo'
 import { LANDING, longDate } from '../data/landing'
 import { pinThemeColor } from '../lib/theme'
+import { landingFreeLine } from '../lib/anon'
 
 interface Props {
   /** "Try DiaBite" and "Sign in": the parent shows the sign-in screen. */
   onEnter: () => void
+  /**
+   * How many free answers a visitor may have without an account, from the engine (0 or absent: none). When above 0 the keys read
+   * "Ask a question" and open the Ask screen through `onAsk`; "Sign in" stays in the header (docs/specs/anon-screen.md, section 3).
+   */
+  freeAnswers?: number
+  onAsk?: () => void
 }
 
 const EMERGENCY =
@@ -20,8 +27,9 @@ const shortDate = (iso: string) => longDate(iso).toUpperCase().replace(/(\d+) (\
  * nothing, asks the network for nothing but its own clip, and sets no cookie. The receipt is a real answer of the
  * app, kept true by `npm run eval`; no number on this page comes from a model.
  */
-export default function Landing({ onEnter }: Props) {
+export default function Landing({ onEnter, freeAnswers = 0, onAsk }: Props) {
   const L = LANDING
+  const free = freeAnswers > 0 && !!onAsk
   // The page is always the dark one, so the browser's bar is too, whatever look the person chose for the app.
   useEffect(() => pinThemeColor('tape'), [])
   return (
@@ -42,8 +50,8 @@ export default function Landing({ onEnter }: Props) {
             <h1 id="landing-h1" className="lp-title">Can I <span className="lp-mark">eat</span> this?</h1>
             <p className="lp-lede">Describe a meal in your own words. DiaBite prints the receipt: whether it fits what is left of your day, and every step of the arithmetic.</p>
             <div className="lp-cta-row">
-              <button className="lp-key" type="button" onClick={onEnter}>Try DiaBite</button>
-              <span className="lp-small">Free to try. You sign in with your email; there is no password.</span>
+              <button className="lp-key" type="button" onClick={free ? onAsk : onEnter}>{free ? 'Ask a question' : 'Try DiaBite'}</button>
+              <span className="lp-small">{free ? landingFreeLine(freeAnswers) : 'Free to try. You sign in with your email; there is no password.'}</span>
             </div>
             <p className="lp-small">Being prepared for its first user sessions. Some things will be wrong.</p>
           </div>
@@ -176,7 +184,7 @@ export default function Landing({ onEnter }: Props) {
 
         <section className="lp-last">
           <p>Print your first receipt.</p>
-          <button className="lp-key lp-key-dark" type="button" onClick={onEnter}>Try DiaBite</button>
+          <button className="lp-key lp-key-dark" type="button" onClick={free ? onAsk : onEnter}>{free ? 'Ask a question' : 'Try DiaBite'}</button>
         </section>
       </main>
 

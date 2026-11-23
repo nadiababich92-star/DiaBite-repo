@@ -1089,6 +1089,13 @@ body:has(.landing) { background: #0a1812; }
 .summary-days th[scope='row'] { white-space: nowrap; color: var(--text); font-size: 14px; }
 .summary-footer { margin-top: 24px; font-size: 13px; color: var(--text-dim); }
 
+/* The first answers, signed out (docs/design.md, "The first answers, signed out"): only existing tokens, no new value. */
+.anon-banner { margin: 0 0 12px; font-size: 14px; line-height: 1.4; color: var(--text-dim); }
+.anon-banner .anon-make { color: var(--accent); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; padding: 2px 4px; }
+.anon-note { margin: 0 0 12px; }
+.signin-card, .anon-limit { margin-top: 12px; }
+.signin-card h2, .anon-limit h2 { margin-top: 0; }
+
 @page { size: auto; margin: 16mm; @bottom-right { content: 'Page ' counter(page) ' of ' counter(pages); font-size: 9pt; color: #000; } }
 @media print {
   html, body { background: #fff !important; }

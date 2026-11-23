@@ -13,8 +13,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
  * Both values are optional at build time: without them the app runs normally
  * and only the feedback form reports that it is not configured.
  */
-const url = import.meta.env.VITE_SUPABASE_URL
-const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+const url = import.meta.env?.VITE_SUPABASE_URL
+const key = import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY
 
 export const supabase: SupabaseClient | null =
   url && key

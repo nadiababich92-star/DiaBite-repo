@@ -13,10 +13,12 @@ interface Props {
   onGlInfo: () => void
   /** Opens "Summary for my clinician", a printable page of the person's own diary. */
   onClinicianSummary: () => void
+  /** A visitor with no account: appearance, help and one key to sign in. No account block, no clinician summary, no feedback (it needs a person). */
+  anonymous?: { onSignIn: () => void }
 }
 
 /** The app's own settings: how it looks, the account, help. The person's health answers stay in Profile. */
-export default function SettingsPage({ account, onFeedback, onHowItWorks, onGlInfo, onClinicianSummary }: Props) {
+export default function SettingsPage({ account, onFeedback, onHowItWorks, onGlInfo, onClinicianSummary, anonymous }: Props) {
   const [theme, setTheme] = useState<ThemeChoice>(loadTheme)
   const choose = (c: ThemeChoice) => { setTheme(c); saveTheme(c) }
 
@@ -38,21 +40,27 @@ export default function SettingsPage({ account, onFeedback, onHowItWorks, onGlIn
         <p className="muted theme-note">Tape is the dark page. Follow my phone uses Paper in the daytime and Tape after dark.</p>
       </section>
 
-      {account}
+      {anonymous ? (
+        <section className="card">
+          <h2>Keep your profile and diary</h2>
+          <p className="muted">Sign in with your email and they follow you to any device. There is no password.</p>
+          <button className="primary" onClick={anonymous.onSignIn}>Sign in</button>
+        </section>
+      ) : account}
 
-      <section className="card">
+      {!anonymous && <section className="card">
         <h2>For your clinician</h2>
         <p className="muted">A printable page of your last days of eating and your daily targets, to show a dietitian or doctor. It lists your condition and medicines. It does not include your email, age or weight. Nothing is sent anywhere: you print it or save it as a PDF.</p>
         <button id="open-clinician-summary" className="ghost" onClick={onClinicianSummary}>Summary for my clinician</button>
-      </section>
+      </section>}
 
       <section className="card">
         <h2>Help</h2>
-        <p className="muted">Tell us what was wrong, unclear or missing. It goes to the people building DiaBite.</p>
+        {!anonymous && <p className="muted">Tell us what was wrong, unclear or missing. It goes to the people building DiaBite.</p>}
         <div className="row">
           <button className="ghost" onClick={onHowItWorks}>How it works</button>
           <button className="ghost" onClick={onGlInfo}>What are GI and GL?</button>
-          <button className="ghost" onClick={onFeedback}>Send feedback</button>
+          {!anonymous && <button className="ghost" onClick={onFeedback}>Send feedback</button>}
         </div>
       </section>
     </>

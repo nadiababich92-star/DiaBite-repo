@@ -68,6 +68,12 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import MealCarbsLimit from '../src/components/MealCarbsLimit'
 import Logo, { Wordmark } from '../src/components/Logo'
 import ImportPrompt from '../src/components/ImportPrompt'
+import Landing from '../src/components/Landing'
+import SettingsPage from '../src/components/SettingsPage'
+import AskPage from '../src/components/AskPage'
+import { SignInCard } from '../src/components/SignInCard'
+import { AnonBanner } from '../src/components/AnonBanner'
+import { landingFreeLine, LIMIT_BODY, limitTitle, retryLine, SIGN_IN_CARDS } from '../src/lib/anon'
 import { ALLERGEN_PATTERNS, PATTERN_PATTERNS, AVOIDED_PATTERNS, dietaryReason } from '../src/lib/dietary'
 import { loadWeekState } from '../src/lib/menuStore'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type NudgeContext } from '../src/lib/nudge'
@@ -738,7 +744,70 @@ recorrectMisses.forEach((m) => console.log(m))
     if (signedIn) bits.push(`AN4 a signed-in turn was refused while only the anonymous ceiling was used: ${reasonOf(signedIn)}`)
     env({}); resetGuard()
   }
-  console.log(`\nanon      ${bits.length === 0 ? 'ok' : 'WRONG'}  (the scaffold)`)
+  // ── the screens (docs/specs/anon-evals.md, AS1 to AS7): static renders, and source checks for what a render cannot reach ──
+  {
+    const html = (el: ReturnType<typeof createElement>) => renderToStaticMarkup(el)
+    const noop = () => {}
+    const count = (h: string, w: string) => h.split(w).length - 1
+    // AS1: the landing page, free answers on and off.
+    const on = html(createElement(Landing, { onEnter: noop, freeAnswers: 3, onAsk: noop }))
+    const offL = html(createElement(Landing, { onEnter: noop }))
+    if (count(on, 'Ask a question') !== 2 || count(on, 'Try DiaBite') !== 0) bits.push(`AS1 with free answers on the keys are: Ask a question x${count(on, 'Ask a question')}, Try DiaBite x${count(on, 'Try DiaBite')}`)
+    if (!on.includes('>Sign in<')) bits.push('AS1 the landing page lost its Sign in key')
+    if (!on.includes('Free to try. No sign-up for your first three answers.')) bits.push('AS1 the free line is missing or wrong')
+    if (count(offL, 'Try DiaBite') !== 2 || offL.includes('Ask a question') || !offL.includes('Free to try. You sign in with your email; there is no password.')) bits.push('AS1 with free answers off the landing page is not as before')
+    if (landingFreeLine(1) !== 'Free to try. No sign-up for your first answer.') bits.push(`AS1 the line for one answer: ${landingFreeLine(1)}`)
+    // AS2: the banner.
+    const b0 = html(createElement(AnonBanner, { onMakeItYours: noop, disclosure: '' }))
+    const b1 = html(createElement(AnonBanner, { onMakeItYours: noop, disclosure: 'For adults. Not for mealtime insulin or pregnancy. Not medical advice.' }))
+    if (!b0.includes('Counting for a typical adult.') || !/<button[^>]*class="link anon-make"[^>]*>Make it yours<\/button>/.test(b0)) bits.push('AS2 the banner text or its key is wrong')
+    if (b0.includes('anon-note')) bits.push('AS2 a disclosure paragraph is drawn while the line is empty')
+    if (!b1.includes('For adults. Not for mealtime insulin or pregnancy. Not medical advice.')) bits.push('AS2 the disclosure line is not drawn when set')
+    // AS3: the cards the locked tabs show, word for word.
+    for (const [name, card] of Object.entries(SIGN_IN_CARDS)) {
+      const h = html(createElement(SignInCard, { ...card, onSignIn: noop }))
+      if (!h.includes(`<h2>${card.title.replace(/'/g, '&#x27;')}</h2>`) || !h.includes(card.body.replace(/'/g, '&#x27;')) || count(h, 'class="primary"') !== 1 || !/class="primary"[^>]*>Sign in<\/button>/.test(h)) bits.push(`AS3 the ${name} card is wrong`)
+    }
+    if (SIGN_IN_CARDS.diary.title !== 'Sign in to keep a diary' || SIGN_IN_CARDS.menu.title !== 'Sign in to plan your week' || SIGN_IN_CARDS.profile.title !== 'Sign in to make the numbers yours') bits.push('AS3 a card title changed')
+    // AS4: the limit card and the line about when another free answer comes.
+    if (limitTitle(3) !== 'That was your third free answer for today') bits.push(`AS4 title: ${limitTitle(3)}`)
+    for (const [sec, want] of [[21600, 'Another free answer in about 6 hours.'], [5400, 'Another free answer in about 2 hours.'], [2400, 'Another free answer in about 40 minutes.'], [3600, 'Another free answer in about 1 hour.'], [60, 'Another free answer in about 1 minute.']] as const) {
+      if (retryLine(sec) !== want) bits.push(`AS4 ${sec} s says "${retryLine(sec)}"`)
+    }
+    if (retryLine(undefined) !== null || retryLine(0) !== null) bits.push('AS4 a line is drawn for a wait that is not known')
+    const lim = html(createElement(SignInCard, { className: 'anon-limit', title: limitTitle(3), body: LIMIT_BODY, line: retryLine(21600) ?? undefined, onSignIn: noop }))
+    if (!lim.includes('anon-limit') || !lim.includes(LIMIT_BODY) || !lim.includes('about 6 hours') || count(lim, 'class="primary"') !== 1) bits.push('AS4 the limit card is wrong')
+    // AS5: the Ask screen, with and without a visitor. The log key needs an answer on screen: the rehearsal (W21) reads it; here the source is read.
+    const askProps = { profile: ANON_PROFILE, targets: calculateTargets(ANON_PROFILE), diary: [], onLog: noop, tourSeen: [], onTourSeen: noop, tourSuspended: false }
+    const anonAsk = html(createElement(AskPage, { ...askProps, anonymous: { onSignIn: noop, onOff: noop, freeAnswers: 3 } }))
+    const userAsk = html(createElement(AskPage, askProps))
+    if (!anonAsk.includes('anon-banner') || anonAsk.includes('ask-day')) bits.push('AS5 the visitor\'s Ask lacks the banner or still has the day picker')
+    if (userAsk.includes('anon-banner') || !userAsk.includes('ask-day')) bits.push('AS5 a signed-in person\'s Ask has the banner or lost the day picker')
+    const askSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../src/components/AskPage.tsx'), 'utf8')
+    if (!askSource.includes('Sign in to log this') || !/anonymous\s*\?\s*<button className="primary" data-tour="log" onClick=\{anonymous\.onSignIn\}>Sign in to log this/.test(askSource)) bits.push('AS5 the visitor\'s log key does not read "Sign in to log this"')
+    // AS6: Settings for a visitor.
+    const setProps = { account: null, onFeedback: noop, onHowItWorks: noop, onGlInfo: noop, onClinicianSummary: noop }
+    const anonSet = html(createElement(SettingsPage, { ...setProps, anonymous: { onSignIn: noop } }))
+    if (!anonSet.includes('Appearance') || !anonSet.includes('Help') || count(anonSet, 'class="primary"') !== 1 || !/class="primary"[^>]*>Sign in<\/button>/.test(anonSet)) bits.push('AS6 the visitor\'s Settings lacks appearance, help or the one Sign in key')
+    if (/export|delete|account|clinician|feedback/i.test(anonSet)) bits.push('AS6 the visitor\'s Settings holds an account, export, delete, clinician or feedback line')
+    const userSet = html(createElement(SettingsPage, setProps))
+    if (!userSet.includes('Summary for my clinician') || !userSet.includes('Send feedback')) bits.push('AS6 a signed-in person\'s Settings lost the clinician summary or feedback')
+    // AS7: the style rules use only tokens (a source check).
+    const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../src/styles.css'), 'utf8')
+    const rules = css.split('\n').filter((l) => /^\.(anon-banner|anon-note|signin-card|anon-limit)\b|^\.signin-card, \.anon-limit/.test(l))
+    if (rules.length < 3) bits.push(`AS7 only ${rules.length} anonymous style rules were found`)
+    for (const l of rules) {
+      if (/#[0-9a-f]{3,8}\b/i.test(l) || /--[\w-]+\s*:/.test(l) || /\b(rgb|hsl)a?\(/i.test(l)) bits.push(`AS7 a rule has a raw colour or declares a custom property: ${l.slice(0, 80)}`)
+    }
+    // The device id header is sent only without a token (tested above), and no file stores the visitor's profile.
+    const agentSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../src/lib/agent.ts'), 'utf8')
+    if (!/authorization: `Bearer \$\{token\}` \} : \{ 'x-diabite-device': deviceId\(\) \}/.test(agentSource)) bits.push('AS-source the device header is not tied to having no token')
+    for (const f of ['../src/App.tsx', '../src/components/AskPage.tsx', '../src/lib/profile.ts', '../src/lib/storage.ts']) {
+      const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), f), 'utf8')
+      if (src.split('\n').some((l) => /ANON_PROFILE/.test(l) && /(saveProfile|localStorage|setItem)/.test(l))) bits.push(`AS-source ${f} writes the visitor's profile to storage`)
+    }
+  }
+  console.log(`\nanon      ${bits.length === 0 ? 'ok' : 'WRONG'}  (the first answers without an account)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }

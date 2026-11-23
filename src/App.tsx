@@ -15,12 +15,14 @@ import { GlHelpContext } from './components/GlHelp'
 import Onboarding from './components/Onboarding'
 import MenuPage from './components/MenuPage'
 import ProfilePage from './components/ProfilePage'
-import { calculateTargets, CARB_APPROACH_LABELS } from './lib/profile'
-import { signOutAndClear, useAuth, useSignInRequired } from './lib/auth'
+import { ANON_PROFILE, calculateTargets, CARB_APPROACH_LABELS } from './lib/profile'
+import { signOutAndClear, useAccess, useAuth } from './lib/auth'
+import { SignInCard } from './components/SignInCard'
+import { SIGN_IN_CARDS } from './lib/anon'
 import { supabaseConfigured } from './lib/supabase'
 import { loadDiary, loadProfile, loadTour, saveDiary, saveProfile, saveTour, thawWrites } from './lib/storage'
 import { initialSeen, STEP_ORDER, type TourStep } from './lib/tour'
-import { showLanding } from './lib/landingRule'
+import { authInUrl, showLanding, skipLanding } from './lib/landingRule'
 import { CONSENT_VERSION, LEGACY_DIARY_KEY, PENDING_KEY, loadAccount, mergeById, reconcileAfterFailedPush, useAccountSync } from './lib/sync'
 import type { DiaryEntry, MealType, Profile } from './types'
 
@@ -37,9 +39,19 @@ const TABS: { id: Tab; label: string; icon: JSX.Element }[] = [
 
 type AccountState = 'none' | 'loading' | 'ready' | 'failed'
 
+/** A visitor with no account has no diary, and nothing here is saved for them. */
+const NO_DIARY: DiaryEntry[] = []
+const ANON_KEY = 'diabite.anon'
+
 export default function App() {
   const auth = useAuth()
-  const signInRequired = useSignInRequired()
+  const access = useAccess()
+  const signInRequired = access.required
+  // A visitor who pressed "Ask a question" on the landing page: the Ask screen with the neutral profile, for this tab only (docs/specs/anon-screen.md, section 3).
+  const [anon, setAnon] = useState<boolean>(() => { try { return sessionStorage.getItem(ANON_KEY) === '1' } catch { return false } })
+  const startAnon = () => { try { sessionStorage.setItem(ANON_KEY, '1') } catch { /* private mode: this page load only */ } setAnon(true); setTab('ask') }
+  const leaveAnon = useCallback(() => { try { sessionStorage.removeItem(ANON_KEY) } catch { /* nothing kept */ } setAnon(false) }, [])
+  const anonTargets = useMemo(() => calculateTargets(ANON_PROFILE), [])
   const [tab, setTab] = useState<Tab>('ask')
   // The day and meal the Diary sent the person to Ask for. It lasts only while they stay on Ask.
   const [logTarget, setLogTarget] = useState<{ date: string; meal: MealType } | null>(null)
@@ -127,7 +139,7 @@ export default function App() {
   }, [prime])
 
   useEffect(() => {
-    if (auth.status === 'signedIn' && auth.userId) { wasSignedIn.current = true; setSigningIn(false); void load(auth.userId) }
+    if (auth.status === 'signedIn' && auth.userId) { wasSignedIn.current = true; setSigningIn(false); leaveAnon(); void load(auth.userId) }
     if (auth.status === 'signedOut') {
       // Signed out: nothing of the account stays on screen or in memory.
       if (wasSignedIn.current) { setProfile(loadProfile()); setDiary(loadDiary()); setWaiting(0) }
@@ -135,7 +147,7 @@ export default function App() {
       thawWrites()
       setAccount('none')
     }
-  }, [auth.status, auth.userId, load])
+  }, [auth.status, auth.userId, load, leaveAnon])
 
   const targets = useMemo(() => calculateTargets(profile), [profile])
 
@@ -162,12 +174,19 @@ export default function App() {
   if (signInRequired === null || auth.status === 'loading' || (auth.status === 'signedIn' && account !== 'ready' && account !== 'failed')) {
     return <div className="app"><p className="muted" role="status">Opening DiaBite…</p></div>
   }
+  // Signed out, sign-in required, free answers on, and the visitor asked a question: the app in anonymous mode, never over an email link or /?signin.
+  const anonMode = signInRequired === true && auth.status === 'signedOut' && anon && access.freeAnswers > 0 && !authInUrl(window.location) && !skipLanding(window.location)
   if (signInRequired && auth.status === 'signedOut') {
-    // A stranger sees the page about the product first. Never over an email link, a session that just ended, or /?signin.
-    if (showLanding({ signInRequired, signedOut: true, notice, entering, location: window.location })) {
-      return <Landing onEnter={() => setEntering(true)} />
+    if (anonMode) {
+      // "Make it yours" and every Sign in key: the sign-in screen, with a way back to the visitor's Ask screen.
+      if (signingIn) return <SignIn notice={notice} onCancel={() => setSigningIn(false)} />
+    } else {
+      // A stranger sees the page about the product first. Never over an email link, a session that just ended, or /?signin.
+      if (showLanding({ signInRequired, signedOut: true, notice, entering, location: window.location })) {
+        return <Landing onEnter={() => setEntering(true)} freeAnswers={access.freeAnswers} onAsk={access.freeAnswers > 0 ? startAnon : undefined} />
+      }
+      return <SignIn notice={notice} onCancel={entering ? () => setEntering(false) : undefined} />
     }
-    return <SignIn notice={notice} onCancel={entering ? () => setEntering(false) : undefined} />
   }
   // Not required, but wanted: someone signing in from the Settings tab to keep their diary across devices.
   if (!signInRequired && auth.status === 'signedOut' && signingIn) return <SignIn notice={notice} onCancel={() => setSigningIn(false)} />
@@ -186,7 +205,7 @@ export default function App() {
     )
   }
 
-  if (!profile.onboarded || onboarding || editStep !== null) {
+  if (!anonMode && (!profile.onboarded || onboarding || editStep !== null)) {
     return (
       <div className="app">
         <header className="masthead">
@@ -216,7 +235,7 @@ export default function App() {
     )
   }
 
-  if (summaryOpen) return <ClinicianSummary diary={diary} profile={profile} targets={targets} onClose={() => setSummaryOpen(false)} />
+  if (!anonMode && summaryOpen) return <ClinicianSummary diary={diary} profile={profile} targets={targets} onClose={() => setSummaryOpen(false)} />
 
   return (
     <GlHelpContext.Provider value={() => setGlOpen(true)}>
@@ -250,15 +269,20 @@ export default function App() {
       <div role="tabpanel" id="tabpanel" aria-labelledby={`tab-${tab}`}>
       {tab === 'ask' && (
         <AskPage
-          profile={profile} targets={targets} diary={diary} onLog={(added) => setDiary((d) => [...d, ...added])} onOpenDiary={() => setTab('diary')} onSessionEnded={sessionEnded}
+          profile={anonMode ? ANON_PROFILE : profile} targets={anonMode ? anonTargets : targets} diary={anonMode ? NO_DIARY : diary}
+          anonymous={anonMode ? { onSignIn: () => setSigningIn(true), onOff: () => { leaveAnon(); setEntering(false) }, freeAnswers: access.freeAnswers } : undefined}
+          onLog={(added) => setDiary((d) => [...d, ...added])} onOpenDiary={() => setTab('diary')} onSessionEnded={sessionEnded}
           logTarget={logTarget} onClearTarget={() => setLogTarget(null)}
           tourSeen={tourSeen} onTourSeen={(s) => { setTourSeen(s); saveTour(s) }} tourSuspended={feedbackOpen || waiting > 0 || howOpen || glOpen}
         />
       )}
-      {tab === 'diary' && (
+      {anonMode && tab === 'diary' && <SignInCard {...SIGN_IN_CARDS.diary} onSignIn={() => setSigningIn(true)} />}
+      {anonMode && tab === 'menu' && <SignInCard {...SIGN_IN_CARDS.menu} onSignIn={() => setSigningIn(true)} />}
+      {anonMode && tab === 'profile' && <SignInCard {...SIGN_IN_CARDS.profile} onSignIn={() => setSigningIn(true)} />}
+      {!anonMode && tab === 'diary' && (
         <DiaryPage targets={targets} diary={diary} onChange={setDiary} onAsk={(target) => { setLogTarget(target ?? null); setTab('ask') }} showBreadUnits={profile.showBreadUnits} units={profile.units} />
       )}
-      {tab === 'menu' && (
+      {!anonMode && tab === 'menu' && (
         <MenuPage
           profile={profile} targets={targets} diary={diary} onAsk={() => setTab('ask')}
           onAdd={(added) => setDiary((d) => [...d, ...added])}
@@ -266,7 +290,7 @@ export default function App() {
           onOpenDiary={() => setTab('diary')}
         />
       )}
-      {tab === 'profile' && (
+      {!anonMode && tab === 'profile' && (
         <ProfilePage
           profile={profile}
           targets={targets}
@@ -278,6 +302,7 @@ export default function App() {
       )}
       {tab === 'settings' && (
         <SettingsPage
+          anonymous={anonMode ? { onSignIn: () => setSigningIn(true) } : undefined}
           onFeedback={() => setFeedbackOpen(true)}
           onHowItWorks={() => setHowOpen(true)}
           onGlInfo={() => setGlOpen(true)}
@@ -315,7 +340,7 @@ export default function App() {
 
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
       {howOpen && <HowItWorks onClose={() => setHowOpen(false)} />}
-      {glOpen && <GlInfo budget={targets.glBudget} onClose={() => setGlOpen(false)} />}
+      {glOpen && <GlInfo budget={anonMode ? anonTargets.glBudget : targets.glBudget} onClose={() => setGlOpen(false)} />}
       {waiting > 0 && !feedbackOpen && <ImportPrompt count={waiting} onMove={moveLegacyDiary} onLater={holdLegacyDiary} onDiscard={discardLegacyDiary} />}
     </div>
     </GlHelpContext.Provider>
