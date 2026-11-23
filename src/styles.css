@@ -409,12 +409,10 @@ tr:last-child td { border-bottom: none; }
 .eyebrow-line { display: flex; align-items: center; gap: 7px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; margin-bottom: 10px; color: var(--text-faint); }
 .answer .eyebrow-line { display: inline-flex; border-radius: 99px; padding: 5px 13px 5px 7px; background: var(--surface-2); color: var(--text); }
 .tone-good .eyebrow-line { color: var(--low); }
-.tone-change .eyebrow-line { color: var(--medium); }
 .tone-bad .eyebrow-line, .tone-blocked .eyebrow-line { color: var(--high); }
 .tone-ask .eyebrow-line, .tone-carbs .eyebrow-line, .tone-partial .eyebrow-line, .tone-estimate .eyebrow-line { color: var(--text); }
 .tone-advice .eyebrow-line { color: var(--text-dim); }
 .answer.tone-good .eyebrow-line { background: var(--low-bg); }
-.answer.tone-change .eyebrow-line { background: var(--medium-bg); }
 .answer.tone-bad .eyebrow-line, .answer.tone-blocked .eyebrow-line { background: var(--high-bg); }
 .card.tone-blocked { border-left: 3px solid var(--high); }
 
@@ -425,7 +423,6 @@ tr:last-child td { border-bottom: none; }
   width: 20px; height: 20px; border-radius: 50%; color: var(--surface); /* the card colour: light on the dark discs of Paper, dark on the light discs of Night */
 }
 .dot-good { background: var(--low); }
-.dot-change { background: var(--medium); }
 .dot-bad, .dot-blocked { background: var(--high); }
 .dot-ask, .dot-carbs, .dot-partial, .dot-estimate { background: var(--accent); }
 .dot-advice { background: var(--text-faint); }
@@ -1018,7 +1015,7 @@ body:has(.landing) { background: #0a1812; }
 :root[data-theme='tape'] .chip-btn.on { background: var(--marker); color: var(--marker-ink); border: 2px solid var(--marker); box-shadow: none; }
 :root[data-theme='tape'] .day-key[aria-pressed='true'] b { background: var(--marker-ink); color: var(--marker); }
 /* The verdict as a stamp on the slip. A short word (Fits, Estimate) sits in the corner beside the verdict; a long one
- * ("Fits with a change", "Not something I can answer") is printed above it, so it never lies across the text. */
+ * ("Over today’s budget", "Not something I can answer") is printed above it, so it never lies across the text. */
 :root[data-theme='tape'] .answer .eyebrow-line {
   position: static; align-self: flex-start; margin: 0 0 12px; background: none; border: 3px solid currentColor; border-radius: 10px;
   padding: 4px 10px 4px 7px; font-family: var(--mono); font-weight: 500; transform: rotate(-2deg);

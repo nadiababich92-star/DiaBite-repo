@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import GlHelp from './GlHelp'
 import { boldSegments, isLabelled, parseMeal } from '../lib/answer'
 import { sessionId } from '../lib/session'
@@ -13,6 +13,7 @@ import { nudgeMeasure, unitLabel } from '../lib/measure'
 import { PortionEditor, WeightsUsed, type TypedQuantity } from './WeightEditor'
 import { dayLabel, eaten, mealForNow, noLoadNote, portionText, viewEntry } from '../lib/diary'
 import { swapNamedIn, type SwapOffer } from '../lib/swap'
+import { BUTTONS, ERROR_EYEBROW, GL_LINK_LABEL, HINT, PILL_NO_NUMBERS, pillChecked, STAMP_LABEL, verdictTone } from '../lib/verdict'
 import { MEAL_LABELS, menuHidden } from '../lib/menu'
 import DayPicker from './DayPicker'
 import { SignInCard } from './SignInCard'
@@ -80,7 +81,6 @@ export function portionSwapsFor(profile: Profile): false | undefined {
 export function StatusDot({ tone }: { tone: string | null }) {
   const path =
     tone === 'good' ? 'M20 6L9 17l-5-5' :
-    tone === 'change' ? 'M12 5v14M5 12h14' :
     tone === 'bad' || tone === 'blocked' ? 'M18 6L6 18M6 6l12 12' :
     tone === 'advice' || tone === 'carbs' || tone === 'estimate' ? 'M12 8h.01M11 12h1v5h1' :
     'M12 17h.01M12 7v6'
@@ -257,41 +257,6 @@ function Answer({ text, reply, onSwap, swapState, countBy }: {
   )
 }
 
-/**
- * An advisory answer has no verdict line to read, so reading one gave it the
- * clarifying-question badge: "One question first" over a plain explanation of
- * the glycemic index. Who answered decides the label; only a meal has a
- * verdict.
- */
-function verdictTone(answer: string, route?: string, reply?: AgentResponse): 'good' | 'change' | 'bad' | 'ask' | 'advice' | 'carbs' | 'partial' | 'estimate' {
-  if (route === 'advisor') return 'advice'
-  // The engine already decided this. Reading it out of the prose worked only
-  // while the prose was a label: the moment the verdict became a sentence a
-  // person would say — "This one goes over today." — the badge over it read
-  // "One question first". `afterMeal.fits` is the same comparison the answer
-  // is built on, and it cannot be paraphrased.
-  const meal = lastMealCall(reply?.trace)?.result as
-    { afterMeal?: { fits?: boolean | null; partial?: { unscored?: string[] } }; items?: { loadAvailable?: boolean }[]; alternatives?: unknown[]; assumed?: boolean } | undefined
-  // A dish counted from an assumed recipe is an estimate, whatever the engine's comparison says: the
-  // badge never reads "Fits" for a guess. The engine states `assumed`; nothing here reads the sentence.
-  if (meal?.assumed === true && (meal.items ?? []).length > 0) return 'estimate'
-  // A partial meal has no verdict to badge: a food is missing and the answer is
-  // asking what is in it, which is what "One question first" says.
-  // Every item branded: carbohydrate and no load. Some branded, some scored: the
-  // part of a meal that could be judged. Neither is a verdict, and neither is green.
-  if (meal?.afterMeal?.partial?.unscored?.length && (meal.items ?? []).length > 0 && (meal.items ?? []).every((it) => it.loadAvailable === false)) return 'carbs'
-  if (meal?.afterMeal?.partial?.unscored?.length && meal.afterMeal.fits !== false) return 'partial'
-  if (meal?.afterMeal?.fits === null) return 'ask'
-  if (meal?.afterMeal && typeof meal.afterMeal.fits === 'boolean') {
-    if (!meal.afterMeal.fits) return 'bad'
-    return (meal.alternatives?.length ?? 0) > 0 ? 'change' : 'good'
-  }
-  const first = answer.split('\n')[0].toLowerCase()
-  if (first.includes('does not fit') || first.includes("doesn't fit") || first.includes('not today') || first.includes('goes over')) return 'bad'
-  if (first.includes('with a change') || first.includes('with one change') || first.includes('swap')) return 'change'
-  if (first.includes('fits') || first.startsWith('**yes') || first.startsWith('yes')) return 'good'
-  return 'ask'
-}
 
 /**
  * What to show in the answer box under a question: an example taken from the engine's own result, never from the
@@ -647,6 +612,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
 
   // The actions (Log it, Calculation, Portions) follow the person down the screen, so what they open
   // appears below them: bring it into view, or a tap would seem to do nothing.
+  const editorId = useId(), receiptId = useId()
   const editorRef = useRef<HTMLDivElement>(null)
   const receiptRef = useRef<HTMLElement>(null)
   const bringIntoView = (el: HTMLElement | null) => {
@@ -677,8 +643,9 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
         {anonymous
           ? <button className="primary" data-tour="log" onClick={anonymous.onSignIn}>Sign in to log this</button>
           : <button className="primary" data-tour="log" onClick={logIt} disabled={logged}>{logged ? (logDay && logDay > today ? 'Planned' : 'Logged') : logDay && logDay > today ? 'Plan it' : active?.partial || active?.unscored ? 'Log what was counted' : 'Log it'}</button>}
-        <button className="ghost" data-tour="calc" onClick={() => setShowReceipt((v) => !v)}>{showReceipt ? 'Hide calculation' : 'Calculation'}</button>
-        {!receipt.carbsOnly && <button className="ghost" aria-expanded={editing} onClick={() => setEditing((v) => !v)}>{editing ? 'Done' : receipt.assumed ? 'Recipe' : 'Portions'}</button>}
+        {/* No label changes with state: the open state is aria-expanded, and the panel itself being on screen. */}
+        <button className="ghost" data-tour="calc" aria-expanded={showReceipt} aria-controls={showReceipt ? receiptId : undefined} onClick={() => setShowReceipt((v) => !v)}>{BUTTONS.calculation}</button>
+        {!receipt.carbsOnly && <button className="ghost" aria-expanded={editing} aria-controls={editing ? editorId : undefined} onClick={() => setEditing((v) => !v)}>{receipt.assumed ? BUTTONS.recipe : BUTTONS.portions}</button>}
       </div>
     </>
   ) : null
@@ -691,7 +658,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
             <span className="label">glycemic load left {dayWord}</span>
             <span className="ask-budget-note">Glycemic load (GL) is how much a meal raises your blood sugar, counting both the food and the portion. This is what is left of your budget {dayWord}.</span>
             {noLoadNote(dayEntries) && <span className="ask-budget-note no-load-note">{noLoadNote(dayEntries)}</span>}
-            <GlHelp label="What is GL, and how do I use it?" />
+            <GlHelp label={GL_LINK_LABEL} />
           </div>
           <span className="value"><b className="num">{left}</b> <small>of {targets.glBudget}</small></span>
         </div>
@@ -715,7 +682,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
             Fresh context per question
           </label>
         </div>}
-        <p className="muted">Say it the way you'd say it to a friend. The agent does the counting — and shows its arithmetic.<span className="voice-hint"> On a phone, tap the microphone on your keyboard to say it instead of typing.</span></p>
+        <p className="muted">{HINT}<span className="voice-hint"> On a phone, tap the microphone on your keyboard to say it instead of typing.</span></p>
         {logTarget && (
           <p className="muted ask-target" role="status">
             Adding to {MEAL_LABELS[logTarget.meal].toLowerCase()}, {dayLabel(logTarget.date, today)}.{' '}
@@ -778,7 +745,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
 
       {error && (
         <section className="card tone-blocked">
-          <div className="eyebrow-line">Couldn't reach the agent</div>
+          <div className="eyebrow-line">{ERROR_EYEBROW}</div>
           <p style={{ margin: 0 }}>{error}</p>
           {asked && <div className="row"><button className="ghost" type="button" onClick={() => ask(asked)} disabled={busy}>Try again</button></div>}
         </section>
@@ -793,9 +760,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
           <section className={`card answer tone-${tone}${recalc ? ' stale' : ''}`} role="status" aria-live="polite">
             <div className="eyebrow-line" data-tour="verdict">
               <StatusDot tone={tone} />
-              {reply.blocked ? 'Not something I\'ll answer' :
-               tone === 'good' ? 'Fits' : tone === 'change' ? 'Fits with a change' : tone === 'bad' ? 'Over today’s budget' :
-               tone === 'advice' ? 'Advice' : tone === 'estimate' ? 'Estimate' : tone === 'carbs' ? 'Carbs only' : tone === 'partial' ? 'Part of the meal' : 'One question first'}
+              {STAMP_LABEL[reply.blocked ? 'blocked' : (tone as keyof typeof STAMP_LABEL)]}
             </div>
             <Answer text={reply.answer} reply={reply} countBy={profile.countBy} onSwap={receipt && !receipt.assumed ? acceptSwap : undefined} swapState={{ accepted: swap?.id ?? null, busy: !!swap && !recalc && !recalcError, failed: !!swap && !recalc && !!recalcError }} />
             {!reply.blocked && (
@@ -803,10 +768,10 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
                 {reply.verified ? (
                   <span className="pill low">
                     {(reply.matchedNumbers?.length ?? 0) === 0
-                      // "Verified · 0 numbers traced to tools" reads like a
+                      // "0 numbers match the calculation" reads like a
                       // warning under an answer whose whole rule is to state none.
-                      ? 'No numbers stated — nothing to trace'
-                      : `Verified · ${reply.matchedNumbers?.length} numbers traced to tools`}
+                      ? PILL_NO_NUMBERS
+                      : pillChecked(reply.matchedNumbers?.length ?? 0)}
                   </span>
                 ) : reply.withheld ? (
                   <span className="pill high">Answer withheld: its numbers did not check</span>
@@ -836,13 +801,13 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
           {logNote && <p className="muted" role="status" aria-live="polite" style={{ margin: '-4px 0 12px' }}>{logNote}{onOpenDiary && <>{' '}<button type="button" className="link" onClick={onOpenDiary}>Open Diary</button></>}</p>}
 
           {editing && receipt && !receipt.carbsOnly && (
-            <div ref={editorRef}>
+            <div ref={editorRef} id={editing ? editorId : undefined}>
               <PortionEditor lines={baseLines} grams={grams} units={profile.units} busy={recalcBusy} error={recalcError} onNudge={nudge} assumed={receipt.assumed} removed={removed} onRemove={toggleRemoved} onReset={resetRecipe} weightEdit={{ typed, mine, fieldFor, setFieldFor, aligned: alignedRecalc, commit: commitWeight, cancel: cancelWeight, refusal }} />
             </div>
           )}
 
           {showReceipt && active && (
-            <section className="card" ref={receiptRef}>
+            <section className="card" ref={receiptRef} id={showReceipt ? receiptId : undefined}>
               <h2>The receipt</h2>
               <ReceiptView r={active} units={profile.units} mineFlags={recalc ? mineFlags : undefined} />
             </section>

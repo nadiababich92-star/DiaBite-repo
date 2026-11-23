@@ -81,7 +81,7 @@ The verdict on an answer is printed as a stamp in the slip's corner (`--low`, `-
 | Token | Paper | Night | Meaning |
 |---|---|---|---|
 | `--low` / `--low-bg` | `#1b6b45` / `#ddf0e4` | `#63b98c` / `#15291f` | Low load, fits |
-| `--medium` / `--medium-bg` | `#8f5200` / `#fbebcb` | `#e2ad4c` / `#2b2313` | Medium, fits with a change |
+| `--medium` / `--medium-bg` | `#8f5200` / `#fbebcb` | `#e2ad4c` / `#2b2313` | Medium: a caution (a medium load, a check that could not run) |
 | `--high` / `--high-bg` | `#9e3025` / `#f8ddd8` | `#d97b70` / `#2c1c1a` | High, over budget, refused |
 
 Contrast of every text pair, computed from these values: 4.7:1 or better in both
@@ -103,7 +103,7 @@ Depth is built the same way in both sets, from tokens, never ad hoc:
 
 ### Colour rules
 1. **Colour carries meaning, so it is never decoration.** Green = fits,
-   amber = fits with a change, red = over or refused. Nothing else is amber or red.
+   amber = a caution (a medium load, a check that could not run), red = over or refused. Nothing else is amber or red.
    The marker is the one exception to "colour is meaning": it marks emphasis, once
    per screen, and never marks a loss.
 2. **Colour is never the only signal.** Every status has a word and an icon
@@ -193,6 +193,8 @@ In this order: status disc + label → **verdict** → **three figures** → rea
 next action behind a dashed rule → verified pill. Advice, clarifying questions
 and refusals are plain prose; never dress them as a verdict.
 
+The stamp over the verdict says what the engine's comparison said ("Fits" or "Over today's budget") and nothing about alternatives; a swap is offered in the Next line, with its own button. No button under an answer changes its label with state (Log it, Calculation, Portions or Recipe): whether a panel is open is carried by `aria-expanded`.
+
 ### The day, at the top of Ask
 
 Under the budget bar, above the question, sits the **Day picker** (Today, Yesterday, Tomorrow, Pick a date). The day chosen is the day the meal is asked about: the number above it reads "glycemic load left tomorrow" (or "on Fri 6 Nov"), the verdict is counted against that day's budget and what was eaten on it (a future day has nothing eaten, a planned entry never counts), and **Log it** puts the meal on it (**Plan it** for a future day). A line under the picker says so for any day but today. Choosing another day with an answer on screen asks the question again for that day, since the answer was counted against the old one. Under an answer, "Adding to Tomorrow. Change day" scrolls back to the picker. The Diary's **Add food** opens Ask on the day it was on.
@@ -213,7 +215,7 @@ into it, so a phone's keyboard does not open over the question.
 
 ### Status disc
 A 20px filled circle in the verdict colour with a white icon, beside an
-uppercase label: ✓ Fits, + Fits with a change, ✕ Over today’s budget, ! One question first,
+uppercase label: ✓ Fits, ✕ Over today’s budget, ! One question first,
 i Advice. The red label names a fact about the day, never a prohibition: "Not today" was changed on
 9 November 2026 after a person with diabetes said it sounded like a refusal.
 

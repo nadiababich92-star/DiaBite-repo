@@ -52,6 +52,7 @@ import { budgetOf, buildReceipt, receiptFrom, requestHeaders, SignInRequiredErro
 import { deviceId } from '../src/lib/device'
 import { chargeAnon, chargeTurn, countFreeAnswer, deviceKeyOf, RateLimited, SignInNeeded, _reset as resetGuard } from '../server/guard'
 import { countsAsFreeAnswer } from '../server/agent'
+import { askCopy, BUTTONS, STAMP_LABEL, verdictTone } from '../src/lib/verdict'
 import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
 import { accessOf, looksLikeCode, looksLikeEmail, problemOf, signInReasonOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
@@ -808,6 +809,44 @@ recorrectMisses.forEach((m) => console.log(m))
     }
   }
   console.log(`\nanon      ${bits.length === 0 ? 'ok' : 'WRONG'}  (the first answers without an account)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// The Ask screen's stamp and words (docs/specs/ask-evals.md, AK1 and AK2): what the stamp says, and the fixed strings of the screen. No model, no browser.
+{
+  const bits: string[] = []
+  const reply = (result: object, over: object = {}) => ({ answer: '', blocked: false, verified: true, unmatchedNumbers: [], matchedNumbers: [], toolCalls: 1, trace: [{ tool: 'diabite_engine_compute_meal', input: {}, result }], ...over }) as never
+  const alt = [{ id: 'seed:apple', name: 'Apple' }]
+  const tone = (r: ReturnType<typeof reply>, answer = '', route?: string) => verdictTone(answer, route, r)
+  // AK1: the stamp follows afterMeal.fits and nothing else. A swap on offer changes nothing about it.
+  const cases: [string, string, string][] = [
+    ['fits with alternatives', tone(reply({ afterMeal: { fits: true }, items: [{ loadAvailable: true }], alternatives: alt })), 'good'],
+    ['fits with none', tone(reply({ afterMeal: { fits: true }, items: [{ loadAvailable: true }] })), 'good'],
+    ['does not fit', tone(reply({ afterMeal: { fits: false }, items: [{ loadAvailable: true }], alternatives: alt })), 'bad'],
+    ['fits null', tone(reply({ afterMeal: { fits: null }, items: [{ loadAvailable: true }] })), 'ask'],
+    ['an assumed recipe', tone(reply({ afterMeal: { fits: true }, assumed: true, items: [{ loadAvailable: true }] })), 'estimate'],
+    ['every item without a load', tone(reply({ afterMeal: { fits: true, partial: { unscored: ['x'] } }, items: [{ loadAvailable: false }] })), 'carbs'],
+    ['a scored item and one without', tone(reply({ afterMeal: { fits: true, partial: { unscored: ['x'] } }, items: [{ loadAvailable: true }, { loadAvailable: false }] })), 'partial'],
+    ['the advisor', tone(reply({}), 'Brown rice is better.', 'advisor'), 'advice'],
+    ['no result, "It fits, with the rice swapped."', verdictTone('It fits, with the rice swapped.', undefined, { trace: [] } as never), 'good'],
+    ['no result, "This goes over today."', verdictTone('This goes over today.', undefined, { trace: [] } as never), 'bad'],
+  ]
+  for (const [what, got, want] of cases) if (got !== want) bits.push(`AK1 ${what}: ${got}, wanted ${want}`)
+  // AK2: no label names a change, and the screen's own words say neither "agent", "tools" nor "traced".
+  for (const [k, v] of Object.entries(STAMP_LABEL)) if (/with a change|swap|alternative/i.test(v)) bits.push(`AK2 the ${k} label says "${v}"`)
+  if (STAMP_LABEL.good !== 'Fits') bits.push(`AK2 the good label is "${STAMP_LABEL.good}"`)
+  const copy = askCopy()
+  for (const w of copy) if (/\bagent\b|\btools?\b|traced/i.test(w) || /\bDone\b|Hide calculation/.test(w)) bits.push(`AK2 a fixed string says a word it must not: "${w}"`)
+  for (const label of [BUTTONS.calculation, BUTTONS.portions, BUTTONS.recipe]) if (copy.filter((w) => w === label).length !== 1) bits.push(`AK2 the label "${label}" is not listed exactly once`)
+  // The page prints these constants and no other: the old strings are gone from the source, and the buttons have no state-dependent label.
+  const here = dirname(fileURLToPath(import.meta.url))
+  const askSrc = readFileSync(join(here, '../src/components/AskPage.tsx'), 'utf8')
+  for (const old of ['Hide calculation', "'Done'", 'traced to tools', 'nothing to trace', 'The agent does the counting', "reach the agent", "'change'"]) if (askSrc.includes(old)) bits.push(`AK2 AskPage still holds "${old}"`)
+  if (/\{(showReceipt|editing) \?[^}]*(BUTTONS|'Calculation'|'Portions'|'Recipe')/.test(askSrc)) bits.push('AK2 a button label depends on whether its panel is open')
+  const cssSrc = readFileSync(join(here, '../src/styles.css'), 'utf8')
+  if (/tone-change|dot-change|with a change/i.test(cssSrc)) bits.push('AK2 the style sheet still names the change tone')
+  console.log(`\nask       ${bits.length === 0 ? 'ok' : 'WRONG'}  (the stamp and the words)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }
