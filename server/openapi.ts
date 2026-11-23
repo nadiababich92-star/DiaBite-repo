@@ -199,7 +199,7 @@ export function openApiSpec() {
           operationId: 'find_alternatives',
           summary: 'Find lower-glycemic-load alternatives to a food',
           description:
-            'Return alternatives whose glycemic load is at or under `maxGL`. Use it when a meal does not fit the remaining budget. Pass the `foodId` of the item with the largest glycemic load, its `grams` so alternatives are costed at the same weight, the remaining glycemic load as `maxGL`, and always the `sessionId` — the engine uses it to drop anything the person cannot eat.',
+            'Return alternatives that are worth making: the same kind of food and about the same amount of food, with a glycemic load that makes the meal fit or saves at least 5 and a quarter of the item\'s load. An alternative may be less of the same food (`change: "portion"`). Use it when a meal does not fit the remaining budget. Pass the `foodId` of the item with the largest glycemic load, its `grams` (or `servings` for a recipe) so alternatives are costed at the same weight, the whole meal\'s load as `mealGL`, the remaining glycemic load as `remainingGL` and as `maxGL`, and always the `sessionId` — the engine uses it to drop anything the person cannot eat. The first alternative is the best; read `label` for how to say it.',
           requestBody: {
             required: true,
             content: {
@@ -215,12 +215,15 @@ export function openApiSpec() {
                     sameCategory: { type: 'boolean', description: 'Keep alternatives in the same food category. Usually true.' },
                     sessionId: { type: 'string', description: 'The session id you were given. Always pass it: allergens and excluded foods are filtered out server-side.' },
                     topK: { type: 'integer', description: 'How many to return. Default 3.' },
+                    servings: { type: 'number', description: 'Servings of the item being replaced when it is a recipe.' },
+                    mealGL: { type: 'number', description: 'The whole meal\'s glycemic load, from the compute_meal totals.' },
+                    remainingGL: { type: 'number', description: 'Glycemic load left for the day before this meal.' },
                   },
                 },
               },
             },
           },
-          responses: { '200': { description: 'Ranked alternatives with their glycemic load. A bad call returns 200 with an `error` field to read and act on.' } },
+          responses: { '200': { description: 'Ranked alternatives, best first, each with `change`, `gl`, `gain` (load saved), `fitsMeal`, `label` and its weight. Empty when none is worth making. A bad call returns 200 with an `error` field to read and act on.' } },
         },
       },
     },

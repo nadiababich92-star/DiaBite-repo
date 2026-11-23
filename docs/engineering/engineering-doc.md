@@ -54,7 +54,7 @@ Person: "a bowl of oatmeal with a banana"
  → Ask screen: "Accept the swap" → /meal/recompute with the new line (unchanged)
 ```
 
-**B. A smaller portion is the swap.** Same flow; `alternatives[0].kind === 'portion'` with `label` "half a banana (59 g)". The Ask screen's accept replaces the line by the same food at the new weight.
+**B. A smaller portion is the swap.** Same flow; `alternatives[0].change === 'portion'` with `label` "half a banana (59 g)". The Ask screen's accept replaces the line by the same food at the new weight.
 
 **C. Nothing qualifies.** `alternatives` is empty; the agent says no change is needed or, when the meal does not fit, that no swap was found that is worth making (the prompt already says this for a meal that fits; a short rule is added for the other case).
 
@@ -79,7 +79,7 @@ Rule 3 of CLAUDE.md holds: `hasNoLoad` kinds (branded, unrated, restaurant) are 
 
 No new screen (**Decided**). Touched:
 
-- `src/lib/swap.ts`: `SwapOffer` gains `kind: 'swap' | 'portion'` and `label?: string`. `swapNamedIn` must recognise a portion option: today it skips any offer whose name is inside the replaced food's name ("potato, scalloped" is in "mashed potato"), which would remove "half a banana" for the banana. For `kind: 'portion'` the Next line names it by its `label` words ("half", "smaller", the grams), matched against the engine's `label`, not against the food's name.
+- `src/lib/swap.ts`: `SwapOffer` gains `change: 'swap' | 'portion'` and `label?: string`. `swapNamedIn` must recognise a portion option: today it skips any offer whose name is inside the replaced food's name ("potato, scalloped" is in "mashed potato"), which would remove "half a banana" for the banana. For `change: 'portion'` the Next line names it by its `label` words ("half", "smaller", the grams), matched against the engine's `label`, not against the food's name.
 - `src/components/AskPage.tsx`: `acceptSwap` already replaces a line by `foodId`; for a portion option the new line is the same `foodId` at `alt.portion` grams (`unit: 'g'`). The button reads "Accept the swap" as now; after acceptance the receipt line says the weight the engine counted. States unchanged: counting, accepted, failed (original answer kept), none offered.
 - Phone layout, accessibility: unchanged (same button, same 44 px target, same live region).
 
@@ -94,7 +94,7 @@ No new screen (**Decided**). Touched:
 | `anchorKcal?: number` | filled by the engine from the anchor; accepted only for the free-text query path |
 | `portionSwaps?: boolean` | default `true`; `false` omits smaller portions (see section 9) |
 
-**`Alternative`** gains: `kind: 'swap' | 'portion'`, `grams?: number` (an ingredient or a smaller portion; for a recipe `servingGrams × servings`), `servings?: number`, `gain: number`, `fitsMeal: boolean | null` (null when `mealGL` was not sent), `label: string` (the engine's phrase: "half a banana (59 g)", "1 serving of Oat Muffin (96 g)"), `portionOf?: string`. `portion` is kept for the browser; its meaning is documented (grams for `unit: 'g'`, servings for a recipe).
+**`Alternative`** gains: `change: 'swap' | 'portion'`, `grams?: number` (an ingredient or a smaller portion; for a recipe `servingGrams × servings`), `servings?: number`, `gain: number`, `fitsMeal: boolean | null` (null when `mealGL` was not sent), `label: string` (the engine's phrase: "half a banana (59 g)", "1 serving of Oat Muffin (96 g)"), `portionOf?: string`. `portion` is kept for the browser; its meaning is documented (grams for `unit: 'g'`, servings for a recipe).
 
 **`findAlternatives` — the rules, in order** (the first that fails drops the candidate):
 
@@ -118,7 +118,7 @@ No new screen (**Decided**). Touched:
 `agent/prompts/meal.md`, the **Next action** paragraph, changed with "and also", not "instead of" (CLAUDE.md rule 8):
 
 - Keep: one concrete change, the first alternative the engine returned; never an option of your own; never two joined by "or".
-- Add: when `alternatives[0].kind` is `portion`, say it with the engine's `label` ("half the banana, 59 g"); a smaller portion is offered only when the engine returned it.
+- Add: when `alternatives[0].change` is `portion`, say it with the engine's `label` ("half the banana, 59 g"); a smaller portion is offered only when the engine returned it.
 - Add: when no alternative came back **and** the meal does not fit, say that nothing worth swapping was found and give the number of the day left; do not invent a change. (Today the prompt covers only the meal that fits.)
 
 `diabite-triage` and `diabite-advisor` are not touched. The tool spec for `find_alternatives` gains the new optional fields. After the edit: `npx tsx agent/provision.ts` with `MODEL_MEAL` and `MODEL_DEPLOYMENT_NAME` unset, read each agent's model back from the project (rule 11), and **sample twelve fresh sessions** on the oatmeal and banana cases before and after (rule 12).
@@ -150,7 +150,7 @@ Added in the same change; every check reads `alternatives`, `afterMeal`, `altern
 |---|---|---|
 | SW1 | oatmeal 1 cup (234 g), meal over the day | the cups (gain 3.8, role `baked`) are **not** returned |
 | SW2 | the same | `alternatives[0]` has `gain ≥ 5` and `≥ 25%`, or `fitsMeal` |
-| SW3 | every returned alternative, over 40 anchors | `kcal` within ±30% of the anchor's, or `kind: 'portion'` |
+| SW3 | every returned alternative, over 40 anchors | `kcal` within ±30% of the anchor's, or `change: 'portion'` |
 | SW4 | every returned alternative, over 40 anchors | `role` compatible; no `baked`/`sweet` for a non-baked, non-sweet anchor |
 | SW5 | banana 118 g | a `portion` option with `label` "half a banana (59 g)" and `gl` = the engine's own for 59 g (read from `computeItem`, equal to the cent) |
 | SW6 | the same with `portionSwaps: false` | no `portion` option |
@@ -173,7 +173,7 @@ Added in the same change; every check reads `alternatives`, `afterMeal`, `altern
 
 1. Build, `npm run eval`, `eval:abuse`, smoke. A change to the engine's response shape is additive; the browser and the agent tolerate absent fields.
 2. `npm run deploy`; read the live image tag (rule 1).
-3. A food-data field was added (`servingGrams`, `wweia`) in code, not in the table, so `scripts/sync-foods.ts` and a revision restart are **not** needed; but the engine reads records at start, so the restart that `deploy` does is enough. Ask the live service: `find_alternatives` for oatmeal and banana; read `kind`, `gain`, `label`.
+3. A food-data field was added (`servingGrams`, `wweia`) in code, not in the table, so `scripts/sync-foods.ts` and a revision restart are **not** needed; but the engine reads records at start, so the restart that `deploy` does is enough. Ask the live service: `find_alternatives` for oatmeal and banana; read `change`, `gain`, `label`.
 4. `agent/provision.ts` after the engine is live (the agent must not call fields the engine lacks), then `eval:agent`.
 5. **Roll back:** the rules are in code; `git revert` and redeploy restores today's behaviour; the prompt returns to the previous version through the provision script (the agent versions are kept in the project). No data to undo.
 

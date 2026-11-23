@@ -5,7 +5,7 @@ export interface SwapOffer {
   unit: 'g' | 'serving'
   portion: number
   /** 'portion' is less of the food being replaced (docs/specs/swaps-engine.md). Absent means 'swap', which is what an older engine sends. */
-  kind?: 'swap' | 'portion'
+  change?: 'swap' | 'portion'
   /** The engine's own phrase for the option with its weight, e.g. "half the banana (59 g)". The agent repeats it; nothing here composes it. */
   label?: string
 }

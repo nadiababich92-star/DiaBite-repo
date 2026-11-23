@@ -5,6 +5,7 @@
 import { availableCarbs, dayGlLevel, glLevel, glycemicLoad, nutrientsFor } from '../src/lib/glycemic'
 import { isAvoided, type AvoidList } from './avoid'
 import { asFood, getRecord, hasNoLoad, householdMeasure, loadFoods, stepUnit, summary, type PortionRow } from './foods'
+import { mayReplace, swapClass } from './roles'
 import { gramsFor, householdUnitsFor, saidText, unitsFor } from './quantity'
 import { embed, type VectorStore } from './embeddings'
 import { resolvePhrases, sameFamily, sameFood } from './resolve'
@@ -236,16 +237,45 @@ export function withDayUnscored(mealUnscored: string[], day: DayStateResponse): 
   return [...new Set([...mealUnscored, ...(day.unscored ?? [])])]
 }
 
-/** What an alternative "costs": at the requested grams for ingredients, per serving for recipes. */
-function costOf(id: string, grams?: number): { gl: number; kcal: number; availableCarbs: number; portion: number } {
+/** What an alternative "costs", at one quantity: grams for an ingredient, servings for a recipe. */
+function costAt(id: string, q: { grams?: number; servings?: number }): { gl: number; kcal: number; availableCarbs: number; portion: number; grams?: number; servings?: number } | null {
   const rec = getRecord(id)
-  const input = rec.kind === 'ingredient' && grams ? { foodId: id, grams } : { foodId: id }
-  const it = computeItem(input)
-  return { gl: it.gl ?? 0, kcal: it.kcal, availableCarbs: it.availableCarbs, portion: rec.kind === 'ingredient' ? it.grams : (it.servings ?? 1) }
+  const it = rec.kind === 'ingredient' ? computeItem({ foodId: id, grams: q.grams }) : computeItem({ foodId: id, servings: q.servings ?? 1 })
+  if (it.gl === null) return null
+  if (rec.kind === 'ingredient') return { gl: it.gl, kcal: it.kcal, availableCarbs: it.availableCarbs, portion: it.grams, grams: it.grams }
+  const servings = q.servings ?? 1
+  return { gl: it.gl, kcal: it.kcal, availableCarbs: it.availableCarbs, portion: servings, servings, ...(rec.servingGrams ? { grams: Math.round(rec.servingGrams * servings) } : {}) }
 }
 
+// Swaps worth making (docs/specs/swaps-engine.md). The numbers are the owner's of 23 November 2026; a clinician reviews them (Q33 to Q35).
+export const SWAP_MIN_GAIN = 5            // glycemic load units
+export const SWAP_MIN_GAIN_SHARE = 0.25   // of the anchor's load
+export const SWAP_ENERGY_BAND = 0.30      // ±, of the anchor's energy at the comparison quantity
+export const SWAP_SIMILAR_POOL = 12       // best N different foods by similarity, after the filters
+export const PORTION_FRACTIONS = [0.75, 0.5] as const
+
+/** "Banana (raw)" is "banana": the way a sentence would name it. Recipes keep their own name. */
+const plainName = (rec: { kind: string; name: string }) => {
+  const plain = rec.name.replace(/\s*\(.*?\)/g, '').split(',')[0].trim()
+  return rec.kind === 'recipe' ? rec.name : plain.toLowerCase()
+}
+const weight = (c: { grams?: number }) => (c.grams ? ` (${c.grams} g)` : '')
+const FRACTION_WORD: Record<number, string> = { 0.75: 'three quarters of', 0.5: 'half' }
+
+/** The engine's own words for an option, with its weight; the agent repeats them and composes nothing. */
+export function swapLabel(rec: { kind: string; name: string }, c: { grams?: number; servings?: number }, fraction?: number): string {
+  const name = plainName(rec)
+  if (fraction !== undefined) {
+    if (rec.kind === 'recipe') return `${fraction === 0.5 ? 'half a serving' : 'three quarters of a serving'} of ${name}${weight(c)}`
+    return `${FRACTION_WORD[fraction] ?? `${Math.round(fraction * 100)}% of`} the ${name}${weight(c)}`
+  }
+  return rec.kind === 'recipe' ? `${name}, ${c.servings === 1 || c.servings === undefined ? '1 serving' : `${c.servings} servings`}${weight(c)}` : `${name}${weight(c)}`
+}
+
+export interface AlternativesOpts { allowPortion?: boolean }
+
 export async function findAlternatives(
-  store: VectorStore, req: AlternativesRequest, avoid?: AvoidList,
+  store: VectorStore, req: AlternativesRequest, avoid?: AvoidList, opts: AlternativesOpts = {},
 ): Promise<Alternative[]> {
   const { byId } = loadFoods()
   const topK = req.topK ?? 5
@@ -254,6 +284,21 @@ export async function findAlternatives(
   if (anchor) query = await store.vectorOf(anchor.id)
   else if (req.query) [query] = await embed([req.query])
   if (!query) return []
+
+  // The anchor, costed at the quantity it is in the meal.
+  let anchorGL = 0, anchorKcal = 0
+  let anchorQ: { grams?: number; servings?: number } = {}
+  if (anchor) {
+    anchorQ = anchor.kind === 'ingredient' ? { grams: req.grams ?? anchor.defaultPortion } : { servings: req.servings ?? 1 }
+    const a = hasNoLoad(anchor.kind) ? null : costAt(anchor.id, anchorQ)
+    // A food with no load, or none to save, has no swap.
+    if (!a || a.gl <= 0) return []
+    anchorGL = a.gl; anchorKcal = a.kcal
+  }
+  const fits = (gain: number): boolean | null =>
+    req.mealGL !== undefined && req.remainingGL !== undefined ? req.mealGL - gain <= req.remainingGL + 1e-9 : null
+  const worth = (gain: number, fitsMeal: boolean | null) =>
+    gain > 0 && (fitsMeal === true || (gain >= SWAP_MIN_GAIN && gain >= SWAP_MIN_GAIN_SHARE * anchorGL))
 
   const filter = (id: string) => {
     if (anchor && id === anchor.id) return false
@@ -280,7 +325,24 @@ export async function findAlternatives(
   const curated = raw.filter((h) => !h.id.startsWith('usda:'))
   const coverage = raw.filter((h) => h.id.startsWith('usda:'))
   const hits = [...curated, ...coverage]
-  const out: Alternative[] = []
+
+  // No anchor, only words: today's rule, the load under the cap, in the store's order.
+  if (!anchor) {
+    const out: Alternative[] = []
+    for (const h of hits) {
+      const rec = byId.get(h.id)
+      if (!rec) continue
+      const c = costAt(rec.id, rec.kind === 'ingredient' ? { grams: req.grams } : { servings: 1 })
+      if (!c || c.gl > req.maxGL) continue
+      if (out.some((o) => sameFood(o.name, rec.name))) continue
+      out.push({ ...summary(rec), score: Math.round(h.score * 1000) / 1000, change: 'swap', gain: 0, fitsMeal: null, label: swapLabel(rec, c), portion: c.portion, gl: c.gl, kcal: c.kcal, availableCarbs: c.availableCarbs, ...(c.grams ? { grams: c.grams } : {}), ...(c.servings ? { servings: c.servings } : {}) })
+      if (out.length >= topK) break
+    }
+    return out
+  }
+
+  const anchorClass = swapClass(anchor)
+  const survivors: Alternative[] = []
   for (const h of hits) {
     // Same reason as in resolve: the store may know an id this build does not.
     const rec = byId.get(h.id)
@@ -290,25 +352,82 @@ export async function findAlternatives(
     // are other white rices — and the product offered "swap the white rice for
     // rice, white, with vegetables and gravy", which is the same food with
     // gravy on it. Suggesting a swap means suggesting a different food.
-    if (anchor && (sameFood(rec.name, anchor.name) || sameFamily(anchor.name, rec.name))) continue
-    const cost = costOf(rec.id, req.grams)
-    if (cost.gl > req.maxGL) continue
-    // And a swap should be worth making: at least a fifth less load than the
-    // thing it replaces, or it is noise dressed as advice.
-    if (anchor) {
-      const anchorCost = costOf(anchor.id, req.grams)
-      if (anchorCost.gl > 0 && cost.gl > anchorCost.gl * 0.8) continue
-    }
+    if (sameFood(rec.name, anchor.name) || sameFamily(anchor.name, rec.name)) continue
+    // The quantity a candidate is compared at: the anchor's grams for an ingredient; for a recipe, one serving, or as many as the anchor if the anchor is a recipe.
+    const q = rec.kind === 'ingredient' ? { grams: anchor.kind === 'ingredient' ? anchorQ.grams : (req.grams ?? rec.defaultPortion) } : { servings: anchor.kind === 'recipe' ? anchorQ.servings : 1 }
+    const c = costAt(rec.id, q)
+    if (!c || c.gl > req.maxGL) continue
+    // The same kind of food, and about the same amount of it.
+    if (!mayReplace(anchorClass, swapClass(rec))) continue
+    if (Math.abs(c.kcal - anchorKcal) > SWAP_ENERGY_BAND * anchorKcal) continue
+    const gain = r1(anchorGL - c.gl)
+    const fitsMeal = fits(gain)
+    if (!worth(gain, fitsMeal)) continue
     // The curated table and the ingredient table both hold an Apple, so a list
     // of three swaps could be Apple, Apple, Watermelon.
-    if (out.some((o) => sameFood(o.name, rec.name))) continue
-    out.push({ ...summary(rec), score: Math.round(h.score * 1000) / 1000, ...cost })
-    if (out.length >= topK) break
+    if (survivors.some((o) => sameFood(o.name, rec.name))) continue
+    survivors.push({ ...summary(rec), score: Math.round(h.score * 1000) / 1000, change: 'swap', gain, fitsMeal, label: swapLabel(rec, c), portion: c.portion, gl: c.gl, kcal: c.kcal, availableCarbs: c.availableCarbs, ...(c.grams ? { grams: c.grams } : {}), ...(c.servings ? { servings: c.servings } : {}) })
+    if (survivors.length >= SWAP_SIMILAR_POOL) break
   }
-  return out
+
+  const pool = [...survivors]
+  if (opts.allowPortion !== false) {
+    const portion = portionOption(anchor, anchorQ, anchorGL, req, avoid, fits, worth)
+    if (portion) pool.push(portion)
+  }
+  // Fits the meal first, then the load saved, then likeness; a portion is the same food, so it wins a tie.
+  const order = (a: Alternative, b: Alternative) =>
+    (b.fitsMeal === true ? 1 : 0) - (a.fitsMeal === true ? 1 : 0) || b.gain - a.gain || b.score - a.score
+  return pool.sort(order).slice(0, topK)
 }
 
+/** Less of the same food: the largest fraction that is still worth saying. */
+function portionOption(
+  anchor: ReturnType<typeof getRecord>, anchorQ: { grams?: number; servings?: number }, anchorGL: number, req: AlternativesRequest,
+  avoid: AvoidList | undefined, fits: (g: number) => boolean | null, worth: (g: number, f: boolean | null) => boolean,
+): Alternative | null {
+  // Left out by hand: the engine does not suggest eating even half of it.
+  if (isAvoided(anchor, avoid)) return null
+  if (anchor.kind === 'ingredient' && (anchorQ.grams ?? 0) < 20) return null
+  for (const f of PORTION_FRACTIONS) {
+    const q = anchor.kind === 'ingredient' ? { grams: r1((anchorQ.grams ?? 0) * f) } : { servings: (anchorQ.servings ?? 1) * f }
+    if (anchor.kind === 'ingredient' && (q.grams ?? 0) < 10) continue
+    const c = costAt(anchor.id, q)
+    if (!c || c.gl > req.maxGL) continue
+    const gain = r1(anchorGL - c.gl)
+    const fitsMeal = fits(gain)
+    if (!worth(gain, fitsMeal)) continue
+    const label = swapLabel(anchor, { grams: c.grams !== undefined ? Math.round(c.grams) : undefined, servings: c.servings }, f)
+    return {
+      ...summary(anchor), score: 1, change: 'portion', gain, fitsMeal, label, portion: c.portion, gl: c.gl, kcal: c.kcal, availableCarbs: c.availableCarbs,
+      ...(c.grams !== undefined ? { grams: Math.round(c.grams) } : {}), ...(c.servings ? { servings: c.servings } : {}), portionOf: anchor.id, fraction: f,
+    }
+  }
+  return null
+}
 
+/**
+ * Swaps for a meal, when it needs them: over what is left of the day, or heavy on its own. Asking on a meal that fits would spend a search to print nothing.
+ * Only a scored item can be "the heaviest": a branded or unrated one has no load to swap on. The route calls it; so do the evals.
+ */
+export async function alternativesForMeal(store: VectorStore, a: {
+  meal: { items: MealItemResult[]; totals: MealTotals }
+  remaining: number | undefined
+  avoid?: AvoidList
+  allowPortion: boolean
+}): Promise<{ alternatives?: Alternative[]; alternativesFor?: { foodId: string; name: string; grams: number; servings?: number } }> {
+  const { meal, remaining } = a
+  const needsHelp = meal.totals.glLevel === 'high' || (remaining !== undefined && meal.totals.gl > remaining)
+  if (!needsHelp) return {}
+  const heaviest = meal.items.filter((it) => it.gl !== null).sort((x, y) => (y.gl ?? 0) - (x.gl ?? 0))[0]
+  if (!heaviest || heaviest.gl === null) return {}
+  const alternatives = await findAlternatives(store, {
+    foodId: heaviest.foodId, grams: heaviest.grams, servings: heaviest.servings,
+    maxGL: remaining !== undefined ? Math.max(0, remaining) : heaviest.gl,
+    mealGL: meal.totals.gl, remainingGL: remaining, topK: 3,
+  }, a.avoid, { allowPortion: a.allowPortion })
+  return { alternatives, alternativesFor: { foodId: heaviest.foodId, name: heaviest.name, grams: heaviest.grams, ...(heaviest.servings ? { servings: heaviest.servings } : {}) } }
+}
 
 /**
  * What is left of the day after a meal, and whether it fits.

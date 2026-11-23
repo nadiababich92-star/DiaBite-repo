@@ -306,6 +306,12 @@ export interface AlternativesRequest {
    */
   sessionId?: string
   sameCategory?: boolean
+  /** Servings of the item being replaced when it is a recipe. */
+  servings?: number
+  /** The whole meal's glycemic load, so the engine can say whether the swap makes the meal fit. */
+  mealGL?: number
+  /** The day's remaining glycemic load before this meal. */
+  remainingGL?: number
 }
 
 export interface Alternative extends FoodSummary {
@@ -313,8 +319,22 @@ export interface Alternative extends FoodSummary {
   gl: number
   kcal: number
   availableCarbs: number
-  /** The portion these numbers are for. */
+  /** The portion these numbers are for: grams for `unit: 'g'`, servings for a recipe. */
   portion: number
+  /** 'swap' is a different food; 'portion' is less of the same food. */
+  change: 'swap' | 'portion'
+  /** Load saved against the item being replaced, at the comparison quantity, one decimal. */
+  gain: number
+  /** True when the meal fits the day after this swap; null when the engine was not told the meal. */
+  fitsMeal: boolean | null
+  /** The engine's own phrase for it, with its weight ("half the banana (59 g)"). The agent repeats it. */
+  label: string
+  /** Whole grams; for a recipe `servingGrams × servings`, absent when unknown. */
+  grams?: number
+  servings?: number
+  /** Portions only: the food it is less of, and the fraction (0.75 or 0.5). */
+  portionOf?: string
+  fraction?: number
 }
 
 export interface AlternativesResponse {

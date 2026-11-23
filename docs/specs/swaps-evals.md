@@ -1,6 +1,6 @@
 # Spec — Swaps worth making: the checks that prove it
 
-*Stage 2, from `docs/engineering/engineering-doc.md` (approved 23 November 2026). Companion specs: `swaps-engine.md`, `swaps-screen.md`, `swaps-agent.md`. A feature is not finished until `npm run eval`, `npm run eval:abuse`, the smoke check and `npm run eval:agent` have run and every case below is added in the same change (CLAUDE.md, stage 5). **Mechanical checks read `alternatives`, `afterMeal`, `kind`, `gain`, `fitsMeal`, `label`, never the wording of an answer** (rule 7).*
+*Stage 2, from `docs/engineering/engineering-doc.md` (approved 23 November 2026). Companion specs: `swaps-engine.md`, `swaps-screen.md`, `swaps-agent.md`. A feature is not finished until `npm run eval`, `npm run eval:abuse`, the smoke check and `npm run eval:agent` have run and every case below is added in the same change (CLAUDE.md, stage 5). **Mechanical checks read `alternatives`, `afterMeal`, `change`, `gain`, `fitsMeal`, `label`, never the wording of an answer** (rule 7).*
 
 **Ids:** `SW1` to `SW15` for the engine block, `SW-A1` to `SW-A4` for the agent, `SX1` to `SX4` for the owner's four examples. No migration, no `.env.example` change.
 
@@ -14,17 +14,18 @@ It builds the store as the other blocks do, calls `alternativesForMeal` and `fin
 |---|---|---|
 | SW1 | anchor `seed:oats` 234 g, `mealGL 13.3`, `remainingGL 8` | `rec:DB-0029` (Apple Cinnamon Baked Oatmeal Cups, gain 3.8) is **not** returned; no returned alternative has `swapClass === 'baked'` |
 | SW2 | every anchor of `ANCHORS` | every returned alternative has `fitsMeal === true` **or** (`gain >= 5` **and** `gain >= 0.25 × anchorGL`); `gain > 0` |
-| SW3 | every anchor | every `kind === 'swap'` alternative has `|kcal − anchorKcal| ≤ 0.30 × anchorKcal`; a `kind === 'portion'` one has `kcal` equal to the anchor's `kcal × fraction` to one decimal |
+| SW2b | every anchor, `maxGL 1000`, `remainingGL 0.05` (no room to fit anything) | every returned alternative that does not make the meal fit has `gain >= 5` and `gain >= 0.25 × anchorGL`; this is the case that fails when the worth rule is removed |
+| SW3 | every anchor | every `change === 'swap'` alternative has `|kcal − anchorKcal| ≤ 0.30 × anchorKcal`; a `change === 'portion'` one has `kcal` equal to the anchor's `kcal × fraction` to one decimal |
 | SW4 | every anchor | `ALLOWED[swapClass(anchor)]` contains `swapClass(candidate)` for every returned swap; **no returned swap has class `baked` or `sweet` unless the anchor's class is `baked`, or `sweet` (the anchor `sweet` may also get `fruit`)**; none has class `other` |
-| SW5 | banana 118 g, `remainingGL 6` | one `kind: 'portion'` alternative; `fraction` 0.5; `grams` 59; `gl` equals `computeItem({ foodId, grams: 59 }).gl` exactly; `label` equals `half the banana (59 g)` |
+| SW5 | banana 118 g, `remainingGL` just above the half portion's own load (the engine's cap `maxGL` is the remaining load, so a half banana of about 6.15 needs a day of about 6.7) | one `change: 'portion'` alternative; `fraction` 0.5; `grams` 59; `gl` equals `computeItem({ foodId, grams: 59 }).gl` exactly; `label` equals `half the banana (59 g)` |
 | SW5b | banana 118 g, `remainingGL 9.5` | the 0.75 option is **chosen over 0.5 when it passes** (the largest fraction that passes): `fraction 0.75`, `label` `three quarters of the banana (89 g)` (grams rounded to a whole number) if it satisfies rule 5, else 0.5. The expected fraction is computed in the test from `computeItem`, not typed |
-| SW6 | the banana of SW5 with `allowPortion: false` | no alternative has `kind: 'portion'` |
+| SW6 | the banana of SW5 with `allowPortion: false` | no alternative has `change: 'portion'` |
 | SW7 | all recipe alternatives of the block, and 10 recipes of `recipes_db.json` | `servingGrams === round(Σ ingredients[].grams / servings)`; a recipe alternative's `grams === round(servingGrams × servings)`; a recipe with unknown `servingGrams` has no `grams` and a label without a weight |
 | SW8 | every anchor with two or more alternatives | the list is sorted by `(fitsMeal === true first, gain descending, score descending)`; with two alternatives of the same `fitsMeal`, the first has the larger `gain` |
-| SW9 | anchor `seed:oats`, `avoid { words: ['almond'] }`; and the anchor `almonds` with `avoid { words: ['almond'] }` | no alternative's name or ingredients contain "almond" (`isAvoided`); for the anchor that is itself avoided, **no portion option** |
+| SW9 | anchor `seed:oats`, `avoid { words: ['almond'] }`; and the anchor `banana` 118 g, `maxGL 1000`, `remainingGL 0.05`, with `avoid { words: ['banana'] }` and, as the control, without it | no alternative's name or ingredients contain "almond"; for the avoided banana **no portion option**, and without the avoid list the half banana is offered |
 | SW10 | a branded anchor (`A Kraft mac and cheese`), an unrated one (`pepperoni pizza`), a restaurant one (a Chipotle bowl), and an anchor of GL 0 (`olive oil`) | `alternatives` is `[]` for each |
 | SW11 | `alternativesForMeal` with a meal whose `gl <= remaining` and `glLevel !== 'high'` | returns `{}` (no `alternatives`, no `alternativesFor`) |
-| SW12 | `swapNamedIn` (`src/lib/swap.ts`) | for a portion offer `{ kind: 'portion', label: 'half the banana (59 g)', id: <banana> }`: the Next lines "Have half the banana (59 g) instead.", "Have half the banana instead.", "Try 59 g of the banana." each return the offer; "Keep the banana." and "Nothing to change." return `undefined`; with both a swap and a portion named, the one named last wins; **every case of the existing `swap` block still passes** |
+| SW12 | `swapNamedIn` (`src/lib/swap.ts`) | for a portion offer `{ change: 'portion', label: 'half the banana (59 g)', id: <banana> }`: the Next lines "Have half the banana (59 g) instead.", "Have half the banana instead.", "Try 59 g of the banana." each return the offer; "Keep the banana." and "Nothing to change." return `undefined`; with both a swap and a portion named, the one named last wins; **every case of the existing `swap` block still passes** |
 | SW13 | `swapClass` over 40 named records | `Oatmeal (rolled oats), cooked` → `breakfast-cooked`; `Apple Cinnamon Baked Oatmeal Cups` → `baked`; `Blueberry Oat Breakfast Bars` → `baked`; `Almond Butter Banana Oat Muffins` → `baked`; `Cauliflower Oatmeal (Low-Carb Porridge)` → `breakfast-cooked`; `Banana` → `fruit`; `Pear` → `fruit`; `Snickers` (branded) → `sweet`; `ice cream bar` → `sweet`; `English muffin` → `bread`; `Whole wheat bread` → `bread`; `White rice, cooked` → `cooked-grain`; `Cauliflower rice` → `veg`; `Baked potato` → `starch`; `Greek yogurt` → `dairy`; `Almonds` → `nut`; `Chicken breast` → `protein-main`; `Turkey sandwich on white` → `mixed-dish`; `Orange juice` → `drink`; `Mayonnaise` → `other`; plus 20 USDA survey records chosen by the developer across the `wweia` rules (at least one per rule), each with its expected class written into the test |
 | SW14 | the mutations of section 4 | each fails the case named there |
 | SW15 | the turn log | after a `/agent/ask` with `portionSwaps: false` against the local engine, the line `logTurn` writes contains neither `portionSwaps` nor `false`; `/health` and every response body contain no `portionSwaps`; `validateAsk` returns `{ field: 'portionSwaps' }` for `true`, `1` and `"false"`, and accepts `false` and absent |
@@ -46,7 +47,7 @@ New `expect` keys, all read from the trace (`compute_meal` result), never the an
 
 - `alternativesWorthy: true`: every `alternatives[]` has `fitsMeal === true` or (`gain >= 5` and `gain >= 0.25 × the anchor's gl`);
 - `alternativesFirstIsBest: true`: the list is in the sort order of `swaps-engine.md`;
-- `alternativesHavePortion: true`: some `alternatives[].kind === 'portion'`;
+- `alternativesHavePortion: true`: some `alternatives[].change === 'portion'`;
 - `noAlternatives: true`: `alternatives` is absent or `[]`.
 
 And one **style** key, not gating (the existing `style: true` mechanism): `nextNamesFirst: true`, true when the answer's Next line contains the first alternative's plain name or label words.
@@ -64,12 +65,12 @@ The existing cases that must still pass: `alternativesReturned` + `alternativesG
 
 | Mutation | Fails |
 |---|---|
-| remove rule 5 (the worth test) | SW1, SW2 |
-| remove rule 3 (the role) | SW4, SW1 |
+| remove rule 5 (the worth test) | SW2b |
+| remove rule 3 (the role) | SW1, SW4 |
 | remove rule 4 (the energy band) | SW3 |
 | sort by `score` only | SW8 |
 | let a portion option skip `isAvoided` | SW9 |
-| drop the `anchorGL <= 0` return | SW10 |
+| drop the `anchorGL <= 0` return | **equivalent**: the worth rule's `gain > 0` already drops everything for an anchor with no load to save, so no case can tell the two apart; the return stays for clarity and the mutation is reported as equivalent |
 | `portionSwaps` honoured only in `compute_meal`, not in `/tools/find_alternatives` | SW6 (run through both) |
 | `servingGrams` includes only the first ingredient | SW7 |
 | `swapNamedIn` keeps the "name inside the replaced food" drop for a portion | SW12 |
@@ -85,6 +86,6 @@ The existing cases that must still pass: `alternativesReturned` + `alternativesG
 
 ## 6. Live checks, and rollback
 
-After step 3, with the engine key and no model: `POST /tools/compute_meal` with `withAlternatives: true` for oatmeal 234 g and a budget of `glBudget 10`; read `alternatives[0]` (`kind`, `gain`, `fitsMeal`, `label`, `grams`) and confirm the cups are absent. The same for a banana: a `portion` with `label` `half the banana (59 g)`. A request with `portionSwaps: false` in `PUT /session/:id` returns no portion. Read the image tag the app runs (rule 1); `GET /health` is unchanged.
+After step 3, with the engine key and no model: `POST /tools/compute_meal` with `withAlternatives: true` for oatmeal 234 g and a budget of `glBudget 10`; read `alternatives[0]` (`change`, `gain`, `fitsMeal`, `label`, `grams`) and confirm the cups are absent. The same for a banana: a `portion` with `label` `half the banana (59 g)`. A request with `portionSwaps: false` in `PUT /session/:id` returns no portion. Read the image tag the app runs (rule 1); `GET /health` is unchanged.
 
 **Rollback:** the rules are in code; `git revert` and `npm run deploy` restore today's behaviour; the prompt returns to its previous version by republishing the old `agent/prompts/meal.md` (`git revert` the same commit and run `provision`), models read back. There is no data to undo; the session boolean is a memory entry that expires in an hour.

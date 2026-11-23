@@ -57,7 +57,7 @@ Definitions, for one call:
 - Skipped when the anchor is avoided (`isAvoided(anchor, avoid)`: the person left it out by hand; the engine does not suggest eating even half of it), and when the anchor's grams are under 20 g (a spice, a spoon of oil), or the grams of the portion would be under 10.
 - Costed by `computeItem` at that quantity: `gl`, `kcal`, `availableCarbs`. `gain` and `fitsMeal` as above. **Rules 3 and 4 do not apply** (same food, smaller on purpose); rule 5 does.
 - **At most one is kept: the largest fraction that passes rule 5** (the least reduction that is worth saying). If 0.75 passes it is the one; otherwise 0.5; otherwise none.
-- Fields: `kind: 'portion'`, `portionOf: anchor.id`, `fraction: f`, `name: anchor.name`, `id: anchor.id`, `grams` (ingredient) or `servings` (recipe), `label` (below).
+- Fields: `change: 'portion'`, `portionOf: anchor.id`, `fraction: f`, `name: anchor.name`, `id: anchor.id`, `grams` (ingredient) or `servings` (recipe), `label` (below).
 
 **Labels** (the engine's own words, in `labelFor(candidate, cost)`; the agent repeats them, never composes them):
 
@@ -109,13 +109,13 @@ export const ALLOWED: Record<SwapClass, SwapClass[]>
 
 **`swapClass`: the first rule that matches wins** (the safety-critical name rules come first, so a baked or sweet thing is never taken for anything else):
 
-1. **Name rules (any kind).** Case-insensitive on `rec.name`:
+1. **Name rules (any kind).** Case-insensitive on `rec.name`; **each word also in its plural** (`muffin`/`muffins`, `candy`/`candies`); baby food (`baby|babies|toddler|infant` in the name or the survey category) is class `other` before anything else:
    - `baked`: `\b(muffin|cupcake|cake|cookie|brownie|scone|pastry|doughnut|donut|croissant|danish|pie|tart|waffle|pancake|(granola|energy|protein|breakfast|oat|cereal|nut) bars?|(oat|oatmeal|baked|apple|banana) cups)\b` **or** `\bbaked\b` combined with `oat|apple|banana|berry|cinnamon` in a recipe of category Breakfast or Dessert.
    - (A bare "bar" is not `baked`: a candy bar or an ice cream bar is `sweet`, below.)
    - `sweet`: `\b(candy|chocolate|snickers|caramel|ice cream|ice-cream|popsicle|gelato|sorbet|pudding|jam|jelly|syrup|honey|sugar|marshmallow|frosting|gummy|gummies)\b`.
-   - `drink`: category `Drinks & Smoothies`, group `drink`, or `plant_milk`; or the `wweia` string starts with `Beverages`, `Soft drinks`, `Juice`, `Coffee`, `Tea`, `Water`.
+   - `drink`: category `Drinks & Smoothies` or `drinks`; a name with `drink|juice|soda|smoothie|beverage`; or the `wweia` string contains `drink`, `beverage`, `juice`, `coffee`, `smoothie` or starts with `tea` or `water`.
 2. **USDA survey records (`wweia` set).** First match: `/banana|apple|berr|citrus|melon|grape|peach|fruit/i` → `fruit`; `/potato|corn|plantain/i` → `starch`; `/rice|pasta|noodle|grain/i` → `cooked-grain`; `/bread|roll|bagel|tortilla|toast|biscuit/i` → `bread`; `/oatmeal|cereal, cooked|grits|porridge/i` → `breakfast-cooked`; `/cookie|cake|pie|pastry|donut|brownie/i` → `baked`; `/candy|ice cream|frozen dairy|dessert/i` → `sweet`; `/milk|yogurt|cheese/i` → `dairy`; `/nut|seed/i` → `nut`; `/vegetable|salad|leafy/i` → `veg`; `/beef|pork|poultry|chicken|turkey|fish|seafood|egg|bean|legume|tofu/i` → `protein-main`; `/sandwich|soup|stew|pizza|burrito|taco|casserole|mixed/i` → `mixed-dish`; `/snack|chip|pretzel|popcorn/i` → `savoury-snack`.
-3. **Ingredient groups (curated table).** `fruit` → `fruit`; `veg`, `herb`, `spice` → `veg`; names matching `potato|sweet potato|corn|yam|plantain|cassava` override `veg` to `starch`; `grain` → `bread` when the name matches `bread|bagel|tortilla|bun|roll|pita|toast|muffin` (English muffin is `bread`, checked before the baked rule: see the exception below), `breakfast-cooked` when it matches `oat|porridge|grits|farina`, else `cooked-grain`; `dairy` → `dairy`; `nut`, `seed` → `nut`; `protein`, `seafood`, `egg`, `legume` → `protein-main`; `condiment`, `pantry`, `supplement`, `fat` → `other`.
+3. **Curated ingredients and everyday foods, by the category the catalogue stores** (the group is mapped to it: `condiment` is `sweets`, `pantry` is `grains`, `spice` and `herb` are `vegetables`, so the category is what the rule can read): `fruits` → `fruit`; `vegetables` → `veg`; names matching `potato|sweet potato|corn|yam|plantain|cassava` override `veg` to `starch`; `grain` → `bread` when the name matches `bread|bagel|tortilla|bun|roll|pita|toast|muffin` (English muffin is `bread`, checked before the baked rule: see the exception below), `breakfast-cooked` when it matches `oat|porridge|grits|farina`, else `cooked-grain`; `dairy` → `dairy`; `nut`, `seed` → `nut`; `protein`, `seafood`, `egg`, `legume` → `protein-main`; `condiment`, `pantry`, `supplement`, `fat` → `other`.
 4. **Recipes by category.** `Breakfast` → `breakfast-cooked` (the `baked` name rule has already caught muffins and bars); `Snack & Appetizer` → `savoury-snack`; `Dessert` → `sweet`; `Poultry`, `Beef, Pork & Lamb`, `Seafood`, `Soup & Stew`, `Vegetarian & Vegan`, `Sandwiches & Wraps`, `Salad`, `Side Dish` → `mixed-dish`; `Drinks & Smoothies` → `drink`.
 5. Anything else → `other`.
 
@@ -170,7 +170,7 @@ export interface Alternative extends FoodSummary {
   /** Grams for `unit: 'g'`, servings for a recipe. Unchanged meaning. */
   portion: number
   /** NEW. 'swap' is a different food; 'portion' is less of the same food. */
-  kind: 'swap' | 'portion'
+  change: 'swap' | 'portion'
   /** NEW. Load saved against the anchor at the comparison quantity, one decimal. */
   gain: number
   /** NEW. True when the meal fits the day after this swap; null when the engine was not told the meal. */
@@ -209,4 +209,4 @@ None new. `/tools/find_alternatives` still answers 200 with `{ alternatives: [],
 
 ## Verifiable
 
-`swaps-evals.md`: SW1 to SW15 read `alternatives[].kind`, `gain`, `fitsMeal`, `kcal`, `label`, `grams`, `portionOf`, the sort order and `swapClass` of every returned alternative; mutations remove each rule in turn; the owner's four examples are run and reported.
+`swaps-evals.md`: SW1 to SW15 read `alternatives[].change`, `gain`, `fitsMeal`, `kcal`, `label`, `grams`, `portionOf`, the sort order and `swapClass` of every returned alternative; mutations remove each rule in turn; the owner's four examples are run and reported.

@@ -214,7 +214,7 @@ export interface Receipt {
 export interface AlternativeResult {
   id: string; name: string; unit?: 'g' | 'serving'; portion: number; gl: number; kcal: number
   /** 'swap' is a different food; 'portion' is less of the same food. Absent from an older engine. */
-  kind?: 'swap' | 'portion'
+  change?: 'swap' | 'portion'
   /** Load saved against the item being replaced; `fitsMeal` is true when the meal fits the day after it, null when the engine was not told the meal. */
   gain?: number
   fitsMeal?: boolean | null

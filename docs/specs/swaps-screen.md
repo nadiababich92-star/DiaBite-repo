@@ -8,7 +8,7 @@
 
 | File | Change |
 |---|---|
-| `src/lib/swap.ts` | `SwapOffer` gains `kind` and `label`; `swapNamedIn` recognises a smaller portion |
+| `src/lib/swap.ts` | `SwapOffer` gains `change` and `label`; `swapNamedIn` recognises a smaller portion |
 | `src/components/AskPage.tsx` | `acceptSwap` handles a portion (same food, new weight); the request carries `portionSwaps` |
 | `src/lib/agent.ts` | `AskRequest.portionSwaps?: false`; `Alternative`-shaped fields on the trace type |
 
@@ -33,7 +33,7 @@ export interface SwapOffer {
   unit: 'g' | 'serving'
   portion: number
   /** NEW. 'portion' means less of the food being replaced. Absent is 'swap' (an older engine). */
-  kind?: 'swap' | 'portion'
+  change?: 'swap' | 'portion'
   /** NEW. The engine's own phrase for the option, e.g. "half the banana (59 g)". */
   label?: string
 }
@@ -41,15 +41,15 @@ export interface SwapOffer {
 
 `swapNamedIn(next, meal)` keeps its contract (the sentence only says which; the food, the weight and every number come from the engine) and gains one path:
 
-1. For an alternative with `kind === 'portion'`: it is named when the Next line, lower-cased, contains the `label` **with its parenthesis removed** (`half the banana`), or contains the fraction word (`half`, `three quarters`) **and** the plain name of the food being replaced, **or** contains the grams (`59 g`, `59g`, `59 grams`) **and** that plain name. This path does **not** apply the rule that drops an offer whose name is inside the replaced food's name (that rule exists so "potato, scalloped" is not taken for "mashed potato"; a portion is, by definition, the replaced food).
-2. For `kind` absent or `'swap'`: exactly today's logic (`lastIndexOf` of the plain name, the replaced food excluded, latest mention wins).
+1. For an alternative with `change === 'portion'`: it is named when the Next line, lower-cased, contains the `label` **with its parenthesis removed** (`half the banana`), or contains the fraction word (`half`, `three quarters`) **and** the plain name of the food being replaced, **or** contains the grams (`59 g`, `59g`, `59 grams`) **and** that plain name. This path does **not** apply the rule that drops an offer whose name is inside the replaced food's name (that rule exists so "potato, scalloped" is not taken for "mashed potato"; a portion is, by definition, the replaced food).
+2. For `change` absent or `'swap'`: exactly today's logic (`lastIndexOf` of the plain name, the replaced food excluded, latest mention wins).
 3. When both a portion and a swap are named, the one mentioned **last** wins (the sentence "instead of the pear, have half the banana" is the portion).
 
 ## 3. `src/components/AskPage.tsx`
 
 `acceptSwap(alt)` today finds the line by `alternativesFor.foodId` and sets `swap = { index, id: alt.id, name, unit, portion, replaced }`. For a portion `alt.id === alternativesFor.foodId` (same food): the code that applies `swap` already replaces the line's `foodId`, `unit` and `portion`; **no new branch is needed there**, but two checks are added:
 
-- the line is replaced even though `id` equals the replaced line's `foodId` (a guard today may treat "same id" as "nothing to do": read the code and remove that guard for `kind === 'portion'`);
+- the line is replaced even though `id` equals the replaced line's `foodId` (a guard today may treat "same id" as "nothing to do": read the code and remove that guard for `change === 'portion'`);
 - the receipt's note for the replaced line reads the engine's recount, not the sentence.
 
 `recompute` sends `{ items: [{ foodId, grams | servings }] }` as today; a portion is `{ foodId: alt.id, grams: alt.portion }` (ingredient) or `{ foodId: alt.id, servings: alt.portion }` (recipe).
@@ -64,7 +64,7 @@ export interface SwapOffer {
 
 ## 4. `src/lib/agent.ts`
 
-`AskRequest` gains `portionSwaps?: false` with the comment *"Set only when the person's profile hides the weekly menu: the engine then offers no smaller portion. Parked with the day, memory only, never named."* The trace type that reads `compute_meal` results gains the new `Alternative` fields (`kind`, `gain`, `fitsMeal`, `label`, `grams`, `servings`, `portionOf`, `fraction`), all optional.
+`AskRequest` gains `portionSwaps?: false` with the comment *"Set only when the person's profile hides the weekly menu: the engine then offers no smaller portion. Parked with the day, memory only, never named."* The trace type that reads `compute_meal` results gains the new `Alternative` fields (`change`, `gain`, `fitsMeal`, `label`, `grams`, `servings`, `portionOf`, `fraction`), all optional.
 
 ## 5. States
 

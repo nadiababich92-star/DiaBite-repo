@@ -32,6 +32,10 @@ import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
 import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
+import { alternativesForMeal, findAlternatives, SWAP_ENERGY_BAND, SWAP_MIN_GAIN, SWAP_MIN_GAIN_SHARE } from '../server/compute'
+import { ALLOWED, mayReplace, swapClass } from '../server/roles'
+import { validateAsk } from '../server/guard'
+import { getSession, putSession } from '../server/sessions'
 import { gramsFor, householdUnitsFor, needsWeightHint, quantityError, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
@@ -2306,6 +2310,203 @@ hangMisses.forEach((m) => console.log(m))
   console.log(`\ndishes    ${misses.length === 0 ? `ok (${dishes.length} recipes)` : 'WRONG'}`)
   misses.forEach((m) => console.log(m))
   if (misses.length) process.exitCode = 1
+}
+
+// ── swaps worth making (docs/specs/swaps-evals.md, SW1 to SW15 and the four examples) ─────────────────────────────
+// 20 November 2026: oatmeal 1 cup -> baked oatmeal cups passed with a gain of 3.8, a recipe was costed at "1 serving" against grams, the closest by name came
+// first, and porridge could become a breakfast cake. These read what the engine returns: change, gain, fitsMeal, kcal, label, grams, the order. The wording is
+// the agent's and is checked elsewhere. SW12 (the Accept key) is written with the screen; SW14 is the mutations, run by hand and reported.
+{
+  const misses: string[] = []
+  const miss = (m: string) => misses.push('    ' + m)
+  const ANCHORS = ['banana', 'apple', 'grapes', 'mango', 'raisins', 'orange juice', 'white rice', 'brown rice', 'cooked pasta', 'oatmeal', 'bread', 'bagel', 'flour tortilla',
+    'mashed potato', 'baked potato', 'sweet potato', 'corn', 'granola', 'plain yogurt', 'cereal', 'pancakes', 'waffles', 'a blueberry muffin', 'a chocolate chip cookie',
+    'vanilla ice cream', 'french fries', 'cooked quinoa', 'lentil soup', 'chili with beans', 'a bean burrito', 'a ham sandwich on white bread', 'a tuna salad sandwich',
+    'an egg salad sandwich on white', 'macaroni and cheese', 'potato salad', 'fried rice', 'a hamburger bun', 'a banana smoothie', 'honey on toast', 'a peanut butter sandwich']
+  const idOf = async (phrase: string) => (await resolvePhrases(store, [phrase]))[0]?.candidates[0]?.id
+  const loadOf = (id: string, grams?: number) => { const it = computeItem(id.startsWith('rec:') ? { foodId: id, servings: 1 } : { foodId: id, grams }); return it }
+  const run = async (id: string, grams: number | undefined, remaining: number, o: { allowPortion?: boolean; avoid?: object } = {}) => {
+    const it = loadOf(id, grams)
+    const gl = it.gl as number
+    const g = id.startsWith('rec:') ? undefined : (grams ?? it.grams)
+    return { it, gl, alts: await findAlternatives(store, { foodId: id, ...(g ? { grams: g } : {}), maxGL: remaining, mealGL: gl, remainingGL: remaining, topK: 3 }, o.avoid, { allowPortion: o.allowPortion }) }
+  }
+
+  // SW1: the oatmeal of the review.
+  {
+    const r = await run('seed:oats', 234, 8)
+    if (r.alts.some((a) => a.id === 'rec:DB-0029')) miss('SW1 the baked oatmeal cups (a gain of 3.8) are offered for porridge')
+    if (r.alts.some((a) => swapClass(getRecord(a.id)) === 'baked')) miss('SW1 a baked thing is offered for porridge')
+  }
+  // SW2, SW3, SW4, SW8 over the anchors.
+  let withLoad = 0
+  for (const phrase of ANCHORS) {
+    const id = await idOf(phrase)
+    if (!id) continue
+    const rec = getRecord(id)
+    if (hasNoLoad(rec.kind)) continue
+    const first = loadOf(id)
+    if (first.gl === null || first.gl <= 0) continue
+    withLoad++
+    const { gl, it, alts } = await run(id, undefined, Math.round(0.6 * (first.gl as number) * 10) / 10)
+    for (const a of alts) {
+      if (!(a.gain > 0 && (a.fitsMeal === true || (a.gain >= SWAP_MIN_GAIN && a.gain >= SWAP_MIN_GAIN_SHARE * gl)))) miss(`SW2 "${phrase}": ${a.label} gain ${a.gain} is not worth making`)
+      if (a.change === 'swap' && Math.abs(a.kcal - it.kcal) > SWAP_ENERGY_BAND * it.kcal + 1e-6) miss(`SW3 "${phrase}": ${a.label} is ${a.kcal} kcal against ${it.kcal}`)
+      if (a.change === 'portion' && Math.abs(a.kcal - it.kcal * (a.fraction ?? 1)) > 0.2) miss(`SW3 "${phrase}": the portion ${a.label} is ${a.kcal} kcal, not ${(it.kcal * (a.fraction ?? 1)).toFixed(1)}`)
+      if (a.change === 'swap') {
+        const cls = swapClass(getRecord(a.id)), from = swapClass(rec)
+        if (!mayReplace(from, cls)) miss(`SW4 "${phrase}" (${from}): ${a.label} is ${cls}`)
+        if ((cls === 'baked' || cls === 'sweet') && from !== 'baked' && from !== 'sweet') miss(`SW4 "${phrase}" (${from}): a ${cls} thing is offered`)
+      }
+    }
+    // SW2b: with the day too small to fit anything, only the second clause of the worth rule can keep a swap: a gain of 5 and a quarter of the load.
+    const wide = await findAlternatives(store, { foodId: id, ...(id.startsWith('rec:') ? {} : { grams: it.grams }), maxGL: 1000, mealGL: gl, remainingGL: 0.05, topK: 3 })
+    for (const a of wide) if (a.fitsMeal !== true && !(a.gain >= SWAP_MIN_GAIN && a.gain >= SWAP_MIN_GAIN_SHARE * gl)) miss(`SW2b "${phrase}": ${a.label} gain ${a.gain} of ${gl} is kept with no room to fit`)
+    for (let i = 1; i < alts.length; i++) {
+      const x = alts[i - 1], y = alts[i]
+      const kx = x.fitsMeal === true ? 1 : 0, ky = y.fitsMeal === true ? 1 : 0
+      if (kx < ky || (kx === ky && x.gain < y.gain)) miss(`SW8 "${phrase}": the order is ${alts.map((a) => `${a.fitsMeal ? 'F' : '-'}${a.gain}`).join(' ')}`)
+    }
+  }
+  if (withLoad < 30) miss(`SW2 only ${withLoad} of the ${ANCHORS.length} anchors have a load: the list is wrong`)
+
+  // SW5, SW5b, SW6: the banana.
+  {
+    const bid = await idOf('banana')
+    if (!bid) miss('SW5 no banana')
+    else {
+      const grams = 118
+      const gl = computeItem({ foodId: bid, grams }).gl as number
+      const half = computeItem({ foodId: bid, grams: Math.round(grams * 0.5 * 10) / 10 })
+      const r = await run(bid, grams, Math.round((gl - (gl - (half.gl as number)) + 0.5) * 10) / 10)   // a day with just room for half of it
+      const p = r.alts.find((a) => a.change === 'portion')
+      if (!p) miss('SW5 no smaller portion offered for the banana')
+      else {
+        if (p.fraction !== 0.5) miss(`SW5 the fraction is ${p.fraction}, wanted 0.5`)
+        if (p.gl !== half.gl) miss(`SW5 the portion's load is ${p.gl}, the engine says ${half.gl} for ${half.grams} g`)
+        if (p.label !== `half the banana (${Math.round(half.grams)} g)`) miss(`SW5 the label is "${p.label}"`)
+      }
+      // The least reduction that is worth saying: with room for three quarters, it is three quarters.
+      const q = computeItem({ foodId: bid, grams: Math.round(grams * 0.75 * 10) / 10 })
+      const r2 = await run(bid, grams, Math.round((q.gl as number + 0.3) * 10) / 10)
+      const p2 = r2.alts.find((a) => a.change === 'portion')
+      if (p2 && p2.fraction !== 0.75) miss(`SW5b the fraction is ${p2.fraction} when three quarters fits`)
+      const r3 = await run(bid, grams, Math.round((half.gl as number + 0.5) * 10) / 10, { allowPortion: false })
+      if (r3.alts.some((a) => a.change === 'portion')) miss('SW6 a smaller portion is offered when the session says no')
+    }
+  }
+  // SW7: what a serving weighs.
+  {
+    const raw = JSON.parse(readFileSync(join(ROOT, 'data', 'recipes-db', 'recipes_db.json'), 'utf8'))
+    const rows = (Array.isArray(raw) ? raw : raw.recipes) as { id: string; servings: number; ingredients: { grams: number }[] }[]
+    for (const r of rows.filter((_, i) => i % 200 === 0).slice(0, 10)) {
+      const rec = getRecord(`rec:${r.id}`)
+      const want = Math.round(r.ingredients.reduce((t, i) => t + i.grams, 0) / r.servings)
+      if (rec.servingGrams !== want) miss(`SW7 rec:${r.id} servingGrams ${rec.servingGrams}, the recipe's own ingredients say ${want}`)
+    }
+    const cups = await run('rec:DB-0029', undefined, 3)
+    for (const a of cups.alts) if (a.id.startsWith('rec:') && getRecord(a.id).servingGrams && a.grams !== Math.round(getRecord(a.id).servingGrams! * (a.servings ?? 1))) miss(`SW7 ${a.label} has grams ${a.grams}`)
+  }
+  // SW9: an avoided food is not offered, nor half of it.
+  {
+    const avoid = { words: ['almond'] }
+    const r = await run('seed:oats', 234, 8, { avoid })
+    if (r.alts.some((a) => /almond/i.test(getRecord(a.id).name + ' ' + (getRecord(a.id).ingredientNames ?? []).join(' ')))) miss('SW9 an avoided food is offered')
+    const banana = await idOf('banana')
+    if (banana) {
+      const bg = loadOf(banana, 118).gl as number
+      const own = await findAlternatives(store, { foodId: banana, grams: 118, maxGL: 1000, mealGL: bg, remainingGL: 0.05, topK: 3 }, { words: ['banana'] })
+      if (own.some((a) => a.change === 'portion')) miss('SW9 half of an avoided banana is offered')
+      const ok = await findAlternatives(store, { foodId: banana, grams: 118, maxGL: 1000, mealGL: bg, remainingGL: 0.05, topK: 3 })
+      if (!ok.some((a) => a.change === 'portion')) miss('SW9 the control: with nothing avoided, half the banana is offered')
+    }
+    const aid = await idOf('almonds')
+    if (aid) {
+      const g = loadOf(aid, 40).gl as number
+      const own = await findAlternatives(store, { foodId: aid, grams: 40, maxGL: Math.max(0.5, g / 3), mealGL: g, remainingGL: g / 3, topK: 3 }, avoid)
+      if (own.some((a) => a.change === 'portion')) miss('SW9 half of an avoided food is offered')
+    }
+  }
+  // SW10: no load, no swap.
+  for (const phrase of ['A Kraft mac and cheese', 'pepperoni pizza', 'chipotle chicken burrito bowl', 'olive oil']) {
+    const id = await idOf(phrase)
+    if (!id) continue
+    const rec = getRecord(id)
+    const alts = await findAlternatives(store, { foodId: id, grams: rec.defaultPortion, maxGL: 5, mealGL: 5, remainingGL: 2, topK: 3 })
+    if (alts.length) miss(`SW10 "${phrase}" (${rec.kind}) has ${alts.length} swaps`)
+  }
+  // SW11: a meal that fits has none.
+  {
+    const meal = computeMeal([{ foodId: (await idOf('an apple'))!, grams: 100 }])
+    const out = await alternativesForMeal(store, { meal, remaining: 50, allowPortion: true })
+    if (out.alternatives || out.alternativesFor) miss('SW11 a meal that fits has alternatives')
+    const over = await alternativesForMeal(store, { meal: computeMeal([{ foodId: 'seed:oats', grams: 234 }]), remaining: 8, allowPortion: true })
+    if (!over.alternatives || !over.alternativesFor) miss('SW11 a meal over the day has none to offer, even a smaller portion')
+  }
+  // SW13: what kind of food it is.
+  {
+    const want: [string, string, string, string | undefined, string][] = [
+      ['ingredient', 'Oatmeal (rolled oats), cooked', 'grains', undefined, 'breakfast-cooked'],
+      ['recipe', 'Apple Cinnamon Baked Oatmeal Cups', 'Breakfast', undefined, 'baked'], ['recipe', 'Blueberry Oat Breakfast Bars', 'Breakfast', undefined, 'baked'],
+      ['recipe', 'Almond Butter Banana Oat Muffins', 'Breakfast', undefined, 'baked'], ['recipe', 'Cauliflower Oatmeal (Low-Carb Porridge)', 'Breakfast', undefined, 'breakfast-cooked'],
+      ['ingredient', 'Banana', 'fruits', undefined, 'fruit'], ['ingredient', 'Pear', 'fruits', undefined, 'fruit'], ['branded', 'Snickers', 'sweets', undefined, 'sweet'],
+      ['ingredient', 'Ice cream bar', 'sweets', undefined, 'sweet'], ['ingredient', 'English muffin', 'grains', undefined, 'bread'], ['ingredient', 'Whole wheat bread', 'grains', undefined, 'bread'],
+      ['ingredient', 'White rice, long-grain, cooked', 'grains', undefined, 'cooked-grain'], ['ingredient', 'Cauliflower rice', 'vegetables', undefined, 'veg'],
+      ['ingredient', 'Potato, baked, flesh (russet)', 'vegetables', undefined, 'starch'], ['ingredient', 'Greek yogurt', 'dairy', undefined, 'dairy'], ['ingredient', 'Almonds', 'nuts', undefined, 'nut'],
+      ['ingredient', 'Chicken breast, skinless', 'protein', undefined, 'protein-main'], ['recipe', 'Turkey sandwich on white', 'Sandwiches & Wraps', undefined, 'mixed-dish'],
+      ['ingredient', 'Orange juice', 'drinks', undefined, 'drink'], ['ingredient', 'Mayonnaise (avocado oil)', 'sweets', undefined, 'other'],
+      ['ingredient', 'Bananas, raw', 'grains', 'Bananas', 'fruit'], ['ingredient', 'Cookie, chocolate chip', 'grains', 'Cookies and brownies', 'baked'],
+      ['ingredient', 'Rice, white, cooked', 'grains', 'Rice', 'cooked-grain'], ['ingredient', 'Bread, whole wheat', 'grains', 'Yeast breads', 'bread'],
+      ['ingredient', 'Oatmeal, made with water', 'grains', 'Oatmeal', 'breakfast-cooked'], ['ingredient', 'Baby toddler fruit', 'grains', 'Baby food: fruit', 'other'],
+      ['ingredient', 'Fruit flavored drink', 'grains', 'Fruit drinks', 'drink'], ['ingredient', 'Cheese sandwich', 'grains', 'Sandwiches (single meat)', 'mixed-dish'],
+      ['ingredient', 'Milk, whole', 'grains', 'Milk, whole', 'dairy'], ['ingredient', 'Candy, gummy', 'grains', 'Candy not containing chocolate', 'sweet'],
+    ]
+    for (const [kind, name, category, wweia, cls] of want) {
+      const got = swapClass({ kind: kind as 'ingredient', name, category, wweia })
+      if (got !== cls) miss(`SW13 "${name}" is ${got}, wanted ${cls}`)
+    }
+    // a baked or sweet food may only be replaced by a baked or sweet one; a fruit is never replaced by a sweet.
+    if (ALLOWED.baked.join() !== 'baked' || ALLOWED.fruit.join() !== 'fruit' || !ALLOWED.sweet.includes('fruit') || ALLOWED.fruit.includes('sweet' as never)) miss('SW13 the allow-list lets a baked thing or a sweet stand in where it must not')
+  }
+  // SW15: the one boolean about a person lives in memory only.
+  {
+    const ok = (b: unknown) => validateAsk({ sessionId: 'sw15', message: 'x', ...(b as object) })
+    if (ok({ portionSwaps: false }) !== null) miss('SW15 portionSwaps false is refused')
+    if (ok({}) !== null) miss('SW15 a request without portionSwaps is refused')
+    for (const bad of [true, 1, 'false', null]) if (ok({ portionSwaps: bad }) === null) miss(`SW15 portionSwaps ${JSON.stringify(bad)} is accepted`)
+    putSession('sw15-a', { glBudget: 54, carbsG: 107, kcal: 1653 }, [], undefined, undefined, undefined, false)
+    putSession('sw15-b', { glBudget: 54, carbsG: 107, kcal: 1653 }, [])
+    if (getSession('sw15-a')?.portionSwaps !== false || getSession('sw15-b')?.portionSwaps !== undefined) miss('SW15 the session does not keep exactly what it was given')
+    const agentSrc = readFileSync(join(ROOT, 'server', 'agent.ts'), 'utf8')
+    const logBody = agentSrc.slice(agentSrc.indexOf('function logTurn'), agentSrc.indexOf('function logTurn') + 1800)
+    if (/portionSwaps/.test(logBody)) miss('SW15 logTurn mentions portionSwaps')
+  }
+  console.log(`\nswaps     ${misses.length === 0 ? 'ok' : 'WRONG'}  (${withLoad} anchors with a load)`)
+  misses.forEach((m) => console.log(m))
+  if (misses.length) process.exitCode = 1
+
+  // The owner's four examples: each prints a line and none is a failure; where the rules, not the data, decide, the line says so.
+  const say = (id: string, text: string) => console.log(`  ${id}  ${text}`)
+  {
+    const mid = await idOf('a blueberry muffin')
+    if (mid && !hasNoLoad(getRecord(mid).kind)) {
+      const r = await run(mid, undefined, 0.6 * (loadOf(mid).gl as number))
+      const oat = r.alts.find((a) => getRecord(a.id).kind === 'recipe' && /oat/i.test(a.name) && swapClass(getRecord(a.id)) === 'baked')
+      say('SX1', oat ? `ok  ${oat.label}` : `MISSING DATA: no oat muffin recipe in the energy band and gain of "${getRecord(mid).name}" (load ${r.gl}); best: ${r.alts[0]?.label ?? 'none'}`)
+    } else say('SX1', 'MISSING DATA: "a blueberry muffin" resolves to a food with no load')
+    const sid = await idOf('a Snickers bar')
+    say('SX2', sid && hasNoLoad(getRecord(sid).kind) ? `NOT POSSIBLE BY DESIGN: ${getRecord(sid).name} has no glycemic load (${getRecord(sid).kind}, CLAUDE.md rule 4), so there is nothing to save and no swap is computed` : sid ? 'resolves to a food with a load: run it by hand' : 'MISSING DATA: no Snickers')
+    const tid = await idOf('a tuna salad sandwich on whole wheat bread')
+    if (!tid) say('SX3', 'MISSING DATA: no tuna sandwich on whole wheat')
+    else if (hasNoLoad(getRecord(tid).kind) || getRecord(tid).gi === null) say('SX3', `NOT A SWAP: "${getRecord(tid).name}" has no glycemic load or is unknown; a food the database lacks is named, never replaced (rule 3)`)
+    else {
+      const r = await run(tid, undefined, 0.6 * (loadOf(tid).gl as number))
+      const white = r.alts.find((a) => /on white/i.test(a.name))
+      say('SX3', white ? `UNEXPECTED: ${white.label} offered at gain ${white.gain}` : 'NOT A SWAP: white bread is not lower in load than wheat; none is offered')
+    }
+    const bid = (await resolvePhrases(store, ['a Big Mac']))[0]
+    say('SX4', bid?.candidates[0] && !bid.unknown ? `resolves to ${bid.candidates[0].id} (${getRecord(bid.candidates[0].id).kind}); cost_dish is for a dish the database lacks` : 'MISSING DATA: no Big Mac in the database and no recipe to cost it from')
+  }
 }
 
 // ── familiar dishes ──────────────────────────────────────────────────

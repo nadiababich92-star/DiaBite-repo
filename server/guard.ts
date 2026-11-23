@@ -66,6 +66,7 @@ export function validateAsk(body: unknown): Invalid | null {
   if (b.avoid !== undefined && !validAvoid(b.avoid)) return { field: 'avoid' }
   if (b.carbLimit !== undefined && !validCarbLimit(b.carbLimit)) return { field: 'carbLimit' }
   if (b.units !== undefined && !validUnits(b.units)) return { field: 'units' }
+  if (b.portionSwaps !== undefined && b.portionSwaps !== false) return { field: 'portionSwaps' }
   return null
 }
 

@@ -156,6 +156,10 @@ export interface FoodRecord extends FoodSummary {
   verifiedAt?: string
   /** The record's own USDA household measures ("cup", "slice"), where we hold a table that matches it. */
   portions?: { label: string; grams: number }[]
+  /** Recipes: what one serving weighs, whole grams, from the recipe's own ingredients (water counted). Absent for every other kind. */
+  servingGrams?: number
+  /** USDA survey records: the survey's own food category ("Bananas", "Yeast breads"), which the swap rules read; `category` is 'grains' for all of them. Never shown. */
+  wweia?: string
 }
 
 /** A record as `public.foods` stores it. */
@@ -216,6 +220,9 @@ function fromRow(r: FoodRow): FoodRecord {
     // the table without them says every portion is "only a serving size", so a cup, a medium and a slice stop meaning anything, and the engine
     // answered needsWeight for every food the day the catalogue came from the database (18 November).
     portions: loadFoods().byId.get(r.id)?.portions,
+    // Same for what the swap rules read: the table has no column for them, and a record without them is a food of unknown kind.
+    servingGrams: loadFoods().byId.get(r.id)?.servingGrams,
+    wweia: loadFoods().byId.get(r.id)?.wweia,
   }
 }
 
@@ -700,7 +707,7 @@ function usdaRecords(): FoodRecord[] {
     const name = readableName(r.name)
     out.push({
       id: `usda:${r.fdc_id}`, kind: unrated ? 'unrated' : 'ingredient', name, gi, giLevel: giLevel(gi),
-      aliases: USDA_ALIASES[`usda:${r.fdc_id}`],
+      aliases: USDA_ALIASES[`usda:${r.fdc_id}`], wweia: r.category,
       category: 'grains', unit: 'g', defaultPortion: householdPortion(r.portions, r.name), portions: r.portions,
       searchText: `${name}. ${r.name}. ${r.category}.${USDA_ALIASES[`usda:${r.fdc_id}`] ? ` ${USDA_ALIASES[`usda:${r.fdc_id}`].join(', ')}.` : ''}`,
       per100: { kcal: r.per100.kcal, protein: r.per100.protein, fat: r.per100.fat, carbs: r.per100.carbs, fiber: r.per100.fiber },
@@ -861,6 +868,7 @@ export function loadFoods() {
         availableCarbs, gl: r.glycemic_load,
       },
       ingredientNames: names,
+      ...(r.servings > 0 && r.ingredients.length ? { servingGrams: Math.round(r.ingredients.reduce((t, i) => t + i.grams, 0) / r.servings) } : {}),
     })
   }
 

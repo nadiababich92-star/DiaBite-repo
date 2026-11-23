@@ -29,7 +29,7 @@ import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
-import { afterMealFor, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, withDayUnscored, withSaid } from './compute'
+import { afterMealFor, alternativesForMeal, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, withDayUnscored, withSaid } from './compute'
 import { NEEDS_WEIGHT_INSTRUCTION, needsWeightHint, quantityError, settleAmount, weightQuestion } from './quantity'
 import { verify } from './verify'
 import { claimSession, getSession, noteResolution, putSession } from './sessions'
@@ -196,12 +196,13 @@ async function main() {
 
   /** The client parks the day's budget and log here, then hands the agent only the id. */
   app.put('/session/:id', (req, res) => {
-    const { budget, entries, avoid, carbLimit, units } = req.body ?? {}
+    const { budget, entries, avoid, carbLimit, units, portionSwaps } = req.body ?? {}
     if (!validSessionId(req.params.id)) return res.status(400).json({ error: 'invalid session id' })
     if (!budget || !Array.isArray(entries) || entries.length > 100) return res.status(400).json({ error: 'budget and at most 100 entries required' })
     if (carbLimit !== undefined && !validCarbLimit(carbLimit)) return res.status(400).json({ error: 'invalid carbLimit' })
     if (units !== undefined && !validUnits(units)) return res.status(400).json({ error: 'invalid units' })
-    putSession(req.params.id, budget, entries, avoid, carbLimit, units)
+    if (portionSwaps !== undefined && portionSwaps !== false) return res.status(400).json({ error: 'invalid portionSwaps' })
+    putSession(req.params.id, budget, entries, avoid, carbLimit, units, portionSwaps)
     res.json({ ok: true, sessionId: req.params.id, entries: entries.length })
   })
 
@@ -458,20 +459,9 @@ async function main() {
       }
 
       const remaining = day && !('unknown' in day) ? day.remaining.gl : undefined
-      const needsHelp = meal.totals.glLevel === 'high' || (remaining !== undefined && meal.totals.gl > remaining)
-      if (body.withAlternatives && needsHelp) {
-        // Only a scored item can be "the heaviest": a branded or unrated one has no load to swap on.
-        const heaviest = meal.items.filter((it) => it.gl !== null).sort((a, b) => (b.gl ?? 0) - (a.gl ?? 0))[0]
-        if (heaviest && heaviest.gl !== null) {
-          const avoid = body.sessionId ? getSession(body.sessionId)?.avoid : undefined
-          out.alternatives = await findAlternatives(store, {
-            foodId: heaviest.foodId,
-            grams: heaviest.grams,
-            maxGL: remaining !== undefined ? Math.max(0, remaining) : heaviest.gl,
-            topK: 3,
-          }, avoid)
-          out.alternativesFor = { foodId: heaviest.foodId, name: heaviest.name, grams: heaviest.grams }
-        }
+      if (body.withAlternatives) {
+        const sess = body.sessionId ? getSession(body.sessionId) : undefined
+        Object.assign(out, await alternativesForMeal(store, { meal, remaining, avoid: sess?.avoid, allowPortion: sess?.portionSwaps !== false }))
       }
       res.json(out)
     }
@@ -581,7 +571,7 @@ async function main() {
     // The allergy filter lives here rather than in the prompt: an option the
     // person must not eat should never reach the model in the first place.
     const avoid = body.sessionId ? getSession(body.sessionId)?.avoid : undefined
-    res.json({ alternatives: await findAlternatives(store, body, avoid) })
+    res.json({ alternatives: await findAlternatives(store, body, avoid, { allowPortion: getSession(body.sessionId!)?.portionSwaps !== false }) })
   })
 
   app.post('/verify', (req, res) => {
