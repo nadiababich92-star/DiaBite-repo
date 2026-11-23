@@ -17,6 +17,10 @@ export interface AccountInput {
   glBudget: number
   /** Every entry of this person, planned ones included. */
   diary: DiaryEntry[]
+  /** The address was confirmed (email_confirmed_at is set). A count only; the date is not kept. */
+  confirmed: boolean
+  /** When the first eaten (not planned) diary row was created, or null. An approximation of when the person first ate: a meal planned and eaten later keeps the time it was planned. */
+  firstEntryAt: string | null
 }
 export interface FeedbackInput { createdAt: string; rating: number; context: string | null; text: string }
 /** The agent's numbers for one kind of traffic. */
@@ -56,6 +60,10 @@ export interface Retention { eligible: number; returned: number }
 export interface Report {
   today: string
   signedUp: number; onboarded: number; firstMeal: number; active7: number
+  /** Accounts whose email address was confirmed. */
+  confirmed: number
+  /** Median minutes from sign-up to the first eaten diary row, over the accounts that have one; null with none. */
+  minutesToFirstMeal: number | null
   retention: { within2: Retention; within7: Retention }
   mealSlots7Median: number | null; inRangeDays7Median: number | null
   people: PersonRow[]
@@ -67,6 +75,9 @@ export interface Report {
 }
 
 const one = (x: number) => Math.round(x * 10) / 10
+
+/** Whole minutes from sign-up to the first logged meal; a gap below zero (clock skew) is 0. */
+const minutesBetween = (from: string, to: string) => Math.max(0, Math.round((Date.parse(to) - Date.parse(from)) / 60000))
 
 export function median(values: number[]): number | null {
   if (!values.length) return null
@@ -111,6 +122,11 @@ export function buildReport(input: ReportInput): Report {
     onboarded: people.filter((p) => p.onboarded).length,
     firstMeal: people.filter((p) => p.firstMealDate !== null).length,
     active7: active.length,
+    confirmed: ordered.filter((a) => a.confirmed).length,
+    minutesToFirstMeal: (() => {
+      const m = median(ordered.filter((a) => a.firstEntryAt !== null).map((a) => minutesBetween(a.createdAt, a.firstEntryAt as string)))
+      return m === null ? null : Math.round(m)
+    })(),
     retention: { within2: retention((p) => p.returnedWithin2), within7: retention((p) => p.returnedWithin7) },
     mealSlots7Median: median(active.map((p) => p.mealSlots7)),
     inRangeDays7Median: median(active.map((p) => p.inRangeDays7)),
@@ -132,11 +148,13 @@ export function reportMarkdown(r: Report): string {
   const ret = (x: Retention) => `${x.returned} of ${x.eligible}`
   out.push(`# DiaBite weekly report, ${r.today}`, '')
   out.push('## People', '',
-    `- Signed up: ${r.signedUp}`, `- Finished the setup: ${r.onboarded}`,
-    `- Logged a first meal: ${r.firstMeal}`, `- Active in the last 7 days: ${r.active7}`, '')
+    `- Signed up: ${r.signedUp}`, `- Confirmed the email: ${r.confirmed} of ${r.signedUp}`, `- Finished the setup: ${r.onboarded}`,
+    `- Logged a first meal: ${r.firstMeal}`, `- Active in the last 7 days: ${r.active7}`, '',
+    "From the short onboarding of the first-session change, 'finished the setup' means the safety questions and the five numbers; it rises by design. Compare 'logged a first meal'.", '')
   out.push('## Coming back', '',
     `- Within 2 days of the first meal: ${ret(r.retention.within2)}`,
-    `- Within 7 days of the first meal: ${ret(r.retention.within7)}`, '')
+    `- Within 7 days of the first meal: ${ret(r.retention.within7)}`,
+    `- Minutes from sign-up to the first logged meal, median: ${r.minutesToFirstMeal ?? 'none yet'}`, '')
   out.push('## Use in the last 7 days', '',
     `- Meal slots logged, median: ${r.mealSlots7Median ?? 'no one yet'}`,
     `- Days in range, median: ${r.inRangeDays7Median ?? 'no one yet'}`, '')

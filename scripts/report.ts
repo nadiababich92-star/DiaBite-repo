@@ -42,17 +42,17 @@ async function pages<T>(path: string): Promise<T[]> {
   }
 }
 
-async function accounts(): Promise<{ id: string; createdAt: string }[]> {
-  const out: { id: string; createdAt: string }[] = []
+async function accounts(): Promise<{ id: string; createdAt: string; confirmed: boolean }[]> {
+  const out: { id: string; createdAt: string; confirmed: boolean }[] = []
   for (let page = 1; ; page++) {
     const res = await fetch(`${SB}/auth/v1/admin/users?page=${page}&per_page=1000`, { headers })
     if (!res.ok) throw new Error(`auth users: ${res.status}`)
-    const users = ((await res.json()) as { users: { id: string; email?: string; created_at: string }[] }).users
+    const users = ((await res.json()) as { users: { id: string; email?: string; created_at: string; email_confirmed_at?: string | null }[] }).users
     for (const u of users) {
       const mail = (u.email ?? '').toLowerCase()
       // The rehearsal, screens and demo-video throwaways live on example.com; the email is used for this filter and dropped.
       if (mail.endsWith('@example.com') || exclude.has(mail)) continue
-      out.push({ id: u.id, createdAt: u.created_at })
+      out.push({ id: u.id, createdAt: u.created_at, confirmed: !!u.email_confirmed_at })
     }
     if (users.length < 1000) return out
   }
@@ -86,15 +86,19 @@ try {
   const ids = new Set(people.map((p) => p.id))
   const profiles = new Map((await pages<{ user_id: string; data: Record<string, unknown> | null }>('/rest/v1/profiles?select=user_id,data&order=user_id')).map((p) => [p.user_id, p.data]))
   const diaries = new Map<string, DiaryEntry[]>()
-  for (const row of await pages<Parameters<typeof fromRow>[0] & { user_id: string }>('/rest/v1/diary_entries?select=user_id,id,day,meal,food_id,grams,snapshot,planned&order=user_id,id')) {
+  // The earliest created_at among a person's eaten (not planned) rows: an approximation of when they first ate.
+  const firstRow = new Map<string, string>()
+  for (const row of await pages<Parameters<typeof fromRow>[0] & { user_id: string; created_at?: string }>('/rest/v1/diary_entries?select=user_id,id,day,meal,food_id,grams,snapshot,planned,created_at&order=user_id,id')) {
     if (!ids.has(row.user_id)) continue
     const e = fromRow(row)
-    if (e) diaries.set(row.user_id, [...(diaries.get(row.user_id) ?? []), e])
+    if (!e) continue
+    diaries.set(row.user_id, [...(diaries.get(row.user_id) ?? []), e])
+    if (!e.planned && row.created_at && (!firstRow.has(row.user_id) || row.created_at < (firstRow.get(row.user_id) as string))) firstRow.set(row.user_id, row.created_at)
   }
   const input: AccountInput[] = people.map((p) => {
     const data = profiles.get(p.id)
     const profile = data ? sanitizeProfile(data) : DEFAULT_PROFILE
-    return { createdAt: p.createdAt, onboarded: data?.onboarded === true, glBudget: calculateTargets(profile).glBudget, diary: diaries.get(p.id) ?? [] }
+    return { createdAt: p.createdAt, onboarded: data?.onboarded === true, glBudget: calculateTargets(profile).glBudget, diary: diaries.get(p.id) ?? [], confirmed: p.confirmed, firstEntryAt: firstRow.get(p.id) ?? null }
   })
   const feedback = (await pages<{ created_at: string; rating: number; context?: string | null; feedback: string }>('/rest/v1/feedback?select=created_at,rating,context,feedback&order=created_at.desc'))
     .map((f): FeedbackInput => ({ createdAt: f.created_at, rating: f.rating, context: f.context ?? null, text: f.feedback }))

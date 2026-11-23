@@ -667,7 +667,7 @@ recorrectMisses.forEach((m) => console.log(m))
   let n = 0
   const e = (date: string, meal: 'breakfast' | 'lunch' | 'dinner' | 'snack', planned = false) =>
     ({ id: `e${n++}`, date, meal, foodId: 'seed:test', grams: 100, snapshot: snap(5), ...(planned ? { planned: true } : {}) })
-  const acct = (createdAt: string, onboarded: boolean, diary: ReturnType<typeof e>[]): AccountInput => ({ createdAt, onboarded, glBudget: 45, diary })
+  const acct = (createdAt: string, onboarded: boolean, diary: ReturnType<typeof e>[]): AccountInput => ({ createdAt, onboarded, glBudget: 45, diary, confirmed: true, firstEntryAt: null })
   const input = (withPlanned: boolean): ReportInput => ({
     today: '2026-10-20',
     accounts: [
@@ -699,6 +699,30 @@ recorrectMisses.forEach((m) => console.log(m))
     if (/@/.test(withTurns)) bits.push('the split report holds an @')
     const none = reportMarkdown(buildReport({ ...input(true), turns: { browser: g(0, 0), tests: g(5, 0), unknownQuestions: [] } }))
     if (/Verified/.test(none.split('Our own tests')[0].split('Browser sessions')[1] ?? '')) bits.push('an empty group printed percentages')
+  }
+  // OB6 (first-session-evals.md): the two lines the first-session change is measured by. Fixtures are written here; the emails are not part of the input at all.
+  {
+    const ob = (createdAt: string, confirmed: boolean, firstEntryAt: string | null): AccountInput => ({ createdAt, onboarded: true, glBudget: 45, diary: [], confirmed, firstEntryAt })
+    const three = (over?: (a: AccountInput[]) => AccountInput[]): ReportInput => ({
+      today: '2026-11-23',
+      accounts: (over ?? ((a) => a))([
+        ob('2026-11-20T10:00:00Z', true, '2026-11-20T10:10:00Z'),
+        ob('2026-11-20T11:00:00Z', true, '2026-11-20T11:30:00Z'),
+        ob('2026-11-20T12:00:00Z', false, null),
+      ]),
+      feedback: [], turns: null,
+    })
+    const a = buildReport(three())
+    const md = reportMarkdown(a)
+    if (a.confirmed !== 2) bits.push(`OB6 confirmed is ${a.confirmed}, wanted 2`)
+    if (a.minutesToFirstMeal !== 20) bits.push(`OB6 minutes to the first meal is ${a.minutesToFirstMeal}, wanted 20`)
+    if (!md.includes('Confirmed the email: 2 of 3') || !md.includes('median: 20')) bits.push('OB6 the Markdown lacks the confirmed line or the minutes line')
+    if (/fixture\.test|@/.test(md)) bits.push('OB6 the report holds an email')
+    if (buildReport(three((x) => x.map((y) => ({ ...y, firstEntryAt: null })))).minutesToFirstMeal !== null) bits.push('OB6 minutes are not null with no first meal')
+    if (!reportMarkdown(buildReport(three((x) => x.map((y) => ({ ...y, firstEntryAt: null }))))).includes('median: none yet')) bits.push('OB6 "none yet" is not printed')
+    if (buildReport(three((x) => [ob('2026-11-20T10:00:00Z', true, '2026-11-20T09:55:00Z'), x[2]])).minutesToFirstMeal !== 0) bits.push('OB6 a gap below zero is not counted as 0')
+    if (buildReport(three((x) => [x[0], x[1], ob('2026-11-20T13:00:00Z', true, '2026-11-20T13:40:00Z'), ob('2026-11-20T14:00:00Z', true, '2026-11-20T14:20:00Z')])).minutesToFirstMeal !== 25) bits.push('OB6 the median of an even count is not the mean of the middle two')
+    if (!md.includes("'finished the setup' means the safety questions")) bits.push('OB6 the note under "finished the setup" is missing')
   }
   if (/@/.test(JSON.stringify(r)) || /@/.test(reportMarkdown(r))) bits.push('the report holds an @')
   if (r.feedback.average !== 3 || r.feedback.byContext.form !== 1 || r.feedback.byContext.after_3_meals !== 1 || r.feedback.comments[0].rating !== 2) bits.push('feedback counts or order')
