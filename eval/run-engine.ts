@@ -846,6 +846,9 @@ recorrectMisses.forEach((m) => console.log(m))
   if (/\{(showReceipt|editing) \?[^}]*(BUTTONS|'Calculation'|'Portions'|'Recipe')/.test(askSrc)) bits.push('AK2 a button label depends on whether its panel is open')
   const cssSrc = readFileSync(join(here, '../src/styles.css'), 'utf8')
   if (/tone-change|dot-change|with a change/i.test(cssSrc)) bits.push('AK2 the style sheet still names the change tone')
+  // An open panel shows on its key (docs/design.md, Buttons): one rule on aria-expanded, in tokens only.
+  const pressed = cssSrc.split('\n').find((l) => l.startsWith(".act-bar button.ghost[aria-expanded='true']"))
+  if (!pressed || !/border-color: var\(--accent\)/.test(pressed) || !/color: var\(--accent\)/.test(pressed) || /#[0-9a-f]{3,8}\b/i.test(pressed)) bits.push('AK2 the key of an open panel is not drawn pressed by a token-only rule on aria-expanded')
   console.log(`\nask       ${bits.length === 0 ? 'ok' : 'WRONG'}  (the stamp and the words)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1

@@ -187,6 +187,7 @@ the status chip, not by a coloured edge.
 - **Ghost:** a stamp: `--surface`, 1.5px `--text` border and a 3px `--text` shadow
   beneath, radius 12.
 - **Ask:** full width under the input on phones, 46px tall.
+- A ghost key that opens a panel is drawn pressed (accent border and text) while its panel is open: pressed in, as a chosen option is (`--accent-soft` behind it, no stamp beneath), so the state shows in its shape as well as its colour. The rule reads `aria-expanded`, so the look and the state cannot disagree.
 
 ### The answer (a meal)
 In this order: status disc + label → **verdict** → **three figures** → reason →

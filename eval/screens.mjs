@@ -102,6 +102,24 @@ try {
     for (let i = 0; i < 90; i++) { await sleep(500); if (!(await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break }
     await sleep(1000)
     await shot('ask-answer')
+    // A key whose panel is open is drawn pressed (docs/design.md, Buttons): its border is the accent, and closing the panel changes the look.
+    {
+      const read = `(() => {
+        const probe = document.createElement('span'); probe.style.color = 'var(--accent)'; document.querySelector('.act-bar')?.appendChild(probe)
+        const accent = probe ? getComputedStyle(probe).color : ''; probe.remove()
+        const keys = [...document.querySelectorAll('.act-bar button.ghost[aria-expanded]')].map((k) => { const c = getComputedStyle(k); return { name: k.innerText.trim(), open: k.getAttribute('aria-expanded') === 'true', border: c.borderTopColor, shadow: c.boxShadow } })
+        return { accent, keys }
+      })()`
+      const before = await b.ev(read)
+      const open = before.keys.filter((k) => k.open)
+      await click('Calculation'); await sleep(500)
+      const after = await b.ev(read)
+      const calcNow = after.keys.find((k) => k.name === 'Calculation'), calcBefore = before.keys.find((k) => k.name === 'Calculation')
+      await click('Calculation'); await sleep(500)
+      const ok = open.length > 0 && open.every((k) => k.border === before.accent && k.shadow === 'none') && calcBefore?.open && calcNow && !calcNow.open && calcNow.border !== before.accent
+      console.log(`  ${ok ? 'PASS' : 'FAIL'}  an open panel's key is drawn pressed, a closed one is not (${size.name})${ok ? '' : '  → ' + JSON.stringify({ before, after })}`)
+      if (!ok) process.exitCode = 1
+    }
     if (process.env.PLAN === '1') {
       // The day is chosen at the top of Ask; with an answer on screen it is asked again for that day.
       await b.ev(`(()=>{const e=[...document.querySelectorAll('.ask-day button')].find(x=>x.innerText.trim()==='Tomorrow'); e?.click()})()`); await sleep(1500)

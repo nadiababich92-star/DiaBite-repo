@@ -345,6 +345,8 @@ tr:last-child td { border-bottom: none; }
    answer never pushes them out of reach. On a wide screen the bar is at the top, so they sit at the bottom edge. */
 .act-bar { position: sticky; z-index: 10; bottom: calc(max(14px, env(safe-area-inset-bottom)) + 76px); padding: 10px 0; margin: 0 0 6px; background: var(--bg); align-items: center; flex-wrap: nowrap; gap: 8px; }
 .act-bar button { padding-left: 14px; padding-right: 14px; white-space: nowrap; }
+/* A key whose panel is open is drawn pressed in, read from aria-expanded so the look and the state cannot disagree (docs/design.md, Buttons). */
+.act-bar button.ghost[aria-expanded='true'] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); box-shadow: none; transform: translateY(3px); margin-bottom: 0; }
 @media (min-width: 760px) { .act-bar { bottom: 8px; } }
 /* The original answer, folded once a swap or a new portion has replaced it at the top. */
 .was-original { margin: 0 0 12px; }
