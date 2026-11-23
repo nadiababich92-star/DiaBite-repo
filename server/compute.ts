@@ -259,18 +259,25 @@ const plainName = (rec: { kind: string; name: string }) => {
   const plain = rec.name.replace(/\s*\(.*?\)/g, '').split(',')[0].trim()
   return rec.kind === 'recipe' ? rec.name : plain.toLowerCase()
 }
+const fullName = (rec: { kind: string; name: string }) => {
+  const n = rec.name.replace(/\s*\(.*?\)/g, '').replace(/\s+/g, ' ').trim()
+  return rec.kind === 'recipe' || /^[A-Z]{2}/.test(n) ? n : n.charAt(0).toLowerCase() + n.slice(1)
+}
 const weight = (c: { grams?: number }) => (c.grams ? ` (${c.grams} g)` : '')
 const FRACTION_WORD: Record<number, string> = { 0.75: 'three quarters of', 0.5: 'half' }
 
 /** The engine's own words for an option, with its weight; the agent repeats them and composes nothing. */
 export function swapLabel(rec: { kind: string; name: string }, c: { grams?: number; servings?: number }, fraction?: number): string {
-  const name = plainName(rec)
+  // A different food keeps the words that tell it from its neighbours ("pasta, whole grain, cooked", not "pasta"); less of the same food keeps the short name the person used.
+  const name = fraction === undefined ? fullName(rec) : plainName(rec)
   if (fraction !== undefined) {
     if (rec.kind === 'recipe') return `${fraction === 0.5 ? 'half a serving' : 'three quarters of a serving'} of ${name}${weight(c)}`
     return `${FRACTION_WORD[fraction] ?? `${Math.round(fraction * 100)}% of`} the ${name}${weight(c)}`
   }
   return rec.kind === 'recipe' ? `${name}, ${c.servings === 1 || c.servings === undefined ? '1 serving' : `${c.servings} servings`}${weight(c)}` : `${name}${weight(c)}`
 }
+
+const COMPOSITE = /\b(with|and|sauce|casserole|gravy|stuffed|filled|topped)\b/i
 
 export interface AlternativesOpts { allowPortion?: boolean }
 
@@ -359,6 +366,8 @@ export async function findAlternatives(
     if (!c || c.gl > req.maxGL) continue
     // The same kind of food, and about the same amount of it.
     if (!mayReplace(anchorClass, swapClass(rec))) continue
+    // A survey record that is a prepared dish ("pasta, whole grain, with tomato sauce and poultry") is not a swap for a plain food, only for another dish.
+    if (rec.id.startsWith('usda:') && COMPOSITE.test(rec.name) && !COMPOSITE.test(anchor.name)) continue
     if (Math.abs(c.kcal - anchorKcal) > SWAP_ENERGY_BAND * anchorKcal) continue
     const gain = r1(anchorGL - c.gl)
     const fitsMeal = fits(gain)

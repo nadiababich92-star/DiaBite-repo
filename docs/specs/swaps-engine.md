@@ -44,7 +44,7 @@ Definitions, for one call:
 
 1. **Pool.** `store.search(vector, max(topK × 8, 80), filter)` as today. The filter keeps what it keeps today (the anchor itself, avoid list via `isAvoided`, `hasNoLoad(kind)`, `sameCategory`). Order inside the pool is the store's similarity order; `score` is carried.
 2. **Same food or family, and the existing cap.** `sameFood` / `sameFamily` against the anchor as today; `cost.gl > req.maxGL` drops (the existing rule: an option that alone exceeds the day's remaining load is not a swap).
-3. **Role.** `ALLOWED[swapClass(anchor)].includes(swapClass(candidate))`. A candidate of class `other` is never offered (section 3).
+3. **Role.** `ALLOWED[swapClass(anchor)].includes(swapClass(candidate))`. A candidate of class `other` is never offered (section 3). **And also** a USDA survey record whose name has `with|and|sauce|casserole|gravy|stuffed|filled|topped` (a prepared dish: "pasta, whole grain, with tomato sauce and poultry") is not a swap for an anchor whose name has none of those words (found 23 November 2026: a cup of plain pasta was offered three pasta-and-poultry dishes).
 4. **Energy.** `|cost.kcal − anchorKcal| <= SWAP_ENERGY_BAND × anchorKcal`.
 5. **Worth.** `fitsMeal === true || (gain >= SWAP_MIN_GAIN && gain >= SWAP_MIN_GAIN_SHARE × anchorGL)`. With `fitsMeal === null` only the second clause counts. `gain` must also be `> 0`.
 6. **Dedupe** by `sameFood` among already kept (the Apple in two tables), as today.

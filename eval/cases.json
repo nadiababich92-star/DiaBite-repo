@@ -7124,6 +7124,128 @@
       "tags": [
         "us-measures"
       ]
+    },
+    {
+      "id": "SWA1",
+      "dimension": "helpful",
+      "query": "A bowl of oatmeal",
+      "ground_truth": "Does not fit; the swap offered is worth making and the best the engine found; never a baked breakfast cake.",
+      "context": {
+        "budget": {
+          "glBudget": 8,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "alternativesWorthy": true,
+        "alternativesFirstIsBest": true,
+        "alternativesExclude": [
+          "muffin",
+          "cups",
+          "bar",
+          "cookie"
+        ],
+        "nextNamesFirst": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "swaps"
+      ]
+    },
+    {
+      "id": "SWA2",
+      "dimension": "helpful",
+      "query": "A banana",
+      "ground_truth": "Does not fit; a smaller portion of the same food is among the swaps, computed by the engine.",
+      "context": {
+        "budget": {
+          "glBudget": 8,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "alternativesWorthy": true,
+        "alternativesHavePortion": true,
+        "nextNamesFirst": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "swaps"
+      ]
+    },
+    {
+      "id": "SWA3",
+      "dimension": "helpful",
+      "query": "A glass of orange juice",
+      "ground_truth": "Does not fit and nothing is worth swapping: no swap is offered and the answer invents none.",
+      "context": {
+        "budget": {
+          "glBudget": 3,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "noAlternatives": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "swaps"
+      ]
+    },
+    {
+      "id": "SWA4",
+      "dimension": "helpful",
+      "query": "A banana",
+      "ground_truth": "An excluded food is never among the swaps.",
+      "context": {
+        "budget": {
+          "glBudget": 8,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": [],
+        "avoid": {
+          "words": [
+            "cherr"
+          ]
+        }
+      },
+      "expect": {
+        "toolsCalled": [
+          "resolve_foods",
+          "compute_meal"
+        ],
+        "verified": true,
+        "alternativesWorthy": true,
+        "alternativesExclude": [
+          "cherr"
+        ]
+      },
+      "judge": "mechanical",
+      "tags": [
+        "swaps"
+      ]
     }
   ]
 }

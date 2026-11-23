@@ -447,6 +447,35 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
     const ok = typeof alt?.grams === 'number' || typeof inMeal?.alternativesFor?.grams === 'number'
     say('alternatives costed at the same grams', ok, JSON.stringify(alt ?? inMeal?.alternativesFor))
   }
+  // Swaps worth making (docs/specs/swaps-evals.md): read from the meal call's own result, never from the sentence.
+  {
+    type Alt = { name: string; label?: string; change?: string; gain?: number; fitsMeal?: boolean | null }
+    const meal = callOf(r, 'compute_meal')?.result as { alternatives?: Alt[]; alternativesFor?: { foodId: string }; items?: { foodId: string; gl: number | null }[] } | undefined
+    const alts = meal?.alternatives ?? []
+    const anchorGL = meal?.items?.find((it) => it.foodId === meal.alternativesFor?.foodId)?.gl ?? 0
+    if (e.alternativesWorthy === true) {
+      const bad = alts.filter((a) => !((a.gain ?? 0) > 0 && (a.fitsMeal === true || ((a.gain ?? 0) >= 5 && (a.gain ?? 0) >= 0.25 * anchorGL))))
+      say('every swap offered is worth making', alts.length > 0 && bad.length === 0, `${alts.length} offered, ${bad.length} not worth it: ${bad.map((a) => `${a.label} gain ${a.gain}`).join('; ')}`)
+    }
+    if (e.alternativesFirstIsBest === true) {
+      let ok = alts.length > 0
+      for (let i = 1; i < alts.length; i++) {
+        const kx = alts[i - 1].fitsMeal === true ? 1 : 0, ky = alts[i].fitsMeal === true ? 1 : 0
+        if (kx < ky || (kx === ky && (alts[i - 1].gain ?? 0) < (alts[i].gain ?? 0))) ok = false
+      }
+      say('the first swap is the best', ok, alts.map((a) => `${a.fitsMeal ? 'F' : '-'}${a.gain}`).join(' '))
+    }
+    if (e.alternativesHavePortion === true) say('a smaller portion is among the swaps', alts.some((a) => a.change === 'portion'), alts.map((a) => a.label).join(' | '))
+    if (e.noAlternatives === true) say('no swap is offered', alts.length === 0, `${alts.length} alternatives`)
+    if (Array.isArray(e.alternativesExclude)) {
+      const hit = alts.filter((a) => (e.alternativesExclude as string[]).some((w) => a.name.toLowerCase().includes(w.toLowerCase())))
+      say('no excluded food among the swaps', hit.length === 0, hit.map((a) => a.name).join(', '))
+    }
+    if (e.nextNamesFirst === true && alts[0]) {
+      const words = (alts[0].label ?? alts[0].name).toLowerCase().replace(/\s*\(.*?\)\s*/g, ' ').trim()
+      style('the answer names the first swap', answer.toLowerCase().includes(words) || answer.toLowerCase().includes(alts[0].name.toLowerCase().split(',')[0]), words)
+    }
+  }
   // "I used 200 g because no portion was given" is the disclosure this asks
   // for, in the words a person would use.
   // Asking instead of costing is the other honest answer: when the engine
