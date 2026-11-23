@@ -15,9 +15,9 @@ import { dayLabel, eaten, mealForNow, noLoadNote, portionText, viewEntry } from 
 import { swapNamedIn, type SwapOffer } from '../lib/swap'
 import { BUTTONS, ERROR_EYEBROW, GL_LINK_LABEL, HINT, PILL_NO_NUMBERS, pillChecked, STAMP_LABEL, verdictTone } from '../lib/verdict'
 import { MEAL_LABELS, menuHidden } from '../lib/menu'
-import DayPicker from './DayPicker'
 import { SignInCard } from './SignInCard'
 import { AnonBanner } from './AnonBanner'
+import DayChip from './DayChip'
 import { LIMIT_BODY, limitTitle, retryLine } from '../lib/anon'
 import { DEFAULTS_LINE, showWhatNext, WHAT_NEXT } from '../lib/firstSession'
 import { ANON_DISCLOSURE } from '../lib/profile'
@@ -415,7 +415,8 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   const usedGL = useMemo(() => dayEntries.reduce((s, e) => s + viewEntry(e).gl, 0), [dayEntries])
   const left = Math.max(0, Math.round((targets.glBudget - usedGL) * 10) / 10)
   const dayWord = day === today ? 'today' : ['tomorrow', 'yesterday'].includes(dayLabel(day, today).toLowerCase()) ? dayLabel(day, today).toLowerCase() : `on ${dayLabel(day, today)}`
-  const dayPick = useRef<HTMLDivElement>(null)
+  // "Change day" under an answer opens the day chip's picker and focuses its first button.
+  const [daySignal, setDaySignal] = useState(0)
 
   const receipt = useMemo(() => receiptFrom(reply?.trace), [reply])
 
@@ -644,7 +645,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     <>
       {!anonymous && <p className="muted log-day">
         Adding to {dayLabel(day, today)}.{' '}
-        <button type="button" className="link" onClick={() => { dayPick.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }); dayPick.current?.querySelector('button')?.focus({ preventScroll: true }) }}>Change day</button>
+        <button type="button" className="link" onClick={() => setDaySignal((n) => n + 1)}>Change day</button>
       </p>}
       <div className="row act-bar">
         {anonymous
@@ -664,41 +665,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   return (
     <div>
       <section className={`card ask-hero${reply || busy ? ' compact' : ''}`}>
-        <div className="ask-budget">
-          <div className="ask-budget-text">
-            <span className="label">glycemic load left {dayWord}</span>
-            <span className="ask-budget-note">Glycemic load (GL) is how much a meal raises your blood sugar, counting both the food and the portion. This is what is left of your budget {dayWord}.</span>
-            {noLoadNote(dayEntries) && <span className="ask-budget-note no-load-note">{noLoadNote(dayEntries)}</span>}
-            <GlHelp label={GL_LINK_LABEL} />
-          </div>
-          <span className="value"><b className="num">{left}</b> <small>of {targets.glBudget}</small></span>
-        </div>
-        {/* The day, at a glance. A bar rather than a ring: a ring is a score
-            to close, and the design canvas ruled those out. */}
-        <div className="budget-bar" role="img"
-             aria-label={`${Math.round(Math.max(0, targets.glBudget - left) * 10) / 10} of ${targets.glBudget} glycemic load used ${dayWord}`}>
-          <span style={{ width: `${Math.min(100, Math.max(0, ((targets.glBudget - left) / Math.max(1, targets.glBudget)) * 100))}%` }} />
-        </div>
-        {anonymous && <AnonBanner onMakeItYours={anonymous.onSignIn} disclosure={ANON_DISCLOSURE} />}
-        {!anonymous && firstSession?.line && (
-          <p className="anon-banner">{DEFAULTS_LINE}{' '}
-            <button type="button" className="link anon-make" onClick={firstSession.onMakeItYours}>Make it yours</button>{' · '}
-            <button type="button" className="link anon-make" onClick={firstSession.onOpenProfile}>Where the numbers come from</button>
-          </p>
-        )}
-        {!anonymous && <div className="ask-day" ref={dayPick}>
-          <DayPicker value={day} today={today} onChange={pickDay} />
-          {day !== today && <p className="muted ask-day-note">The verdict is for {dayLabel(day, today)}: it counts what was eaten on that day.</p>}
-        </div>}
         <h2 className="ask-title">What are you about to eat?</h2>
-        {!isDemo && <div className="row lab-row">
-          {saved > 0 && <button className="ghost" onClick={downloadResponses}>Download Responses</button>}
-          {saved > 0 && <span className="muted">{saved} saved</span>}
-          <label className="muted lab-toggle">
-            <input type="checkbox" checked={fresh} onChange={toggleFresh} />
-            Fresh context per question
-          </label>
-        </div>}
         <p className="muted">{HINT}<span className="voice-hint"> On a phone, tap the microphone on your keyboard to say it instead of typing.</span></p>
         {logTarget && (
           <p className="muted ask-target" role="status">
@@ -732,6 +699,40 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
             ))}
           </div>
         )}
+
+        {/* The budget, under the box (docs/specs/ask-order-and-day-chip.md, section 2): nothing about the day is needed before a person has typed. */}
+        <div className="ask-budget">
+          <div className="ask-budget-text">
+            <span className="label">glycemic load left {dayWord}</span>
+            {noLoadNote(dayEntries) && <span className="ask-budget-note no-load-note">{noLoadNote(dayEntries)}</span>}
+            <GlHelp label={GL_LINK_LABEL} />
+          </div>
+          <span className="value"><b className="num">{left}</b> <small>of {targets.glBudget}</small></span>
+        </div>
+        {/* The day, at a glance. A bar rather than a ring: a ring is a score
+            to close, and the design canvas ruled those out. */}
+        <div className="budget-bar" role="img"
+             aria-label={`${Math.round(Math.max(0, targets.glBudget - left) * 10) / 10} of ${targets.glBudget} glycemic load used ${dayWord}`}>
+          <span style={{ width: `${Math.min(100, Math.max(0, ((targets.glBudget - left) / Math.max(1, targets.glBudget)) * 100))}%` }} />
+        </div>
+        {!anonymous && <DayChip day={day} today={today} onChange={pickDay} openSignal={daySignal} />}
+        {anonymous && <AnonBanner onMakeItYours={anonymous.onSignIn} disclosure={ANON_DISCLOSURE} />}
+        {!anonymous && firstSession?.line && (
+          <p className="anon-banner">{DEFAULTS_LINE}{' '}
+            <button type="button" className="link anon-make" onClick={firstSession.onMakeItYours}>Make it yours</button>{' · '}
+            <button type="button" className="link anon-make" onClick={firstSession.onOpenProfile}>Where the numbers come from</button>
+          </p>
+        )}
+        {!anonymous && day !== today && <p className="muted ask-day-note">The verdict is for {dayLabel(day, today)}: it counts what was eaten on that day.</p>}
+
+        {!isDemo && <div className="row lab-row">
+          {saved > 0 && <button className="ghost" onClick={downloadResponses}>Download Responses</button>}
+          {saved > 0 && <span className="muted">{saved} saved</span>}
+          <label className="muted lab-toggle">
+            <input type="checkbox" checked={fresh} onChange={toggleFresh} />
+            Fresh context per question
+          </label>
+        </div>}
       </section>
 
       <div ref={resultRef}>

@@ -79,7 +79,7 @@ import { landingFreeLine, LIMIT_BODY, limitTitle, retryLine, SIGN_IN_CARDS } fro
 import { ALLERGEN_PATTERNS, PATTERN_PATTERNS, AVOIDED_PATTERNS, dietaryReason } from '../src/lib/dietary'
 import { loadWeekState } from '../src/lib/menuStore'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type NudgeContext } from '../src/lib/nudge'
-import { clampDate, dateAllowed, eaten, isPlanned, markEaten, pickerState, plannedOnly } from '../src/lib/diary'
+import { clampDate, dateAllowed, eaten, isPlanned, markEaten, pickerState, plannedOnly, dayChipLabel } from '../src/lib/diary'
 import { shoppingFromEntries } from '../src/lib/menu'
 import { clearDevice, loadDiary, saveDiary, thawWrites } from '../src/lib/storage'
 import { execFileSync } from 'node:child_process'
@@ -786,8 +786,8 @@ recorrectMisses.forEach((m) => console.log(m))
     const askProps = { profile: ANON_PROFILE, targets: calculateTargets(ANON_PROFILE), diary: [], onLog: noop, tourSeen: [], onTourSeen: noop, tourSuspended: false }
     const anonAsk = html(createElement(AskPage, { ...askProps, anonymous: { onSignIn: noop, onOff: noop, freeAnswers: 3 } }))
     const userAsk = html(createElement(AskPage, askProps))
-    if (!anonAsk.includes('anon-banner') || anonAsk.includes('ask-day')) bits.push('AS5 the visitor\'s Ask lacks the banner or still has the day picker')
-    if (userAsk.includes('anon-banner') || !userAsk.includes('ask-day')) bits.push('AS5 a signed-in person\'s Ask has the banner or lost the day picker')
+    if (!anonAsk.includes('anon-banner') || anonAsk.includes('day-chip')) bits.push('AS5 the visitor\'s Ask lacks the banner or still has the day chip')
+    if (userAsk.includes('anon-banner') || !userAsk.includes('day-chip')) bits.push('AS5 a signed-in person\'s Ask has the banner or lost the day chip')
     const askSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../src/components/AskPage.tsx'), 'utf8')
     if (!askSource.includes('Sign in to log this') || !/anonymous\s*\?\s*<button className="primary" data-tour="log" onClick=\{anonymous\.onSignIn\}>Sign in to log this/.test(askSource)) bits.push('AS5 the visitor\'s log key does not read "Sign in to log this"')
     // AS6: Settings for a visitor.
@@ -853,7 +853,23 @@ recorrectMisses.forEach((m) => console.log(m))
   // An open panel shows on its key (docs/design.md, Buttons): one rule on aria-expanded, in tokens only.
   const pressed = cssSrc.split('\n').find((l) => l.startsWith(".act-bar button.ghost[aria-expanded='true']"))
   if (!pressed || !/border-color: var\(--accent\)/.test(pressed) || !/color: var\(--accent\)/.test(pressed) || /#[0-9a-f]{3,8}\b/i.test(pressed)) bits.push('AK2 the key of an open panel is not drawn pressed by a token-only rule on aria-expanded')
-  console.log(`\nask       ${bits.length === 0 ? 'ok' : 'WRONG'}  (the stamp and the words)`)
+  // AK3: the day chip reads the day the way every other place names it; a day beyond yesterday or tomorrow is a date, not a word.
+  const t0 = '2026-11-23'
+  for (const [d, want] of [[t0, 'Today'], ['2026-11-22', 'Yesterday'], ['2026-11-24', 'Tomorrow'], ['2026-12-06', dayLabel('2026-12-06', t0)], ['2026-11-15', dayLabel('2026-11-15', t0)]] as const) {
+    if (dayChipLabel(d, t0) !== want) bits.push(`AK3 the chip for ${d} reads "${dayChipLabel(d, t0)}", wanted "${want}"`)
+  }
+  if (!/^[A-Z][a-z]{2}, [A-Z][a-z]{2} \d{1,2}$/.test(dayChipLabel('2026-11-15', t0))) bits.push(`AK3 a past day reads "${dayChipLabel('2026-11-15', t0)}", not a short date`)
+  // The order of the card (docs/specs/ask-order-and-day-chip.md, section 2): the question, then the budget row, the chip, the builders' row last.
+  // The old paragraph is gone and the link is the receipt's "What is GL?".
+  const order = renderToStaticMarkup(createElement(GlHelpContext.Provider, { value: () => {} }, createElement(AskPage, { profile: DEFAULT_PROFILE, targets: calculateTargets(DEFAULT_PROFILE), diary: [], onLog: () => {}, tourSeen: [], onTourSeen: () => {}, tourSuspended: false })))
+  const at = (needle: string) => order.indexOf(needle)
+  // The builders' row is drawn only with ?lab, so a static render has none: the source must put it after the chip.
+  const seq = ['ask-title', 'class="ask-form"', 'class="ask-budget"', 'class="budget-bar"', 'day-chip']
+  if (!(askSrc.indexOf('<DayChip ') > 0 && askSrc.indexOf('<DayChip ') < askSrc.indexOf('className="row lab-row"'))) bits.push('the builders\' row is not after the day chip in AskPage')
+  if (seq.some((n) => at(n) < 0) || seq.some((n, i) => i > 0 && at(seq[i - 1]) > at(n))) bits.push(`the Ask card is not in the order question, box, budget, bar, chip, builders: ${seq.map((n) => at(n)).join(', ')}`)
+  if (order.includes('Glycemic load (GL) is how much')) bits.push('the Ask card still carries the paragraph on what GL is')
+  if (!order.includes('>What is GL?<')) bits.push('the Ask card\'s link does not read "What is GL?"')
+  console.log(`\nask       ${bits.length === 0 ? 'ok' : 'WRONG'}  (the stamp, the words, the order and the day chip)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }

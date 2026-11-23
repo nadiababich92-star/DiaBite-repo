@@ -54,7 +54,7 @@ export const STAMP_LABEL: Record<VerdictTone | 'blocked', string> = {
 
 /** The fixed strings of the Ask screen that the page prints and a check reads. */
 export const HINT = "Say it the way you'd say it to a friend. DiaBite counts it and shows the arithmetic."
-export const GL_LINK_LABEL = 'What is GL, and how do I use it?'
+export const GL_LINK_LABEL = 'What is GL?'
 export const PILL_NO_NUMBERS = 'No numbers stated, so nothing to check'
 export const pillChecked = (n: number) => `Checked · ${n} numbers match the calculation`
 export const ERROR_EYEBROW = "Couldn't reach DiaBite"

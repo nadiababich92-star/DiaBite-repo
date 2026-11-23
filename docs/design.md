@@ -187,6 +187,7 @@ the status chip, not by a coloured edge.
 - **Primary:** the one filled key: `--primary-1` to `--primary-2`, `--primary-ink`, 600, radius
   12, flat (no edge, no shadow); pressing moves it down 2px. One per view.
 - **Ghost:** outlined: `--surface`, 1.5px `--text` border, radius 12, no shadow.
+- **A button's label never changes with its state;** an open panel is read from `aria-expanded`.
 - **Ask:** full width under the input on phones, 46px tall.
 - A ghost key that opens a panel is drawn pressed (accent border and text) while its panel is open: pressed in, as a chosen option is (`--accent-soft` behind it, no stamp beneath), so the state shows in its shape as well as its colour. The rule reads `aria-expanded`, so the look and the state cannot disagree.
 
@@ -197,9 +198,9 @@ and refusals are plain prose; never dress them as a verdict.
 
 The stamp over the verdict says what the engine's comparison said ("Fits" or "Over today's budget") and nothing about alternatives; a swap is offered in the Next line, with its own button. No button under an answer changes its label with state (Log it, Calculation, Portions or Recipe): whether a panel is open is carried by `aria-expanded`.
 
-### The day, at the top of Ask
+### The day, under the budget
 
-Under the budget bar, above the question, sits the **Day picker** (Today, Yesterday, Tomorrow, Pick a date). The day chosen is the day the meal is asked about: the number above it reads "glycemic load left tomorrow" (or "on Fri 6 Nov"), the verdict is counted against that day's budget and what was eaten on it (a future day has nothing eaten, a planned entry never counts), and **Log it** puts the meal on it (**Plan it** for a future day). A line under the picker says so for any day but today. Choosing another day with an answer on screen asks the question again for that day, since the answer was counted against the old one. Under an answer, "Adding to Tomorrow. Change day" scrolls back to the picker. The Diary's **Add food** opens Ask on the day it was on.
+The question comes first. Under the question box (and the "Try one" examples) sits the budget row: the label "glycemic load left today" (or "tomorrow", or "on Fri 6 Nov"), the link **What is GL?** (the same words as on a receipt; the dialog it opens says what the load is, so the card does not repeat it), the figure and "of N", the bar, and under the bar a **day chip**. The chip reads the day the meal is asked about ("Today", "Yesterday", "Tomorrow" or "Fri 6 Nov") with a small caret, and is a 44 px chip-toggle; pressing it opens the **Day picker** under it (Today, Yesterday, Tomorrow, Pick a date), and choosing a day, pressing the chip again or Escape closes it, with the focus back on the chip. The day chosen is still the day the verdict is counted against (what was eaten on it; a future day has nothing eaten, a planned entry never counts) and the day **Log it** puts the meal on (**Plan it** for a future day); a line under the row says so for any day but today. Choosing another day with an answer on screen asks the question again for that day, since the answer was counted against the old one. Under an answer, "Adding to Tomorrow. Change day" opens the picker and puts the focus on its first choice. Nothing about the day is placed before the question: nothing about it is needed before a person has typed. The builders' row (`?lab`) is the last thing in the card. The Diary's **Add food** opens Ask on the day it was on. (Reordered 23 November 2026, `docs/specs/ask-order-and-day-chip.md`; the CSS follows this entry: `.day-chip`, `.day-chip-caret`, `.day-chip-panel`.)
 
 ### Accepting a swap
 

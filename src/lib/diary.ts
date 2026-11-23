@@ -119,6 +119,9 @@ export function dayLabel(isoDate: string, today: string): string {
   return new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 }
 
+/** What the day chip on Ask reads: the same words as everywhere else a day is named (docs/specs/ask-order-and-day-chip.md). */
+export const dayChipLabel = (day: string, today: string): string => dayLabel(day, today)
+
 // ── Planned and eaten ─────────────────────────────────────────────────────
 
 /** How far a new meal may be put back, and ahead. These limit new entries only: older ones stay and stay editable. */

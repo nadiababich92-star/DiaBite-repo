@@ -97,6 +97,16 @@ const region22 = await A.b.ev(`document.querySelector('section.nudge[role=region
 check('W22b', 'device A, after the first meal: What next is gone, and the card for Medicines shows with Answer now and Later, once a session', !/Log it to count it toward today/.test(t22) && region22 === 'Two minutes more, and the numbers become yours' && /Classes only, never doses/.test(t22) && k22.includes('Answer now') && k22.includes('Later') && (await A.b.ev(`sessionStorage.getItem('diabite.deferredShown')`)) === '1', JSON.stringify({ region22, keys: k22.slice(-12) }))
 await A.click('Later'); await sleep(400)
 check('W22c', 'device A: Later hides the card', !(await A.b.ev(`!!document.querySelector('section.nudge[role=region]')`)), '')
+// The Ask card, commit 2 (docs/specs/ask-evals.md, section 3): Change day under the answer opens the day chip's picker with the focus on it;
+// choosing Tomorrow asks the question again for that day, so the key under the new answer reads Plan it. Then back to today.
+const waitAnswer = async () => { for (let i = 0; i < 90; i++) { await sleep(500); if (!(await A.b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break } await sleep(800) }
+await A.b.ev(`[...document.querySelectorAll('.log-day button')].find((x) => x.innerText.trim() === 'Change day')?.click()`); await sleep(900)
+const w23open = await A.b.ev(`(() => { const first = document.querySelector('.day-chip-panel button'); return { open: document.querySelector('.day-chip')?.getAttribute('aria-expanded'), focused: !!first && document.activeElement === first } })()`)
+await A.b.ev(`[...document.querySelectorAll('.day-chip-panel button')].find((x) => x.innerText.trim() === 'Tomorrow')?.click()`); await waitAnswer()
+const w23 = await A.b.ev(`({ chip: document.querySelector('.day-chip')?.innerText.trim(), keys: [...document.querySelectorAll('.act-bar button')].map((x) => x.innerText.trim()) })`)
+check('W23', 'device A: Change day opens the picker with the focus on its first choice, and Tomorrow asks the question again for tomorrow (Plan it)', w23open.open === 'true' && w23open.focused && w23.chip === 'Tomorrow' && w23.keys.includes('Plan it'), JSON.stringify({ w23open, w23 }))
+await A.b.ev(`document.querySelector('.day-chip')?.click()`); await sleep(400)
+await A.b.ev(`[...document.querySelectorAll('.day-chip-panel button')].find((x) => x.innerText.trim() === 'Today')?.click()`); await waitAnswer()
 
 // ── device B: the same person, a fresh browser ──────────────────────────────
 const B = await device(9702, 'B')

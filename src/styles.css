@@ -305,7 +305,7 @@ tr:last-child td { border-bottom: none; }
 .ask-budget .label, .chips-col .label { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
 .ask-budget-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .ask-budget-note { font-size: 13px; line-height: 1.35; color: var(--text-dim); }
-.ask-budget .value { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; }
+.ask-budget .value { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .ask-budget .value small { font-size: 13px; color: var(--text-faint); font-weight: 400; }
 .budget-bar {
   display: block; height: 10px; border-radius: 99px; background: var(--groove); box-shadow: var(--groove-fx);
@@ -1055,7 +1055,14 @@ body:has(.landing) { background: #0a1812; }
 .lp-sources a:hover { color: var(--lp-cream); }
 .answer-text .a-swap { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 10px 0 0; }
 .answer-text .a-swap button { min-height: 44px; }
-.ask-day { margin: 0 0 14px; }
+/* The day chip under the budget bar (docs/design.md, "The day, under the budget"): a chip-toggle with a caret, the picker under it. */
+.ask-hero .ask-budget { margin-top: 18px; }
+.ask-hero.compact .ask-budget { margin-top: 12px; }
+.day-chip-row { margin: 0 0 12px; }
+.day-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
+.day-chip-caret { flex: none; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid currentColor; }
+.day-chip[aria-expanded='true'] .day-chip-caret { transform: rotate(180deg); }
+.day-chip-panel .day-picker { margin: 10px 0 0; }
 .ask-day-note { margin: 6px 0 0; font-size: 14px; }
 .ask-hero.compact .ask-day-note { display: none; }
 

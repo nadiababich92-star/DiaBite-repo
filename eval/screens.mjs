@@ -107,6 +107,49 @@ try {
       }
     }
     await shot('ask-empty')
+    // The Ask card, commit 2 (docs/specs/ask-order-and-day-chip.md and ask-evals.md, section 2): the box first and above the tab bar,
+    // the budget row under it, and the day chip that opens the picker, closes on a choice and on Escape, with the focus back on it.
+    {
+      const fits = async () => b.ev(`(() => {
+        window.scrollTo(0, 0)
+        const input = document.querySelector('.ask-form input'), key = document.querySelector('.ask-form button.primary')
+        const nav = document.querySelector('nav.tabs'), navTop = nav && getComputedStyle(nav).position === 'fixed' ? nav.getBoundingClientRect().top : innerHeight
+        return { input: Math.round(input.getBoundingClientRect().bottom), key: Math.round(key.getBoundingClientRect().bottom), navTop: Math.round(navTop), ok: input.getBoundingClientRect().bottom <= navTop && key.getBoundingClientRect().bottom <= navTop }
+      })()`)
+      const sizes = {}
+      if (size.name === 'phone') {
+        for (const [w, h] of [[375, 667], [390, 844]]) {
+          await b.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: size.dpr, mobile: true }); await sleep(600)
+          sizes[`${w}x${h}`] = await fits()
+        }
+        await b.send('Emulation.setDeviceMetricsOverride', { width: size.width, height: size.height, deviceScaleFactor: size.dpr, mobile: true }); await sleep(400)
+      } else sizes[size.name] = await fits()
+      const layout = await b.ev(`(() => {
+        const top = (sel) => document.querySelector(sel)?.getBoundingClientRect().top ?? null
+        return { form: top('.ask-form'), budget: top('.ask-budget'), bar: top('.budget-bar'), chip: top('.day-chip'), label: document.querySelector('.ask-budget .label')?.innerText.trim().toLowerCase(), link: document.querySelector('.ask-budget .gl-help')?.innerText.trim(), oldNote: document.body.innerText.includes('Glycemic load (GL) is how much') }
+      })()`)
+      const chipState = () => b.ev(`(() => { const c = document.querySelector('.day-chip'); return { text: c?.innerText.trim(), open: c?.getAttribute('aria-expanded'), choices: [...document.querySelectorAll('.day-chip-panel .day-picker .chip-toggle')].map((e) => e.innerText.trim()), focus: document.activeElement === c, note: !!document.querySelector('.ask-day-note') } })()`)
+      const closed = await chipState()
+      await b.ev(`document.querySelector('.day-chip').click()`); await sleep(400)
+      const opened = await chipState()
+      await b.ev(`[...document.querySelectorAll('.day-chip-panel button')].find((x) => x.innerText.trim() === 'Tomorrow')?.click()`); await sleep(600)
+      const tomorrow = { ...(await chipState()), verdictLine: /The verdict is for Tomorrow/.test(await b.ev(`document.querySelector('.ask-day-note')?.innerText ?? ''`)), label: await b.ev(`document.querySelector('.ask-budget .label')?.innerText.trim().toLowerCase()`) }
+      await b.ev(`document.querySelector('.day-chip').click()`); await sleep(400)
+      await b.ev(`document.querySelector('.day-chip-panel button').focus(); document.querySelector('.day-chip-panel button').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`); await sleep(400)
+      const escaped = await chipState()
+      // Back to today, so the answer below is counted against today as before.
+      await b.ev(`document.querySelector('.day-chip').click()`); await sleep(300)
+      await b.ev(`[...document.querySelectorAll('.day-chip-panel button')].find((x) => x.innerText.trim() === 'Today')?.click()`); await sleep(600)
+      await shot('ask-day-chip')
+      const ok = Object.values(sizes).every((x) => x.ok)
+        && layout.form < layout.budget && layout.budget < layout.bar && layout.bar < layout.chip && layout.label === 'glycemic load left today' && layout.link === 'What is GL?' && !layout.oldNote
+        && closed.text === 'Today' && closed.open === 'false' && opened.open === 'true' && ['Today', 'Yesterday', 'Tomorrow', 'Pick a date'].every((c) => opened.choices.includes(c))
+        && tomorrow.text === 'Tomorrow' && tomorrow.open === 'false' && tomorrow.verdictLine && tomorrow.label === 'glycemic load left tomorrow'
+        && escaped.open === 'false' && escaped.focus
+        && (await b.ev(`document.querySelector('.day-chip')?.innerText.trim()`)) === 'Today'
+      console.log(`  ${ok ? 'PASS' : 'FAIL'}  the Ask card: the box first and above the tab bar, the budget under it, the day chip opens, closes on a choice and on Escape (${size.name})${ok ? '' : '  → ' + JSON.stringify({ sizes, layout, closed, opened, tomorrow, escaped })}`)
+      if (!ok) process.exitCode = 1
+    }
     if (await b.ev(`!!document.querySelector('.nudge')`)) { await b.ev(`document.querySelector('.nudge').scrollIntoView({block:'center'})`); await sleep(500); await shot('feedback-card') }
     if (process.env.TOUR === '1') await shot('tour-1')
     await b.ev(`(()=>{const i=document.querySelector('input[type=text]'); i.focus()})()`)
@@ -115,6 +158,15 @@ try {
     for (let i = 0; i < 90; i++) { await sleep(500); if (!(await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break }
     await sleep(1000)
     await shot('ask-answer')
+    // "Change day" under an answer opens the day chip's picker and puts the focus on its first choice; Escape closes it again.
+    {
+      await b.ev(`[...document.querySelectorAll('.log-day button')].find((x) => x.innerText.trim() === 'Change day')?.click()`); await sleep(900)
+      const st = await b.ev(`(() => { const first = document.querySelector('.day-chip-panel button'); return { open: document.querySelector('.day-chip')?.getAttribute('aria-expanded'), first: first?.innerText.trim() ?? null, focused: !!first && document.activeElement === first } })()`)
+      await b.ev(`document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`); await sleep(400)
+      const ok = st.open === 'true' && st.focused && (await b.ev(`document.querySelector('.day-chip')?.getAttribute('aria-expanded')`)) === 'false'
+      console.log(`  ${ok ? 'PASS' : 'FAIL'}  Change day under an answer opens the picker with the focus on its first choice (${size.name})${ok ? '' : '  → ' + JSON.stringify(st)}`)
+      if (!ok) process.exitCode = 1
+    }
     // Flat surfaces, one slip (docs/engineering/lighter-surfaces.md): no shadow on cards, keys, outlined buttons, fields or the tab bar; the answer slip keeps
     // its drop shadow; no grain; the marker does not glow; the highlights on the figures are still there; the active tab is underlined, not on a marker.
     {
@@ -161,7 +213,8 @@ try {
     }
     if (process.env.PLAN === '1') {
       // The day is chosen at the top of Ask; with an answer on screen it is asked again for that day.
-      await b.ev(`(()=>{const e=[...document.querySelectorAll('.ask-day button')].find(x=>x.innerText.trim()==='Tomorrow'); e?.click()})()`); await sleep(1500)
+      await b.ev(`document.querySelector('.day-chip')?.click()`); await sleep(400)
+      await b.ev(`(()=>{const e=[...document.querySelectorAll('.day-chip-panel button')].find(x=>x.innerText.trim()==='Tomorrow'); e?.click()})()`); await sleep(1500)
       for (let i = 0; i < 90; i++) { await sleep(500); if (!(await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`))) break }
       await b.ev(`document.querySelector('.log-day')?.scrollIntoView({block:'center'})`); await sleep(400)
       await shot('ask-plan')
