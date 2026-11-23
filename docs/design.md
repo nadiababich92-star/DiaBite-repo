@@ -53,7 +53,7 @@ look, Night, is Tape: a stored "night" choice is read as Tape.
 How the slips are made: the table's **Night** column below is the Tape *page* (background, bars, chips, text on the
 page). A slip redefines the tokens for everything inside it to the **Paper** column, so its text, fields, pills and
 keys are Paper's without a second set of rules (`src/styles.css`, the scope near the top). The keys on the page itself
-are the marker colour: `--primary-1/2` are `#dcf26b` / `#cde85a` with ink `#0c1b15` and a hard `#8fa23a` edge. A
+are the marker colour: `--primary-1/2` are `#dcf26b` / `#cde85a` with ink `#0c1b15`, flat (no edge, no shadow). A
 disabled key in the question box is pale (`#e9f2b3`, text `--text-dim`, edge `#cfd7a6`), not faded, so it stays at 4.5:1.
 The verdict on an answer is printed as a stamp in the slip's corner (`--low`, `--medium` or `--high`, a word and a mark).
 
@@ -90,16 +90,18 @@ sets (ink on the receipt 16.4 / 13.8, dim 7.0 / 7.7, faint on the page ground 4.
 
 ### Depth
 
-Depth is built the same way in both sets, from tokens, never ad hoc:
+**Flat surfaces, one slip** (23 November 2026, `docs/engineering/lighter-surfaces.md`). Depth is kept for the one object that is
+the product's answer and for state, and taken away from everything else, in both looks, from tokens, never ad hoc:
 
-- **A lifted slip.** The answer is a card whose bottom edge is torn into teeth,
-  with two sheets behind it. The shadow follows the teeth (`filter: drop-shadow`),
-  never a box.
-- **A key.** Buttons have a lit top edge, a dark bottom edge and press down 2px.
-- **Pressed in and cut in.** A chosen option is pressed in; a field is cut in.
-- **A groove.** The day bar is a groove with a filled bead.
-- **The marker.** On the figure that answers the question: tilted, with an uneven
-  edge. It is never put on a negative number, and in Night it glows softly.
+- **The one slip.** The answer is a card whose bottom edge is torn into teeth, with two sheets behind it. Its shadow follows
+  the teeth (`--fx-slip`, `filter: drop-shadow`), never a box. It is the only thing on a screen that casts a shadow (a dialog that opens over the page keeps its own, so it reads as above it).
+- **Flat surfaces.** Cards, keys, outlined buttons, fields, the tab bar and the disclaimer have no shadow: a card is its
+  `--surface` and a 1px `--border`, a field a 1px `--text-faint` border, because flat it has only its border to show it is a field and `--field-border` (1.5:1) is too faint for that (3:1 is the bar for what identifies a control). The `--fx-raised`, `--fx-key`, `--fx-key-soft`,
+  `--fx-stamp`, `--fx-nav` and `--fx-field` tokens are `none` in both looks. No grain on the page.
+- **Pressed in.** A chosen option is still pressed in (`--fx-pressed`): that is state, not decoration.
+- **The day bar** is a thin bar with a filled bead.
+- **The marker.** On the figure that answers the question: tilted, with an uneven edge, a flat fill (no glow). It is never put
+  on a negative number, and it appears once per screen.
 
 ### Colour rules
 1. **Colour carries meaning, so it is never decoration.** Green = fits,
@@ -166,8 +168,8 @@ at least 44px tall.
 ## Layout
 
 - **One column.** Everything stacks; nothing sits beside the ask box at any width.
-- **Navigation is a floating bar at the bottom**, five items (Ask, Diary, Menu,
-  Profile, Settings), reachable with a thumb, at every width. The page leaves room beneath it.
+- **Navigation is a flat bar along the bottom** on a phone, five items (Ask, Diary, Menu,
+  Profile, Settings), reachable with a thumb; on a wide screen it sits in the header. The page leaves room beneath it.
 - **Below 560px:** the ask button goes under its input at full width, the
   receipt shows each food above its three numbers, figure tiles tighten.
 - **Mobile first.** Check every change at 375px before desktop.
@@ -182,10 +184,9 @@ the one card with a torn edge and two sheets behind it; its verdict is carried b
 the status chip, not by a coloured edge.
 
 ### Buttons
-- **Primary:** the key: `--primary-1` to `--primary-2`, `--primary-ink`, 600, radius
-  12, a lit top and a dark bottom edge. One per view.
-- **Ghost:** a stamp: `--surface`, 1.5px `--text` border and a 3px `--text` shadow
-  beneath, radius 12.
+- **Primary:** the one filled key: `--primary-1` to `--primary-2`, `--primary-ink`, 600, radius
+  12, flat (no edge, no shadow); pressing moves it down 2px. One per view.
+- **Ghost:** outlined: `--surface`, 1.5px `--text` border, radius 12, no shadow.
 - **Ask:** full width under the input on phones, 46px tall.
 - A ghost key that opens a panel is drawn pressed (accent border and text) while its panel is open: pressed in, as a chosen option is (`--accent-soft` behind it, no stamp beneath), so the state shows in its shape as well as its colour. The rule reads `aria-expanded`, so the look and the state cannot disagree.
 
@@ -247,8 +248,10 @@ Header hidden on phones.
 Raised: `--surface`, 1px border, radius 12, 15px, 44px minimum height.
 
 ### Navigation bar
-A floating slab at the bottom: five items, each an icon above a 13px label. The
-selected item sits on a marker pill. Feedback is not in the bar; it lives in **Settings**.
+A flat bar: on a phone it runs along the bottom edge with a 1px top border; on a wide screen the same tabs sit in the header
+with a 1px bottom border. Five items, each an icon and a 13px label (15px beside the icon on a wide screen). The selected
+item is in `--text`, 600, with a 2px `--accent` underline; it has no marker pill, so the marker appears once per screen, on
+the figure. Feedback is not in the bar; it lives in **Settings**.
 
 **Your answers** (a card in Profile, between the daily targets and Excluded foods) shows the onboarding answers that have no field of their own, one line each (Medicines; Kidneys and other conditions; How you eat; Allergies), with an **Edit** ghost button of at least 44 px on each row. Edit opens that one onboarding step on its own: the label "Editing your answers" and the step's name replace the progress bar, there is no Back, and the actions are **Save** and **Cancel**. The rules are the step's own, exits included. Back on You, a line at the top says what saving did, and when a medicine ruled out the carbohydrate approach the person had, that it was changed to moderate.
 

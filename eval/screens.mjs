@@ -115,6 +115,32 @@ try {
     for (let i = 0; i < 90; i++) { await sleep(500); if (!(await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break }
     await sleep(1000)
     await shot('ask-answer')
+    // Flat surfaces, one slip (docs/engineering/lighter-surfaces.md): no shadow on cards, keys, outlined buttons, fields or the tab bar; the answer slip keeps
+    // its drop shadow; no grain; the marker does not glow; the highlights on the figures are still there; the active tab is underlined, not on a marker.
+    {
+      const flat = await b.ev(`(() => {
+        const shadowed = (sel) => [...document.querySelectorAll(sel)].filter((e) => getComputedStyle(e).boxShadow !== 'none').map((e) => e.className || e.tagName)
+        const slip = document.querySelector('.card.answer')
+        const carb = document.querySelector('.fig-big.carb .num'), gl = document.querySelector('.fig-big.gl.ok .num')
+        const tab = document.querySelector('nav.tabs button[aria-selected="true"]')
+        const tabStyle = tab ? getComputedStyle(tab) : null
+        const markerProbe = document.createElement('span'); markerProbe.style.background = 'var(--marker)'; document.body.appendChild(markerProbe)
+        const marker = getComputedStyle(markerProbe).backgroundColor; markerProbe.remove()
+        const opaque = (el) => !!el && !/rgba\(0, 0, 0, 0\)|transparent/.test(getComputedStyle(el).backgroundColor)
+        return {
+          shadowed: [...shadowed('.card:not(.answer)'), ...shadowed('button.primary'), ...shadowed('button.ghost'), ...shadowed('nav.tabs'), ...shadowed('input:not([type=checkbox]):not([type=radio]), select, textarea')],
+          slipFilter: slip ? getComputedStyle(slip).filter : 'no slip',
+          grain: /svg/.test(getComputedStyle(document.body).backgroundImage),
+          glow: [...document.querySelectorAll('.fig-big .num, .ask-budget .value .num')].map((e) => getComputedStyle(e).boxShadow).filter((x) => x !== 'none'),
+          carbHighlight: opaque(carb), glHighlight: gl ? getComputedStyle(gl).backgroundColor === marker : 'no fit',
+          tab: tabStyle ? { line: tabStyle.textDecorationLine, bg: tabStyle.backgroundColor, ico: getComputedStyle(tab.querySelector('.tab-ico')).backgroundColor, marker } : null,
+        }
+      })()`)
+      const tabOk = flat.tab && /underline/.test(flat.tab.line) && flat.tab.bg !== flat.tab.marker && flat.tab.ico !== flat.tab.marker
+      const ok = flat.shadowed.length === 0 && flat.slipFilter !== 'none' && flat.slipFilter !== 'no slip' && !flat.grain && flat.glow.length === 0 && flat.carbHighlight && flat.glHighlight !== false && tabOk
+      console.log(`  ${ok ? 'PASS' : 'FAIL'}  flat surfaces, one slip: no shadows, the slip keeps its own, no grain or glow, the highlights stay, the tab is underlined (${size.name})${ok ? '' : '  → ' + JSON.stringify(flat)}`)
+      if (!ok) process.exitCode = 1
+    }
     // A key whose panel is open is drawn pressed (docs/design.md, Buttons): its border is the accent, and closing the panel changes the look.
     {
       const read = `(() => {

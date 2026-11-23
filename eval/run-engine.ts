@@ -50,6 +50,7 @@ import GlHelp, { GlHelpContext } from '../src/components/GlHelp'
 import { GI_GL_HOW, GI_GL_VIDEO, GI_GL_WORDS } from '../src/lib/glWords'
 import { budgetOf, buildReceipt, receiptFrom, requestHeaders, SignInRequiredError } from '../src/lib/agent'
 import { deviceId } from '../src/lib/device'
+import { loadTheme } from '../src/lib/theme'
 import { chargeAnon, chargeTurn, countFreeAnswer, deviceKeyOf, RateLimited, SignInNeeded, _reset as resetGuard } from '../server/guard'
 import { countsAsFreeAnswer } from '../server/agent'
 import { askCopy, BUTTONS, STAMP_LABEL, verdictTone } from '../src/lib/verdict'
@@ -963,6 +964,32 @@ recorrectMisses.forEach((m) => console.log(m))
   if (/budget left/.test(short)) bits.push('the short screen promises no "budget left", which the Ask screen still shows')
   if (!full.includes('First, the numbers the formula needs') || !full.includes('onb-progress')) bits.push('the full onboarding changed')
   console.log(`\nshort onb ${bits.length === 0 ? 'ok' : 'WRONG'}  (Before we start)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// Flat surfaces, one slip (docs/engineering/lighter-surfaces.md): the depth tokens are none in every block, the slip and the pressed state keep theirs,
+// no grain, no glow, and the active tab is not drawn on the marker. The live page is read by npm run screens.
+{
+  const bits: string[] = []
+  const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../src/styles.css'), 'utf8')
+  for (const tok of ['raised', 'nav', 'key', 'key-soft', 'stamp', 'field']) {
+    const vals = [...css.matchAll(new RegExp(`--fx-${tok}:\\s*([^;]+);`, 'g'))].map((m) => m[1].trim())
+    if (!vals.length || vals.some((v) => v !== 'none')) bits.push(`--fx-${tok} is ${JSON.stringify(vals)}, wanted none everywhere`)
+  }
+  for (const tok of ['slip', 'pressed']) {
+    const vals = [...css.matchAll(new RegExp(`--fx-${tok}:\\s*([^;]+);`, 'g'))].map((m) => m[1].trim())
+    if (!vals.length || vals.some((v) => v === 'none')) bits.push(`--fx-${tok} lost its depth: ${JSON.stringify(vals)}`)
+  }
+  if (/--grain/.test(css)) bits.push('the grain is still defined or used')
+  if ([...css.matchAll(/--marker-glow:\s*([^;]+);/g)].some((m) => m[1].trim() !== 'none')) bits.push('the marker still glows')
+  if (/nav\.tabs button\[aria-selected='true'\][^{]*\{[^}]*background: var\(--marker\)/.test(css)) bits.push('the active tab is drawn on the marker')
+  if (!/nav\.tabs button\[aria-selected='true'\] \{[^}]*text-decoration: underline 2px var\(--accent\)/.test(css)) bits.push('the active tab is not underlined')
+  if (/button\.ghost \{[^}]*margin-bottom: 3px/.test(css)) bits.push('an outlined button still leaves room for a stamp beneath')
+  for (const line of css.split('\n')) if (/box-shadow:\s*0 \d+px 0/.test(line) && !/inset/.test(line) && !/^\.lp-|\.lp-key/.test(line)) bits.push(`a hard edge beneath a key is back: ${line.trim().slice(0, 90)}`)
+  // Both looks stay, and Tape is still the default: with nothing stored (no localStorage in this process) the choice reads as Tape.
+  if (loadTheme() !== 'tape') bits.push(`the default look is ${loadTheme()}, wanted tape`)
+  console.log(`\nflat      ${bits.length === 0 ? 'ok' : 'WRONG'}  (flat surfaces, one slip)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }

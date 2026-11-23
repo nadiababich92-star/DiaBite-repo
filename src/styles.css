@@ -9,7 +9,6 @@
   --bg: #0a1812;
   --bg-top: #12291f;
   --bg-bottom: #0a1812;
-  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .3 0 0 0 0 .22 0 0 0 0 .1 0 0 0 .6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/></svg>");
   --surface: #14281f;
   --surface-2: #1d332a;
   --sheet-1: #10221a;
@@ -30,7 +29,7 @@
   --mark: #eef3e8;
   --marker: #dcf26b;
   --marker-ink: #0c1b15;
-  --marker-glow: 0 0 22px rgba(220, 242, 107, 0.3);
+  --marker-glow: none;
   /* Carbohydrate has its own colour, blue: the verdict colours (green, amber, red) mean the day, and the lime marker is the load. */
   --carb-marker: #2d5b82;
   --carb-ink: #eaf4fb;
@@ -44,12 +43,12 @@
   --high-bg: #2c1c1a;
   --scrim: rgba(0, 0, 0, 0.6);
   --fx-slip: drop-shadow(0 16px 14px rgba(0, 0, 0, 0.55)) drop-shadow(0 1px 1px rgba(255, 255, 255, 0.05));
-  --fx-raised: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 10px 16px -8px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.4);
-  --fx-nav: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 14px 26px -8px rgba(0, 0, 0, 0.8);
-  --fx-key: 0 4px 0 #8fa23a, 0 12px 16px -8px rgba(0, 0, 0, 0.7);
-  --fx-key-soft: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 -3px 0 rgba(0, 0, 0, 0.35) inset, 0 6px 10px -5px rgba(0, 0, 0, 0.7);
-  --fx-stamp: 0 3px 0 #5c7366;
-  --fx-field: inset 0 3px 7px rgba(0, 0, 0, 0.6);
+  --fx-raised: none;
+  --fx-nav: none;
+  --fx-key: none;
+  --fx-key-soft: none;
+  --fx-stamp: none;
+  --fx-field: none;
   --fx-pressed: inset 0 3px 7px rgba(0, 0, 0, 0.5);
   --groove: #0a1812;
   --groove-fx: inset 0 1px 4px rgba(0, 0, 0, 0.7);
@@ -66,7 +65,6 @@
   --bg: #f1ece0;
   --bg-top: #f8f4e9;
   --bg-bottom: #eee8d8;
-  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .3 0 0 0 0 .22 0 0 0 0 .1 0 0 0 .6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.07'/></svg>");
   --surface: #fffcf5;
   --surface-2: #efe9da;
   --sheet-1: #f2ebd9;
@@ -100,12 +98,12 @@
   --high-bg: #f8ddd8;
   --scrim: rgba(20, 32, 26, 0.5);
   --fx-slip: drop-shadow(0 14px 12px rgba(70, 50, 20, 0.22)) drop-shadow(0 2px 2px rgba(70, 50, 20, 0.12));
-  --fx-raised: 0 1px 0 #fff inset, 0 8px 14px -8px rgba(70, 50, 20, 0.38), 0 1px 3px rgba(70, 50, 20, 0.12);
-  --fx-nav: 0 1px 0 #fff inset, 0 14px 26px -10px rgba(70, 50, 20, 0.5);
-  --fx-key: 0 1px 0 rgba(255, 255, 255, 0.28) inset, 0 -3px 0 rgba(0, 0, 0, 0.26) inset, 0 9px 14px -6px rgba(14, 90, 60, 0.6);
-  --fx-key-soft: 0 1px 0 #fff inset, 0 -3px 0 rgba(70, 50, 20, 0.14) inset, 0 6px 10px -5px rgba(70, 50, 20, 0.35);
-  --fx-stamp: 0 3px 0 var(--text);
-  --fx-field: inset 0 2px 5px rgba(70, 50, 20, 0.16);
+  --fx-raised: none;
+  --fx-nav: none;
+  --fx-key: none;
+  --fx-key-soft: none;
+  --fx-stamp: none;
+  --fx-field: none;
   --fx-pressed: inset 0 3px 6px rgba(14, 90, 60, 0.28);
   --groove: #e3dbc6;
   --groove-fx: inset 0 1px 3px rgba(70, 50, 20, 0.3);
@@ -116,7 +114,7 @@
 :root[data-theme='tape'] :is(.card:not(.ask-hero), .answer, .day, .chips-col .chip-btn, .ask-form, .tour-tip, .modal, .summary-root) {
   color: var(--text);
   --fx-slip: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.5));
-  --fx-raised: 0 14px 22px -12px rgba(0, 0, 0, 0.65);
+  --fx-raised: none;
 }
 
 * { box-sizing: border-box; }
@@ -124,7 +122,7 @@
 body {
   margin: 0;
   background-color: var(--bg);
-  background-image: var(--grain), linear-gradient(var(--bg-top), var(--bg-bottom));
+  background-image: linear-gradient(var(--bg-top), var(--bg-bottom));
   background-attachment: fixed;
   min-height: 100vh;
   color: var(--text);
@@ -160,14 +158,12 @@ header.masthead h1, header.masthead span.wordmark { margin: 0; font-size: 21px; 
 }
 .disclaimer strong { color: var(--text); }
 
-/* Navigation: a floating slab at the bottom, five items, reachable with a thumb. */
+/* Navigation: a flat bar along the bottom, five items, reachable with a thumb (docs/design.md, Navigation bar). */
 nav.tabs {
-  position: fixed; left: 50%; transform: translateX(-50%); z-index: 20;
-  bottom: max(14px, env(safe-area-inset-bottom));
-  width: min(calc(100% - 28px), 460px);
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
   display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
-  background: var(--surface); border: 1px solid var(--border); border-radius: 26px;
-  box-shadow: var(--fx-nav); padding: 5px 6px;
+  background: var(--surface); border: 0; border-top: 1px solid var(--border); border-radius: 0;
+  box-shadow: var(--fx-nav); padding: 4px max(6px, calc((100% - 460px) / 2)) max(4px, env(safe-area-inset-bottom));
 }
 nav.tabs button {
   appearance: none; background: none; border: none; cursor: pointer; font: inherit;
@@ -177,8 +173,8 @@ nav.tabs button {
 nav.tabs .tab-ico { width: 52px; height: 30px; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
 nav.tabs .tab-ico svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 nav.tabs button:hover { color: var(--text); }
-nav.tabs button[aria-selected='true'] { color: var(--text); font-weight: 600; }
-nav.tabs button[aria-selected='true'] .tab-ico { background: var(--marker); color: var(--marker-ink); box-shadow: var(--marker-glow); }
+nav.tabs button[aria-selected='true'] { color: var(--text); font-weight: 600; text-decoration: underline 2px var(--accent); text-underline-offset: 5px; }
+nav.tabs button[aria-selected='true'] .tab-ico { color: var(--text); }
 nav.tabs button[aria-selected='true'] .tab-ico svg { stroke-width: 1.9; }
 
 .card {
@@ -199,7 +195,9 @@ label.field { display: flex; flex-direction: column; gap: 5px; font-size: 13px; 
 label.field > span { font-weight: 500; }
 input, select {
   font: inherit; color: var(--text); background: var(--field);
-  border: 1px solid var(--field-border); border-radius: 10px; padding: 9px 11px; width: 100%;
+  /* Flat, a field has only its border to show it is one, so the border is --text-faint (5.4:1 in Paper, 5.6:1 in Tape); --field-border was
+   * 1.5:1 and leaned on the inset shadow that is gone (WCAG 1.4.11 asks 3:1 for what identifies a control). */
+  border: 1px solid var(--text-faint); border-radius: 10px; padding: 9px 11px; width: 100%;
   box-shadow: var(--fx-field);
 }
 input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
@@ -216,11 +214,11 @@ button.primary {
 }
 button.primary:hover { filter: brightness(1.05); }
 button.primary:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
-/* A stamp: an ink outline and a hard step beneath. */
+/* Outlined: an ink border, flat (docs/design.md, Buttons). */
 button.ghost {
   font: inherit; font-weight: 600; cursor: pointer; background: var(--surface); color: var(--text);
   border: 1.5px solid var(--text); border-radius: 12px; padding: 8px 14px;
-  box-shadow: var(--fx-stamp); margin-bottom: 3px;
+  box-shadow: var(--fx-stamp);
 }
 button.ghost:hover { border-color: var(--accent); }
 button.link {
@@ -343,7 +341,7 @@ tr:last-child td { border-bottom: none; }
 .was-now { margin: 0 0 6px; font-size: 14px; }
 /* Log it, Calculation, Portions: pinned above the bottom bar while the answer scrolls under them, so a long
    answer never pushes them out of reach. On a wide screen the bar is at the top, so they sit at the bottom edge. */
-.act-bar { position: sticky; z-index: 10; bottom: calc(max(14px, env(safe-area-inset-bottom)) + 76px); padding: 10px 0; margin: 0 0 6px; background: var(--bg); align-items: center; flex-wrap: nowrap; gap: 8px; }
+.act-bar { position: sticky; z-index: 10; bottom: calc(max(4px, env(safe-area-inset-bottom)) + 65px); padding: 10px 0; margin: 0 0 6px; background: var(--bg); align-items: center; flex-wrap: nowrap; gap: 8px; }
 .act-bar button { padding-left: 14px; padding-right: 14px; white-space: nowrap; }
 /* A key whose panel is open is drawn pressed in, read from aria-expanded so the look and the state cannot disagree (docs/design.md, Buttons). */
 .act-bar button.ghost[aria-expanded='true'] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); box-shadow: none; transform: translateY(3px); margin-bottom: 0; }
@@ -716,11 +714,11 @@ button.danger:disabled { opacity: 0.45; cursor: not-allowed; }
   .app > header.masthead { grid-column: 1; grid-row: 1; }
   .app > nav.tabs {
     grid-column: 2; grid-row: 1; align-self: center; position: static; transform: none; width: auto; margin: 0;
-    display: flex; gap: 2px; padding: 4px; border-radius: 18px; box-shadow: var(--fx-raised);
+    display: flex; gap: 2px; padding: 0; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; background: none; box-shadow: none;
   }
   nav.tabs button { flex-direction: row; gap: 8px; min-height: 44px; padding: 0 14px 0 8px; border-radius: 14px; font-size: 15px; }
   nav.tabs .tab-ico, nav.tabs button[aria-selected='true'] .tab-ico { width: 24px; height: 24px; background: none; box-shadow: none; border-radius: 0; }
-  nav.tabs button[aria-selected='true'] { background: var(--marker); color: var(--marker-ink); box-shadow: var(--marker-glow); }
+  nav.tabs button[aria-selected='true'] { background: none; color: var(--text); }
 }
 
 /* After a question: the budget and the box, nothing else, so the answer is close. */
@@ -1018,7 +1016,7 @@ body:has(.landing) { background: #0a1812; }
 :root[data-theme='tape'] .ask-hero .ask-title { color: var(--text); }
 :root[data-theme='tape'] .ask-form { background: var(--surface); border-radius: var(--radius); padding: 14px; box-shadow: var(--fx-raised); margin: 14px 0 10px; }
 :root[data-theme='tape'] .ask-hero.compact .ask-form { margin: 0; }
-:root[data-theme='tape'] .chips-col .chip-btn { border: 0; box-shadow: 0 6px 0 -2px #cfc6ae; }
+:root[data-theme='tape'] .chips-col .chip-btn { border: 1px solid var(--border); box-shadow: none; }
 :root[data-theme='tape'] .chip-btn.on { background: var(--marker); color: var(--marker-ink); border: 2px solid var(--marker); box-shadow: none; }
 :root[data-theme='tape'] .day-key[aria-pressed='true'] b { background: var(--marker-ink); color: var(--marker); }
 /* The verdict as a stamp on the slip. A short word (Fits, Estimate) sits in the corner beside the verdict; a long one
@@ -1035,8 +1033,8 @@ body:has(.landing) { background: #0a1812; }
 :root[data-theme='tape'] .answer.tone-estimate .answer-text .a-verdict { max-width: calc(100% - 124px); }
 
 :root[data-theme='tape'] .ask-budget { flex-direction: column; align-items: flex-start; gap: 4px; margin-bottom: 14px; }
-:root[data-theme='tape'] .ask-form button.primary { background: var(--marker); color: var(--marker-ink); box-shadow: 0 4px 0 #8fa23a; }
-:root[data-theme='tape'] .ask-form button.primary:disabled { opacity: 1; background: #e9f2b3; color: var(--text-dim); box-shadow: 0 4px 0 #cfd7a6; }
+:root[data-theme='tape'] .ask-form button.primary { background: var(--marker); color: var(--marker-ink); box-shadow: none; }
+:root[data-theme='tape'] .ask-form button.primary:disabled { opacity: 1; background: #e9f2b3; color: var(--text-dim); box-shadow: none; }
 :root[data-theme='tape'] .chip-toggle.on { background: var(--marker); border-color: var(--marker); color: var(--marker-ink); }
 
 /* "Your answers": the onboarding answers with no field of their own, one line each, and Edit. */
