@@ -138,6 +138,22 @@ try {
     await tab('Menu')
     for (let i = 0; i < 40 && !(await b.ev(`!!document.querySelector('.menu-meal')`)); i++) await sleep(300)
     await shot('menu')
+    // The day strip says what its numbers are (docs/engineering/menu-day-strip.md): a caption directly before the keys, the group described by it,
+    // seven keys that each name the glycemic load, and no overlap. Read from the page, not from the source.
+    {
+      const strip = await b.ev(`(() => {
+        const note = document.querySelector('.day-strip-note'), strip = document.querySelector('.day-strip')
+        if (!note || !strip) return { present: false }
+        const n = note.getBoundingClientRect(), t = strip.getBoundingClientRect()
+        const keys = [...strip.querySelectorAll('button')]
+        return { present: true, before: note.nextElementSibling === strip, says: /glycemic load/i.test(note.textContent || ''),
+          described: !!note.id && strip.getAttribute('aria-describedby') === note.id, keys: keys.length, labelled: keys.every((k) => /glycemic load/i.test(k.getAttribute('aria-label') || '')),
+          clear: n.bottom <= t.top + 0.5 }
+      })()`)
+      const ok = strip.present && strip.before && strip.says && strip.described && strip.keys === 7 && strip.labelled && strip.clear
+      console.log(`  ${ok ? 'PASS' : 'FAIL'}  menu day strip caption (${size.name})${ok ? '' : '  → ' + JSON.stringify(strip)}`)
+      if (!ok) process.exitCode = 1
+    }
     if (process.env.PLAN === '1') {
       await b.ev(`document.querySelector('.menu-meal button[aria-expanded]')?.click()`); await sleep(600)
       await b.ev(`document.querySelector('.plan-inline')?.scrollIntoView({block:'center'})`); await sleep(400)

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import GlHelp from './GlHelp'
 import { CATEGORY_LABELS, getFood } from '../data/foods'
 import { MEAL_LABELS, recipeCount, regenerateSlot, replayWeek, amountText, shoppingFromEntries, shoppingList, shoppingText, menuHidden } from '../lib/menu'
@@ -41,6 +41,7 @@ function saveChecked(key: string, checked: Set<string>) {
 const todayIndex = () => (new Date().getDay() + 6) % 7
 
 export default function MenuPage({ profile, targets, diary, onAsk, onAdd, onRemove, onOpenDiary }: Props) {
+  const dayStripNoteId = useId()
   const hidden = menuHidden(profile)
   const today = useToday()
   // The week stays the week until the person asks for another: it is kept on this device.
@@ -252,7 +253,8 @@ export default function MenuPage({ profile, targets, diary, onAsk, onAdd, onRemo
         </section>
       )}
 
-      <div className="day-strip" role="group" aria-label="Day of the week">
+      <p className="muted day-strip-note" id={dayStripNoteId}>Under each day: its glycemic load (GL).</p>
+      <div className="day-strip" role="group" aria-label="Day of the week" aria-describedby={dayStripNoteId}>
         {plan.days.map((d, i) => (
           <button key={d.weekday} className="day-key" aria-pressed={i === day} onClick={() => setDay(i)}
             aria-label={`${d.weekday}, glycemic load ${d.gl.toFixed(0)}`}>

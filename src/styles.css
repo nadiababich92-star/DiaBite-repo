@@ -820,6 +820,7 @@ button.step-day:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; 
 .recent .label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 600; margin-bottom: 8px; }
 .recent .chip-toggle em { font-style: normal; color: var(--text-dim); font-size: 13px; margin-left: 4px; }
 
+.day-strip-note { margin: 0 0 6px; }
 .day-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; padding-bottom: 3px; margin-bottom: 14px; }
 .day-key {
   appearance: none; font: inherit; cursor: pointer; color: var(--text); min-height: 58px; border-radius: 12px; padding: 4px 0;

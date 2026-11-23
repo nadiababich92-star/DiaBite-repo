@@ -288,7 +288,7 @@ A **planned row** in the Diary is in the muted text colour with a dashed **plann
 Under each dish's title is **one short line** in `--text-dim`, 14 px: its main ingredients, heaviest first, at most four ("Egg whites, spinach, feta cheese"). It is built from the recipe's own ingredient list, never written by a model, and carries no number; oil, seasoning and small amounts are left out and stay in the full list below it.
 Seven day keys (the day's name and its planned glycemic load), today pre-selected, and one
 day open as a card: a bar, then each meal with its glycemic load, its foods at their weights,
-the recipe behind a disclosure, **I ate this**, **Plan it…** and **Replace**. The week stays on this
+the recipe behind a disclosure, **I ate this**, **Plan it…** and **Replace**. A quiet line above the seven day keys says what the number under each day is: its glycemic load. The week stays on this
 device until **Generate again** is pressed.
 
 ### Portions

@@ -851,6 +851,26 @@ recorrectMisses.forEach((m) => console.log(m))
   if (bits.length) process.exitCode = 1
 }
 
+// The Menu's day strip says what its numbers are (docs/engineering/menu-day-strip.md). The page itself is read by `npm run screens`; this reads the source,
+// which needs no account and no browser: the caption is the element right before the strip, names the load, and describes the group by its id.
+{
+  const bits: string[] = []
+  const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../src/components/MenuPage.tsx'), 'utf8')
+  const note = /<p className="muted day-strip-note" id=\{(\w+)\}>([^<]*)<\/p>\s*<div className="day-strip"([^>]*)>/.exec(src)
+  if (!note) bits.push('the caption is missing, or is not the element right before the day strip')
+  else {
+    if (!/glycemic load/i.test(note[2])) bits.push(`the caption does not name the glycemic load: "${note[2]}"`)
+    if (!new RegExp(`aria-describedby=\\{${note[1]}\\}`).test(note[3])) bits.push('the day strip is not described by the caption')
+  }
+  if (!/aria-label=\{`\$\{d\.weekday\}, glycemic load \$\{d\.gl\.toFixed\(0\)\}`\}/.test(src)) bits.push('a day key lost its "glycemic load" label')
+  const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../src/styles.css'), 'utf8')
+  const rule = css.split('\n').find((l) => l.startsWith('.day-strip-note'))
+  if (!rule || /#[0-9a-f]{3,8}\b/i.test(rule) || /--[\w-]+\s*:/.test(rule)) bits.push('the caption rule is missing, holds a raw colour or declares a custom property')
+  console.log(`\nmenu strip ${bits.length === 0 ? 'ok' : 'WRONG'}  (the caption)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
 // Watching the test users and hearing from them: when the feedback card is asked, and what the weekly report counts.
 {
   const bits: string[] = []
