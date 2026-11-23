@@ -62,7 +62,7 @@ function readFresh(): boolean {
 /** The verdict, as a mark you can read before you read anything. */
 /**
  * What to tell the engine about smaller portions: `false` for a person whose profile hides the weekly menu (an eating-disorder history, kidney
- * disease), nothing for everyone else. Docs/specs/swaps-screen.md, section 3; it goes into the ask request in Stage 4, not yet.
+ * disease), nothing for everyone else. Docs/specs/swaps-screen.md, section 3; it goes into the ask request.
  */
 export function portionSwapsFor(profile: Profile): false | undefined {
   return menuHidden(profile) ? false : undefined
@@ -577,6 +577,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
         budget: budgetOf(targets),
         avoid: avoidOf(profile),
         units: profile.units,
+        ...(portionSwapsFor(profile) === false ? { portionSwaps: false as const } : {}),
         ...(carbLimit.g > 0 ? { carbLimit: { kind: carbLimit.kind, g: carbLimit.g } } : {}),
         entries: fresh ? [] : counted.filter((e) => e.date === forDay).map((e) => (e.snapshot?.servings
           ? { foodId: engineId(e), servings: e.snapshot.servings }

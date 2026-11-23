@@ -2443,6 +2443,26 @@ hangMisses.forEach((m) => console.log(m))
     const over = await alternativesForMeal(store, { meal: computeMeal([{ foodId: 'seed:oats', grams: 234 }]), remaining: 8, allowPortion: true })
     if (!over.alternatives || !over.alternativesFor) miss('SW11 a meal over the day has none to offer, even a smaller portion')
   }
+  // SW12: the Next line names a smaller portion, and the button is offered for it.
+  {
+    const pear = { id: 'ing:pear', name: 'Pear', unit: 'g' as const, portion: 118, change: 'swap' as const, label: 'pear (118 g)' }
+    const half = { id: 'ing:banana', name: 'Banana', unit: 'g' as const, portion: 59, change: 'portion' as const, fraction: 0.5, label: 'half the banana (59 g)' }
+    const meal = { alternativesFor: { foodId: 'ing:banana', name: 'Banana' }, alternatives: [pear, half] }
+    const pick = (next: string | undefined) => swapNamedIn(next, meal)?.id ?? null
+    const want = (next: string | undefined, id: string | null) => { if (pick(next) !== id) miss(`SW12 "${next}": ${pick(next)}, wanted ${id}`) }
+    want('Have half the banana (59 g) instead.', 'ing:banana')
+    want('Have half the banana instead.', 'ing:banana')
+    want('Try 59 g of the banana.', 'ing:banana')
+    want('Half of the banana would fit.', 'ing:banana')
+    want('Swap the banana for the pear.', 'ing:pear')
+    want('Swap the banana for the pear (118 g).', 'ing:pear')
+    want('Instead of the pear, have half the banana.', 'ing:banana')
+    want('Keep the banana.', null)
+    want('Nothing to change.', null)
+    want('Have 59 g.', null)
+    want(undefined, null)
+    if (swapNamedIn('Have half the banana.', { alternativesFor: meal.alternativesFor, alternatives: [pear] })) miss('SW12 a portion is named with none offered')
+  }
   // SW13: what kind of food it is.
   {
     const want: [string, string, string, string | undefined, string][] = [

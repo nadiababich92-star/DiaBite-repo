@@ -31,7 +31,7 @@ export interface AgentRequest {
   units?: 'imperial' | 'metric'
   /**
    * Set only when the person's profile hides the weekly menu: the engine then offers no smaller portion as a swap. Parked with the day, in
-   * memory, and never named after the condition (docs/specs/swaps-engine.md, section 6). Not sent yet.
+   * memory, and never named after the condition (docs/specs/swaps-engine.md, section 6).
    */
   portionSwaps?: false
 }
