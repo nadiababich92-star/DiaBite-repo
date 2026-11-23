@@ -1764,6 +1764,15 @@ hangMisses.forEach((m) => console.log(m))
     const got = householdMeasure(byId.get(id)?.portions, grams)?.text
     if (got !== want) mapMisses.push(`    ${id} at ${grams} g says ${JSON.stringify(got)}, wanted ${JSON.stringify(want)}`)
   }
+  // "A cup of plain greek yogurt" asked for grams, because the curated record that wins the tie had no table of measures while a neighbour from the survey had one
+  // (the owner linked all three yogurts on 23 November 2026). A cup is 245 g, from the USDA row, for each of them, and half a cup is half of it.
+  for (const id of ['ing:greek_yogurt', 'seed:greekyogurt', 'seed:yogurt']) {
+    const rec = byId.get(id)
+    const one = rec ? gramsFor(rec, { count: 1, unit: 'cup' }) : null
+    const half = rec ? gramsFor(rec, { count: 0.5, unit: 'cup' }) : null
+    if (!one || !('grams' in one) || one.grams !== 245 || one.basis !== 'usda_measure') mapMisses.push(`    ${id} at one cup: ${JSON.stringify(one)}, wanted 245 g from the USDA measure`)
+    if (!half || !('grams' in half) || half.grams !== 122.5) mapMisses.push(`    ${id} at half a cup: ${JSON.stringify(half)}, wanted 122.5 g`)
+  }
   console.log(`\nmapped    ${mapMisses.length === 0 ? 'ok' : 'WRONG'}  (${keys.length} foods)`)
   mapMisses.forEach((m) => console.log(m))
   if (mapMisses.length) process.exitCode = 1

@@ -297,7 +297,7 @@ candidate,ing:mint,Fresh mint,curated ingredient,herb,173475,"Spearmint, fresh",
 candidate,ing:oregano_fresh,Fresh oregano,curated ingredient,herb,173474,"Peppermint, fresh",sr_legacy,0.738,0.5,,,,,tbsp 3.2 g,,66,15,2.2,1.4
 candidate,ing:sage,Fresh sage,curated ingredient,herb,170935,"Spices, sage, ground",sr_legacy,0.019,0.5,,,,,tsp 0.7 g; tbsp 2 g,,315,60,10.6,12.7
 candidate,ing:garlic,Garlic,curated ingredient,veg,2709786,"Garlic, raw",survey_fndds,0.26,1.0,,,,,1 cup 135 g; 1 teaspoon 5 g,,149,33,6.4,0.5
-candidate,ing:greek_yogurt,"Greek yogurt, plain 2%",curated ingredient,dairy,2705421,"Yogurt, Greek, NS as to type of milk, plain",survey_fndds,0.396,1.0,,,,,1 cup 245 g,,73,4,10,2
+candidate,ing:greek_yogurt,"Greek yogurt, plain 2%",curated ingredient,dairy,2705421,"Yogurt, Greek, NS as to type of milk, plain",survey_fndds,0.396,1.0,,yes,,,1 cup 245 g,,73,4,10,2
 candidate,ing:green_beans,Green beans,curated ingredient,veg,169962,"Beans, snap, green, frozen, all styles, unprepared (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.134,1.0,,,,,cup 121 g,,31,7,1.8,0.2
 candidate,ing:cabbage,Green cabbage,curated ingredient,veg,2710124,"Baby Toddler green beans, Stage 1",survey_fndds,0.058,0.5,,,,,1 tablespoon 15 g,,25,5.8,1.3,0.1
 candidate,ing:grits,"Grits, cooked with water",curated ingredient,grain,171672,"Cereals, corn grits, yellow, regular and quick, enriched, cooked with water, without salt",sr_legacy,0.285,1.0,,,,,cup 233 g,,58,12.4,1.2,0.28
@@ -402,7 +402,7 @@ candidate,seed:cottage,"Cottage cheese, 5%",everyday food,dairy,2706812,"Chicken
 candidate,seed:couscous,"Couscous, cooked",everyday food,grains,168897,"Wild rice, cooked",sr_legacy,0.267,0.5,,,,,cup 164 g,,112.0,23.0,3.8,0.2
 candidate,seed:pasta-durum,"Durum wheat pasta, al dente",everyday food,grains,169721,"Wheat, durum",sr_legacy,4.322,0.4,,yes,2708357,,cup 192 g,,158.0,31.0,5.8,0.9
 candidate,seed:flax,Flaxseed,everyday food,nuts,171442,"Oil, flaxseed, contains added sliced flaxseed",sr_legacy,3.968,1.0,,,,,tablespoon 13.7 g; cup 219 g,,534.0,29.0,18.0,42.0
-candidate,seed:greekyogurt,"Greek yogurt, 2%",everyday food,dairy,2705421,"Yogurt, Greek, NS as to type of milk, plain",survey_fndds,0.376,1.0,,,,,1 cup 245 g,,73.0,3.9,10.0,2.0
+candidate,seed:greekyogurt,"Greek yogurt, 2%",everyday food,dairy,2705421,"Yogurt, Greek, NS as to type of milk, plain",survey_fndds,0.376,1.0,,yes,,,1 cup 245 g,,73.0,3.9,10.0,2.0
 candidate,seed:greenbeans,Green beans,everyday food,vegetables,169962,"Beans, snap, green, frozen, all styles, unprepared (Includes foods for USDA's Food Distribution Program)",sr_legacy,0.167,1.0,,,,,cup 121 g,,31.0,7.0,1.8,0.1
 candidate,seed:cabbage,Green cabbage,everyday food,vegetables,2710124,"Baby Toddler green beans, Stage 1",survey_fndds,0.092,0.5,,,,,1 tablespoon 15 g,,25.0,6.0,1.3,0.1
 candidate,seed:cheese,Hard cheese,everyday food,dairy,173419,"Cheese, edam",sr_legacy,0.06,0.5,,,,,oz 28.4 g,,364.0,1.3,25.0,29.0
@@ -412,7 +412,7 @@ candidate,seed:lettuce,Leaf lettuce,everyday food,vegetables,2709790,"Lettuce, B
 candidate,seed:potato-mash,Mashed potato,everyday food,vegetables,2709493,"Potato, mashed, from fast food",survey_fndds,0.258,1.0,,,,,1 cup 250 g,,88.0,15.0,2.0,2.5
 candidate,seed:milkchoc,Milk chocolate,everyday food,sweets,169637,"Candies, milk chocolate coated coffee beans",sr_legacy,0.221,1.0,,,,,oz 28.4 g,,535.0,59.0,7.6,30.0
 candidate,seed:onion,Onion,everyday food,vegetables,2710010,"Peppers and onions, cooked, no added fat",survey_fndds,0.164,1.0,,,,,1 cup 140 g,,40.0,9.0,1.1,0.1
-candidate,seed:yogurt,Plain yogurt,everyday food,dairy,171284,"Yogurt, plain, whole milk",sr_legacy,0.032,1.0,,,,,cup (8 fl oz) 245 g,,61.0,4.7,3.5,3.3
+candidate,seed:yogurt,Plain yogurt,everyday food,dairy,171284,"Yogurt, plain, whole milk",sr_legacy,0.032,1.0,,yes,,,cup (8 fl oz) 245 g,,61.0,4.7,3.5,3.3
 candidate,seed:potato-boil,"Potato, boiled",everyday food,vegetables,168483,"Sweet potato, cooked, baked in skin, flesh, without salt",sr_legacy,0.123,1.0,,,,,cup 200 g; large 180 g; small 60 g,,87.0,20.0,1.9,0.1
 candidate,seed:pumpkin,"Pumpkin, roasted",everyday food,vegetables,170109,"Peppers, sweet, green, cooked, boiled, drained, with salt",sr_legacy,0.078,0.5,,,,,tbsp 11.6 g; pepper 73 g,,26.0,6.0,1.0,0.1
 candidate,seed:raspberry,Raspberries,everyday food,fruits,2709281,"Raspberries, raw",survey_fndds,0.404,1.0,,,,,1 cup 150 g,,52.0,12.0,1.2,0.7
