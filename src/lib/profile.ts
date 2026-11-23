@@ -371,10 +371,10 @@ export const DEFAULT_PROFILE: Profile = {
 export const ANON_PROFILE: Profile = { ...DEFAULT_PROFILE, condition: 't2', carbApproach: 'moderate', goal: 'maintain', onboarded: true }
 
 /**
- * An optional line of disclosure under the signed-out banner. Empty until the owner says yes; the text proposed for it is
- * "For adults. Not for mealtime insulin or pregnancy. Not medical advice." Changing it is this one string.
+ * The line of disclosure under the signed-out banner: a visitor is not asked about insulin or pregnancy before their first answers,
+ * so the screen says who the numbers are not for. The owner chose this text on 23 November 2026. Changing it is this one string.
  */
-export const ANON_DISCLOSURE = ''
+export const ANON_DISCLOSURE = 'For adults. Not for mealtime insulin or pregnancy. Not medical advice.'
 
 // ── imperial ↔ metric, for the screens (storage stays metric) ────────────
 // Whole inches first, then feet and the rest: rounding the remainder alone gave "5 ft 12 in" for 182.5 cm.

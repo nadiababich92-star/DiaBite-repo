@@ -663,7 +663,7 @@ recorrectMisses.forEach((m) => console.log(m))
   if (ANON_PROFILE.units !== 'imperial' || ANON_PROFILE.insulin !== 'none' || ANON_PROFILE.pregnantOrBreastfeeding || ANON_PROFILE.meds.length) bits.push('AN5 the neutral profile carries insulin, pregnancy, medicines or metric units')
   const t = calculateTargets(ANON_PROFILE)
   if (!(t.carbsG >= DAILY_CARBS_MIN && t.carbsG <= DAILY_CARBS_MAX) || !(t.glBudget > 0)) bits.push(`AN5 the neutral targets are out of bounds: carbs ${t.carbsG}, glycemic load ${t.glBudget}`)
-  if (ANON_DISCLOSURE !== '') bits.push('AN5 the disclosure line is set before the owner said yes')
+  if (ANON_DISCLOSURE !== 'For adults. Not for mealtime insulin or pregnancy. Not medical advice.') bits.push(`AN5 the disclosure line is not the one the owner chose (23 November): "${ANON_DISCLOSURE}"`)
   // The device id: random, stable within a page load, never a constant, a version-4 shape.
   const id = deviceId()
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) bits.push(`the device id is not a UUID: ${id}`)
