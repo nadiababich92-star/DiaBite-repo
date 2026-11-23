@@ -1,6 +1,6 @@
 {
  "meta": {
-  "count": 2094,
+  "count": 2103,
   "nutrition_basis": "per serving",
   "gi_method": "carbohydrate-weighted mean of ingredient GI (Wolever & Jenkins 1986); ingredient GI from International Tables of GI 2021 / University of Sydney",
   "nutrient_source": "USDA FoodData Central"
@@ -175153,6 +175153,79 @@
   },
   {
    "id": "DB-2061",
+   "name": "Turnover or hot pocket, pizza pocket, meat",
+   "category": "Sandwiches & Wraps",
+   "cuisine": "American",
+   "servings": 1,
+   "prep_min": 10,
+   "cook_min": 25,
+   "total_min": 35,
+   "photo_file": "turnover-or-hot-pocket-pizza-pocket-meat.jpg",
+   "photo_keywords": "Turnover or hot pocket, pizza pocket, meat, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "pie_crust",
+     "name": "Pie crust, ready-to-bake",
+     "grams": 10.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "white_bread",
+     "name": "White bread",
+     "grams": 30.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "pepperoni",
+     "name": "Pepperoni",
+     "grams": 5.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "water",
+     "name": "Water / ice",
+     "grams": 5.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "pasta_sauce",
+     "name": "Pasta sauce, marinara",
+     "grams": 15.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "mozzarella",
+     "name": "Mozzarella, part-skim",
+     "grams": 15.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"pie_crust\", \"name\": \"Pie crust, ready-to-bake\", \"grams\": 10.0, \"note\": \"\"}, {\"ingredient_id\": \"white_bread\", \"name\": \"White bread\", \"grams\": 30.0, \"note\": \"\"}, {\"ingredient_id\": \"pepperoni\", \"name\": \"Pepperoni\", \"grams\": 5.0, \"note\": \"\"}, {\"ingredient_id\": \"water\", \"name\": \"Water / ice\", \"grams\": 5.0, \"note\": \"\"}, {\"ingredient_id\": \"pasta_sauce\", \"name\": \"Pasta sauce, marinara\", \"grams\": 15.0, \"note\": \"\"}, {\"ingredient_id\": \"mozzarella\", \"name\": \"Mozzarella, part-skim\", \"grams\": 15.0, \"note\": \"\"}]",
+   "kcal": 202,
+   "protein_g": 8.2,
+   "fat_g": 8.9,
+   "carbs_g": 22.0,
+   "fiber_g": 1.3,
+   "net_carbs_g": 20.7,
+   "glycemic_index": 64,
+   "gi_category": "medium",
+   "glycemic_load": 13.3,
+   "gl_category": "medium",
+   "gi_note": "Medium-GI dish: keep to the stated portion and pair with the protein/fat in the recipe; GL per serving is the better guide.",
+   "gi_evidence": "68% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 68,
+   "diet_tags": "nut-free",
+   "instructions": "1. Lay out the white bread.\n2. Layer pie crust, pepperoni, pasta sauce and mozzarella on top.\n3. Close it, cut in half and serve.",
+   "steps_json": "[\"Lay out the white bread.\", \"Layer pie crust, pepperoni, pasta sauce and mozzarella on top.\", \"Close it, cut in half and serve.\"]",
+   "steps": [
+    "Lay out the white bread.",
+    "Layer pie crust, pepperoni, pasta sauce and mozzarella on top.",
+    "Close it, cut in half and serve."
+   ]
+  },
+  {
+   "id": "DB-2062",
    "name": "Bean salad, yellow and/or green string beans",
    "category": "Salad",
    "cuisine": "American",
@@ -175225,7 +175298,7 @@
    ]
   },
   {
-   "id": "DB-2062",
+   "id": "DB-2063",
    "name": "Black bean salad",
    "category": "Salad",
    "cuisine": "American",
@@ -175292,7 +175365,7 @@
    ]
   },
   {
-   "id": "DB-2063",
+   "id": "DB-2064",
    "name": "Macaroni or pasta salad with cheese",
    "category": "Salad",
    "cuisine": "American",
@@ -175377,7 +175450,7 @@
    ]
   },
   {
-   "id": "DB-2064",
+   "id": "DB-2065",
    "name": "Macaroni or pasta salad with chicken",
    "category": "Salad",
    "cuisine": "American",
@@ -175462,7 +175535,7 @@
    ]
   },
   {
-   "id": "DB-2065",
+   "id": "DB-2066",
    "name": "Macaroni or pasta salad with crab meat",
    "category": "Salad",
    "cuisine": "American",
@@ -175547,7 +175620,7 @@
    ]
   },
   {
-   "id": "DB-2066",
+   "id": "DB-2067",
    "name": "Macaroni or pasta salad with egg",
    "category": "Salad",
    "cuisine": "American",
@@ -175632,7 +175705,7 @@
    ]
   },
   {
-   "id": "DB-2067",
+   "id": "DB-2068",
    "name": "Macaroni or pasta salad with meat",
    "category": "Salad",
    "cuisine": "American",
@@ -175717,7 +175790,7 @@
    ]
   },
   {
-   "id": "DB-2068",
+   "id": "DB-2069",
    "name": "Macaroni or pasta salad with shrimp",
    "category": "Salad",
    "cuisine": "American",
@@ -175802,7 +175875,7 @@
    ]
   },
   {
-   "id": "DB-2069",
+   "id": "DB-2070",
    "name": "Macaroni or pasta salad with tuna",
    "category": "Salad",
    "cuisine": "American",
@@ -175887,7 +175960,7 @@
    ]
   },
   {
-   "id": "DB-2070",
+   "id": "DB-2071",
    "name": "Macaroni or pasta salad with tuna and egg",
    "category": "Salad",
    "cuisine": "American",
@@ -175978,7 +176051,7 @@
    ]
   },
   {
-   "id": "DB-2071",
+   "id": "DB-2072",
    "name": "Macaroni or pasta salad, made with mayonnaise",
    "category": "Salad",
    "cuisine": "American",
@@ -176057,7 +176130,7 @@
    ]
   },
   {
-   "id": "DB-2072",
+   "id": "DB-2073",
    "name": "Pea salad",
    "category": "Salad",
    "cuisine": "American",
@@ -176124,7 +176197,7 @@
    ]
   },
   {
-   "id": "DB-2073",
+   "id": "DB-2074",
    "name": "Pea salad with cheese",
    "category": "Salad",
    "cuisine": "American",
@@ -176197,7 +176270,7 @@
    ]
   },
   {
-   "id": "DB-2074",
+   "id": "DB-2075",
    "name": "Potato salad with egg, from restaurant",
    "category": "Salad",
    "cuisine": "American",
@@ -176288,7 +176361,7 @@
    ]
   },
   {
-   "id": "DB-2075",
+   "id": "DB-2076",
    "name": "Potato salad, German style",
    "category": "Salad",
    "cuisine": "American",
@@ -176373,7 +176446,7 @@
    ]
   },
   {
-   "id": "DB-2076",
+   "id": "DB-2077",
    "name": "Potato salad, from restaurant",
    "category": "Salad",
    "cuisine": "American",
@@ -176458,7 +176531,7 @@
    ]
   },
   {
-   "id": "DB-2077",
+   "id": "DB-2078",
    "name": "Rice dessert or salad with fruit",
    "category": "Salad",
    "cuisine": "American",
@@ -176531,7 +176604,7 @@
    ]
   },
   {
-   "id": "DB-2078",
+   "id": "DB-2079",
    "name": "Adobo, with rice",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -176604,7 +176677,7 @@
    ]
   },
   {
-   "id": "DB-2079",
+   "id": "DB-2080",
    "name": "Broccoli casserole with rice",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -176677,7 +176750,7 @@
    ]
   },
   {
-   "id": "DB-2080",
+   "id": "DB-2081",
    "name": "Dirty rice",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -176762,7 +176835,80 @@
    ]
   },
   {
-   "id": "DB-2081",
+   "id": "DB-2082",
+   "name": "Flavored rice and pasta mixture, reduced sodium",
+   "category": "Vegetarian & Vegan",
+   "cuisine": "American",
+   "servings": 5,
+   "prep_min": 10,
+   "cook_min": 25,
+   "total_min": 35,
+   "photo_file": "flavored-rice-and-pasta-mixture-reduced-sodium.jpg",
+   "photo_keywords": "Flavored rice and pasta mixture, reduced sodium, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "butter",
+     "name": "Butter",
+     "grams": 33.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "water",
+     "name": "Water / ice",
+     "grams": 711.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "spice",
+     "name": "Dried spices/herbs (generic)",
+     "grams": 4.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "dry_milk_nonfat",
+     "name": "Dry milk, nonfat",
+     "grams": 4.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "white_rice_raw",
+     "name": "White rice, long-grain, raw",
+     "grams": 90.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "pasta_dry",
+     "name": "Pasta, dry",
+     "grams": 90.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"butter\", \"name\": \"Butter\", \"grams\": 33.0, \"note\": \"\"}, {\"ingredient_id\": \"water\", \"name\": \"Water / ice\", \"grams\": 711.0, \"note\": \"\"}, {\"ingredient_id\": \"spice\", \"name\": \"Dried spices/herbs (generic)\", \"grams\": 4.0, \"note\": \"\"}, {\"ingredient_id\": \"dry_milk_nonfat\", \"name\": \"Dry milk, nonfat\", \"grams\": 4.0, \"note\": \"\"}, {\"ingredient_id\": \"white_rice_raw\", \"name\": \"White rice, long-grain, raw\", \"grams\": 90.0, \"note\": \"\"}, {\"ingredient_id\": \"pasta_dry\", \"name\": \"Pasta, dry\", \"grams\": 90.0, \"note\": \"\"}]",
+   "kcal": 185,
+   "protein_g": 4.0,
+   "fat_g": 5.8,
+   "carbs_g": 28.7,
+   "fiber_g": 1.0,
+   "net_carbs_g": 27.7,
+   "glycemic_index": 61,
+   "gi_category": "medium",
+   "glycemic_load": 16.9,
+   "gl_category": "medium",
+   "gi_note": "Medium-GI dish: keep to the stated portion and pair with the protein/fat in the recipe; GL per serving is the better guide.",
+   "gi_evidence": "53% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 53,
+   "diet_tags": "vegetarian, nut-free, meal-prep",
+   "instructions": "1. Prepare and measure the ingredients: dried spices/herbs (generic), dry milk, white rice and pasta.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 5 portions.",
+   "steps_json": "[\"Prepare and measure the ingredients: dried spices/herbs (generic), dry milk, white rice and pasta.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 5 portions.\"]",
+   "steps": [
+    "Prepare and measure the ingredients: dried spices/herbs (generic), dry milk, white rice and pasta.",
+    "Combine them and cook, stirring, until everything is hot and cooked through.",
+    "Serve in 5 portions."
+   ]
+  },
+  {
+   "id": "DB-2083",
    "name": "Potato, hash brown, from fresh",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -176811,7 +176957,7 @@
    ]
   },
   {
-   "id": "DB-2082",
+   "id": "DB-2084",
    "name": "Potato, hash brown, from fresh, with cheese",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -176866,7 +177012,74 @@
    ]
   },
   {
-   "id": "DB-2083",
+   "id": "DB-2085",
+   "name": "Ramen bowl, vegetarian",
+   "category": "Vegetarian & Vegan",
+   "cuisine": "American",
+   "servings": 1,
+   "prep_min": 10,
+   "cook_min": 25,
+   "total_min": 35,
+   "photo_file": "ramen-bowl-vegetarian.jpg",
+   "photo_keywords": "Ramen bowl, vegetarian, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "water",
+     "name": "Water / ice",
+     "grams": 61.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "white_pasta",
+     "name": "White pasta, cooked al dente",
+     "grams": 122.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "tofu_soft",
+     "name": "Tofu, soft",
+     "grams": 37.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "bok_choy",
+     "name": "Bok choy",
+     "grams": 12.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "green_onion",
+     "name": "Green onions (scallions)",
+     "grams": 12.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"water\", \"name\": \"Water / ice\", \"grams\": 61.0, \"note\": \"\"}, {\"ingredient_id\": \"white_pasta\", \"name\": \"White pasta, cooked al dente\", \"grams\": 122.0, \"note\": \"\"}, {\"ingredient_id\": \"tofu_soft\", \"name\": \"Tofu, soft\", \"grams\": 37.0, \"note\": \"\"}, {\"ingredient_id\": \"bok_choy\", \"name\": \"Bok choy\", \"grams\": 12.0, \"note\": \"\"}, {\"ingredient_id\": \"green_onion\", \"name\": \"Green onions (scallions)\", \"grams\": 12.0, \"note\": \"\"}]",
+   "kcal": 220,
+   "protein_g": 10.1,
+   "fat_g": 2.5,
+   "carbs_g": 39.0,
+   "fiber_g": 2.7,
+   "net_carbs_g": 36.3,
+   "glycemic_index": 48,
+   "gi_category": "low",
+   "glycemic_load": 17.4,
+   "gl_category": "medium",
+   "gi_note": "",
+   "gi_evidence": "97% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 97,
+   "diet_tags": "vegan, dairy-free, nut-free",
+   "instructions": "1. Prepare and measure the ingredients: white pasta, tofu, bok choy and green onions (scallions).\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in one portion.",
+   "steps_json": "[\"Prepare and measure the ingredients: white pasta, tofu, bok choy and green onions (scallions).\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in one portion.\"]",
+   "steps": [
+    "Prepare and measure the ingredients: white pasta, tofu, bok choy and green onions (scallions).",
+    "Combine them and cook, stirring, until everything is hot and cooked through.",
+    "Serve in one portion."
+   ]
+  },
+  {
+   "id": "DB-2086",
    "name": "Rice croquette",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -176939,7 +177152,7 @@
    ]
   },
   {
-   "id": "DB-2084",
+   "id": "DB-2087",
    "name": "Rice with raisins",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -177000,7 +177213,7 @@
    ]
   },
   {
-   "id": "DB-2085",
+   "id": "DB-2088",
    "name": "Rice, white, cooked, made with oil",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -177049,7 +177262,7 @@
    ]
   },
   {
-   "id": "DB-2086",
+   "id": "DB-2089",
    "name": "Stuffed tomato, with rice and meat",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -177122,11 +177335,188 @@
    ]
   },
   {
-   "id": "DB-2087",
+   "id": "DB-2090",
+   "name": "Rice with stewed beans, Puerto Rican style",
+   "category": "Soup & Stew",
+   "cuisine": "American",
+   "servings": 1,
+   "prep_min": 10,
+   "cook_min": 25,
+   "total_min": 35,
+   "photo_file": "rice-with-stewed-beans-puerto-rican-style.jpg",
+   "photo_keywords": "Rice with stewed beans, Puerto Rican style, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "olive_oil",
+     "name": "Extra-virgin olive oil",
+     "grams": 6.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "white_beans",
+     "name": "Cannellini beans, cooked",
+     "grams": 38.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "white_rice",
+     "name": "White rice, long-grain, cooked",
+     "grams": 120.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "water",
+     "name": "Water / ice",
+     "grams": 23.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"olive_oil\", \"name\": \"Extra-virgin olive oil\", \"grams\": 6.0, \"note\": \"\"}, {\"ingredient_id\": \"white_beans\", \"name\": \"Cannellini beans, cooked\", \"grams\": 38.0, \"note\": \"\"}, {\"ingredient_id\": \"white_rice\", \"name\": \"White rice, long-grain, cooked\", \"grams\": 120.0, \"note\": \"\"}, {\"ingredient_id\": \"water\", \"name\": \"Water / ice\", \"grams\": 23.0, \"note\": \"\"}]",
+   "kcal": 261,
+   "protein_g": 6.9,
+   "fat_g": 6.5,
+   "carbs_g": 43.1,
+   "fiber_g": 2.9,
+   "net_carbs_g": 40.2,
+   "glycemic_index": 69,
+   "gi_category": "medium",
+   "glycemic_load": 27.8,
+   "gl_category": "high",
+   "gi_note": "Medium-GI dish: keep to the stated portion and pair with the protein/fat in the recipe; GL per serving is the better guide.",
+   "gi_evidence": "100% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 100,
+   "diet_tags": "vegan, gluten-free, dairy-free, nut-free",
+   "instructions": "1. Prepare and measure the ingredients: cannellini beans and white rice.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in one portion.",
+   "steps_json": "[\"Prepare and measure the ingredients: cannellini beans and white rice.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in one portion.\"]",
+   "steps": [
+    "Prepare and measure the ingredients: cannellini beans and white rice.",
+    "Combine them and cook, stirring, until everything is hot and cooked through.",
+    "Serve in one portion."
+   ]
+  },
+  {
+   "id": "DB-2091",
+   "name": "Soup, sopa de fideo aguada",
+   "category": "Soup & Stew",
+   "cuisine": "American",
+   "servings": 1,
+   "prep_min": 10,
+   "cook_min": 25,
+   "total_min": 35,
+   "photo_file": "soup-sopa-de-fideo-aguada.jpg",
+   "photo_keywords": "Soup, sopa de fideo aguada, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
+     "grams": 12.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "crushed_tomatoes",
+     "name": "Crushed tomatoes, canned",
+     "grams": 37.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "white_pasta",
+     "name": "White pasta, cooked al dente",
+     "grams": 98.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "water",
+     "name": "Water / ice",
+     "grams": 98.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "olive_oil",
+     "name": "Extra-virgin olive oil",
+     "grams": 7.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 12.0, \"note\": \"\"}, {\"ingredient_id\": \"crushed_tomatoes\", \"name\": \"Crushed tomatoes, canned\", \"grams\": 37.0, \"note\": \"\"}, {\"ingredient_id\": \"white_pasta\", \"name\": \"White pasta, cooked al dente\", \"grams\": 98.0, \"note\": \"\"}, {\"ingredient_id\": \"water\", \"name\": \"Water / ice\", \"grams\": 98.0, \"note\": \"\"}, {\"ingredient_id\": \"olive_oil\", \"name\": \"Extra-virgin olive oil\", \"grams\": 7.0, \"note\": \"\"}]",
+   "kcal": 232,
+   "protein_g": 6.4,
+   "fat_g": 8.0,
+   "carbs_g": 33.8,
+   "fiber_g": 2.7,
+   "net_carbs_g": 31.1,
+   "glycemic_index": 47,
+   "gi_category": "low",
+   "glycemic_load": 14.6,
+   "gl_category": "medium",
+   "gi_note": "",
+   "gi_evidence": "91% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 91,
+   "diet_tags": "vegan, dairy-free, nut-free",
+   "instructions": "1. Prepare and measure the ingredients: yellow onion, crushed tomatoes and white pasta.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in one portion.",
+   "steps_json": "[\"Prepare and measure the ingredients: yellow onion, crushed tomatoes and white pasta.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in one portion.\"]",
+   "steps": [
+    "Prepare and measure the ingredients: yellow onion, crushed tomatoes and white pasta.",
+    "Combine them and cook, stirring, until everything is hot and cooked through.",
+    "Serve in one portion."
+   ]
+  },
+  {
+   "id": "DB-2092",
+   "name": "Barbecue chicken",
+   "category": "Poultry",
+   "cuisine": "American",
+   "servings": 1,
+   "prep_min": 10,
+   "cook_min": 25,
+   "total_min": 35,
+   "photo_file": "barbecue-chicken.jpg",
+   "photo_keywords": "Barbecue chicken, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "rotisserie_chicken",
+     "name": "Rotisserie chicken, skin removed",
+     "grams": 168.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "bbq_sauce",
+     "name": "Barbecue sauce",
+     "grams": 72.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"rotisserie_chicken\", \"name\": \"Rotisserie chicken, skin removed\", \"grams\": 168.0, \"note\": \"\"}, {\"ingredient_id\": \"bbq_sauce\", \"name\": \"Barbecue sauce\", \"grams\": 72.0, \"note\": \"\"}]",
+   "kcal": 393,
+   "protein_g": 39.2,
+   "fat_g": 12.2,
+   "carbs_g": 29.4,
+   "fiber_g": 0.6,
+   "net_carbs_g": 28.7,
+   "glycemic_index": 50,
+   "gi_category": "low",
+   "glycemic_load": 14.4,
+   "gl_category": "medium",
+   "gi_note": "",
+   "gi_evidence": "0% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 0,
+   "diet_tags": "gluten-free, dairy-free, nut-free, high-protein",
+   "instructions": "1. Prepare and measure the ingredients: rotisserie chicken.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in one portion.",
+   "steps_json": "[\"Prepare and measure the ingredients: rotisserie chicken.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in one portion.\"]",
+   "steps": [
+    "Prepare and measure the ingredients: rotisserie chicken.",
+    "Combine them and cook, stirring, until everything is hot and cooked through.",
+    "Serve in one portion."
+   ]
+  },
+  {
+   "id": "DB-2093",
    "name": "Chicken or turkey fricassee",
    "category": "Poultry",
    "cuisine": "American",
-   "servings": 6,
+   "servings": 7,
    "prep_min": 10,
    "cook_min": 25,
    "total_min": 35,
@@ -177153,6 +177543,12 @@
      "note": ""
     },
     {
+     "ingredient_id": "water",
+     "name": "Water / ice",
+     "grams": 118.0,
+     "note": ""
+    },
+    {
      "ingredient_id": "salt",
      "name": "Salt",
      "grams": 3.0,
@@ -177165,31 +177561,31 @@
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"chicken_fat\", \"name\": \"Chicken fat\", \"grams\": 68.0, \"note\": \"\"}, {\"ingredient_id\": \"chicken_broth\", \"name\": \"Chicken broth, low sodium\", \"grams\": 840.0, \"note\": \"\"}, {\"ingredient_id\": \"white_flour\", \"name\": \"White flour, all-purpose\", \"grams\": 62.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"rotisserie_chicken\", \"name\": \"Rotisserie chicken, skin removed\", \"grams\": 540.0, \"note\": \"\"}]",
-   "kcal": 293,
-   "protein_g": 23.2,
-   "fat_g": 18.0,
-   "carbs_g": 8.6,
-   "fiber_g": 0.3,
-   "net_carbs_g": 8.3,
+   "ingredients_json": "[{\"ingredient_id\": \"chicken_fat\", \"name\": \"Chicken fat\", \"grams\": 68.0, \"note\": \"\"}, {\"ingredient_id\": \"chicken_broth\", \"name\": \"Chicken broth, low sodium\", \"grams\": 840.0, \"note\": \"\"}, {\"ingredient_id\": \"white_flour\", \"name\": \"White flour, all-purpose\", \"grams\": 62.0, \"note\": \"\"}, {\"ingredient_id\": \"water\", \"name\": \"Water / ice\", \"grams\": 118.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"rotisserie_chicken\", \"name\": \"Rotisserie chicken, skin removed\", \"grams\": 540.0, \"note\": \"\"}]",
+   "kcal": 251,
+   "protein_g": 19.9,
+   "fat_g": 15.4,
+   "carbs_g": 7.4,
+   "fiber_g": 0.2,
+   "net_carbs_g": 7.1,
    "glycemic_index": 66,
    "gi_category": "medium",
-   "glycemic_load": 5.5,
+   "glycemic_load": 4.7,
    "gl_category": "low",
    "gi_note": "Medium-GI dish: keep to the stated portion and pair with the protein/fat in the recipe; GL per serving is the better guide.",
    "gi_evidence": "0% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
    "gi_measured_carb_share_pct": 0,
    "diet_tags": "dairy-free, nut-free, low-carb, meal-prep",
-   "instructions": "1. Prepare and measure the ingredients: chicken fat, chicken broth, white flour and rotisserie chicken.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 6 portions.",
-   "steps_json": "[\"Prepare and measure the ingredients: chicken fat, chicken broth, white flour and rotisserie chicken.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 6 portions.\"]",
+   "instructions": "1. Prepare and measure the ingredients: chicken fat, chicken broth, white flour and rotisserie chicken.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 7 portions.",
+   "steps_json": "[\"Prepare and measure the ingredients: chicken fat, chicken broth, white flour and rotisserie chicken.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 7 portions.\"]",
    "steps": [
     "Prepare and measure the ingredients: chicken fat, chicken broth, white flour and rotisserie chicken.",
     "Combine them and cook, stirring, until everything is hot and cooked through.",
-    "Serve in 6 portions."
+    "Serve in 7 portions."
    ]
   },
   {
-   "id": "DB-2088",
+   "id": "DB-2094",
    "name": "Chicken or turkey hash",
    "category": "Poultry",
    "cuisine": "American",
@@ -177256,11 +177652,96 @@
    ]
   },
   {
-   "id": "DB-2089",
+   "id": "DB-2095",
+   "name": "Chicken or turkey tetrazzini",
+   "category": "Poultry",
+   "cuisine": "American",
+   "servings": 11,
+   "prep_min": 10,
+   "cook_min": 25,
+   "total_min": 35,
+   "photo_file": "chicken-or-turkey-tetrazzini.jpg",
+   "photo_keywords": "Chicken or turkey tetrazzini, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "cream_of_mushroom_soup",
+     "name": "Cream of mushroom soup, condensed",
+     "grams": 606.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "bouillon_dry",
+     "name": "Bouillon, dry",
+     "grams": 7.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "butter",
+     "name": "Butter",
+     "grams": 56.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "cheddar",
+     "name": "Cheddar cheese",
+     "grams": 28.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "water",
+     "name": "Water / ice",
+     "grams": 533.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "rotisserie_chicken",
+     "name": "Rotisserie chicken, skin removed",
+     "grams": 992.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "salt",
+     "name": "Salt",
+     "grams": 6.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "white_pasta",
+     "name": "White pasta, cooked al dente",
+     "grams": 454.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"cream_of_mushroom_soup\", \"name\": \"Cream of mushroom soup, condensed\", \"grams\": 606.0, \"note\": \"\"}, {\"ingredient_id\": \"bouillon_dry\", \"name\": \"Bouillon, dry\", \"grams\": 7.0, \"note\": \"\"}, {\"ingredient_id\": \"butter\", \"name\": \"Butter\", \"grams\": 56.0, \"note\": \"\"}, {\"ingredient_id\": \"cheddar\", \"name\": \"Cheddar cheese\", \"grams\": 28.0, \"note\": \"\"}, {\"ingredient_id\": \"water\", \"name\": \"Water / ice\", \"grams\": 533.0, \"note\": \"\"}, {\"ingredient_id\": \"rotisserie_chicken\", \"name\": \"Rotisserie chicken, skin removed\", \"grams\": 992.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 6.0, \"note\": \"\"}, {\"ingredient_id\": \"white_pasta\", \"name\": \"White pasta, cooked al dente\", \"grams\": 454.0, \"note\": \"\"}]",
+   "kcal": 302,
+   "protein_g": 24.6,
+   "fat_g": 14.7,
+   "carbs_g": 16.9,
+   "fiber_g": 1.1,
+   "net_carbs_g": 15.7,
+   "glycemic_index": 48,
+   "gi_category": "low",
+   "glycemic_load": 7.6,
+   "gl_category": "low",
+   "gi_note": "",
+   "gi_evidence": "76% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 76,
+   "diet_tags": "nut-free, meal-prep",
+   "instructions": "1. Prepare and measure the ingredients: cream of mushroom soup, bouillon, cheddar cheese, rotisserie chicken and white pasta.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 11 portions.",
+   "steps_json": "[\"Prepare and measure the ingredients: cream of mushroom soup, bouillon, cheddar cheese, rotisserie chicken and white pasta.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 11 portions.\"]",
+   "steps": [
+    "Prepare and measure the ingredients: cream of mushroom soup, bouillon, cheddar cheese, rotisserie chicken and white pasta.",
+    "Combine them and cook, stirring, until everything is hot and cooked through.",
+    "Serve in 11 portions."
+   ]
+  },
+  {
+   "id": "DB-2096",
    "name": "Chicken or turkey with stuffing",
    "category": "Poultry",
    "cuisine": "American",
-   "servings": 6,
+   "servings": 7,
    "prep_min": 10,
    "cook_min": 25,
    "total_min": 35,
@@ -177268,6 +177749,12 @@
    "photo_keywords": "Chicken or turkey with stuffing, healthy food photography, plated, natural light",
    "photo_url": "",
    "ingredients": [
+    {
+     "ingredient_id": "water",
+     "name": "Water / ice",
+     "grams": 237.0,
+     "note": ""
+    },
     {
      "ingredient_id": "stuffing_mix",
      "name": "Bread stuffing, dry mix",
@@ -177281,35 +177768,35 @@
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"stuffing_mix\", \"name\": \"Bread stuffing, dry mix\", \"grams\": 227.0, \"note\": \"\"}, {\"ingredient_id\": \"rotisserie_chicken\", \"name\": \"Rotisserie chicken, skin removed\", \"grams\": 1008.0, \"note\": \"\"}]",
-   "kcal": 415,
-   "protein_g": 42.8,
-   "fat_g": 13.0,
-   "carbs_g": 28.8,
-   "fiber_g": 1.2,
-   "net_carbs_g": 27.6,
+   "ingredients_json": "[{\"ingredient_id\": \"water\", \"name\": \"Water / ice\", \"grams\": 237.0, \"note\": \"\"}, {\"ingredient_id\": \"stuffing_mix\", \"name\": \"Bread stuffing, dry mix\", \"grams\": 227.0, \"note\": \"\"}, {\"ingredient_id\": \"rotisserie_chicken\", \"name\": \"Rotisserie chicken, skin removed\", \"grams\": 1008.0, \"note\": \"\"}]",
+   "kcal": 356,
+   "protein_g": 36.7,
+   "fat_g": 11.2,
+   "carbs_g": 24.7,
+   "fiber_g": 1.0,
+   "net_carbs_g": 23.7,
    "glycemic_index": 75,
    "gi_category": "high",
-   "glycemic_load": 20.7,
-   "gl_category": "high",
+   "glycemic_load": 17.8,
+   "gl_category": "medium",
    "gi_note": "Medium-GI dish: keep to the stated portion and pair with the protein/fat in the recipe; GL per serving is the better guide.",
    "gi_evidence": "0% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
    "gi_measured_carb_share_pct": 0,
    "diet_tags": "dairy-free, nut-free, high-protein, meal-prep",
-   "instructions": "1. Prepare and measure the ingredients: bread stuffing and rotisserie chicken.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 6 portions.",
-   "steps_json": "[\"Prepare and measure the ingredients: bread stuffing and rotisserie chicken.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 6 portions.\"]",
+   "instructions": "1. Prepare and measure the ingredients: bread stuffing and rotisserie chicken.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 7 portions.",
+   "steps_json": "[\"Prepare and measure the ingredients: bread stuffing and rotisserie chicken.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 7 portions.\"]",
    "steps": [
     "Prepare and measure the ingredients: bread stuffing and rotisserie chicken.",
     "Combine them and cook, stirring, until everything is hot and cooked through.",
-    "Serve in 6 portions."
+    "Serve in 7 portions."
    ]
   },
   {
-   "id": "DB-2090",
+   "id": "DB-2097",
    "name": "Beef stroganoff with noodles",
    "category": "Beef, Pork & Lamb",
    "cuisine": "American",
-   "servings": 6,
+   "servings": 7,
    "prep_min": 10,
    "cook_min": 25,
    "total_min": 35,
@@ -177317,6 +177804,12 @@
    "photo_keywords": "Beef stroganoff with noodles, healthy food photography, plated, natural light",
    "photo_url": "",
    "ingredients": [
+    {
+     "ingredient_id": "water",
+     "name": "Water / ice",
+     "grams": 237.0,
+     "note": ""
+    },
     {
      "ingredient_id": "mushrooms",
      "name": "Mushrooms (cremini/white)",
@@ -177372,31 +177865,31 @@
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"mushrooms\", \"name\": \"Mushrooms (cremini/white)\", \"grams\": 132.0, \"note\": \"\"}, {\"ingredient_id\": \"white_flour\", \"name\": \"White flour, all-purpose\", \"grams\": 31.0, \"note\": \"\"}, {\"ingredient_id\": \"cream_of_mushroom_soup\", \"name\": \"Cream of mushroom soup, condensed\", \"grams\": 303.0, \"note\": \"\"}, {\"ingredient_id\": \"beef_sirloin\", \"name\": \"Beef sirloin, trimmed\", \"grams\": 454.0, \"note\": \"\"}, {\"ingredient_id\": \"sour_cream\", \"name\": \"Sour cream\", \"grams\": 240.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 6.0, \"note\": \"\"}, {\"ingredient_id\": \"egg_noodles\", \"name\": \"Egg noodles, cooked\", \"grams\": 320.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 80.0, \"note\": \"\"}, {\"ingredient_id\": \"olive_oil\", \"name\": \"Extra-virgin olive oil\", \"grams\": 28.0, \"note\": \"\"}]",
-   "kcal": 361,
-   "protein_g": 22.1,
-   "fat_g": 19.6,
-   "carbs_g": 24.5,
-   "fiber_g": 1.6,
-   "net_carbs_g": 22.9,
+   "ingredients_json": "[{\"ingredient_id\": \"water\", \"name\": \"Water / ice\", \"grams\": 237.0, \"note\": \"\"}, {\"ingredient_id\": \"mushrooms\", \"name\": \"Mushrooms (cremini/white)\", \"grams\": 132.0, \"note\": \"\"}, {\"ingredient_id\": \"white_flour\", \"name\": \"White flour, all-purpose\", \"grams\": 31.0, \"note\": \"\"}, {\"ingredient_id\": \"cream_of_mushroom_soup\", \"name\": \"Cream of mushroom soup, condensed\", \"grams\": 303.0, \"note\": \"\"}, {\"ingredient_id\": \"beef_sirloin\", \"name\": \"Beef sirloin, trimmed\", \"grams\": 454.0, \"note\": \"\"}, {\"ingredient_id\": \"sour_cream\", \"name\": \"Sour cream\", \"grams\": 240.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 6.0, \"note\": \"\"}, {\"ingredient_id\": \"egg_noodles\", \"name\": \"Egg noodles, cooked\", \"grams\": 320.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 80.0, \"note\": \"\"}, {\"ingredient_id\": \"olive_oil\", \"name\": \"Extra-virgin olive oil\", \"grams\": 28.0, \"note\": \"\"}]",
+   "kcal": 309,
+   "protein_g": 18.9,
+   "fat_g": 16.8,
+   "carbs_g": 21.0,
+   "fiber_g": 1.4,
+   "net_carbs_g": 19.7,
    "glycemic_index": 53,
    "gi_category": "low",
-   "glycemic_load": 12.2,
+   "glycemic_load": 10.4,
    "gl_category": "medium",
    "gi_note": "",
    "gi_evidence": "55% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
    "gi_measured_carb_share_pct": 55,
    "diet_tags": "nut-free, meal-prep",
-   "instructions": "1. Prepare and measure the ingredients: mushrooms (cremini/white), white flour, cream of mushroom soup, beef sirloin, sour cream and egg noodles.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 6 portions.",
-   "steps_json": "[\"Prepare and measure the ingredients: mushrooms (cremini/white), white flour, cream of mushroom soup, beef sirloin, sour cream and egg noodles.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 6 portions.\"]",
+   "instructions": "1. Prepare and measure the ingredients: mushrooms (cremini/white), white flour, cream of mushroom soup, beef sirloin, sour cream and egg noodles.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 7 portions.",
+   "steps_json": "[\"Prepare and measure the ingredients: mushrooms (cremini/white), white flour, cream of mushroom soup, beef sirloin, sour cream and egg noodles.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 7 portions.\"]",
    "steps": [
     "Prepare and measure the ingredients: mushrooms (cremini/white), white flour, cream of mushroom soup, beef sirloin, sour cream and egg noodles.",
     "Combine them and cook, stirring, until everything is hot and cooked through.",
-    "Serve in 6 portions."
+    "Serve in 7 portions."
    ]
   },
   {
-   "id": "DB-2091",
+   "id": "DB-2098",
    "name": "Beef with spaetzle or rice, vegetable, frozen meal",
    "category": "Beef, Pork & Lamb",
    "cuisine": "American",
@@ -177439,6 +177932,12 @@
      "note": ""
     },
     {
+     "ingredient_id": "water",
+     "name": "Water / ice",
+     "grams": 22.0,
+     "note": ""
+    },
+    {
      "ingredient_id": "white_rice",
      "name": "White rice, long-grain, cooked",
      "grams": 80.0,
@@ -177451,7 +177950,7 @@
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"water_chestnuts\", \"name\": \"Water chestnuts, canned\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"jalapeno_raw\", \"name\": \"Jalapeno pepper, raw\", \"grams\": 21.0, \"note\": \"\"}, {\"ingredient_id\": \"bell_pepper\", \"name\": \"Bell pepper\", \"grams\": 28.0, \"note\": \"\"}, {\"ingredient_id\": \"olive_oil\", \"name\": \"Extra-virgin olive oil\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"beef_broth\", \"name\": \"Beef broth, low sodium\", \"grams\": 29.0, \"note\": \"\"}, {\"ingredient_id\": \"white_rice\", \"name\": \"White rice, long-grain, cooked\", \"grams\": 80.0, \"note\": \"\"}, {\"ingredient_id\": \"beef_round_roast\", \"name\": \"Beef round, cooked, with fat\", \"grams\": 50.0, \"note\": \"\"}]",
+   "ingredients_json": "[{\"ingredient_id\": \"water_chestnuts\", \"name\": \"Water chestnuts, canned\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"jalapeno_raw\", \"name\": \"Jalapeno pepper, raw\", \"grams\": 21.0, \"note\": \"\"}, {\"ingredient_id\": \"bell_pepper\", \"name\": \"Bell pepper\", \"grams\": 28.0, \"note\": \"\"}, {\"ingredient_id\": \"olive_oil\", \"name\": \"Extra-virgin olive oil\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"beef_broth\", \"name\": \"Beef broth, low sodium\", \"grams\": 29.0, \"note\": \"\"}, {\"ingredient_id\": \"water\", \"name\": \"Water / ice\", \"grams\": 22.0, \"note\": \"\"}, {\"ingredient_id\": \"white_rice\", \"name\": \"White rice, long-grain, cooked\", \"grams\": 80.0, \"note\": \"\"}, {\"ingredient_id\": \"beef_round_roast\", \"name\": \"Beef round, cooked, with fat\", \"grams\": 50.0, \"note\": \"\"}]",
    "kcal": 266,
    "protein_g": 16.8,
    "fat_g": 10.0,
@@ -177475,7 +177974,7 @@
    ]
   },
   {
-   "id": "DB-2092",
+   "id": "DB-2099",
    "name": "Meat loaf made with beef",
    "category": "Beef, Pork & Lamb",
    "cuisine": "American",
@@ -177548,7 +178047,50 @@
    ]
   },
   {
-   "id": "DB-2093",
+   "id": "DB-2100",
+   "name": "Pork and beans",
+   "category": "Beef, Pork & Lamb",
+   "cuisine": "American",
+   "servings": 1,
+   "prep_min": 10,
+   "cook_min": 25,
+   "total_min": 35,
+   "photo_file": "pork-and-beans.jpg",
+   "photo_keywords": "Pork and beans, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "baked_beans",
+     "name": "Baked beans, canned, with pork",
+     "grams": 260.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"baked_beans\", \"name\": \"Baked beans, canned, with pork\", \"grams\": 260.0, \"note\": \"\"}]",
+   "kcal": 273,
+   "protein_g": 11.7,
+   "fat_g": 2.3,
+   "carbs_g": 56.2,
+   "fiber_g": 11.4,
+   "net_carbs_g": 44.7,
+   "glycemic_index": 47,
+   "gi_category": "low",
+   "glycemic_load": 21.0,
+   "gl_category": "high",
+   "gi_note": "",
+   "gi_evidence": "100% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 100,
+   "diet_tags": "vegan, gluten-free, dairy-free, nut-free, high-fiber",
+   "instructions": "1. Prepare and measure the ingredients: baked beans.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in one portion.",
+   "steps_json": "[\"Prepare and measure the ingredients: baked beans.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in one portion.\"]",
+   "steps": [
+    "Prepare and measure the ingredients: baked beans.",
+    "Combine them and cook, stirring, until everything is hot and cooked through.",
+    "Serve in one portion."
+   ]
+  },
+  {
+   "id": "DB-2101",
    "name": "Antipasto with ham, fish, cheese, vegetables",
    "category": "Seafood",
    "cuisine": "American",
@@ -177633,7 +178175,68 @@
    ]
   },
   {
-   "id": "DB-2094",
+   "id": "DB-2102",
+   "name": "Gefilte fish",
+   "category": "Seafood",
+   "cuisine": "American",
+   "servings": 1,
+   "prep_min": 10,
+   "cook_min": 25,
+   "total_min": 35,
+   "photo_file": "gefilte-fish.jpg",
+   "photo_keywords": "Gefilte fish, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "water",
+     "name": "Water / ice",
+     "grams": 48.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "cod",
+     "name": "Cod fillet",
+     "grams": 150.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
+     "grams": 25.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "white_flour",
+     "name": "White flour, all-purpose",
+     "grams": 25.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"water\", \"name\": \"Water / ice\", \"grams\": 48.0, \"note\": \"\"}, {\"ingredient_id\": \"cod\", \"name\": \"Cod fillet\", \"grams\": 150.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 25.0, \"note\": \"\"}, {\"ingredient_id\": \"white_flour\", \"name\": \"White flour, all-purpose\", \"grams\": 25.0, \"note\": \"\"}]",
+   "kcal": 224,
+   "protein_g": 29.8,
+   "fat_g": 1.3,
+   "carbs_g": 21.4,
+   "fiber_g": 1.1,
+   "net_carbs_g": 20.3,
+   "glycemic_index": 67,
+   "gi_category": "medium",
+   "glycemic_load": 13.6,
+   "gl_category": "medium",
+   "gi_note": "Medium-GI dish: keep to the stated portion and pair with the protein/fat in the recipe; GL per serving is the better guide.",
+   "gi_evidence": "0% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 0,
+   "diet_tags": "pescatarian, dairy-free, nut-free, high-protein",
+   "instructions": "1. Prepare and measure the ingredients: cod fillet, yellow onion and white flour.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in one portion.",
+   "steps_json": "[\"Prepare and measure the ingredients: cod fillet, yellow onion and white flour.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in one portion.\"]",
+   "steps": [
+    "Prepare and measure the ingredients: cod fillet, yellow onion and white flour.",
+    "Combine them and cook, stirring, until everything is hot and cooked through.",
+    "Serve in one portion."
+   ]
+  },
+  {
+   "id": "DB-2103",
    "name": "Shrimp creole, with rice",
    "category": "Seafood",
    "cuisine": "American",

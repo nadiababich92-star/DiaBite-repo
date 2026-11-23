@@ -71,7 +71,9 @@ def main():
         ing = collections.OrderedDict(); notes = []; why = None; subs = 0.0
         for row in rows[d['fdc_id']]:
             g = float(row['gram_weight'] or 0); code = row['sr_code'].lstrip('0'); fid = ndb.get(code, '')
-            if g < 3 or code == '14411' or fid == '174' or code == '14429': continue
+            if g < 3: continue
+            if code in ('14411', '14429'):   # tap water: the water a dish takes up in cooking is part of its weight and of its energy density
+                ing['water'] = ing.get('water', 0) + g; continue
             key = None
             forced = next((v for k0, v in FORCE.items() if (srdesc.get(fid, '') or row['sr_description']).startswith(k0)), None)
             if forced: key = forced

@@ -56,6 +56,12 @@ keep, left = [], []
 for r in recipes:
     f = foods[r['fdc_id']]; p = f['per100']; M = portion[r['fdc_id']]['grams']
     tot = sum(g for _, g in r['ing'])
+    # USDA lists some recipes per 100 g of the cooked dish (raw rice, dry pasta and the cooking water add up to 100 g): with the water counted, a list of
+    # 95 to 108 g for a portion that weighs more is such a recipe, and the portion is that list times portion / 100. Found 21 November 2026 from the dishes
+    # whose weights came to 100 g exactly (barbecue chicken, ramen bowls, soups); a list that weighs far less than a portion without reaching 100 g is not.
+    if 95 <= tot <= 108 and M >= tot * 1.25:
+        r = {**r, 'ing': [[k, round(g * M / 100)] for k, g in r['ing']]}
+        tot = sum(g for _, g in r['ing'])
     k = sum(ING[a][1] * g / 100 for a, g in r['ing']); c = sum((ING[a][4] - ING[a][5]) * g / 100 for a, g in r['ing'])
     dk, dc = k / tot * 100, c / tot * 100                      # per 100 g of what is listed
     uk, uc = p['kcal'], p['carbs'] - p['fiber']                # USDA's own, per 100 g of the dish
