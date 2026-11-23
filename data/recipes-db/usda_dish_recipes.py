@@ -37,6 +37,15 @@ SAME = {
  'usda_fish_anchovy': 'anchovies', 'usda_fish_cod': 'cod', 'usda_soup_chicken_broth': 'chicken_broth', 'usda_soup_beef_broth_or_bouillon_canned': 'beef_broth',
  'usda_sugars_powdered': 'sugar_white', 'usda_cabbage_chinese_pak_choi': 'bok_choy', 'usda_waterchestnuts_chinese': 'water_chestnuts',
 }
+# The name matcher below chose wrongly for these (found 21 November 2026: enriched pasta matched whole wheat pasta, onions matched scallions); a USDA
+# ingredient whose description starts with one of these is this ingredient of ours, whatever the matcher says.
+FORCE = {
+ 'Pasta, cooked, enriched': 'white_pasta', 'Onions, raw': 'onion', 'Onions, cooked': 'onion', 'Onions, spring': 'green_onion',
+ 'Peppers, bell, red, raw': 'bell_pepper', 'Peppers, bell, green': 'bell_pepper', 'Peppers, sweet, green, cooked': 'bell_pepper',
+ 'Pork, cured, ham': 'ham', 'Pork, fresh, shoulder': 'pork_shoulder', 'Pork, fresh, loin': 'pork_tenderloin',
+ 'Tomato products, canned, sauce': 'tomato_sauce', 'Tomatoes, red, ripe, canned': 'diced_tomatoes',
+ 'Pickles, cucumber, dill': 'dill_pickle', 'Tomato products, canned, puree': 'crushed_tomatoes', 'Lentils, mature seeds': 'lentils',
+}
 NID = {'1008': 'kcal', '1003': 'protein', '1004': 'fat', '1005': 'carbs', '1079': 'fiber'}
 STOP = {'raw','cooked','with','and','without','added','salt','the','or','of','nfs','ns','as','to','type','includes','foods','for','usda','s','food','distribution','program','boiled','drained','enriched','regular','prepackaged','sliced','canned','whole','fresh','year','round','average','ingredient','ingredients','recipes','use','sandwich','sandwiches','on','in','a'}
 words = lambda s: set(re.findall(r'[a-z]+', s.lower())) - STOP
@@ -57,13 +66,16 @@ def main():
     for r in csv.DictReader(open(sv + '/input_food.csv')): rows[r['fdc_id']].append(r)
     dishes = json.load(open(os.path.join(HERE, 'drafts', 'usda-dishes-approved-list.json')))
     new, recipes, left = {}, [], []
+    mapping = {}   # what each USDA ingredient resolved to, written for review (drafts/usda-ingredient-mapping.json)
     for d in dishes:
         ing = collections.OrderedDict(); notes = []; why = None; subs = 0.0
         for row in rows[d['fdc_id']]:
             g = float(row['gram_weight'] or 0); code = row['sr_code'].lstrip('0'); fid = ndb.get(code, '')
             if g < 3 or code == '14411' or fid == '174' or code == '14429': continue
             key = None
-            if fid in link: key = link[fid]
+            forced = next((v for k0, v in FORCE.items() if (srdesc.get(fid, '') or row['sr_description']).startswith(k0)), None)
+            if forced: key = forced
+            elif fid in link: key = link[fid]
             elif fid and srnut.get(fid, {}).get('kcal') is not None:
                 p = srnut[fid]; a = words(srdesc[fid])
                 best = None
@@ -82,6 +94,7 @@ def main():
             else:
                 why = f'no nutrient data for "{row["sr_description"]}"'; break
             key = SAME.get(key, key)
+            mapping[row['sr_description'] or code] = key
             ing[key] = ing.get(key, 0) + g
         if why is None and subs > MAX_SUB_CARBS_G: why = f'the substituted ingredients would add {subs:.1f} g carbohydrate'
         if why: left.append((d['name'], why)); continue
@@ -97,6 +110,7 @@ def main():
             k = final.get(k, k); merged[k] = merged.get(k, 0) + g
         r['ing'] = [[k, g] for k, g in merged.items()]
     json.dump(recipes, open(os.path.join(HERE, 'drafts', 'usda-dishes-recipes.json'), 'w'), indent=1)
+    json.dump(mapping, open(os.path.join(HERE, 'drafts', 'usda-ingredient-mapping.json'), 'w'), indent=1, ensure_ascii=False)
     json.dump(new, open(os.path.join(HERE, 'drafts', 'usda-new-ingredients.json'), 'w'), indent=1)
     print(f'{len(recipes)} dishes buildable, {len(left)} left out, {len(new)} new ingredients')
     print(collections.Counter(w.split(' for ')[0][:40] for _, w in left).most_common(8))

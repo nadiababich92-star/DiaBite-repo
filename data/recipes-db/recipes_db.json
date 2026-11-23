@@ -1,6 +1,6 @@
 {
  "meta": {
-  "count": 2085,
+  "count": 2094,
   "nutrition_basis": "per serving",
   "gi_method": "carbohydrate-weighted mean of ingredient GI (Wolever & Jenkins 1986); ingredient GI from International Tables of GI 2021 / University of Sydney",
   "nutrient_source": "USDA FoodData Central"
@@ -175183,8 +175183,8 @@
      "note": ""
     },
     {
-     "ingredient_id": "green_onion",
-     "name": "Green onions (scallions)",
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
      "grams": 80.0,
      "note": ""
     },
@@ -175201,25 +175201,25 @@
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"italian_dressing\", \"name\": \"Italian dressing\", \"grams\": 235.0, \"note\": \"\"}, {\"ingredient_id\": \"bell_pepper\", \"name\": \"Bell pepper\", \"grams\": 74.0, \"note\": \"\"}, {\"ingredient_id\": \"kidney_beans\", \"name\": \"Kidney beans, cooked\", \"grams\": 354.0, \"note\": \"\"}, {\"ingredient_id\": \"green_onion\", \"name\": \"Green onions (scallions)\", \"grams\": 80.0, \"note\": \"\"}, {\"ingredient_id\": \"green_beans\", \"name\": \"Green beans\", \"grams\": 153.0, \"note\": \"\"}, {\"ingredient_id\": \"green_beans_frozen\", \"name\": \"Green beans, frozen, cooked\", \"grams\": 153.0, \"note\": \"\"}]",
-   "kcal": 165,
-   "protein_g": 5.6,
+   "ingredients_json": "[{\"ingredient_id\": \"italian_dressing\", \"name\": \"Italian dressing\", \"grams\": 235.0, \"note\": \"\"}, {\"ingredient_id\": \"bell_pepper\", \"name\": \"Bell pepper\", \"grams\": 74.0, \"note\": \"\"}, {\"ingredient_id\": \"kidney_beans\", \"name\": \"Kidney beans, cooked\", \"grams\": 354.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 80.0, \"note\": \"\"}, {\"ingredient_id\": \"green_beans\", \"name\": \"Green beans\", \"grams\": 153.0, \"note\": \"\"}, {\"ingredient_id\": \"green_beans_frozen\", \"name\": \"Green beans, frozen, cooked\", \"grams\": 153.0, \"note\": \"\"}]",
+   "kcal": 166,
+   "protein_g": 5.5,
    "fat_g": 7.5,
-   "carbs_g": 20.0,
-   "fiber_g": 5.0,
-   "net_carbs_g": 15.0,
+   "carbs_g": 20.2,
+   "fiber_g": 4.9,
+   "net_carbs_g": 15.3,
    "glycemic_index": 25,
    "gi_category": "low",
    "glycemic_load": 3.8,
    "gl_category": "low",
    "gi_note": "",
-   "gi_evidence": "55% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
-   "gi_measured_carb_share_pct": 55,
+   "gi_evidence": "54% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 54,
    "diet_tags": "vegan, gluten-free, dairy-free, nut-free, meal-prep",
-   "instructions": "1. Prepare bell pepper, kidney beans, green onions (scallions) and green beans.\n2. Mix everything with italian dressing in a large bowl.\n3. Chill before serving and divide into 7 portions.",
-   "steps_json": "[\"Prepare bell pepper, kidney beans, green onions (scallions) and green beans.\", \"Mix everything with italian dressing in a large bowl.\", \"Chill before serving and divide into 7 portions.\"]",
+   "instructions": "1. Prepare bell pepper, kidney beans, yellow onion and green beans.\n2. Mix everything with italian dressing in a large bowl.\n3. Chill before serving and divide into 7 portions.",
+   "steps_json": "[\"Prepare bell pepper, kidney beans, yellow onion and green beans.\", \"Mix everything with italian dressing in a large bowl.\", \"Chill before serving and divide into 7 portions.\"]",
    "steps": [
-    "Prepare bell pepper, kidney beans, green onions (scallions) and green beans.",
+    "Prepare bell pepper, kidney beans, yellow onion and green beans.",
     "Mix everything with italian dressing in a large bowl.",
     "Chill before serving and divide into 7 portions."
    ]
@@ -175256,8 +175256,8 @@
      "note": ""
     },
     {
-     "ingredient_id": "green_onion",
-     "name": "Green onions (scallions)",
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
      "grams": 160.0,
      "note": ""
     },
@@ -175268,31 +175268,371 @@
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"tomato\", \"name\": \"Tomato\", \"grams\": 227.0, \"note\": \"\"}, {\"ingredient_id\": \"black_beans_canned\", \"name\": \"Black beans, canned\", \"grams\": 555.0, \"note\": \"\"}, {\"ingredient_id\": \"corn\", \"name\": \"Sweet corn kernels\", \"grams\": 248.0, \"note\": \"\"}, {\"ingredient_id\": \"green_onion\", \"name\": \"Green onions (scallions)\", \"grams\": 160.0, \"note\": \"\"}, {\"ingredient_id\": \"italian_dressing\", \"name\": \"Italian dressing\", \"grams\": 235.0, \"note\": \"\"}]",
-   "kcal": 229,
-   "protein_g": 7.9,
+   "ingredients_json": "[{\"ingredient_id\": \"tomato\", \"name\": \"Tomato\", \"grams\": 227.0, \"note\": \"\"}, {\"ingredient_id\": \"black_beans_canned\", \"name\": \"Black beans, canned\", \"grams\": 555.0, \"note\": \"\"}, {\"ingredient_id\": \"corn\", \"name\": \"Sweet corn kernels\", \"grams\": 248.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 160.0, \"note\": \"\"}, {\"ingredient_id\": \"italian_dressing\", \"name\": \"Italian dressing\", \"grams\": 235.0, \"note\": \"\"}]",
+   "kcal": 231,
+   "protein_g": 7.7,
    "fat_g": 9.2,
-   "carbs_g": 31.4,
-   "fiber_g": 8.6,
-   "net_carbs_g": 22.7,
-   "glycemic_index": 32,
+   "carbs_g": 31.9,
+   "fiber_g": 8.4,
+   "net_carbs_g": 23.5,
+   "glycemic_index": 31,
    "gi_category": "low",
    "glycemic_load": 7.3,
    "gl_category": "low",
    "gi_note": "",
-   "gi_evidence": "69% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
-   "gi_measured_carb_share_pct": 69,
+   "gi_evidence": "67% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 67,
    "diet_tags": "vegan, gluten-free, dairy-free, nut-free, high-fiber, meal-prep",
-   "instructions": "1. Prepare tomato, black beans, sweet corn kernels and green onions (scallions).\n2. Mix everything with italian dressing in a large bowl.\n3. Chill before serving and divide into 6 portions.",
-   "steps_json": "[\"Prepare tomato, black beans, sweet corn kernels and green onions (scallions).\", \"Mix everything with italian dressing in a large bowl.\", \"Chill before serving and divide into 6 portions.\"]",
+   "instructions": "1. Prepare tomato, black beans, sweet corn kernels and yellow onion.\n2. Mix everything with italian dressing in a large bowl.\n3. Chill before serving and divide into 6 portions.",
+   "steps_json": "[\"Prepare tomato, black beans, sweet corn kernels and yellow onion.\", \"Mix everything with italian dressing in a large bowl.\", \"Chill before serving and divide into 6 portions.\"]",
    "steps": [
-    "Prepare tomato, black beans, sweet corn kernels and green onions (scallions).",
+    "Prepare tomato, black beans, sweet corn kernels and yellow onion.",
     "Mix everything with italian dressing in a large bowl.",
     "Chill before serving and divide into 6 portions."
    ]
   },
   {
    "id": "DB-2063",
+   "name": "Macaroni or pasta salad with cheese",
+   "category": "Salad",
+   "cuisine": "American",
+   "servings": 9,
+   "prep_min": 15,
+   "cook_min": 10,
+   "total_min": 25,
+   "photo_file": "macaroni-or-pasta-salad-with-cheese.jpg",
+   "photo_keywords": "Macaroni or pasta salad with cheese, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "celery",
+     "name": "Celery",
+     "grams": 40.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "cheddar",
+     "name": "Cheddar cheese",
+     "grams": 226.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "salt",
+     "name": "Salt",
+     "grams": 3.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
+     "grams": 18.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "mayo",
+     "name": "Mayonnaise (avocado oil)",
+     "grams": 220.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "lemon_juice",
+     "name": "Lemon juice",
+     "grams": 62.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "white_pasta",
+     "name": "White pasta, cooked al dente",
+     "grams": 1120.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "sweet_relish",
+     "name": "Sweet pickle relish",
+     "grams": 61.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 40.0, \"note\": \"\"}, {\"ingredient_id\": \"cheddar\", \"name\": \"Cheddar cheese\", \"grams\": 226.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 18.0, \"note\": \"\"}, {\"ingredient_id\": \"mayo\", \"name\": \"Mayonnaise (avocado oil)\", \"grams\": 220.0, \"note\": \"\"}, {\"ingredient_id\": \"lemon_juice\", \"name\": \"Lemon juice\", \"grams\": 62.0, \"note\": \"\"}, {\"ingredient_id\": \"white_pasta\", \"name\": \"White pasta, cooked al dente\", \"grams\": 1120.0, \"note\": \"\"}, {\"ingredient_id\": \"sweet_relish\", \"name\": \"Sweet pickle relish\", \"grams\": 61.0, \"note\": \"\"}]",
+   "kcal": 480,
+   "protein_g": 13.1,
+   "fat_g": 28.6,
+   "carbs_g": 41.7,
+   "fiber_g": 2.4,
+   "net_carbs_g": 39.3,
+   "glycemic_index": 48,
+   "gi_category": "low",
+   "glycemic_load": 18.8,
+   "gl_category": "medium",
+   "gi_note": "",
+   "gi_evidence": "92% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 92,
+   "diet_tags": "vegetarian, nut-free, meal-prep",
+   "instructions": "1. Cook what needs cooking and let it cool: celery, cheddar cheese, yellow onion and lemon juice.\n2. Mix everything with mayonnaise (avocado oil) and sweet pickle relish in a large bowl.\n3. Chill before serving and divide into 9 portions.",
+   "steps_json": "[\"Cook what needs cooking and let it cool: celery, cheddar cheese, yellow onion and lemon juice.\", \"Mix everything with mayonnaise (avocado oil) and sweet pickle relish in a large bowl.\", \"Chill before serving and divide into 9 portions.\"]",
+   "steps": [
+    "Cook what needs cooking and let it cool: celery, cheddar cheese, yellow onion and lemon juice.",
+    "Mix everything with mayonnaise (avocado oil) and sweet pickle relish in a large bowl.",
+    "Chill before serving and divide into 9 portions."
+   ]
+  },
+  {
+   "id": "DB-2064",
+   "name": "Macaroni or pasta salad with chicken",
+   "category": "Salad",
+   "cuisine": "American",
+   "servings": 9,
+   "prep_min": 15,
+   "cook_min": 10,
+   "total_min": 25,
+   "photo_file": "macaroni-or-pasta-salad-with-chicken.jpg",
+   "photo_keywords": "Macaroni or pasta salad with chicken, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "celery",
+     "name": "Celery",
+     "grams": 40.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
+     "grams": 18.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "sweet_relish",
+     "name": "Sweet pickle relish",
+     "grams": 61.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "rotisserie_chicken",
+     "name": "Rotisserie chicken, skin removed",
+     "grams": 270.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "mayo",
+     "name": "Mayonnaise (avocado oil)",
+     "grams": 220.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "lemon_juice",
+     "name": "Lemon juice",
+     "grams": 62.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "salt",
+     "name": "Salt",
+     "grams": 3.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "white_pasta",
+     "name": "White pasta, cooked al dente",
+     "grams": 1120.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 40.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 18.0, \"note\": \"\"}, {\"ingredient_id\": \"sweet_relish\", \"name\": \"Sweet pickle relish\", \"grams\": 61.0, \"note\": \"\"}, {\"ingredient_id\": \"rotisserie_chicken\", \"name\": \"Rotisserie chicken, skin removed\", \"grams\": 270.0, \"note\": \"\"}, {\"ingredient_id\": \"mayo\", \"name\": \"Mayonnaise (avocado oil)\", \"grams\": 220.0, \"note\": \"\"}, {\"ingredient_id\": \"lemon_juice\", \"name\": \"Lemon juice\", \"grams\": 62.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"white_pasta\", \"name\": \"White pasta, cooked al dente\", \"grams\": 1120.0, \"note\": \"\"}]",
+   "kcal": 426,
+   "protein_g": 14.2,
+   "fat_g": 22.4,
+   "carbs_g": 41.4,
+   "fiber_g": 2.4,
+   "net_carbs_g": 38.9,
+   "glycemic_index": 49,
+   "gi_category": "low",
+   "glycemic_load": 19.1,
+   "gl_category": "medium",
+   "gi_note": "",
+   "gi_evidence": "92% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 92,
+   "diet_tags": "dairy-free, nut-free, meal-prep",
+   "instructions": "1. Cook what needs cooking and let it cool: celery, yellow onion, rotisserie chicken and lemon juice.\n2. Mix everything with sweet pickle relish and mayonnaise (avocado oil) in a large bowl.\n3. Chill before serving and divide into 9 portions.",
+   "steps_json": "[\"Cook what needs cooking and let it cool: celery, yellow onion, rotisserie chicken and lemon juice.\", \"Mix everything with sweet pickle relish and mayonnaise (avocado oil) in a large bowl.\", \"Chill before serving and divide into 9 portions.\"]",
+   "steps": [
+    "Cook what needs cooking and let it cool: celery, yellow onion, rotisserie chicken and lemon juice.",
+    "Mix everything with sweet pickle relish and mayonnaise (avocado oil) in a large bowl.",
+    "Chill before serving and divide into 9 portions."
+   ]
+  },
+  {
+   "id": "DB-2065",
+   "name": "Macaroni or pasta salad with crab meat",
+   "category": "Salad",
+   "cuisine": "American",
+   "servings": 9,
+   "prep_min": 15,
+   "cook_min": 10,
+   "total_min": 25,
+   "photo_file": "macaroni-or-pasta-salad-with-crab-meat.jpg",
+   "photo_keywords": "Macaroni or pasta salad with crab meat, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "mayo",
+     "name": "Mayonnaise (avocado oil)",
+     "grams": 220.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "sweet_relish",
+     "name": "Sweet pickle relish",
+     "grams": 61.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
+     "grams": 18.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "crab",
+     "name": "Crab meat, lump",
+     "grams": 270.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "white_pasta",
+     "name": "White pasta, cooked al dente",
+     "grams": 1120.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "lemon_juice",
+     "name": "Lemon juice",
+     "grams": 62.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "salt",
+     "name": "Salt",
+     "grams": 3.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "celery",
+     "name": "Celery",
+     "grams": 40.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"mayo\", \"name\": \"Mayonnaise (avocado oil)\", \"grams\": 220.0, \"note\": \"\"}, {\"ingredient_id\": \"sweet_relish\", \"name\": \"Sweet pickle relish\", \"grams\": 61.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 18.0, \"note\": \"\"}, {\"ingredient_id\": \"crab\", \"name\": \"Crab meat, lump\", \"grams\": 270.0, \"note\": \"\"}, {\"ingredient_id\": \"white_pasta\", \"name\": \"White pasta, cooked al dente\", \"grams\": 1120.0, \"note\": \"\"}, {\"ingredient_id\": \"lemon_juice\", \"name\": \"Lemon juice\", \"grams\": 62.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 40.0, \"note\": \"\"}]",
+   "kcal": 404,
+   "protein_g": 12.7,
+   "fat_g": 20.6,
+   "carbs_g": 41.4,
+   "fiber_g": 2.4,
+   "net_carbs_g": 38.9,
+   "glycemic_index": 49,
+   "gi_category": "low",
+   "glycemic_load": 19.1,
+   "gl_category": "medium",
+   "gi_note": "",
+   "gi_evidence": "92% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 92,
+   "diet_tags": "pescatarian, dairy-free, nut-free, meal-prep",
+   "instructions": "1. Cook what needs cooking and let it cool: yellow onion, crab meat, white pasta and lemon juice.\n2. Mix everything with mayonnaise (avocado oil) and sweet pickle relish in a large bowl.\n3. Chill before serving and divide into 9 portions.",
+   "steps_json": "[\"Cook what needs cooking and let it cool: yellow onion, crab meat, white pasta and lemon juice.\", \"Mix everything with mayonnaise (avocado oil) and sweet pickle relish in a large bowl.\", \"Chill before serving and divide into 9 portions.\"]",
+   "steps": [
+    "Cook what needs cooking and let it cool: yellow onion, crab meat, white pasta and lemon juice.",
+    "Mix everything with mayonnaise (avocado oil) and sweet pickle relish in a large bowl.",
+    "Chill before serving and divide into 9 portions."
+   ]
+  },
+  {
+   "id": "DB-2066",
+   "name": "Macaroni or pasta salad with egg",
+   "category": "Salad",
+   "cuisine": "American",
+   "servings": 8,
+   "prep_min": 15,
+   "cook_min": 10,
+   "total_min": 25,
+   "photo_file": "macaroni-or-pasta-salad-with-egg.jpg",
+   "photo_keywords": "Macaroni or pasta salad with egg, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "sweet_relish",
+     "name": "Sweet pickle relish",
+     "grams": 61.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "white_pasta",
+     "name": "White pasta, cooked al dente",
+     "grams": 1120.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "celery",
+     "name": "Celery",
+     "grams": 40.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
+     "grams": 18.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "mayo",
+     "name": "Mayonnaise (avocado oil)",
+     "grams": 220.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "egg",
+     "name": "Egg, large (50 g each)",
+     "grams": 150.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "salt",
+     "name": "Salt",
+     "grams": 3.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "lemon_juice",
+     "name": "Lemon juice",
+     "grams": 62.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"sweet_relish\", \"name\": \"Sweet pickle relish\", \"grams\": 61.0, \"note\": \"\"}, {\"ingredient_id\": \"white_pasta\", \"name\": \"White pasta, cooked al dente\", \"grams\": 1120.0, \"note\": \"\"}, {\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 40.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 18.0, \"note\": \"\"}, {\"ingredient_id\": \"mayo\", \"name\": \"Mayonnaise (avocado oil)\", \"grams\": 220.0, \"note\": \"\"}, {\"ingredient_id\": \"egg\", \"name\": \"Egg, large (50 g each)\", \"grams\": 150.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"lemon_juice\", \"name\": \"Lemon juice\", \"grams\": 62.0, \"note\": \"\"}]",
+   "kcal": 452,
+   "protein_g": 10.5,
+   "fat_g": 24.6,
+   "carbs_g": 46.7,
+   "fiber_g": 2.7,
+   "net_carbs_g": 43.9,
+   "glycemic_index": 48,
+   "gi_category": "low",
+   "glycemic_load": 21.1,
+   "gl_category": "high",
+   "gi_note": "",
+   "gi_evidence": "92% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 92,
+   "diet_tags": "vegetarian, dairy-free, nut-free, meal-prep",
+   "instructions": "1. Cook what needs cooking and let it cool: white pasta, celery, yellow onion and egg.\n2. Mix everything with sweet pickle relish and mayonnaise (avocado oil) in a large bowl.\n3. Chill before serving and divide into 8 portions.",
+   "steps_json": "[\"Cook what needs cooking and let it cool: white pasta, celery, yellow onion and egg.\", \"Mix everything with sweet pickle relish and mayonnaise (avocado oil) in a large bowl.\", \"Chill before serving and divide into 8 portions.\"]",
+   "steps": [
+    "Cook what needs cooking and let it cool: white pasta, celery, yellow onion and egg.",
+    "Mix everything with sweet pickle relish and mayonnaise (avocado oil) in a large bowl.",
+    "Chill before serving and divide into 8 portions."
+   ]
+  },
+  {
+   "id": "DB-2067",
    "name": "Macaroni or pasta salad with meat",
    "category": "Salad",
    "cuisine": "American",
@@ -175305,8 +175645,8 @@
    "photo_url": "",
    "ingredients": [
     {
-     "ingredient_id": "green_onion",
-     "name": "Green onions (scallions)",
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
      "grams": 18.0,
      "note": ""
     },
@@ -175341,8 +175681,8 @@
      "note": ""
     },
     {
-     "ingredient_id": "whole_wheat_pasta",
-     "name": "Whole wheat pasta, cooked al dente",
+     "ingredient_id": "white_pasta",
+     "name": "White pasta, cooked al dente",
      "grams": 1120.0,
      "note": ""
     },
@@ -175353,31 +175693,371 @@
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"green_onion\", \"name\": \"Green onions (scallions)\", \"grams\": 18.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 40.0, \"note\": \"\"}, {\"ingredient_id\": \"mayo\", \"name\": \"Mayonnaise (avocado oil)\", \"grams\": 220.0, \"note\": \"\"}, {\"ingredient_id\": \"ham\", \"name\": \"Ham, lean\", \"grams\": 280.0, \"note\": \"\"}, {\"ingredient_id\": \"sweet_relish\", \"name\": \"Sweet pickle relish\", \"grams\": 61.0, \"note\": \"\"}, {\"ingredient_id\": \"whole_wheat_pasta\", \"name\": \"Whole wheat pasta, cooked al dente\", \"grams\": 1120.0, \"note\": \"\"}, {\"ingredient_id\": \"lemon_juice\", \"name\": \"Lemon juice\", \"grams\": 62.0, \"note\": \"\"}]",
-   "kcal": 382,
-   "protein_g": 13.3,
-   "fat_g": 21.6,
-   "carbs_g": 36.6,
-   "fiber_g": 5.1,
-   "net_carbs_g": 31.5,
-   "glycemic_index": 52,
+   "ingredients_json": "[{\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 18.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 40.0, \"note\": \"\"}, {\"ingredient_id\": \"mayo\", \"name\": \"Mayonnaise (avocado oil)\", \"grams\": 220.0, \"note\": \"\"}, {\"ingredient_id\": \"ham\", \"name\": \"Ham, lean\", \"grams\": 280.0, \"note\": \"\"}, {\"ingredient_id\": \"sweet_relish\", \"name\": \"Sweet pickle relish\", \"grams\": 61.0, \"note\": \"\"}, {\"ingredient_id\": \"white_pasta\", \"name\": \"White pasta, cooked al dente\", \"grams\": 1120.0, \"note\": \"\"}, {\"ingredient_id\": \"lemon_juice\", \"name\": \"Lemon juice\", \"grams\": 62.0, \"note\": \"\"}]",
+   "kcal": 423,
+   "protein_g": 13.8,
+   "fat_g": 22.1,
+   "carbs_g": 41.8,
+   "fiber_g": 2.4,
+   "net_carbs_g": 39.4,
+   "glycemic_index": 48,
    "gi_category": "low",
-   "glycemic_load": 16.4,
+   "glycemic_load": 18.9,
    "gl_category": "medium",
    "gi_note": "",
-   "gi_evidence": "89% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
-   "gi_measured_carb_share_pct": 89,
+   "gi_evidence": "91% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 91,
    "diet_tags": "dairy-free, nut-free, meal-prep",
-   "instructions": "1. Prepare green onions (scallions), celery, ham and whole wheat pasta.\n2. Mix everything with mayonnaise (avocado oil) and sweet pickle relish in a large bowl.\n3. Chill before serving and divide into 9 portions.",
-   "steps_json": "[\"Prepare green onions (scallions), celery, ham and whole wheat pasta.\", \"Mix everything with mayonnaise (avocado oil) and sweet pickle relish in a large bowl.\", \"Chill before serving and divide into 9 portions.\"]",
+   "instructions": "1. Cook what needs cooking and let it cool: yellow onion, celery, ham and white pasta.\n2. Mix everything with mayonnaise (avocado oil) and sweet pickle relish in a large bowl.\n3. Chill before serving and divide into 9 portions.",
+   "steps_json": "[\"Cook what needs cooking and let it cool: yellow onion, celery, ham and white pasta.\", \"Mix everything with mayonnaise (avocado oil) and sweet pickle relish in a large bowl.\", \"Chill before serving and divide into 9 portions.\"]",
    "steps": [
-    "Prepare green onions (scallions), celery, ham and whole wheat pasta.",
+    "Cook what needs cooking and let it cool: yellow onion, celery, ham and white pasta.",
     "Mix everything with mayonnaise (avocado oil) and sweet pickle relish in a large bowl.",
     "Chill before serving and divide into 9 portions."
    ]
   },
   {
-   "id": "DB-2064",
+   "id": "DB-2068",
+   "name": "Macaroni or pasta salad with shrimp",
+   "category": "Salad",
+   "cuisine": "American",
+   "servings": 9,
+   "prep_min": 15,
+   "cook_min": 10,
+   "total_min": 25,
+   "photo_file": "macaroni-or-pasta-salad-with-shrimp.jpg",
+   "photo_keywords": "Macaroni or pasta salad with shrimp, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "white_pasta",
+     "name": "White pasta, cooked al dente",
+     "grams": 1120.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "lemon_juice",
+     "name": "Lemon juice",
+     "grams": 62.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "shrimp",
+     "name": "Shrimp, peeled",
+     "grams": 270.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "salt",
+     "name": "Salt",
+     "grams": 3.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "sweet_relish",
+     "name": "Sweet pickle relish",
+     "grams": 61.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "mayo",
+     "name": "Mayonnaise (avocado oil)",
+     "grams": 220.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "celery",
+     "name": "Celery",
+     "grams": 40.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
+     "grams": 18.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"white_pasta\", \"name\": \"White pasta, cooked al dente\", \"grams\": 1120.0, \"note\": \"\"}, {\"ingredient_id\": \"lemon_juice\", \"name\": \"Lemon juice\", \"grams\": 62.0, \"note\": \"\"}, {\"ingredient_id\": \"shrimp\", \"name\": \"Shrimp, peeled\", \"grams\": 270.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"sweet_relish\", \"name\": \"Sweet pickle relish\", \"grams\": 61.0, \"note\": \"\"}, {\"ingredient_id\": \"mayo\", \"name\": \"Mayonnaise (avocado oil)\", \"grams\": 220.0, \"note\": \"\"}, {\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 40.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 18.0, \"note\": \"\"}]",
+   "kcal": 404,
+   "protein_g": 13.3,
+   "fat_g": 20.4,
+   "carbs_g": 41.4,
+   "fiber_g": 2.4,
+   "net_carbs_g": 38.9,
+   "glycemic_index": 49,
+   "gi_category": "low",
+   "glycemic_load": 19.1,
+   "gl_category": "medium",
+   "gi_note": "",
+   "gi_evidence": "92% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 92,
+   "diet_tags": "pescatarian, dairy-free, nut-free, meal-prep",
+   "instructions": "1. Cook what needs cooking and let it cool: white pasta, lemon juice, shrimp and celery.\n2. Mix everything with sweet pickle relish and mayonnaise (avocado oil) in a large bowl.\n3. Chill before serving and divide into 9 portions.",
+   "steps_json": "[\"Cook what needs cooking and let it cool: white pasta, lemon juice, shrimp and celery.\", \"Mix everything with sweet pickle relish and mayonnaise (avocado oil) in a large bowl.\", \"Chill before serving and divide into 9 portions.\"]",
+   "steps": [
+    "Cook what needs cooking and let it cool: white pasta, lemon juice, shrimp and celery.",
+    "Mix everything with sweet pickle relish and mayonnaise (avocado oil) in a large bowl.",
+    "Chill before serving and divide into 9 portions."
+   ]
+  },
+  {
+   "id": "DB-2069",
+   "name": "Macaroni or pasta salad with tuna",
+   "category": "Salad",
+   "cuisine": "American",
+   "servings": 9,
+   "prep_min": 15,
+   "cook_min": 10,
+   "total_min": 25,
+   "photo_file": "macaroni-or-pasta-salad-with-tuna.jpg",
+   "photo_keywords": "Macaroni or pasta salad with tuna, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "white_pasta",
+     "name": "White pasta, cooked al dente",
+     "grams": 1120.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
+     "grams": 18.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "lemon_juice",
+     "name": "Lemon juice",
+     "grams": 62.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "celery",
+     "name": "Celery",
+     "grams": 40.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "mayo",
+     "name": "Mayonnaise (avocado oil)",
+     "grams": 220.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "salt",
+     "name": "Salt",
+     "grams": 3.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "sweet_relish",
+     "name": "Sweet pickle relish",
+     "grams": 61.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "tuna_canned",
+     "name": "Tuna, canned in water",
+     "grams": 276.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"white_pasta\", \"name\": \"White pasta, cooked al dente\", \"grams\": 1120.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 18.0, \"note\": \"\"}, {\"ingredient_id\": \"lemon_juice\", \"name\": \"Lemon juice\", \"grams\": 62.0, \"note\": \"\"}, {\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 40.0, \"note\": \"\"}, {\"ingredient_id\": \"mayo\", \"name\": \"Mayonnaise (avocado oil)\", \"grams\": 220.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"sweet_relish\", \"name\": \"Sweet pickle relish\", \"grams\": 61.0, \"note\": \"\"}, {\"ingredient_id\": \"tuna_canned\", \"name\": \"Tuna, canned in water\", \"grams\": 276.0, \"note\": \"\"}]",
+   "kcal": 414,
+   "protein_g": 15.2,
+   "fat_g": 20.6,
+   "carbs_g": 41.4,
+   "fiber_g": 2.4,
+   "net_carbs_g": 38.9,
+   "glycemic_index": 49,
+   "gi_category": "low",
+   "glycemic_load": 19.1,
+   "gl_category": "medium",
+   "gi_note": "",
+   "gi_evidence": "92% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 92,
+   "diet_tags": "pescatarian, dairy-free, nut-free, meal-prep",
+   "instructions": "1. Cook what needs cooking and let it cool: white pasta, yellow onion, lemon juice and celery.\n2. Mix everything with mayonnaise (avocado oil) and sweet pickle relish in a large bowl.\n3. Chill before serving and divide into 9 portions.",
+   "steps_json": "[\"Cook what needs cooking and let it cool: white pasta, yellow onion, lemon juice and celery.\", \"Mix everything with mayonnaise (avocado oil) and sweet pickle relish in a large bowl.\", \"Chill before serving and divide into 9 portions.\"]",
+   "steps": [
+    "Cook what needs cooking and let it cool: white pasta, yellow onion, lemon juice and celery.",
+    "Mix everything with mayonnaise (avocado oil) and sweet pickle relish in a large bowl.",
+    "Chill before serving and divide into 9 portions."
+   ]
+  },
+  {
+   "id": "DB-2070",
+   "name": "Macaroni or pasta salad with tuna and egg",
+   "category": "Salad",
+   "cuisine": "American",
+   "servings": 10,
+   "prep_min": 15,
+   "cook_min": 10,
+   "total_min": 25,
+   "photo_file": "macaroni-or-pasta-salad-with-tuna-and-egg.jpg",
+   "photo_keywords": "Macaroni or pasta salad with tuna and egg, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "egg",
+     "name": "Egg, large (50 g each)",
+     "grams": 150.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "white_pasta",
+     "name": "White pasta, cooked al dente",
+     "grams": 1120.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "celery",
+     "name": "Celery",
+     "grams": 40.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "lemon_juice",
+     "name": "Lemon juice",
+     "grams": 62.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "sweet_relish",
+     "name": "Sweet pickle relish",
+     "grams": 61.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "mayo",
+     "name": "Mayonnaise (avocado oil)",
+     "grams": 220.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "salt",
+     "name": "Salt",
+     "grams": 3.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
+     "grams": 18.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "tuna_canned",
+     "name": "Tuna, canned in water",
+     "grams": 276.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"egg\", \"name\": \"Egg, large (50 g each)\", \"grams\": 150.0, \"note\": \"\"}, {\"ingredient_id\": \"white_pasta\", \"name\": \"White pasta, cooked al dente\", \"grams\": 1120.0, \"note\": \"\"}, {\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 40.0, \"note\": \"\"}, {\"ingredient_id\": \"lemon_juice\", \"name\": \"Lemon juice\", \"grams\": 62.0, \"note\": \"\"}, {\"ingredient_id\": \"sweet_relish\", \"name\": \"Sweet pickle relish\", \"grams\": 61.0, \"note\": \"\"}, {\"ingredient_id\": \"mayo\", \"name\": \"Mayonnaise (avocado oil)\", \"grams\": 220.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 18.0, \"note\": \"\"}, {\"ingredient_id\": \"tuna_canned\", \"name\": \"Tuna, canned in water\", \"grams\": 276.0, \"note\": \"\"}]",
+   "kcal": 394,
+   "protein_g": 15.6,
+   "fat_g": 19.9,
+   "carbs_g": 37.3,
+   "fiber_g": 2.2,
+   "net_carbs_g": 35.1,
+   "glycemic_index": 48,
+   "gi_category": "low",
+   "glycemic_load": 16.9,
+   "gl_category": "medium",
+   "gi_note": "",
+   "gi_evidence": "92% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 92,
+   "diet_tags": "pescatarian, dairy-free, nut-free, meal-prep",
+   "instructions": "1. Cook what needs cooking and let it cool: egg, white pasta, celery and lemon juice.\n2. Mix everything with sweet pickle relish and mayonnaise (avocado oil) in a large bowl.\n3. Chill before serving and divide into 10 portions.",
+   "steps_json": "[\"Cook what needs cooking and let it cool: egg, white pasta, celery and lemon juice.\", \"Mix everything with sweet pickle relish and mayonnaise (avocado oil) in a large bowl.\", \"Chill before serving and divide into 10 portions.\"]",
+   "steps": [
+    "Cook what needs cooking and let it cool: egg, white pasta, celery and lemon juice.",
+    "Mix everything with sweet pickle relish and mayonnaise (avocado oil) in a large bowl.",
+    "Chill before serving and divide into 10 portions."
+   ]
+  },
+  {
+   "id": "DB-2071",
+   "name": "Macaroni or pasta salad, made with mayonnaise",
+   "category": "Salad",
+   "cuisine": "American",
+   "servings": 7,
+   "prep_min": 15,
+   "cook_min": 10,
+   "total_min": 25,
+   "photo_file": "macaroni-or-pasta-salad-made-with-mayonnaise.jpg",
+   "photo_keywords": "Macaroni or pasta salad, made with mayonnaise, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
+     "grams": 18.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "salt",
+     "name": "Salt",
+     "grams": 3.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "celery",
+     "name": "Celery",
+     "grams": 40.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "lemon_juice",
+     "name": "Lemon juice",
+     "grams": 62.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "sweet_relish",
+     "name": "Sweet pickle relish",
+     "grams": 61.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "white_pasta",
+     "name": "White pasta, cooked al dente",
+     "grams": 1120.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "mayo",
+     "name": "Mayonnaise (avocado oil)",
+     "grams": 220.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 18.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 40.0, \"note\": \"\"}, {\"ingredient_id\": \"lemon_juice\", \"name\": \"Lemon juice\", \"grams\": 62.0, \"note\": \"\"}, {\"ingredient_id\": \"sweet_relish\", \"name\": \"Sweet pickle relish\", \"grams\": 61.0, \"note\": \"\"}, {\"ingredient_id\": \"white_pasta\", \"name\": \"White pasta, cooked al dente\", \"grams\": 1120.0, \"note\": \"\"}, {\"ingredient_id\": \"mayo\", \"name\": \"Mayonnaise (avocado oil)\", \"grams\": 220.0, \"note\": \"\"}]",
+   "kcal": 486,
+   "protein_g": 9.4,
+   "fat_g": 26.1,
+   "carbs_g": 53.2,
+   "fiber_g": 3.1,
+   "net_carbs_g": 50.1,
+   "glycemic_index": 49,
+   "gi_category": "low",
+   "glycemic_load": 24.5,
+   "gl_category": "high",
+   "gi_note": "",
+   "gi_evidence": "92% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 92,
+   "diet_tags": "vegetarian, dairy-free, nut-free, meal-prep",
+   "instructions": "1. Cook what needs cooking and let it cool: yellow onion, celery, lemon juice and white pasta.\n2. Mix everything with sweet pickle relish and mayonnaise (avocado oil) in a large bowl.\n3. Chill before serving and divide into 7 portions.",
+   "steps_json": "[\"Cook what needs cooking and let it cool: yellow onion, celery, lemon juice and white pasta.\", \"Mix everything with sweet pickle relish and mayonnaise (avocado oil) in a large bowl.\", \"Chill before serving and divide into 7 portions.\"]",
+   "steps": [
+    "Cook what needs cooking and let it cool: yellow onion, celery, lemon juice and white pasta.",
+    "Mix everything with sweet pickle relish and mayonnaise (avocado oil) in a large bowl.",
+    "Chill before serving and divide into 7 portions."
+   ]
+  },
+  {
+   "id": "DB-2072",
    "name": "Pea salad",
    "category": "Salad",
    "cuisine": "American",
@@ -175444,7 +176124,7 @@
    ]
   },
   {
-   "id": "DB-2065",
+   "id": "DB-2073",
    "name": "Pea salad with cheese",
    "category": "Salad",
    "cuisine": "American",
@@ -175517,7 +176197,7 @@
    ]
   },
   {
-   "id": "DB-2066",
+   "id": "DB-2074",
    "name": "Potato salad with egg, from restaurant",
    "category": "Salad",
    "cuisine": "American",
@@ -175548,8 +176228,8 @@
      "note": ""
     },
     {
-     "ingredient_id": "green_onion",
-     "name": "Green onions (scallions)",
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
      "grams": 20.0,
      "note": ""
     },
@@ -175584,31 +176264,31 @@
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"mayo\", \"name\": \"Mayonnaise (avocado oil)\", \"grams\": 165.0, \"note\": \"\"}, {\"ingredient_id\": \"egg\", \"name\": \"Egg, large (50 g each)\", \"grams\": 150.0, \"note\": \"\"}, {\"ingredient_id\": \"distilled_vinegar\", \"name\": \"Distilled vinegar\", \"grams\": 30.0, \"note\": \"\"}, {\"ingredient_id\": \"green_onion\", \"name\": \"Green onions (scallions)\", \"grams\": 20.0, \"note\": \"\"}, {\"ingredient_id\": \"potato_baked\", \"name\": \"Potato, baked, flesh (russet)\", \"grams\": 835.0, \"note\": \"\"}, {\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 4.0, \"note\": \"\"}, {\"ingredient_id\": \"yellow_mustard\", \"name\": \"Yellow mustard\", \"grams\": 16.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 7.0, \"note\": \"\"}, {\"ingredient_id\": \"sweet_relish\", \"name\": \"Sweet pickle relish\", \"grams\": 15.0, \"note\": \"\"}]",
+   "ingredients_json": "[{\"ingredient_id\": \"mayo\", \"name\": \"Mayonnaise (avocado oil)\", \"grams\": 165.0, \"note\": \"\"}, {\"ingredient_id\": \"egg\", \"name\": \"Egg, large (50 g each)\", \"grams\": 150.0, \"note\": \"\"}, {\"ingredient_id\": \"distilled_vinegar\", \"name\": \"Distilled vinegar\", \"grams\": 30.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 20.0, \"note\": \"\"}, {\"ingredient_id\": \"potato_baked\", \"name\": \"Potato, baked, flesh (russet)\", \"grams\": 835.0, \"note\": \"\"}, {\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 4.0, \"note\": \"\"}, {\"ingredient_id\": \"yellow_mustard\", \"name\": \"Yellow mustard\", \"grams\": 16.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 7.0, \"note\": \"\"}, {\"ingredient_id\": \"sweet_relish\", \"name\": \"Sweet pickle relish\", \"grams\": 15.0, \"note\": \"\"}]",
    "kcal": 438,
-   "protein_g": 7.3,
+   "protein_g": 7.2,
    "fat_g": 28.9,
-   "carbs_g": 37.6,
-   "fiber_g": 2.8,
-   "net_carbs_g": 34.9,
+   "carbs_g": 37.7,
+   "fiber_g": 2.7,
+   "net_carbs_g": 35.0,
    "glycemic_index": 83,
    "gi_category": "high",
-   "glycemic_load": 29.0,
+   "glycemic_load": 29.1,
    "gl_category": "high",
    "gi_note": "Medium-GI dish: keep to the stated portion and pair with the protein/fat in the recipe; GL per serving is the better guide.",
-   "gi_evidence": "96% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
-   "gi_measured_carb_share_pct": 96,
+   "gi_evidence": "95% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 95,
    "diet_tags": "vegetarian, gluten-free, dairy-free, nut-free, meal-prep",
-   "instructions": "1. Cook what needs cooking and let it cool: egg, green onions (scallions), potato and celery.\n2. Mix everything with mayonnaise (avocado oil), yellow mustard and sweet pickle relish in a large bowl.\n3. Chill before serving and divide into 5 portions.",
-   "steps_json": "[\"Cook what needs cooking and let it cool: egg, green onions (scallions), potato and celery.\", \"Mix everything with mayonnaise (avocado oil), yellow mustard and sweet pickle relish in a large bowl.\", \"Chill before serving and divide into 5 portions.\"]",
+   "instructions": "1. Cook what needs cooking and let it cool: egg, yellow onion, potato and celery.\n2. Mix everything with mayonnaise (avocado oil), yellow mustard and sweet pickle relish in a large bowl.\n3. Chill before serving and divide into 5 portions.",
+   "steps_json": "[\"Cook what needs cooking and let it cool: egg, yellow onion, potato and celery.\", \"Mix everything with mayonnaise (avocado oil), yellow mustard and sweet pickle relish in a large bowl.\", \"Chill before serving and divide into 5 portions.\"]",
    "steps": [
-    "Cook what needs cooking and let it cool: egg, green onions (scallions), potato and celery.",
+    "Cook what needs cooking and let it cool: egg, yellow onion, potato and celery.",
     "Mix everything with mayonnaise (avocado oil), yellow mustard and sweet pickle relish in a large bowl.",
     "Chill before serving and divide into 5 portions."
    ]
   },
   {
-   "id": "DB-2067",
+   "id": "DB-2075",
    "name": "Potato salad, German style",
    "category": "Salad",
    "cuisine": "American",
@@ -175633,8 +176313,8 @@
      "note": ""
     },
     {
-     "ingredient_id": "green_onion",
-     "name": "Green onions (scallions)",
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
      "grams": 80.0,
      "note": ""
     },
@@ -175663,37 +176343,37 @@
      "note": ""
     },
     {
-     "ingredient_id": "cucumber",
-     "name": "Cucumber",
+     "ingredient_id": "dill_pickle",
+     "name": "Dill pickles",
      "grams": 36.0,
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 30.0, \"note\": \"\"}, {\"ingredient_id\": \"bacon\", \"name\": \"Bacon\", \"grams\": 32.0, \"note\": \"\"}, {\"ingredient_id\": \"green_onion\", \"name\": \"Green onions (scallions)\", \"grams\": 80.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"bacon_grease\", \"name\": \"Bacon grease\", \"grams\": 26.0, \"note\": \"\"}, {\"ingredient_id\": \"potato_baked\", \"name\": \"Potato, baked, flesh (russet)\", \"grams\": 907.0, \"note\": \"\"}, {\"ingredient_id\": \"apple_cider_vinegar\", \"name\": \"Apple cider vinegar\", \"grams\": 75.0, \"note\": \"\"}, {\"ingredient_id\": \"cucumber\", \"name\": \"Cucumber\", \"grams\": 36.0, \"note\": \"\"}]",
-   "kcal": 186,
-   "protein_g": 4.5,
+   "ingredients_json": "[{\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 30.0, \"note\": \"\"}, {\"ingredient_id\": \"bacon\", \"name\": \"Bacon\", \"grams\": 32.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 80.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"bacon_grease\", \"name\": \"Bacon grease\", \"grams\": 26.0, \"note\": \"\"}, {\"ingredient_id\": \"potato_baked\", \"name\": \"Potato, baked, flesh (russet)\", \"grams\": 907.0, \"note\": \"\"}, {\"ingredient_id\": \"apple_cider_vinegar\", \"name\": \"Apple cider vinegar\", \"grams\": 75.0, \"note\": \"\"}, {\"ingredient_id\": \"dill_pickle\", \"name\": \"Dill pickles\", \"grams\": 36.0, \"note\": \"\"}]",
+   "kcal": 187,
+   "protein_g": 4.4,
    "fat_g": 5.8,
-   "carbs_g": 29.2,
+   "carbs_g": 29.3,
    "fiber_g": 2.3,
-   "net_carbs_g": 26.8,
-   "glycemic_index": 83,
+   "net_carbs_g": 27.1,
+   "glycemic_index": 82,
    "gi_category": "high",
-   "glycemic_load": 22.3,
+   "glycemic_load": 22.2,
    "gl_category": "high",
    "gi_note": "Medium-GI dish: keep to the stated portion and pair with the protein/fat in the recipe; GL per serving is the better guide.",
-   "gi_evidence": "97% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
-   "gi_measured_carb_share_pct": 97,
+   "gi_evidence": "96% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 96,
    "diet_tags": "gluten-free, dairy-free, nut-free, meal-prep",
-   "instructions": "1. Cook what needs cooking and let it cool: celery, bacon, green onions (scallions) and bacon grease.\n2. Mix everything in a large bowl.\n3. Chill before serving and divide into 7 portions.",
-   "steps_json": "[\"Cook what needs cooking and let it cool: celery, bacon, green onions (scallions) and bacon grease.\", \"Mix everything in a large bowl.\", \"Chill before serving and divide into 7 portions.\"]",
+   "instructions": "1. Cook what needs cooking and let it cool: celery, bacon, yellow onion and bacon grease.\n2. Mix everything in a large bowl.\n3. Chill before serving and divide into 7 portions.",
+   "steps_json": "[\"Cook what needs cooking and let it cool: celery, bacon, yellow onion and bacon grease.\", \"Mix everything in a large bowl.\", \"Chill before serving and divide into 7 portions.\"]",
    "steps": [
-    "Cook what needs cooking and let it cool: celery, bacon, green onions (scallions) and bacon grease.",
+    "Cook what needs cooking and let it cool: celery, bacon, yellow onion and bacon grease.",
     "Mix everything in a large bowl.",
     "Chill before serving and divide into 7 portions."
    ]
   },
   {
-   "id": "DB-2068",
+   "id": "DB-2076",
    "name": "Potato salad, from restaurant",
    "category": "Salad",
    "cuisine": "American",
@@ -175736,8 +176416,8 @@
      "note": ""
     },
     {
-     "ingredient_id": "green_onion",
-     "name": "Green onions (scallions)",
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
      "grams": 20.0,
      "note": ""
     },
@@ -175754,31 +176434,31 @@
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"yellow_mustard\", \"name\": \"Yellow mustard\", \"grams\": 16.0, \"note\": \"\"}, {\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 4.0, \"note\": \"\"}, {\"ingredient_id\": \"potato_baked\", \"name\": \"Potato, baked, flesh (russet)\", \"grams\": 835.0, \"note\": \"\"}, {\"ingredient_id\": \"sweet_relish\", \"name\": \"Sweet pickle relish\", \"grams\": 15.0, \"note\": \"\"}, {\"ingredient_id\": \"mayo\", \"name\": \"Mayonnaise (avocado oil)\", \"grams\": 165.0, \"note\": \"\"}, {\"ingredient_id\": \"green_onion\", \"name\": \"Green onions (scallions)\", \"grams\": 20.0, \"note\": \"\"}, {\"ingredient_id\": \"distilled_vinegar\", \"name\": \"Distilled vinegar\", \"grams\": 30.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 7.0, \"note\": \"\"}]",
-   "kcal": 493,
+   "ingredients_json": "[{\"ingredient_id\": \"yellow_mustard\", \"name\": \"Yellow mustard\", \"grams\": 16.0, \"note\": \"\"}, {\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 4.0, \"note\": \"\"}, {\"ingredient_id\": \"potato_baked\", \"name\": \"Potato, baked, flesh (russet)\", \"grams\": 835.0, \"note\": \"\"}, {\"ingredient_id\": \"sweet_relish\", \"name\": \"Sweet pickle relish\", \"grams\": 15.0, \"note\": \"\"}, {\"ingredient_id\": \"mayo\", \"name\": \"Mayonnaise (avocado oil)\", \"grams\": 165.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 20.0, \"note\": \"\"}, {\"ingredient_id\": \"distilled_vinegar\", \"name\": \"Distilled vinegar\", \"grams\": 30.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 7.0, \"note\": \"\"}]",
+   "kcal": 494,
    "protein_g": 4.3,
    "fat_g": 32.5,
-   "carbs_g": 46.8,
+   "carbs_g": 46.9,
    "fiber_g": 3.4,
-   "net_carbs_g": 43.4,
+   "net_carbs_g": 43.5,
    "glycemic_index": 83,
    "gi_category": "high",
-   "glycemic_load": 36.0,
+   "glycemic_load": 36.1,
    "gl_category": "high",
    "gi_note": "Medium-GI dish: keep to the stated portion and pair with the protein/fat in the recipe; GL per serving is the better guide.",
    "gi_evidence": "96% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
    "gi_measured_carb_share_pct": 96,
    "diet_tags": "vegetarian, gluten-free, dairy-free, nut-free, meal-prep",
-   "instructions": "1. Cook what needs cooking and let it cool: celery, potato and green onions (scallions).\n2. Mix everything with yellow mustard, sweet pickle relish and mayonnaise (avocado oil) in a large bowl.\n3. Chill before serving and divide into 4 portions.",
-   "steps_json": "[\"Cook what needs cooking and let it cool: celery, potato and green onions (scallions).\", \"Mix everything with yellow mustard, sweet pickle relish and mayonnaise (avocado oil) in a large bowl.\", \"Chill before serving and divide into 4 portions.\"]",
+   "instructions": "1. Cook what needs cooking and let it cool: celery, potato and yellow onion.\n2. Mix everything with yellow mustard, sweet pickle relish and mayonnaise (avocado oil) in a large bowl.\n3. Chill before serving and divide into 4 portions.",
+   "steps_json": "[\"Cook what needs cooking and let it cool: celery, potato and yellow onion.\", \"Mix everything with yellow mustard, sweet pickle relish and mayonnaise (avocado oil) in a large bowl.\", \"Chill before serving and divide into 4 portions.\"]",
    "steps": [
-    "Cook what needs cooking and let it cool: celery, potato and green onions (scallions).",
+    "Cook what needs cooking and let it cool: celery, potato and yellow onion.",
     "Mix everything with yellow mustard, sweet pickle relish and mayonnaise (avocado oil) in a large bowl.",
     "Chill before serving and divide into 4 portions."
    ]
   },
   {
-   "id": "DB-2069",
+   "id": "DB-2077",
    "name": "Rice dessert or salad with fruit",
    "category": "Salad",
    "cuisine": "American",
@@ -175851,7 +176531,7 @@
    ]
   },
   {
-   "id": "DB-2070",
+   "id": "DB-2078",
    "name": "Adobo, with rice",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -175882,8 +176562,8 @@
      "note": ""
     },
     {
-     "ingredient_id": "ground_pork",
-     "name": "Ground pork, lean",
+     "ingredient_id": "pork_shoulder",
+     "name": "Pork shoulder, trimmed",
      "grams": 680.0,
      "note": ""
     },
@@ -175900,10 +176580,10 @@
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"chicken_thigh_bbq_rotisserie\", \"name\": \"Chicken thigh, BBQ rotisserie, meat only\", \"grams\": 680.0, \"note\": \"\"}, {\"ingredient_id\": \"white_rice\", \"name\": \"White rice, long-grain, cooked\", \"grams\": 632.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 12.0, \"note\": \"\"}, {\"ingredient_id\": \"ground_pork\", \"name\": \"Ground pork, lean\", \"grams\": 680.0, \"note\": \"\"}, {\"ingredient_id\": \"soy_sauce\", \"name\": \"Soy sauce, low sodium\", \"grams\": 64.0, \"note\": \"\"}, {\"ingredient_id\": \"garlic\", \"name\": \"Garlic\", \"grams\": 9.0, \"note\": \"\"}]",
-   "kcal": 381,
+   "ingredients_json": "[{\"ingredient_id\": \"chicken_thigh_bbq_rotisserie\", \"name\": \"Chicken thigh, BBQ rotisserie, meat only\", \"grams\": 680.0, \"note\": \"\"}, {\"ingredient_id\": \"white_rice\", \"name\": \"White rice, long-grain, cooked\", \"grams\": 632.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 12.0, \"note\": \"\"}, {\"ingredient_id\": \"pork_shoulder\", \"name\": \"Pork shoulder, trimmed\", \"grams\": 680.0, \"note\": \"\"}, {\"ingredient_id\": \"soy_sauce\", \"name\": \"Soy sauce, low sodium\", \"grams\": 64.0, \"note\": \"\"}, {\"ingredient_id\": \"garlic\", \"name\": \"Garlic\", \"grams\": 9.0, \"note\": \"\"}]",
+   "kcal": 393,
    "protein_g": 35.1,
-   "fat_g": 17.4,
+   "fat_g": 18.9,
    "carbs_g": 20.3,
    "fiber_g": 0.4,
    "net_carbs_g": 20.0,
@@ -175915,16 +176595,16 @@
    "gi_evidence": "97% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
    "gi_measured_carb_share_pct": 97,
    "diet_tags": "dairy-free, nut-free, high-protein, meal-prep",
-   "instructions": "1. Prepare and measure the ingredients: chicken thigh, white rice, ground pork, soy sauce and garlic.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 9 portions.",
-   "steps_json": "[\"Prepare and measure the ingredients: chicken thigh, white rice, ground pork, soy sauce and garlic.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 9 portions.\"]",
+   "instructions": "1. Prepare and measure the ingredients: chicken thigh, white rice, pork shoulder, soy sauce and garlic.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 9 portions.",
+   "steps_json": "[\"Prepare and measure the ingredients: chicken thigh, white rice, pork shoulder, soy sauce and garlic.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 9 portions.\"]",
    "steps": [
-    "Prepare and measure the ingredients: chicken thigh, white rice, ground pork, soy sauce and garlic.",
+    "Prepare and measure the ingredients: chicken thigh, white rice, pork shoulder, soy sauce and garlic.",
     "Combine them and cook, stirring, until everything is hot and cooked through.",
     "Serve in 9 portions."
    ]
   },
   {
-   "id": "DB-2071",
+   "id": "DB-2079",
    "name": "Broccoli casserole with rice",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -175997,7 +176677,7 @@
    ]
   },
   {
-   "id": "DB-2072",
+   "id": "DB-2080",
    "name": "Dirty rice",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -176028,8 +176708,8 @@
      "note": ""
     },
     {
-     "ingredient_id": "green_onion",
-     "name": "Green onions (scallions)",
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
      "grams": 240.0,
      "note": ""
     },
@@ -176058,31 +176738,31 @@
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"garlic\", \"name\": \"Garlic\", \"grams\": 12.0, \"note\": \"\"}, {\"ingredient_id\": \"bell_pepper\", \"name\": \"Bell pepper\", \"grams\": 74.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 6.0, \"note\": \"\"}, {\"ingredient_id\": \"green_onion\", \"name\": \"Green onions (scallions)\", \"grams\": 240.0, \"note\": \"\"}, {\"ingredient_id\": \"olive_oil\", \"name\": \"Extra-virgin olive oil\", \"grams\": 28.0, \"note\": \"\"}, {\"ingredient_id\": \"white_rice_raw\", \"name\": \"White rice, long-grain, raw\", \"grams\": 370.0, \"note\": \"\"}, {\"ingredient_id\": \"chicken_giblets\", \"name\": \"Chicken giblets, simmered\", \"grams\": 227.0, \"note\": \"\"}, {\"ingredient_id\": \"chicken_broth\", \"name\": \"Chicken broth, low sodium\", \"grams\": 960.0, \"note\": \"\"}]",
-   "kcal": 214,
-   "protein_g": 10.3,
+   "ingredients_json": "[{\"ingredient_id\": \"garlic\", \"name\": \"Garlic\", \"grams\": 12.0, \"note\": \"\"}, {\"ingredient_id\": \"bell_pepper\", \"name\": \"Bell pepper\", \"grams\": 74.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 6.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 240.0, \"note\": \"\"}, {\"ingredient_id\": \"olive_oil\", \"name\": \"Extra-virgin olive oil\", \"grams\": 28.0, \"note\": \"\"}, {\"ingredient_id\": \"white_rice_raw\", \"name\": \"White rice, long-grain, raw\", \"grams\": 370.0, \"note\": \"\"}, {\"ingredient_id\": \"chicken_giblets\", \"name\": \"Chicken giblets, simmered\", \"grams\": 227.0, \"note\": \"\"}, {\"ingredient_id\": \"chicken_broth\", \"name\": \"Chicken broth, low sodium\", \"grams\": 960.0, \"note\": \"\"}]",
+   "kcal": 216,
+   "protein_g": 10.2,
    "fat_g": 4.3,
-   "carbs_g": 32.7,
-   "fiber_g": 1.3,
-   "net_carbs_g": 31.4,
-   "glycemic_index": 69,
+   "carbs_g": 33.2,
+   "fiber_g": 1.1,
+   "net_carbs_g": 32.1,
+   "glycemic_index": 68,
    "gi_category": "medium",
-   "glycemic_load": 21.7,
+   "glycemic_load": 21.8,
    "gl_category": "high",
    "gi_note": "Medium-GI dish: keep to the stated portion and pair with the protein/fat in the recipe; GL per serving is the better guide.",
-   "gi_evidence": "93% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
-   "gi_measured_carb_share_pct": 93,
+   "gi_evidence": "91% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 91,
    "diet_tags": "gluten-free, dairy-free, nut-free, meal-prep",
-   "instructions": "1. Prepare and measure the ingredients: garlic, bell pepper, green onions (scallions), white rice, chicken giblets and chicken broth.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 10 portions.",
-   "steps_json": "[\"Prepare and measure the ingredients: garlic, bell pepper, green onions (scallions), white rice, chicken giblets and chicken broth.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 10 portions.\"]",
+   "instructions": "1. Prepare and measure the ingredients: garlic, bell pepper, yellow onion, white rice, chicken giblets and chicken broth.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 10 portions.",
+   "steps_json": "[\"Prepare and measure the ingredients: garlic, bell pepper, yellow onion, white rice, chicken giblets and chicken broth.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 10 portions.\"]",
    "steps": [
-    "Prepare and measure the ingredients: garlic, bell pepper, green onions (scallions), white rice, chicken giblets and chicken broth.",
+    "Prepare and measure the ingredients: garlic, bell pepper, yellow onion, white rice, chicken giblets and chicken broth.",
     "Combine them and cook, stirring, until everything is hot and cooked through.",
     "Serve in 10 portions."
    ]
   },
   {
-   "id": "DB-2073",
+   "id": "DB-2081",
    "name": "Potato, hash brown, from fresh",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -176131,7 +176811,7 @@
    ]
   },
   {
-   "id": "DB-2074",
+   "id": "DB-2082",
    "name": "Potato, hash brown, from fresh, with cheese",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -176186,7 +176866,7 @@
    ]
   },
   {
-   "id": "DB-2075",
+   "id": "DB-2083",
    "name": "Rice croquette",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -176259,7 +176939,7 @@
    ]
   },
   {
-   "id": "DB-2076",
+   "id": "DB-2084",
    "name": "Rice with raisins",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -176320,7 +177000,7 @@
    ]
   },
   {
-   "id": "DB-2077",
+   "id": "DB-2085",
    "name": "Rice, white, cooked, made with oil",
    "category": "Vegetarian & Vegan",
    "cuisine": "American",
@@ -176369,7 +177049,80 @@
    ]
   },
   {
-   "id": "DB-2078",
+   "id": "DB-2086",
+   "name": "Stuffed tomato, with rice and meat",
+   "category": "Vegetarian & Vegan",
+   "cuisine": "American",
+   "servings": 1,
+   "prep_min": 10,
+   "cook_min": 25,
+   "total_min": 35,
+   "photo_file": "stuffed-tomato-with-rice-and-meat.jpg",
+   "photo_keywords": "Stuffed tomato, with rice and meat, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
+     "grams": 13.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "olive_oil",
+     "name": "Extra-virgin olive oil",
+     "grams": 5.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "tomato",
+     "name": "Tomato",
+     "grams": 142.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "white_rice",
+     "name": "White rice, long-grain, cooked",
+     "grams": 53.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "ground_beef",
+     "name": "Ground beef 90% lean",
+     "grams": 31.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "bell_pepper",
+     "name": "Bell pepper",
+     "grams": 8.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 13.0, \"note\": \"\"}, {\"ingredient_id\": \"olive_oil\", \"name\": \"Extra-virgin olive oil\", \"grams\": 5.0, \"note\": \"\"}, {\"ingredient_id\": \"tomato\", \"name\": \"Tomato\", \"grams\": 142.0, \"note\": \"\"}, {\"ingredient_id\": \"white_rice\", \"name\": \"White rice, long-grain, cooked\", \"grams\": 53.0, \"note\": \"\"}, {\"ingredient_id\": \"ground_beef\", \"name\": \"Ground beef 90% lean\", \"grams\": 31.0, \"note\": \"\"}, {\"ingredient_id\": \"bell_pepper\", \"name\": \"Bell pepper\", \"grams\": 8.0, \"note\": \"\"}]",
+   "kcal": 200,
+   "protein_g": 9.1,
+   "fat_g": 8.6,
+   "carbs_g": 22.1,
+   "fiber_g": 2.3,
+   "net_carbs_g": 19.8,
+   "glycemic_index": 61,
+   "gi_category": "medium",
+   "glycemic_load": 12.1,
+   "gl_category": "medium",
+   "gi_note": "Medium-GI dish: keep to the stated portion and pair with the protein/fat in the recipe; GL per serving is the better guide.",
+   "gi_evidence": "74% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 74,
+   "diet_tags": "gluten-free, dairy-free, nut-free",
+   "instructions": "1. Prepare and measure the ingredients: yellow onion, tomato, white rice, ground beef 90% lean and bell pepper.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in one portion.",
+   "steps_json": "[\"Prepare and measure the ingredients: yellow onion, tomato, white rice, ground beef 90% lean and bell pepper.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in one portion.\"]",
+   "steps": [
+    "Prepare and measure the ingredients: yellow onion, tomato, white rice, ground beef 90% lean and bell pepper.",
+    "Combine them and cook, stirring, until everything is hot and cooked through.",
+    "Serve in one portion."
+   ]
+  },
+  {
+   "id": "DB-2087",
    "name": "Chicken or turkey fricassee",
    "category": "Poultry",
    "cuisine": "American",
@@ -176436,7 +177189,7 @@
    ]
   },
   {
-   "id": "DB-2079",
+   "id": "DB-2088",
    "name": "Chicken or turkey hash",
    "category": "Poultry",
    "cuisine": "American",
@@ -176455,8 +177208,8 @@
      "note": ""
     },
     {
-     "ingredient_id": "green_onion",
-     "name": "Green onions (scallions)",
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
      "grams": 13.0,
      "note": ""
     },
@@ -176479,31 +177232,31 @@
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"olive_oil\", \"name\": \"Extra-virgin olive oil\", \"grams\": 14.0, \"note\": \"\"}, {\"ingredient_id\": \"green_onion\", \"name\": \"Green onions (scallions)\", \"grams\": 13.0, \"note\": \"\"}, {\"ingredient_id\": \"potato_baked\", \"name\": \"Potato, baked, flesh (russet)\", \"grams\": 156.0, \"note\": \"\"}, {\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 150.0, \"note\": \"\"}, {\"ingredient_id\": \"turkey_roasted\", \"name\": \"Turkey, roasted, meat only\", \"grams\": 140.0, \"note\": \"\"}]",
+   "ingredients_json": "[{\"ingredient_id\": \"olive_oil\", \"name\": \"Extra-virgin olive oil\", \"grams\": 14.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 13.0, \"note\": \"\"}, {\"ingredient_id\": \"potato_baked\", \"name\": \"Potato, baked, flesh (russet)\", \"grams\": 156.0, \"note\": \"\"}, {\"ingredient_id\": \"celery\", \"name\": \"Celery\", \"grams\": 150.0, \"note\": \"\"}, {\"ingredient_id\": \"turkey_roasted\", \"name\": \"Turkey, roasted, meat only\", \"grams\": 140.0, \"note\": \"\"}]",
    "kcal": 260,
    "protein_g": 22.5,
    "fat_g": 9.9,
-   "carbs_g": 19.5,
+   "carbs_g": 19.6,
    "fiber_g": 2.5,
-   "net_carbs_g": 17.0,
+   "net_carbs_g": 17.1,
    "glycemic_index": 79,
    "gi_category": "high",
-   "glycemic_load": 13.4,
+   "glycemic_load": 13.5,
    "gl_category": "medium",
    "gi_note": "Medium-GI dish: keep to the stated portion and pair with the protein/fat in the recipe; GL per serving is the better guide.",
-   "gi_evidence": "92% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
-   "gi_measured_carb_share_pct": 92,
+   "gi_evidence": "91% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 91,
    "diet_tags": "gluten-free, dairy-free, nut-free, meal-prep",
-   "instructions": "1. Prepare and measure the ingredients: green onions (scallions), potato, celery and turkey.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 2 portions.",
-   "steps_json": "[\"Prepare and measure the ingredients: green onions (scallions), potato, celery and turkey.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 2 portions.\"]",
+   "instructions": "1. Prepare and measure the ingredients: yellow onion, potato, celery and turkey.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 2 portions.",
+   "steps_json": "[\"Prepare and measure the ingredients: yellow onion, potato, celery and turkey.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 2 portions.\"]",
    "steps": [
-    "Prepare and measure the ingredients: green onions (scallions), potato, celery and turkey.",
+    "Prepare and measure the ingredients: yellow onion, potato, celery and turkey.",
     "Combine them and cook, stirring, until everything is hot and cooked through.",
     "Serve in 2 portions."
    ]
   },
   {
-   "id": "DB-2080",
+   "id": "DB-2089",
    "name": "Chicken or turkey with stuffing",
    "category": "Poultry",
    "cuisine": "American",
@@ -176552,7 +177305,7 @@
    ]
   },
   {
-   "id": "DB-2081",
+   "id": "DB-2090",
    "name": "Beef stroganoff with noodles",
    "category": "Beef, Pork & Lamb",
    "cuisine": "American",
@@ -176607,8 +177360,8 @@
      "note": ""
     },
     {
-     "ingredient_id": "green_onion",
-     "name": "Green onions (scallions)",
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
      "grams": 80.0,
      "note": ""
     },
@@ -176619,20 +177372,20 @@
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"mushrooms\", \"name\": \"Mushrooms (cremini/white)\", \"grams\": 132.0, \"note\": \"\"}, {\"ingredient_id\": \"white_flour\", \"name\": \"White flour, all-purpose\", \"grams\": 31.0, \"note\": \"\"}, {\"ingredient_id\": \"cream_of_mushroom_soup\", \"name\": \"Cream of mushroom soup, condensed\", \"grams\": 303.0, \"note\": \"\"}, {\"ingredient_id\": \"beef_sirloin\", \"name\": \"Beef sirloin, trimmed\", \"grams\": 454.0, \"note\": \"\"}, {\"ingredient_id\": \"sour_cream\", \"name\": \"Sour cream\", \"grams\": 240.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 6.0, \"note\": \"\"}, {\"ingredient_id\": \"egg_noodles\", \"name\": \"Egg noodles, cooked\", \"grams\": 320.0, \"note\": \"\"}, {\"ingredient_id\": \"green_onion\", \"name\": \"Green onions (scallions)\", \"grams\": 80.0, \"note\": \"\"}, {\"ingredient_id\": \"olive_oil\", \"name\": \"Extra-virgin olive oil\", \"grams\": 28.0, \"note\": \"\"}]",
-   "kcal": 360,
-   "protein_g": 22.2,
+   "ingredients_json": "[{\"ingredient_id\": \"mushrooms\", \"name\": \"Mushrooms (cremini/white)\", \"grams\": 132.0, \"note\": \"\"}, {\"ingredient_id\": \"white_flour\", \"name\": \"White flour, all-purpose\", \"grams\": 31.0, \"note\": \"\"}, {\"ingredient_id\": \"cream_of_mushroom_soup\", \"name\": \"Cream of mushroom soup, condensed\", \"grams\": 303.0, \"note\": \"\"}, {\"ingredient_id\": \"beef_sirloin\", \"name\": \"Beef sirloin, trimmed\", \"grams\": 454.0, \"note\": \"\"}, {\"ingredient_id\": \"sour_cream\", \"name\": \"Sour cream\", \"grams\": 240.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 6.0, \"note\": \"\"}, {\"ingredient_id\": \"egg_noodles\", \"name\": \"Egg noodles, cooked\", \"grams\": 320.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 80.0, \"note\": \"\"}, {\"ingredient_id\": \"olive_oil\", \"name\": \"Extra-virgin olive oil\", \"grams\": 28.0, \"note\": \"\"}]",
+   "kcal": 361,
+   "protein_g": 22.1,
    "fat_g": 19.6,
-   "carbs_g": 24.2,
-   "fiber_g": 1.7,
-   "net_carbs_g": 22.5,
-   "glycemic_index": 54,
+   "carbs_g": 24.5,
+   "fiber_g": 1.6,
+   "net_carbs_g": 22.9,
+   "glycemic_index": 53,
    "gi_category": "low",
    "glycemic_load": 12.2,
    "gl_category": "medium",
    "gi_note": "",
-   "gi_evidence": "56% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
-   "gi_measured_carb_share_pct": 56,
+   "gi_evidence": "55% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 55,
    "diet_tags": "nut-free, meal-prep",
    "instructions": "1. Prepare and measure the ingredients: mushrooms (cremini/white), white flour, cream of mushroom soup, beef sirloin, sour cream and egg noodles.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 6 portions.",
    "steps_json": "[\"Prepare and measure the ingredients: mushrooms (cremini/white), white flour, cream of mushroom soup, beef sirloin, sour cream and egg noodles.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 6 portions.\"]",
@@ -176643,7 +177396,7 @@
    ]
   },
   {
-   "id": "DB-2082",
+   "id": "DB-2091",
    "name": "Beef with spaetzle or rice, vegetable, frozen meal",
    "category": "Beef, Pork & Lamb",
    "cuisine": "American",
@@ -176722,7 +177475,7 @@
    ]
   },
   {
-   "id": "DB-2083",
+   "id": "DB-2092",
    "name": "Meat loaf made with beef",
    "category": "Beef, Pork & Lamb",
    "cuisine": "American",
@@ -176735,8 +177488,8 @@
    "photo_url": "",
    "ingredients": [
     {
-     "ingredient_id": "green_onion",
-     "name": "Green onions (scallions)",
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
      "grams": 80.0,
      "note": ""
     },
@@ -176771,31 +177524,31 @@
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"green_onion\", \"name\": \"Green onions (scallions)\", \"grams\": 80.0, \"note\": \"\"}, {\"ingredient_id\": \"beef_round_roast\", \"name\": \"Beef round, cooked, with fat\", \"grams\": 429.0, \"note\": \"\"}, {\"ingredient_id\": \"egg\", \"name\": \"Egg, large (50 g each)\", \"grams\": 50.0, \"note\": \"\"}, {\"ingredient_id\": \"white_bread\", \"name\": \"White bread\", \"grams\": 84.0, \"note\": \"\"}, {\"ingredient_id\": \"milk\", \"name\": \"Milk, 2%\", \"grams\": 122.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 6.0, \"note\": \"\"}]",
-   "kcal": 174,
-   "protein_g": 17.2,
+   "ingredients_json": "[{\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 80.0, \"note\": \"\"}, {\"ingredient_id\": \"beef_round_roast\", \"name\": \"Beef round, cooked, with fat\", \"grams\": 429.0, \"note\": \"\"}, {\"ingredient_id\": \"egg\", \"name\": \"Egg, large (50 g each)\", \"grams\": 50.0, \"note\": \"\"}, {\"ingredient_id\": \"white_bread\", \"name\": \"White bread\", \"grams\": 84.0, \"note\": \"\"}, {\"ingredient_id\": \"milk\", \"name\": \"Milk, 2%\", \"grams\": 122.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 6.0, \"note\": \"\"}]",
+   "kcal": 175,
+   "protein_g": 17.1,
    "fat_g": 8.3,
-   "carbs_g": 6.7,
-   "fiber_g": 0.5,
-   "net_carbs_g": 6.2,
-   "glycemic_index": 62,
+   "carbs_g": 6.9,
+   "fiber_g": 0.4,
+   "net_carbs_g": 6.5,
+   "glycemic_index": 60,
    "gi_category": "medium",
-   "glycemic_load": 3.8,
+   "glycemic_load": 3.9,
    "gl_category": "low",
    "gi_note": "Medium-GI dish: keep to the stated portion and pair with the protein/fat in the recipe; GL per serving is the better guide.",
-   "gi_evidence": "92% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
-   "gi_measured_carb_share_pct": 92,
+   "gi_evidence": "88% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 88,
    "diet_tags": "nut-free, low-carb, meal-prep",
-   "instructions": "1. Prepare and measure the ingredients: green onions (scallions), beef round, egg and milk.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 8 portions.",
-   "steps_json": "[\"Prepare and measure the ingredients: green onions (scallions), beef round, egg and milk.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 8 portions.\"]",
+   "instructions": "1. Prepare and measure the ingredients: yellow onion, beef round, egg and milk.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 8 portions.",
+   "steps_json": "[\"Prepare and measure the ingredients: yellow onion, beef round, egg and milk.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 8 portions.\"]",
    "steps": [
-    "Prepare and measure the ingredients: green onions (scallions), beef round, egg and milk.",
+    "Prepare and measure the ingredients: yellow onion, beef round, egg and milk.",
     "Combine them and cook, stirring, until everything is hot and cooked through.",
     "Serve in 8 portions."
    ]
   },
   {
-   "id": "DB-2084",
+   "id": "DB-2093",
    "name": "Antipasto with ham, fish, cheese, vegetables",
    "category": "Seafood",
    "cuisine": "American",
@@ -176880,7 +177633,7 @@
    ]
   },
   {
-   "id": "DB-2085",
+   "id": "DB-2094",
    "name": "Shrimp creole, with rice",
    "category": "Seafood",
    "cuisine": "American",
@@ -176911,8 +177664,8 @@
      "note": ""
     },
     {
-     "ingredient_id": "tomato",
-     "name": "Tomato",
+     "ingredient_id": "diced_tomatoes",
+     "name": "Diced tomatoes, canned",
      "grams": 480.0,
      "note": ""
     },
@@ -176923,8 +177676,8 @@
      "note": ""
     },
     {
-     "ingredient_id": "green_onion",
-     "name": "Green onions (scallions)",
+     "ingredient_id": "onion",
+     "name": "Yellow onion",
      "grams": 40.0,
      "note": ""
     },
@@ -176935,25 +177688,25 @@
      "note": ""
     }
    ],
-   "ingredients_json": "[{\"ingredient_id\": \"shrimp\", \"name\": \"Shrimp, peeled\", \"grams\": 680.0, \"note\": \"\"}, {\"ingredient_id\": \"white_rice\", \"name\": \"White rice, long-grain, cooked\", \"grams\": 525.0, \"note\": \"\"}, {\"ingredient_id\": \"white_flour\", \"name\": \"White flour, all-purpose\", \"grams\": 23.0, \"note\": \"\"}, {\"ingredient_id\": \"tomato\", \"name\": \"Tomato\", \"grams\": 480.0, \"note\": \"\"}, {\"ingredient_id\": \"bell_pepper\", \"name\": \"Bell pepper\", \"grams\": 37.0, \"note\": \"\"}, {\"ingredient_id\": \"green_onion\", \"name\": \"Green onions (scallions)\", \"grams\": 40.0, \"note\": \"\"}, {\"ingredient_id\": \"butter\", \"name\": \"Butter\", \"grams\": 56.0, \"note\": \"\"}]",
-   "kcal": 231,
-   "protein_g": 19.8,
-   "fat_g": 6.5,
-   "carbs_g": 23.6,
-   "fiber_g": 1.3,
-   "net_carbs_g": 22.3,
+   "ingredients_json": "[{\"ingredient_id\": \"shrimp\", \"name\": \"Shrimp, peeled\", \"grams\": 680.0, \"note\": \"\"}, {\"ingredient_id\": \"white_rice\", \"name\": \"White rice, long-grain, cooked\", \"grams\": 525.0, \"note\": \"\"}, {\"ingredient_id\": \"white_flour\", \"name\": \"White flour, all-purpose\", \"grams\": 23.0, \"note\": \"\"}, {\"ingredient_id\": \"diced_tomatoes\", \"name\": \"Diced tomatoes, canned\", \"grams\": 480.0, \"note\": \"\"}, {\"ingredient_id\": \"bell_pepper\", \"name\": \"Bell pepper\", \"grams\": 37.0, \"note\": \"\"}, {\"ingredient_id\": \"onion\", \"name\": \"Yellow onion\", \"grams\": 40.0, \"note\": \"\"}, {\"ingredient_id\": \"butter\", \"name\": \"Butter\", \"grams\": 56.0, \"note\": \"\"}]",
+   "kcal": 235,
+   "protein_g": 19.9,
+   "fat_g": 6.4,
+   "carbs_g": 24.3,
+   "fiber_g": 1.4,
+   "net_carbs_g": 22.9,
    "glycemic_index": 71,
    "gi_category": "high",
-   "glycemic_load": 15.8,
+   "glycemic_load": 16.3,
    "gl_category": "medium",
    "gi_note": "Medium-GI dish: keep to the stated portion and pair with the protein/fat in the recipe; GL per serving is the better guide.",
-   "gi_evidence": "81% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
-   "gi_measured_carb_share_pct": 81,
+   "gi_evidence": "79% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 79,
    "diet_tags": "pescatarian, nut-free, meal-prep",
-   "instructions": "1. Prepare and measure the ingredients: shrimp, white rice, white flour, tomato, bell pepper and green onions (scallions).\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 8 portions.",
-   "steps_json": "[\"Prepare and measure the ingredients: shrimp, white rice, white flour, tomato, bell pepper and green onions (scallions).\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 8 portions.\"]",
+   "instructions": "1. Prepare and measure the ingredients: shrimp, white rice, white flour, diced tomatoes, bell pepper and yellow onion.\n2. Combine them and cook, stirring, until everything is hot and cooked through.\n3. Serve in 8 portions.",
+   "steps_json": "[\"Prepare and measure the ingredients: shrimp, white rice, white flour, diced tomatoes, bell pepper and yellow onion.\", \"Combine them and cook, stirring, until everything is hot and cooked through.\", \"Serve in 8 portions.\"]",
    "steps": [
-    "Prepare and measure the ingredients: shrimp, white rice, white flour, tomato, bell pepper and green onions (scallions).",
+    "Prepare and measure the ingredients: shrimp, white rice, white flour, diced tomatoes, bell pepper and yellow onion.",
     "Combine them and cook, stirring, until everything is hot and cooked through.",
     "Serve in 8 portions."
    ]
