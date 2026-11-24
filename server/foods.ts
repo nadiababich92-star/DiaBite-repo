@@ -345,6 +345,13 @@ export function householdPortion(rows: { label: string; grams: number }[] | unde
     const breast = (rows ?? []).find((p) => /breast/i.test(p.label))
     if (breast) return Math.round(breast.grams)
   }
+  // A named sandwich is the one in its name: USDA lists "1 McDonald's Mac Jr" (135 g) first for "Big Mac (McDonalds)", which counted a
+  // Big Mac as a Mac Jr (24 November 2026). For a chain's item (its chain in brackets), a portion whose label carries the item's own name is the portion.
+  if (/\((mcdonalds|burger king|wendys|taco bell|kfc|subway|chick-fil-a)\)\s*$/i.test(name)) {
+    const own = name.replace(/\s*\(.*\)\s*$/, '').trim().toLowerCase()
+    const named = (rows ?? []).find((p) => p.label.toLowerCase().includes(own))
+    if (named) return Math.round(named.grams)
+  }
   // A burrito bowl is said by the bowl. USDA lists "1 cup" first, 120 g, which made "a burrito bowl" a fifth of a bowl and
   // 20 g of carbohydrate with a plain "fits" (a dietitian's test, 15 November); the listed item is the portion.
   if (/^burrito bowl\b/i.test(name)) {
