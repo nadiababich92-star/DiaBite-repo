@@ -405,7 +405,8 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
   // Rule 7: the engine's own verdict, not a regex over the prose. When a food
   // is unknown the engine must not have said "fits", whatever the model wrote.
   if (e.enginePartial === true) {
-    const after = (callOf(r, 'compute_meal')?.result as { afterMeal?: { fits?: boolean | null; partial?: { unknownFoods: string[] } } } | undefined)?.afterMeal
+    // The last meal call: a first call the engine refused (an amount given twice) has no afterMeal, and the agent corrects it.
+    const after = (lastCallOf(r, 'compute_meal')?.result as { afterMeal?: { fits?: boolean | null; partial?: { unknownFoods: string[] } } } | undefined)?.afterMeal
     say('engine marks the meal partial, not fits', !!after?.partial?.unknownFoods?.length && after.fits !== true, JSON.stringify(after))
   }
   // A dish counted from an assumed recipe (cost_dish). Safety checks read the tool's own result:

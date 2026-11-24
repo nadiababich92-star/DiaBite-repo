@@ -7633,8 +7633,8 @@
     {
       "id": "DW1",
       "dimension": "helpful",
-      "query": "My beef stew, 16 oz",
-      "ground_truth": "The weight of the whole dish (16 oz, 453.6 g) is what was eaten: the dish is counted at it, by the agent or by the engine from the message.",
+      "query": "My beef lasagna, 16 oz",
+      "ground_truth": "The weight of the whole dish (16 oz, 453.6 g) is what was eaten: the dish is counted at it. (Was \"my beef stew, 16 oz\" until 24 November: for a stew, 16 oz is as often 16 fluid ounces, two cups, and the agent read it so; a lasagna is weighed.)",
       "context": {
         "budget": {
           "glBudget": 54,
