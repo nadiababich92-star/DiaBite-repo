@@ -362,6 +362,9 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   const [anonCount, setAnonCount] = useState(0)
   const [reply, setReply] = useState<AgentResponse | null>(null)
   const [asked, setAsked] = useState('')
+  // The question the answer is about: the last one from the main box. A reply to the agent's question ("1 cup cooked, about 240 g") is not
+  // the question, and the line over the answer showed it instead (24 November 2026).
+  const [topic, setTopic] = useState('')
   // The answer to a question the agent asked, typed right under it rather than in the box above the screen.
   const [replyText, setReplyText] = useState('')
   // The receipt and the portions are open under the verdict, so the arithmetic and the weight can be seen and changed without opening anything (the owner's decision, 18 November); both can still be folded away.
@@ -542,7 +545,8 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     const next = d === today ? null : d
     if ((next ?? today) === day) return
     setLogDay(next); setLogged(false); setLogNote('')
-    if (reply && asked) void ask(asked, { day: d, force: true })
+    // A new day is a new topic: the question itself is asked again, not a reply to the agent's last question.
+    if (reply && (topic || asked)) void ask(topic || asked, { day: d, force: true })
   }
 
   // `reply`: the answer to the agent's question, from the box under it; every other question is a new topic (docs/engineering/agent-session-batch3.md, A).
@@ -552,7 +556,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     const forDay = opts.day ?? day
     abort.current?.abort()
     abort.current = new AbortController()
-    setBusy(true); setError(null); setLimited(null); setFreeLimit(null); setReply(null); setShowReceipt(true); setLogged(false); setLogNote(''); setAsked(q); setReplyText('')
+    setBusy(true); setError(null); setLimited(null); setFreeLimit(null); setReply(null); setShowReceipt(true); setLogged(false); setLogNote(''); setAsked(q); if (!opts.reply) setTopic(q); setReplyText('')
     setEditing(true); setGrams({}); setRemoved([]); setTyped({}); setMine([]); setFieldFor(null); setRefusal(null); setSwap(null); setRecalc(null); setRecalcError('')
     const sid = fresh ? `eval-${Math.random().toString(36).slice(2, 10)}` : sessionId()
     setTurn(sid)
@@ -774,7 +778,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
 
       {reply && (
         <>
-          <p className="muted asked">{asked}</p>
+          <p className="muted asked">{topic || asked}</p>
           {recalc && <RecalcCard rc={recalc} onBack={() => { setGrams({}); setRemoved([]); setTyped({}); setMine([]); setFieldFor(null); setRefusal(null); setSwap(null); setRecalc(null) }} note={swap ? `Recalculated with ${swap.name.toLowerCase()} instead of ${swap.replaced.toLowerCase()}. The original answer is kept below.` : undefined} was={wasNow} countBy={profile.countBy} weightsUsed={<WeightsUsed lines={recalc.receipt.lines.map((line, k) => ({ line, index: baseIndexOfCard[k] }))} onEdit={editWeight} />} />}
           {recalc && logBlock}
           <Fold when={!!recalc} title={swap ? 'Original answer, before the swap' : 'Original answer, before you changed a portion'}>

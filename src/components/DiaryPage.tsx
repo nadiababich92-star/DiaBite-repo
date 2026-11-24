@@ -14,6 +14,9 @@ interface Props {
   onChange: (entries: DiaryEntry[]) => void
   /** Take the person to the Ask tab: from an empty day, or with the day and meal they are looking at. */
   onAsk?: (target?: { date: string; meal: MealType }) => void
+  /** The day on show, kept by the app so it survives a trip to Ask and back (null: today). Without it the page keeps its own. */
+  picked?: string | null
+  onPick?: (date: string | null) => void
   /** Bread units are an opt-in display setting (You); off, they are not shown at all. */
   showBreadUnits?: boolean
   /** The person's units: imperial shows a household measure first, with the grams beside it. */
@@ -24,10 +27,14 @@ interface Props {
 
 const newId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 
-export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUnits = false, units, topCard }: Props) {
+export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUnits = false, units, topCard, picked: pickedProp, onPick }: Props) {
   // The day on show follows the calendar until the person moves to another one.
   const today = useToday()
-  const [picked, setPicked] = useState<string | null>(null)
+  // The page was made again on every visit, so after Add food and Log it the day went back to today, and filling in past days meant
+  // stepping back each time (24 November 2026). The app keeps the day; the page's own state is only for a page used alone.
+  const [ownPicked, setOwnPicked] = useState<string | null>(null)
+  const picked = onPick ? (pickedProp ?? null) : ownPicked
+  const setPicked = onPick ?? setOwnPicked
   const date = picked ?? today
   const isToday = date === today
   const [meal, setMeal] = useState<MealType>(mealForNow)

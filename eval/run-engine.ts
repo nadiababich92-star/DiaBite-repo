@@ -1095,6 +1095,25 @@ recorrectMisses.forEach((m) => console.log(m))
   if (bits.length) process.exitCode = 1
 }
 
+// ── the Diary keeps its day, and the line over an answer is the question (findings J and I, 24 November) ──────────────
+{
+  const bits: string[] = []
+  const t = todayISO()
+  const d = new Date(t + 'T12:00:00'); d.setDate(d.getDate() - 3)
+  const past = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const html = renderToStaticMarkup(createElement(DiaryPage, { targets: calculateTargets(DEFAULT_PROFILE), diary: [], onChange: () => {}, picked: past, onPick: () => {} }))
+  const nav = html.slice(html.indexOf('day-nav'), html.indexOf('day-nav') + 600)
+  if (!nav.includes(dayLabel(past, t)) || !html.includes('Back to today')) bits.push('the Diary does not show the day the app kept')
+  const here = dirname(fileURLToPath(import.meta.url))
+  const app = readFileSync(join(here, '../src/App.tsx'), 'utf8'), ask = readFileSync(join(here, '../src/components/AskPage.tsx'), 'utf8')
+  if (!app.includes('picked={diaryDay} onPick={setDiaryDay}')) bits.push('the app does not keep the Diary day')
+  if (!/onLog=\{\(added\) => \{ setDiary\(\(d\) => \[\.\.\.d, \.\.\.added\]\); const day = added\[0\]\?\.date; if \(day\) setDiaryDay/.test(app)) bits.push('a meal logged for another day does not open the Diary on it')
+  if (!ask.includes('if (!opts.reply) setTopic(q)') || !ask.includes('<p className="muted asked">{topic || asked}</p>')) bits.push('the line over an answer shows a reply, not the question')
+  console.log(`\ndiary day ${bits.length === 0 ? 'ok' : 'WRONG'}  (the Diary keeps its day; the question over an answer)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
 // ── findings of 24 November, batch 2 ─────────────────────────────────────────
 // A food with no GI and real carbohydrate is "carbs only", never "no carbs"; a Diary meal with such a food has no load level; a partial
 // answer says "counted so far"; one checked number is singular; the feedback card is never on screen while a question is answered.

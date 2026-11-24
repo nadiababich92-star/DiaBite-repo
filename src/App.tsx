@@ -23,7 +23,7 @@ import { signOutAndClear, useAccess, useAuth } from './lib/auth'
 import { SignInCard } from './components/SignInCard'
 import { SIGN_IN_CARDS } from './lib/anon'
 import { supabaseConfigured } from './lib/supabase'
-import { loadDiary, loadProfile, loadTour, saveDiary, saveProfile, saveTour, thawWrites } from './lib/storage'
+import { loadDiary, loadProfile, loadTour, saveDiary, saveProfile, saveTour, thawWrites, todayISO } from './lib/storage'
 import { initialSeen, STEP_ORDER, type TourStep } from './lib/tour'
 import { authInUrl, showLanding, skipLanding } from './lib/landingRule'
 import { CONSENT_VERSION, LEGACY_DIARY_KEY, PENDING_KEY, loadAccount, mergeById, reconcileAfterFailedPush, useAccountSync } from './lib/sync'
@@ -60,6 +60,8 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('ask')
   // The day and meal the Diary sent the person to Ask for. It lasts only while they stay on Ask.
   const [logTarget, setLogTarget] = useState<{ date: string; meal: MealType } | null>(null)
+  // The day the Diary shows, kept here so a trip to Ask and back does not reset it; a meal logged for another day opens the Diary on that day.
+  const [diaryDay, setDiaryDay] = useState<string | null>(null)
   useEffect(() => { if (tab !== 'ask') setLogTarget(null) }, [tab])
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   // "Summary for my clinician": a printable page that replaces the app while it is open, so only it prints.
@@ -300,7 +302,7 @@ export default function App() {
         <AskPage
           profile={anonMode ? ANON_PROFILE : profile} targets={anonMode ? anonTargets : targets} diary={anonMode ? NO_DIARY : diary}
           anonymous={anonMode ? { onSignIn: () => setSigningIn(true), onOff: () => { leaveAnon(); setEntering(false) }, freeAnswers: access.freeAnswers } : undefined}
-          onLog={(added) => setDiary((d) => [...d, ...added])} onOpenDiary={() => setTab('diary')} onSessionEnded={sessionEnded}
+          onLog={(added) => { setDiary((d) => [...d, ...added]); const day = added[0]?.date; if (day) setDiaryDay(day === todayISO() ? null : day) }} onOpenDiary={() => setTab('diary')} onSessionEnded={sessionEnded}
           logTarget={logTarget} onClearTarget={() => setLogTarget(null)}
           tourSeen={tourSeen} onTourSeen={(s) => { setTourSeen(s); saveTour(s) }} tourSuspended={feedbackOpen || waiting > 0 || howOpen || glOpen}
           firstSession={anonMode ? undefined : {
@@ -315,7 +317,7 @@ export default function App() {
       {anonMode && tab === 'menu' && <SignInCard {...SIGN_IN_CARDS.menu} onSignIn={() => setSigningIn(true)} />}
       {anonMode && tab === 'profile' && <SignInCard {...SIGN_IN_CARDS.profile} onSignIn={() => setSigningIn(true)} />}
       {!anonMode && tab === 'diary' && (
-        <DiaryPage targets={targets} diary={diary} onChange={setDiary} onAsk={(target) => { setLogTarget(target ?? null); setTab('ask') }} showBreadUnits={profile.showBreadUnits} units={profile.units} topCard={deferredCard} />
+        <DiaryPage targets={targets} diary={diary} onChange={setDiary} picked={diaryDay} onPick={setDiaryDay} onAsk={(target) => { setLogTarget(target ?? null); setTab('ask') }} showBreadUnits={profile.showBreadUnits} units={profile.units} topCard={deferredCard} />
       )}
       {!anonMode && tab === 'menu' && (
         <MenuPage
