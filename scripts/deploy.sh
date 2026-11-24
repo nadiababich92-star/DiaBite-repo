@@ -39,6 +39,19 @@ for candidate in $(git log -20 --format=%H); do
   fi
 done
 [ -n "$SHA" ] || { echo "no build found for HEAD or the 20 commits before it"; exit 1; }
+# Several commits pushed at once get one build, at the tip. If anything between the last built commit and HEAD
+# changes the image, that build is HEAD's, and it may not have started yet: wait for it rather than ship the older image
+# (24 November 2026: an engine change two commits under an eval-only HEAD was skipped, and the old image went live).
+IMAGE_PATHS='^(\.github/workflows/build-engine\.yml|Dockerfile|\.dockerignore|package(-lock)?\.json|server/|agent/|src/|data/foods-usda/(foods_usda|branded_common|restaurant_items)\.json|data/recipes-db/(ingredients|recipes_db|portion_mapping|gi_crosscheck)\.json|data/recipes-db/embeddings\.|index\.html|public/|vite\.config\.ts|tsconfig\.json)'
+if [ "$SHA" != "$(git rev-parse HEAD)" ] && git diff --name-only "$SHA" HEAD | grep -qE "$IMAGE_PATHS"; then
+  echo "commits after $SHA change the image; waiting for HEAD's build…"
+  for _ in $(seq 1 30); do
+    gh run list --repo "$REPO" --workflow build-engine --commit "$(git rev-parse HEAD)" --limit 1 \
+      --json status -q '.[0].status' 2>/dev/null | grep -q . && { SHA=$(git rev-parse HEAD); break; }
+    sleep 10
+  done
+  [ "$SHA" = "$(git rev-parse HEAD)" ] || { echo "HEAD changes the image and has no build; push it, or check the workflow"; exit 1; }
+fi
 [ "$SHA" = "$(git rev-parse HEAD)" ] && echo "commit  $SHA" || echo "commit  $SHA (HEAD changed nothing the image is built from)"
 
 echo "waiting for that build…"
