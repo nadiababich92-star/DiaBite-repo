@@ -805,6 +805,9 @@ export function uncountedFoods(trace: ToolCallTrace[]): string[] {
   if (!meal) return []
   const costed = new Set(((meal.result as { items?: { foodId?: string }[] }).items ?? []).map((it) => it.foodId).filter(Boolean) as string[])
   const named = (((meal.input as { notCounted?: unknown } | undefined)?.notCounted ?? []) as unknown[]).filter((x): x is string => typeof x === 'string').map((x) => x.toLowerCase().trim())
+  // A dish counted from its ingredients (cost_dish) is counted under its own name: the name resolved earlier is the dish, not a food left out.
+  const dish = meal.tool.endsWith('cost_dish') ? String((meal.input as { dish?: unknown } | undefined)?.dish ?? '').toLowerCase().trim() : ''
+  if (dish) named.push(dish)
   const words = (p: string) => p.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2)
   const resolved = trace.filter((t) => t.tool.endsWith('resolve_foods'))
     .flatMap((t) => ((t.result as { results?: { phrase?: string; unknown?: boolean; candidates?: { id: string }[] }[] } | undefined)?.results ?? []))

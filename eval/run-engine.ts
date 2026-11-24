@@ -1067,6 +1067,8 @@ recorrectMisses.forEach((m) => console.log(m))
   if (uncountedFoods([rf([['chicken', ['seed:chicken']]]), rf([['chicken breast', ['ing:chicken_breast']]]), cm(['ing:chicken_breast'])]).length) bits.push('the turn check flags a food re-resolved under more words')
   if (uncountedFoods([rf([['cholent', [], true]]), cm(['ing:beef_chuck'])]).length) bits.push('the turn check flags an unknown food')
   if (uncountedFoods([yogurt]).length) bits.push('the turn check flags a turn with no meal count')
+  const bowl = { tool: 'diabite_engine_cost_dish', input: { dish: 'chicken burrito bowl', ingredients: [] }, result: { totals: { gl: 9 }, items: [{ foodId: 'seed:chicken' }, { foodId: 'ing:white_rice' }], afterMeal: { fits: true } } }
+  if (uncountedFoods([rf([['chicken burrito bowl', ['usda:2708563']], ['A chicken burrito bowl with white rice', ['usda:2708563']]]), bowl]).length) bits.push('the turn check flags the name of a dish counted from its ingredients')
   // A sandwich record already holds its bread (5 of 10 after-samples counted "Turkey sandwich on white" and the two slices beside it).
   if (!sandwichWithItsBread(['Turkey sandwich on white', 'Whole wheat bread (100% whole wheat)'])) bits.push('a sandwich beside its bread is allowed')
   if (sandwichWithItsBread(['Turkey breast, deli', 'Whole wheat bread (100% whole wheat)']) || sandwichWithItsBread(['Steak sandwich or sub on white', 'Garlic bread, with parmesan cheese'])) bits.push('a filling on bread, or a sandwich with garlic bread on the side, is refused')
