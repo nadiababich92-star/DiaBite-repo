@@ -118,7 +118,8 @@ const ALIASES: Record<string, string[]> = {
   'oats': ['oatmeal', 'porridge', 'oats'],
   'oats-instant': ['instant oats', 'quick oats'],
   'egg': ['eggs', 'scrambled eggs', 'fried egg', 'boiled egg', 'boiled eggs', 'hard-boiled egg', 'hard-boiled eggs', 'hard boiled egg', 'hard boiled eggs', 'soft-boiled egg', 'omelette', 'omelet'],
-  'chicken': ['chicken', 'grilled chicken', 'chicken breast'],
+  // "Cooked chicken breast" found fried coated chicken, and was left out of a 450 g burrito bowl as ambiguous (CL1, 24 November 2026).
+  'chicken': ['chicken', 'grilled chicken', 'chicken breast', 'cooked chicken breast', 'chicken breast, cooked', 'grilled chicken breast', 'baked chicken breast', 'boneless chicken breast', 'skinless chicken breast', 'boneless skinless chicken breast'],
   'beef': ['steak', 'beef'],
   'cheese': ['cheddar', 'cheese', 'cheese slice', 'swiss cheese'],
   'cola': ['coke', 'soda', 'pepsi', 'soft drink', 'pop'],
@@ -672,6 +673,8 @@ const USDA_ALIASES: Record<string, string[]> = {
 const INGREDIENT_ALIASES: Record<string, string[]> = {
   // "1 oz shredded cheese" found "Blue cheese, crumbled" (24 November 2026): shredded cheese, as sold in the US, is cheddar unless named.
   cheddar: ['shredded cheese', 'shredded cheddar', 'grated cheddar'],
+  // "Shredded chicken" found a tostada recipe (24 November 2026); it is cooked chicken pulled apart.
+  rotisserie_chicken: ['shredded chicken', 'pulled chicken'],
   turkey_sausage: ['breakfast sausage', 'sausage links', 'sausage patties', 'turkey breakfast patties', 'turkey sausage patties', 'turkey breakfast sausage', 'turkey breakfast links'],
   chicken_sausage: ['breakfast sausage', 'sausage links', 'sausage patties'],
   // 'pizza sauce' matched fish sauce, a neighbour by the word 'sauce'; on a pizza it is tomato sauce.

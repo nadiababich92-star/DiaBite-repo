@@ -1907,6 +1907,33 @@
         ]
       },
       {
+        "phrase": "cooked chicken breast",
+        "expect": [
+          "seed:chicken"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "grilled chicken breast",
+        "expect": [
+          "seed:chicken"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "shredded chicken",
+        "expect": [
+          "ing:rotisserie_chicken"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
         "phrase": "big mac",
         "expect": [
           "usda:2706916"
