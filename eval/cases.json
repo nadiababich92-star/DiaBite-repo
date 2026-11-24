@@ -7602,6 +7602,50 @@
       "tags": [
         "batch3"
       ]
+    },
+    {
+      "id": "DW1",
+      "dimension": "helpful",
+      "query": "My beef stew, 16 oz",
+      "ground_truth": "The weight of the whole dish (16 oz, 453.6 g) is what was eaten: the dish is counted at it, by the agent or by the engine from the message.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "costedTotalGrams": 453.6,
+        "verified": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "dish-weight"
+      ]
+    },
+    {
+      "id": "DW2",
+      "dimension": "helpful",
+      "query": "450 g of pasta with a slice of bread",
+      "ground_truth": "The 450 g is the pasta's, not the meal's: nothing is scaled to it.",
+      "context": {
+        "budget": {
+          "glBudget": 54,
+          "carbsG": 107,
+          "kcal": 1653
+        },
+        "entries": []
+      },
+      "expect": {
+        "notScaledByMessage": true,
+        "verified": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "dish-weight"
+      ]
     }
   ]
 }

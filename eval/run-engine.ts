@@ -31,13 +31,14 @@ import { resolvePhrases, withoutQuantity } from '../server/resolve'
 import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
-import { afterMealFor, sandwichWithItsBread, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
+import { afterMealFor, sandwichWithItsBread, scaleToDishWeight, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
 import { alternativesForMeal, findAlternatives, SWAP_ENERGY_BAND, SWAP_MIN_GAIN, SWAP_MIN_GAIN_SHARE } from '../server/compute'
 import { ALLOWED, mayReplace, potatoKind, standInsFor, swapClass } from '../server/roles'
 import { validateAsk } from '../server/guard'
 import { getSession, putSession } from '../server/sessions'
 import { gramsFor, householdUnitsFor, needsWeightHint, quantityError, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
 import { continuationFor, uncountedFoods } from '../server/agent'
+import { wholeDishWeight } from '../server/dishWeight'
 import { rememberResponse } from '../server/sessions'
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
@@ -1091,6 +1092,33 @@ recorrectMisses.forEach((m) => console.log(m))
   const agentSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../server/agent.ts'), 'utf8')
   if (!agentSrc.includes('const prior = req.newTopic ? undefined : lastTurnOf(req.sessionId)')) bits.push('a new topic is still routed as a reply to the last question')
   console.log(`\nnew topic ${bits.length === 0 ? 'ok' : 'WRONG'}  (batch 3, commit 2: the main box starts fresh, the answer box continues)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// ── CL1: the weight of a whole dish, applied by the engine (docs/engineering/dish-weight-cl1.md) ───────────────────
+{
+  const bits: string[] = []
+  const yes: [string, number][] = [
+    ['A chicken burrito bowl with white rice and black beans, 450 g', 450], ['my stew (16 oz)', 453.6], ['a 1 lb plate of nachos', 453.6],
+    ['450 g of the casserole', 450], ['it weighed about 300 g', 300], ['Beef chili with beans - 400 grams', 400],
+  ]
+  for (const [m, g] of yes) { const w = wholeDishWeight(m); if (w?.grams !== g) bits.push(`"${m}" read as ${JSON.stringify(w)}, wanted ${g} g`) }
+  for (const m of ['450 g of pasta and a slice of bread', '450 g chicken with rice', '100 g of rice and 150 g of beans', 'an 8 oz glass of juice', '12 fl oz of milk', '2% milk with cereal', 'a 12-inch pizza', 'A burrito bowl with rice and beans']) {
+    const w = wholeDishWeight(m); if (w) bits.push(`"${m}" read as a dish weight ${JSON.stringify(w)}`)
+  }
+  // Scaling: three assumed items to 450 g; an item with a stated amount, a single item, or a scale beyond 4x: nothing changes.
+  const items = [{ foodId: 'seed:chicken' }, { foodId: 'ing:white_rice' }, { foodId: 'ing:black_beans' }].filter((it) => { try { getRecord(it.foodId); return true } catch { return false } })
+  if (items.length === 3) {
+    const fit = scaleToDishWeight(items, planQuantities(items), 450)
+    const total = 'plan' in fit ? fit.plan.items.reduce((a, it) => a + (it.grams ?? 0), 0) : 0
+    if (!('plan' in fit) || Math.abs(total - 450) > 1) bits.push(`three assumed items were not scaled to 450 g (${JSON.stringify(fit).slice(0, 80)})`)
+    const stated = [{ foodId: 'seed:chicken', grams: 120 }, items[1], items[2]]
+    if (!('notApplied' in scaleToDishWeight(stated, planQuantities(stated), 450))) bits.push('a stated amount was scaled')
+    if (!('notApplied' in scaleToDishWeight([items[0]], planQuantities([items[0]]), 450))) bits.push('a single item was scaled')
+    if (!('notApplied' in scaleToDishWeight(items, planQuantities(items), 3000))) bits.push('a scale beyond four times was applied')
+  } else bits.push(`the scaling fixture is missing records (${items.length} of 3)`)
+  console.log(`\ndish wt   ${bits.length === 0 ? 'ok' : 'WRONG'}  (CL1: one weight for the whole dish, applied by the engine)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }

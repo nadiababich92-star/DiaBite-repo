@@ -25,7 +25,7 @@
   → /agent/ask: wholeDishWeight(message) = 450 g → parked with the day state for this turn
   → meal agent → resolve_foods → compute_meal (parts, usual portions, 330 g in all)   or   cost_dish (no totalGrams)
   → engine: every amount assumed, one dish weight parked → scale the assumed parts by 450 / 330
-  → reply: items at the scaled grams, scaled: { by: "message", totalG: 450, factor: 1.364 }, each said "… (scaled to the 450 g you said)"
+  → reply: items at the scaled grams, scaled: { by: "totalGrams", from: "message", totalG: 450, factor: 1.364 }, each said "… (scaled to the 450 g you said)"
   → answer: "Counted at the 450 g you said." in the Weights line; the verifier checks every number against that reply
 ```
 A person who gave amounts ("1 cup of rice and half a cup of beans, 450 g in all") is not scaled: their amounts stand, and the 450 g is not applied over them (the reply says so in `dishWeight.notApplied: "amounts given"`, and nothing changes in the numbers).
@@ -47,15 +47,15 @@ None. The receipt already shows the engine's grams and `said`; a scaled item rea
 
 **Parking** (`server/agent.ts` `parkDayState`, `server/sessions.ts`). The weight rides with the day state for this turn only (memory, never logged, cleared on the next turn), as `dishWeight`.
 
-**`cost_dish`** (`server/engine.ts`, `server/compute.ts`). When the call has neither `totalGrams` nor `servings` and a dish weight is parked, it is applied as `totalGrams` through the existing `scaleDish`; `scaled.by` becomes `"message"`.
+**`cost_dish`** (`server/engine.ts`, `server/compute.ts`). When the call has neither `totalGrams` nor `servings` and a dish weight is parked, it is applied as `totalGrams` through the existing `scaleDish`; `scaled.from` is `"message"` (and `scaled.by` stays `"totalGrams"`, so existing readers keep working).
 
-**`compute_meal`** (same files). When a dish weight is parked, the meal has two or more items, no item carries `grams`, a weight or a volume the person gave, and no item is a recipe counted by servings, the engine scales every item's grams by `W / sum` before costing, if the factor is between 0.25 and 4 and the sum differs from W by more than 2%. Otherwise nothing changes and the reply says why in `dishWeight.notApplied` (`"amounts given"`, `"one item"`, `"out of range"`). The reply carries `scaled: { by: "message", totalG, factor }`; each scaled item's `said` ends "(scaled to the 450 g you said)".
+**`compute_meal`** (same files). When a dish weight is parked, the meal has two or more items, no item carries `grams`, a weight or a volume the person gave, and no item is a recipe counted by servings, the engine scales every item's grams by `W / sum` before costing, if the factor is between 0.25 and 4 and the sum differs from W by more than 2%. Otherwise nothing changes and the reply says why in `dishWeight.notApplied` (`"amounts given"`, `"one item"`, `"out of range"`). The reply carries `scaled: { by: "totalGrams", from: "message", totalG, factor }`; each scaled item's `said` ends "(scaled to the 450 g you said)".
 
-**Contract** (`server/contract.ts`): `scaled.by` gains `"message"`; `ComputeMealResponse` gains `scaled?` and `dishWeight?`. Model-facing errors stay 200 with an `error` field.
+**Contract** (`server/contract.ts`): `DishScale` gains `from?: "message"`; `ComputeMealResponse` gains `scaled?` and `dishWeight?`. Model-facing errors stay 200 with an `error` field.
 
 ## 7. Agents
 
-**`diabite-meal`** (`agent/prompts/meal.md`), and also, one sentence: "When the reply carries `scaled.by: "message"`, the engine counted the meal at the weight the person said: say so once ('Counted at the 450 g you said') and copy each `said` as it is." Provisioned with the model variables unset and `PUBLIC_URL` set (`agent/SETUP.md`), each agent read back from the project. Twelve fresh samples before (taken: 6 of 12) and after (rule 12).
+**`diabite-meal`** (`agent/prompts/meal.md`), and also, one sentence: "When the reply carries `scaled.from: "message"`, the engine counted the meal at the weight the person said: say so once ('Counted at the 450 g you said') and copy each `said` as it is." Provisioned with the model variables unset and `PUBLIC_URL` set (`agent/SETUP.md`), each agent read back from the project. Twelve fresh samples before (taken: 6 of 12) and after (rule 12).
 
 ## 8. Data
 
@@ -69,7 +69,7 @@ The rules gate runs first, unchanged. The risk is a weight attached to the wrong
 
 **Engine (`npm run eval`):**
 - `wholeDishWeight`: applied to "a chicken burrito bowl with white rice and black beans, 450 g" (450), "my stew (16 oz)" (453.6), "a 1 lb plate of nachos" (453.6), "450 g of the casserole" (450), "it weighed about 300 g" (300); not applied to "450 g of pasta and a slice of bread", "450 g chicken with rice", "100 g of rice and 150 g of beans", "an 8 oz glass of juice" (`fl oz` and a drink's own quantity), "2% milk", "a 12-inch pizza".
-- `compute_meal` with a parked 450 g: three assumed items scaled to 450 ± 1 g, `scaled.by === "message"`; one item with a stated weight → not applied (`"amounts given"`); a single item → not applied; factor 5 → not applied.
+- `compute_meal` with a parked 450 g: three assumed items scaled to 450 ± 1 g, `scaled.from === "message"`; one item with a stated weight → not applied (`"amounts given"`); a single item → not applied; factor 5 → not applied.
 - `cost_dish` with a parked 450 g and no `totalGrams` → scaled to 450; with `totalGrams` given → the call's own value wins.
 - Mutations: drop the detection, the parking, the `compute_meal` scaling or the `cost_dish` default: a case fails each time.
 

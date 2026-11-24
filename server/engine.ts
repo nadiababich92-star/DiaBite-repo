@@ -29,7 +29,7 @@ import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
-import { afterMealFor, sandwichWithItsBread, alternativesForMeal, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, withDayUnscored, withSaid } from './compute'
+import { afterMealFor, sandwichWithItsBread, scaleToDishWeight, alternativesForMeal, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, withDayUnscored, withSaid } from './compute'
 import { NEEDS_WEIGHT_INSTRUCTION, needsWeightHint, quantityError, settleAmount, weightQuestion } from './quantity'
 import { verify } from './verify'
 import { claimSession, getSession, noteResolution, putSession } from './sessions'
@@ -204,13 +204,14 @@ async function main() {
 
   /** The client parks the day's budget and log here, then hands the agent only the id. */
   app.put('/session/:id', (req, res) => {
-    const { budget, entries, avoid, carbLimit, units, portionSwaps } = req.body ?? {}
+    const { budget, entries, avoid, carbLimit, units, portionSwaps, dishWeight } = req.body ?? {}
     if (!validSessionId(req.params.id)) return res.status(400).json({ error: 'invalid session id' })
     if (!budget || !Array.isArray(entries) || entries.length > 100) return res.status(400).json({ error: 'budget and at most 100 entries required' })
     if (carbLimit !== undefined && !validCarbLimit(carbLimit)) return res.status(400).json({ error: 'invalid carbLimit' })
     if (units !== undefined && !validUnits(units)) return res.status(400).json({ error: 'invalid units' })
     if (portionSwaps !== undefined && portionSwaps !== false) return res.status(400).json({ error: 'invalid portionSwaps' })
-    putSession(req.params.id, budget, entries, avoid, carbLimit, units, portionSwaps)
+    if (dishWeight !== undefined && !(dishWeight && typeof dishWeight.grams === 'number' && dishWeight.grams >= 30 && dishWeight.grams <= 3000 && typeof dishWeight.said === 'string' && dishWeight.said.length <= 20)) return res.status(400).json({ error: 'invalid dishWeight' })
+    putSession(req.params.id, budget, entries, avoid, carbLimit, units, portionSwaps, dishWeight)
     res.json({ ok: true, sessionId: req.params.id, entries: entries.length })
   })
 
@@ -453,17 +454,25 @@ async function main() {
     }
     try {
       const units = body.sessionId ? getSession(body.sessionId)?.units : undefined
-      const plan = planQuantities(body.items)
+      let plan = planQuantities(body.items)
       // A measure that cannot honestly be turned into grams: nothing is costed and no number comes back, so the agent asks.
       if (plan.needs.length > 0) return res.json({ needsWeight: plan.needs, hint: needsWeightHint(plan.needs[0].name, units), instruction: NEEDS_WEIGHT_INSTRUCTION })
+      // The weight of the whole dish the person said (parked from their message, never the model's): the assumed amounts are scaled to it.
+      const dish = body.sessionId ? getSession(body.sessionId)?.dishWeight : undefined
+      const fit = dish ? scaleToDishWeight(body.items, plan, dish.grams) : undefined
+      if (fit && 'plan' in fit) plan = fit.plan
       const costed = computeMeal(plan.items)
-      const meal = { ...costed, items: withSaid(costed.items, plan, units) }
+      const meal = { ...costed, items: fit && 'plan' in fit && dish
+        ? costed.items.map((it) => ({ ...it, basis: 'typical' as const, said: `${Math.round(it.grams)} g (scaled to the ${dish.said} you said)` }))
+        : withSaid(costed.items, plan, units) }
       const day = dayStateFor(body.sessionId)
       const top = driverOf(meal.items)
       const out: Record<string, unknown> = {
         ...meal,
         ...(top ? { driver: top } : {}),
         ...(day ? { dayState: day } : {}),
+        ...(fit && 'plan' in fit && dish ? { scaled: { by: 'totalGrams', from: 'message', factor: fit.factor, totalG: dish.grams } } : {}),
+        ...(fit && 'notApplied' in fit && fit.notApplied !== 'already' && dish ? { dishWeight: { grams: dish.grams, notApplied: fit.notApplied } } : {}),
       }
 
       // Swaps in the same breath, but only when the meal needs them: over what
@@ -506,8 +515,15 @@ async function main() {
     const bad = validateDish(body)
     if (bad) return res.json({ error: bad })
     try {
-      // The person's amount (the dish's weight, or how many portions) is applied here, not by the model.
-      const sc = scaleDish(body)
+      // The person's amount (the dish's weight, or how many portions) is applied here, not by the model. A weight of the whole dish said in
+      // the message and left out of the call is applied too (server/dishWeight.ts): the call's own totalGrams or servings always win.
+      const said = body.sessionId ? getSession(body.sessionId)?.dishWeight : undefined
+      const fromMessage = !!said && body.totalGrams === undefined && body.servings === undefined
+      if (fromMessage) body.totalGrams = said!.grams
+      let sc = scaleDish(body)
+      // The person's weight cannot hold what they stated for single ingredients: the call stands as the agent made it.
+      if (fromMessage && 'error' in sc) { body.totalGrams = undefined; sc = scaleDish(body) }
+      else if (fromMessage && sc.scaled) sc.scaled.from = 'message'
       if ('error' in sc) return res.json({ error: sc.error })
       const plan = await planDish(store, sc.req)
       if (plan.costed.length === 0) {

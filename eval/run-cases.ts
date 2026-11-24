@@ -250,6 +250,10 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
     const fits = ((lastMeal()?.result as { afterMeal?: { fits?: boolean | null } } | undefined)?.afterMeal?.fits)
     say('no fit with a food left out', !(fits === true && ((r as { uncounted?: string[] }).uncounted ?? []).length > 0), JSON.stringify((r as { uncounted?: string[] }).uncounted ?? []))
   }
+  if (e.notScaledByMessage === true) {
+    const sc = (lastMeal()?.result as { scaled?: { from?: string } } | undefined)?.scaled
+    say('not scaled to a weight from the message', sc?.from !== 'message', JSON.stringify(sc ?? null))
+  }
   if (typeof e.traceLacks === 'string') {
     const all = (JSON.stringify(r.trace ?? []) + ' ' + r.answer).toLowerCase()
     say(`nothing about "${e.traceLacks}"`, !all.includes((e.traceLacks as string).toLowerCase()))

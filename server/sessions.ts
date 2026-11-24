@@ -41,6 +41,8 @@ export interface SessionState {
    * keeps that from being called "fits". Reset whenever a turn parks its day.
    */
   unknownFoods: string[]
+  /** The weight of the whole dish the person said in this turn's message (server/dishWeight.ts); memory only, cleared by the next turn. */
+  dishWeight?: { grams: number; said: string }
   storedAt: number
 }
 
@@ -69,9 +71,10 @@ function sweep(now = Date.now()) {
 
 export function putSession(
   id: string, budget: DayBudget, entries: MealItemInput[], avoid?: AvoidList, carbLimit?: CarbLimit, units?: 'imperial' | 'metric', portionSwaps?: false,
+  dishWeight?: { grams: number; said: string },
 ): SessionState {
   sweep()
-  const state: SessionState = { budget, entries, avoid, carbLimit, ...(units ? { units } : {}), ...(portionSwaps === false ? { portionSwaps: false as const } : {}), unknownFoods: [], storedAt: Date.now() }
+  const state: SessionState = { budget, entries, avoid, carbLimit, ...(units ? { units } : {}), ...(portionSwaps === false ? { portionSwaps: false as const } : {}), ...(dishWeight ? { dishWeight } : {}), unknownFoods: [], storedAt: Date.now() }
   setBounded(store, id, state)
   return state
 }

@@ -225,7 +225,7 @@ export interface CostDishRequest {
 }
 
 /** What the engine did to the model's ingredient weights to honour the amount the person said. */
-export interface DishScale { by: 'totalGrams' | 'servings'; factor: number; totalG?: number; servings?: number }
+export interface DishScale { by: 'totalGrams' | 'servings'; factor: number; totalG?: number; servings?: number; /** The weight came from the person's message, applied by the engine (server/dishWeight.ts), not from the call. */ from?: 'message' }
 
 export type UnresolvedReason = 'unknown' | 'ambiguous' | 'not_an_ingredient'
 

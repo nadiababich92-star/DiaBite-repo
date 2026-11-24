@@ -29,6 +29,7 @@
  * the turn is regenerated once, and failing that the answer is assembled from
  * the tool results directly.
  */
+import { wholeDishWeight } from './dishWeight'
 import { createReadStream, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
@@ -594,11 +595,13 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
 /** Park the day state where only the engine can read it. */
 async function parkDayState(req: AskRequest): Promise<void> {
   if (!req.budget || !req.entries) { if (!ENGINE_URL) dropCarbLimit(req.sessionId); return }
-  if (!ENGINE_URL) { putSession(req.sessionId, req.budget, req.entries, req.avoid, req.carbLimit, req.units, req.portionSwaps); return }
+  // The weight of the whole dish, if the person said one, read here by a rule and never by a model (server/dishWeight.ts).
+  const dishWeight = wholeDishWeight(req.message) ?? undefined
+  if (!ENGINE_URL) { putSession(req.sessionId, req.budget, req.entries, req.avoid, req.carbLimit, req.units, req.portionSwaps, dishWeight); return }
   const r = await fetch(`${ENGINE_URL}/session/${encodeURIComponent(req.sessionId)}`, {
     method: 'PUT',
     headers: { 'content-type': 'application/json', ...(ENGINE_KEY ? { 'x-api-key': ENGINE_KEY } : {}) },
-    body: JSON.stringify({ budget: req.budget, entries: req.entries, avoid: req.avoid, carbLimit: req.carbLimit, units: req.units, portionSwaps: req.portionSwaps }),
+    body: JSON.stringify({ budget: req.budget, entries: req.entries, avoid: req.avoid, carbLimit: req.carbLimit, units: req.units, portionSwaps: req.portionSwaps, dishWeight }),
   })
   if (!r.ok) throw new Error(`could not park the day state: ${r.status} ${await r.text()}`)
 }

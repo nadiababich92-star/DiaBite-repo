@@ -515,3 +515,26 @@ export function sandwichWithItsBread(names: string[]): boolean {
   return sandwich && bread
 }
 
+/**
+ * Scale a meal's assumed amounts to the weight of the whole dish the person said (docs/engineering/dish-weight-cl1.md): every item's
+ * amount must be the engine's assumption (no grams, no servings, no quantity other than `default`), there must be two items or more, and
+ * the scale must be between a quarter and four times. Otherwise nothing changes and the reason comes back.
+ */
+export function scaleToDishWeight(original: MealItemInput[], plan: QuantityPlan, totalG: number):
+  { plan: QuantityPlan; factor: number } | { notApplied: 'one item' | 'amounts given' | 'a recipe' | 'out of range' | 'already' } {
+  if (original.length < 2) return { notApplied: 'one item' }
+  if (original.some((it) => it.grams !== undefined || it.servings !== undefined || (it.quantity && it.quantity.unit !== 'default'))) return { notApplied: 'amounts given' }
+  if (plan.items.some((it) => it.servings !== undefined || getRecord(it.foodId).kind === 'recipe')) return { notApplied: 'a recipe' }
+  const grams = plan.items.map((it) => it.grams ?? getRecord(it.foodId).defaultPortion)
+  const sum = grams.reduce((a, b) => a + b, 0)
+  if (!(sum > 0)) return { notApplied: 'out of range' }
+  if (Math.abs(sum - totalG) / totalG <= 0.02) return { notApplied: 'already' }
+  const factor = totalG / sum
+  if (factor < 0.25 || factor > 4) return { notApplied: 'out of range' }
+  const r1x = (x: number) => Math.round(x * 10) / 10
+  return {
+    factor: Math.round(factor * 1000) / 1000,
+    plan: { ...plan, items: plan.items.map((it, i) => ({ foodId: it.foodId, grams: r1x(grams[i] * factor) })), meta: plan.meta.map(() => undefined) },
+  }
+}
+
