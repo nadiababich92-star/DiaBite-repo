@@ -32,6 +32,8 @@ export function verdictTone(answer: string, route?: string, reply?: AgentRespons
   if (meal?.afterMeal?.partial?.unscored?.length && (meal.items ?? []).length > 0 && (meal.items ?? []).every((it) => it.loadAvailable === false)) return 'carbs'
   if (meal?.afterMeal?.partial?.unscored?.length && meal.afterMeal.fits !== false) return 'partial'
   if (meal?.afterMeal?.fits === null) return 'ask'
+  // The server found a food the turn named and left out of the count (server/agent.ts uncountedFoods): what was counted may fit, the meal is not known to.
+  if (reply?.uncounted?.length && meal?.afterMeal?.fits === true) return 'partial'
   if (meal?.afterMeal && typeof meal.afterMeal.fits === 'boolean') return meal.afterMeal.fits ? 'good' : 'bad'
   // No tool result: the only path that reads the sentence.
   const first = answer.split('\n')[0].toLowerCase()

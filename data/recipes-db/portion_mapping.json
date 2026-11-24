@@ -2203,9 +2203,13 @@
     {
      "label": "cup",
      "grams": 150.0
+    },
+    {
+     "label": "1 fruit",
+     "grams": 18.0
     }
    ],
-   "accepted_by": "owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)"
+   "accepted_by": "owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup); 24 Nov 2026: the per-item or regular-slice row of the same USDA record added by hand (FNDDS lists it; the local copy keeps four rows), for 'a few' and 'two slices' (docs/engineering/agent-session-batch3.md)"
   },
   "ing:strawberries": {
    "fdc_id": "2709283",
@@ -2214,9 +2218,13 @@
     {
      "label": "cup",
      "grams": 150.0
+    },
+    {
+     "label": "1 fruit",
+     "grams": 18.0
     }
    ],
-   "accepted_by": "owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)"
+   "accepted_by": "owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup); 24 Nov 2026: the per-item or regular-slice row of the same USDA record added by hand (FNDDS lists it; the local copy keeps four rows), for 'a few' and 'two slices' (docs/engineering/agent-session-batch3.md)"
   },
   "seed:blueberry": {
    "fdc_id": "2709275",
@@ -2225,9 +2233,13 @@
     {
      "label": "cup",
      "grams": 150.0
+    },
+    {
+     "label": "1 berry",
+     "grams": 2.0
     }
    ],
-   "accepted_by": "owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)"
+   "accepted_by": "owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup); 24 Nov 2026: the per-item or regular-slice row of the same USDA record added by hand (FNDDS lists it; the local copy keeps four rows), for 'a few' and 'two slices' (docs/engineering/agent-session-batch3.md)"
   },
   "ing:blueberries": {
    "fdc_id": "2709275",
@@ -2236,9 +2248,13 @@
     {
      "label": "cup",
      "grams": 150.0
+    },
+    {
+     "label": "1 berry",
+     "grams": 2.0
     }
    ],
-   "accepted_by": "owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup)"
+   "accepted_by": "owner, 18 Nov: worklist В (fruit and vegetables whose default portion is one USDA cup); 24 Nov 2026: the per-item or regular-slice row of the same USDA record added by hand (FNDDS lists it; the local copy keeps four rows), for 'a few' and 'two slices' (docs/engineering/agent-session-batch3.md)"
   },
   "ing:almond_milk": {
    "fdc_id": "2705409",
@@ -2262,9 +2278,13 @@
     {
      "label": "1 oz",
      "grams": 28.4
+    },
+    {
+     "label": "1 nut",
+     "grams": 1.2
     }
    ],
-   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food; 24 Nov 2026: the per-item or regular-slice row of the same USDA record added by hand (FNDDS lists it; the local copy keeps four rows), for 'a few' and 'two slices' (docs/engineering/agent-session-batch3.md)"
   },
   "ing:apple": {
    "fdc_id": "2709215",
@@ -2813,9 +2833,17 @@
     {
      "label": "1 small or thin/very thin slice",
      "grams": 24.0
+    },
+    {
+     "label": "1 medium or regular slice",
+     "grams": 36.0
+    },
+    {
+     "label": "1 large or thick slice",
+     "grams": 43.0
     }
    ],
-   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food; 24 Nov 2026: the per-item or regular-slice row of the same USDA record added by hand (FNDDS lists it; the local copy keeps four rows), for 'a few' and 'two slices' (docs/engineering/agent-session-batch3.md)"
   },
   "seed:almonds": {
    "fdc_id": "2707485",
@@ -2824,9 +2852,13 @@
     {
      "label": "1 oz",
      "grams": 28.4
+    },
+    {
+     "label": "1 nut",
+     "grams": 1.2
     }
    ],
-   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food"
+   "accepted_by": "rule: distance<=0.25, overlap>=0.6, no modifier of another food; 24 Nov 2026: the per-item or regular-slice row of the same USDA record added by hand (FNDDS lists it; the local copy keeps four rows), for 'a few' and 'two slices' (docs/engineering/agent-session-batch3.md)"
   },
   "seed:apple": {
    "fdc_id": "2709215",
@@ -3416,9 +3448,13 @@
     {
      "label": "1 cup",
      "grams": 150.0
+    },
+    {
+     "label": "1 berry",
+     "grams": 2.0
     }
    ],
-   "accepted_by": "owner, 2026-11-23"
+   "accepted_by": "owner, 2026-11-23; 24 Nov 2026: the per-item or regular-slice row of the same USDA record added by hand (FNDDS lists it; the local copy keeps four rows), for 'a few' and 'two slices' (docs/engineering/agent-session-batch3.md)"
   },
   "seed:turkey": {
    "fdc_id": "2706105",

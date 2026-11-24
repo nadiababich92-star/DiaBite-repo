@@ -1898,6 +1898,15 @@
         ]
       },
       {
+        "phrase": "shredded cheese",
+        "expect": [
+          "ing:cheddar"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
         "phrase": "big mac",
         "expect": [
           "usda:2706916"
@@ -4696,12 +4705,15 @@
       },
       {
         "id": "L11-wholewheat-slice",
+        "why": "until 24 November 2026 the table held only a thin slice and this was a question; USDA's medium or regular slice of the same record (36 g) is now in it",
         "foodId": "ing:whole_grain_bread",
         "quantity": {
           "count": 1,
           "unit": "slice"
         },
-        "needs": true
+        "grams": 36,
+        "basis": "usda_measure",
+        "said_imperial": "1 slice (36 g)"
       }
     ],
     "defaults": [

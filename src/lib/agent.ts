@@ -60,6 +60,8 @@ export interface AgentResponse {
   trace?: TraceStep[]
   /** Which specialist answered: the meal agent, or the advisor with no tools. */
   route?: 'meal' | 'advisor' | 'triage'
+  /** Foods the engine's own check found left out of the count: the meal is partial and is never stamped Fits. */
+  uncounted?: string[]
 }
 
 /** Engine ids for diary entries: locally known foods are `seed:<id>`; agent-logged ones already carry theirs. */

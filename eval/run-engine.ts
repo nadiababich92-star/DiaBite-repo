@@ -37,6 +37,7 @@ import { ALLOWED, mayReplace, potatoKind, standInsFor, swapClass } from '../serv
 import { validateAsk } from '../server/guard'
 import { getSession, putSession } from '../server/sessions'
 import { gramsFor, householdUnitsFor, needsWeightHint, quantityError, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
+import { uncountedFoods } from '../server/agent'
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
@@ -1026,6 +1027,46 @@ recorrectMisses.forEach((m) => console.log(m))
   const diaryHtml = renderToStaticMarkup(createElement(DiaryPage, { targets: calculateTargets(DEFAULT_PROFILE), diary: [], onChange: () => {}, topCard: createElement(DeferredCard, { step: 'diagnosis', onAnswer: () => {}, onLater: () => {} }) }))
   if (!(diaryHtml.indexOf('Two minutes more') >= 0 && diaryHtml.indexOf('Two minutes more') < diaryHtml.indexOf('day-nav'))) bits.push('the Diary does not show the card above the day')
   console.log(`\nafter ans ${bits.length === 0 ? 'ok' : 'WRONG'}  (the first session after the first answer, OB7 and OB8)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// ── findings of 24 November, batch 3, commit 1 (docs/engineering/agent-session-batch3.md) ─────────────────────
+// "A few" is three of the food's single item; an unweighed amount of a food with almost no carbohydrate is its typical portion, and of
+// any other food a question; a food named and left out makes the meal partial, whether the agent says so (`notCounted`) or the server finds it.
+{
+  const bits: string[] = []
+  const g = (id: string, q: Quantity) => gramsFor(getRecord(id), q)
+  const grams = (id: string, q: Quantity) => { const r = g(id, q); return 'grams' in r && r.grams !== undefined ? r.grams : null }
+  const said = (id: string, q: Quantity) => { const r = g(id, q); return 'grams' in r && r.grams !== undefined ? saidText({ grams: r.grams, basis: r.basis, quantity: q, row: r.row, rec: getRecord(id), units: 'imperial' }) : null }
+  if (grams('ing:strawberries', { count: 1, unit: 'few' }) !== 54 || said('ing:strawberries', { count: 1, unit: 'few' }) !== 'a few (3 strawberries, 54 g)') bits.push(`a few strawberries is ${said('ing:strawberries', { count: 1, unit: 'few' })}`)
+  if (grams('ing:blueberries', { count: 1, unit: 'few' }) !== 6) bits.push('a few blueberries is not three berries')
+  if (grams('ing:egg', { count: 1, unit: 'few' }) !== 150) bits.push('a few eggs is not three eggs')
+  if (grams('ing:whole_grain_bread', { count: 2, unit: 'slice' }) !== 72) bits.push(`two slices of whole wheat bread are ${grams('ing:whole_grain_bread', { count: 2, unit: 'slice' })} g, wanted 72 (USDA's medium or regular slice, 36 g)`)
+  const spinach = g('ing:spinach', { count: 1, unit: 'handful' })
+  if (!('grams' in spinach) || spinach.basis !== 'typical') bits.push('a handful of spinach is a question')
+  if (!('needs' in g('seed:rice-white', { count: 1, unit: 'bowl' }))) bits.push('a bowl of rice was weighed')
+  const chips = loadFoods().records.find((r) => /^potato chips/i.test(r.name) && r.kind !== 'branded')
+  if (chips && !('needs' in gramsFor(chips, { count: 1, unit: 'handful' }))) bits.push('a handful of chips was weighed')
+  if (!('needs' in g('rec:DB-2104', { count: 1, unit: 'few' }))) bits.push('a few of a recipe was weighed')
+  if (quantityError({ count: 1, unit: 'few' }, 'x') !== null || quantityError({ count: 1, unit: 'handful' }, 'x') !== null) bits.push('few or handful refused as a unit')
+  // A food named and left out.
+  const left = afterMealFor({ gl: 40, carbsG: 100, kcal: 1500 }, { gl: 5, carbs: 20, kcal: 300 }, [], [], undefined, ['strawberries'])
+  if (left.fits !== null || !(left.partial as { notCounted?: string[] } | undefined)?.notCounted?.includes('strawberries')) bits.push('a meal with a food left out still fits')
+  const over = afterMealFor({ gl: 4, carbsG: 100, kcal: 1500 }, { gl: 5, carbs: 20, kcal: 300 }, [], [], undefined, ['strawberries'])
+  if (over.fits !== false) bits.push('a meal over budget on its counted part alone is not "false"')
+  // The server's own check, from recorded traces.
+  const rf = (phrases: [string, string[], boolean?][]) => ({ tool: 'diabite_engine_resolve_foods', input: {}, result: { results: phrases.map(([phrase, ids, unknown]) => ({ phrase, unknown: !!unknown, candidates: ids.map((id) => ({ id })) })) } })
+  const cm = (ids: string[], notCounted?: string[]) => ({ tool: 'diabite_engine_compute_meal', input: { items: ids.map((foodId) => ({ foodId })), ...(notCounted ? { notCounted } : {}) }, result: { totals: { gl: 3 }, items: ids.map((foodId) => ({ foodId })), afterMeal: { fits: true } } })
+  const yogurt = rf([['greek yogurt', ['ing:greek_yogurt']], ['granola', ['usda:2708461']], ['strawberries', ['ing:strawberries']]])
+  if (uncountedFoods([yogurt, cm(['ing:greek_yogurt', 'usda:2708461'])]).join() !== 'strawberries') bits.push('the turn check misses strawberries left out')
+  if (uncountedFoods([yogurt, cm(['ing:greek_yogurt', 'usda:2708461'], ['strawberries'])]).length) bits.push('the turn check flags a food the agent named in notCounted')
+  if (uncountedFoods([rf([['chicken', ['seed:chicken']]]), rf([['chicken breast', ['ing:chicken_breast']]]), cm(['ing:chicken_breast'])]).length) bits.push('the turn check flags a food re-resolved under more words')
+  if (uncountedFoods([rf([['cholent', [], true]]), cm(['ing:beef_chuck'])]).length) bits.push('the turn check flags an unknown food')
+  if (uncountedFoods([yogurt]).length) bits.push('the turn check flags a turn with no meal count')
+  const tone = verdictTone('This fits your day.', 'meal', { answer: '', trace: [cm(['ing:greek_yogurt'])] as never, uncounted: ['strawberries'] })
+  if (tone !== 'partial') bits.push(`a meal with a food left out is stamped ${tone}`)
+  console.log(`\nbatch 3   ${bits.length === 0 ? 'ok' : 'WRONG'}  (a few, a handful, a food left out)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }
@@ -2062,7 +2103,8 @@ hangMisses.forEach((m) => console.log(m))
   for (const [what, q, wantPart] of [
     ['zero', { count: 0, unit: 'cup' }, 'positive number up to 100'], ['negative', { count: -1, unit: 'cup' }, 'positive number up to 100'], ['101', { count: 101, unit: 'cup' }, 'positive number up to 100'],
     ['NaN', { count: NaN, unit: 'cup' }, 'positive number up to 100'], ['Infinity', { count: Infinity, unit: 'cup' }, 'positive number up to 100'], ['a string count', { count: '2', unit: 'cup' }, 'positive number up to 100'],
-    ['handful', { count: 1, unit: 'handful' }, 'unit must be one of'], ['bowl', { count: 1, unit: 'bowl' }, 'unit must be one of'], ['cups', { count: 1, unit: 'cups' }, 'unit must be one of'], ['empty unit', { count: 1, unit: '' }, 'unit must be one of'], ['null unit', { count: 1, unit: null }, 'unit must be one of'],
+    // "handful" and "bowl" are units since 24 November 2026: the engine weighs them for a near-carb-free food and answers needsWeight otherwise (batch 3 above).
+    ['cups', { count: 1, unit: 'cups' }, 'unit must be one of'], ['handfuls', { count: 1, unit: 'handfuls' }, 'unit must be one of'], ['empty unit', { count: 1, unit: '' }, 'unit must be one of'], ['null unit', { count: 1, unit: null }, 'unit must be one of'],
   ] as [string, unknown, string][]) { const e = quantityError(q, 'ing:x'); if (!e || !e.includes(wantPart)) miss(`${what} was ${JSON.stringify(e)}`) }
   for (const q of [{ count: 100, unit: 'g' }, { count: 0.25, unit: 'cup' }, { count: 450, unit: 'g' }, { count: 5000, unit: 'g' }, { count: 100, unit: 'cup' }]) if (quantityError(q, 'ing:x') !== null) miss(`${JSON.stringify(q)} was refused`)
   for (const q of [{ count: 5001, unit: 'g' }, { count: 101, unit: 'cup' }, { count: 101, unit: 'oz' }]) if (quantityError(q, 'ing:x') === null) miss(`${JSON.stringify(q)} was accepted`)

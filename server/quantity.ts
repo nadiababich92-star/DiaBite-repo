@@ -17,6 +17,9 @@ export const QUANTITY_UNITS = [
   'slice', 'piece',
   'small', 'medium', 'large', 'whole',
   'default',
+  // Said with no number or no weight (24 November 2026, the owner's decisions; docs/engineering/agent-session-batch3.md): "a few" is three of
+  // the food's own single item; a handful, a bowl, some… is the food's typical portion only for a food with almost no carbohydrate.
+  'few', 'handful', 'bowl', 'plate', 'scoop', 'some', 'serving',
 ] as const
 export type QuantityUnit = (typeof QUANTITY_UNITS)[number]
 
@@ -30,6 +33,19 @@ const TSP: Record<'tsp' | 'tbsp' | 'fl oz' | 'cup', number> = { tsp: 1, tbsp: 3,
 const VOLUME_SOURCES = ['cup', 'tbsp', 'tsp', 'fl oz'] as const
 
 const r1 = (x: number) => Math.round(x * 10) / 10
+
+/** "A few" is this many of the food's single item (the owner's decision of 24 November 2026), said back so the person can correct it. */
+export const FEW = 3
+/** Amounts with no weight in any table. */
+export const UNWEIGHED = new Set<QuantityUnit>(['handful', 'bowl', 'plate', 'scoop', 'some', 'serving'])
+/** The most available carbohydrate, in grams, a food's typical portion may carry for an unweighed amount of it to be that portion. */
+export const NEAR_CARB_FREE_G = 3
+/** Available carbohydrate in the food's typical portion; null when the record has no per-100 g nutrients. */
+export function typicalAvailableCarbs(rec: FoodRecord): number | null {
+  const n = rec.per100
+  if (!n || typeof n.carbs !== 'number') return null
+  return Math.max(0, n.carbs - (n.fiber ?? 0)) * rec.defaultPortion / 100
+}
 
 export type Resolved =
   | { grams: number; basis: Basis; row?: PortionRow; via?: string; servings?: undefined }
@@ -107,6 +123,25 @@ export function gramsFor(rec: FoodRecord, q: Quantity): Resolved {
   if (unit === 'g') return { grams: r1(count), basis: 'stated' }
   if (unit === 'oz') return { grams: r1(count * GRAMS_PER_OUNCE), basis: 'exact_conversion' }
   if (unit === 'lb') return { grams: r1(count * GRAMS_PER_POUND), basis: 'exact_conversion' }
+  // 2a. Amounts said with no number or no weight. A recipe has already been sent back (it is counted by serving).
+  if (unit === 'few') {
+    const rows = plainRows(rec)
+    const one = rows.find((r) => r.unit === 'medium') ?? rows.find((r) => r.unit === 'whole') ?? rows.find((r) => r.unit === 'piece')
+      ?? rows.find((r) => r.unit === 'slice' && (r.size === 'medium' || r.size === undefined))
+    if (one) return { grams: r1(FEW * count * one.grams), basis: 'typical', row: one }
+    // A single thing USDA names by its own noun ("1 berry", "1 nut", "1 grape"), which the household reader keeps only for the food's own word.
+    const raw = (rec.portions ?? []).map((p) => ({ label: String(p.label).trim(), grams: p.grams })).find((p) => /^1 [a-z]+$/i.test(p.label) && !NOT_AN_ITEM.test(p.label) && p.grams > 0 && p.grams <= 100)
+    if (raw) { const word = raw.label.slice(2).toLowerCase(); return { grams: r1(FEW * count * raw.grams), basis: 'typical', row: { unit: 'whole', qualifier: '', word, grams: raw.grams, label: raw.label, rawUnit: word } } }
+    // A food whose usual portion is one item (an egg): three of them.
+    if (defaultIsOneItem(rec)) return { grams: r1(FEW * count * rec.defaultPortion), basis: 'typical' }
+    return { needs: 'no single item in USDA\'s table for this food, so "a few" has no weight here' }
+  }
+  if (UNWEIGHED.has(unit)) {
+    const carbs = typicalAvailableCarbs(rec)
+    // A handful of spinach changes the answer by nothing, so it is not a question; a handful of chips is.
+    if (carbs !== null && carbs <= NEAR_CARB_FREE_G && rec.defaultPortion > 0) return { grams: r1(rec.defaultPortion * count), basis: 'typical' }
+    return { needs: `"${unit}" has no weight in USDA's tables, and this food carries carbohydrate` }
+  }
   // 2. The food's own usual portion, times the count. A recipe is counted by serving.
   if (unit === 'default') {
     if (rec.kind === 'recipe') return { servings: count, basis: 'default' }
@@ -200,6 +235,16 @@ export interface SaidInput {
 /** The words a person reads for a weight: "1 cup (158 g)", "4 oz (113 g)", or just grams for a metric session. */
 export function saidText(i: SaidInput): string {
   const g = gramsText(i.grams)
+  // An amount the engine assumed is said back in the person's words and the engine's number, in either units, so it can be corrected.
+  if (i.quantity.unit === 'few') {
+    const n = Math.round(FEW * i.quantity.count)
+    // "1 fruit" of strawberries is a strawberry: the food's own name (already plural) stands for it; "1 berry" is three berries.
+    const own = !i.row || ['fruit', 'item', 'each', 'regular', 'medium'].includes(i.row.word)
+    const base = own ? foodWord(i.rec) : i.row!.word
+    const w = own && /s$/.test(base) ? base : base.endsWith('y') ? base.slice(0, -1) + 'ies' : base + 's'
+    return `a few (${n} ${w}, ${g})`
+  }
+  if (UNWEIGHED.has(i.quantity.unit)) return `${i.quantity.count === 1 ? (i.quantity.unit === 'some' ? 'some' : `a ${i.quantity.unit}`) : `${countText(i.quantity.count)} ${i.quantity.unit}s`} (${g})`
   if (i.units !== 'imperial' || i.basis === 'stated') return g
   if (i.basis === 'exact_conversion') { const oz = ouncesText(i.grams); return oz ? `${oz} (${g})` : g }
   if (i.basis === 'default') {

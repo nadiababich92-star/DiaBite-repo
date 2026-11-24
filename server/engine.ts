@@ -439,6 +439,11 @@ async function main() {
     // beans" is telling what is in the bowl, not that they ate a bowl and a portion of each beside it: the same words came out as
     // 33 g, 39 g and 94 g depending on how the model split them (a dietitian's test, 15 November). The prompt already says to cost the
     // parts and drop the container; this is the rule that does not depend on the model keeping it.
+    // Foods named and left out: phrases only, a few of them. A wrong value is a message to correct, as every model-facing tool answers.
+    const notCounted = body.notCounted
+    if (notCounted !== undefined && (!Array.isArray(notCounted) || notCounted.length > 12 || notCounted.some((x) => typeof x !== 'string' || !x.trim() || x.length > 80 || /\d/.test(x)))) {
+      return res.json({ error: 'notCounted must be a list of up to 12 food names the person said that are not in items (no numbers), e.g. ["strawberries"].' })
+    }
     const wholeBowl = body.items.length > 1 && body.items.some((it) => /^burrito bowl\b/i.test(loadFoods().byId.get(it.foodId)?.name ?? ''))
     if (wholeBowl) {
       return res.json({ error: 'A burrito bowl record is the whole bowl, with its rice and beans already in it, so it cannot be counted beside them. When the person listed what is in the bowl, cost those foods alone and leave the bowl record out; when they did not, cost the bowl record alone.' })
@@ -467,7 +472,7 @@ async function main() {
       if (day && !('unknown' in day)) {
         const unknownFoods = (body.sessionId ? getSession(body.sessionId)?.unknownFoods : undefined) ?? []
         const unscored = meal.items.filter((it) => !it.loadAvailable).map((it) => it.name)
-        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, withDayUnscored(unscored, day), (body.sessionId ? getSession(body.sessionId)?.carbLimit : undefined))
+        out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, withDayUnscored(unscored, day), (body.sessionId ? getSession(body.sessionId)?.carbLimit : undefined), (notCounted ?? []).map((x) => x.trim()))
         { const ex = excludedIn(meal.items, body.sessionId ? getSession(body.sessionId)?.avoid : undefined); if (ex.length) out.excluded = ex }
       }
 

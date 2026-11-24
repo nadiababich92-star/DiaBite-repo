@@ -148,6 +148,12 @@ export interface ComputeMealRequest {
    * asking costs nothing on a meal that fits.
    */
   withAlternatives?: boolean
+  /**
+   * Foods the person named that are not in `items`: one the agent is asking about, or could not find. Each makes the meal partial, so
+   * "fits" is never said of it (CLAUDE.md rule 3). Phrases only, never a number. (24 November 2026: "a few strawberries" was asked about
+   * and left out, and the meal was stamped Fits.)
+   */
+  notCounted?: string[]
 }
 
 export interface ComputeMealResponse {

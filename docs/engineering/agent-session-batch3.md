@@ -1,6 +1,6 @@
 # Engineering plan: findings of 24 November, batch 3 (agent and session)
 
-*Stage 1, 24 November 2026. A separate file because `docs/engineering/engineering-doc.md` holds another session's uncommitted work. Batches 1 (data) and 2 (screen) are live (revisions 251–257). This plan covers what is left: the agent and the session. **Decided** marks the owner's answers of 24 November. Nothing here is built yet.*
+*Stage 1, 24 November 2026; weights corrected from USDA while building commit 1. A separate file because `docs/engineering/engineering-doc.md` holds another session's uncommitted work. Batches 1 (data) and 2 (screen) are live (revisions 251–257). This plan covers what is left: the agent and the session. **Decided** marks the owner's answers of 24 November. Nothing here is built yet.*
 
 ## 1. Summary
 
@@ -51,7 +51,7 @@ Main box "Check this meal" → AskPage sends { newTopic: true } → /agent/ask: 
 `"yogurt, a quarter cup of granola and some strawberries"` → the agent resolves three foods, costs two and asks about the third → `compute_meal` carries `notCounted: ["strawberries"]` → `afterMeal.partial.notCounted` → `fits: null` → stamp **Part of the meal**, never **Fits**. If the agent forgets the field, the server's turn check (section 6) finds a resolved food missing from the costed items and withholds the fit itself.
 
 **F, amounts.**
-`"a few strawberries"` → `quantity { count: 1, unit: "few" }` → engine: 3 × USDA's medium strawberry (12 g) = 36 g, `basis: "assumed"`, said "a few (3 medium, 36 g)". `"a handful of spinach"` → `quantity { count: 1, unit: "handful" }` → engine: spinach's typical portion has 3 g of available carbohydrate or less, so it uses that portion, `basis: "typical"`, said "a handful (USDA's typical size, 30 g)". `"a handful of chips"` → `needsWeight` → one question, as today.
+`"a few strawberries"` → `quantity { count: 1, unit: "few" }` → engine: 3 × USDA's single strawberry ("1 fruit", 18 g) = 54 g, `basis: "typical"`, said "a few (3 strawberries, 54 g)". `"a handful of spinach"` → `quantity { count: 1, unit: "handful" }` → engine: spinach's typical portion has 3 g of available carbohydrate or less, so it uses that portion, `basis: "typical"`, said "a handful (100 g)", to which the agent adds "USDA's typical size". `"a handful of chips"` → `needsWeight` → one question, as today.
 
 ## 4. The promise check
 
@@ -62,7 +62,7 @@ Every number in these flows comes from the engine. "A few = 3" and "a handful = 
 **Files:** `src/components/AskPage.tsx`, `src/lib/agent.ts`.
 
 - `AskRequest` gains `newTopic?: true`. `ask()` from the main form, "Try again", the day chip's re-ask and the Diary's Add food sets it; the reply box (`form.reply-box`, `AskPage.tsx:808`) does not.
-- No visible change: no new screen, text, colour or state. The answer card is unchanged except that "Weights I used" may now say "a few (3 medium, 36 g)" or "a handful (USDA's typical size, 30 g)", which the agent copies from `said`.
+- No visible change: no new screen, text, colour or state. The answer card is unchanged except that "Weights I used" may now say "a few (3 strawberries, 54 g)" or "a handful (100 g, USDA's typical size)", which the agent copies from `said`.
 - `docs/design.md` needs no new section.
 
 ## 6. Engine and API
@@ -74,11 +74,11 @@ Every number in these flows comes from the engine. "A few = 3" and "a handful = 
 **The turn check** (`server/agent.ts`, after the agent's last tool call). From this turn's trace: every phrase `resolve_foods` answered with a candidate (not unknown) must have one of its candidate ids among the final `compute_meal` (or `cost_dish`) items, or be in `notCounted`. If one is missing, the response is marked partial (`withheldFit: true`): the browser shows **Part of the meal**, not **Fits**. A false alarm (the agent re-resolved a food under other words) costs a missing green stamp, never a wrong one: the safe direction. Logged to the turn log as `uncounted` so the rate can be watched.
 
 **`server/quantity.ts`.**
-- Unit `few`: 3 × the food's per-item portion (`1 medium`, `1 large`, `1 piece`, `1 slice`, the first that exists); with none, `needs` as today. `basis: "assumed"`, `said: "a few (3 medium, 36 g)"`.
-- An amount with no weight (`handful`, `bowl`, `plate`, `scoop`, `some`, `bit`, `serving`): if the food's typical portion (`defaultPortion`) has **3 g of available carbohydrate or less**, use it, `basis: "typical"`, `said: "a handful (USDA's typical size, 30 g)"`. Otherwise `needs`, as today.
+- Unit `few`: 3 × the food's per-item portion (`1 medium`, `1 large`, `1 piece`, `1 slice`, the first that exists); with none, `needs` as today. `basis: "typical"`, `said: "a few (3 strawberries, 54 g)"`.
+- An amount with no weight (`handful`, `bowl`, `plate`, `scoop`, `some`, `bit`, `serving`): if the food's typical portion (`defaultPortion`) has **3 g of available carbohydrate or less**, use it, `basis: "typical"`, `said: "a handful (100 g)"`. Otherwise `needs`, as today.
 - A slice label with a qualifier ("1 small or thin/very thin slice") is not a plain slice and stays unread; the fix is data (next).
 
-**Data** (`data/recipes-db/portion_mapping.json`, `server/foods.ts`): USDA SR Legacy per-item and slice portions for the curated records that lack them: whole wheat bread "1 slice" (from SR "Bread, whole-wheat, commercially prepared", 32 g), strawberry "1 medium" (12 g), and the same for every curated bread, berry and small fruit a person counts (the spec lists each with its SR number). Two names: "shredded cheese" → a shredded cheddar record; "grilled chicken breast" with an amount already takes the non-recipe record by prompt rule, and gets a case. The catalogue change reaches production only after `sync-foods` and a restart (rule 10).
+**Data** (`data/recipes-db/portion_mapping.json`, `server/foods.ts`): USDA SR Legacy per-item and slice portions for the curated records that lack them: whole wheat bread "1 medium or regular slice" (36 g, from the same FNDDS record 2707709, whose local copy kept only four rows), strawberry "1 fruit" (18 g), and the same for every curated bread, berry and small fruit a person counts (the spec lists each with its SR number). Two names: "shredded cheese" → a shredded cheddar record; "grilled chicken breast" with an amount already takes the non-recipe record by prompt rule, and gets a case. The catalogue change reaches production only after `sync-foods` and a restart (rule 10).
 
 ## 7. Agents
 
@@ -104,7 +104,7 @@ No table, column or migration. Nothing new is stored about a person: `newTopic` 
 ## 10. Evaluation plan (in the same change)
 
 **Engine (`npm run eval`, `eval/cases.json`, `eval/run-engine.ts`):**
-- Quantity: strawberries `few` → 36 g, assumed; whole wheat bread 2 `slice` → 64 g; spinach `handful` → its typical portion, no `needs`; potato chips `handful` → `needs`; lettuce `some` → typical; white rice `bowl` → `needs`.
+- Quantity: strawberries `few` → 54 g; whole wheat bread 2 `slice` → 72 g; spinach `handful` → its typical portion, no `needs`; potato chips `handful` → `needs`; lettuce `some` → typical; white rice `bowl` → `needs`.
 - `compute_meal` with `notCounted: ["strawberries"]` → `afterMeal.fits === null`, `partial.notCounted` holds it; over by the counted part alone → `fits === false`.
 - The turn check, from recorded traces: a resolved phrase missing from the items and from `notCounted` → `withheldFit`; the same phrase in `notCounted` → no double flag; a re-resolved phrase whose second resolution was costed → no flag.
 - `/agent/ask` with `newTopic: true` does not pass `previous` (a unit test of the function that picks the continuation, no model).
@@ -113,8 +113,8 @@ No table, column or migration. Nothing new is stored about a person: `newTopic` 
 **Agent (`npm run eval:agent`, mechanical, reading the trace):**
 - **AS1** two turns, one session: "A cup of Greek yogurt with granola and some strawberries", then with `newTopic` "Chipotle chicken burrito bowl with brown rice and black beans": the second turn's tool calls name no strawberry. The runner gains two-turn cases (`turns: [...]`) in `eval/run-cases.ts`.
 - **AS2** the burrito bowl with its parts: `compute_meal` items hold brown rice, black beans, chicken breast (not a recipe), cheese; no `cost_dish`; no burrito-bowl record.
-- **AS3** "…and a few strawberries": strawberries in the items at 36 g, `basis: assumed`; no `needsWeight`.
-- **AS4** "a turkey sandwich on two slices of whole wheat bread": bread at 64 g; no question.
+- **AS3** "…and a few strawberries": strawberries in the items at 54 g, `basis: typical`; no `needsWeight`.
+- **AS4** "a turkey sandwich on two slices of whole wheat bread": bread at 72 g; no question.
 - **AS5** "eggs with a handful of spinach": spinach in the items, no question.
 - **AS6** "about 1.5 cups of lentil soup": `quantity.count === 1.5`.
 - **AS7** a food left out: `afterMeal.fits !== true` whenever `partial` is present or the turn check fired.

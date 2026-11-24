@@ -670,6 +670,8 @@ const USDA_ALIASES: Record<string, string[]> = {
  * user typed it and got "Breakfast Sausage Patties with Apple"). Keyed by the ingredient table's id.
  */
 const INGREDIENT_ALIASES: Record<string, string[]> = {
+  // "1 oz shredded cheese" found "Blue cheese, crumbled" (24 November 2026): shredded cheese, as sold in the US, is cheddar unless named.
+  cheddar: ['shredded cheese', 'shredded cheddar', 'grated cheddar'],
   turkey_sausage: ['breakfast sausage', 'sausage links', 'sausage patties', 'turkey breakfast patties', 'turkey sausage patties', 'turkey breakfast sausage', 'turkey breakfast links'],
   chicken_sausage: ['breakfast sausage', 'sausage links', 'sausage patties'],
   // 'pizza sauce' matched fish sauce, a neighbour by the word 'sauce'; on a pizza it is tomato sauce.

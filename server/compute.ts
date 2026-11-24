@@ -461,17 +461,18 @@ export function afterMealFor(
   unknownFoods: string[] = [],
   unscored: string[] = [],
   carbLimit?: { kind: 'meal' | 'snack'; g: number },
+  notCounted: string[] = [],
 ) {
   const after = {
     gl: Math.round((remaining.gl - meal.gl) * 10) / 10,
     carbsG: Math.round((remaining.carbsG - meal.carbs) * 10) / 10,
     kcal: Math.round(remaining.kcal - meal.kcal),
   }
-  const partial = unknownFoods.length + unscored.length > 0
+  const partial = unknownFoods.length + unscored.length + notCounted.length > 0
   return {
     remaining: after,
     fits: partial ? (after.gl >= 0 ? null : false) : after.gl >= 0,
-    ...(partial ? { partial: { unknownFoods, ...(unscored.length ? { unscored } : {}) } } : {}),
+    ...(partial ? { partial: { unknownFoods, ...(unscored.length ? { unscored } : {}), ...(notCounted.length ? { notCounted } : {}) } } : {}),
     // Returned only when the meal is above the person's own number. A meal within it is not news, and a number the model can see is a number it
     // may quote: the answer to "An apple" with a 60 g snack number said "It also stays under your 60 g snack target" about one time in six
     // (18 November 2026). With no field there is nothing to quote, so the rule "say nothing" no longer depends on the model obeying it.

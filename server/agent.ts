@@ -328,6 +328,8 @@ export interface AskResponse {
   toolCalls: number
   trace: ToolCallTrace[]
   responseId?: string
+  /** Foods the turn found and left out of the count without naming them in `notCounted`: the meal is partial (see `uncountedFoods`). */
+  uncounted?: string[]
   /** 1 on a first-pass answer, 2 when the regenerate was needed. */
   attempts?: number
   /** True when both attempts failed the verifier and this text came from tool results. */
@@ -781,6 +783,37 @@ export function askedSomething(trace: ToolCallTrace[], answer: string): boolean 
   return answer.trim().slice(-300).includes('?')
 }
 
+/**
+ * Foods this turn found and then left out of the meal's count without saying so (24 November 2026: yogurt, granola and "a few
+ * strawberries" was costed without the strawberries, asked about them, and was stamped Fits). Read from tool results only (rule 7):
+ * every phrase `resolve_foods` answered with a candidate must have one of its candidates among the last meal call's items, or be
+ * named in that call's `notCounted`. A phrase whose words all sit inside another phrase that was costed ("chicken" then "chicken
+ * breast") is the same food asked twice, not a food left out. When one is left out the browser shows "Part of the meal", never
+ * "Fits": a false alarm costs a green stamp, never a wrong one.
+ */
+export function uncountedFoods(trace: ToolCallTrace[]): string[] {
+  const meal = [...trace].reverse().find((t) => (t.tool.endsWith('compute_meal') || t.tool.endsWith('cost_dish')) && typeof (t.result as { totals?: unknown } | undefined)?.totals === 'object')
+  if (!meal) return []
+  const costed = new Set(((meal.result as { items?: { foodId?: string }[] }).items ?? []).map((it) => it.foodId).filter(Boolean) as string[])
+  const named = (((meal.input as { notCounted?: unknown } | undefined)?.notCounted ?? []) as unknown[]).filter((x): x is string => typeof x === 'string').map((x) => x.toLowerCase().trim())
+  const words = (p: string) => p.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2)
+  const resolved = trace.filter((t) => t.tool.endsWith('resolve_foods'))
+    .flatMap((t) => ((t.result as { results?: { phrase?: string; unknown?: boolean; candidates?: { id: string }[] }[] } | undefined)?.results ?? []))
+    .filter((r) => !r.unknown && typeof r.phrase === 'string' && (r.candidates ?? []).length > 0)
+  const isCosted = (r: { candidates?: { id: string }[] }) => (r.candidates ?? []).some((c) => costed.has(c.id))
+  const out: string[] = []
+  for (const r of resolved) {
+    if (isCosted(r)) continue
+    const phrase = r.phrase!.trim()
+    const p = phrase.toLowerCase()
+    if (named.some((n) => n.includes(p) || p.includes(n))) continue
+    const w = words(phrase)
+    if (resolved.some((o) => o !== r && isCosted(o) && w.every((x) => words(o.phrase!).includes(x)))) continue
+    if (!out.some((x) => x.toLowerCase() === p)) out.push(phrase)
+  }
+  return out
+}
+
 /** Who is asking, as far as the limits are concerned. */
 export interface AskContext {
   /** The caller's address; absent for trusted callers, who are not rate limited. */
@@ -1056,5 +1089,6 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
     toolCalls: trace.length, trace, responseId, attempts, templated, withheld, stripped,
     timing: { routeMs: clock.route, parkMs: clock.park, agentMs: clock.agent },
     route: role, routedBy: by,
+    ...(role === 'meal' && uncountedFoods(trace).length ? { uncounted: uncountedFoods(trace) } : {}),
   }
 }

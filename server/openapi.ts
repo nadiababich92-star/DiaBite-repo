@@ -71,6 +71,7 @@ export function openApiSpec() {
                   required: ['items'],
                   properties: {
                     sessionId: { type: 'string', description: 'The session id you were given. Pass it and today\u2019s budget comes back with the meal, so get_day_state is not needed.' },
+                    notCounted: { type: 'array', maxItems: 12, items: { type: 'string', maxLength: 80 }, description: 'Foods the person named that are not in items: one you are asking about, or could not find. The meal is then partial and never "fits". Names only, no numbers.' },
                     withAlternatives: { type: 'boolean', description: 'Ask for swaps in the same call. They come back only when the meal is over the remaining budget or carries a high load, so passing true every time is safe.' },
                     items: {
                       type: 'array',
@@ -91,8 +92,8 @@ export function openApiSpec() {
                               count: { type: 'number', description: 'How many, as the person said it: 1, 2, 0.5 for "half", 1.5.' },
                               unit: {
                                 type: 'string',
-                                enum: ['g', 'oz', 'lb', 'cup', 'tbsp', 'tsp', 'fl oz', 'slice', 'piece', 'small', 'medium', 'large', 'whole', 'default'],
-                                description: '"default" for "two eggs" or "a banana" (the food\u2019s usual portion, multiplied by count); "whole" for one of it ("half an avocado" is count 0.5, unit whole); "g" only when they typed grams.',
+                                enum: ['g', 'oz', 'lb', 'cup', 'tbsp', 'tsp', 'fl oz', 'slice', 'piece', 'small', 'medium', 'large', 'whole', 'default', 'few', 'handful', 'bowl', 'plate', 'scoop', 'some', 'serving'],
+                                description: '"default" for "two eggs" or "a banana" (the food\u2019s usual portion, multiplied by count); "whole" for one of it ("half an avocado" is count 0.5, unit whole); "g" only when they typed grams. "few" for "a few" (count 1). "handful", "bowl", "plate", "scoop", "some", "serving" as the person said them: the engine weighs them, or answers needsWeight and you ask.',
                               },
                             },
                           },
