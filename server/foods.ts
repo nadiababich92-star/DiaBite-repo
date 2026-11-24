@@ -577,15 +577,15 @@ const readableName = (name: string) =>
  * "fries" asked whether someone meant yuca or sweet-potato fries.
  */
 const USDA_ALIASES: Record<string, string[]> = {
-  // 24 November 2026, the owner's choice: fries as people buy them are USDA's fast-food fries (41.4 g carbohydrate per 100 g), not fries
-  // cooked from fresh at home (18.5 g), which counted a medium order at half its carbohydrate. GI 78 by data/foods-usda/fix_fries_gi.py.
-  'usda:2709461': ['french fries', 'french fry', 'fries', 'fast food fries', 'mcdonalds fries', "mcdonald's fries"], // Potato, french fries, fast food
+  // 24 November 2026, the owner's choice: fries as people buy them are USDA's restaurant / fast-food fries (37.2 and 41.4 g carbohydrate per
+  // 100 g), not fries cooked from fresh at home (18.5 g), which counted a medium order at half its carbohydrate. GI 78 by fix_fries_gi.py.
+  'usda:2709462': ['french fries', 'french fry', 'fries', 'fast food fries', 'mcdonalds fries', "mcdonald's fries"], // Potato, french fries, restaurant: the record whose USDA portions are fast-food orders (medium 145 g, large 180 g), so "medium fries" needs no question
   // Findings of 24 November 2026 (the owner's live questions): each phrase found a different food; each now names the record that is it.
   'usda:2706916': ['big mac', 'big macs', 'mcdonalds big mac', "mcdonald's big mac"],                 // Big Mac (McDonalds); "big mac" found macadamia nuts
   'usda:2706442': ['chicken parmesan', 'chicken parmigiana', 'chicken parm', 'chicken parmesan cutlet'], // Chicken or turkey parmigiana; found a meatball skillet
   'usda:2705855': ['beef patty', 'hamburger patty', 'burger patty', 'ground beef patty'],              // Beef, ground, patty; found corned beef patty
   'usda:2706983': ['turkey sandwich on whole wheat', 'turkey sandwich on wheat bread', 'turkey sandwich on whole wheat bread'], // Turkey sandwich on wheat (carbohydrate only); found "on white"
-  'usda:2708562': ['chicken burrito bowl', 'chipotle chicken burrito bowl', 'chipotle burrito bowl', 'chipotle chicken bowl'], // Burrito bowl, chicken, with beans; found a meal kit
+  'usda:2708563': ['chicken burrito bowl', 'chipotle chicken burrito bowl', 'chipotle burrito bowl', 'chipotle chicken bowl'], // Burrito bowl, chicken, with beans and rice (a Chipotle bowl has rice); found a meal kit
   'usda:2708461': ['granola', 'granola cereal'],                                                      // Cereal, granola (carbohydrate only); found a granola bar
   'usda:2710011': ['fajita veggies', 'fajita vegetables', 'sauteed peppers and onions', 'sautéed peppers and onions', 'peppers and onions'], // Peppers and onions, cooked, fat added; "fajita veggies" found chicken fajita
   // Worklist 63, the owner's yes on 17 November: words people used that found nothing, each given the record that is that food.

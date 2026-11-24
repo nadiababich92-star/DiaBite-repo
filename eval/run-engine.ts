@@ -2905,8 +2905,8 @@ hangMisses.forEach((m) => console.log(m))
       if (own.some((a) => a.change === 'portion')) miss('SW9 half of an avoided food is offered')
     }
   }
-  // SW10: no load, no swap.
-  for (const phrase of ['A Kraft mac and cheese', 'pepperoni pizza', 'chipotle chicken burrito bowl', 'olive oil']) {
+  // SW10: no load, no swap. (The branded kit is named in full since 24 November 2026: "chipotle chicken burrito bowl" alone is now a USDA bowl with a load.)
+  for (const phrase of ['A Kraft mac and cheese', 'pepperoni pizza', 'old el paso chipotle chicken burrito bowl kit', 'olive oil']) {
     const id = await idOf(phrase)
     if (!id) continue
     const rec = getRecord(id)

@@ -1007,7 +1007,7 @@
       {
         "phrase": "french fries",
         "expect": [
-          "usda:2709461"
+          "usda:2709462"
         ],
         "tags": [
           "everyday"
@@ -1016,7 +1016,7 @@
       {
         "phrase": "fries",
         "expect": [
-          "usda:2709461"
+          "usda:2709462"
         ],
         "tags": [
           "everyday"
@@ -1025,7 +1025,7 @@
       {
         "phrase": "french fry",
         "expect": [
-          "usda:2709461"
+          "usda:2709462"
         ],
         "tags": [
           "everyday"
@@ -1874,7 +1874,7 @@
       {
         "phrase": "chipotle chicken burrito bowl",
         "expect": [
-          "usda:2708562"
+          "usda:2708563"
         ],
         "tags": [
           "restaurant-not"
@@ -1909,7 +1909,7 @@
       {
         "phrase": "medium fries",
         "expect": [
-          "usda:2709461"
+          "usda:2709462"
         ],
         "tags": [
           "no-swap"
