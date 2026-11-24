@@ -84,6 +84,7 @@ export function validateAsk(body: unknown): Invalid | null {
   if (b.carbLimit !== undefined && !validCarbLimit(b.carbLimit)) return { field: 'carbLimit' }
   if (b.units !== undefined && !validUnits(b.units)) return { field: 'units' }
   if (b.portionSwaps !== undefined && b.portionSwaps !== false) return { field: 'portionSwaps' }
+  if (b.newTopic !== undefined && typeof b.newTopic !== 'boolean') return { field: 'newTopic' }
   return null
 }
 

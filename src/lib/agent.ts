@@ -36,6 +36,8 @@ export interface AgentRequest {
    * memory, and never named after the condition (docs/specs/swaps-engine.md, section 6).
    */
   portionSwaps?: false
+  /** A question from the main box: the engine starts a new conversation. The "Your answer" box under a question leaves it out, and continues. */
+  newTopic?: true
 }
 
 export interface TraceStep {

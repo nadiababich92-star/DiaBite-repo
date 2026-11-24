@@ -310,6 +310,12 @@ export interface AskRequest {
   units?: 'imperial' | 'metric'
   /** `false` for a person whose profile hides the weekly menu: parked with the day state so the engine offers no smaller portion. Memory only; never logged. */
   portionSwaps?: false
+  /**
+   * The question came from the main box: a new topic. The conversation is not continued, so a question the agent asked about the last meal
+   * cannot be answered by the next one (24 November 2026: a Chipotle bowl got an answer about strawberries). Only the "Your answer" box under
+   * a question leaves it out. Absent keeps the old behaviour, for old clients and the eval runner.
+   */
+  newTopic?: boolean
 }
 
 export interface ToolCallTrace {
@@ -814,6 +820,11 @@ export function uncountedFoods(trace: ToolCallTrace[]): string[] {
   return out
 }
 
+/** The response a turn continues: none for a new topic (docs/engineering/agent-session-batch3.md, A), the session's last one otherwise. */
+export function continuationFor(req: Pick<AskRequest, 'sessionId' | 'newTopic'>): string | undefined {
+  return req.newTopic ? undefined : previousResponseFor(req.sessionId)
+}
+
 /** Who is asking, as far as the limits are concerned. */
 export interface AskContext {
   /** The caller's address; absent for trusted callers, who are not rate limited. */
@@ -960,7 +971,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   if (!ctx.trusted) chargeTurn(ctx.clientKey, req.sessionId, undefined, ctx.person?.sub)
 
   const clock = { t0: Date.now(), route: 0, park: 0, agent: [] as number[] }
-  let previous = previousResponseFor(req.sessionId)
+  let previous = continuationFor(req)
   // The model carries this id to the tools, which take it only with the engine's signature on it (server/bind.ts).
   const mealInput = `[session_id: ${bindSession(req.sessionId)}]\n\n${req.message}`
 
@@ -975,7 +986,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   speculative?.catch(() => { /* its error is read where it is used */ })
   // A short reply to a question the meal specialist just asked goes back to it: the router sees one message and would
   // read "i don't know" as a general question, and the advisor cannot ask again or cost anything.
-  const prior = lastTurnOf(req.sessionId)
+  const prior = req.newTopic ? undefined : lastTurnOf(req.sessionId)
   const { role, by } = continuesMealQuestion(prior, req.message)
     ? { role: 'meal' as Role, by: 'followup' as const }
     : await route(req.message)

@@ -545,7 +545,8 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
     if (reply && asked) void ask(asked, { day: d, force: true })
   }
 
-  async function ask(message: string, opts: { day?: string; force?: boolean } = {}) {
+  // `reply`: the answer to the agent's question, from the box under it; every other question is a new topic (docs/engineering/agent-session-batch3.md, A).
+  async function ask(message: string, opts: { day?: string; force?: boolean; reply?: boolean } = {}) {
     const q = message.trim()
     if (!q || (busy && !opts.force)) return
     const forDay = opts.day ?? day
@@ -564,6 +565,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
         units: profile.units,
         ...(portionSwapsFor(profile) === false ? { portionSwaps: false as const } : {}),
         ...(carbLimit.g > 0 ? { carbLimit: { kind: carbLimit.kind, g: carbLimit.g } } : {}),
+        ...(opts.reply ? {} : { newTopic: true as const }),
         entries: fresh ? [] : counted.filter((e) => e.date === forDay).map((e) => (e.snapshot?.servings
           ? { foodId: engineId(e), servings: e.snapshot.servings }
           : { foodId: engineId(e), grams: e.grams })),
@@ -805,7 +807,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
           </Fold>
 
           {tone === 'ask' && !reply.blocked && reply.route !== 'advisor' && (
-            <form className="reply-box" onSubmit={(e) => { e.preventDefault(); ask(replyText) }}>
+            <form className="reply-box" onSubmit={(e) => { e.preventDefault(); ask(replyText, { reply: true }) }}>
               <span className="label">Your answer</span>
               <div className="ask-form">
                 <input type="text" value={replyText} onChange={(e) => setReplyText(e.target.value)} autoComplete="off"

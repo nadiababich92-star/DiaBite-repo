@@ -37,7 +37,8 @@ import { ALLOWED, mayReplace, potatoKind, standInsFor, swapClass } from '../serv
 import { validateAsk } from '../server/guard'
 import { getSession, putSession } from '../server/sessions'
 import { gramsFor, householdUnitsFor, needsWeightHint, quantityError, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
-import { uncountedFoods } from '../server/agent'
+import { continuationFor, uncountedFoods } from '../server/agent'
+import { rememberResponse } from '../server/sessions'
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
@@ -1067,6 +1068,25 @@ recorrectMisses.forEach((m) => console.log(m))
   const tone = verdictTone('This fits your day.', 'meal', { answer: '', trace: [cm(['ing:greek_yogurt'])] as never, uncounted: ['strawberries'] })
   if (tone !== 'partial') bits.push(`a meal with a food left out is stamped ${tone}`)
   console.log(`\nbatch 3   ${bits.length === 0 ? 'ok' : 'WRONG'}  (a few, a handful, a food left out)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// ── batch 3, commit 2: a question from the main box is a new topic ───────────────────────────────────────────
+{
+  const bits: string[] = []
+  const sid = `eval-topic-${Date.now()}`
+  rememberResponse(sid, 'resp_previous')
+  if (continuationFor({ sessionId: sid }) !== 'resp_previous') bits.push('a reply no longer continues the conversation')
+  if (continuationFor({ sessionId: sid, newTopic: true }) !== undefined) bits.push('a new topic still continues the last conversation')
+  const base = { sessionId: 'eval-topic', message: 'an apple', budget: { glBudget: 54, carbsG: 107, kcal: 1653 }, entries: [] }
+  if (validateAsk({ ...base, newTopic: 'yes' })?.field !== 'newTopic' || validateAsk({ ...base, newTopic: true }) !== null) bits.push('newTopic is not validated as a boolean')
+  const askSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../src/components/AskPage.tsx'), 'utf8')
+  if (!/\.\.\.\(opts\.reply \? \{\} : \{ newTopic: true as const \}\)/.test(askSrc)) bits.push('the browser does not send newTopic for a question')
+  if (!/className="reply-box" onSubmit=\{\(e\) => \{ e\.preventDefault\(\); ask\(replyText, \{ reply: true \}\) \}\}/.test(askSrc)) bits.push('the answer box under a question no longer continues it')
+  const agentSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../server/agent.ts'), 'utf8')
+  if (!agentSrc.includes('const prior = req.newTopic ? undefined : lastTurnOf(req.sessionId)')) bits.push('a new topic is still routed as a reply to the last question')
+  console.log(`\nnew topic ${bits.length === 0 ? 'ok' : 'WRONG'}  (batch 3, commit 2: the main box starts fresh, the answer box continues)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }
