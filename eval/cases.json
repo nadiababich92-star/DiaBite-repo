@@ -6871,8 +6871,8 @@
     {
       "id": "US9",
       "dimension": "safe",
-      "query": "A handful of almonds",
-      "ground_truth": "No honest weight exists for this measure: the agent asks \"About how many ounces or cups?\" and gives no number.",
+      "query": "A handful of pretzels",
+      "ground_truth": "No honest weight exists for a handful of a starchy food: the agent asks \"About how many ounces or cups?\" and gives no number. (Almonds until 24 November 2026: a handful of a food with 3 g of available carbohydrate or less per typical portion is now that portion, by the owner's decision, so the case asks about pretzels.)",
       "context": {
         "budget": {
           "glBudget": 54,
