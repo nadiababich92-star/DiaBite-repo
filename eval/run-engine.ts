@@ -44,6 +44,9 @@ import { GI_CROSSCHECKED_ON, recordFromRow, getRecord, hasNoLoad, householdMeasu
 import { legacyHouseholdMeasure, legacyStepUnit } from './legacy-measure'
 import { countOf, countText, gramsShown, measureLabel, nudgeMeasure } from '../src/lib/measure'
 import { FigurePair } from '../src/components/FigurePair'
+import { GIPill } from '../src/components/Pills'
+import { todayISO } from '../src/lib/storage'
+import { pillChecked } from '../src/lib/verdict'
 import { PortionEditor, WeightsUsed } from '../src/components/WeightEditor'
 import type { ReceiptLine } from '../src/lib/agent'
 import GlHelp, { GlHelpContext } from '../src/components/GlHelp'
@@ -1023,6 +1026,35 @@ recorrectMisses.forEach((m) => console.log(m))
   const diaryHtml = renderToStaticMarkup(createElement(DiaryPage, { targets: calculateTargets(DEFAULT_PROFILE), diary: [], onChange: () => {}, topCard: createElement(DeferredCard, { step: 'diagnosis', onAnswer: () => {}, onLater: () => {} }) }))
   if (!(diaryHtml.indexOf('Two minutes more') >= 0 && diaryHtml.indexOf('Two minutes more') < diaryHtml.indexOf('day-nav'))) bits.push('the Diary does not show the card above the day')
   console.log(`\nafter ans ${bits.length === 0 ? 'ok' : 'WRONG'}  (the first session after the first answer, OB7 and OB8)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// ── findings of 24 November, batch 2 ─────────────────────────────────────────
+// A food with no GI and real carbohydrate is "carbs only", never "no carbs"; a Diary meal with such a food has no load level; a partial
+// answer says "counted so far"; one checked number is singular; the feedback card is never on screen while a question is answered.
+{
+  const bits: string[] = []
+  const pill = (gi: number | null, carbs?: number) => renderToStaticMarkup(createElement(GIPill, { gi, carbs }))
+  if (!pill(null, 65.3).includes('carbs only')) bits.push('pizza (no GI, 65.3 g) is not "carbs only"')
+  if (!pill(null, 0).includes('no carbs')) bits.push('cheese (no GI, 0 g) is not "no carbs"')
+  const t = todayISO()
+  const snapP = (name: string, availableCarbs: number, loadAvailable: boolean) => ({ name, kcal: 300, carbs: availableCarbs + 2, fiber: 2, protein: 10, fat: 10, availableCarbs, gi: loadAvailable ? 50 : null, gl: loadAvailable ? availableCarbs / 2 : 0, loadAvailable })
+  const entry = (id: string, s: ReturnType<typeof snapP>) => ({ id, date: t, meal: 'dinner' as const, foodId: 'usda:test', grams: 100, snapshot: s })
+  const diaryFor = (entries: ReturnType<typeof entry>[]) => renderToStaticMarkup(createElement(DiaryPage, { targets: calculateTargets(DEFAULT_PROFILE), diary: entries, onChange: () => {} }))
+  const allPizza = diaryFor([entry('a', snapP('Pizza with pepperoni', 65.3, false))])
+  if (/GL 0\.0 · /.test(allPizza) || !allPizza.includes('GL —') || allPizza.includes('>no carbs<')) bits.push('a dinner of pizza alone shows a load level, or "no carbs"')
+  const mixed = diaryFor([entry('a', snapP('Pizza with pepperoni', 65.3, false)), entry('b', snapP('Side salad', 4, true))])
+  if (!mixed.includes('GL 2.0 so far') || /GL 2\.0 · /.test(mixed)) bits.push('a dinner with one unscored food shows a load level, not "so far"')
+  const scored = diaryFor([entry('b', snapP('Side salad', 4, true))])
+  if (!/GL 2\.0 · /.test(scored)) bits.push('a fully scored dinner lost its load level')
+  const fig = (partial: boolean) => renderToStaticMarkup(createElement(GlHelpContext.Provider, { value: () => {} }, createElement(FigurePair, { countBy: 'gl', gl: { mealGl: 0, before: 64, after: 64, fits: true, partial } })))
+  if (!fig(true).includes('counted so far') || fig(true).includes('>this meal<')) bits.push('a partial answer says "this meal"')
+  if (!fig(false).includes('>this meal<')) bits.push('a whole answer lost "this meal"')
+  if (pillChecked(1) !== 'Checked · 1 number matches the calculation' || !pillChecked(2).includes('2 numbers match')) bits.push(`the checked pill reads "${pillChecked(1)}"`)
+  const askSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../src/components/AskPage.tsx'), 'utf8')
+  if (!/card && !busy && !recalcBusy && <FeedbackNudge/.test(askSrc)) bits.push('the feedback card can be on screen while a question is answered')
+  console.log(`\nbatch 2   ${bits.length === 0 ? 'ok' : 'WRONG'}  (findings of 24 November: Diary labels, partial figures, the pill, the card)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }
@@ -3318,7 +3350,7 @@ if (searchMisses.length) { console.log('  the search for foods to leave out matc
 const answerMisses: string[] = []
 for (const c of cases.engine.answer) {
   const got = parseMeal(c.text, { costed: c.costed })
-  const ok = c.verdict === null ? got === null : got?.verdict === c.verdict && (c.next === undefined || got?.next === c.next) && (c.why === undefined || !!got?.why?.includes(c.why))
+  const ok = c.verdict === null ? got === null : got?.verdict === c.verdict && (c.next === undefined || (got?.next ?? null) === c.next) && (c.why === undefined || !!got?.why?.includes(c.why))
   if (!ok) answerMisses.push(`    ${c.id.padEnd(24)} want ${JSON.stringify(c.verdict)} got ${JSON.stringify(got?.verdict ?? null)}`)
 }
 // What is drawn from a line: bold only for a complete pair, and no character lost at either end.

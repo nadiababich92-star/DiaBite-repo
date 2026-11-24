@@ -56,7 +56,7 @@ export const STAMP_LABEL: Record<VerdictTone | 'blocked', string> = {
 export const HINT = "Say it the way you'd say it to a friend. DiaBite counts it and shows the arithmetic."
 export const GL_LINK_LABEL = 'What is GL?'
 export const PILL_NO_NUMBERS = 'No numbers stated, so nothing to check'
-export const pillChecked = (n: number) => `Checked · ${n} numbers match the calculation`
+export const pillChecked = (n: number) => n === 1 ? 'Checked · 1 number matches the calculation' : `Checked · ${n} numbers match the calculation`
 export const ERROR_EYEBROW = "Couldn't reach DiaBite"
 /** Buttons under an answer: no label changes with state; the open state is `aria-expanded`. */
 export const BUTTONS = { calculation: 'Calculation', portions: 'Portions', recipe: 'Recipe' } as const

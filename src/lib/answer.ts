@@ -16,6 +16,8 @@ export interface MealParts { verdict: string; numbers?: string; why?: string; ne
 
 const LABELS = ['Verdict', 'Numbers', 'Why', 'Next action'] as const
 const SEP = '[:—–-]'
+/** Lines that report what was weighed or left out: never one of the four parts. */
+const NOT_A_PART = /^\*{0,2}(weights i used|not counted)\b/i
 
 /** What follows a label, to the end of its line: "**Why** — x", "Why: x", "Why - x". */
 function part(text: string, label: string): string | undefined {
@@ -50,9 +52,12 @@ export function parseMeal(text: string, opts: { costed?: boolean } = {}): (MealP
       // Four plain paragraphs, no labels at all: verdict, numbers, reason, next step.
       // Read by position, and only when the engine really costed a meal (the caller
       // knows from the trace), so a question is never dressed as a verdict.
-      if (!opts.costed || lines.length < 3 || /\?$/.test(lines[0])) return null
-      const [v, n, w, x] = lines
-      return { verdict: v.charAt(0).toUpperCase() + v.slice(1), numbers: n, why: w, next: x, used: lines.slice(0, x ? 4 : 3) }
+      // "Weights I used: …" and "Not counted: …" are lines of their own, never the next step: read by position, a four-paragraph
+      // answer with no next step printed "Next" over the weights (24 November 2026). They stay below as plain lines.
+      const core = lines.filter((l) => !NOT_A_PART.test(l))
+      if (!opts.costed || core.length < 3 || /\?$/.test(core[0])) return null
+      const [v, n, w, x] = core
+      return { verdict: v.charAt(0).toUpperCase() + v.slice(1), numbers: n, why: w, next: x, used: core.slice(0, x ? 4 : 3) }
     }
     const first = lines.findIndex((l) => !isLabelled(l))
     if (first < 0) return null

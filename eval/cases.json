@@ -3354,6 +3354,20 @@
     ],
     "answer": [
       {
+        "id": "plain-weights-not-next",
+        "text": "This fits your day.\nNumbers: glycemic load 9.8, 15.5 g available carbs.\nWhy: the toast drives the load.\nWeights I used: Egg 2 large (100 g), whole wheat toast 1 slice (33 g), avocado half (75 g).",
+        "costed": true,
+        "verdict": "This fits your day.",
+        "next": null
+      },
+      {
+        "id": "unlabelled-weights-not-next",
+        "text": "This fits your day.\nThis meal has a glycemic load of 9.8 and 15.5 g available carbs.\nThe toast drives the load.\nWeights I used: Egg 2 large (100 g), whole wheat toast 1 slice (33 g), avocado half (75 g).",
+        "costed": true,
+        "verdict": "This fits your day.",
+        "next": null
+      },
+      {
         "id": "labelled",
         "text": "**Verdict** — This fits your day.\n**Numbers** — Potato, boiled has a glycemic load of 21.3.\n**Why** — Potato, boiled is the main driver.\n**Next action** — Swap the potato for boiled carrot.",
         "verdict": "This fits your day.",

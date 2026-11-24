@@ -866,7 +866,8 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
       {/* After everything else: the question box stays first on the screen, and the card is met on the way down, never in front of an answer. */}
       {/* The card for the next question: never together with the feedback card or a tip. */}
       {!anonymous && !card && !tipShowing && firstSession?.card}
-      {!anonymous && card && <FeedbackNudge milestone={card} onAsked={cardAsked} onClose={cardClosed} />}
+      {/* Never while a question is being answered (docs/design.md): a card already on screen steps aside until the answer is in. */}
+      {!anonymous && card && !busy && !recalcBusy && <FeedbackNudge milestone={card} onAsked={cardAsked} onClose={cardClosed} />}
       {!anonymous && <Tour seen={tourSeen} onSeen={onTourSeen} ctx={{ hasReply: !!reply, hasReceipt: !!receipt, assumed: !!receipt?.assumed, busy, suspended: tourSuspended }} />}
     </div>
   )
