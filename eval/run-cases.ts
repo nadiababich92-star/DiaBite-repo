@@ -39,6 +39,10 @@ interface Case {
   expect: Record<string, unknown>
   judge: string
   tags: string[]
+  /** Questions asked first, in the same session (batch 3: a question carried over into the next). The checks read the last reply. */
+  before?: string[]
+  /** The main question is sent as a new topic, as the browser's main box sends it. */
+  newTopic?: boolean
 }
 
 interface TraceStep { tool: string; input: unknown; result: unknown }
@@ -231,6 +235,25 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
     say('no weight was guessed: the engine said needsWeight or the agent asked before costing', !called(r, 'compute_meal') || (res?.needsWeight !== undefined && res?.totals === undefined), JSON.stringify(res)?.slice(0, 120))
   }
   if (e.noComputeMeal === true) say('no compute_meal', !called(r, 'compute_meal'))
+  // Batch 3 (docs/engineering/agent-session-batch3.md): read from tool results only.
+  const lastMeal = () => (lastCallOf(r, 'compute_meal') ?? lastCallOf(r, 'cost_dish'))
+  const mealNames = () => (((lastMeal()?.result as { items?: { name?: string }[] } | undefined)?.items ?? []).map((x) => (x.name ?? '').toLowerCase()))
+  if (Array.isArray(e.toolsNotCalled)) for (const op of e.toolsNotCalled as string[]) say(`does not call ${op}`, !called(r, op))
+  if (e.noNeedsWeight === true) say('no question about grams', !(r.trace ?? []).some((t) => !!(t.result as { needsWeight?: unknown } | undefined)?.needsWeight) && !!lastMeal())
+  if (Array.isArray(e.itemsNamed)) for (const rx of e.itemsNamed as string[]) say(`an item matching /${rx}/ costed`, mealNames().some((n) => new RegExp(rx, 'i').test(n)), mealNames().join('; '))
+  if (Array.isArray(e.itemsNotNamed)) for (const rx of e.itemsNotNamed as string[]) say(`no item matching /${rx}/`, !mealNames().some((n) => new RegExp(rx, 'i').test(n)), mealNames().join('; '))
+  if (typeof e.quantityCount === 'number') {
+    const qs = (((lastCallOf(r, 'compute_meal')?.input as { items?: { quantity?: { count?: number } }[] } | undefined)?.items) ?? []).map((x) => x.quantity?.count)
+    say(`a quantity of ${e.quantityCount} sent`, qs.includes(e.quantityCount as number), JSON.stringify(qs))
+  }
+  if (e.noFitWithFoodLeftOut === true) {
+    const fits = ((lastMeal()?.result as { afterMeal?: { fits?: boolean | null } } | undefined)?.afterMeal?.fits)
+    say('no fit with a food left out', !(fits === true && ((r as { uncounted?: string[] }).uncounted ?? []).length > 0), JSON.stringify((r as { uncounted?: string[] }).uncounted ?? []))
+  }
+  if (typeof e.traceLacks === 'string') {
+    const all = (JSON.stringify(r.trace ?? []) + ' ' + r.answer).toLowerCase()
+    say(`nothing about "${e.traceLacks}"`, !all.includes((e.traceLacks as string).toLowerCase()))
+  }
   if (e.noToolCalls === true) say('no tool calls', (r.toolCalls ?? 0) === 0)
   if (e.blocked === true) say('blocked', r.blocked === true)
   // Which rule caught it, from the engine's own field. A refusal recognised only by its wording passes
@@ -589,6 +612,14 @@ console.log(`asking ${AGENT_URL}\n`)
 for (const c of runnable) {
   process.stdout.write(`${c.id.padEnd(4)} ${c.query.slice(0, 48).padEnd(50)}`)
   const sessionId = `eval-${c.id}-${Date.now()}`
+  // Earlier questions in the same session, as a person would ask them; their replies are not checked.
+  for (const [k, q] of (c.before ?? []).entries()) {
+    await fetch(AGENT_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', ...(process.env.ENGINE_API_KEY ? { 'x-api-key': process.env.ENGINE_API_KEY } : {}) },
+      body: JSON.stringify({ sessionId, message: q, budget: c.context?.budget, entries: c.context?.entries, ...(k === 0 ? { newTopic: true } : {}) }),
+    }).catch(() => undefined)
+  }
   const startedAt = Date.now()
   const res = await fetch(AGENT_URL, {
     method: 'POST',
@@ -603,6 +634,7 @@ for (const c of runnable) {
       ...(c.context?.carbLimit ? { carbLimit: c.context.carbLimit } : {}),
       ...(c.context?.avoid ? { avoid: c.context.avoid } : {}),
       ...(c.context?.units ? { units: c.context.units } : {}),
+      ...(c.newTopic ? { newTopic: true } : {}),
     }),
   })
   if (!res.ok) {

@@ -31,7 +31,7 @@ import { resolvePhrases, withoutQuantity } from '../server/resolve'
 import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { parseMeal } from '../src/lib/answer'
-import { afterMealFor, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
+import { afterMealFor, sandwichWithItsBread, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
 import { alternativesForMeal, findAlternatives, SWAP_ENERGY_BAND, SWAP_MIN_GAIN, SWAP_MIN_GAIN_SHARE } from '../server/compute'
 import { ALLOWED, mayReplace, potatoKind, standInsFor, swapClass } from '../server/roles'
 import { validateAsk } from '../server/guard'
@@ -1065,6 +1065,9 @@ recorrectMisses.forEach((m) => console.log(m))
   if (uncountedFoods([rf([['chicken', ['seed:chicken']]]), rf([['chicken breast', ['ing:chicken_breast']]]), cm(['ing:chicken_breast'])]).length) bits.push('the turn check flags a food re-resolved under more words')
   if (uncountedFoods([rf([['cholent', [], true]]), cm(['ing:beef_chuck'])]).length) bits.push('the turn check flags an unknown food')
   if (uncountedFoods([yogurt]).length) bits.push('the turn check flags a turn with no meal count')
+  // A sandwich record already holds its bread (5 of 10 after-samples counted "Turkey sandwich on white" and the two slices beside it).
+  if (!sandwichWithItsBread(['Turkey sandwich on white', 'Whole wheat bread (100% whole wheat)'])) bits.push('a sandwich beside its bread is allowed')
+  if (sandwichWithItsBread(['Turkey breast, deli', 'Whole wheat bread (100% whole wheat)']) || sandwichWithItsBread(['Steak sandwich or sub on white', 'Garlic bread, with parmesan cheese'])) bits.push('a filling on bread, or a sandwich with garlic bread on the side, is refused')
   const tone = verdictTone('This fits your day.', 'meal', { answer: '', trace: [cm(['ing:greek_yogurt'])] as never, uncounted: ['strawberries'] })
   if (tone !== 'partial') bits.push(`a meal with a food left out is stamped ${tone}`)
   console.log(`\nbatch 3   ${bits.length === 0 ? 'ok' : 'WRONG'}  (a few, a handful, a food left out)`)

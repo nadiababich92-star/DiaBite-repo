@@ -7429,6 +7429,179 @@
       "tags": [
         "swaps"
       ]
+    },
+    {
+      "id": "AS1",
+      "dimension": "helpful",
+      "query": "Chipotle chicken burrito bowl with brown rice, black beans, fajita veggies, salsa and cheese",
+      "ground_truth": "Asked after a question about strawberries in the same session, from the main box: a new topic, so nothing about the strawberries.",
+      "context": {
+        "budget": {
+          "glBudget": 64,
+          "carbsG": 128,
+          "kcal": 1800
+        },
+        "entries": []
+      },
+      "expect": {
+        "traceLacks": "strawberr",
+        "verified": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "batch3"
+      ],
+      "before": [
+        "A cup of plain Greek yogurt with a quarter cup of granola and some strawberries"
+      ],
+      "newTopic": true
+    },
+    {
+      "id": "AS2",
+      "dimension": "helpful",
+      "query": "A burrito bowl: 1 cup brown rice, half a cup of black beans, 4 oz grilled chicken breast, sauteed peppers and onions, salsa and 1 oz shredded cheese",
+      "ground_truth": "A dish with its parts listed is costed from the parts; never cost_dish and never a whole-bowl record.",
+      "context": {
+        "budget": {
+          "glBudget": 64,
+          "carbsG": 128,
+          "kcal": 1800
+        },
+        "entries": []
+      },
+      "expect": {
+        "toolsNotCalled": [
+          "cost_dish"
+        ],
+        "itemsNamed": [
+          "rice",
+          "bean",
+          "chicken",
+          "chees|cheddar"
+        ],
+        "itemsNotNamed": [
+          "burrito bowl"
+        ],
+        "verified": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "batch3"
+      ]
+    },
+    {
+      "id": "AS3",
+      "dimension": "helpful",
+      "query": "A cup of plain Greek yogurt with a quarter cup of granola and a few strawberries",
+      "ground_truth": "'A few' is three strawberries from USDA, counted, no question about grams.",
+      "context": {
+        "budget": {
+          "glBudget": 64,
+          "carbsG": 128,
+          "kcal": 1800
+        },
+        "entries": []
+      },
+      "expect": {
+        "itemsNamed": [
+          "strawberr"
+        ],
+        "noNeedsWeight": true,
+        "noFitWithFoodLeftOut": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "batch3"
+      ]
+    },
+    {
+      "id": "AS4",
+      "dimension": "helpful",
+      "query": "A turkey sandwich on two slices of whole wheat bread",
+      "ground_truth": "Two slices of whole wheat bread have a weight (USDA's regular slice); no question.",
+      "context": {
+        "budget": {
+          "glBudget": 64,
+          "carbsG": 128,
+          "kcal": 1800
+        },
+        "entries": []
+      },
+      "expect": {
+        "noNeedsWeight": true,
+        "verified": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "batch3"
+      ]
+    },
+    {
+      "id": "AS5",
+      "dimension": "helpful",
+      "query": "Two eggs with a handful of spinach",
+      "ground_truth": "A handful of spinach is its typical portion (almost no carbohydrate); no question.",
+      "context": {
+        "budget": {
+          "glBudget": 64,
+          "carbsG": 128,
+          "kcal": 1800
+        },
+        "entries": []
+      },
+      "expect": {
+        "itemsNamed": [
+          "spinach",
+          "egg"
+        ],
+        "noNeedsWeight": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "batch3"
+      ]
+    },
+    {
+      "id": "AS6",
+      "dimension": "helpful",
+      "query": "About 1.5 cups of lentil soup",
+      "ground_truth": "'About 1.5 cups' is a count of 1.5.",
+      "context": {
+        "budget": {
+          "glBudget": 64,
+          "carbsG": 128,
+          "kcal": 1800
+        },
+        "entries": []
+      },
+      "expect": {
+        "quantityCount": 1.5
+      },
+      "judge": "mechanical",
+      "tags": [
+        "batch3"
+      ]
+    },
+    {
+      "id": "AS7",
+      "dimension": "helpful",
+      "query": "Grilled salmon with a few strawberries and a slice of grandma's honey cake",
+      "ground_truth": "A food left out (or counted from an assumed recipe) never yields a plain fit.",
+      "context": {
+        "budget": {
+          "glBudget": 64,
+          "carbsG": 128,
+          "kcal": 1800
+        },
+        "entries": []
+      },
+      "expect": {
+        "noFitWithFoodLeftOut": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "batch3"
+      ]
     }
   ]
 }

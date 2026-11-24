@@ -503,3 +503,15 @@ export function driverOf(items: MealItemResult[]): { foodId: string; name: strin
   if ((top.gl as number) < DRIVER_MIN_GL) return undefined
   return { foodId: top.foodId, name: top.name, gl: top.gl as number }
 }
+
+/**
+ * A sandwich record is the whole sandwich, its bread already in it. "A turkey sandwich on two slices of whole wheat bread" was costed as
+ * "Turkey sandwich on white" and the two slices beside it, in 5 of 10 samples after the batch 3 prompt (24 November 2026): the same
+ * meal counted twice. Plain sliced bread only: garlic bread or a roll on the side is its own food.
+ */
+export function sandwichWithItsBread(names: string[]): boolean {
+  const sandwich = names.some((n) => /\b(sandwich|sub|wrap|panini|club)\b/i.test(n))
+  const bread = names.some((n) => !/\bsandwich\b/i.test(n) && /^(bread\b|white bread|whole wheat bread|whole grain bread|whole-wheat bread|rye bread|multigrain bread|sourdough bread|pumpernickel)/i.test(n.trim()))
+  return sandwich && bread
+}
+

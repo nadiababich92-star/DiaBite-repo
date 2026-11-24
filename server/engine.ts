@@ -29,7 +29,7 @@ import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
-import { afterMealFor, alternativesForMeal, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, withDayUnscored, withSaid } from './compute'
+import { afterMealFor, sandwichWithItsBread, alternativesForMeal, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, withDayUnscored, withSaid } from './compute'
 import { NEEDS_WEIGHT_INSTRUCTION, needsWeightHint, quantityError, settleAmount, weightQuestion } from './quantity'
 import { verify } from './verify'
 import { claimSession, getSession, noteResolution, putSession } from './sessions'
@@ -447,6 +447,9 @@ async function main() {
     const wholeBowl = body.items.length > 1 && body.items.some((it) => /^burrito bowl\b/i.test(loadFoods().byId.get(it.foodId)?.name ?? ''))
     if (wholeBowl) {
       return res.json({ error: 'A burrito bowl record is the whole bowl, with its rice and beans already in it, so it cannot be counted beside them. When the person listed what is in the bowl, cost those foods alone and leave the bowl record out; when they did not, cost the bowl record alone.' })
+    }
+    if (sandwichWithItsBread(body.items.map((it) => loadFoods().byId.get(it.foodId)?.name ?? ''))) {
+      return res.json({ error: 'A sandwich record is the whole sandwich, with its bread already in it, so it cannot be counted beside slices of bread. When the person said what is in the sandwich and on what bread, cost those foods (the filling and the bread) and leave the sandwich record out; when they did not, cost the sandwich record alone.' })
     }
     try {
       const units = body.sessionId ? getSession(body.sessionId)?.units : undefined
