@@ -118,6 +118,8 @@ export function householdUnitsFor(rec: FoodRecord): { units?: QuantityUnit[] } {
 export function gramsFor(rec: FoodRecord, q: Quantity): Resolved {
   const { count, unit } = q
   // A recipe is costed by serving, not by weight: four ounces of "Lemon Herb Grilled Chicken" was costed as a recipe at 0 g (18 November).
+  // "A serving" of a recipe is one of its servings: sent as the unit `serving`, it was a question about grams of a recipe (H9, 24 November).
+  if (rec.kind === 'recipe' && unit === 'serving') return { servings: count, basis: 'default' }
   if (rec.kind === 'recipe' && unit !== 'default') return { needs: 'a recipe is counted by serving' }
   // 1. Weights: exact, for any food that has a weight.
   if (unit === 'g') return { grams: r1(count), basis: 'stated' }

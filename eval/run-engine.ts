@@ -1050,6 +1050,7 @@ recorrectMisses.forEach((m) => console.log(m))
   const chips = loadFoods().records.find((r) => /^potato chips/i.test(r.name) && r.kind !== 'branded')
   if (chips && !('needs' in gramsFor(chips, { count: 1, unit: 'handful' }))) bits.push('a handful of chips was weighed')
   if (!('needs' in g('rec:DB-2104', { count: 1, unit: 'few' }))) bits.push('a few of a recipe was weighed')
+  { const r = g('rec:DB-2104', { count: 1, unit: 'serving' }); if (!('servings' in r) || r.servings !== 1) bits.push('a serving of a recipe is not one of its servings') }
   if (quantityError({ count: 1, unit: 'few' }, 'x') !== null || quantityError({ count: 1, unit: 'handful' }, 'x') !== null) bits.push('few or handful refused as a unit')
   // A food named and left out.
   const left = afterMealFor({ gl: 40, carbsG: 100, kcal: 1500 }, { gl: 5, carbs: 20, kcal: 300 }, [], [], undefined, ['strawberries'])
