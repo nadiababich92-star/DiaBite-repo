@@ -66,8 +66,20 @@ After changing the system prompt or the OpenAPI spec, re-provision the agent so
 the portal copy never drifts from this repository:
 
 ```bash
-npx tsx agent/provision.ts
+env -u MODEL_MEAL -u MODEL_DEPLOYMENT_NAME -u MODEL_TRIAGE -u MODEL_ADVISOR \
+  PUBLIC_URL=https://diabite-engine.greenglacier-ab5551c6.swedencentral.azurecontainerapps.io \
+  PROJECT_ENDPOINT=https://diabite-resource.services.ai.azure.com/api/projects/diabite \
+  ENGINE_CONNECTION_ID=<the diabite-engine-key connection id, from the Container App's environment> \
+  npx tsx agent/provision.ts
 ```
+
+**`PUBLIC_URL` is required.** Without it the tool spec points the meal agent at
+`http://localhost:8787` (`server/openapi.ts`), and every meal question fails until
+the next provision. It happened once, on 24 November 2026, for about a minute.
+The script prints the address as its second line (`engine …`): if it says
+localhost, provision again with `PUBLIC_URL` set. Then read each agent back from
+the project (`GET <project>/agents/<name>?api-version=v1`): the model, and the
+`servers[0].url` of the meal agent's OpenAPI tool (CLAUDE.md rule 11).
 
 `agent/try.ts` runs a single turn and prints the answer, the verifier's verdict
 and the full tool trace.

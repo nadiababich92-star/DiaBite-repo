@@ -23,6 +23,12 @@ const spec = openApiSpec() as { servers: { url: string }[]; paths: Record<string
 console.log('project   ', process.env.PROJECT_ENDPOINT || '(PROJECT_ENDPOINT not set)')
 
 console.log('engine    ', spec.servers[0].url)
+// A tool spec pointing at localhost publishes a meal agent that cannot reach the engine: every meal question failed for about a minute
+// on 24 November 2026. PUBLIC_URL must name the deployed engine (agent/SETUP.md); ALLOW_LOCAL_ENGINE=1 is for a local agent on purpose.
+if (/\/\/(localhost|127\.0\.0\.1)\b/.test(spec.servers[0].url) && process.env.ALLOW_LOCAL_ENGINE !== '1') {
+  console.error('\nrefusing to publish: the tool spec points at localhost. Set PUBLIC_URL to the deployed engine (agent/SETUP.md).')
+  process.exit(1)
+}
 console.log('auth      ', process.env.ENGINE_CONNECTION_ID ? `connection "${process.env.ENGINE_CONNECTION_ID}"` : 'anonymous')
 console.log('operations', Object.keys(spec.paths).length)
 for (const role of ['triage', 'meal', 'advisor'] as Role[]) {
