@@ -377,10 +377,14 @@ function band(phrase: string, cands: ResolveCandidate[]): Confidence {
     const n = norm(plainName(top.name))
     if (stated.some((t) => !n.includes(t))) return 'low'
   }
-  // "mashed vegetables" is not mashed potato: a word that names a whole class of
-  // food, which the record's own name does not carry, is a question.
-  const vague = tokens(phrase).filter((t) => VAGUE_WORDS.has(t))
-  if (vague.length && vague.some((t) => !norm(top.name).includes(stem(t)))) return 'medium'
+  // "mashed vegetables" is not mashed potato, and "roasted vegetables" is not roasted pumpkin (counted as the whole side on
+  // 24 November 2026): a word that names a whole class of food, which the record's own name does not carry, means the record
+  // is one member of the class, not the food. It is a food we do not have (CLAUDE.md rule 3), not a guess to confirm.
+  // The word must be in the head of the name, before any "with": "Potato, baked, with vegetables" is a potato. "Veggie" is short for
+  // vegetable. A record written down under exactly the phrase ("veggies") is that food.
+  const vague = aliasesOf().get(norm(phrase)) === top.id ? [] : tokens(phrase).filter((t) => VAGUE_WORDS.has(t))
+  const head = norm(top.name.split(/,? with /i)[0])
+  if (vague.length && vague.some((t) => !head.includes(/^veggi/.test(t) ? 'veg' : stem(t)))) return 'low'
   // A category word is never certain, however well it matched.
   // Unless a survey food was given exactly those words by hand ("cheese pizza": both are category words). An
   // ingredient's everyday names do not count: "chicken" and "beans" are still a question.

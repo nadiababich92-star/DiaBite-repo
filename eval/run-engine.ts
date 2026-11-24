@@ -190,7 +190,8 @@ cases.engine.clarify.forEach((c, i) => {
   if (missing.length) bandMisses.push(`    ${c.phrase.padEnd(28)} the question leaves out ${missing.join(', ')}: ${clarified[i].clarify ?? '(none)'}`)
 })
 console.log(`\nclarify   ${cases.engine.clarify.length - bandMisses.length}/${cases.engine.clarify.length}`)
-if (bandMisses.length) { console.log('  wrong band:'); bandMisses.forEach((m) => console.log(m)) }
+// A wrong band fails the run: until 24 November 2026 it was only printed, so a regression here could pass `npm run eval`.
+if (bandMisses.length) { console.log('  wrong band:'); bandMisses.forEach((m) => console.log(m)); process.exitCode = 1 }
 
 // ── gate ──────────────────────────────────────────────────────────────────
 // The rules that run before any model. A phrasing that once got past them is

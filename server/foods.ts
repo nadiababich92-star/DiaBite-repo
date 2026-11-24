@@ -594,6 +594,8 @@ const USDA_ALIASES: Record<string, string[]> = {
   // "Steak and salad" on 24 November 2026 counted the salad as "Beef salad": a bare "salad" had no record, and the nearest vector was a meat dish.
   // A salad with no other word is what a US menu calls a side or garden salad.
   'usda:2709822': ['garden salad', 'side salad', 'house salad', 'tossed salad', 'green salad', 'salad', 'salads', 'vegetable salad', 'veggie salad', 'mixed salad', 'salad with vegetables', 'fresh salad'], // Lettuce, salad with assorted vegetables including tomatoes and/or carrots, no dressing
+  // "Steak and veggies" counted "Veggie-Loaded Scrambled Eggs" (24 November 2026): the words for plain cooked mixed vegetables name the record that is that.
+  'usda:2710015': ['veggies', 'mixed veggies', 'mixed vegetables', 'steamed vegetables', 'steamed veggies', 'cooked vegetables', 'boiled vegetables'], // Classic mixed vegetables, cooked
   'usda:2706375': ['chili con carne', 'beef chili'],                     // Chili with meat and beans
   'usda:2708352': ['egg noodles', 'noodles'],                             // Noodles, cooked
   'usda:2705949': ['fried chicken'],                                      // Chicken, NS as to part, fried, coated, skin eaten
@@ -668,6 +670,8 @@ const INGREDIENT_ALIASES: Record<string, string[]> = {
  */
 const RECIPE_ALIASES: Record<string, string[]> = {
   'Fish and Chips (Oven-Baked)': ['fish and chips', 'fish & chips'],
+  // 24 November 2026, the owner's choice: the side people mean by grilled or roasted vegetables is our own recipe, not pumpkin (what "roasted vegetables" found).
+  'Grilled Vegetables': ['grilled vegetables', 'roasted vegetables', 'grilled veggies', 'roasted veggies', 'sauteed vegetables', 'sautéed vegetables', 'sauteed veggies', 'grilled vegetable', 'roasted vegetable'],
   'Black-Eyed Pea Salad (Texas Caviar)': ['texas caviar', 'cowboy caviar'],
   'Bratwurst-Style Turkey Sausage with Sauerkraut and Apple': ['brats', 'bratwurst'],
   "Oyster Po' Boy on a Bun": ['po boy', "po' boy", 'poboy'],

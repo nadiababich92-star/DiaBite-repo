@@ -1,6 +1,6 @@
 {
  "meta": {
-  "count": 2103,
+  "count": 2104,
   "nutrition_basis": "per serving",
   "gi_method": "carbohydrate-weighted mean of ingredient GI (Wolever & Jenkins 1986); ingredient GI from International Tables of GI 2021 / University of Sydney",
   "nutrient_source": "USDA FoodData Central"
@@ -178312,6 +178312,86 @@
     "Prepare and measure the ingredients: shrimp, white rice, white flour, diced tomatoes, bell pepper and yellow onion.",
     "Combine them and cook, stirring, until everything is hot and cooked through.",
     "Serve in 8 portions."
+   ]
+  },
+  {
+   "id": "DB-2104",
+   "name": "Grilled Vegetables",
+   "category": "Side Dish",
+   "cuisine": "American",
+   "servings": 4,
+   "prep_min": 10,
+   "cook_min": 12,
+   "total_min": 22,
+   "photo_file": "grilled-vegetables.jpg",
+   "photo_keywords": "Grilled Vegetables, healthy food photography, plated, natural light",
+   "photo_url": "",
+   "ingredients": [
+    {
+     "ingredient_id": "zucchini",
+     "name": "Zucchini",
+     "grams": 300.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "bell_pepper",
+     "name": "Bell pepper",
+     "grams": 250.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "red_onion",
+     "name": "Red onion",
+     "grams": 150.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "mushrooms",
+     "name": "Mushrooms (cremini/white)",
+     "grams": 150.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "olive_oil",
+     "name": "Extra-virgin olive oil",
+     "grams": 20.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "salt",
+     "name": "Salt",
+     "grams": 3.0,
+     "note": ""
+    },
+    {
+     "ingredient_id": "black_pepper",
+     "name": "Black pepper",
+     "grams": 1.0,
+     "note": ""
+    }
+   ],
+   "ingredients_json": "[{\"ingredient_id\": \"zucchini\", \"name\": \"Zucchini\", \"grams\": 300.0, \"note\": \"\"}, {\"ingredient_id\": \"bell_pepper\", \"name\": \"Bell pepper\", \"grams\": 250.0, \"note\": \"\"}, {\"ingredient_id\": \"red_onion\", \"name\": \"Red onion\", \"grams\": 150.0, \"note\": \"\"}, {\"ingredient_id\": \"mushrooms\", \"name\": \"Mushrooms (cremini/white)\", \"grams\": 150.0, \"note\": \"\"}, {\"ingredient_id\": \"olive_oil\", \"name\": \"Extra-virgin olive oil\", \"grams\": 20.0, \"note\": \"\"}, {\"ingredient_id\": \"salt\", \"name\": \"Salt\", \"grams\": 3.0, \"note\": \"\"}, {\"ingredient_id\": \"black_pepper\", \"name\": \"Black pepper\", \"grams\": 1.0, \"note\": \"\"}]",
+   "kcal": 100,
+   "protein_g": 3.1,
+   "fat_g": 5.6,
+   "carbs_g": 11.0,
+   "fiber_g": 3.1,
+   "net_carbs_g": 7.8,
+   "glycemic_index": 15,
+   "gi_category": "low",
+   "glycemic_load": 1.2,
+   "gl_category": "low",
+   "gi_note": "",
+   "gi_evidence": "0% of this dish's available carbohydrate comes from ingredients with a published, measured GI; the rest uses conventional placeholders (see Ingredients sheet)",
+   "gi_measured_carb_share_pct": 0,
+   "diet_tags": "vegan, gluten-free, dairy-free, nut-free, low-carb, quick",
+   "instructions": "1. Cut the zucchini, bell pepper and red onion into thick pieces and halve the mushrooms.\n2. Toss with the olive oil, salt and pepper.\n3. Grill or roast at 450°F for 10 to 12 minutes, turning once, until browned at the edges.\n4. Serve in 4 portions.",
+   "steps_json": "[\"Cut the zucchini, bell pepper and red onion into thick pieces and halve the mushrooms.\", \"Toss with the olive oil, salt and pepper.\", \"Grill or roast at 450°F for 10 to 12 minutes, turning once, until browned at the edges.\", \"Serve in 4 portions.\"]",
+   "steps": [
+    "Cut the zucchini, bell pepper and red onion into thick pieces and halve the mushrooms.",
+    "Toss with the olive oil, salt and pepper.",
+    "Grill or roast at 450°F for 10 to 12 minutes, turning once, until browned at the edges.",
+    "Serve in 4 portions."
    ]
   }
  ]

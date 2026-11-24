@@ -1836,6 +1836,42 @@
         ]
       },
       {
+        "phrase": "roasted vegetables",
+        "expect": [
+          "rec:DB-2104"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "grilled vegetables",
+        "expect": [
+          "rec:DB-2104"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "veggies",
+        "expect": [
+          "usda:2710015"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "steamed vegetables",
+        "expect": [
+          "usda:2710015"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
         "phrase": "salad",
         "expect": [
           "usda:2709822"
@@ -2157,8 +2193,13 @@
     "clarify": [
       {
         "phrase": "mashed vegetables",
-        "band": "medium",
-        "why": "vegetables is a class; it was served as mashed potato, with high confidence, in a real turn"
+        "band": "low",
+        "why": "vegetables is a class; it was served as mashed potato, with high confidence, in a real turn. Low, not medium, since 24 November 2026: at medium the agent still counted the member it found (\"roasted vegetables\" as roasted pumpkin), so a record that does not carry the class word is a food we do not have"
+      },
+      {
+        "phrase": "baked vegetables",
+        "band": "low",
+        "why": "no record is baked mixed vegetables; a single baked vegetable is not the side (24 November 2026)"
       },
       {
         "phrase": "breakfast sausage",
