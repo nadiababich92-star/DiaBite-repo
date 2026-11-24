@@ -1836,6 +1836,33 @@
         ]
       },
       {
+        "phrase": "salad",
+        "expect": [
+          "usda:2709822"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "vegetable salad",
+        "expect": [
+          "usda:2709822"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "salad with vegetables",
+        "expect": [
+          "usda:2709822"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
         "phrase": "cooked spaghetti",
         "expect": [
           "seed:pasta-durum"
