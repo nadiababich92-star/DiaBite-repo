@@ -1118,6 +1118,13 @@ recorrectMisses.forEach((m) => console.log(m))
     if (!('notApplied' in scaleToDishWeight([items[0]], planQuantities([items[0]]), 450))) bits.push('a single item was scaled')
     if (!('notApplied' in scaleToDishWeight(items, planQuantities(items), 3000))) bits.push('a scale beyond four times was applied')
   } else bits.push(`the scaling fixture is missing records (${items.length} of 3)`)
+  // Inside a dish, "chicken" is chicken breast and "cheese" is cheddar, named as assumed; alone, "chicken" is still a question.
+  const dishPlan = await planDish(store, { dish: 'chicken burrito bowl', ingredients: [{ phrase: 'chicken', grams: 120 }, { phrase: 'cheese', grams: 28 }, { phrase: 'white rice', grams: 150 }] } as never)
+  const ids = dishPlan.costed.map((c) => c.foodId)
+  if (!ids.includes('seed:chicken') || !ids.includes('ing:cheddar') || dishPlan.unresolved.some((u) => /chicken|cheese/.test(u.phrase))) bits.push(`in a dish, chicken or cheese was left out: ${JSON.stringify(dishPlan.unresolved)} ${ids.join(',')}`)
+  if (!dishPlan.ingredients.filter((g) => /chicken|cheese/.test(g.phrase)).every((g) => g.assumedFood === true)) bits.push('a defaulted ingredient is not marked assumedFood')
+  const [alone] = await resolvePhrases(store, ['chicken'])
+  if (alone.confidence === 'high') bits.push('"chicken" alone is no longer a question')
   console.log(`\ndish wt   ${bits.length === 0 ? 'ok' : 'WRONG'}  (CL1: one weight for the whole dish, applied by the engine)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1

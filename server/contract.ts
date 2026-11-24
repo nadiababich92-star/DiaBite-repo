@@ -237,6 +237,8 @@ export interface DishIngredientResult {
   /** True when the grams were assumed, false when the person stated them. */
   assumedGrams: boolean
   confidence: Confidence
+  /** The word was a category ("chicken", "cheese") that a dish takes as its usual member (server/compute.ts DISH_DEFAULTS): an assumption, named. */
+  assumedFood?: true
 }
 
 export interface UnresolvedIngredient { phrase: string; reason: UnresolvedReason; clarify?: string }

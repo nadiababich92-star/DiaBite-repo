@@ -185,6 +185,18 @@ export function scaleDish(req: CostDishRequest): { req: CostDishRequest; scaled?
   return { req: { ...req, ingredients }, scaled: totalGrams !== undefined ? { by: 'totalGrams', factor: f, totalG: totalGrams } : { by: 'servings', factor: f, servings } }
 }
 
+/**
+ * Inside a dish, a category word is the member a dish usually holds (the owner's decision of 24 November 2026): "chicken" in a burrito
+ * bowl or a stir-fry is chicken breast, "cheese" is cheddar. Alone, "chicken" is still a question (breast, thigh and fried differ too
+ * much); in a dish the agent had already chosen the parts, and leaving the chicken out understated a 450 g bowl by a third (CL1).
+ * The ingredient comes back with `assumedFood: true`, so the answer can say what was taken.
+ */
+export const DISH_DEFAULTS: Record<string, string> = {
+  chicken: 'seed:chicken', 'cooked chicken': 'seed:chicken', 'grilled chicken': 'seed:chicken', 'chicken meat': 'seed:chicken',
+  cheese: 'ing:cheddar', 'shredded cheese': 'ing:cheddar', 'grated cheese': 'ing:cheddar', 'cheddar cheese': 'ing:cheddar', 'shredded cheddar cheese': 'ing:cheddar',
+}
+const dishKey = (p: string) => p.toLowerCase().replace(/[^a-z ]+/g, ' ').replace(/\s+/g, ' ').trim()
+
 export async function planDish(store: VectorStore, req: CostDishRequest): Promise<{
   costed: MealItemInput[]
   ingredients: DishIngredientResult[]
@@ -195,6 +207,13 @@ export async function planDish(store: VectorStore, req: CostDishRequest): Promis
   const ingredients: DishIngredientResult[] = []
   const unresolved: UnresolvedIngredient[] = []
   req.ingredients.forEach((ing, i) => {
+    const preset = DISH_DEFAULTS[dishKey(ing.phrase)]
+    if (preset) {
+      const rec = getRecord(preset)
+      costed.push({ foodId: rec.id, grams: ing.grams })
+      ingredients.push({ phrase: ing.phrase, foodId: rec.id, name: rec.name, grams: ing.grams, assumedGrams: ing.gramsStated !== true, confidence: 'high', assumedFood: true })
+      return
+    }
     const r = resolved[i]
     const top = r?.candidates[0]
     if (!r || r.unknown || !top) { unresolved.push({ phrase: ing.phrase, reason: 'unknown' }); return }
