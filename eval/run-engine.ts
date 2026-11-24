@@ -181,6 +181,15 @@ if (misses.length) { console.log('  misses:'); misses.forEach((m) => console.log
 
 // ── clarify ───────────────────────────────────────────────────────────────
 
+// A meal kit is never the meal (24 November 2026: "Chipotle chicken burrito bowl" found "Old El Paso … Burrito Bowl Kit"): it is not even
+// offered, unless the person said "kit" or the brand.
+{
+  const [plain, named] = await resolvePhrases(store, ['chipotle style chicken bowl', 'old el paso chipotle chicken burrito bowl kit'])
+  const kit = 'branded:2682596'
+  const bad = [plain.candidates.some((c) => c.id === kit) && 'a kit offered for "chipotle style chicken bowl"', named.candidates[0]?.id !== kit && 'the kit not found when it was named'].filter(Boolean)
+  console.log(`kit       ${bad.length ? 'WRONG  ' + bad.join('; ') : 'ok'}`)
+  if (bad.length) process.exitCode = 1
+}
 const clarified = await resolvePhrases(store, cases.engine.clarify.map((c) => c.phrase))
 const bandMisses: string[] = []
 cases.engine.clarify.forEach((c, i) => {

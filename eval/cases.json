@@ -1007,7 +1007,7 @@
       {
         "phrase": "french fries",
         "expect": [
-          "usda:2709458"
+          "usda:2709461"
         ],
         "tags": [
           "everyday"
@@ -1016,7 +1016,7 @@
       {
         "phrase": "fries",
         "expect": [
-          "usda:2709458"
+          "usda:2709461"
         ],
         "tags": [
           "everyday"
@@ -1025,7 +1025,7 @@
       {
         "phrase": "french fry",
         "expect": [
-          "usda:2709458"
+          "usda:2709461"
         ],
         "tags": [
           "everyday"
@@ -1866,6 +1866,95 @@
         "phrase": "steamed vegetables",
         "expect": [
           "usda:2710015"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "chipotle chicken burrito bowl",
+        "expect": [
+          "usda:2708562"
+        ],
+        "tags": [
+          "restaurant-not"
+        ]
+      },
+      {
+        "phrase": "chipotle chicken bowl with rice and beans",
+        "expect": [],
+        "notBranded": true,
+        "tags": [
+          "restaurant-not"
+        ]
+      },
+      {
+        "phrase": "old el paso chipotle chicken burrito bowl",
+        "expect": [
+          "branded:2682596"
+        ],
+        "tags": [
+          "branded"
+        ]
+      },
+      {
+        "phrase": "big mac",
+        "expect": [
+          "usda:2706916"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "medium fries",
+        "expect": [
+          "usda:2709461"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "chicken parmesan",
+        "expect": [
+          "usda:2706442"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "beef patty",
+        "expect": [
+          "usda:2705855"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "turkey sandwich on whole wheat",
+        "expect": [
+          "usda:2706983"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "granola",
+        "expect": [
+          "usda:2708461"
+        ],
+        "tags": [
+          "no-swap"
+        ]
+      },
+      {
+        "phrase": "fajita veggies",
+        "expect": [
+          "usda:2710011"
         ],
         "tags": [
           "no-swap"

@@ -163,7 +163,9 @@ const SIZE_WORD = /^(?:small|medium|large|extra[- ]large|big|little)\s+(?=\S)/i
 export function withoutQuantity(phrase: string): string {
   let out = phrase.trim()
   for (let i = 0; i < 3; i++) {
-    const next = out.replace(AMOUNT, '').replace(COUNT_WORD, '').replace(SIZE_WORD, '').trim()
+    // A size word that is part of an everyday name stays: "Big Mac" lost its "big" and found macadamia nuts (24 November 2026).
+    const stripped = out.replace(AMOUNT, '').replace(COUNT_WORD, '').trim()
+    const next = (aliasesOf().has(norm(stripped)) ? stripped : stripped.replace(SIZE_WORD, '')).trim()
     if (next === out || next === '') break
     out = next
   }
@@ -524,6 +526,9 @@ export async function resolvePhrases(store: VectorStore, phrases: string[], topK
       .filter((h) => byId.has(h.id) || unknownId(h.id))
       .filter((h) => {
         const rec = byId.get(h.id)!
+        // A meal kit is a box to cook from, not the meal a person ate: "Chipotle chicken burrito bowl" found "Old El Paso Chipotle
+        // Chicken Burrito Bowl Kit" (24 November 2026), counted beside the rice and beans the person named. Only when they said "kit" or the brand.
+        if (/\bkits?\b/i.test(rec.name) && !/\bkits?\b/i.test(phrase) && !(brandWord(rec.name) && tokens(phrase).map(stem).includes(brandWord(rec.name)))) return false
         return !(unaskedSwap(phrase, rec.name, rec.kind) && !rec.aliases?.includes(norm(phrase)))
       })
       .map((h) => {
