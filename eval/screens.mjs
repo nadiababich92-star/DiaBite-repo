@@ -107,6 +107,14 @@ try {
       }
     }
     await shot('ask-empty')
+    // The remaining budget sits on the marker in both looks while no answer is on screen (docs/design.md, The marker).
+    {
+      const st = await b.ev(`(() => { const probe = document.createElement('span'); probe.style.background = 'var(--marker)'; document.body.appendChild(probe); const marker = getComputedStyle(probe).backgroundColor; probe.remove()
+        const num = document.querySelector('.ask-budget .value .num'); return { marker, bg: num ? getComputedStyle(num).backgroundColor : null } })()`)
+      const ok = !!st.bg && st.bg === st.marker
+      console.log(`  ${ok ? 'PASS' : 'FAIL'}  the remaining budget is on the marker before a question (${size.name})${ok ? '' : '  → ' + JSON.stringify(st)}`)
+      if (!ok) process.exitCode = 1
+    }
     // The Ask card, commit 2 (docs/specs/ask-order-and-day-chip.md and ask-evals.md, section 2): the box first and above the tab bar,
     // the budget row under it, and the day chip that opens the picker, closes on a choice and on Escape, with the focus back on it.
     {
@@ -158,6 +166,21 @@ try {
     for (let i = 0; i < 90; i++) { await sleep(500); if (!(await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break }
     await sleep(1000)
     await shot('ask-answer')
+    // With an answer on screen the marker is the answer's: the budget is a plain figure, and the Ask card and the answer hold one marker
+    // between them. The load and the carbohydrate stand at the same height, with "What is GL?" under the load's figures (docs/design.md).
+    {
+      const st = await b.ev(`(() => { const probe = document.createElement('span'); probe.style.background = 'var(--marker)'; document.body.appendChild(probe); const marker = getComputedStyle(probe).backgroundColor; probe.remove()
+        const num = document.querySelector('.ask-budget .value .num')
+        const marked = [...document.querySelectorAll('.ask-hero *, .card.answer *')].filter((e) => !e.closest('button') && getComputedStyle(e).backgroundColor === marker && e.getClientRects().length).map((e) => e.className || e.tagName)
+        const top = (sel) => Math.round(document.querySelector('.card.answer ' + sel)?.getBoundingClientRect().top ?? NaN)
+        const gl = document.querySelector('.card.answer .fig-card.gl'), help = gl?.querySelector('.gl-help'), rows = gl ? [...gl.querySelectorAll('.fig-row')] : []
+        return { budgetBg: num ? getComputedStyle(num).backgroundColor : null, marker, marked, glBig: top('.fig-card.gl .fig-big'), carbBig: top('.fig-card.carb .fig-big'),
+          helpLast: !!help && rows.length > 0 && help.getBoundingClientRect().top > rows[rows.length - 1].getBoundingClientRect().top }
+      })()`)
+      const ok = st.budgetBg !== st.marker && st.marked.length === 1 && Math.abs(st.glBig - st.carbBig) <= 2 && st.helpLast
+      console.log(`  ${ok ? 'PASS' : 'FAIL'}  with an answer: one marker, the budget plain, the load and the carbohydrate level, What is GL? under the figures (${size.name})${ok ? '' : '  → ' + JSON.stringify(st)}`)
+      if (!ok) process.exitCode = 1
+    }
     // "Change day" under an answer opens the day chip's picker and puts the focus on its first choice; Escape closes it again.
     {
       await b.ev(`[...document.querySelectorAll('.log-day button')].find((x) => x.innerText.trim() === 'Change day')?.click()`); await sleep(900)

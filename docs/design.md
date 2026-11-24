@@ -101,7 +101,9 @@ the product's answer and for state, and taken away from everything else, in both
 - **Pressed in.** A chosen option is still pressed in (`--fx-pressed`): that is state, not decoration.
 - **The day bar** is a thin bar with a filled bead.
 - **The marker.** On the figure that answers the question: tilted, with an uneven edge, a flat fill (no glow). It is never put
-  on a negative number, and it appears once per screen.
+  on a negative number, and it appears once per screen. On Ask the remaining budget sits on the marker in both looks while
+  no answer is on screen; once an answer is there, the marker moves to the answer's own figure and the budget is a plain
+  figure (24 November 2026, the owner's choice of two mock-ups).
 
 ### Colour rules
 1. **Colour carries meaning, so it is never decoration.** Green = fits,
@@ -310,7 +312,8 @@ The weight on a portion row is a button. Tapping it opens a number field and a u
 
 ### Plain-words link
 **What is GL?** sits under the main figure as an underlined link and opens a short
-dialog, drawn into `.app` so the rest of the page can go inert behind it.
+dialog, drawn into `.app` so the rest of the page can go inert behind it. In the answer's two columns it is the last line of
+the load's column, under its figures, so the two big figures and their rows stand at the same height (24 November 2026).
 
 ### Onboarding progress
 Five bars (cut-in grooves, the filled ones beaded) and one line, *"Step name, N of 5"*.

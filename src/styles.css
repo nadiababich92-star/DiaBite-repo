@@ -301,12 +301,16 @@ tr:last-child td { border-bottom: none; }
 
 /* ── Ask page ─────────────────────────────────────────────────────────── */
 .ask-hero { padding: 22px 20px 20px; }
-.ask-budget { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
+.ask-budget { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-bottom: 14px; }
 .ask-budget .label, .chips-col .label { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
 .ask-budget-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .ask-budget-note { font-size: 13px; line-height: 1.35; color: var(--text-dim); }
-.ask-budget .value { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ask-budget .value { font-family: var(--mono); font-size: 18px; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .ask-budget .value small { font-size: 13px; color: var(--text-faint); font-weight: 400; }
+/* The remaining budget on the marker, in both looks, while no answer is on screen (docs/design.md, The marker). With an answer
+   (the card compact) the marker is the answer's, so the budget is a plain figure: one marker per screen. */
+.ask-budget .value .num { font-size: 40px; font-weight: 500; letter-spacing: -0.04em; background: var(--marker); color: var(--marker-ink); padding: 0 8px; border-radius: 6px; margin-right: 4px; }
+.ask-hero.compact .ask-budget .value .num { background: none; color: var(--text); padding: 0; }
 .budget-bar {
   display: block; height: 10px; border-radius: 99px; background: var(--groove); box-shadow: var(--groove-fx);
   margin: 0 0 18px; overflow: hidden;
@@ -1018,8 +1022,6 @@ body:has(.landing) { background: #0a1812; }
  * on the dark page, the question box as a slip of its own, the verdict as a stamp, and the marker on the key
  * the person has chosen. Paper is untouched by anything below. */
 :root[data-theme='tape'] .card.ask-hero { background: none; border: 0; box-shadow: none; padding: 4px 0 2px; }
-:root[data-theme='tape'] .ask-budget .value { color: var(--text); font-size: 18px; }
-:root[data-theme='tape'] .ask-budget .value .num { font-size: 40px; font-weight: 500; letter-spacing: -0.04em; background: var(--marker); color: var(--marker-ink); padding: 0 8px; border-radius: 6px; margin-right: 4px; box-shadow: var(--marker-glow); }
 :root[data-theme='tape'] .ask-hero .ask-title { color: var(--text); }
 :root[data-theme='tape'] .ask-form { background: var(--surface); border-radius: var(--radius); padding: 14px; box-shadow: var(--fx-raised); margin: 14px 0 10px; }
 :root[data-theme='tape'] .ask-hero.compact .ask-form { margin: 0; }
@@ -1039,7 +1041,6 @@ body:has(.landing) { background: #0a1812; }
 :root[data-theme='tape'] .answer.tone-good .answer-text .a-verdict,
 :root[data-theme='tape'] .answer.tone-estimate .answer-text .a-verdict { max-width: calc(100% - 124px); }
 
-:root[data-theme='tape'] .ask-budget { flex-direction: column; align-items: flex-start; gap: 4px; margin-bottom: 14px; }
 :root[data-theme='tape'] .ask-form button.primary { background: var(--marker); color: var(--marker-ink); box-shadow: none; }
 :root[data-theme='tape'] .ask-form button.primary:disabled { opacity: 1; background: #e9f2b3; color: var(--text-dim); box-shadow: none; }
 :root[data-theme='tape'] .chip-toggle.on { background: var(--marker); border-color: var(--marker); color: var(--marker-ink); }
