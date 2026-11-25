@@ -28,12 +28,14 @@ export type Pattern = 'none' | 'vegetarian' | 'vegan' | 'pescatarian' | 'halal' 
 export type Avoided = 'pork' | 'beef' | 'lamb' | 'chicken' | 'turkey' | 'duck' | 'game'
 
 export const ALLERGEN_PATTERNS: Record<Allergen, RegExp> = {
-  milk: /\b(milk|cream|butter|cheese|yog(h)?urt|kefir|ghee|whey|casein|custard|ricotta|mozzarella|parmesan|feta|paneer)\b/i,
-  lactose: /\b(milk|cream|butter|cheese|yog(h)?urt|kefir|ice cream|condensed|evaporated)\b/i,
+  // pesto: parmesan; ranch and buttermilk: cultured milk (tracker #120, 25 November 2026: 26 recipes with "Basil pesto" passed a milk or tree-nut filter).
+  milk: /\b(milk|buttermilk|cream|butter|cheese|yog(h)?urt|kefir|ghee|whey|casein|custard|ricotta|mozzarella|parmesan|feta|paneer|pesto|ranch)\b/i,
+  lactose: /\b(milk|buttermilk|cream|butter|cheese|yog(h)?urt|kefir|ice cream|condensed|evaporated|ranch)\b/i,
   egg: /\b(egg|eggs|omelet(te)?|frittata|mayonnaise|meringue|custard)\b/i,
   fish: /\b(fish|salmon|tuna|cod|halibut|trout|sardine|anchovy|anchovies|mackerel|tilapia|herring|bass)\b/i,
   shellfish: /\b(shrimp|prawn|crab|lobster|scallop|clam|mussel|oyster|squid|calamari|crawfish|shellfish)\b/i,
-  treenuts: /\b(almond|walnut|pecan|cashew|pistachio|hazelnut|macadamia|brazil nut|pine nut|nutella)\b/i,
+  // pesto: pine nuts (or walnuts), by the classic recipe and most jars.
+  treenuts: /\b(almond|walnut|pecan|cashew|pistachio|hazelnut|macadamia|brazil nut|pine nut|nutella|pesto)\b/i,
   peanuts: /\b(peanut|peanuts|groundnut|satay)\b/i,
   wheat: /\b(wheat|flour|bread|pasta|spaghetti|macaroni|noodle|couscous|bulgur|semolina|cracker|tortilla|bagel|pita|farro|seitan|panko|breadcrumb)\b/i,
   gluten: /\b(wheat|flour|bread|pasta|spaghetti|macaroni|noodle|couscous|bulgur|semolina|barley|rye|malt|seitan|farro|spelt|panko|breadcrumb|soy sauce|beer)\b/i,

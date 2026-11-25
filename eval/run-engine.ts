@@ -1831,6 +1831,12 @@ const menuMisses: string[] = []
     const noPorkBeef = avoided({ avoided: [...noMeats] }, new RegExp(noMeats.map((m) => AVOIDED_PATTERNS[m].source).join('|'), 'i'))
     if (pesco || noPorkBeef) menuMisses.push(`    a recipe offered what the person avoids (pescatarian ${pesco}, meats ${noPorkBeef})`)
     if (celiac || vegan || nutFree || noEgg) menuMisses.push(`    a recipe offered what the person avoids (gluten ${celiac}, vegan ${vegan}, nuts ${nutFree}, egg ${noEgg})`)
+    // The same filters checked against a list written by hand, not against their own patterns (#120): a sauce whose name hides its allergen.
+    // "Basil pesto" (pine nuts, parmesan) passed a tree-nut and a milk allergy in 26 recipes; "Ranch seasoning" (buttermilk) passed a milk one.
+    const hidden: [string, string[]][] = [['Basil pesto', ['treenuts', 'milk']], ['Ranch seasoning (dry)', ['milk', 'lactose']]]
+    for (const [name, alls] of hidden) for (const a of alls) if (!ALLERGEN_PATTERNS[a as keyof typeof ALLERGEN_PATTERNS].test(name)) menuMisses.push(`    "${name}" is not read as ${a}`)
+    const pestoOffered = avoided({ allergens: ['treenuts'] }, /\bpesto\b/i) + avoided({ allergens: ['milk'] }, /\bpesto\b|\branch\b/i) + avoided({ pattern: 'vegan' }, /\bpesto\b|\branch\b/i)
+    if (pestoOffered) menuMisses.push(`    a pesto or ranch recipe offered to a person with a tree-nut or milk allergy, or vegan: ${pestoOffered} times in 40 weeks each`)
     // the shopping list covers every ingredient above a pinch, and a recipe's name is one line however many times it is cooked
     const list = shoppingList(week)
     const names = new Set(list.map((x) => x.name))
