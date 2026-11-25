@@ -280,16 +280,33 @@ try {
         const block = card.querySelector('[data-tour="weights"]')
         return { n: lines.length, engine: lines.length === 1 && lines[0].classList.contains('weights-used') && !!lines[0].closest('[data-tour="weights"]'),
           buttons: block ? block.querySelectorAll('button.weight-btn').length : 0, why: block?.querySelector('.weights-why')?.innerText.trim() ?? null,
-          tailDup: [...card.querySelectorAll('.a-tail')].some((p) => /^Weights I used/.test(p.innerText.trim())) } })()`)
+          tailDup: [...card.querySelectorAll('.a-tail')].some((p) => /^Weights I used/.test(p.innerText.trim())),
+          // Each weight: wrapped text starts at the left, and its comma (or full stop) stands right after the last word, on the same
+          // line, never alone on a line of its own (25 November 2026, seen at 375 px with "pumpernickel / whole rye bread 1 slice (32 g)").
+          layout: block ? [...block.querySelectorAll('.weights-used button.weight-btn')].map((btn) => {
+            const words = btn.querySelector('.weight-btn-text'); const sep = words?.nextSibling
+            if (!words || !sep || sep.nodeType !== 3 || !/^[,.]$/.test(sep.textContent)) return { ok: false, why: 'no separator after the words', text: btn.innerText }
+            const r = document.createRange(); r.selectNodeContents(sep); const s = r.getBoundingClientRect()
+            const rects = [...words.getClientRects()]; const last = rects[rects.length - 1]
+            const sameLine = Math.abs(s.top - last.top) < 4 && s.left >= last.right - 1
+            const left = /^(left|start)$/.test(getComputedStyle(btn).textAlign)
+            return { ok: sameLine && left, lines: rects.length, sameLine, left, text: btn.innerText }
+          }) : [] } })()`)
+      await b.ev(`document.querySelector('.card.answer [data-tour="weights"]')?.scrollIntoView({ block: 'center' })`); await sleep(400)
+      await shot('ask-weights-line')
       await b.ev(`document.querySelector('.card.answer [data-tour="weights"] button.weight-btn')?.click()`); await sleep(1200)
       const opened = await b.ev(`(() => { const p = document.querySelector('.card.portions'); return { portions: !!p, focusInside: !!p && p.contains(document.activeElement) } })()`)
-      await shot('ask-weights-line')
+      await shot('ask-weights-field')
       // Leave the editor as it was found: the steps after this one open it themselves.
       await b.ev(`(() => { const l = [...document.querySelectorAll('.act-bar button[aria-expanded]')].find((x) => /Portions|Recipe/.test(x.innerText)); if (l && l.getAttribute('aria-expanded') === 'true') l.click() })()`); await sleep(500)
       const WHY = 'These weights decide the numbers. They are typical portions, not yours: tap one if you ate more or less.'
       const ok = !!w && w.n === 1 && w.engine && w.buttons >= 1 && w.why === WHY && !w.tailDup && opened.portions && opened.focusInside
       console.log(`  ${ok ? 'PASS' : 'FAIL'}  the weights line: one, from the engine, each weight a button that opens its field, the sentence under it (${size.name})${ok ? '' : '  → ' + JSON.stringify({ w, opened })}`)
       if (!ok) process.exitCode = 1
+      const wraps = (w?.layout ?? []).some((x) => x.lines > 1)
+      const okLayout = !!w && w.layout.length === w.buttons && w.layout.every((x) => x.ok)
+      console.log(`  ${okLayout ? 'PASS' : 'FAIL'}  the weights line reads left to right: each comma right after its weight, never on a line alone${wraps ? ', a long name wrapping' : ''} (${size.name})${okLayout ? '' : '  → ' + JSON.stringify(w?.layout)}`)
+      if (!okLayout) process.exitCode = 1
     }
     // An estimate card (a dish counted from an assumed recipe) also gets its composition editor.
     if (await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Recipe'))`)) {

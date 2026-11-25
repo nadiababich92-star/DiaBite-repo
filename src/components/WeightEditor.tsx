@@ -65,10 +65,9 @@ export function WeightsUsed({ lines, onEdit }: { lines: { line: ReceiptLine; ind
     <div className="weights-used-block" data-tour="weights">
       <p className="a-why weights-used">
         <span>Weights I used:</span>
+        {/* The comma sits inside the button, after the underlined words, so a long name that wraps never leaves it alone on a line (25 November 2026). */}
         {assumed.map(({ line, index }, k) => (
-          <span key={`${line.foodId}-${index}`}>
-            <button type="button" className="weight-btn weight-btn-inline" aria-label={`Change the weight of ${line.name}, now ${line.said}`} onClick={() => onEdit(index)}>{foodHead(line.name)} {line.said}</button>{k < assumed.length - 1 ? ',' : '.'}
-          </span>
+          <button key={`${line.foodId}-${index}`} type="button" className="weight-btn weight-btn-inline" aria-label={`Change the weight of ${line.name}, now ${line.said}`} onClick={() => onEdit(index)}><span className="weight-btn-text">{foodHead(line.name)} {line.said}</span>{k < assumed.length - 1 ? ',' : '.'}</button>
         ))}
       </p>
       <p className="muted weights-why">{WEIGHTS_WHY}</p>

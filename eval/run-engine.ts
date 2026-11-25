@@ -615,11 +615,12 @@ const recorrectMisses: string[] = []
   if (!/pill none mine">your weight</.test(s3a)) miss('S3 a changed line does not say your weight')
   if (/your weight/.test(s3b)) miss('S3 a line the person did not change on this card says your weight')
   if (!/pill none typical">typical size</.test(s3c) || /your weight/.test(s3c)) miss('S3 a typical line must say typical size and not your weight')
-  // S4, S5: the weights line is built from basis: assumed lines only, in order, each a button; none left, no line
+  // S4, S5: the weights line is built from basis: assumed lines only, in order, each a button whose comma or full stop is inside it,
+  // after the underlined words, so it cannot fall onto a line of its own (25 November 2026); none left, no line
   const rows = (ls: ReceiptLine[]) => ls.map((l, index) => ({ line: l, index }))
   const banana = line({ foodId: 'seed:banana', name: 'Banana', basis: 'typical', said: '1 banana (126 g)' }), rice = line({ foodId: 'seed:rice-white', name: 'White rice, cooked', basis: 'usda_measure', said: '1 cup (158 g)' })
   const s4 = renderToStaticMarkup(createElement(WeightsUsed, { lines: rows([banana, line({ basis: 'stated', said: '120 g' }), rice, line({ foodId: 'x', name: 'Mystery' })]), onEdit: noop }))
-  if (!s4.includes('Weights I used:') || (s4.match(/<button/g) ?? []).length !== 2 || !s4.includes('>banana 1 banana (126 g)</button>') || !s4.includes('>white rice 1 cup (158 g)</button>') || s4.indexOf('banana') > s4.indexOf('white rice')) miss(`S4 the weights line: ${s4.slice(0, 400)}`)
+  if (!s4.includes('Weights I used:') || (s4.match(/<button/g) ?? []).length !== 2 || !s4.includes('<span class="weight-btn-text">banana 1 banana (126 g)</span>,</button>') || !s4.includes('<span class="weight-btn-text">white rice 1 cup (158 g)</span>.</button>') || s4.indexOf('banana') > s4.indexOf('white rice')) miss(`S4 the weights line: ${s4.slice(0, 400)}`)
   if (/120 g|Mystery|mystery/.test(s4)) miss('S4/S5 a stated line or a line with no basis is listed')
   if (renderToStaticMarkup(createElement(WeightsUsed, { lines: rows([line({ basis: 'stated', said: '120 g' })]), onEdit: noop })) !== '') miss('S4 with every weight the person\'s the line is still shown')
   // S6: a recipe counted by serving keeps the stepper and has no field
