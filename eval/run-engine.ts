@@ -1258,6 +1258,9 @@ recorrectMisses.forEach((m) => console.log(m))
   const trace = [{ tool: 'diabite_engine_compute_meal', input: {}, result: { ...roll, afterMeal: a, dayState: { remaining: { gl: 49.3 } } } }] as never
   const text = templatedAnswer(trace) ?? ''
   if (!/can't judge/i.test(text) || (/\bfits\b/i.test(text) && !/can't judge/i.test(text)) || !text.includes(cheerios) || /wasn't counted|not counted|left out/i.test(text)) bits.push(`the last-resort answer: ${text.slice(0, 200)}`)
+  // The figures: the meal is whole ("this meal", "in this meal"), only what is left is "so far".
+  const figs = renderToStaticMarkup(createElement(GlHelpContext.Provider, { value: () => {} }, createElement(FigurePair, { countBy: 'gl', gl: { mealGl: 21, before: 49.3, after: 28.3, fits: true, partial: false, dayOnly: true }, carbs: { carbs: 55.6, fiber: 4.9, availableCarbs: 50.7 } as never })))
+  if (!/this meal/.test(figs) || /counted so far/.test(figs) || !/left so far/.test(figs) || /fig-big gl ok/.test(figs)) bits.push(`the figures of a whole meal on a partly counted day: ${figs.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 200)}`)
   console.log(`\nday part  ${bits.length === 0 ? 'ok' : 'WRONG'}  (a whole meal on a partly counted day)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1

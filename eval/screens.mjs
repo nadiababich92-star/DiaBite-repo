@@ -61,10 +61,12 @@ if (SEED === 'full' || SEED === 'thin') {
 // "Not scored" line for a food it does not hold. Only these checks run; the rest of the walk is skipped.
 if (SEED === 'day') {
   const d = new Date(), today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-  const rows = [{ user_id: uid, id: 'seed-day-cheerios', day: today, meal: 'breakfast', food_id: 'branded:2551420', grams: 28, snapshot: null, updated_at: new Date().toISOString() }]
+  const rows = [{ user_id: uid, id: 'seed-day-cheerios', day: today, meal: 'breakfast', food_id: 'branded:2551420', grams: 28,
+    // As Log it writes it (src/components/AskPage.tsx logIt): the label's figures for 28 g, no load.
+    snapshot: { name: 'Cheerios Honey Nut Cereal', kcal: 110, carbs: 22.1, fiber: 1.8, protein: 2, fat: 1.6, availableCarbs: 20.3, gi: null, gl: 0, loadAvailable: false, said: '28 g', basis: 'stated' }, updated_at: new Date().toISOString() }]
   const r = await admin('/rest/v1/diary_entries', { method: 'POST', body: JSON.stringify(rows), headers: { prefer: 'return=minimal' } })
   console.log('seeded breakfast with Honey Nut Cheerios:', r.status)
-  process.env.QUESTION ??= 'a California roll, 8 pieces, and a cup of miso soup'
+  process.env.QUESTION ??= 'a California roll, 8 pieces, and a medium apple'
 }
 
 // SIZE=phone (or laptop) shoots one size alone, onboarding included: the first size run always walks it.
@@ -118,7 +120,8 @@ try {
     }
     await shot('ask-empty')
     // The remaining budget sits on the marker in both looks while no answer is on screen (docs/design.md, The marker).
-    {
+    // Not under SEED=day: a day that holds a food with no load shows its budget differently, and that walk checks the answer only.
+    if (SEED !== 'day') {
       const st = await b.ev(`(() => { const probe = document.createElement('span'); probe.style.background = 'var(--marker)'; document.body.appendChild(probe); const marker = getComputedStyle(probe).backgroundColor; probe.remove()
         const num = document.querySelector('.ask-budget .value .num'); return { marker, bg: num ? getComputedStyle(num).backgroundColor : null } })()`)
       const ok = !!st.bg && st.bg === st.marker
@@ -127,7 +130,7 @@ try {
     }
     // The Ask card, commit 2 (docs/specs/ask-order-and-day-chip.md and ask-evals.md, section 2): the box first and above the tab bar,
     // the budget row under it, and the day chip that opens the picker, closes on a choice and on Escape, with the focus back on it.
-    {
+    if (SEED !== 'day') {
       const fits = async () => b.ev(`(() => {
         window.scrollTo(0, 0)
         const input = document.querySelector('.ask-form input'), key = document.querySelector('.ask-form button.primary')
@@ -178,16 +181,20 @@ try {
     await shot('ask-answer')
     if (SEED === 'day') {
       const st = await b.ev(`(() => { const card = document.querySelector('.card.answer'); if (!card) return null
-        return { stamp: card.querySelector('.eyebrow-line')?.innerText.trim(), note: card.querySelector('.day-unscored-note')?.innerText.trim() ?? null,
+        return { stamp: card.querySelector('.eyebrow-line')?.textContent.trim(), note: card.querySelector('.day-unscored-note')?.innerText.trim() ?? null,
           log: [...document.querySelectorAll('.act-bar button.primary')].map((x) => x.innerText.trim()),
           text: card.querySelector('.answer-text')?.innerText ?? '' } })()`)
-      await b.ev(`[...document.querySelectorAll('.act-bar button[aria-expanded]')].find((x) => /Calculation/.test(x.innerText))?.click()`); await sleep(700)
+      await click('Calculation'); await sleep(700)
+      if (!(await b.ev(`!!document.querySelector('.receipt')`))) { await click('Calculation'); await sleep(700) }
       const receipt = await b.ev(`document.querySelector('.receipt')?.innerText ?? ''`)
+      const figs = await b.ev(`document.querySelector('.card.answer .fig-card.gl')?.innerText ?? ''`)
       await b.ev(`document.querySelector('.day-unscored-note')?.scrollIntoView({ block: 'center' })`); await sleep(400)
       await shot('ask-day-partly-counted')
       const NOTE = 'Cheerios Honey Nut Cereal, earlier today, has no glycemic load in our data, so what is left today may be less.'
-      const ok = !!st && st.stamp === 'Day partly counted' && st.note === NOTE && st.log.includes('Log it') && !/Not scored/.test(receipt) && /Meal glycemic load/.test(receipt) && /GL left so far/.test(receipt)
-      console.log(`  ${ok ? 'PASS' : 'FAIL'}  a whole lunch on a day with Cheerios: "Day partly counted", the engine's line, Log it, no "Not scored" for the cereal (${size.name})${ok ? '' : '  → ' + JSON.stringify({ st, receipt: receipt.slice(0, 300) })}`)
+      // The meal is whole: its load is "this meal", not "counted so far"; only what is left is "so far".
+      const ok = !!st && /^day partly counted$/i.test(st.stamp) && st.note === NOTE && st.log.includes('Log it') && !/Not scored/.test(receipt) && /Meal glycemic load/.test(receipt) && /GL left so far/.test(receipt)
+        && /this meal/i.test(figs) && !/counted so far/i.test(figs) && /left so far/i.test(figs)
+      console.log(`  ${ok ? 'PASS' : 'FAIL'}  a whole lunch on a day with Cheerios: "Day partly counted", the engine's line, Log it, "this meal", no "Not scored" for the cereal (${size.name})${ok ? '' : '  → ' + JSON.stringify({ st: { ...st, text: undefined }, figs, receipt: receipt.slice(0, 300) })}`)
       if (!ok) process.exitCode = 1
       // The model's words, shown and not gated (rule 7): does it say the lunch left the cereal out?
       console.log(`  NOTE  the answer ${/wasn't counted|was not counted|left out|not counted/i.test(st?.text ?? '') ? 'still says the cereal was not counted / left out' : 'does not say the cereal was left out'} (${size.name})`)

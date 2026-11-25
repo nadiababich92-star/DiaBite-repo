@@ -13,14 +13,14 @@ export function FigurePair({ countBy, gl, carbs, limit }: {
   countBy: CountBy
   /** The engine's own comparison with the person's number from their doctor; absent when they gave none. Never worked out here. */
   limit?: CarbLimitResult
-  gl: { mealGl: number; before: number; after: number; fits: boolean; partial: boolean; assumed?: boolean }
+  gl: { mealGl: number; before: number; after: number; fits: boolean; partial: boolean; assumed?: boolean; /** The meal is whole, the day is not (#117): its load is "this meal", what is left is "so far". */ dayOnly?: boolean }
   carbs?: CarbFigures
 }) {
   const glBlock = (
     <div key="gl" className="fig-card gl">
       <p className="fig-title">Glycemic load (GL)</p>
-      <p className={`fig-big gl ${gl.partial || gl.assumed ? '' : gl.fits ? 'ok' : 'over'}`}><span className="num">{gl.fits ? gl.after : Math.abs(gl.after)}</span></p>
-      <p className="fig-cap">{gl.partial ? 'left so far' : gl.fits ? 'left after' : 'over by'}</p>
+      <p className={`fig-big gl ${gl.partial || gl.assumed || gl.dayOnly ? '' : gl.fits ? 'ok' : 'over'}`}><span className="num">{gl.fits ? gl.after : Math.abs(gl.after)}</span></p>
+      <p className="fig-cap">{gl.partial || (gl.dayOnly && gl.fits) ? 'left so far' : gl.fits ? 'left after' : 'over by'}</p>
       {/* A partial meal's load is only the foods we could count: "this meal 0" under two slices of pizza read as a meal with no load. */}
       <div className="fig-row"><span className="fig-k">{gl.partial ? 'counted so far' : 'this meal'}</span><span className="fig-v">{gl.mealGl}</span></div>
       <div className="fig-row"><span className="fig-k">before</span><span className="fig-v">{gl.before}</span></div>

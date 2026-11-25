@@ -13,7 +13,7 @@ import { nudgeMeasure, unitLabel } from '../lib/measure'
 import { PortionEditor, WeightsUsed, type TypedQuantity } from './WeightEditor'
 import { dayLabel, eaten, mealForNow, noLoadNote, portionText, viewEntry } from '../lib/diary'
 import { swapNamedIn, type SwapOffer } from '../lib/swap'
-import { BUTTONS, dayUnscoredNote, ERROR_EYEBROW, GL_LINK_LABEL, HINT, PILL_NO_NUMBERS, pillChecked, STAMP_LABEL, verdictTone } from '../lib/verdict'
+import { BUTTONS, dayOnly as dayOnlyOf, dayUnscoredNote, ERROR_EYEBROW, GL_LINK_LABEL, HINT, PILL_NO_NUMBERS, pillChecked, STAMP_LABEL, verdictTone } from '../lib/verdict'
 import { MEAL_LABELS, menuHidden } from '../lib/menu'
 import { SignInCard } from './SignInCard'
 import { AnonBanner } from './AnonBanner'
@@ -135,11 +135,13 @@ function Figures({ reply, countBy }: { reply: AgentResponse; countBy: CountBy })
   if (typeof mealGl !== 'number' || typeof before !== 'number' || typeof after !== 'number') return null
   // `null` is a partial meal: what was costed still leaves room, but a food is
   // missing from the sum, so the figure is shown as "so far", not as a verdict.
-  const partial = meal?.afterMeal?.fits === null
+  // A whole meal on a day that holds a food with no load (#117): the meal's load is whole, only what is left is "so far".
+  const dayOnly = dayOnlyOf(meal?.afterMeal as Parameters<typeof dayOnlyOf>[0])
+  const partial = meal?.afterMeal?.fits === null && !dayOnly
   const fits = meal?.afterMeal?.fits !== false
   return (
     <>
-      <FigurePair countBy={countBy} gl={{ mealGl, before, after, fits, partial, assumed: meal?.assumed }} carbs={meal?.totals as CarbFigures | undefined} limit={meal?.afterMeal?.carbLimit} />
+      <FigurePair countBy={countBy} gl={{ mealGl, before, after, fits, partial, assumed: meal?.assumed, dayOnly }} carbs={meal?.totals as CarbFigures | undefined} limit={meal?.afterMeal?.carbLimit} />
       {!!meal?.afterMeal?.partial?.dayUnscored?.length && <p className="muted day-unscored-note">{dayUnscoredNote(meal.afterMeal.partial.dayUnscored)}</p>}
     </>
   )
@@ -178,7 +180,7 @@ function RecalcCard({ rc, onBack, note, was, countBy, weightsUsed }: { rc: Recal
         <p className="a-verdict">{verdict}</p>
         {rc.before !== null && lead !== null ? (
           <>
-            <FigurePair countBy={countBy} limit={rc.carbLimit} gl={{ mealGl: rc.mealGl, before: rc.before, after: rc.after ?? 0, fits: rc.fits !== false, partial: tone === 'partial' || rc.fits === null, assumed: tone === 'estimate' }} carbs={rc.carbs} />
+            <FigurePair countBy={countBy} limit={rc.carbLimit} gl={{ mealGl: rc.mealGl, before: rc.before, after: rc.after ?? 0, fits: rc.fits !== false, partial: tone === 'partial' || (rc.fits === null && tone !== 'day'), assumed: tone === 'estimate', dayOnly: tone === 'day' }} carbs={rc.carbs} />
             {!!rc.receipt.dayUnscored?.length && <p className="muted day-unscored-note">{dayUnscoredNote(rc.receipt.dayUnscored)}</p>}
             {was && (
               <p className="muted was-now">
