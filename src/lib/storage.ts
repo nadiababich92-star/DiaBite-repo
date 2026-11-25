@@ -35,6 +35,37 @@ export function clearDevice(): void {
   } catch { /* storage unavailable */ }
 }
 
+/**
+ * Whose account the data on this device belongs to (the user id of the last account loaded here).
+ *
+ * Signing out clears the device. Signing in to another account without signing out (an email link opened while
+ * someone else is signed in on a shared computer, or a test sign-in) did not: the next account's "Before we start"
+ * was filled with the last person's age, height and weight, the last person's diary was offered to it to import,
+ * and a diary whose last push had failed was merged into it without a question (found 25 November 2026).
+ */
+const OWNER_KEY = 'diabite.owner.v1'
+
+/** Kept when another account signs in: they belong to the device, not to a person. */
+const DEVICE_KEYS = new Set(['diabite.theme', 'diabite.device.v1', 'diabite.lab', 'diabite.session', 'diabite.sessionOwner'])
+
+/**
+ * `mine`: the data here is this account's. `unclaimed`: nobody's yet (used without an account, or before this release):
+ * the person signing in is taken to be the one who used it, as before, and a diary kept here is offered to them.
+ * `someone-else`: another account's, never read or offered.
+ */
+export function localDataOwner(stored: unknown, userId: string): 'mine' | 'unclaimed' | 'someone-else' {
+  if (typeof stored !== 'string' || stored === '') return 'unclaimed'
+  return stored === userId ? 'mine' : 'someone-else'
+}
+export const loadOwner = (): unknown => read<unknown>(OWNER_KEY, null)
+export const claimDevice = (userId: string): void => write(OWNER_KEY, userId)
+
+/** Removes what belongs to the last account (profile, diary, diary set aside, unsent changes, tips, cards, menu); keeps the device's own keys. */
+export function forgetPreviousAccount(): void {
+  try { for (const k of Object.keys(localStorage)) if (k.startsWith('diabite.') && !DEVICE_KEYS.has(k)) localStorage.removeItem(k) } catch { /* storage unavailable */ }
+  try { for (const k of Object.keys(sessionStorage)) if (k.startsWith('diabite.')) sessionStorage.removeItem(k) } catch { /* storage unavailable */ }
+}
+
 function write(key: string, value: unknown): void {
   if (frozen) return
   try {

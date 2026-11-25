@@ -113,6 +113,17 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
     if (h) { h.tabIndex = -1; h.focus() }
   }, [step])
 
+  // An exit screen opening, or "Change that answer" closing it, is a new screen too: the focus goes to its heading
+  // (first-session-onboarding-screen.md). On the short screen the step does not change, so the effect above misses it.
+  const exitShown = showExit && !!exit
+  const seenExit = useRef(exitShown)
+  useEffect(() => {
+    if (seenExit.current === exitShown) return
+    seenExit.current = exitShown
+    const h = card.current?.querySelector<HTMLElement>('h2')
+    if (h) { h.tabIndex = -1; h.focus() }
+  }, [exitShown])
+
   useEffect(() => {
     if (!focusesHeadingOnOpen({ onCancel })) return
     const h = card.current?.querySelector<HTMLElement>('h2')
@@ -395,7 +406,7 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
                 </div>
 
                 <h3>How you eat</h3>
-                <p className="muted">Low carb is set on the next step, under carbohydrate approach. Gluten-free is under the foods to keep out, below.</p>
+                <p className="muted">{only === undefined ? 'Low carb is set on the next step, under carbohydrate approach.' : 'Low carb is set under carbohydrate approach, in Your day.'} Gluten-free is under the foods to keep out, below.</p>
                 <div className="chips">
                   {PATTERNS.map((v) => (
                     <button key={v} className={`chip-toggle${p.pattern === v ? ' on' : ''}`}

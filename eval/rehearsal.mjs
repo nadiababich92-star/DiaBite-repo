@@ -347,6 +347,24 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
   }
 }
 
+// ── another account on the same browser, without signing out (W23) ──────────
+// An email link opened while someone else is signed in replaces the session in place. Found 25 November 2026: the new account's
+// "Before we start" held the last person's age, height and weight, and the last person's diary was offered to it. Device A (its
+// person is 52, with meals logged) now takes a second throwaway's session without signing out.
+{
+  const emailB = `rehearsal-b-${Date.now()}@example.com`, pwB = 'Rh-' + Math.random().toString(36).slice(2) + 'Bb1'
+  const madeB = await (await admin('/auth/v1/admin/users', { method: 'POST', body: JSON.stringify({ email: emailB, password: pwB, email_confirm: true }) })).json()
+  const sB = await (await fetch(`${SB}/auth/v1/token?grant_type=password`, { method: 'POST', headers: { apikey: PUB, 'content-type': 'application/json' }, body: JSON.stringify({ email: emailB, password: pwB }) })).json()
+  const storedB = JSON.stringify({ ...sB, expires_at: Math.floor(Date.now() / 1000) + sB.expires_in })
+  await A.b.ev(`localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(storedB)})`)
+  await A.b.send('Page.reload'); await sleep(7000)
+  const tB = await A.text()
+  const ageB = await A.b.ev(`[...document.querySelectorAll('label.field')].find((l) => l.innerText.trim().startsWith('Age'))?.querySelector('input')?.value ?? null`)
+  const keptDiary = await A.b.ev(`(localStorage.getItem('diabite.diary.v1') ?? '[]').length > 2 || !!localStorage.getItem('diabite.legacy.diary.v1')`)
+  check('W23', 'another account signs in on the same browser without signing out: "Before we start" holds none of the last person\'s numbers, and their diary is neither offered nor kept', /Before we start/.test(tB) && ageB !== '52' && !/We found a diary on this device/.test(tB) && !keptDiary, JSON.stringify({ start: /Before we start/.test(tB), ageB, offered: /We found a diary on this device/.test(tB), keptDiary }))
+  if (madeB.id) await admin(`/auth/v1/admin/users/${madeB.id}`, { method: 'DELETE' }).catch(() => {})
+}
+
 // ── the account can be removed, and takes everything with it ────────────────
 await A.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('Profile'))?.click()`); await sleep(800)
 const del = await fetch(`${APP}/account`, { method: 'DELETE', headers: { authorization: `Bearer ${session.access_token}` } })

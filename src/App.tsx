@@ -23,7 +23,7 @@ import { signOutAndClear, useAccess, useAuth } from './lib/auth'
 import { SignInCard } from './components/SignInCard'
 import { SIGN_IN_CARDS } from './lib/anon'
 import { supabaseConfigured } from './lib/supabase'
-import { loadDiary, loadProfile, loadTour, saveDiary, saveProfile, saveTour, thawWrites, todayISO } from './lib/storage'
+import { claimDevice, forgetPreviousAccount, loadDiary, loadOwner, loadProfile, loadTour, localDataOwner, saveDiary, saveProfile, saveTour, thawWrites, todayISO } from './lib/storage'
 import { initialSeen, STEP_ORDER, type TourStep } from './lib/tour'
 import { authInUrl, showLanding, skipLanding } from './lib/landingRule'
 import { CONSENT_VERSION, LEGACY_DIARY_KEY, PENDING_KEY, loadAccount, mergeById, reconcileAfterFailedPush, useAccountSync } from './lib/sync'
@@ -115,6 +115,9 @@ export default function App() {
   useEffect(() => saveDiary(diary), [diary])
 
   const load = useCallback(async (userId: string) => {
+    // Another account's data on this device is removed before anything here reads it, and the page starts again clean,
+    // so nothing of that person stays in memory either (storage.ts, OWNER_KEY). The reload finds the device unclaimed.
+    if (localDataOwner(loadOwner(), userId) === 'someone-else') { forgetPreviousAccount(); window.location.reload(); return }
     setAccount('loading')
     try {
       const a = await loadAccount(userId)
@@ -146,6 +149,7 @@ export default function App() {
         const kept = JSON.parse(localStorage.getItem(LEGACY_DIARY_KEY) ?? '[]') as unknown[]
         setWaiting(Array.isArray(kept) ? kept.length : 0)
       } catch { setWaiting(0) }
+      claimDevice(userId)
       setAccount('ready')
     } catch { setAccount('failed') }
   }, [prime])

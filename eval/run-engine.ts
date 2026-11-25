@@ -87,7 +87,7 @@ import { loadWeekState } from '../src/lib/menuStore'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type NudgeContext } from '../src/lib/nudge'
 import { clampDate, dateAllowed, eaten, isPlanned, markEaten, pickerState, plannedOnly, dayChipLabel } from '../src/lib/diary'
 import { shoppingFromEntries } from '../src/lib/menu'
-import { clearDevice, loadDiary, saveDiary, thawWrites } from '../src/lib/storage'
+import { claimDevice, clearDevice, forgetPreviousAccount, loadDiary, loadOwner, localDataOwner, saveDiary, thawWrites } from '../src/lib/storage'
 import { execFileSync } from 'node:child_process'
 import type { DiaryEntry, Dish } from '../src/types'
 import { RATING_ONLY } from '../src/lib/feedbackCopy'
@@ -695,6 +695,54 @@ recorrectMisses.forEach((m) => console.log(m))
   console.log(`weights   ${bits.length === 0 ? 'ok' : 'WRONG'}`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) { console.log('the weights line misbehaves: see weights above'); process.exit(1) }
+}
+// Another account on the same device (found 25 November 2026): its data is removed before anything reads it; a device used without an
+// account is still taken to be the person's own; signing out clears the owner with the rest.
+{
+  const bits: string[] = []
+  if (localDataOwner(null, 'u1') !== 'unclaimed' || localDataOwner('', 'u1') !== 'unclaimed' || localDataOwner(42, 'u1') !== 'unclaimed') bits.push('a device with no owner was not unclaimed')
+  if (localDataOwner('u1', 'u1') !== 'mine' || localDataOwner('u1', 'u2') !== 'someone-else') bits.push('the owner was misread')
+  // A storage whose keys enumerate as in a browser (Object.keys(localStorage) lists the stored keys, not the methods).
+  const fake = () => { const st: Record<string, string> = {}; for (const m of ['getItem', 'setItem', 'removeItem']) Object.defineProperty(st, m, { enumerable: false, value: m === 'getItem' ? (k: string) => (k in st ? st[k] : null) : m === 'setItem' ? (k: string, v: string) => { st[k] = String(v) } : (k: string) => { delete st[k] } }); return st }
+  const g = globalThis as { localStorage?: unknown; sessionStorage?: unknown }
+  const ls = fake(), ss = fake()
+  g.localStorage = ls; g.sessionStorage = ss
+  thawWrites()
+  for (const k of ['diabite.profile.v1', 'diabite.diary.v1', 'diabite.legacy.diary.v1', 'diabite.pending.v1', 'diabite.tour.v1', 'diabite.nudge.v1', 'diabite.menu.v1', 'diabite.shopping.v1', 'diabite.responses.v1', 'diabite.feedback.v1', 'diabite.freshContext',
+    'diabite.theme', 'diabite.device.v1', 'diabite.lab', 'diabite.session', 'diabite.sessionOwner', 'other.app']) ls[k] = '1'
+  ss['diabite.deferredShown'] = '1'
+  claimDevice('person-a')
+  if (localDataOwner(loadOwner(), 'person-a') !== 'mine' || localDataOwner(loadOwner(), 'person-b') !== 'someone-else') bits.push('claiming the device did not record its owner')
+  forgetPreviousAccount()
+  const left = Object.keys(ls).sort().join(',')
+  if (left !== 'diabite.device.v1,diabite.lab,diabite.session,diabite.sessionOwner,diabite.theme,other.app') bits.push(`after another account signed in, the device kept ${left}`)
+  if (Object.keys(ss).length) bits.push('the session flags of the last account stayed')
+  if (localDataOwner(loadOwner(), 'person-b') !== 'unclaimed') bits.push('the device still named the last account as owner')
+  claimDevice('person-b'); clearDevice()
+  if (loadOwner() !== null) bits.push('signing out left the owner on the device')
+  thawWrites()
+  delete g.localStorage; delete g.sessionStorage
+  // App: the check runs before the account is loaded (and so before the diary set aside, the unsent changes or the profile seed are read), and the device is claimed once loaded.
+  const app = readFileSync(join(ROOT, 'src', 'App.tsx'), 'utf8')
+  const load = app.slice(app.indexOf('const load = useCallback'), app.indexOf('}, [prime])'))
+  const at = (needle: string) => load.indexOf(needle)
+  if (at("=== 'someone-else') { forgetPreviousAccount()") < 0 || at("=== 'someone-else')") > at('loadAccount(userId)') || at("=== 'someone-else')") > at('loadDiary()')) bits.push('the account is loaded before another account\'s data is removed')
+  if (at('claimDevice(userId)') < 0 || at('claimDevice(userId)') < at('loadAccount(userId)')) bits.push('the device is not claimed after the account loads')
+  console.log(`owner     ${bits.length === 0 ? 'ok' : 'WRONG'}`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) { console.log('data of another account on this device is not handled: see owner above'); process.exit(1) }
+}
+// Small onboarding fixes of 25 November: the answers row names insulin; the Conditions step opened alone points to no next step.
+{
+  const bits: string[] = []
+  const row = (insulin: 'basal' | 'mealtime_or_pump') => answerRows({ ...DEFAULT_PROFILE, insulin, meds: ['sulfonylurea'] }).find((r) => r.id === 'medicines')?.text ?? ''
+  if (!/insulin/i.test(row('basal')) || !/insulin/i.test(row('mealtime_or_pump'))) bits.push(`the medicines row does not say insulin: ${row('basal')}`)
+  const onb = readFileSync(join(ROOT, 'src', 'components', 'Onboarding.tsx'), 'utf8')
+  if (!/only === undefined \? 'Low carb is set on the next step/.test(onb)) bits.push('the Conditions step opened alone still points to a next step')
+  if (!/\[exitShown\]/.test(onb)) bits.push('opening or closing an exit screen does not move the focus to its heading')
+  console.log(`onboard   ${bits.length === 0 ? 'ok' : 'WRONG'}`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) { console.log('the onboarding fixes regressed: see onboard above'); process.exit(1) }
 }
 // A free first answer without signing in, the scaffold (docs/specs/anon-evals.md, AN5; the device id, the access words and the request headers
 // of docs/specs/anon-screen.md). The engine's counters and the screens are the next steps and have their own checks.
@@ -2957,7 +3005,7 @@ filterMisses.forEach((m) => console.log(m))
   want('how you eat', row(some, 'eating'), 'Vegetarian, no pork')
   want('allergies', row(some, 'allergies'), 'Shellfish, Milk')
   const basal = answerRows({ ...DEFAULT_PROFILE, insulin: 'basal', meds: [] })
-  want('basal insulin', row(basal, 'medicines'), 'Long-acting once a day')
+  want('basal insulin', row(basal, 'medicines'), 'Long-acting insulin once a day')
   // A brand name or an example in brackets never reaches the one-line summary.
   if ((row(answerRows({ ...DEFAULT_PROFILE, meds: ['sulfonylurea', 'glp1'] }), 'medicines') ?? '').includes('(')) misses.push('    a summary carries an example in brackets')
   if ((row(answerRows({ ...DEFAULT_PROFILE, condition: 'ir' }), 'diagnosis') ?? '').includes('(')) misses.push('    the diagnosis carries an example in brackets')

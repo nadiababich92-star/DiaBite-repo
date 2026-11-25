@@ -1,4 +1,4 @@
-import { ALLERGEN_LABELS, CARB_APPROACH_LABELS, COMORBIDITY_LABELS, CONDITION_LABELS, COUNT_BY_LABELS, GOAL_LABELS, INSULIN_LABELS, KIDNEY_LABELS, MED_LABELS } from './profile'
+import { ALLERGEN_LABELS, CARB_APPROACH_LABELS, COMORBIDITY_LABELS, CONDITION_LABELS, COUNT_BY_LABELS, GOAL_LABELS, KIDNEY_LABELS, MED_LABELS } from './profile'
 import { AVOIDED_LABELS, PATTERN_LABELS } from './dietary'
 import type { Profile } from '../types'
 
@@ -20,7 +20,8 @@ export const NOT_ASKED = 'Not asked yet'
 /** The onboarding answers that have no field of their own on the profile, as one line each. */
 export function answerRows(p: Profile): AnswerRow[] {
   const meds = p.meds.map((m) => short(MED_LABELS[m]))
-  const insulin = p.insulin === 'none' ? [] : [short(INSULIN_LABELS[p.insulin])]
+  // The insulin choices are labelled by how they are taken ("Long-acting once a day"); in a row of medicines the word insulin has to be there.
+  const insulin = p.insulin === 'none' ? [] : [p.insulin === 'basal' ? 'Long-acting insulin once a day' : 'Insulin before meals, or a pump']
   const taking = [...meds, ...insulin]
   const medicines = taking.length === 0 ? 'Nothing for glucose' : `${taking.join(', ')}${p.insulin === 'none' ? ', no insulin' : ''}`
 
