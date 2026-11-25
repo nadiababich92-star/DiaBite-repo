@@ -817,7 +817,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
           </section>
           </Fold>
 
-          {tone === 'ask' && !reply.blocked && reply.route !== 'advisor' && (
+          {(tone === 'ask' || reply.asks) && !reply.blocked && reply.route !== 'advisor' && (
             <form className="reply-box" onSubmit={(e) => { e.preventDefault(); ask(replyText, { reply: true }) }}>
               <span className="label">Your answer</span>
               <div className="ask-form">

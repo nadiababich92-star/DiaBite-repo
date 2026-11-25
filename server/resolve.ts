@@ -210,21 +210,33 @@ function stem(t: string): string {
   return t
 }
 
-/** How much of the phrase the record's name accounts for, and what that is worth. */
+/**
+ * One word the person said is in the record's name: as it is, by its stem, or, for a long word, written as two in the name. "Sourdough"
+ * is "Bread, sour dough, toasted" in USDA's survey; matched word by word it was missing, took the penalty and came back unknown, and a
+ * breakfast that counted the toast also said "sourdough toast is not in the database" (diary test, 25 November 2026, tracker #121).
+ */
+function inName(t: string, n: string, stems: Set<string>): boolean {
+  return n.includes(t) || stems.has(stem(t)) || (t.length >= 6 && n.replace(/ /g, '').includes(t))
+}
+
 /** Every word the person said is in the record's name (or its stem). */
 function coversPhrase(phrase: string, name: string): boolean {
   const ts = tokens(phrase)
   const n = norm(plainName(name))
   const stems = new Set(n.split(' ').map(stem))
-  return ts.length > 0 && ts.every((t) => n.includes(t) || stems.has(stem(t)))
+  return ts.length > 0 && ts.every((t) => inName(t, n, stems))
 }
 
+/** The phrase names this record: every word of it is in the record's name. Exported for the engine's unknown-food bookkeeping (#121). */
+export const phraseNames = coversPhrase
+
+/** How much of the phrase the record's name accounts for, and what that is worth. */
 function lexicalScore(phrase: string, name: string): number {
   const ts = tokens(phrase)
   if (ts.length === 0) return 0
   const n = norm(plainName(name))
   const stems = new Set(n.split(' ').map(stem))
-  const covered = (t: string) => n.includes(t) || stems.has(stem(t))
+  const covered = (t: string) => inName(t, n, stems)
   const coverage = ts.filter(covered).length / ts.length
   if (coverage === 1) return LEXICAL_BOOST
   return coverage * LEXICAL_BOOST * 0.5 - (1 - coverage) * MISSING_TOKEN_PENALTY

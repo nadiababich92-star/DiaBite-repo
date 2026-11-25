@@ -31,7 +31,7 @@ import { resolvePhrases, withoutQuantity } from '../server/resolve'
 import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { AGENT_WEIGHTS_LINE, parseMeal, tailLines, WEIGHTS_WHY } from '../src/lib/answer'
-import { afterMealFor, dayOnlyUnscored, recipeWithItsPart, sandwichWithItsBread, scaleToDishWeight, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withSaid } from '../server/compute'
+import { afterMealFor, dayOnlyUnscored, recipeWithItsPart, stillUnknown, sandwichWithItsBread, scaleToDishWeight, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withSaid } from '../server/compute'
 import { alternativesForMeal, findAlternatives, SWAP_ENERGY_BAND, SWAP_MIN_GAIN, SWAP_MIN_GAIN_SHARE } from '../server/compute'
 import { ALLOWED, mayReplace, potatoKind, standInsFor, swapClass } from '../server/roles'
 import { validateAsk } from '../server/guard'
@@ -43,7 +43,7 @@ import { countedAsPieces, countsSaid, piecesOf, piecesPerServing } from '../serv
 import { sourceForPerson } from '../src/lib/agent'
 import { rememberResponse } from '../server/sessions'
 import { sanitizeProfile } from '../src/lib/storage'
-import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withContentFilterRetry, contentFilterCategories, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
+import { askedSomething, asksPerson, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withContentFilterRetry, contentFilterCategories, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
 import { GI_CROSSCHECKED_ON, recordFromRow, getRecord, hasNoLoad, householdMeasure, householdPortion, readPortion, restaurantFaults, restaurantRecordsFrom, stepUnit, summary, type RestaurantRow } from '../server/foods'
 import { legacyHouseholdMeasure, legacyStepUnit } from './legacy-measure'
@@ -1259,6 +1259,35 @@ recorrectMisses.forEach((m) => console.log(m))
   const text = templatedAnswer(trace) ?? ''
   if (!/can't judge/i.test(text) || (/\bfits\b/i.test(text) && !/can't judge/i.test(text)) || !text.includes(cheerios) || /wasn't counted|not counted|left out/i.test(text)) bits.push(`the last-resort answer: ${text.slice(0, 200)}`)
   console.log(`\nday part  ${bits.length === 0 ? 'ok' : 'WRONG'}  (a whole meal on a partly counted day)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// ── #121: a food counted and also called "not in the database" (diary test, 25 November 2026, nadia+james) ──────────
+{
+  const bits: string[] = []
+  for (const p of ['sourdough toast', 'toasted sourdough', 'sourdough bread']) {
+    const r = (await resolvePhrases(store, [p], 3))[0] as { unknown?: boolean; candidates: { name: string }[] }
+    if (r.unknown || !/^Bread, sour dough/.test(r.candidates[0]?.name ?? '')) bits.push(`"${p}": unknown ${!!r.unknown}, first ${r.candidates[0]?.name}`)
+  }
+  const left = stillUnknown(['sourdough toast', 'dragon fruit'], ['Bread, sour dough, toasted', 'Banana'])
+  if (left.join() !== 'dragon fruit') bits.push(`still unknown after costing sourdough toast: ${JSON.stringify(left)}`)
+  if (stillUnknown(['dragon fruit'], ['Fruit cocktail, canned']).length !== 1) bits.push('a food the meal does not hold was cleared by a neighbour\'s name')
+  console.log(`\nfound     ${bits.length === 0 ? 'ok' : 'WRONG'}  (sourdough, and a phrase found under other words)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// ── #122: a question under a costed meal gets a field to answer in (diary test, 25 November 2026, nadia+ruth) ────
+{
+  const bits: string[] = []
+  const yes = ['This fits your day.\n\nWhy: the biscuit drives the load.\n\nHow much milk was in the coffee?', 'I counted the coffee without milk. How much milk did you add?', '**Question:** what is in the dragon fruit smoothie?**']
+  const no = ['This fits your day.\n\nWhy: the biscuit drives the load.\n\nNext: swap the biscuit for an English muffin.', 'What is GL? It is the load.\n\nThis fits your day.\n\nWhy: rice.\n\nNext: brown rice.\n\nWeights I used: rice 1 cup (158 g).\n\nNot counted: nothing.']
+  for (const a of yes) if (!asksPerson(a)) bits.push(`not read as a question: ${JSON.stringify(a.slice(-60))}`)
+  for (const a of no) if (asksPerson(a)) bits.push(`read as a question: ${JSON.stringify(a.slice(-60))}`)
+  const page = readFileSync(join(ROOT, 'src', 'components', 'AskPage.tsx'), 'utf8')
+  if (!page.includes("{(tone === 'ask' || reply.asks) && !reply.blocked && reply.route !== 'advisor' && (")) bits.push('the answer field is not shown when the reply asks')
+  console.log(`\nasks      ${bits.length === 0 ? 'ok' : 'WRONG'}  (a question under a costed meal)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }

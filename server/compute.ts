@@ -8,7 +8,7 @@ import { asFood, getRecord, hasNoLoad, householdMeasure, loadFoods, stepUnit, su
 import { mayReplace, potatoKind, standInsFor, swapClass } from './roles'
 import { gramsFor, householdUnitsFor, saidText, unitsFor } from './quantity'
 import { embed, type VectorStore } from './embeddings'
-import { resolvePhrases, sameFamily, sameFood } from './resolve'
+import { phraseNames, resolvePhrases, sameFamily, sameFood } from './resolve'
 import type {
   Alternative, AlternativesRequest, ComputeMealResponse, CostDishRequest, DayBudget, DayStateResponse,
   DishIngredientResult, DishScale, MealItemInput, MealItemResult, MealTotals, UnresolvedIngredient,
@@ -246,6 +246,15 @@ export function dayState(budget: DayBudget, entries: MealItemInput[]): DayStateR
     entries: results,
     ...(unscored.length ? { unscored } : {}),
   }
+}
+
+/**
+ * The phrases still unknown once a meal is costed (tracker #121). The session keeps a phrase resolve_foods could not find until the same
+ * phrase is found; a food the agent then found under other words ("sourdough toast" as "Bread, sour dough, toasted") stayed "not in the
+ * database" beside its own line in the receipt, and the meal could not be judged. A phrase every word of which names a costed item is found.
+ */
+export function stillUnknown(unknownFoods: string[], costedNames: string[]): string[] {
+  return unknownFoods.filter((p) => !costedNames.some((n) => phraseNames(p, n)))
 }
 
 /**

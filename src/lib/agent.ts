@@ -64,6 +64,8 @@ export interface AgentResponse {
   route?: 'meal' | 'advisor' | 'triage'
   /** Foods the engine's own check found left out of the count: the meal is partial and is never stamped Fits. */
   uncounted?: string[]
+  /** The meal answer puts a question to the person (server/agent.ts asksPerson): the field to answer in is shown whatever the stamp. */
+  asks?: boolean
 }
 
 /** Engine ids for diary entries: locally known foods are `seed:<id>`; agent-logged ones already carry theirs. */

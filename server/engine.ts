@@ -29,7 +29,7 @@ import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { resolvePhrases } from './resolve'
-import { afterMealFor, recipeWithItsPart, sandwichWithItsBread, scaleToDishWeight, alternativesForMeal, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, dayOnlyUnscored, withSaid } from './compute'
+import { afterMealFor, recipeWithItsPart, sandwichWithItsBread, scaleToDishWeight, alternativesForMeal, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, dayOnlyUnscored, stillUnknown, withSaid } from './compute'
 import { amountQuestion, NEEDS_WEIGHT_INSTRUCTION, quantityError, settleAmount, weightQuestion } from './quantity'
 import { countedAsPieces } from './pieces'
 import { verify } from './verify'
@@ -381,7 +381,7 @@ async function main() {
       const out: Record<string, unknown> = { ...meal, ...(top ? { driver: top } : {}) }
       if (day && !('unknown' in day)) {
         out.dayState = day
-        const unknownFoods = getSession(body.sessionId)?.unknownFoods ?? []
+        const unknownFoods = stillUnknown(getSession(body.sessionId)?.unknownFoods ?? [], meal.items.map((it) => it.name))
         const unscored = meal.items.filter((it) => !it.loadAvailable).map((it) => it.name)
         out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, unscored, (body.sessionId ? getSession(body.sessionId)?.carbLimit : undefined), [], dayOnlyUnscored(unscored, day))
         { const ex = excludedIn(meal.items, body.sessionId ? getSession(body.sessionId)?.avoid : undefined); if (ex.length) out.excluded = ex }
@@ -492,7 +492,7 @@ async function main() {
       // is left once this meal is counted. Negative means over budget, and is
       // returned as such — "fits" is the engine's verdict, not the model's.
       if (day && !('unknown' in day)) {
-        const unknownFoods = (body.sessionId ? getSession(body.sessionId)?.unknownFoods : undefined) ?? []
+        const unknownFoods = stillUnknown((body.sessionId ? getSession(body.sessionId)?.unknownFoods : undefined) ?? [], meal.items.map((it) => it.name))
         const unscored = meal.items.filter((it) => !it.loadAvailable).map((it) => it.name)
         out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, unscored, (body.sessionId ? getSession(body.sessionId)?.carbLimit : undefined), (notCounted ?? []).map((x) => x.trim()), dayOnlyUnscored(unscored, day))
         { const ex = excludedIn(meal.items, body.sessionId ? getSession(body.sessionId)?.avoid : undefined); if (ex.length) out.excluded = ex }
@@ -567,7 +567,7 @@ async function main() {
         ...(sc.scaled ? { scaled: sc.scaled } : {}),
       }
       if (day && !('unknown' in day)) {
-        const unknownFoods = (body.sessionId ? getSession(body.sessionId)?.unknownFoods : undefined) ?? []
+        const unknownFoods = stillUnknown((body.sessionId ? getSession(body.sessionId)?.unknownFoods : undefined) ?? [], meal.items.map((it) => it.name))
         const unscored = meal.items.filter((it) => !it.loadAvailable).map((it) => it.name)
         out.afterMeal = afterMealFor(day.remaining, meal.totals, unknownFoods, unscored, (body.sessionId ? getSession(body.sessionId)?.carbLimit : undefined), [], dayOnlyUnscored(unscored, day))
         { const ex = excludedIn(meal.items, body.sessionId ? getSession(body.sessionId)?.avoid : undefined); if (ex.length) out.excluded = ex }

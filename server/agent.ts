@@ -338,6 +338,8 @@ export interface AskResponse {
   responseId?: string
   /** Foods the turn found and left out of the count without naming them in `notCounted`: the meal is partial (see `uncountedFoods`). */
   uncounted?: string[]
+  /** The meal answer puts a question to the person (`asksPerson`): the screen shows the field to answer in whatever the stamp says. */
+  asks?: boolean
   /** 1 on a first-pass answer, 2 when the regenerate was needed. */
   attempts?: number
   /** True when both attempts failed the verifier and this text came from tool results. */
@@ -843,6 +845,15 @@ export function continuesMealQuestion(prior: { role: string; asked: boolean } | 
  * Did the answer end by asking the person something? The engine says so when it can (a food it could not cost, a
  * choice between records); a question in the last lines is the rest.
  */
+/**
+ * The answer puts a question to the person: one of its last lines ends with a question mark (tracker #122). A meal costed and then a
+ * question ("How much milk was in the coffee?") was stamped by the engine's verdict, and the field to answer in, shown only under "One
+ * question first", was not there (diary test, 25 November 2026, nadia+ruth). The screen shows the field when this is true as well.
+ */
+export function asksPerson(answer: string): boolean {
+  return answer.trim().split(/\n+/).slice(-4).some((l) => /\?\s*\**\s*$/.test(l.trim()))
+}
+
 export function askedSomething(trace: ToolCallTrace[], answer: string): boolean {
   const results = trace.map((t) => t.result as { unresolved?: unknown[]; afterMeal?: { partial?: unknown }; results?: { clarify?: string; unknown?: boolean }[] } | undefined)
   if (results.some((r) => (r?.unresolved?.length ?? 0) > 0 || !!r?.afterMeal?.partial || r?.results?.some((x) => !!x.clarify || x.unknown))) return true
@@ -1164,5 +1175,6 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
     timing: { routeMs: clock.route, parkMs: clock.park, agentMs: clock.agent },
     route: role, routedBy: by,
     ...(role === 'meal' && uncountedFoods(trace).length ? { uncounted: uncountedFoods(trace) } : {}),
+    ...(role === 'meal' && !withheld && asksPerson(answer) ? { asks: true } : {}),
   }
 }
