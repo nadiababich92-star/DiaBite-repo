@@ -87,7 +87,7 @@ import { loadWeekState } from '../src/lib/menuStore'
 import { markAsked, nextNudge, nudgeFacts, sanitizeAsked, type NudgeContext } from '../src/lib/nudge'
 import { clampDate, dateAllowed, eaten, isPlanned, markEaten, pickerState, plannedOnly, dayChipLabel } from '../src/lib/diary'
 import { shoppingFromEntries } from '../src/lib/menu'
-import { claimDevice, clearDevice, forgetPreviousAccount, loadDiary, loadOwner, localDataOwner, saveDiary, thawWrites } from '../src/lib/storage'
+import { claimDevice, clearDevice, forgetPreviousAccount, holdFor, loadDiary, loadOwner, localDataOwner, saveDiary, tabIsStale, thawWrites } from '../src/lib/storage'
 import { execFileSync } from 'node:child_process'
 import type { DiaryEntry, Dish } from '../src/types'
 import { RATING_ONLY } from '../src/lib/feedbackCopy'
@@ -721,6 +721,16 @@ recorrectMisses.forEach((m) => console.log(m))
   claimDevice('person-b'); clearDevice()
   if (loadOwner() !== null) bits.push('signing out left the owner on the device')
   thawWrites()
+  // Two tabs (found after the first fix): a tab holding A writes nothing once another tab has given the device to B.
+  claimDevice('person-a'); holdFor('person-a')
+  const entry = { id: 'e1', date: '2026-11-25', meal: 'lunch', items: [] } as unknown as DiaryEntry
+  saveDiary([entry])
+  if (!String(ls['diabite.diary.v1'] ?? '').includes('e1')) bits.push('a tab holding the device\'s own account could not write its diary')
+  ls['diabite.owner.v1'] = JSON.stringify('person-b'); delete ls['diabite.diary.v1']
+  if (!tabIsStale()) bits.push('a tab holding A did not see that the device is now B\'s')
+  saveDiary([entry])
+  if ('diabite.diary.v1' in ls) bits.push('a tab holding A wrote A\'s diary into a device that is now B\'s')
+  holdFor(null); thawWrites()
   delete g.localStorage; delete g.sessionStorage
   // App: the check runs before the account is loaded (and so before the diary set aside, the unsent changes or the profile seed are read), and the device is claimed once loaded.
   const app = readFileSync(join(ROOT, 'src', 'App.tsx'), 'utf8')
@@ -728,6 +738,9 @@ recorrectMisses.forEach((m) => console.log(m))
   const at = (needle: string) => load.indexOf(needle)
   if (at("=== 'someone-else') { forgetPreviousAccount()") < 0 || at("=== 'someone-else')") > at('loadAccount(userId)') || at("=== 'someone-else')") > at('loadDiary()')) bits.push('the account is loaded before another account\'s data is removed')
   if (at('claimDevice(userId)') < 0 || at('claimDevice(userId)') < at('loadAccount(userId)')) bits.push('the device is not claimed after the account loads')
+  if (at('if (held && held !== userId) { freezeWrites(); window.location.reload(); return }') < 0 || at('held !== userId') > at("=== 'someone-else')")) bits.push('a tab holding another account loads the new one in place instead of starting again')
+  if (!/ready: account === 'ready' && heldFor\(\) === auth\.userId/.test(app)) bits.push('a tab syncs an account it does not hold')
+  if (!/e\.key === 'diabite\.owner\.v1' && tabIsStale\(\)/.test(app)) bits.push('a tab does not notice that another tab gave the device to someone else')
   console.log(`owner     ${bits.length === 0 ? 'ok' : 'WRONG'}`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) { console.log('data of another account on this device is not handled: see owner above'); process.exit(1) }

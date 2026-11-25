@@ -365,6 +365,42 @@ check('W15', 'switching bread units on shows them, and the choice is kept with t
   if (madeB.id) await admin(`/auth/v1/admin/users/${madeB.id}`, { method: 'DELETE' }).catch(() => {})
 }
 
+// ── another account in a second tab, while the first tab holds the last one (W25) ──
+// Found by the metrics session on 25 November 2026, after W24's fix: a tab still showing account A wrote A's profile and diary back
+// into storage once a second tab had signed B in and cleared it. Device A's browser gets a second tab (the same storage); a fresh
+// throwaway B signs in there, the first tab is left alone, and the storage is read: nothing of A may be in it.
+{
+  const second = async (port) => {
+    const t = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json()
+    const ws = new WebSocket(t.webSocketDebuggerUrl)
+    await new Promise((res, rej) => { ws.addEventListener('open', res); ws.addEventListener('error', rej) })
+    let id = 0; const pending = new Map()
+    ws.addEventListener('message', (m) => { const d = JSON.parse(m.data); if (d.id && pending.has(d.id)) { pending.get(d.id)(d.result); pending.delete(d.id) } })
+    const send = (method, params = {}) => new Promise((res) => { const i = ++id; pending.set(i, res); ws.send(JSON.stringify({ id: i, method, params })) })
+    const ev = async (expression) => (await send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true }))?.result?.value
+    return { send, ev, close: () => { try { ws.close() } catch {} } }
+  }
+  // Device A first holds A again (W24 left B there): a fresh A session, reloaded, its Ask screen and diary loaded.
+  const sA = await (await fetch(`${SB}/auth/v1/token?grant_type=password`, { method: 'POST', headers: { apikey: PUB, 'content-type': 'application/json' }, body: JSON.stringify({ email, password }) })).json()
+  const storedA2 = JSON.stringify({ ...sA, expires_at: Math.floor(Date.now() / 1000) + sA.expires_in })
+  await A.b.ev(`localStorage.clear(); localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','weights','calc','log'])); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(storedA2)})`)
+  await A.b.send('Page.reload'); await sleep(7000)
+  const heldA = await A.b.ev(`(() => { try { return JSON.parse(localStorage.getItem('diabite.profile.v1') ?? '{}').age ?? null } catch { return null } })()`)
+  const emailC = `rehearsal-c-${Date.now()}@example.com`, pwC = 'Rh-' + Math.random().toString(36).slice(2) + 'Cc1'
+  const madeC = await (await admin('/auth/v1/admin/users', { method: 'POST', body: JSON.stringify({ email: emailC, password: pwC, email_confirm: true }) })).json()
+  const sC = await (await fetch(`${SB}/auth/v1/token?grant_type=password`, { method: 'POST', headers: { apikey: PUB, 'content-type': 'application/json' }, body: JSON.stringify({ email: emailC, password: pwC }) })).json()
+  const storedC = JSON.stringify({ ...sC, expires_at: Math.floor(Date.now() / 1000) + sC.expires_in })
+  const T2 = await second(9701)
+  await T2.send('Page.navigate', { url: APP }); await sleep(3000)
+  await T2.ev(`localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(storedC)})`)
+  await T2.send('Page.reload'); await sleep(9000)
+  const st = await T2.ev(`(() => { const p = (() => { try { return JSON.parse(localStorage.getItem('diabite.profile.v1') ?? '{}') } catch { return {} } })()
+    return { age: p.age ?? null, legacy: !!localStorage.getItem('diabite.legacy.diary.v1'), diary: (localStorage.getItem('diabite.diary.v1') ?? '[]').length, start: /Before we start/.test(document.body.innerText), ageField: [...document.querySelectorAll('label.field')].find((l) => l.innerText.trim().startsWith('Age'))?.querySelector('input')?.value ?? null } })()`)
+  check('W25', 'a second tab signs another account in while the first tab holds the last one: the storage keeps nothing of the last person, and the new account starts from the defaults', heldA === 52 && st.start && st.ageField !== '52' && st.age !== 52 && !st.legacy && st.diary <= 2, JSON.stringify({ heldA, ...st }))
+  T2.close()
+  if (madeC.id) await admin(`/auth/v1/admin/users/${madeC.id}`, { method: 'DELETE' }).catch(() => {})
+}
+
 // ── the account can be removed, and takes everything with it ────────────────
 await A.b.ev(`[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes('Profile'))?.click()`); await sleep(800)
 const del = await fetch(`${APP}/account`, { method: 'DELETE', headers: { authorization: `Bearer ${session.access_token}` } })

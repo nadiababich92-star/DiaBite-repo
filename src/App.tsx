@@ -23,7 +23,7 @@ import { signOutAndClear, useAccess, useAuth } from './lib/auth'
 import { SignInCard } from './components/SignInCard'
 import { SIGN_IN_CARDS } from './lib/anon'
 import { supabaseConfigured } from './lib/supabase'
-import { claimDevice, forgetPreviousAccount, loadDiary, loadOwner, loadProfile, loadTour, localDataOwner, saveDiary, saveProfile, saveTour, thawWrites, todayISO } from './lib/storage'
+import { claimDevice, forgetPreviousAccount, freezeWrites, heldFor, holdFor, loadDiary, loadOwner, loadProfile, loadTour, localDataOwner, saveDiary, saveProfile, saveTour, tabIsStale, thawWrites, todayISO } from './lib/storage'
 import { initialSeen, STEP_ORDER, type TourStep } from './lib/tour'
 import { authInUrl, showLanding, skipLanding } from './lib/landingRule'
 import { CONSENT_VERSION, LEGACY_DIARY_KEY, PENDING_KEY, loadAccount, mergeById, reconcileAfterFailedPush, useAccountSync } from './lib/sync'
@@ -107,7 +107,15 @@ export default function App() {
   const [signingIn, setSigningIn] = useState(false)
   // Set by "Try DiaBite" on the landing page: the sign-in screen is shown instead, with a way back.
   const [entering, setEntering] = useState(false)
-  const sync = useAccountSync({ userId: auth.userId, ready: account === 'ready', profile, diary, consent })
+  // Only the account this tab holds is synced: right after another tab signs someone else in, auth.userId is theirs while this
+  // tab's profile and diary are still the last person's.
+  const sync = useAccountSync({ userId: auth.userId, ready: account === 'ready' && heldFor() === auth.userId, profile, diary, consent })
+  // Another tab gave the device to another account: this one writes nothing more and starts again.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => { if (e.key === 'diabite.owner.v1' && tabIsStale()) { freezeWrites(); window.location.reload() } }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
   const prime = sync.prime
   const wasSignedIn = useRef(false)
 
@@ -117,6 +125,9 @@ export default function App() {
   const load = useCallback(async (userId: string) => {
     // Another account's data on this device is removed before anything here reads it, and the page starts again clean,
     // so nothing of that person stays in memory either (storage.ts, OWNER_KEY). The reload finds the device unclaimed.
+    // This tab already holds another account in memory (the other tab signed someone else in): it touches nothing and starts again.
+    const held = heldFor()
+    if (held && held !== userId) { freezeWrites(); window.location.reload(); return }
     if (localDataOwner(loadOwner(), userId) === 'someone-else') { forgetPreviousAccount(); window.location.reload(); return }
     setAccount('loading')
     try {
@@ -150,6 +161,7 @@ export default function App() {
         setWaiting(Array.isArray(kept) ? kept.length : 0)
       } catch { setWaiting(0) }
       claimDevice(userId)
+      holdFor(userId)
       setAccount('ready')
     } catch { setAccount('failed') }
   }, [prime])
@@ -158,7 +170,7 @@ export default function App() {
     if (auth.status === 'signedIn' && auth.userId) { wasSignedIn.current = true; setSigningIn(false); leaveAnon(); void load(auth.userId) }
     if (auth.status === 'signedOut') {
       // Signed out: nothing of the account stays on screen or in memory.
-      if (wasSignedIn.current) { setProfile(loadProfile()); setDiary(loadDiary()); setWaiting(0) }
+      if (wasSignedIn.current) { holdFor(null); setProfile(loadProfile()); setDiary(loadDiary()); setWaiting(0) }
       // Whatever sign-out cleared stays cleared until the screen above has been reset.
       thawWrites()
       setAccount('none')

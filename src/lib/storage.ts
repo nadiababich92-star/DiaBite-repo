@@ -66,8 +66,26 @@ export function forgetPreviousAccount(): void {
   try { for (const k of Object.keys(sessionStorage)) if (k.startsWith('diabite.')) sessionStorage.removeItem(k) } catch { /* storage unavailable */ }
 }
 
+/**
+ * The account whose data this tab holds in memory (set when it has loaded one, cleared on sign-out). Two tabs share
+ * storage: when the other tab signs a different account in, this one still holds the last person's profile and diary,
+ * and wrote them back after the other tab had cleared them (found by the metrics session, 25 November 2026).
+ */
+let tabOwner: string | null = null
+export const holdFor = (userId: string | null): void => { tabOwner = userId }
+export const heldFor = (): string | null => tabOwner
+/** Nothing more is written from this tab (it is about to reload). */
+export const freezeWrites = (): void => { frozen = true }
+/** This tab holds one account and the device now belongs to another. */
+export function tabIsStale(): boolean {
+  if (tabOwner === null) return false
+  return read<unknown>(OWNER_KEY, null) !== tabOwner
+}
+
 function write(key: string, value: unknown): void {
   if (frozen) return
+  // A tab holding another account writes nothing of it into a device that has moved on; it freezes and waits to reload.
+  if (key !== OWNER_KEY && !DEVICE_KEYS.has(key) && tabIsStale()) { frozen = true; return }
   try {
     localStorage.setItem(key, JSON.stringify(value))
   } catch {

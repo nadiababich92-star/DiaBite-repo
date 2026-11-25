@@ -120,7 +120,8 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
   useEffect(() => {
     if (seenExit.current === exitShown) return
     seenExit.current = exitShown
-    const h = card.current?.querySelector<HTMLElement>('h2')
+    // The screen's own heading ("Before we start", or the exit's title), not the consent card's above it.
+    const h = [...(card.current?.querySelectorAll<HTMLElement>('h2') ?? [])].find((x) => !x.closest('.consent')) ?? null
     if (h) { h.tabIndex = -1; h.focus() }
   }, [exitShown])
 
