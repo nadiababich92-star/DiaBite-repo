@@ -125,7 +125,9 @@ async function main() {
     })
   }
 
-  app.get('/health', (_req, res) => res.json({ ok: true, records: records.length, signIn: signInRequired(), freeAnswers: freeAnswers() }))
+  // `revision` is the Container App revision answering (Azure sets CONTAINER_APP_REVISION): the deploy reads it to know which version a person
+  // reaches, before and after traffic moves (CLAUDE.md rule 1: ask the running service). Not secret: it is in the revision's own address.
+  app.get('/health', (_req, res) => res.json({ ok: true, records: records.length, signIn: signInRequired(), freeAnswers: freeAnswers(), ...(process.env.CONTAINER_APP_REVISION ? { revision: process.env.CONTAINER_APP_REVISION } : {}) }))
 
   app.get('/openapi.json', (_req, res) => res.json(openApiSpec()))
 

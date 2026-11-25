@@ -67,44 +67,70 @@ done
 [ "${CONCLUSION:-}" = "success" ] || { echo "build for $SHA is $STATUS/$CONCLUSION — not deploying"; exit 1; }
 
 echo "deploying…"
-PREVIOUS_IMAGE=$(az containerapp show -g "$RG" -n "$APP" --query "properties.template.containers[0].image" -o tsv)
-az containerapp update -g "$RG" -n "$APP" --image "$REGISTRY/$APP:$SHA" --query properties.latestRevisionName -o tsv >/dev/null
-
-LATEST=$(az containerapp show -g "$RG" -n "$APP" --query properties.latestRevisionName -o tsv)
+# Blue-green (26 November 2026, asked by the team): the new version starts beside the old one with no traffic, is checked on its own
+# address, and only then takes the traffic, all at once. The old one keeps running for 15 minutes, for requests in flight and an instant
+# way back, and is then switched off. A version that fails its checks never reaches a person. Needs the app in multiple-revision mode with
+# its traffic pinned to a named revision (docs/engineering/blue-green-deploy.md); in single mode the new revision would take the traffic
+# the moment it started, which is what this replaces.
+MODE=$(az containerapp show -g "$RG" -n "$APP" --query properties.configuration.activeRevisionsMode -o tsv)
+[ "$MODE" = "Multiple" ] || { echo "the app is in $MODE revision mode; blue-green needs Multiple (docs/engineering/blue-green-deploy.md)"; exit 1; }
 FQDN=$(az containerapp show -g "$RG" -n "$APP" --query properties.configuration.ingress.fqdn -o tsv)
+OLD=$(az containerapp ingress traffic show -g "$RG" -n "$APP" --query "[?weight > \`0\`].revisionName | [0]" -o tsv)
+[ -n "$OLD" ] || { echo "no named revision holds the traffic (traffic follows 'latest'?); pin it first (docs/engineering/blue-green-deploy.md)"; exit 1; }
+SUFFIX="g${SHA:0:7}-$(date +%m%d%H%M)"
+NEW="$APP--$SUFFIX"
+az containerapp update -g "$RG" -n "$APP" --image "$REGISTRY/$APP:$SHA" --revision-suffix "$SUFFIX" -o none
+NEWFQDN=$(az containerapp revision show -g "$RG" -n "$APP" --revision "$NEW" --query properties.fqdn -o tsv)
+echo "new     $NEW (no traffic yet; $OLD still serves everyone)"
 
-# The old revisions stay until the new one has answered. They used to be switched off
-# first, and on 9 October a new revision that could not start left nothing to fall back
-# on: the app was down for twelve minutes.
-echo "waiting for $LATEST to answer…"
-LIVE=""
-for _ in $(seq 1 30); do
-  if curl -fsS -m 15 "https://$FQDN/health" 2>/dev/null | grep -q '"ok":true'; then LIVE=yes; break; fi
-  sleep 12
-done
-
-if [ -z "$LIVE" ]; then
-  echo "revision never answered; its state:"
-  az containerapp revision show -g "$RG" -n "$APP" --revision "$LATEST" --query "properties.runningState" -o tsv
-  echo "to go back:  az containerapp update -g $RG -n $APP --image $PREVIOUS_IMAGE"
-  exit 1
-fi
-
-for r in $(az containerapp revision list -g "$RG" -n "$APP" --query "[?properties.active].name" -o tsv); do
-  [ "$r" = "$LATEST" ] || az containerapp revision deactivate -g "$RG" -n "$APP" --revision "$r" >/dev/null 2>&1
-done
-# The ingress answers 404 "Container App is stopped or does not exist" for a few seconds while the old
-# revision is deactivated and the new one takes the traffic. That, not the app, is why the first smoke
-# failed after four deploys in a row. Wait until /health answers with JSON before checking anything.
-# One good answer is not enough: the ingress flaps between the old and the new revision for a while, and
-# three smoke checks failed on exactly that after every deploy. Require six good answers in a row, from
-# /health and from the page itself, four seconds apart.
+# The new version, on its own address: six good answers in a row from /health and the page, then the smoke test.
 GOOD=0
-for i in $(seq 1 60); do
-  if curl -s -m 10 "https://$FQDN/health" | grep -q '"ok":true' && curl -s -m 10 -o /dev/null -w '%{http_code}' "https://$FQDN/" | grep -q '^200$'; then GOOD=$((GOOD+1)); else GOOD=0; fi
+for _ in $(seq 1 90); do
+  if curl -s -m 10 "https://$NEWFQDN/health" | grep -q "\"revision\":\"$NEW\"" && curl -s -m 10 -o /dev/null -w '%{http_code}' "https://$NEWFQDN/" | grep -q '^200$'; then GOOD=$((GOOD+1)); else GOOD=0; fi
   [ "$GOOD" -ge 6 ] && break
   sleep 4
 done
+if [ "$GOOD" -lt 6 ]; then
+  echo "$NEW never answered on its own address; switching it off. Nobody saw it: $OLD still has all the traffic."
+  az containerapp revision deactivate -g "$RG" -n "$APP" --revision "$NEW" -o none 2>/dev/null || true
+  exit 1
+fi
+if [ -z "${SKIP_SMOKE:-}" ] && command -v node >/dev/null 2>&1; then
+  SMOKE_OUT="$(mktemp)"
+  if ! node eval/smoke.mjs "https://$NEWFQDN" >"$SMOKE_OUT" 2>&1; then
+    echo "smoke: FIRST TRY FAILED on $NEW:"; grep -E "^(FAIL|[A-Za-z]*Error)" "$SMOKE_OUT" | cut -c1-300
+    echo "retrying once in 30 s"; sleep 30
+    if ! node eval/smoke.mjs "https://$NEWFQDN" >"$SMOKE_OUT" 2>&1; then
+      grep -E "^(FAIL|PASS)|Error" "$SMOKE_OUT" | cut -c1-300
+      echo "SMOKE FAILED on $NEW; switching it off. Nobody saw it: $OLD still has all the traffic."
+      az containerapp revision deactivate -g "$RG" -n "$APP" --revision "$NEW" -o none 2>/dev/null || true
+      exit 2
+    fi
+    echo "smoke: passed on the SECOND try on $NEW (see the failure above)"
+  else
+    echo "smoke: passed on $NEW, before it took any traffic"
+  fi
+fi
+
+# All at once.
+az containerapp ingress traffic set -g "$RG" -n "$APP" --revision-weight "$NEW=100" -o none
+echo "traffic: $NEW 100%"
+echo "to go back in the next 15 minutes:  az containerapp ingress traffic set -g $RG -n $APP --revision-weight $OLD=100"
+# Anything older than the version just replaced is switched off now; the replaced one in 15 minutes, unless it took the traffic back.
+for r in $(az containerapp revision list -g "$RG" -n "$APP" --query "[?properties.active].name" -o tsv); do
+  [ "$r" = "$NEW" ] || [ "$r" = "$OLD" ] || az containerapp revision deactivate -g "$RG" -n "$APP" --revision "$r" -o none 2>/dev/null || true
+done
+nohup bash -c "sleep 900; W=\$(az containerapp ingress traffic show -g $RG -n $APP --query \"[?revisionName=='$OLD'].weight | [0]\" -o tsv); [ \"\$W\" = 0 ] || [ -z \"\$W\" ] && az containerapp revision deactivate -g $RG -n $APP --revision $OLD -o none" >/dev/null 2>&1 &
+echo "$OLD switches off at $(date -v+15M +%H:%M 2>/dev/null || date -d '+15 min' +%H:%M)"
+
+# The address people use: it must now be the new version, the page and /health, several times in a row.
+GOOD=0
+for _ in $(seq 1 30); do
+  if curl -s -m 10 "https://$FQDN/health" | grep -q "\"revision\":\"$NEW\"" && curl -s -m 10 -o /dev/null -w '%{http_code}' "https://$FQDN/" | grep -q '^200$'; then GOOD=$((GOOD+1)); else GOOD=0; fi
+  [ "$GOOD" -ge 6 ] && break
+  sleep 3
+done
+[ "$GOOD" -ge 6 ] || { echo "the public address does not answer from $NEW yet; check, and go back with the command above if needed"; exit 1; }
 echo "live: $(curl -s -m 15 "https://$FQDN/health")"
 
 # Check the thing, not the report (CLAUDE.md rule 1): the page, the closed routes, the safety rules, a real question.
@@ -123,7 +149,7 @@ if [ -z "${SKIP_SMOKE:-}" ] && command -v node >/dev/null 2>&1; then
     else
       grep -E "^(FAIL|PASS)|Error" "$SMOKE_OUT" | cut -c1-300
       echo
-      echo "SMOKE FAILED on $LATEST. To go back:  az containerapp update -g $RG -n $APP --image $PREVIOUS_IMAGE"
+      echo "SMOKE FAILED on the public address, now $NEW. To go back:  az containerapp ingress traffic set -g $RG -n $APP --revision-weight $OLD=100"
       exit 2
     fi
   fi

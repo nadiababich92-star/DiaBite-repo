@@ -44,7 +44,7 @@ npm run dev                      # frontend on :5173, proxied to the deployed en
 npm run eval                     # engine evals — run after ANY change to data, aliases, thresholds, targets
 npm run eval:abuse               # rate limits, size caps, CORS, bounded memory — no model, no money
 ENGINE_API_KEY=<key> AGENT_URL=<url>/agent/ask npm run eval:agent   # agent evals — after ANY change to a prompt, tool spec, model or food data (the key exempts the run from rate limits)
-npm run deploy                   # waits for that commit's image build, updates the app, retires old revisions
+npm run deploy                   # waits for the build, starts the new revision with no traffic, checks it on its own address, then moves all traffic (blue-green: docs/engineering/blue-green-deploy.md)
 npx tsx agent/provision.ts       # republish the three agents after editing agent/prompts/*.md (needs the env in agent/SETUP.md)
 npx tsx scripts/sync-foods.ts    # push the catalogue and vectors to Supabase (needs .env.local)
                                  # refuses to run unless every vector was made from its record's current text
