@@ -12,7 +12,7 @@
 import '../eval/lib/timeouts.mjs'  // a default timeout on every fetch
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { buildReport, reportMarkdown, type AccountInput, type FeedbackInput, type TurnGroup, type TurnStats } from '../src/lib/report'
+import { buildReport, isTestAddress, reportMarkdown, type AccountInput, type FeedbackInput, type TurnGroup, type TurnStats } from '../src/lib/report'
 import { fromRow } from '../src/lib/syncCore'
 import { calculateTargets, DEFAULT_PROFILE } from '../src/lib/profile'
 import { sanitizeProfile, todayISO } from '../src/lib/storage'
@@ -50,8 +50,8 @@ async function accounts(): Promise<{ id: string; createdAt: string; confirmed: b
     const users = ((await res.json()) as { users: { id: string; email?: string; created_at: string; email_confirmed_at?: string | null }[] }).users
     for (const u of users) {
       const mail = (u.email ?? '').toLowerCase()
-      // The rehearsal, screens and demo-video throwaways live on example.com; the email is used for this filter and dropped.
-      if (mail.endsWith('@example.com') || exclude.has(mail)) continue
+      // Test accounts (example.com throwaways, nadia+<name>@diabite.pro) are not people; the email is used for this filter and dropped.
+      if (isTestAddress(mail) || exclude.has(mail)) continue
       out.push({ id: u.id, createdAt: u.created_at, confirmed: !!u.email_confirmed_at })
     }
     if (users.length < 1000) return out

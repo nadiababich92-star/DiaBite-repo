@@ -91,13 +91,13 @@ import { clearDevice, loadDiary, saveDiary, thawWrites } from '../src/lib/storag
 import { execFileSync } from 'node:child_process'
 import type { DiaryEntry, Dish } from '../src/types'
 import { RATING_ONLY } from '../src/lib/feedbackCopy'
-import { buildReport, reportMarkdown, type AccountInput, type ReportInput } from '../src/lib/report'
+import { buildReport, isTestAddress, reportMarkdown, type AccountInput, type ReportInput } from '../src/lib/report'
 import { CONSENT_VERSION } from '../src/lib/syncCore'
 import { addDays, dayLabel, gramStep, mealForNow, noLoadNote, nudgeGrams, portionText, recentEntries, viewEntry } from '../src/lib/diary'
 import { sumNutrients } from '../src/lib/glycemic'
 import { ouncesText } from '../src/lib/measure'
 import { buildSummary } from '../src/lib/clinicianSummary'
-import { ANON_DISCLOSURE, ANON_PROFILE, answered, calculateTargets, carbApproachBlocked, carbApproachReason, cmToFtIn, DAILY_CARBS_MAX, DAILY_CARBS_MIN, DEFAULT_PROFILE, DEFERRED_ORDER, exitReason, ftInToCm, kgToLb, lbToKg, MEDICINES_FIRST, nextDeferred, shortStart, STEP_OF_FIELD, weightUsed } from '../src/lib/profile'
+import { ANON_DISCLOSURE, ANON_PROFILE, answered, calculateTargets, carbApproachBlocked, carbApproachReason, cmToFtIn, DAILY_CARBS_MAX, DAILY_CARBS_MIN, DEFAULT_PROFILE, DEFERRED_ORDER, exitReason, ftInToCm, meanGiTarget, kgToLb, lbToKg, MEDICINES_FIRST, nextDeferred, shortStart, STEP_OF_FIELD, weightUsed } from '../src/lib/profile'
 import { HeightWeight, UnitsSwitch } from '../src/components/BodyUnits'
 import Onboarding, { focusesHeadingOnOpen } from '../src/components/Onboarding'
 import DiaryPage from '../src/components/DiaryPage'
@@ -1229,6 +1229,18 @@ recorrectMisses.forEach((m) => console.log(m))
 // Watching the test users and hearing from them: when the feedback card is asked, and what the weekly report counts.
 {
   const bits: string[] = []
+  // Test addresses are not people in the report; the owner's own address is (25 November 2026).
+  for (const m of ['rehearsal-1@example.com', 'nadia+maya@diabite.pro', 'NADIA+diary@DiaBite.pro']) if (!isTestAddress(m)) bits.push(`${m} counted as a person`)
+  for (const m of ['nadia@diabite.pro', 'nadia.babich92@gmail.com', 'maya+nadia@diabite.pro', 'nadia+x@diabite.pro.evil.com', 'someone@gmail.com']) if (isTestAddress(m)) bits.push(`${m} left out as a test`)
+  // The sentence under the targets names the mean GI the ceiling is built on, for every diagnosis (Profile said 50 for "I'm not sure" while counting 45).
+  for (const c of ['t2', 't1', 'unsure', 'prediabetes', 'ir'] as const) {
+    const p = { ...DEFAULT_PROFILE, condition: c }
+    const t = calculateTargets(p)
+    const want = Math.round(Math.min(120, (t.carbsG * meanGiTarget(c)) / 100))
+    if (Math.abs(Math.round(t.glBudget) - want) > 1) bits.push(`${c}: GL ${t.glBudget} is not carbs x ${meanGiTarget(c)}`)
+  }
+  if (meanGiTarget('unsure') !== 45) bits.push('"I\'m not sure" is not counted at a mean GI of 45')
+  if (!/mean GI of about \{meanGiTarget\(profile\.condition\)\}/.test(readFileSync(join(ROOT, 'src/components/ProfilePage.tsx'), 'utf8'))) bits.push('Profile states the mean GI from its own rule, not from meanGiTarget')
   const ctx = (over: Partial<NudgeContext> = {}): NudgeContext => ({ eatenSlots: 0, firstMealDate: null, today: '2026-10-20', asked: [], busy: false, suspended: false, shownThisVisit: false, ...over })
   if (nextNudge(ctx({ eatenSlots: 2, firstMealDate: '2026-10-20' })) !== null) bits.push('asked after two meals')
   if (nextNudge(ctx({ eatenSlots: 3, firstMealDate: '2026-10-20' })) !== 'after_3_meals') bits.push('not asked after the third meal')

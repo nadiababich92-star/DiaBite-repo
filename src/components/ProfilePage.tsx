@@ -10,7 +10,7 @@ import {
   COUNT_BY_LABELS,
   GOAL_LABELS,
   weightUsed,
-  answered, carbApproachReason, STEP_OF_FIELD,
+  answered, carbApproachReason, meanGiTarget, STEP_OF_FIELD,
 } from '../lib/profile'
 import { answerRows, NOT_ASKED } from '../lib/answers'
 import GiGlExplainer from './GiGlExplainer'
@@ -190,7 +190,7 @@ export default function ProfilePage({ profile, targets, onChange, onRedoOnboardi
         <p className="muted">
           Calories use Mifflin-St Jeor with an activity factor. Carbohydrate is a share of that
           energy, set by the approach you chose. The glycemic-load ceiling is derived so the diet
-          holds a mean GI of about {profile.condition === 't1' || profile.condition === 't2' ? 45 : 50}.
+          holds a mean GI of about {meanGiTarget(profile.condition)}.
         </p>
 
         {targets.constraints.length > 0 && (

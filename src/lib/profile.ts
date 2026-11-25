@@ -380,9 +380,16 @@ export function calculateTargets(raw: Profile): Targets {
  * diets above that are consistently associated with worse control.
  */
 function glBudget(carbsG: number, condition: Condition): number {
-  const cautious = condition === 't1' || condition === 't2' || condition === 'unsure'
-  const targetAvgGI = cautious ? 45 : 50
-  return Math.min(120, (carbsG * targetAvgGI) / 100)
+  return Math.min(120, (carbsG * meanGiTarget(condition)) / 100)
+}
+
+/**
+ * The mean diet GI the glycemic-load ceiling is built on: 45 for diabetes and for "I'm not sure" (the cautious
+ * reading), 50 for prediabetes and insulin resistance. Profile's sentence about it reads this too: it once said
+ * "about 50" for "I'm not sure" while the ceiling was counted at 45 (25 November 2026).
+ */
+export function meanGiTarget(condition: Condition): 45 | 50 {
+  return condition === 't1' || condition === 't2' || condition === 'unsure' ? 45 : 50
 }
 
 /** The range a per-meal carbohydrate number may take: a typo guard, not advice. */

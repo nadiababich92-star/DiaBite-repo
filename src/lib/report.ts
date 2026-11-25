@@ -10,6 +10,16 @@ import { addDays, eaten } from './diary'
 import { weekSummary } from './history'
 import type { DiaryEntry } from '../types'
 
+/**
+ * An address that belongs to a test, not a person: the rehearsal and screen throwaways on example.com, and the owner's
+ * test accounts nadia+<name>@diabite.pro (every one receives mail in her own inbox). Her own nadia@diabite.pro, with no
+ * plus, is hers and is counted (her decision, 25 November 2026).
+ */
+export function isTestAddress(email: string): boolean {
+  const mail = email.trim().toLowerCase()
+  return mail.endsWith('@example.com') || /^nadia\+[^@]+@diabite\.pro$/.test(mail)
+}
+
 export interface AccountInput {
   createdAt: string
   /** The profile row exists and its data says onboarding is done. */
