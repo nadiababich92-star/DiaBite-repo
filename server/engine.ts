@@ -457,7 +457,7 @@ async function main() {
     // A plate that already holds a pita, counted beside the pita the person named (tracker #116, finding Q).
     const twice = recipeWithItsPart(body.items.map((it) => it.foodId))
     if (twice) {
-      return res.json({ error: `"${twice.dish}" is a whole dish that already holds ${twice.part.toLowerCase()}, so it cannot be counted beside the ${twice.part.toLowerCase()} the person named. When the person listed the parts of their meal, cost the main food on its own (the meat or the main part, by its own record) together with each part they named, and leave "${twice.dish}" out; when they did not, cost "${twice.dish}" alone.` })
+      return res.json({ error: `"${twice.dish}" is a whole dish that already holds ${twice.part.toLowerCase()}, so it cannot be counted beside the ${twice.part.toLowerCase()} the person named. The person listed the parts of their meal, so do not ask them about this: call compute_meal again now with the main food on its own (the meat or the main part, by its own record, from resolve_foods) together with each part they named, and leave "${twice.dish}" out. (Had they named only the dish, "${twice.dish}" alone would be right.)` })
     }
     // "Two beef tacos" sent as 2 servings of a taco recipe that holds two tacos a serving: the person's count, read from their own message, is of
     // pieces (tracker #116, finding S). Only where the recipe's own shell says how many pieces a serving holds.

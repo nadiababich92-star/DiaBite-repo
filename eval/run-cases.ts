@@ -254,8 +254,11 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
   // #117: a whole meal on a day that already holds a food with no load. The engine names that food as the day's, not this meal's, and the
   // answer never calls the meal a fit. Whether the words say "wasn't counted" is the model's wording: a style check (rule 7).
   if (e.dayPartlyCounted === true) {
-    const am = (lastCallOf(r, 'compute_meal')?.result as { afterMeal?: { fits?: boolean | null; partial?: { unscored?: string[]; dayUnscored?: string[] } } } | undefined)?.afterMeal
-    say('the engine names the earlier food as the day\'s, not the meal\'s', !!am?.partial?.dayUnscored?.length && !am.partial.unscored?.length, JSON.stringify(am?.partial))
+    const res = lastCallOf(r, 'compute_meal')?.result as { totals?: unknown; needsWeight?: unknown; afterMeal?: { fits?: boolean | null; partial?: { unscored?: string[]; dayUnscored?: string[] } } } | undefined
+    const am = res?.afterMeal
+    // A turn that ends on a question about an amount ("About how many servings of …?") costed nothing yet: there is no day to judge.
+    if (!res?.totals) say('the meal was costed, or the agent asked about an amount first', !!res?.needsWeight, JSON.stringify(res)?.slice(0, 120))
+    else say('the engine names the earlier food as the day\'s, not the meal\'s', !!am?.partial?.dayUnscored?.length && !am.partial.unscored?.length, JSON.stringify(am?.partial))
     say('the meal is not called a fit', am?.fits !== true, JSON.stringify(am?.fits))
     style('the answer does not say the earlier food was left out of this meal', !/wasn't counted|was not counted|were not counted|left out|not counted/i.test(answer), answer.slice(0, 160))
   }
@@ -472,8 +475,9 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
   // The same promise one level up: a day that already holds a food with no glycemic load is understated,
   // so the engine says so and the verdict on the next food is not "fits".
   if (e.dayUnscored === true) {
-    const res = lastCallOf(r, 'compute_meal')?.result as { dayState?: { unscored?: string[] }; afterMeal?: { fits?: boolean | null; partial?: { unscored?: string[] } } } | undefined
-    say('engine marks the day partial, fits is not true', !!res?.dayState?.unscored?.length && !!res?.afterMeal?.partial?.unscored?.length && res.afterMeal.fits !== true, JSON.stringify(res?.afterMeal))
+    // Since #117 the earlier food is named as the day's (`partial.dayUnscored`), not as this meal's (`partial.unscored`): an apple has none of its own.
+    const res = lastCallOf(r, 'compute_meal')?.result as { dayState?: { unscored?: string[] }; afterMeal?: { fits?: boolean | null; partial?: { unscored?: string[]; dayUnscored?: string[] } } } | undefined
+    say('engine marks the day partial, fits is not true', !!res?.dayState?.unscored?.length && !!res?.afterMeal?.partial?.dayUnscored?.length && res.afterMeal.fits !== true, JSON.stringify(res?.afterMeal))
   }
   if (e.noFitsClaim === true) {
     say('claims no fit', !/\b(it )?fits\b|within (your )?budget/i.test(answer.replace(/can'?t (?:say|tell|judge)[^.]*\./gi, ' ')))
