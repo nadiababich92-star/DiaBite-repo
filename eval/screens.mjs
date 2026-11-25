@@ -190,7 +190,7 @@ try {
       console.log(`  ${ok ? 'PASS' : 'FAIL'}  Change day under an answer opens the picker with the focus on its first choice (${size.name})${ok ? '' : '  → ' + JSON.stringify(st)}`)
       if (!ok) process.exitCode = 1
     }
-    // Flat surfaces, one slip (docs/engineering/lighter-surfaces.md): no shadow on cards, keys, outlined buttons, fields or the tab bar; the answer slip keeps
+    // Flat surfaces, one slip (docs/engineering/lighter-surfaces.md): no shadow on cards, keys, outlined buttons, fields, the tab bar or the disclaimer; the answer slip keeps
     // its drop shadow; no grain; the marker does not glow; the highlights on the figures are still there; the active tab is underlined, not on a marker.
     {
       const flat = await b.ev(`(() => {
@@ -209,11 +209,14 @@ try {
           glow: [...document.querySelectorAll('.fig-big .num, .ask-budget .value .num')].map((e) => getComputedStyle(e).boxShadow).filter((x) => x !== 'none'),
           carbHighlight: opaque(carb), glHighlight: gl ? getComputedStyle(gl).backgroundColor === marker : 'no fit',
           tab: tabStyle ? { line: tabStyle.textDecorationLine, bg: tabStyle.backgroundColor, ico: getComputedStyle(tab.querySelector('.tab-ico')).backgroundColor, marker } : null,
+          disclaimer: (() => { const d = document.querySelector('.disclaimer'); if (!d) return null; const c = getComputedStyle(d); return { shadow: c.boxShadow, widths: [c.borderTopWidth, c.borderRightWidth, c.borderBottomWidth, c.borderLeftWidth], left: c.borderLeftColor, top: c.borderTopColor } })(),
         }
       })()`)
       const tabOk = flat.tab && /underline/.test(flat.tab.line) && flat.tab.bg !== flat.tab.marker && flat.tab.ico !== flat.tab.marker
-      const ok = flat.shadowed.length === 0 && flat.slipFilter !== 'none' && flat.slipFilter !== 'no slip' && !flat.grain && flat.glow.length === 0 && flat.carbHighlight && flat.glHighlight !== false && tabOk
-      console.log(`  ${ok ? 'PASS' : 'FAIL'}  flat surfaces, one slip: no shadows, the slip keeps its own, no grain or glow, the highlights stay, the tab is underlined (${size.name})${ok ? '' : '  → ' + JSON.stringify(flat)}`)
+      // The disclaimer (lighter-surfaces.md 5.2): a thin 1px border all round, the same colour on every side, no accent bar, no shadow.
+      const discOk = !flat.disclaimer || (flat.disclaimer.shadow === 'none' && flat.disclaimer.widths.every((w) => w === '1px') && flat.disclaimer.left === flat.disclaimer.top)
+      const ok = discOk && flat.shadowed.length === 0 && flat.slipFilter !== 'none' && flat.slipFilter !== 'no slip' && !flat.grain && flat.glow.length === 0 && flat.carbHighlight && flat.glHighlight !== false && tabOk
+      console.log(`  ${ok ? 'PASS' : 'FAIL'}  flat surfaces, one slip: no shadows, the slip keeps its own, no grain or glow, the highlights stay, the tab is underlined, the disclaimer a thin border (${size.name})${ok ? '' : '  → ' + JSON.stringify(flat)}`)
       if (!ok) process.exitCode = 1
     }
     // Under an answer, Log it is the one key; Calculation and Portions are quiet links: underlined accent text, 44px, weight 400, with a caret

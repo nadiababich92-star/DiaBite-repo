@@ -145,12 +145,11 @@ header.masthead h1, header.masthead span.wordmark { margin: 0; font-size: 21px; 
 .logo-ring { stroke: var(--text); }
 .logo-tick { stroke: var(--logo-tick); }
 
+/* A thin border all round, no accent bar and no shadow (docs/design.md, Flat surfaces; lighter-surfaces.md 5.2). */
 .disclaimer {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
   border-radius: var(--radius);
-  box-shadow: var(--fx-raised);
   padding: 12px 14px;
   font-size: 13px;
   color: var(--text-dim);

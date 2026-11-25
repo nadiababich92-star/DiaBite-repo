@@ -95,7 +95,7 @@ the product's answer and for state, and taken away from everything else, in both
 
 - **The one slip.** The answer is a card whose bottom edge is torn into teeth, with two sheets behind it. Its shadow follows
   the teeth (`--fx-slip`, `filter: drop-shadow`), never a box. It is the only thing on a screen that casts a shadow (a dialog that opens over the page keeps its own, so it reads as above it).
-- **Flat surfaces.** Cards, keys, outlined buttons, fields, the tab bar and the disclaimer have no shadow: a card is its
+- **Flat surfaces.** Cards, keys, outlined buttons, fields, the tab bar and the disclaimer have no shadow (the disclaimer has no accent bar either: a 1px `--border` all round, 25 November 2026): a card is its
   `--surface` and a 1px `--border`, a field a 1px `--text-faint` border, because flat it has only its border to show it is a field and `--field-border` (1.5:1) is too faint for that (3:1 is the bar for what identifies a control). The `--fx-raised`, `--fx-key`, `--fx-key-soft`,
   `--fx-stamp`, `--fx-nav` and `--fx-field` tokens are `none` in both looks. No grain on the page.
 - **Pressed in.** A chosen option is still pressed in (`--fx-pressed`): that is state, not decoration.
