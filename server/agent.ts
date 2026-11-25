@@ -717,9 +717,54 @@ async function runAgent(role: Role, input: string, previous?: string, forceTools
       responses.create(payload as never, { timeout: TRIAGE_TIMEOUT_MS, maxRetries: 0 }),
     )) as unknown as Turn
   }
-  return (await withRateLimitRetry(() => withHangRetry(() =>
+  return (await withContentFilterRetry(() => withRateLimitRetry(() => withHangRetry(() =>
     responses.create(payload as never, { timeout: CALL_TIMEOUT_MS, maxRetries: 0 }),
-  ))) as unknown as Turn
+  )), role)) as unknown as Turn
+}
+
+/**
+ * The names of the content-filter categories that fired, when `e` is Azure's content-filter refusal; otherwise null.
+ * Only the category names (for example `jailbreak`, `indirect_attack`, `self_harm`) are read: never the prompt, never
+ * the person's words. The shape of `content_filters` is not documented for agent responses, so it is walked for any
+ * object marked `filtered: true` or `detected: true`, and the key it sits under is the category.
+ */
+export function contentFilterCategories(e: unknown): string[] | null {
+  const err = e as { code?: string; message?: string; error?: { code?: string; content_filters?: unknown; innererror?: unknown } } | undefined
+  const isFilter = err?.code === 'content_filter' || err?.error?.code === 'content_filter' || /content management policy/i.test(err?.message ?? '')
+  if (!isFilter) return null
+  const found = new Set<string>()
+  const walk = (v: unknown, key: string, depth: number) => {
+    if (depth > 6 || v === null || typeof v !== 'object') return
+    const o = v as Record<string, unknown>
+    if (o.filtered === true || o.detected === true) found.add(key)
+    for (const [k, child] of Object.entries(o)) walk(child, /^\d+$/.test(k) ? key : k, depth + 1)
+  }
+  walk(err?.error?.content_filters, 'unknown', 0)
+  walk(err?.error?.innererror, 'unknown', 0)
+  return [...found].filter((k) => k !== 'unknown' && k !== 'content_filters' && k !== 'content_filter_results').sort()
+}
+
+/**
+ * Azure's content filter once refused "An apple" (24 November 2026, 1 of 12 fresh samples, three times that day): the meal
+ * agent's own call, `param: prompt`, a filter that reads the tool results inside the turn as well as the message, so the
+ * same question passed eleven times out of twelve. A refusal gets one more try, and the categories that fired are logged
+ * (names only) so the policy can be judged on evidence. A second refusal stands: the caller answers it as a refusal.
+ */
+export async function withContentFilterRetry<T>(run: () => Promise<T>, role = 'meal', log: (line: string) => void = (l) => console.warn(l)): Promise<T> {
+  try {
+    return await run()
+  } catch (e) {
+    const categories = contentFilterCategories(e)
+    if (!categories) throw e
+    log(JSON.stringify({ evt: 'content_filter', role, attempt: 1, categories }))
+    try {
+      return await run()
+    } catch (e2) {
+      const again = contentFilterCategories(e2)
+      if (again) log(JSON.stringify({ evt: 'content_filter', role, attempt: 2, categories: again }))
+      throw e2
+    }
+  }
 }
 
 /**

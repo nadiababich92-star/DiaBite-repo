@@ -41,7 +41,7 @@ import { continuationFor, uncountedFoods } from '../server/agent'
 import { wholeDishWeight } from '../server/dishWeight'
 import { rememberResponse } from '../server/sessions'
 import { sanitizeProfile } from '../src/lib/storage'
-import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
+import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withContentFilterRetry, contentFilterCategories, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
 import { GI_CROSSCHECKED_ON, recordFromRow, getRecord, hasNoLoad, householdMeasure, householdPortion, readPortion, restaurantFaults, restaurantRecordsFrom, stepUnit, summary, type RestaurantRow } from '../server/foods'
 import { legacyHouseholdMeasure, legacyStepUnit } from './legacy-measure'
@@ -1937,6 +1937,34 @@ const hangMisses: string[] = []
 console.log(`\nhang      ${hangMisses.length === 0 ? 'ok' : 'WRONG'}`)
 hangMisses.forEach((m) => console.log(m))
 
+// ── content filter ────────────────────────────────────────────────────────
+// Azure's content filter refusing a turn gets one more try, and only the names of the categories that fired are logged
+// (tracker #113). Anything else is not retried here; a second refusal stands.
+const filterMisses: string[] = []
+{
+  const refusal = () => Object.assign(new Error("400 The response was filtered due to the prompt triggering Azure OpenAI's content management policy."), {
+    status: 400, code: 'content_filter',
+    error: { code: 'content_filter', content_filters: [{ blocked: true, source_type: 'prompt', content_filter_results: { jailbreak: { filtered: true, detected: true }, hate: { filtered: false, severity: 'safe' } } }] },
+  })
+  const cats = contentFilterCategories(refusal())
+  if (JSON.stringify(cats) !== JSON.stringify(['jailbreak'])) filterMisses.push(`    categories read as ${JSON.stringify(cats)}, not ["jailbreak"]`)
+  if (contentFilterCategories(Object.assign(new Error('bad request'), { status: 400 })) !== null) filterMisses.push('    a plain 400 was read as a content-filter refusal')
+  const lines: string[] = []
+  let calls = 0
+  const ok = await withContentFilterRetry(async () => { if (++calls === 1) throw refusal(); return 'ok' }, 'meal', (l) => lines.push(l))
+  if (ok !== 'ok' || calls !== 2) filterMisses.push(`    a refusal was not retried once (calls ${calls})`)
+  if (lines.length !== 1 || !/"evt":"content_filter"/.test(lines[0]) || !/"categories":\["jailbreak"\]/.test(lines[0])) filterMisses.push(`    the log line was ${JSON.stringify(lines)}`)
+  if (lines.some((l) => /An apple|filtered due to/.test(l))) filterMisses.push('    the log carried words that are not category names')
+  calls = 0; lines.length = 0
+  try { await withContentFilterRetry(async () => { calls++; throw refusal() }, 'meal', (l) => lines.push(l)); filterMisses.push('    two refusals did not fail') } catch { if (calls !== 2) filterMisses.push(`    two refusals made ${calls} calls`) }
+  if (lines.length !== 2) filterMisses.push(`    two refusals logged ${lines.length} lines`)
+  calls = 0
+  try { await withContentFilterRetry(async () => { calls++; throw Object.assign(new Error('bad request'), { status: 400 }) }, 'meal', () => {}) } catch { /* expected */ }
+  if (calls !== 1) filterMisses.push(`    a plain 400 was retried (${calls} calls)`)
+}
+console.log(`\nfilter    ${filterMisses.length === 0 ? 'ok' : 'WRONG'}`)
+filterMisses.forEach((m) => console.log(m))
+
 // ── session tag ───────────────────────────────────────────────────────────
 // The engine tells the model whose day to read with a `[session_id: …]` line. A message that carries
 // one could steer the tools at another day, so it is cut out; ordinary food talk is left alone.
@@ -3690,6 +3718,7 @@ if (menuMisses.length) { console.log('the weekly menu broke a rule'); process.ex
 if (routeMisses.length) { console.log('a message started the meal agent that should have waited'); process.exit(1) }
 if (accountMisses.length) { console.log('the account sync or the sign-in messages misbehaved'); process.exit(1) }
 if (hangMisses.length) { console.log('the hang retry misbehaved'); process.exit(1) }
+if (filterMisses.length) { console.log("the content-filter retry misbehaved"); process.exit(1) }
 if (imageMisses.length) { console.log('the image is missing a data file the engine reads'); process.exit(1) }
 if (brandedMisses.length) { console.log('a branded product was given a load, or the layer is the wrong size'); process.exit(1) }
 if (dishMisses.length) { console.log('a dish was costed wrongly: see cost-dish above'); process.exit(1) }
