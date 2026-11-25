@@ -104,7 +104,7 @@ b.on('Runtime.exceptionThrown', (p) => errors.push(p.exceptionDetails?.text ?? '
 b.on('Runtime.consoleAPICalled', (p) => { if (p.type === 'error') errors.push((p.args?.[0]?.value ?? '').toString().slice(0, 120)) })
 try {
   await b.send('Page.navigate', { url: URL_ })
-  await until(b, `document.body && /Try DiaBite|Email me a link|First, the numbers|What are you/.test(document.body.innerText)`)
+  await until(b, `document.body && /Try DiaBite|Ask a question|Email me a link|First, the numbers|What are you/.test(document.body.innerText)`)
   await b.ev(`localStorage.setItem('diabite.session', 'test-smoke-' + crypto.randomUUID())`)
   await b.ev(`
 window.__setNum = (labelText, v) => { const el = [...document.querySelectorAll('label.field')].find(l => l.innerText.trim().startsWith(labelText))?.querySelector('input'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set; set.call(el,String(v)); el.dispatchEvent(new Event('input',{bubbles:true})) }
@@ -119,13 +119,18 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
     const EMERGENCY = /call emergency services/i
     const FORBIDDEN = [/lower your/i, /\breverse\b/i, /\bcure\b/i, /AI-powered/i, /clinically proven/i, /WCAG compliant/i, /HIPAA/i, /FDA approved/i, /\bguarantee/i]
     const hit = FORBIDDEN.filter((r) => r.test(t)).map(String)
-    check('M7a', 'the first screen is the landing page: the emergency line, Try DiaBite, what it is not, and no app, no sign-in form, no outcome promise',
-      EMERGENCY.test(t) && /Try DiaBite/.test(t) && /not medical advice/i.test(t) && /No clinician has signed it off yet/.test(t)
+    // With free answers on (ANON_FREE_ANSWERS > 0) the landing key opens Ask for a visitor, "Ask a question" (rehearsal W21a);
+    // sign-in is then the "Sign in" key at the top. With them off the key is "Try DiaBite" and leads to sign-in.
+    const anon = Number(health.freeAnswers) > 0
+    const KEY = anon ? 'Ask a question' : 'Try DiaBite'
+    const keyRe = anon ? /Ask a question/ : /Try DiaBite/
+    check('M7a', `the first screen is the landing page: the emergency line, ${KEY}, what it is not, and no app, no sign-in form, no outcome promise`,
+      EMERGENCY.test(t) && keyRe.test(t) && /not medical advice/i.test(t) && /No clinician has signed it off yet/.test(t)
         && !/Email me a link/.test(t) && !/What are you\s+about to eat/i.test(t) && hit.length === 0, hit.join(' ') || t.slice(0, 120))
-    await b.ev(`[...document.querySelectorAll('button')].find(e => e.innerText.trim() === 'Try DiaBite').click()`)
+    await b.ev(`[...document.querySelectorAll('button')].find(e => e.innerText.trim() === ${JSON.stringify(anon ? 'Sign in' : 'Try DiaBite')}).click()`)
     await until(b, `/Email me a link/.test(document.body.innerText)`, 5)
     const t2 = await text()
-    check('M7b', 'Try DiaBite leads to the sign-in screen with the emergency line', /Email me a link/.test(t2) && EMERGENCY.test(t2), t2.slice(0, 120))
+    check('M7b', `${anon ? 'Sign in' : 'Try DiaBite'} leads to the sign-in screen with the emergency line`, /Email me a link/.test(t2) && EMERGENCY.test(t2), t2.slice(0, 120))
     await b.send('Page.navigate', { url: `${URL_}/?signin` })
     await until(b, `/Email me a link/.test(document.body.innerText)`, 8)
     const t3 = await text()
@@ -133,7 +138,7 @@ window.__busy = () => [...document.querySelectorAll('button')].some(x => x.inner
     await b.send('Page.navigate', { url: `${URL_}/#access_token=stub&type=magiclink` })
     await sleep(3000)
     const t4 = await text()
-    check('M7d', 'an address that carries a sign-in result is never covered by the landing page', !/Try DiaBite/.test(t4), t4.slice(0, 120))
+    check('M7d', 'an address that carries a sign-in result is never covered by the landing page', !keyRe.test(t4), t4.slice(0, 120))
   } else {
     await until(b, `[...document.querySelectorAll('label.field')].some(l => l.innerText.trim().startsWith('Age'))`)
     await b.ev(`__setNum('Age', 52)`); await b.ev(`__click('Continue')`); await sleep(250)
