@@ -52,7 +52,7 @@ async function film(who, acct, run) {
   const b = await launch({ port: port++, width: 360, height: 660, dpr: 2 })
   const ev = b.ev
   await b.send('Page.navigate', { url: APP }); await sleep(2500)
-  await ev(`localStorage.clear(); localStorage.setItem('diabite.session','test-demo-'+crypto.randomUUID()); localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log'])); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2'])); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(acct.stored)})`)
+  await ev(`localStorage.clear(); localStorage.setItem('diabite.session','test-demo-'+crypto.randomUUID()); localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','weights','calc','log'])); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2'])); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(acct.stored)})`)
   await b.send('Page.reload'); await sleep(4500)
   let scene = null, t0 = 0, n = 0
   const T = {

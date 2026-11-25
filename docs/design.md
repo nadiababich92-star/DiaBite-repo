@@ -275,7 +275,7 @@ The week card opens with one plain line ("4 of 7 days in range this week") and n
 
 ### Tips, on the Ask screen
 
-A **tip** is a small card that points at the real screen: before the first question it points at the input, and after the first answer, one at a time, at the verdict, at Show calculation and at the log button. A ring in `--accent` marks what it points at. It uses the card tokens (`--surface`, `--border`, `--radius`, `--fx-raised`), the card-heading type and 14 px body text, and carries a "Next" or "Got it" key and a "Skip tips" link. It is **non-modal and never takes focus**; on a phone it is pinned above the tab bar. It carries **no figure**: tips explain where numbers come from and never display one.
+A **tip** is a small card that points at the real screen: before the first question it points at the input, and after the first answer, one at a time, at the verdict, at the weights line (only on an answer with a weight the person did not give), at Show calculation and at the log button. A ring in `--accent` marks what it points at. It uses the card tokens (`--surface`, `--border`, `--radius`, `--fx-raised`), the card-heading type and 14 px body text, and carries a "Next" or "Got it" key and a "Skip tips" link. It is **non-modal and never takes focus**; on a phone it is pinned above the tab bar. It carries **no figure**: tips explain where numbers come from and never display one.
 
 "How it works" (a button under Help in Settings) opens a plain dialog, one line for each tab.
 
@@ -308,7 +308,7 @@ with the verdict word taken from `fits`, and the original is dimmed under the la
 
 A measure the person typed is said back the way they said it, with the grams beside it (`1 medium (200 g)`); when USDA lists only a "regular" or "whole" for a food, the line says that word and carries the pill **typical size** (the same pill style as **assumed**). The engine writes the words; the screen prints them.
 
-The weight on a portion row is a button. Tapping it opens a number field and a unit (grams; on US units also ounces and the food's own measure, such as cup or medium); Enter or **Done** has the engine count the meal again, Esc or **Cancel** leaves it. A weight the person changed is theirs: the line says **your weight** (the pill style of **typical size**), and it leaves the card's line "Weights I used", which lists, from the engine's data and never the agent's sentence, the weights still assumed, each one tappable. When none is left the line is not shown. The browser converts no unit and computes no number.
+The weight on a portion row is a button. Tapping it opens a number field and a unit (grams; on US units also ounces and the food's own measure, such as cup or medium); Enter or **Done** has the engine count the meal again, Esc or **Cancel** leaves it. A weight the person changed is theirs: the line says **your weight** (the pill style of **typical size**), and it leaves the card's line "Weights I used", which lists, from the engine's data and never the agent's sentence, the weights still assumed, each one tappable. When none is left the line is not shown. The same line, built from the engine, stands on the first answer as well, in place of the agent's sentence, with one sentence under it in muted text: "These weights decide the numbers. They are typical portions, not yours: tap one if you ate more or less." (25 November 2026, tracker #75.) The browser converts no unit and computes no number.
 
 ### Plain-words link
 **What is GL?** sits under the main figure as an underlined link and opens a short

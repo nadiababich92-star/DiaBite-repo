@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Receipt, ReceiptLine } from '../lib/agent'
+import { WEIGHTS_WHY } from '../lib/answer'
 import { foodHead, gramsShown, measureLabel, ouncesText, typedNumber, unitLabel, weightUnits } from '../lib/measure'
 
 /**
@@ -56,19 +57,22 @@ export function WeightField({ line, units, assumed, error, initial, onCommit, on
   )
 }
 
-/** The card's line "Weights I used", built from the engine's `basis` per line (never the agent's sentence): what is still assumed, each weight a button. */
+/** The card's line "Weights I used", built from the engine's `basis` per line (never the agent's sentence): what is still assumed, each weight a button, and one sentence saying why it matters (tracker #75). */
 export function WeightsUsed({ lines, onEdit }: { lines: { line: ReceiptLine; index: number }[]; onEdit: (i: number) => void }) {
   const assumed = lines.filter(({ line }) => line.basis && line.basis !== 'stated' && line.said)
   if (assumed.length === 0) return null
   return (
-    <p className="a-why weights-used">
-      <span>Weights I used:</span>
-      {assumed.map(({ line, index }, k) => (
-        <span key={`${line.foodId}-${index}`}>
-          <button type="button" className="weight-btn weight-btn-inline" aria-label={`Change the weight of ${line.name}, now ${line.said}`} onClick={() => onEdit(index)}>{foodHead(line.name)} {line.said}</button>{k < assumed.length - 1 ? ',' : '.'}
-        </span>
-      ))}
-    </p>
+    <div className="weights-used-block" data-tour="weights">
+      <p className="a-why weights-used">
+        <span>Weights I used:</span>
+        {assumed.map(({ line, index }, k) => (
+          <span key={`${line.foodId}-${index}`}>
+            <button type="button" className="weight-btn weight-btn-inline" aria-label={`Change the weight of ${line.name}, now ${line.said}`} onClick={() => onEdit(index)}>{foodHead(line.name)} {line.said}</button>{k < assumed.length - 1 ? ',' : '.'}
+          </span>
+        ))}
+      </p>
+      <p className="muted weights-why">{WEIGHTS_WHY}</p>
+    </div>
   )
 }
 

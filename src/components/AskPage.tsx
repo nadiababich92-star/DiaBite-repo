@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import GlHelp from './GlHelp'
-import { boldSegments, isLabelled, parseMeal } from '../lib/answer'
+import { boldSegments, parseMeal, tailLines } from '../lib/answer'
 import { sessionId } from '../lib/session'
 import { accessToken } from '../lib/auth'
 import Tour from './Tour'
@@ -200,13 +200,15 @@ function RecalcCard({ rc, onBack, note, was, countBy, weightsUsed }: { rc: Recal
   )
 }
 
-function Answer({ text, reply, onSwap, swapState, countBy }: {
+function Answer({ text, reply, onSwap, swapState, countBy, weightsUsed }: {
   text: string; reply?: AgentResponse
   /** Which way of counting the person uses: its figures come first. */
   countBy: CountBy
   /** Accept the swap the Next line suggests. Absent where the answer is not the one to act on. */
   onSwap?: (alt: SwapOffer) => void
   swapState?: { accepted: string | null; busy: boolean; failed: boolean }
+  /** The engine's "Weights I used" line, with its sentence: printed after the next step, in place of the agent's own line (tracker #75). */
+  weightsUsed?: React.ReactNode
 }) {
   const costed = !!reply?.trace?.some((x) => (x.tool.endsWith('compute_meal') || x.tool.endsWith('cost_dish')) && typeof (x.result as { totals?: unknown } | undefined)?.totals === 'object')
   const parts = parseMeal(text, { costed })
@@ -218,10 +220,7 @@ function Answer({ text, reply, onSwap, swapState, countBy }: {
     // verdict is the sentence someone reads, the number is the thing they
     // check, and the reason is support. Four identical paragraphs is what
     // made the screen read as flat.
-    const tail = text
-      .split(/\n+/)
-      .map((l) => l.trim())
-      .filter((l) => l && !isLabelled(l) && !parts.used.includes(l))
+    const tail = tailLines(text, parts.used, !!weightsUsed)
     return (
       <div className="answer-text">
         <p className="a-verdict">{bold(parts.verdict, 'v')}</p>
@@ -248,6 +247,7 @@ function Answer({ text, reply, onSwap, swapState, countBy }: {
             </div>
           )
         })()}
+        {weightsUsed}
         {tail.map((l, i) => (
           <p key={`t${i}`} className="a-tail">{bold(l, `t${i}`)}</p>
         ))}
@@ -426,7 +426,9 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   // "How is it going?": after the third meal and on a later day, once each, and only when nothing else is going on.
   const [card, setCard] = useState<Milestone | null>(visitCard)
   const facts = useMemo(() => nudgeFacts(diary), [diary])
-  const tipShowing = nextStep(tourSeen, { hasReply: !!reply, hasReceipt: !!receipt, assumed: !!receipt?.assumed, busy, suspended: tourSuspended }) !== null
+  // The weights line is on the card (and its tip may be offered) when a weight was one the person did not give (tracker #75).
+  const hasAssumedWeight = !!receipt && !receipt.carbsOnly && receipt.lines.some((l) => !!l.basis && l.basis !== 'stated' && !!l.said)
+  const tipShowing = nextStep(tourSeen, { hasReply: !!reply, hasReceipt: !!receipt, assumed: !!receipt?.assumed, hasAssumedWeight, busy, suspended: tourSuspended }) !== null
   useEffect(() => {
     if (card) return
     const due = nextNudge({
@@ -787,7 +789,8 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
               <StatusDot tone={tone} />
               {STAMP_LABEL[reply.blocked ? 'blocked' : (tone as keyof typeof STAMP_LABEL)]}
             </div>
-            <Answer text={reply.answer} reply={reply} countBy={profile.countBy} onSwap={receipt && !receipt.assumed ? acceptSwap : undefined} swapState={{ accepted: swap?.id ?? null, busy: !!swap && !recalc && !recalcError, failed: !!swap && !recalc && !!recalcError }} />
+            <Answer text={reply.answer} reply={reply} countBy={profile.countBy} onSwap={receipt && !receipt.assumed ? acceptSwap : undefined} swapState={{ accepted: swap?.id ?? null, busy: !!swap && !recalc && !recalcError, failed: !!swap && !recalc && !!recalcError }}
+              weightsUsed={receipt && !receipt.carbsOnly ? <WeightsUsed lines={baseLines.map((line, index) => ({ line, index }))} onEdit={editWeight} /> : undefined} />
             {!reply.blocked && (
               <div className="verify-row">
                 {reply.verified ? (
@@ -874,7 +877,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
       {!anonymous && !card && !tipShowing && firstSession?.card}
       {/* Never while a question is being answered (docs/design.md): a card already on screen steps aside until the answer is in. */}
       {!anonymous && card && !busy && !recalcBusy && <FeedbackNudge milestone={card} onAsked={cardAsked} onClose={cardClosed} />}
-      {!anonymous && <Tour seen={tourSeen} onSeen={onTourSeen} ctx={{ hasReply: !!reply, hasReceipt: !!receipt, assumed: !!receipt?.assumed, busy, suspended: tourSuspended }} />}
+      {!anonymous && <Tour seen={tourSeen} onSeen={onTourSeen} ctx={{ hasReply: !!reply, hasReceipt: !!receipt, assumed: !!receipt?.assumed, hasAssumedWeight, busy, suspended: tourSuspended }} />}
     </div>
   )
 }

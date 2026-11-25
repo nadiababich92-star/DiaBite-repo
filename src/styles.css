@@ -1132,3 +1132,6 @@ body:has(.landing) { background: #0a1812; }
   .summary h2, .summary h3, .summary h4 { break-after: avoid; }
   .summary-footer { margin: 16px 0 0; }
 }
+
+/* The sentence under the weights line (docs/design.md, Portions; tracker #75). Colour from .muted. */
+.weights-why { margin: 2px 0 0; font-size: 14px; }

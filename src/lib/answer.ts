@@ -27,6 +27,12 @@ function part(text: string, label: string): string | undefined {
 }
 
 /** True for a line that opens with one of the four labels. */
+/** The agent's own "Weights I used" line. When the card shows the engine's line instead, this one is not printed (tracker #75). */
+export const AGENT_WEIGHTS_LINE = /^\*{0,2}weights i used\b/i
+
+/** Under the weights line, always (the owner's wording B, 25 November 2026; "below" taken out: the line sits under the figures). No figure. */
+export const WEIGHTS_WHY = 'These weights decide the numbers. They are typical portions, not yours: tap one if you ate more or less.'
+
 export const isLabelled = (line: string): boolean =>
   new RegExp(`^\\*{0,2}(${LABELS.join('|')})\\*{0,2}\\s*${SEP}`, 'i').test(line.trim())
 
@@ -89,4 +95,17 @@ export function parseMeal(text: string, opts: { costed?: boolean } = {}): (MealP
 export function boldSegments(line: string): { text: string; strong: boolean }[] {
   return line.split(/(\*\*[^*]+\*\*)/g).filter((seg) => seg !== '').map((seg) =>
     /^\*\*[^*]+\*\*$/.test(seg) ? { text: seg.slice(2, -2), strong: true } : { text: seg, strong: false })
+}
+
+/**
+ * The lines an answer prints under its verdict, figures, reason and next step: what the parser did not use and no label owns.
+ * With the engine's weights line on the card (`engineWeights`), the agent's own "Weights I used" line is left out, so the
+ * weights appear once; "Not counted" and anything else stays.
+ */
+export function tailLines(text: string, used: string[], engineWeights: boolean): string[] {
+  return text
+    .split(/\n+/)
+    .map((l) => l.trim())
+    .filter((l) => l && !isLabelled(l) && !used.includes(l))
+    .filter((l) => !(engineWeights && AGENT_WEIGHTS_LINE.test(l)))
 }

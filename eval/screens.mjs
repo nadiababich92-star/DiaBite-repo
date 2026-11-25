@@ -75,7 +75,7 @@ try {
     console.log(size.name)
     await b.send('Page.navigate', { url: APP }); await sleep(2500)
     // The first-run tips are marked seen unless TOUR=1, so they never sit over what this script clicks.
-    await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session', 'test-screens-' + crypto.randomUUID()); ${process.env.PAPER === '1' ? "localStorage.setItem('diabite.theme', 'paper');" : ''} localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); ${process.env.TOUR === '1' ? '' : "localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log']));"}`)
+    await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session', 'test-screens-' + crypto.randomUUID()); ${process.env.PAPER === '1' ? "localStorage.setItem('diabite.theme', 'paper');" : ''} localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); ${process.env.TOUR === '1' ? '' : "localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','weights','calc','log']));"}`)
     await b.send('Page.reload'); await sleep(3500)
 
     if (idx === 0) {
@@ -258,12 +258,38 @@ try {
       await shot('ask-plan')
     }
     if (process.env.TOUR === '1') {
-      // tips 2, 3 and 4 hang on the answer: photograph each, then press its button
-      for (const n of [2, 3, 4]) {
+      // tips 2 to 5 hang on the answer: photograph each, then press its button. The weights tip comes second, ringing the weights line, with no figure.
+      const tips = []
+      for (const n of [2, 3, 4, 5]) {
         await sleep(900)
         await shot(`tour-${n}`)
+        tips.push(await b.ev(`(() => { const t = document.querySelector('.tour-tip'); const a = document.querySelector('[data-tour="weights"]'); return t ? { title: t.innerText.trim().split('\\n')[0], text: t.innerText, ringed: !!a && a.classList.contains('tour-ring') } : null })()`))
         await b.ev(`document.querySelector('.tour-tip button.primary')?.click()`)
       }
+      const titles = tips.map((t) => t?.title ?? null)
+      const w = tips.find((t) => t?.title === 'Check the weights')
+      const ok = titles.join('|') === 'Here is the verdict|Check the weights|Check the arithmetic|Keep it in your Diary' && !!w && w.ringed && !/\d/.test(w.text.replace(/\b(Next|Skip tips|Got it)\b/g, ''))
+      console.log(`  ${ok ? 'PASS' : 'FAIL'}  the tips on the first answer: verdict, weights, arithmetic, diary; the weights tip holds no figure (${size.name})${ok ? '' : '  → ' + JSON.stringify(tips)}`)
+      if (!ok) process.exitCode = 1
+    }
+    // The weights line (tracker #75): on an answer with an assumed weight, one "Weights I used" line, built from the engine (each weight a
+    // button), the owner's sentence under it, no second copy from the agent; a weight opens its field in the portion editor.
+    {
+      const w = await b.ev(`(() => { const card = document.querySelector('.card.answer'); if (!card) return null
+        const lines = [...card.querySelectorAll('p')].filter((p) => /^Weights I used/.test(p.innerText.trim()))
+        const block = card.querySelector('[data-tour="weights"]')
+        return { n: lines.length, engine: lines.length === 1 && lines[0].classList.contains('weights-used') && !!lines[0].closest('[data-tour="weights"]'),
+          buttons: block ? block.querySelectorAll('button.weight-btn').length : 0, why: block?.querySelector('.weights-why')?.innerText.trim() ?? null,
+          tailDup: [...card.querySelectorAll('.a-tail')].some((p) => /^Weights I used/.test(p.innerText.trim())) } })()`)
+      await b.ev(`document.querySelector('.card.answer [data-tour="weights"] button.weight-btn')?.click()`); await sleep(1200)
+      const opened = await b.ev(`(() => { const p = document.querySelector('.card.portions'); return { portions: !!p, focusInside: !!p && p.contains(document.activeElement) } })()`)
+      await shot('ask-weights-line')
+      // Leave the editor as it was found: the steps after this one open it themselves.
+      await b.ev(`(() => { const l = [...document.querySelectorAll('.act-bar button[aria-expanded]')].find((x) => /Portions|Recipe/.test(x.innerText)); if (l && l.getAttribute('aria-expanded') === 'true') l.click() })()`); await sleep(500)
+      const WHY = 'These weights decide the numbers. They are typical portions, not yours: tap one if you ate more or less.'
+      const ok = !!w && w.n === 1 && w.engine && w.buttons >= 1 && w.why === WHY && !w.tailDup && opened.portions && opened.focusInside
+      console.log(`  ${ok ? 'PASS' : 'FAIL'}  the weights line: one, from the engine, each weight a button that opens its field, the sentence under it (${size.name})${ok ? '' : '  → ' + JSON.stringify({ w, opened })}`)
+      if (!ok) process.exitCode = 1
     }
     // An estimate card (a dish counted from an assumed recipe) also gets its composition editor.
     if (await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Recipe'))`)) {
@@ -326,6 +352,20 @@ try {
       const ok = nav.inHelp && nav.summary === 'Put DiaBite on your home screen' && nav.caret && !/^none/.test(nav.caret) && /solid/.test(nav.caret)
         && nav.heads.join('|') === 'iPhone or iPad|Android|Computer' && !profileHome && (menuCaret === 'solid' || menuCaret === 'no recipe')
       console.log(`  ${ok ? 'PASS' : 'FAIL'}  the home-screen card is in Settings > Help with a caret, not in Profile; the Menu's recipe shows a caret (${size.name})${ok ? '' : '  → ' + JSON.stringify({ nav, profileHome, menuCaret })}`)
+      if (!ok) process.exitCode = 1
+    }
+    // Every weight given: no weights line and no sentence (tracker #75). Once, on the first size: it costs a model call.
+    if (idx === 0) {
+      await tab('Ask')
+      await b.ev(`(()=>{const i=document.querySelector('input[type=text]'); i.focus(); i.select?.()})()`)
+      await b.send('Input.insertText', { text: '200 g of cooked white rice and 150 g of black beans' })
+      await click('Check this meal')
+      for (let i = 0; i < 90; i++) { await sleep(500); if (!(await b.ev(`[...document.querySelectorAll('button')].some(x=>x.innerText.includes('Thinking'))`)) && i > 3) break }
+      await sleep(1000)
+      const g = await b.ev(`(() => { const card = document.querySelector('.card.answer'); return card ? { receipt: !!card.querySelector('.fig-card'), line: !!card.querySelector('.weights-used'), why: !!card.querySelector('.weights-why') } : null })()`)
+      await shot('ask-all-grams')
+      const ok = !!g && g.receipt && !g.line && !g.why
+      console.log(`  ${ok ? 'PASS' : 'FAIL'}  every weight given: no weights line and no sentence (${size.name})${ok ? '' : '  → ' + JSON.stringify(g)}`)
       if (!ok) process.exitCode = 1
     }
     if (process.env.TOUR === '1') { await click('How it works'); await sleep(700); await shot('how-it-works'); await click('Close') }

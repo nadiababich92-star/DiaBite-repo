@@ -30,7 +30,7 @@ import { tmpdir } from 'node:os'
 import { resolvePhrases, withoutQuantity } from '../server/resolve'
 import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
-import { parseMeal } from '../src/lib/answer'
+import { AGENT_WEIGHTS_LINE, parseMeal, tailLines, WEIGHTS_WHY } from '../src/lib/answer'
 import { afterMealFor, sandwichWithItsBread, scaleToDishWeight, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
 import { alternativesForMeal, findAlternatives, SWAP_ENERGY_BAND, SWAP_MIN_GAIN, SWAP_MIN_GAIN_SHARE } from '../server/compute'
 import { ALLOWED, mayReplace, potatoKind, standInsFor, swapClass } from '../server/roles'
@@ -640,16 +640,22 @@ recorrectMisses.forEach((m) => console.log(m))
 // First-run tips: which one to show, in what order, and that the copy never holds a figure.
 {
   const bits: string[] = []
-  const ctx = (over: Partial<TourContext> = {}): TourContext => ({ hasReply: false, hasReceipt: false, assumed: false, busy: false, suspended: false, ...over })
-  const meal = ctx({ hasReply: true, hasReceipt: true })
+  const ctx = (over: Partial<TourContext> = {}): TourContext => ({ hasReply: false, hasReceipt: false, assumed: false, hasAssumedWeight: false, busy: false, suspended: false, ...over })
+  const meal = ctx({ hasReply: true, hasReceipt: true, hasAssumedWeight: true })
   if (nextStep([], ctx()) !== 'input') bits.push('the empty screen does not offer the input tip')
   if (nextStep([], ctx({ busy: true })) !== null || nextStep([], ctx({ suspended: true })) !== null) bits.push('a tip was offered while busy or while another dialog was open')
   if (nextStep(['input'], ctx({ hasReply: true })) !== null || nextStep([], ctx({ hasReply: true })) !== null) bits.push('a tip hung on an answer with no receipt, or the input tip came late')
   let seen: ReturnType<typeof sanitizeSeen> = []
   const order: (string | null)[] = []
-  for (let i = 0; i < 4; i++) { const st = nextStep(seen, meal); order.push(st); if (st) seen = markSeen(seen, st) }
-  if (order.join() !== 'verdict,calc,log,') bits.push(`the sequence on a receipt was ${order.join()}`)
-  if (nextStep(['input', 'calc'], meal) !== 'verdict' || nextStep(['input', 'verdict'], meal) !== 'calc' || nextStep(['input', 'verdict', 'calc'], meal) !== 'log') bits.push('a step was offered out of order')
+  for (let i = 0; i < 5; i++) { const st = nextStep(seen, meal); order.push(st); if (st) seen = markSeen(seen, st) }
+  if (order.join() !== 'verdict,weights,calc,log,') bits.push(`the sequence on a receipt was ${order.join()}`)
+  // The weights tip (tracker #75): skipped while no weight was assumed, offered later on an answer that has one, never with a figure.
+  const noAssumed = { ...meal, hasAssumedWeight: false }
+  if (nextStep(['input', 'verdict'], noAssumed) !== 'calc' || nextStep(['input', 'verdict', 'calc', 'log'], noAssumed) !== null) bits.push('the weights tip was offered on an answer with every weight given')
+  if (nextStep(['input', 'verdict', 'calc', 'log'], meal) !== 'weights') bits.push('the weights tip was not offered late, on a later answer with an assumed weight')
+  if (nextStep(['input', 'weights'], meal) !== 'verdict') bits.push('the weights tip let a step jump the order')
+  if (copyFor('weights', { assumed: false }).title !== 'Check the weights' || copyFor('weights', { assumed: false }).button !== 'Next') bits.push('the weights tip has the wrong words')
+  if (nextStep(['input', 'calc'], meal) !== 'verdict' || nextStep(['input', 'verdict'], meal) !== 'weights' || nextStep(['input', 'verdict', 'weights'], meal) !== 'calc' || nextStep(['input', 'verdict', 'weights', 'calc'], meal) !== 'log') bits.push('a step was offered out of order')
   if (copyFor('verdict', { assumed: true }).title !== 'This one is an estimate' || copyFor('verdict', { assumed: false }).title !== 'Here is the verdict') bits.push('the estimate copy was not chosen by `assumed`')
   if (copyFor('calc', { assumed: true }).title !== copyFor('calc', { assumed: false }).title) bits.push('another step changed with `assumed`')
   if (JSON.stringify(allSteps()) !== JSON.stringify(STEP_ORDER)) bits.push('Skip tips is not every step')
@@ -670,6 +676,25 @@ recorrectMisses.forEach((m) => console.log(m))
   console.log(`\ntour      ${bits.length === 0 ? 'ok' : 'WRONG'}`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) { console.log('the first-run tips misbehave: see tour above'); process.exit(1) }
+}
+// The weights line (tracker #75): the engine's line replaces the agent's, "Not counted" stays, and the sentence is the owner's, with no figure.
+{
+  const bits: string[] = []
+  for (const l of ['Weights I used: white rice 1 cup (158 g).', '**Weights I used:** apple 1 regular (120 g).']) if (!AGENT_WEIGHTS_LINE.test(l)) bits.push(`not read as the agent's weights line: ${l}`)
+  for (const l of ['Not counted: a few strawberries.', 'Why: the rice carries most of the load.']) if (AGENT_WEIGHTS_LINE.test(l)) bits.push(`read as the agent's weights line: ${l}`)
+  const text = ['This fits your day.', 'Why: the rice carries most of the load.', 'Next action: swap half the rice for beans.', 'Weights I used: white rice 1 cup (158 g).', 'Not counted: a few strawberries.'].join('\n')
+  const used = ['This fits your day.']
+  const withEngine = tailLines(text, used, true), without = tailLines(text, used, false)
+  if (withEngine.some((l) => /^Weights I used/.test(l)) || !withEngine.some((l) => /^Not counted/.test(l))) bits.push(`with the engine line, the tail was ${JSON.stringify(withEngine)}`)
+  if (!without.some((l) => /^Weights I used/.test(l)) || !without.some((l) => /^Not counted/.test(l))) bits.push(`without it, the tail was ${JSON.stringify(without)}`)
+  if (WEIGHTS_WHY !== 'These weights decide the numbers. They are typical portions, not yours: tap one if you ate more or less.') bits.push('the sentence under the weights line is not the owner\'s')
+  if (/\d/.test(WEIGHTS_WHY)) bits.push('the sentence holds a figure')
+  const card = readFileSync(join(ROOT, 'src', 'components', 'AskPage.tsx'), 'utf8')
+  if (!/weightsUsed=\{receipt && !receipt\.carbsOnly \? <WeightsUsed/.test(card)) bits.push('the first answer does not pass the engine\'s weights line')
+  if (!/data-tour="weights"/.test(readFileSync(join(ROOT, 'src', 'components', 'WeightEditor.tsx'), 'utf8'))) bits.push('the weights line has no anchor for its tip')
+  console.log(`weights   ${bits.length === 0 ? 'ok' : 'WRONG'}`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) { console.log('the weights line misbehaves: see weights above'); process.exit(1) }
 }
 // A free first answer without signing in, the scaffold (docs/specs/anon-evals.md, AN5; the device id, the access words and the request headers
 // of docs/specs/anon-screen.md). The engine's counters and the screens are the next steps and have their own checks.

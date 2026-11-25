@@ -3,14 +3,14 @@
  *
  * A tour of the empty screens cannot point at a verdict or a receipt (there is no answer yet), and a sample
  * answer would put numbers on screen the engine did not compute. So there is one tip before the first
- * question and three that hang on the first real answer, and the copy carries no figure at all.
+ * question and four that hang on the first real answer (the weights one only when a weight was assumed), and the copy carries no figure at all.
  *
  * Pure and tested (npm run eval). The only thing remembered is which steps were shown, in this browser.
  */
 
-export type TourStep = 'input' | 'verdict' | 'calc' | 'log'
+export type TourStep = 'input' | 'verdict' | 'weights' | 'calc' | 'log'
 
-export const STEP_ORDER: readonly TourStep[] = ['input', 'verdict', 'calc', 'log']
+export const STEP_ORDER: readonly TourStep[] = ['input', 'verdict', 'weights', 'calc', 'log']
 
 /** What the Ask screen knows right now. */
 export interface TourContext {
@@ -20,6 +20,8 @@ export interface TourContext {
   hasReceipt: boolean
   /** That receipt is an assumed recipe: the verdict step has its own words. */
   assumed: boolean
+  /** The receipt has at least one weight the person did not give: the weights line is on screen (tracker #75). */
+  hasAssumedWeight: boolean
   /** A question is being answered. */
   busy: boolean
   /** The feedback form or the import prompt is open. */
@@ -37,6 +39,11 @@ const COPY: Record<TourStep, TourCopy> = {
   verdict: {
     title: 'Here is the verdict',
     body: 'It compares this meal with what is left of your day. The engine makes that comparison, not the AI\'s opinion.',
+    button: 'Next',
+  },
+  weights: {
+    title: 'Check the weights',
+    body: "When you don't give a weight, DiaBite uses a typical portion and names it here. If you ate more or less, tap the weight and the numbers are counted again.",
     button: 'Next',
   },
   calc: {
@@ -66,7 +73,7 @@ export const allCopy = (): TourCopy[] => [...STEP_ORDER.map((s) => COPY[s]), EST
 
 /**
  * The first step not yet shown that fits what is on screen, or null.
- * `input` belongs to the empty screen only. The other three need a receipt and come in order.
+ * `input` belongs to the empty screen only. The others need a receipt and come in order; `weights` also needs an assumed weight.
  */
 export function nextStep(seen: readonly TourStep[], ctx: TourContext): TourStep | null {
   if (ctx.suspended || ctx.busy) return null
@@ -76,7 +83,9 @@ export function nextStep(seen: readonly TourStep[], ctx: TourContext): TourStep 
       if (ctx.hasReply) continue            // already past the empty screen: treated as satisfied, never offered late
       return 'input'
     }
-    return ctx.hasReceipt ? step : null     // the other three need a receipt, and come in order
+    // The weights tip needs a weight the person did not give; without one it waits for a later answer that has one.
+    if (step === 'weights' && !ctx.hasAssumedWeight) continue
+    return ctx.hasReceipt ? step : null     // the others need a receipt, and come in order
   }
   return null
 }

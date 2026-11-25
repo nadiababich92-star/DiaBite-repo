@@ -47,7 +47,7 @@ async function device(port, label, { tour = false } = {}) {
   await b.send('Page.navigate', { url: APP }); await sleep(2500)
   // The first-run tips are marked seen so they never sit over what this script clicks; device A leaves them on once, to check them (W16).
   // Our own sessions carry a `test-` id so the weekly report counts them as tests, not as a person at the app.
-  await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session', 'test-rehearsal-' + crypto.randomUUID()); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); ${tour ? '' : "localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log']));"}`)
+  await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session', 'test-rehearsal-' + crypto.randomUUID()); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)}); ${tour ? '' : "localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','weights','calc','log']));"}`)
   await b.send('Page.reload'); await sleep(3500)
   const text = () => b.ev('document.body.innerText')
   const click = (t) => b.ev(`(()=>{const e=[...document.querySelectorAll('button')].find(x=>x.innerText.trim().startsWith(${JSON.stringify(t)})); if(!e) return 'NO '+${JSON.stringify(t)}; e.click(); return 'ok'})()`)

@@ -84,7 +84,7 @@ try {
       await scan('landing')
       await click('Try DiaBite'); await sleep(700); await scan('sign-in-screen')
       await b.send('Page.navigate', { url: APP }); await sleep(2500)
-      await b.ev(`localStorage.clear(); ${scheme === 'light' ? "localStorage.setItem('diabite.theme','paper');" : ''} localStorage.setItem('diabite.session','test-a11y-'+crypto.randomUUID()); localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log'])); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2'])); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`)
+      await b.ev(`localStorage.clear(); ${scheme === 'light' ? "localStorage.setItem('diabite.theme','paper');" : ''} localStorage.setItem('diabite.session','test-a11y-'+crypto.randomUUID()); localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','weights','calc','log'])); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2'])); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`)
       await b.send('Page.reload'); await sleep(4500)
       await scan('ask-empty')
       // a real answer
@@ -121,7 +121,7 @@ try {
       results.reflow.push({ view: view.name, screen: 'Landing (signed out)', ok, ...m })
       console.log(view.name.padEnd(30), 'Landing'.padEnd(8), ok ? 'no horizontal scroll' : `HORIZONTAL SCROLL ${m.scrollW} > ${m.innerW} ${m.wide.join(',')}`)
     }
-    await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session','test-a11y-'+crypto.randomUUID()); localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log'])); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2'])); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`)
+    await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session','test-a11y-'+crypto.randomUUID()); localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','weights','calc','log'])); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2'])); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`)
     await b.send('Page.reload'); await sleep(4500)
     const tab = async (n) => { await b.ev(`(()=>{[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes(${JSON.stringify(n)}))?.click()})()`); await sleep(1300) }
     for (const screen of ['Ask', 'Diary', 'Menu', 'Profile', 'Settings']) {
@@ -157,7 +157,7 @@ try {
   {
     const b = await launch({ port: port++, width: 1366, height: 768, dpr: 1 })
     await b.send('Page.navigate', { url: APP }); await sleep(2500)
-    await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session','test-a11y-'+crypto.randomUUID()); localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','calc','log'])); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2'])); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`)
+    await b.ev(`localStorage.clear(); localStorage.setItem('diabite.session','test-a11y-'+crypto.randomUUID()); localStorage.setItem('diabite.tour.v1', JSON.stringify(['input','verdict','weights','calc','log'])); localStorage.setItem('diabite.nudge.v1', JSON.stringify(['after_3_meals','day_2'])); localStorage.setItem('sb-${REF}-auth-token', ${JSON.stringify(stored)})`)
     await b.send('Page.reload'); await sleep(4500)
     const tab = async (n) => { await b.ev(`(()=>{[...document.querySelectorAll('[role=tab]')].find(x=>x.innerText.includes(${JSON.stringify(n)}))?.click()})()`); await sleep(1300) }
     for (const screen of ['Ask', 'Diary', 'Menu', 'Profile', 'Settings']) {
