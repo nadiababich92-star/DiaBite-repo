@@ -249,11 +249,12 @@ export function dayState(budget: DayBudget, entries: MealItemInput[]): DayStateR
 }
 
 /**
- * The meal's unscored items plus the day's. A lunch of pizza has no glycemic load, so the room left at
- * four o'clock is understated, and an answer about an apple built on it is as partial as a meal missing a food.
+ * The foods eaten earlier today that have no load, less this meal's own (tracker #117). They make the room left uncertain, so the meal is
+ * still never called a fit; but they are not in this meal, and the answer must not say the meal has them or left them out. Returned apart
+ * from the meal's own (`afterMeal.partial.dayUnscored`), so the card can say "Day partly counted" for a meal that was counted whole.
  */
-export function withDayUnscored(mealUnscored: string[], day: DayStateResponse): string[] {
-  return [...new Set([...mealUnscored, ...(day.unscored ?? [])])]
+export function dayOnlyUnscored(mealUnscored: string[], day: DayStateResponse): string[] {
+  return [...new Set((day.unscored ?? []).filter((n) => !mealUnscored.includes(n)))]
 }
 
 /** What an alternative "costs", at one quantity: grams for an ingredient, servings for a recipe. */
@@ -481,17 +482,19 @@ export function afterMealFor(
   unscored: string[] = [],
   carbLimit?: { kind: 'meal' | 'snack'; g: number },
   notCounted: string[] = [],
+  dayUnscored: string[] = [],
 ) {
   const after = {
     gl: Math.round((remaining.gl - meal.gl) * 10) / 10,
     carbsG: Math.round((remaining.carbsG - meal.carbs) * 10) / 10,
     kcal: Math.round(remaining.kcal - meal.kcal),
   }
-  const partial = unknownFoods.length + unscored.length + notCounted.length > 0
+  // A food of an earlier meal today with no load makes the room left uncertain just as one in this meal does: never "fits".
+  const partial = unknownFoods.length + unscored.length + notCounted.length + dayUnscored.length > 0
   return {
     remaining: after,
     fits: partial ? (after.gl >= 0 ? null : false) : after.gl >= 0,
-    ...(partial ? { partial: { unknownFoods, ...(unscored.length ? { unscored } : {}), ...(notCounted.length ? { notCounted } : {}) } } : {}),
+    ...(partial ? { partial: { unknownFoods, ...(unscored.length ? { unscored } : {}), ...(notCounted.length ? { notCounted } : {}), ...(dayUnscored.length ? { dayUnscored } : {}) } } : {}),
     // Returned only when the meal is above the person's own number. A meal within it is not news, and a number the model can see is a number it
     // may quote: the answer to "An apple" with a 60 g snack number said "It also stays under your 60 g snack target" about one time in six
     // (18 November 2026). With no field there is nothing to quote, so the rule "say nothing" no longer depends on the model obeying it.
@@ -521,6 +524,33 @@ export function driverOf(items: MealItemResult[]): { foodId: string; name: strin
   const top = scored.reduce((a, b) => ((b.gl ?? 0) > (a.gl ?? 0) ? b : a))
   if ((top.gl as number) < DRIVER_MIN_GL) return undefined
   return { foodId: top.foodId, name: top.name, gl: top.gl as number }
+}
+
+/**
+ * A recipe that already holds a food the person named beside it (tracker #116, finding Q). "Chicken souvlaki, two skewers, with a whole wheat
+ * pita, a quarter cup of tzatziki and a cucumber tomato salad" was costed as two servings of "Chicken Souvlaki Plate" (a plate that already
+ * holds a pita, yogurt, cucumber and tomato) and the pita, the tzatziki and a salad beside it (25 November 2026): the pita counted twice.
+ * The same food is the same id, or the same words in another order ("Bread, pita, whole wheat" and "Whole wheat pita"). Only a part that
+ * carries carbohydrate (5 g or more available per 100 g) counts: two dishes that both hold cucumber are not a double count that matters, and
+ * stopping the meal for it would ask a question about nothing. The burrito bowl and sandwich rules above are the same idea for two records
+ * that have no ingredient list.
+ */
+export function recipeWithItsPart(ids: string[]): { dish: string; part: string } | null {
+  const by = loadFoods().byId
+  const words = (n: string) => n.toLowerCase().split(/[^a-z]+/).filter((w) => w && !['bread', 'plain', 'nfs', 'raw', 'cooked'].includes(w)).sort().join(' ')
+  const carbs = (id: string) => { const r = by.get(id); return r?.per100 ? Math.max(0, r.per100.carbs - (r.per100.fiber ?? 0)) : 0 }
+  for (const dishId of ids) {
+    const dish = by.get(dishId)
+    if (dish?.kind !== 'recipe' || !dish.parts) continue
+    for (const otherId of ids) {
+      if (otherId === dishId) continue
+      const other = by.get(otherId)
+      if (!other) continue
+      const part = dish.parts.find((p) => p.id === otherId || (words(p.name) !== '' && words(p.name) === words(other.name)))
+      if (part && carbs(part.id) >= 5) return { dish: dish.name, part: part.name }
+    }
+  }
+  return null
 }
 
 /**

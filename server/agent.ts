@@ -30,6 +30,7 @@
  * the tool results directly.
  */
 import { wholeDishWeight } from './dishWeight'
+import { countsSaid as readCounts } from './pieces'
 import { createReadStream, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
@@ -512,7 +513,7 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
         // The budget rides in the same reply as the meal, so there is no second
         // tool to read. (It once read get_day_state, which the agent no longer
         // has, and the last-resort answer lost its verdict.)
-        afterMeal?: { remaining?: { gl: number }; fits?: boolean | null; partial?: { unknownFoods: string[]; unscored?: string[] }; carbLimit?: { kind: string; limitG: number; mealG: number; over: boolean } }
+        afterMeal?: { remaining?: { gl: number }; fits?: boolean | null; partial?: { unknownFoods: string[]; unscored?: string[]; dayUnscored?: string[] }; carbLimit?: { kind: string; limitG: number; mealG: number; over: boolean } }
         dayState?: { remaining?: { gl: number } }
         items?: { loadAvailable?: boolean }[]
         assumed?: boolean
@@ -528,6 +529,10 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
   // Foods the engine costed for carbohydrate but not for a load (a packaged product,
   // or a food USDA gives no glycemic index): their load is not zero, it is not available.
   const unscored = meal?.afterMeal?.partial?.unscored ?? []
+  // Foods of an earlier meal today with no load (#117): not in this meal, so never "left out" of it; the day's room is what is uncertain.
+  const dayUnscored = meal?.afterMeal?.partial?.dayUnscored ?? []
+  const dayNames = dayUnscored.length <= 1 ? (dayUnscored[0] ?? '') : `${dayUnscored.slice(0, -1).join(', ')} and ${dayUnscored[dayUnscored.length - 1]}`
+  const dayHas = dayUnscored.length > 1 ? 'have' : 'has'
   const items = meal?.items ?? []
   const onlyUnscored = items.length > 0 && items.every((it) => it.loadAvailable === false)
   const t = meal?.totals
@@ -571,6 +576,11 @@ export function templatedAnswer(trace: ToolCallTrace[]): string | null {
       ? `**Verdict:** the part of this meal that has a load already goes over what is left of today's budget.`
       : `**Verdict:** I can't judge the day on a partial total: our data has no glycemic index for ${unscored.join(', ')}, so it is not scored.`)
     lines.push(`**Numbers:** the glycemic load of the scored part of the meal is ${gl}.`)
+  } else if (dayUnscored.length > 0) {
+    lines.push(meal?.afterMeal?.fits === false
+      ? `**Verdict:** it goes over what is left of today's budget, and ${dayNames}, earlier today, ${dayHas} no glycemic load in our data, so the room was smaller still.`
+      : `**Verdict:** I can't judge the day on this: ${dayNames}, earlier today, ${dayHas} no glycemic load in our data, so what is left today may be less.`)
+    lines.push(`**Numbers:** this meal's glycemic load is ${gl}.`)
   } else if (typeof left === 'number' && typeof after === 'number') {
     // The engine's own comparison, never a second subtraction here.
     const fits = meal?.afterMeal?.fits ?? after >= 0
@@ -597,11 +607,13 @@ async function parkDayState(req: AskRequest): Promise<void> {
   if (!req.budget || !req.entries) { if (!ENGINE_URL) dropCarbLimit(req.sessionId); return }
   // The weight of the whole dish, if the person said one, read here by a rule and never by a model (server/dishWeight.ts).
   const dishWeight = wholeDishWeight(req.message) ?? undefined
-  if (!ENGINE_URL) { putSession(req.sessionId, req.budget, req.entries, req.avoid, req.carbLimit, req.units, req.portionSwaps, dishWeight); return }
+  // The counts the person said ("two beef tacos"), read by a rule for the same reason: a count of a dish's pieces is not its servings (server/pieces.ts).
+  const countsSaid = readCounts(req.message)
+  if (!ENGINE_URL) { putSession(req.sessionId, req.budget, req.entries, req.avoid, req.carbLimit, req.units, req.portionSwaps, dishWeight, countsSaid); return }
   const r = await fetch(`${ENGINE_URL}/session/${encodeURIComponent(req.sessionId)}`, {
     method: 'PUT',
     headers: { 'content-type': 'application/json', ...(ENGINE_KEY ? { 'x-api-key': ENGINE_KEY } : {}) },
-    body: JSON.stringify({ budget: req.budget, entries: req.entries, avoid: req.avoid, carbLimit: req.carbLimit, units: req.units, portionSwaps: req.portionSwaps, dishWeight }),
+    body: JSON.stringify({ budget: req.budget, entries: req.entries, avoid: req.avoid, carbLimit: req.carbLimit, units: req.units, portionSwaps: req.portionSwaps, dishWeight, countsSaid }),
   })
   if (!r.ok) throw new Error(`could not park the day state: ${r.status} ${await r.text()}`)
 }

@@ -159,6 +159,11 @@ export interface FoodRecord extends FoodSummary {
   portions?: { label: string; grams: number }[]
   /** Recipes: what one serving weighs, whole grams, from the recipe's own ingredients (water counted). Absent for every other kind. */
   servingGrams?: number
+  /**
+   * Recipes: what is in one serving, from the recipe's own ingredient list (`ing:<id>`, its name, grams per serving). Read by the rule that a
+   * plate already holding a pita is not counted beside another pita, and by "two tacos" (how many shells one serving holds). Never shown.
+   */
+  parts?: { id: string; name: string; grams: number }[]
   /** USDA survey records: the survey's own food category ("Bananas", "Yeast breads"), which the swap rules read; `category` is 'grains' for all of them. Never shown. */
   wweia?: string
 }
@@ -223,6 +228,7 @@ function fromRow(r: FoodRow): FoodRecord {
     portions: loadFoods().byId.get(r.id)?.portions,
     // Same for what the swap rules read: the table has no column for them, and a record without them is a food of unknown kind.
     servingGrams: loadFoods().byId.get(r.id)?.servingGrams,
+    parts: loadFoods().byId.get(r.id)?.parts,
     wweia: loadFoods().byId.get(r.id)?.wweia,
   }
 }
@@ -897,6 +903,7 @@ export function loadFoods() {
       },
       ingredientNames: names,
       ...(r.servings > 0 && r.ingredients.length ? { servingGrams: Math.round(r.ingredients.reduce((t, i) => t + i.grams, 0) / r.servings) } : {}),
+      ...(r.servings > 0 && r.ingredients.length ? { parts: r.ingredients.map((i) => ({ id: `ing:${i.ingredient_id}`, name: i.name, grams: Math.round((i.grams / r.servings) * 10) / 10 })) } : {}),
     })
   }
 

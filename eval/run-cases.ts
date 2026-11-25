@@ -26,6 +26,8 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { openApiSpec } from '../server/openapi'
 import { bindSession } from '../server/bind'
+import { recipeWithItsPart } from '../server/compute'
+import { RECIPE_BY_SERVING } from '../server/quantity'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const AGENT_URL = process.env.AGENT_URL ?? 'http://localhost:8787/agent/ask'
@@ -235,6 +237,33 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
     say('no weight was guessed: the engine said needsWeight or the agent asked before costing', !called(r, 'compute_meal') || (res?.needsWeight !== undefined && res?.totals === undefined), JSON.stringify(res)?.slice(0, 120))
   }
   if (e.noComputeMeal === true) say('no compute_meal', !called(r, 'compute_meal'))
+  // #116 (diary test, 25 November 2026), each read from tool results. Q: a dish costed beside a part it already holds. S: "two tacos" costed as
+  // more than one serving of a recipe that holds two a serving. N: a recipe the engine could not weigh is asked about in servings, never grams.
+  if (e.noDoubleCount === true) {
+    const ids = (((lastCallOf(r, 'compute_meal')?.input as { items?: { foodId: string }[] } | undefined)?.items) ?? []).map((x) => x.foodId)
+    const costed = !!(lastCallOf(r, 'compute_meal')?.result as { totals?: unknown } | undefined)?.totals
+    const twice = costed ? recipeWithItsPart(ids) : null
+    say('no dish costed beside a part it already holds', twice === null, JSON.stringify({ ids, twice }))
+  }
+  if (e.recipeServingsAtMost && typeof e.recipeServingsAtMost === 'object') {
+    const { name, max } = e.recipeServingsAtMost as { name: string; max: number }
+    const items = ((lastCallOf(r, 'compute_meal')?.result as { items?: { name?: string; kind?: string; servings?: number }[] } | undefined)?.items ?? [])
+    const it = items.find((x) => x.kind === 'recipe' && new RegExp(name, 'i').test(x.name ?? ''))
+    say(`a recipe matching /${name}/ costed at ${max} serving(s) or fewer`, !it || (it.servings ?? 1) <= max, JSON.stringify(items.map((x) => [x.name, x.servings])))
+  }
+  // #117: a whole meal on a day that already holds a food with no load. The engine names that food as the day's, not this meal's, and the
+  // answer never calls the meal a fit. Whether the words say "wasn't counted" is the model's wording: a style check (rule 7).
+  if (e.dayPartlyCounted === true) {
+    const am = (lastCallOf(r, 'compute_meal')?.result as { afterMeal?: { fits?: boolean | null; partial?: { unscored?: string[]; dayUnscored?: string[] } } } | undefined)?.afterMeal
+    say('the engine names the earlier food as the day\'s, not the meal\'s', !!am?.partial?.dayUnscored?.length && !am.partial.unscored?.length, JSON.stringify(am?.partial))
+    say('the meal is not called a fit', am?.fits !== true, JSON.stringify(am?.fits))
+    style('the answer does not say the earlier food was left out of this meal', !/wasn't counted|was not counted|were not counted|left out|not counted/i.test(answer), answer.slice(0, 160))
+  }
+  if (e.noGramsQuestionForRecipe === true) {
+    const asks = (r.trace ?? []).map((t) => t.result as { needsWeight?: { why?: string }[]; hint?: string } | undefined).filter((x) => x?.needsWeight)
+    const wrong = asks.filter((x) => x!.needsWeight![0]?.why === RECIPE_BY_SERVING && !/^About how many servings of /.test(x!.hint ?? ''))
+    say('a recipe is asked about in servings, never in grams', wrong.length === 0, JSON.stringify(asks.map((x) => x!.hint)))
+  }
   // Batch 3 (docs/engineering/agent-session-batch3.md): read from tool results only.
   const lastMeal = () => (lastCallOf(r, 'compute_meal') ?? lastCallOf(r, 'cost_dish'))
   const mealNames = () => (((lastMeal()?.result as { items?: { name?: string }[] } | undefined)?.items ?? []).map((x) => (x.name ?? '').toLowerCase()))

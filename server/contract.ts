@@ -178,7 +178,7 @@ export interface ComputeMealResponse {
      */
     fits: boolean | null
     /** Foods the user named that the database does not have; absent on a whole meal. */
-    partial?: { unknownFoods: string[]; /** Branded items: carbohydrate counted, load not available. */ unscored?: string[] }
+    partial?: { unknownFoods: string[]; /** Branded items: carbohydrate counted, load not available. */ unscored?: string[]; /** Foods eaten earlier today with no load, not in this meal (tracker #117). */ dayUnscored?: string[] }
     /**
      * Present only when the person set their own carbohydrate number for this meal or snack **and the meal is above it**
      * (`over` is then always true). `mealG` is the meal's total carbohydrate, `limitG` their number; it does not change `fits`,

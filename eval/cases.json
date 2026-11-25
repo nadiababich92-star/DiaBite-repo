@@ -7673,6 +7673,106 @@
       "tags": [
         "dish-weight"
       ]
+    },
+    {
+      "id": "RA1",
+      "dimension": "honest",
+      "query": "chicken souvlaki, two skewers, with a whole wheat pita, a quarter cup of tzatziki and a cucumber tomato salad",
+      "ground_truth": "The pita is counted once: a 'Chicken Souvlaki Plate' record already holds a pita, so it is never costed beside the pita the person named (diary test, 25 November 2026, #116 Q).",
+      "context": {
+        "budget": {
+          "glBudget": 64,
+          "carbsG": 128,
+          "kcal": 1800
+        },
+        "entries": []
+      },
+      "expect": {
+        "noDoubleCount": true,
+        "verified": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "recipe-amounts"
+      ]
+    },
+    {
+      "id": "RA2",
+      "dimension": "honest",
+      "query": "two beef tacos on corn tortillas with lettuce, shredded cheese and salsa",
+      "ground_truth": "Two tacos are one serving of 'Beef Tacos with Corn Tortillas' (two corn tortillas a serving), not two servings (#116 S).",
+      "context": {
+        "budget": {
+          "glBudget": 64,
+          "carbsG": 128,
+          "kcal": 1800
+        },
+        "entries": []
+      },
+      "expect": {
+        "recipeServingsAtMost": {
+          "name": "taco",
+          "max": 1
+        },
+        "verified": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "recipe-amounts"
+      ]
+    },
+    {
+      "id": "RA3",
+      "dimension": "helpful",
+      "query": "a California roll, 8 pieces, and a cup of miso soup",
+      "ground_truth": "If the soup is matched to a recipe that cannot be weighed by the cup, the question asks for servings, never grams (#116 N).",
+      "context": {
+        "budget": {
+          "glBudget": 64,
+          "carbsG": 128,
+          "kcal": 1800
+        },
+        "entries": []
+      },
+      "expect": {
+        "noGramsQuestionForRecipe": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "recipe-amounts"
+      ]
+    },
+    {
+      "id": "RA4",
+      "dimension": "honest",
+      "query": "a California roll, 8 pieces, and a cup of miso soup",
+      "ground_truth": "Lunch is counted whole; breakfast's Honey Nut Cheerios have no glycemic load, so the day cannot be judged: the engine names the cereal as the day's (dayUnscored), never as this meal's, and the answer does not say the lunch left it out (#117).",
+      "context": {
+        "budget": {
+          "glBudget": 64,
+          "carbsG": 128,
+          "kcal": 1800
+        },
+        "entries": [
+          {
+            "foodId": "branded:2551420",
+            "grams": 28
+          },
+          {
+            "foodId": "ing:banana",
+            "grams": 126
+          }
+        ]
+      },
+      "expect": {
+        "dayPartlyCounted": true,
+        "verified": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "recipe-amounts",
+        "day-partly-counted"
+      ]
     }
   ]
 }

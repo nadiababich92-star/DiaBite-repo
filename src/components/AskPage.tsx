@@ -13,7 +13,7 @@ import { nudgeMeasure, unitLabel } from '../lib/measure'
 import { PortionEditor, WeightsUsed, type TypedQuantity } from './WeightEditor'
 import { dayLabel, eaten, mealForNow, noLoadNote, portionText, viewEntry } from '../lib/diary'
 import { swapNamedIn, type SwapOffer } from '../lib/swap'
-import { BUTTONS, ERROR_EYEBROW, GL_LINK_LABEL, HINT, PILL_NO_NUMBERS, pillChecked, STAMP_LABEL, verdictTone } from '../lib/verdict'
+import { BUTTONS, dayUnscoredNote, ERROR_EYEBROW, GL_LINK_LABEL, HINT, PILL_NO_NUMBERS, pillChecked, STAMP_LABEL, verdictTone } from '../lib/verdict'
 import { MEAL_LABELS, menuHidden } from '../lib/menu'
 import { SignInCard } from './SignInCard'
 import { AnonBanner } from './AnonBanner'
@@ -113,7 +113,7 @@ const bold = (line: string, key: string) =>
  */
 function Figures({ reply, countBy }: { reply: AgentResponse; countBy: CountBy }) {
   const meal = lastMealCall(reply.trace)?.result as
-    | { totals?: { gl?: number; carbs?: number; availableCarbs?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean | null; carbLimit?: CarbLimitResult }; assumed?: boolean }
+    | { totals?: { gl?: number; carbs?: number; availableCarbs?: number }; dayState?: { remaining?: { gl?: number } }; afterMeal?: { remaining?: { gl?: number }; fits?: boolean | null; carbLimit?: CarbLimitResult; partial?: { dayUnscored?: string[] } }; assumed?: boolean }
     | undefined
   const mealGl = meal?.totals?.gl
   // A meal of branded products only: the three tiles are what the label gives —
@@ -140,6 +140,7 @@ function Figures({ reply, countBy }: { reply: AgentResponse; countBy: CountBy })
   return (
     <>
       <FigurePair countBy={countBy} gl={{ mealGl, before, after, fits, partial, assumed: meal?.assumed }} carbs={meal?.totals as CarbFigures | undefined} limit={meal?.afterMeal?.carbLimit} />
+      {!!meal?.afterMeal?.partial?.dayUnscored?.length && <p className="muted day-unscored-note">{dayUnscoredNote(meal.afterMeal.partial.dayUnscored)}</p>}
     </>
   )
 }
@@ -160,13 +161,15 @@ function Fold({ when, title, children }: { when: boolean; title: string; childre
 
 function RecalcCard({ rc, onBack, note, was, countBy, weightsUsed }: { rc: Recalc; onBack: () => void; note?: string; was?: { gl: number; after: number | null }; countBy: CountBy; weightsUsed?: React.ReactNode }) {
   // A dish counted from an assumed recipe stays an estimate through every recalculation: never a plain "Fits".
+  // Only foods eaten earlier today lack a load: the meal is whole and the day is not (tracker #117).
+  const dayOnly = rc.fits === null && !!rc.receipt.dayUnscored?.length && !rc.receipt.unscored?.length && !rc.receipt.partial?.length
   const tone = rc.assumed && rc.fits !== undefined ? 'estimate'
-    : rc.fits === true ? 'good' : rc.fits === false ? 'bad' : rc.fits === null ? 'partial' : 'ask'
-  const label = tone === 'estimate' ? 'Estimate' : tone === 'good' ? 'Fits' : tone === 'bad' ? 'Over today’s budget' : tone === 'partial' ? 'Part of the meal' : 'One question first'
+    : rc.fits === true ? 'good' : rc.fits === false ? 'bad' : dayOnly ? 'day' : rc.fits === null ? 'partial' : 'ask'
+  const label = tone === 'estimate' ? 'Estimate' : tone === 'good' ? 'Fits' : tone === 'bad' ? 'Over today’s budget' : tone === 'day' ? STAMP_LABEL.day : tone === 'partial' ? 'Part of the meal' : 'One question first'
   const verdict = tone === 'estimate'
     ? (rc.fits === true ? "If it's like this, it fits your day." : rc.fits === false ? "If it's like this, it goes over what is left today." : "I can't judge the day on this.")
     : tone === 'good' ? 'This fits your day.' : tone === 'bad' ? 'This goes over what is left today.'
-    : tone === 'partial' ? "I can't judge the day on a partial total." : "I no longer hold today's budget, so ask again for a verdict."
+    : tone === 'partial' ? "I can't judge the day on a partial total." : tone === 'day' ? "I can't judge the day on this." : "I no longer hold today's budget, so ask again for a verdict."
   const lead = rc.after === null ? null : Math.abs(rc.after)
   return (
     <section className={`card answer tone-${tone} recalc`} role="status" aria-live="polite">
@@ -176,6 +179,7 @@ function RecalcCard({ rc, onBack, note, was, countBy, weightsUsed }: { rc: Recal
         {rc.before !== null && lead !== null ? (
           <>
             <FigurePair countBy={countBy} limit={rc.carbLimit} gl={{ mealGl: rc.mealGl, before: rc.before, after: rc.after ?? 0, fits: rc.fits !== false, partial: tone === 'partial' || rc.fits === null, assumed: tone === 'estimate' }} carbs={rc.carbs} />
+            {!!rc.receipt.dayUnscored?.length && <p className="muted day-unscored-note">{dayUnscoredNote(rc.receipt.dayUnscored)}</p>}
             {was && (
               <p className="muted was-now">
                 Before the change: this meal <b className="num">{was.gl}</b>
@@ -296,7 +300,7 @@ function ReceiptView({ r, units, mineFlags }: { r: Receipt; units?: 'imperial' |
       {r.leftBefore !== null && (
         <>
           <div className="receipt-line muted"><span>GL left before this meal</span><span>{r.leftBefore.toFixed(1)}</span></div>
-          <div className={`receipt-line ${r.partial || r.unscored ? '' : (r.leftAfter ?? 0) < 0 ? 'over' : 'ok'}`}><span>{r.partial || r.unscored ? 'GL left so far' : 'GL left after'}</span><span>{r.leftAfter?.toFixed(1)}</span></div>
+          <div className={`receipt-line ${r.partial || r.unscored || r.dayUnscored ? '' : (r.leftAfter ?? 0) < 0 ? 'over' : 'ok'}`}><span>{r.partial || r.unscored || r.dayUnscored ? 'GL left so far' : 'GL left after'}</span><span>{r.leftAfter?.toFixed(1)}</span></div>
         </>
       )}
       <div className="receipt-foot">

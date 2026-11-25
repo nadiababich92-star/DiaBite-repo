@@ -9,7 +9,8 @@
  * Pure: no I/O, no clock.
  */
 import { ouncesText } from '../src/lib/measure'
-import { householdMeasure, ONE_PIECE_DEFAULT, readPortion, type FoodRecord, type PortionRow } from './foods'
+import { householdMeasure, loadFoods, ONE_PIECE_DEFAULT, readPortion, type FoodRecord, type PortionRow } from './foods'
+import { piecesPerServing } from './pieces'
 
 export const QUANTITY_UNITS = [
   'g', 'oz', 'lb',
@@ -49,7 +50,7 @@ export function typicalAvailableCarbs(rec: FoodRecord): number | null {
 
 export type Resolved =
   | { grams: number; basis: Basis; row?: PortionRow; via?: string; servings?: undefined }
-  | { servings: number; basis: 'default'; grams?: undefined; row?: undefined; via?: undefined }
+  | { servings: number; basis: 'default' | 'typical'; grams?: undefined; row?: undefined; via?: undefined }
   | { needs: string }
 
 /** Validation of what the model sent: null when it is a usable quantity, otherwise the error text. */
@@ -120,7 +121,12 @@ export function gramsFor(rec: FoodRecord, q: Quantity): Resolved {
   // A recipe is costed by serving, not by weight: four ounces of "Lemon Herb Grilled Chicken" was costed as a recipe at 0 g (18 November).
   // "A serving" of a recipe is one of its servings: sent as the unit `serving`, it was a question about grams of a recipe (H9, 24 November).
   if (rec.kind === 'recipe' && unit === 'serving') return { servings: count, basis: 'default' }
-  if (rec.kind === 'recipe' && unit !== 'default') return { needs: 'a recipe is counted by serving' }
+  // "Two tacos" of a taco recipe: its pieces, divided by how many one serving holds, read from the recipe's own tortillas (server/pieces.ts).
+  if (rec.kind === 'recipe' && (unit === 'piece' || unit === 'whole' || unit === 'medium')) {
+    const p = piecesPerServing(rec, (id) => loadFoods().byId.get(id))
+    return p ? { servings: r1(count / p.per), basis: 'typical' } : { needs: RECIPE_BY_SERVING }
+  }
+  if (rec.kind === 'recipe' && unit !== 'default') return { needs: RECIPE_BY_SERVING }
   // 1. Weights: exact, for any food that has a weight.
   if (unit === 'g') return { grams: r1(count), basis: 'stated' }
   if (unit === 'oz') return { grams: r1(count * GRAMS_PER_OUNCE), basis: 'exact_conversion' }
@@ -152,7 +158,7 @@ export function gramsFor(rec: FoodRecord, q: Quantity): Resolved {
     if (count > 1 && !defaultIsOneItem(rec)) return { needs: 'the usual portion of this food is a serving, not one item, so a count of them has no weight here' }
     return { grams: r1(rec.defaultPortion * count), basis: 'default' }
   }
-  if (rec.kind === 'recipe') return { needs: 'a recipe is counted by serving' }
+  if (rec.kind === 'recipe') return { needs: RECIPE_BY_SERVING }
   const rows = plainRows(rec)
   if (rows.length === 0) return { needs: 'this item has only a serving size' }
   const none = { needs: `no USDA household measure for this food in ${unit}` }
@@ -264,6 +270,23 @@ export function saidText(i: SaidInput): string {
   const itemWord = !!i.row && i.row.unit === 'whole' && !['regular', 'whole', 'medium', 'large', 'small'].includes(word)
   const plural = i.quantity.count > 1 && (PLURAL.has(word) || itemWord) ? `${word}s` : pluralWord(word, i.quantity.count)
   return `${countText(i.quantity.count)} ${plural} (${g})`
+}
+
+/** Why a recipe's amount came back as a question: a recipe is costed by the serving, so the question asks for servings. */
+export const RECIPE_BY_SERVING = 'a recipe is counted by serving'
+
+/**
+ * The question for a recipe (tracker #116, finding N): servings, never grams. "A cup of miso soup" matched to a soup recipe was asked "About how
+ * many grams of Shrimp & Vegetable Miso Soup?", and the 240 g the person answered could not be costed either, because a recipe is counted by
+ * serving: a second question, and the person never got an answer (25 November 2026).
+ */
+export function needsServingsHint(dishName: string): string {
+  return `About how many servings of ${dishName}?`
+}
+
+/** The one question for the first item the engine could not weigh: servings for a recipe, a weight in the session's units for anything else. */
+export function amountQuestion(need: { name: string; why: string }, units: 'imperial' | 'metric' | undefined): string {
+  return need.why === RECIPE_BY_SERVING ? needsServingsHint(need.name) : needsWeightHint(need.name, units)
 }
 
 /** The question the agent asks when nothing honest can be said, in the session's units (the owner's wording). */

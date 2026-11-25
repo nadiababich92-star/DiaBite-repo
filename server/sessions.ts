@@ -43,6 +43,8 @@ export interface SessionState {
   unknownFoods: string[]
   /** The weight of the whole dish the person said in this turn's message (server/dishWeight.ts); memory only, cleared by the next turn. */
   dishWeight?: { grams: number; said: string }
+  /** The counts the person said in this turn's message ("two beef tacos" → 2, taco: server/pieces.ts); memory only, cleared by the next turn. */
+  countsSaid?: { count: number; head: string }[]
   storedAt: number
 }
 
@@ -72,9 +74,10 @@ function sweep(now = Date.now()) {
 export function putSession(
   id: string, budget: DayBudget, entries: MealItemInput[], avoid?: AvoidList, carbLimit?: CarbLimit, units?: 'imperial' | 'metric', portionSwaps?: false,
   dishWeight?: { grams: number; said: string },
+  countsSaid?: { count: number; head: string }[],
 ): SessionState {
   sweep()
-  const state: SessionState = { budget, entries, avoid, carbLimit, ...(units ? { units } : {}), ...(portionSwaps === false ? { portionSwaps: false as const } : {}), ...(dishWeight ? { dishWeight } : {}), unknownFoods: [], storedAt: Date.now() }
+  const state: SessionState = { budget, entries, avoid, carbLimit, ...(units ? { units } : {}), ...(portionSwaps === false ? { portionSwaps: false as const } : {}), ...(dishWeight ? { dishWeight } : {}), ...(countsSaid?.length ? { countsSaid } : {}), unknownFoods: [], storedAt: Date.now() }
   setBounded(store, id, state)
   return state
 }

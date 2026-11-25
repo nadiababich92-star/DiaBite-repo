@@ -420,7 +420,7 @@ button.act-link[aria-expanded='true'] .act-link-caret { transform: rotate(180deg
 .answer .eyebrow-line { display: inline-flex; border-radius: 99px; padding: 5px 13px 5px 7px; background: var(--surface-2); color: var(--text); }
 .tone-good .eyebrow-line { color: var(--low); }
 .tone-bad .eyebrow-line, .tone-blocked .eyebrow-line { color: var(--high); }
-.tone-ask .eyebrow-line, .tone-carbs .eyebrow-line, .tone-partial .eyebrow-line, .tone-estimate .eyebrow-line { color: var(--text); }
+.tone-ask .eyebrow-line, .tone-carbs .eyebrow-line, .tone-partial .eyebrow-line, .tone-day .eyebrow-line, .tone-estimate .eyebrow-line { color: var(--text); }
 .tone-advice .eyebrow-line { color: var(--text-dim); }
 .answer.tone-good .eyebrow-line { background: var(--low-bg); }
 .answer.tone-bad .eyebrow-line, .answer.tone-blocked .eyebrow-line { background: var(--high-bg); }
@@ -434,7 +434,7 @@ button.act-link[aria-expanded='true'] .act-link-caret { transform: rotate(180deg
 }
 .dot-good { background: var(--low); }
 .dot-bad, .dot-blocked { background: var(--high); }
-.dot-ask, .dot-carbs, .dot-partial, .dot-estimate { background: var(--accent); }
+.dot-ask, .dot-carbs, .dot-partial, .dot-day, .dot-estimate { background: var(--accent); }
 .dot-advice { background: var(--text-faint); }
 .answer-text p { margin: 0 0 10px; font-size: 15.5px; line-height: 1.55; max-width: 60ch; }
 .answer-text strong { font-weight: 600; }
@@ -1137,3 +1137,5 @@ body:has(.landing) { background: #0a1812; }
 
 /* The sentence under the weights line (docs/design.md, Portions; tracker #75). Colour from .muted. */
 .weights-why { margin: 2px 0 0; font-size: 14px; }
+/* Under the figures when something eaten earlier today has no load: the day's room may be smaller (tracker #117). Tokens only. */
+.day-unscored-note { margin: 8px 0 0; font-size: 14px; }

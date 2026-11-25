@@ -31,14 +31,16 @@ import { resolvePhrases, withoutQuantity } from '../server/resolve'
 import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { AGENT_WEIGHTS_LINE, parseMeal, tailLines, WEIGHTS_WHY } from '../src/lib/answer'
-import { afterMealFor, sandwichWithItsBread, scaleToDishWeight, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withDayUnscored, withSaid } from '../server/compute'
+import { afterMealFor, dayOnlyUnscored, recipeWithItsPart, sandwichWithItsBread, scaleToDishWeight, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withSaid } from '../server/compute'
 import { alternativesForMeal, findAlternatives, SWAP_ENERGY_BAND, SWAP_MIN_GAIN, SWAP_MIN_GAIN_SHARE } from '../server/compute'
 import { ALLOWED, mayReplace, potatoKind, standInsFor, swapClass } from '../server/roles'
 import { validateAsk } from '../server/guard'
 import { getSession, putSession } from '../server/sessions'
-import { gramsFor, householdUnitsFor, needsWeightHint, quantityError, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
+import { amountQuestion, gramsFor, householdUnitsFor, needsServingsHint, needsWeightHint, quantityError, RECIPE_BY_SERVING, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
 import { continuationFor, uncountedFoods } from '../server/agent'
 import { wholeDishWeight } from '../server/dishWeight'
+import { countedAsPieces, countsSaid, piecesOf, piecesPerServing } from '../server/pieces'
+import { sourceForPerson } from '../src/lib/agent'
 import { rememberResponse } from '../server/sessions'
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withContentFilterRetry, contentFilterCategories, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
@@ -59,7 +61,7 @@ import { deviceId } from '../src/lib/device'
 import { loadTheme } from '../src/lib/theme'
 import { chargeAnon, chargeTurn, countFreeAnswer, deviceKeyOf, RateLimited, SignInNeeded, _reset as resetGuard } from '../server/guard'
 import { countsAsFreeAnswer } from '../server/agent'
-import { askCopy, BUTTONS, STAMP_LABEL, verdictTone } from '../src/lib/verdict'
+import { askCopy, BUTTONS, dayUnscoredNote, STAMP_LABEL, verdictTone } from '../src/lib/verdict'
 import { diffEntries, exportShape, fromRow, mergeById, reconcileAfterFailedPush, storable, toRow } from '../src/lib/syncCore'
 import { accessOf, looksLikeCode, looksLikeEmail, problemOf, signInReasonOf } from '../src/lib/authCore'
 import { weekSummary, weeksSummary } from '../src/lib/history'
@@ -275,8 +277,9 @@ const brandedMisses: string[] = []
       const day = dayState({ glBudget: 54, carbsG: 107, kcal: 1653 }, [{ foodId: pizza.id, grams: 230 }])
       if (!day.unscored?.length) brandedMisses.push('    a day with pizza in it does not name the pizza as unscored')
       const apple = computeMeal([{ foodId: 'ing:apple', grams: 150 }])
-      const afterApple = afterMealFor(day.remaining, apple.totals, [], withDayUnscored([], day))
-      if (afterApple.fits !== null || !afterApple.partial?.unscored?.length) brandedMisses.push(`    an apple after pizza at lunch got a verdict: ${JSON.stringify(afterApple)}`)
+      // As the engine calls it (#117): the apple's own foods apart, the pizza named as the day's.
+      const afterApple = afterMealFor(day.remaining, apple.totals, [], [], undefined, [], dayOnlyUnscored([], day))
+      if (afterApple.fits !== null || !afterApple.partial?.dayUnscored?.length || afterApple.partial?.unscored) brandedMisses.push(`    an apple after pizza at lunch got a verdict: ${JSON.stringify(afterApple)}`)
       const clean = dayState({ glBudget: 54, carbsG: 107, kcal: 1653 }, [{ foodId: 'ing:apple', grams: 150 }])
       if (clean.unscored) brandedMisses.push('    a day of scored food is marked partial')
     }
@@ -1162,6 +1165,100 @@ recorrectMisses.forEach((m) => console.log(m))
   const tone = verdictTone('This fits your day.', 'meal', { answer: '', trace: [cm(['ing:greek_yogurt'])] as never, uncounted: ['strawberries'] })
   if (tone !== 'partial') bits.push(`a meal with a food left out is stamped ${tone}`)
   console.log(`\nbatch 3   ${bits.length === 0 ? 'ok' : 'WRONG'}  (a few, a handful, a food left out)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// ── #116: a recipe's amount (diary test, 25 November 2026) ─────────────────────────────────────────────────────
+// Q: a plate that already holds a pita is not counted beside the pita. N: a recipe's question asks for servings. S: "two tacos" are pieces.
+// T: the data's own bookkeeping is not printed under the receipt.
+{
+  const bits: string[] = []
+  const by = loadFoods().byId
+  const lookup = (id: string) => by.get(id)
+  const plate = 'rec:DB-0341', tacos = 'rec:DB-1162', miso = 'rec:DB-0992', salad = 'rec:DB-0209'
+  if (by.get(plate)?.name !== 'Chicken Souvlaki Plate' || by.get(tacos)?.name !== 'Beef Tacos with Corn Tortillas' || by.get(miso)?.name !== 'Shrimp & Vegetable Miso Soup') bits.push('the three recipes of the diary test moved')
+  // Q
+  const q = recipeWithItsPart([plate, 'ing:whole_wheat_pita', 'usda:2705448', salad])
+  if (q?.dish !== 'Chicken Souvlaki Plate' || q.part !== 'Whole wheat pita') bits.push(`the souvlaki plate beside its pita: ${JSON.stringify(q)}`)
+  if (recipeWithItsPart([plate, 'usda:2707730'])?.part !== 'Whole wheat pita') bits.push('the plate beside "Bread, pita, whole wheat" (the same food in other words) is allowed')
+  if (recipeWithItsPart([plate, 'ing:cucumber', salad])) bits.push('two dishes that share cucumber and tomato (no carbohydrate to count twice) are refused')
+  if (recipeWithItsPart([tacos, 'ing:white_rice']) || recipeWithItsPart(['ing:chicken_breast', 'ing:whole_wheat_pita'])) bits.push('a dish beside a food it does not hold is refused')
+  // S
+  const per = piecesPerServing(by.get(tacos)!, lookup)
+  if (per?.per !== 2 || per.shell !== 'tortilla') bits.push(`pieces in a serving of beef tacos: ${JSON.stringify(per)} (60 g of 28 g corn tortillas is 2)`)
+  if (piecesPerServing(by.get(miso)!, lookup) !== null) bits.push('a soup has pieces')
+  const two = gramsFor(by.get(tacos)!, { count: 2, unit: 'piece' })
+  if (!('servings' in two) || two.servings !== 1 || two.basis !== 'typical') bits.push(`two tacos: ${JSON.stringify(two)}, wanted 1 serving`)
+  const three = gramsFor(by.get(tacos)!, { count: 3, unit: 'piece' })
+  if (!('servings' in three) || three.servings !== 1.5) bits.push(`three tacos: ${JSON.stringify(three)}, wanted 1.5 servings`)
+  const said = countsSaid('two beef tacos on corn tortillas with lettuce, shredded cheese and salsa, and a 12 oz can of Coke')
+  if (piecesOf('Beef Tacos with Corn Tortillas', said) !== 2) bits.push(`"two beef tacos" not read as 2 of the dish: ${JSON.stringify(said)}`)
+  for (const m of ['two servings of beef tacos', 'a plate of beef tacos', '2 orders of tacos', 'two beef taco plates']) if (piecesOf('Beef Tacos with Corn Tortillas', countsSaid(m)) !== null) bits.push(`"${m}" read as pieces`)
+  if (piecesOf('Beef Tacos with Corn Tortillas', countsSaid('I had a lunch of three beef tacos and a Coke')) !== 3) bits.push('"a lunch of three beef tacos" not read as 3')
+  if (piecesOf('Shrimp & Vegetable Miso Soup', countsSaid('a California roll, 8 pieces, and a cup of miso soup')) !== null) bits.push('"a cup of miso soup" read as pieces of the soup')
+  const items: { foodId: string; servings?: number; quantity?: { count: number; unit: string } }[] = [{ foodId: tacos, servings: 2 }, { foodId: 'usda:2709583', quantity: { count: 12, unit: 'fl oz' } }]
+  countedAsPieces(items, said, lookup)
+  if (items[0].servings !== undefined || items[0].quantity?.unit !== 'piece' || items[0].quantity.count !== 2 || items[1].quantity?.unit !== 'fl oz') bits.push(`2 servings of tacos after "two beef tacos": ${JSON.stringify(items)}`)
+  const asked = [{ foodId: tacos, servings: 2 }]
+  countedAsPieces(asked, countsSaid('two servings of beef tacos'), lookup)
+  if (asked[0].servings !== 2) bits.push('"two servings of beef tacos" was turned into pieces')
+  const souv = [{ foodId: plate, servings: 2 }]
+  countedAsPieces(souv, countsSaid('chicken souvlaki, two skewers'), lookup)
+  if (souv[0].servings !== 2) bits.push('a count of something the dish is not named for was turned into pieces')
+  // N
+  const cup = gramsFor(by.get(miso)!, { count: 1, unit: 'cup' }), grams = gramsFor(by.get(miso)!, { count: 240, unit: 'g' }), piece = gramsFor(by.get(miso)!, { count: 1, unit: 'piece' })
+  if (!('needs' in cup) || cup.needs !== RECIPE_BY_SERVING || !('needs' in grams) || grams.needs !== RECIPE_BY_SERVING || !('needs' in piece) || piece.needs !== RECIPE_BY_SERVING) bits.push(`a recipe by cup, grams or piece: ${JSON.stringify([cup, grams, piece])}`)
+  if (needsServingsHint('Shrimp & Vegetable Miso Soup') !== 'About how many servings of Shrimp & Vegetable Miso Soup?') bits.push('the servings question is not the wording')
+  const plan = planQuantities([{ foodId: miso, quantity: { count: 1, unit: 'cup' } }])
+  if (plan.needs[0]?.why !== RECIPE_BY_SERVING) bits.push(`a cup of a soup recipe: ${JSON.stringify(plan.needs)}`)
+  if (amountQuestion(plan.needs[0], 'metric') !== 'About how many servings of Shrimp & Vegetable Miso Soup?' || amountQuestion(plan.needs[0], 'imperial') !== amountQuestion(plan.needs[0], 'metric')) bits.push(`the question for a cup of a soup recipe: ${amountQuestion(plan.needs[0], 'metric')}`)
+  const egg = planQuantities([{ foodId: 'ing:egg', quantity: { count: 1, unit: 'cup' } }]).needs[0]
+  if (amountQuestion(egg, 'metric') !== `About how many grams of ${egg.name}?` || amountQuestion(egg, 'imperial') !== `About how many ounces or cups of ${egg.name}?`) bits.push(`the question for a cup of egg: ${amountQuestion(egg, 'metric')}`)
+  // T
+  const pancakes = loadFoods().records.find((r) => /withdrawn 20 November 2026/.test(r.source ?? ''))
+  const shown = sourceForPerson(pancakes?.source ?? '')
+  if (!pancakes || /withdrawn|80%|USDA source hold/.test(shown) || !/no glycemic load is computed\.$/.test(shown)) bits.push(`the source under the receipt: ${JSON.stringify(shown)}`)
+  if (sourceForPerson('USDA FoodData Central, Survey (FNDDS); glycemic index 55.') !== 'USDA FoodData Central, Survey (FNDDS); glycemic index 55.') bits.push('a plain source was changed')
+  console.log(`\nrecipe amounts ${bits.length === 0 ? 'ok' : 'WRONG'}  (a plate beside its pita, two tacos, servings of a soup, the source line)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// ── #117: the day, not the meal, is partly counted (diary test, 25 November 2026) ────────────────────────────────
+// Honey Nut Cheerios at breakfast have no load; lunch (a California roll and miso soup) is counted in full. Lunch was stamped "Part of the
+// meal", offered "Log what was counted", and told "Cheerios wasn't counted". The day still may not be called a fit; the meal is whole.
+{
+  const bits: string[] = []
+  const cheerios = 'Cheerios Honey Nut Cereal'
+  const room = { gl: 49.3, carbsG: 76, kcal: 1500 }, lunch = { gl: 21, carbs: 55.6, kcal: 400 }
+  const a = afterMealFor(room, lunch, [], [], undefined, [], [cheerios])
+  if (a.fits !== null || a.partial?.dayUnscored?.join() !== cheerios || a.partial?.unscored || a.partial?.unknownFoods.length) bits.push(`a whole lunch on a day with Cheerios: ${JSON.stringify(a)}`)
+  const over = afterMealFor({ gl: 10, carbsG: 76, kcal: 1500 }, lunch, [], [], undefined, [], [cheerios])
+  if (over.fits !== false) bits.push('a lunch over the room left, on a day with Cheerios, is not "over"')
+  if (afterMealFor(room, lunch).partial) bits.push('a whole meal on a whole day is partial')
+  // The split: the day's foods without a load, less this meal's own.
+  const day = { remaining: room, unscored: [cheerios, 'Pizza'] } as never
+  if (dayOnlyUnscored(['Pizza'], day).join() !== cheerios || dayOnlyUnscored([], { remaining: room } as never).length) bits.push(`the day's foods without a load, less the meal's: ${dayOnlyUnscored(['Pizza'], day)}`)
+  // The stamp and the line.
+  const reply = (afterMeal: object) => ({ answer: '', blocked: false, verified: true, unmatchedNumbers: [], matchedNumbers: [], toolCalls: 1, trace: [{ tool: 'diabite_engine_compute_meal', input: {}, result: { afterMeal, items: [{ loadAvailable: true }] } }] }) as never
+  const t = (am: object) => verdictTone('', 'meal', reply(am))
+  if (t({ fits: null, partial: { unknownFoods: [], dayUnscored: [cheerios] } }) !== 'day') bits.push('a whole meal on a partly counted day is not stamped "day"')
+  if (t({ fits: null, partial: { unknownFoods: [], unscored: ['Pizza'], dayUnscored: [cheerios] } }) !== 'partial') bits.push('a meal with its own food without a load is not "partial"')
+  if (t({ fits: null, partial: { unknownFoods: ['dragon fruit'], dayUnscored: [cheerios] } }) === 'day') bits.push('a meal missing a food is stamped "day"')
+  if (t({ fits: false, partial: { unknownFoods: [], dayUnscored: [cheerios] } }) !== 'bad') bits.push('a meal over the room on a partly counted day is not "over"')
+  if (STAMP_LABEL.day !== 'Day partly counted') bits.push(`the stamp reads ${STAMP_LABEL.day}`)
+  if (dayUnscoredNote([cheerios]) !== 'Cheerios Honey Nut Cereal, earlier today, has no glycemic load in our data, so what is left today may be less.') bits.push(`the line: ${dayUnscoredNote([cheerios])}`)
+  if (dayUnscoredNote(['Pancakes', 'Pizza']) !== 'Pancakes and Pizza, earlier today, have no glycemic load in our data, so what is left today may be less.') bits.push(`the line for two: ${dayUnscoredNote(['Pancakes', 'Pizza'])}`)
+  // The receipt: the meal's own lines, no "Not scored: Cheerios", the log button for a whole meal.
+  const roll = computeMeal([{ foodId: 'usda:2708963', grams: 240 }])
+  const r = buildReceipt({ ...roll, afterMeal: a } as never, 49.3, [])
+  if (r.unscored || r.partial || r.dayUnscored?.join() !== cheerios) bits.push(`the receipt of the lunch: ${JSON.stringify({ unscored: r.unscored, partial: r.partial, day: r.dayUnscored })}`)
+  // The last-resort answer never says "fits" for it, and never says the lunch has the cereal.
+  const trace = [{ tool: 'diabite_engine_compute_meal', input: {}, result: { ...roll, afterMeal: a, dayState: { remaining: { gl: 49.3 } } } }] as never
+  const text = templatedAnswer(trace) ?? ''
+  if (!/can't judge/i.test(text) || (/\bfits\b/i.test(text) && !/can't judge/i.test(text)) || !text.includes(cheerios) || /wasn't counted|not counted|left out/i.test(text)) bits.push(`the last-resort answer: ${text.slice(0, 200)}`)
+  console.log(`\nday part  ${bits.length === 0 ? 'ok' : 'WRONG'}  (a whole meal on a partly counted day)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }
@@ -2841,7 +2938,7 @@ filterMisses.forEach((m) => console.log(m))
     if (!/apple/i.test(driverOf(mixed.items)?.name ?? '')) restMisses.push('    an item with no load became the driver')
     const day = dayState({ glBudget: 54, carbsG: 107, kcal: 1653 }, [{ foodId: good.id, grams: 400 }])
     if (!day.unscored?.length) restMisses.push('    a day with a restaurant item in it does not name it as unscored')
-    const afterApple = afterMealFor(day.remaining, computeMeal([{ foodId: 'ing:apple', grams: 150 }]).totals, [], withDayUnscored([], day))
+    const afterApple = afterMealFor(day.remaining, computeMeal([{ foodId: 'ing:apple', grams: 150 }]).totals, [], [], undefined, [], dayOnlyUnscored([], day))
     if (afterApple.fits !== null) restMisses.push('    an apple after a restaurant meal got a verdict')
   } finally { byId.delete(good.id) }
   // Never a swap, and the three kinds with no load are exactly these three.

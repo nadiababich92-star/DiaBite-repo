@@ -227,6 +227,8 @@ export interface Receipt {
   partial?: string[]
   /** Branded items: carbohydrate counted, load not available. */
   unscored?: string[]
+  /** Foods eaten earlier today with no load in our data (not in this meal): what is left of the day may be less (tracker #117). */
+  dayUnscored?: string[]
   /** Every item is branded: the card shows carbohydrate, not a load. */
   carbsOnly?: boolean
   /**
@@ -272,7 +274,7 @@ interface MealResult {
   totals: { gl: number; carbs?: number; fiber?: number; availableCarbs?: number }
   /** The budget before this meal; compute_meal returns it when it was given a session. */
   dayState?: { remaining?: { gl: number } }
-  afterMeal?: { remaining?: { gl: number }; fits?: boolean | null; partial?: { unknownFoods: string[]; unscored?: string[] }; carbLimit?: CarbLimitResult }
+  afterMeal?: { remaining?: { gl: number }; fits?: boolean | null; partial?: { unknownFoods: string[]; unscored?: string[]; dayUnscored?: string[] }; carbLimit?: CarbLimitResult }
   /** Present on a cost_dish result: the dish was counted from an assumed recipe. */
   assumed?: boolean
   dish?: string
@@ -325,7 +327,8 @@ export function receiptFrom(trace: TraceStep[] | undefined): Receipt | null {
     for (const phrase of res?.results ?? []) {
       for (const c of phrase.candidates ?? []) {
         if (!used.has(c.id) || !c.source) continue
-        sources.set(c.source, (sources.get(c.source) ?? false) || !!c.verifiedAt)
+        const text = sourceForPerson(c.source)
+        sources.set(text, (sources.get(text) ?? false) || !!c.verifiedAt)
       }
     }
   }
@@ -334,6 +337,16 @@ export function receiptFrom(trace: TraceStep[] | undefined): Receipt | null {
     ? { dish: m.dish ?? 'dish', assumedFoodIds: (m.ingredients ?? []).filter((i) => i.assumedGrams).map((i) => i.foodId) }
     : undefined
   return buildReceipt(m, leftBefore, [...sources].map(([text, verified]) => ({ text, verified })), assumed)
+}
+
+/**
+ * A record's source as the person reads it under the receipt: the data's own bookkeeping is left out (tracker #116, finding T). A USDA dish
+ * whose computed glycemic index was withdrawn keeps the reason in its record ("withdrawn 20 November 2026: the ingredients with a USDA source
+ * hold 69% of this dish's carbohydrate, below the 80% needed…", which the engine suite checks), and the person saw that sentence under their
+ * pancakes on 25 November. What they need is already in the sentence before it: no glycemic index, so no glycemic load.
+ */
+export function sourceForPerson(source: string): string {
+  return source.replace(/\s*withdrawn \d{1,2} [A-Z][a-z]+ \d{4}:[^]*$/, '').trim()
 }
 
 /** The receipt of one costed meal. The same lines whether the agent asked for the meal or the person changed a portion. */
@@ -356,6 +369,7 @@ export function buildReceipt(m: MealResult, leftBefore: number | null, sources: 
     sources,
     ...(m.afterMeal?.partial?.unknownFoods.length ? { partial: m.afterMeal.partial.unknownFoods } : {}),
     ...(m.afterMeal?.partial?.unscored?.length ? { unscored: m.afterMeal.partial.unscored } : {}),
+    ...(m.afterMeal?.partial?.dayUnscored?.length ? { dayUnscored: m.afterMeal.partial.dayUnscored } : {}),
     ...(m.items.length > 0 && m.items.every((it) => it.gl === null) ? { carbsOnly: true } : {}),
     ...(assumed ? { assumed } : {}),
   }

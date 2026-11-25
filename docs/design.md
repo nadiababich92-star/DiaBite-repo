@@ -222,7 +222,11 @@ into it, so a phone's keyboard does not open over the question.
 A 20px filled circle in the verdict colour with a white icon, beside an
 uppercase label: ✓ Fits, ✕ Over today’s budget, ! One question first,
 i Advice. The red label names a fact about the day, never a prohibition: "Not today" was changed on
-9 November 2026 after a person with diabetes said it sounded like a refusal.
+9 November 2026 after a person with diabetes said it sounded like a refusal. **! Day partly counted** (the
+accent disc, like "Part of the meal") stands on a meal counted whole on a day that already holds a food with no load: the meal
+is not partial, the room left is uncertain, so it is neither "Fits" nor "Part of the meal". Under the figures one muted line,
+from the engine's names: "Cheerios Honey Nut Cereal, earlier today, has no glycemic load in our data, so what is left today may
+be less." (`.day-unscored-note`, 14px; owner's choice of wording, 25 November 2026, tracker #117.)
 
 ### The three figures
 `this meal` · `before` · `left after`. The last carries the verdict colour and
