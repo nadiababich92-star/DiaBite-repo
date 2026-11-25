@@ -11,6 +11,9 @@ RG=${RG:-rg-nadia.babich92-5702}
 APP=${APP:-diabite-engine}
 REGISTRY=${REGISTRY:-ca83d2041d5eacr.azurecr.io}
 REPO=${REPO:-nadiababich92-star/DiaBite-repo}
+# Only a push to main can sign in to Azure (CLAUDE.md rule 9): a push of the same commit to another branch starts a run that
+# fails at login. Without this filter that run, being the newest for the commit, was read as "the build failed" (25 November 2026).
+BRANCH=${BRANCH:-main}
 # Only what goes into the image has to be committed: a change in docs/ or eval/ cannot make the image differ from HEAD.
 IMAGE_INPUTS=(Dockerfile .dockerignore package.json package-lock.json server agent src public index.html vite.config.ts tsconfig.json data/foods-usda/foods_usda.json data/foods-usda/branded_common.json data/foods-usda/restaurant_items.json data/recipes-db)
 git diff --quiet HEAD -- "${IMAGE_INPUTS[@]}" || { echo "an input of the image is not committed — commit first"; git diff --stat HEAD -- "${IMAGE_INPUTS[@]}" | tail -5; exit 1; }
@@ -24,7 +27,7 @@ git diff --quiet HEAD -- "${IMAGE_INPUTS[@]}" || { echo "an input of the image i
 # in the commit and the old catalogue was in the app).
 if git diff-tree --no-commit-id --name-only -r HEAD | grep -qE '^(\.github/workflows/build-engine\.yml|Dockerfile|\.dockerignore|package(-lock)?\.json|server/|agent/|src/|data/foods-usda/(foods_usda|branded_common|restaurant_items)\.json|data/recipes-db/(ingredients|recipes_db|portion_mapping|gi_crosscheck)\.json|data/recipes-db/embeddings\.|index\.html|public/|vite\.config\.ts|tsconfig\.json)'; then
   for _ in $(seq 1 18); do
-    gh run list --repo "$REPO" --workflow build-engine --commit "$(git rev-parse HEAD)" --limit 1 \
+    gh run list --repo "$REPO" --workflow build-engine --branch "$BRANCH" --commit "$(git rev-parse HEAD)" --limit 1 \
       --json status -q '.[0].status' 2>/dev/null | grep -q . && break
     echo "HEAD changes the image but its build has not started; waiting…"; sleep 10
   done
@@ -32,7 +35,7 @@ fi
 
 SHA=""
 for candidate in $(git log -20 --format=%H); do
-  if gh run list --repo "$REPO" --workflow build-engine --commit "$candidate" --limit 1 \
+  if gh run list --repo "$REPO" --workflow build-engine --branch "$BRANCH" --commit "$candidate" --limit 1 \
        --json status -q '.[0].status' 2>/dev/null | grep -q .; then
     SHA=$candidate
     break
@@ -46,7 +49,7 @@ IMAGE_PATHS='^(\.github/workflows/build-engine\.yml|Dockerfile|\.dockerignore|pa
 if [ "$SHA" != "$(git rev-parse HEAD)" ] && git diff --name-only "$SHA" HEAD | grep -qE "$IMAGE_PATHS"; then
   echo "commits after $SHA change the image; waiting for HEAD's build…"
   for _ in $(seq 1 30); do
-    gh run list --repo "$REPO" --workflow build-engine --commit "$(git rev-parse HEAD)" --limit 1 \
+    gh run list --repo "$REPO" --workflow build-engine --branch "$BRANCH" --commit "$(git rev-parse HEAD)" --limit 1 \
       --json status -q '.[0].status' 2>/dev/null | grep -q . && { SHA=$(git rev-parse HEAD); break; }
     sleep 10
   done
@@ -56,7 +59,7 @@ fi
 
 echo "waiting for that build…"
 for _ in $(seq 1 60); do
-  read -r STATUS CONCLUSION <<<"$(gh run list --repo "$REPO" --workflow build-engine --commit "$SHA" \
+  read -r STATUS CONCLUSION <<<"$(gh run list --repo "$REPO" --workflow build-engine --branch "$BRANCH" --commit "$SHA" \
     --limit 1 --json status,conclusion -q '.[0] | "\(.status) \(.conclusion // "-")"' 2>/dev/null || echo "missing -")"
   [ "$STATUS" = "completed" ] && break
   sleep 20
