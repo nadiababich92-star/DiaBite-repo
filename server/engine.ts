@@ -29,7 +29,7 @@ import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { phraseNames, resolvePhrases, withoutQuantity } from './resolve'
-import { afterMealFor, doubledStaple, recipeWithItsPart, sandwichWithItsBread, scaleToDishWeight, alternativesForMeal, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, dayOnlyUnscored, stillUnknown, withSaid } from './compute'
+import { afterMealFor, carbLeaderOf, doubledStaple, recipeWithItsPart, sandwichWithItsBread, scaleToDishWeight, alternativesForMeal, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, dayOnlyUnscored, stillUnknown, withSaid } from './compute'
 import { amountQuestion, GRAMS_PER_OUNCE, GRAMS_PER_POUND, NEEDS_WEIGHT_INSTRUCTION, quantityError, RECIPE_WEIGHED, settleAmount, weightQuestion } from './quantity'
 import { countedAsPieces } from './pieces'
 import { withGramsSaid } from './gramsSaid'
@@ -511,6 +511,7 @@ async function main() {
       const out: Record<string, unknown> = {
         ...meal,
         ...(top ? { driver: top } : {}),
+        ...(carbLeaderOf(meal.items, top) ? { carbLeader: carbLeaderOf(meal.items, top) } : {}),
         ...(day ? { dayState: day } : {}),
         ...(fit && 'plan' in fit && dish ? { scaled: { by: 'totalGrams', from: 'message', factor: fit.factor, totalG: dish.grams } } : {}),
         ...(fit && 'notApplied' in fit && fit.notApplied !== 'already' && dish ? { dishWeight: { grams: dish.grams, notApplied: fit.notApplied } } : {}),
@@ -596,6 +597,7 @@ async function main() {
       const out: Record<string, unknown> = {
         ...meal,
         ...(top ? { driver: top } : {}),
+        ...(carbLeaderOf(meal.items, top) ? { carbLeader: carbLeaderOf(meal.items, top) } : {}),
         ...(day ? { dayState: day } : {}),
         assumed: true, dish: body.dish, ingredients: plan.ingredients, unresolved: plan.unresolved,
         ...(sc.scaled ? { scaled: sc.scaled } : {}),

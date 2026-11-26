@@ -262,6 +262,13 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
     say('the meal is not called a fit', am?.fits !== true, JSON.stringify(am?.fits))
     style('the answer does not say the earlier food was left out of this meal', !/wasn't counted|was not counted|were not counted|left out|not counted/i.test(answer), answer.slice(0, 160))
   }
+  // #118 V: the engine names the food with no load that carries more carbohydrate than the driver; whether the Why line says so is wording.
+  if (e.carbLeaderNamed === true) {
+    const res = lastCallOf(r, 'compute_meal')?.result as { carbLeader?: { name: string } } | undefined
+    say('the engine names the food carrying most of the carbohydrate without a load', !!res?.carbLeader, JSON.stringify(res?.carbLeader))
+    const head = (res?.carbLeader?.name ?? '').toLowerCase().split(/[ ,(]/)[0].replace(/s$/, '')
+    style('the answer names that food', !!head && answer.toLowerCase().includes(head), answer.slice(0, 160))
+  }
   // #124: at most one item of a family (one rice) in the meal that was costed, by the costed items' names (a tool result).
   if (typeof e.atMostOne === 'string') {
     const n = mealNames().filter((x) => new RegExp(e.atMostOne as string, 'i').test(x)).length

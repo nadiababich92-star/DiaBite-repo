@@ -31,7 +31,7 @@ import { resolvePhrases, withoutQuantity } from '../server/resolve'
 import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { AGENT_WEIGHTS_LINE, parseMeal, tailLines, WEIGHTS_WHY } from '../src/lib/answer'
-import { afterMealFor, dayOnlyUnscored, doubledStaple, recipeWithItsPart, stillUnknown, sandwichWithItsBread, scaleToDishWeight, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withSaid } from '../server/compute'
+import { afterMealFor, carbLeaderOf, dayOnlyUnscored, doubledStaple, recipeWithItsPart, stillUnknown, sandwichWithItsBread, scaleToDishWeight, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withSaid } from '../server/compute'
 import { alternativesForMeal, findAlternatives, SWAP_ENERGY_BAND, SWAP_MIN_GAIN, SWAP_MIN_GAIN_SHARE } from '../server/compute'
 import { ALLOWED, mayReplace, potatoKind, standInsFor, swapClass } from '../server/roles'
 import { validateAsk } from '../server/guard'
@@ -1362,6 +1362,21 @@ recorrectMisses.forEach((m) => console.log(m))
   const r = (await resolvePhrases(store, ['a slice of baguette'], 3))[0] as { unknown?: boolean; candidates: { id: string }[] }
   if (r.unknown || r.candidates[0]?.id !== 'usda:2707610') bits.push(`"a slice of baguette": unknown ${!!r.unknown}, first ${r.candidates[0]?.id}`)
   console.log(`\nZ again   ${bits.length === 0 ? 'ok' : 'WRONG'}  (a request is a question; a missing food stays named across the question)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// ── #118 V: the food with no load that carries most of the carbohydrate is named (nadia+maya, 25 November 2026) ─────
+{
+  const bits: string[] = []
+  const it = (foodId: string, name: string, availableCarbs: number, gl: number | null) => ({ foodId, name, availableCarbs, gl }) as never
+  const breakfast = [it('usda:pancakes', 'Pancakes, plain, fast food / restaurant', 57.7, null), it('ing:maple_syrup', 'Pure maple syrup', 26.8, 14.5), it('ing:bacon', 'Bacon', 0.2, 0)]
+  const lead = carbLeaderOf(breakfast, { foodId: 'ing:maple_syrup' })
+  if (lead?.foodId !== 'usda:pancakes' || lead.availableCarbs !== 57.7) bits.push(`pancakes and syrup: ${JSON.stringify(lead)}`)
+  if (carbLeaderOf([it('usda:chips', 'Chips', 14, null), it('ing:rice', 'Rice', 44, 32)], { foodId: 'ing:rice' })) bits.push('chips with less carbohydrate than the rice were named')
+  if (carbLeaderOf([it('usda:pizza', 'Pizza', 60, null)], undefined)?.foodId !== 'usda:pizza') bits.push('a meal with no driver and pizza did not name the pizza')
+  if (carbLeaderOf([it('ing:cheese', 'Cheese', 0.4, null), it('ing:apple', 'Apple', 15, 5.2)], { foodId: 'ing:apple' })) bits.push('a food with almost no carbohydrate was named')
+  console.log(`\ncarb lead ${bits.length === 0 ? 'ok' : 'WRONG'}  (the food with no load that carries most of the carbohydrate)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }

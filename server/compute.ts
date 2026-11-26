@@ -536,6 +536,20 @@ export function driverOf(items: MealItemResult[]): { foodId: string; name: strin
 }
 
 /**
+ * The food with no load that carries more carbohydrate than the one driving the load (tracker #118, finding V, nadia+maya, 25 November 2026):
+ * "Pure maple syrup is driving the load" was true of the scored part and misleading of the meal, whose pancakes (no GI) held 57.7 of its 84.7 g.
+ * The engine names that food, so the answer can say so; the agent never compares items itself.
+ */
+export function carbLeaderOf(items: MealItemResult[], driver: { foodId: string } | undefined): { foodId: string; name: string; availableCarbs: number } | undefined {
+  const unscored = items.filter((it) => it.gl === null && it.availableCarbs >= 5)
+  if (!unscored.length) return undefined
+  const top = unscored.reduce((a, b) => (b.availableCarbs > a.availableCarbs ? b : a))
+  const lead = driver ? items.find((it) => it.foodId === driver.foodId) : undefined
+  if (lead && top.availableCarbs <= lead.availableCarbs) return undefined
+  return { foodId: top.foodId, name: top.name, availableCarbs: top.availableCarbs }
+}
+
+/**
  * An assumed recipe that holds the same starch twice (tracker #124, nadia+james, 25 November 2026): "beef and broccoli takeout with a cup of
  * pork fried rice" was costed as a recipe with a cup of white rice the agent assumed, and the fried rice the person named beside it, two rices
  * and a load of 74.7. Two ingredients of one family (rice, pasta, bread, potato), at least one of them with an assumed amount: the assumed one

@@ -7884,6 +7884,28 @@
         "recipe-amounts",
         "double-count"
       ]
+    },
+    {
+      "id": "RA9",
+      "dimension": "honest",
+      "query": "two buttermilk pancakes with 2 tablespoons of maple syrup and two strips of bacon",
+      "ground_truth": "The pancakes (no glycemic index) carry most of the carbohydrate; the syrup drives only the load of what is scored. The answer says both, never only that the syrup drives the meal (#118 V).",
+      "context": {
+        "budget": {
+          "glBudget": 93,
+          "carbsG": 207,
+          "kcal": 2072
+        },
+        "entries": []
+      },
+      "expect": {
+        "carbLeaderNamed": true,
+        "verified": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "why"
+      ]
     }
   ]
 }
