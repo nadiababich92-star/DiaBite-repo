@@ -665,6 +665,18 @@ const styleMisses: string[] = []
 // that a message instead of twelve minutes and a misleading file.
 console.log(`asking ${AGENT_URL}\n`)
 
+// #119: the daily diary tests share the model's quota (13:00–17:00 and 18:30–20:00 in Amsterdam); a run then took 5 of their 9
+// requests on 25 November. The run stops in those hours unless ALLOW_QUIET=1 says it was meant.
+{
+  const [h, m] = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Amsterdam', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date()).split(':').map(Number)
+  const t = h * 60 + m
+  const quiet = (t >= 13 * 60 && t < 17 * 60) || (t >= 18 * 60 + 30 && t < 20 * 60)
+  if (quiet && process.env.ALLOW_QUIET !== '1') {
+    console.error('Not now: 13:00–17:00 and 18:30–20:00 CET are the daily tests\' share of the model quota. Run later, or set ALLOW_QUIET=1 if this run is meant.')
+    process.exit(2)
+  }
+}
+
 for (const c of runnable) {
   process.stdout.write(`${c.id.padEnd(4)} ${c.query.slice(0, 48).padEnd(50)}`)
   const sessionId = `eval-${c.id}-${Date.now()}`
@@ -676,8 +688,8 @@ for (const c of runnable) {
       body: JSON.stringify({ sessionId, message: q, budget: c.context?.budget, entries: c.context?.entries, ...(k === 0 ? { newTopic: true } : {}) }),
     }).catch(() => undefined)
   }
-  const startedAt = Date.now()
-  const res = await fetch(AGENT_URL, {
+  let startedAt = Date.now()
+  const send = () => fetch(AGENT_URL, {
     method: 'POST',
     // The key exempts this run from the per-address limits (server/guard.ts):
     // 87 cases from one machine would otherwise be stopped at 30 per 10 minutes.
@@ -693,6 +705,17 @@ for (const c of runnable) {
       ...(c.newTopic ? { newTopic: true } : {}),
     }),
   })
+  let res = await send()
+  // #119: the model's quota spent shows here as 429 (the engine's limit) or 502 (the model's, after the engine's own two waits).
+  // The first one pauses the run for the token window to refill and asks again, so one burst does not drop rows; a second is a failure.
+  if (res.status === 429 || res.status === 502) {
+    const body = await res.clone().json().catch(() => ({})) as { retryAfterSec?: number }
+    const wait = Math.min(Math.max(body.retryAfterSec ?? 60, 10), 120)
+    process.stdout.write(`HTTP ${res.status}, pausing ${wait}s … `)
+    await new Promise((r) => setTimeout(r, wait * 1000))
+    startedAt = Date.now()
+    res = await send()
+  }
   if (!res.ok) {
     // A dropped row shrinks the sample every metric below is computed over,
     // so it is counted and named rather than skipped past.
