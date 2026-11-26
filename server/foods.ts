@@ -359,6 +359,12 @@ export function householdPortion(rows: { label: string; grams: number }[] | unde
     const named = (rows ?? []).find((p) => p.label.toLowerCase().includes(own))
     if (named) return Math.round(named.grams)
   }
+  // A sandwich or sub is one sandwich: USDA lists a slider first for some (65 g turkey, 60 g steak on wheat), a large one for others. Its own
+  // "1 regular or 6\" submarine" row is the same thing for all seventeen, and a 6-inch sub is what "a turkey sub" means (#130, 26 November 2026).
+  if (/sandwich or sub/i.test(name)) {
+    const six = (rows ?? []).find((p) => /^1 regular or 6" submarine$/i.test(p.label))
+    if (six) return Math.round(six.grams)
+  }
   // A burrito bowl is said by the bowl. USDA lists "1 cup" first, 120 g, which made "a burrito bowl" a fifth of a bowl and
   // 20 g of carbohydrate with a plain "fits" (a dietitian's test, 15 November); the listed item is the portion.
   if (/^burrito bowl\b/i.test(name)) {
@@ -591,6 +597,10 @@ const readableName = (name: string) =>
  * "fries" asked whether someone meant yuca or sweet-potato fries.
  */
 const USDA_ALIASES: Record<string, string[]> = {
+  // 26 November 2026, the owner's choice (tracker #130): a turkey sub is USDA's restaurant turkey sandwich or sub, not "Turkey Meatball Sub
+  // (Open-Faced)", which the search put first for plain "turkey sub". "Subway" before it is dropped by the resolver (resolve.ts, withoutChain).
+  'usda:2706985': ['turkey sub', 'turkey sub sandwich', 'turkey hoagie'],
+  'usda:2706986': ['turkey and cheese sub', 'turkey cheese sub', 'turkey sub with cheese'],
   // 24 November 2026, the owner's choice: fries as people buy them are USDA's restaurant / fast-food fries (37.2 and 41.4 g carbohydrate per
   // 100 g), not fries cooked from fresh at home (18.5 g), which counted a medium order at half its carbohydrate. GI 78 by fix_fries_gi.py.
   'usda:2709462': ['french fries', 'french fry', 'fries', 'fast food fries', 'mcdonalds fries', "mcdonald's fries"], // Potato, french fries, restaurant: the record whose USDA portions are fast-food orders (medium 145 g, large 180 g), so "medium fries" needs no question

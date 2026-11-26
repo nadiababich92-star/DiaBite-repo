@@ -1284,6 +1284,20 @@ recorrectMisses.forEach((m) => console.log(m))
   if (bits.length) process.exitCode = 1
 }
 
+// ── #130: a turkey sub is USDA's restaurant turkey sub, from Subway or not (the owner's decision, 26 November 2026) ─────
+{
+  const bits: string[] = []
+  for (const [p, id] of [['turkey sub', 'usda:2706985'], ['a Subway 6-inch turkey sub', 'usda:2706985'], ["Subway's turkey sub", 'usda:2706985'], ['a turkey and cheese sub', 'usda:2706986']] as const) {
+    const r = (await resolvePhrases(store, [p], 3))[0] as { unknown?: boolean; candidates: { id: string; name: string }[] }
+    if (r.unknown || r.candidates[0]?.id !== id) bits.push(`"${p}": unknown ${!!r.unknown}, first ${r.candidates[0]?.id} ${r.candidates[0]?.name}`)
+  }
+  if (withoutQuantity('Chipotle chicken burrito bowl') !== 'Chipotle chicken burrito bowl') bits.push('a chain with its own records (Chipotle) was stripped')
+  if (withoutQuantity('a turkey footlong') !== 'turkey footlong') bits.push('a footlong was read as a 6-inch sub')
+  console.log(`\nsub       ${bits.length === 0 ? 'ok' : 'WRONG'}  (a turkey sub, from Subway or not)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
 // ── #122: a question under a costed meal gets a field to answer in (diary test, 25 November 2026, nadia+ruth) ────
 {
   const bits: string[] = []
@@ -2640,7 +2654,14 @@ filterMisses.forEach((m) => console.log(m))
   const spoonTooBig = Object.keys(baseline).filter((id) => spoon(id) && id.startsWith('usda:') && getRecord(id).defaultPortion > 40 && (getRecord(id).portions ?? []).some((p) => /^1 (tablespoon|teaspoon|fl oz)|^guideline amount (on regular|per sandwich)/i.test(p.label)))
   if (spoonTooBig.length) dMisses.push(`    ${spoonTooBig.length} spoonful foods still default to more than a spoonful, e.g. ${spoonTooBig[0]} ${getRecord(spoonTooBig[0]).defaultPortion} g`)
   for (const [id, want] of [['usda:2710260', 13.8], ['usda:2710212', 15], ['usda:2705594', 15], ['usda:2710155', 14], ['usda:2705614', 15]] as [string, number][]) if (getRecord(id).defaultPortion !== want) dMisses.push(`    ${id} defaults to ${getRecord(id).defaultPortion} g, wanted the spoonful ${want} g`)
-  const drifted = Object.entries(baseline).filter(([id, g]) => !listed.has(id) && getRecord(id).defaultPortion !== g && !spoon(id))
+  // The second, decided on 26 November (#130, "Subway counts as an ordinary sub"): a USDA sandwich or sub defaults to its own "1 regular or 6\"
+  // submarine" row, not the slider or the large one USDA lists first. Those may differ from the baseline, and every one must be that row exactly.
+  const sub = (id: string) => /sandwich or sub/i.test(getRecord(id).name) && getRecord(id).kind !== 'recipe'
+  const subRow = (id: string) => (getRecord(id).portions ?? []).find((p) => /^1 regular or 6" submarine$/i.test(p.label))
+  const subOff = Object.keys(baseline).filter((id) => sub(id) && subRow(id) && getRecord(id).defaultPortion !== Math.round(subRow(id)!.grams))
+  if (subOff.length) dMisses.push(`    ${subOff.length} sandwiches or subs do not default to their 6-inch row, e.g. ${subOff[0]} ${getRecord(subOff[0]).defaultPortion} g`)
+  if (getRecord('usda:2706985').defaultPortion !== 195 || getRecord('usda:2706986').defaultPortion !== 240) dMisses.push('    a turkey sub is not a 6-inch one (195 g, 240 g with cheese)')
+  const drifted = Object.entries(baseline).filter(([id, g]) => !listed.has(id) && getRecord(id).defaultPortion !== g && !spoon(id) && !sub(id))
   if (drifted.length) dMisses.push(`    ${drifted.length} records off the list changed their default, e.g. ${drifted.slice(0, 3).map(([id, g]) => `${id} ${g} -> ${getRecord(id).defaultPortion}`).join(', ')}`)
   console.log(`\ndefaults  ${dMisses.length === 0 ? 'ok' : 'WRONG'}  (${cases.engine.defaults.length} foods on the list)`)
   dMisses.forEach((m) => console.log(m))

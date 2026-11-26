@@ -160,8 +160,20 @@ const AMOUNT = /^\s*\d+(?:[.,]\d+)?\s*(?!%)(g|gram|grams|kg|oz|ounces?|lb|ml|l|c
 // "A medium apple" is an apple of a size the person said, not a food called "medium apple" (the agent sent it whole and the engine said it
 // did not have it, 18 November). The size is the quantity's business now (`quantity: { unit: 'medium' }`), so it is not part of the food.
 const SIZE_WORD = /^(?:small|medium|large|extra[- ]large|big|little)\s+(?=\S)/i
+/**
+ * A chain we hold no menu for is not part of the food's name (the owner's decision, 26 November 2026, tracker #130): "a Subway 6-inch turkey
+ * sub" is a restaurant turkey sub, a 6-inch one being USDA's regular sub. Only chains decided one by one are here; Chipotle has its own
+ * records (kind restaurant) and is never stripped. A footlong is not a 6-inch sub and is left as said.
+ */
+const CHAIN_AS_GENERIC = /\bsubway(?:'s)?\s+/gi
+const SIX_INCH = /\b(?:6|six)[\s-]?(?:inch|in\.?|")(?=\s)\s*/gi
+export function withoutChain(phrase: string): string {
+  const out = phrase.replace(CHAIN_AS_GENERIC, '').replace(SIX_INCH, '').replace(/\s+/g, ' ').trim()
+  return out || phrase.trim()
+}
+
 export function withoutQuantity(phrase: string): string {
-  let out = phrase.trim()
+  let out = withoutChain(phrase.trim())
   for (let i = 0; i < 3; i++) {
     // A size word that is part of an everyday name stays: "Big Mac" lost its "big" and found macadamia nuts (24 November 2026).
     const stripped = out.replace(AMOUNT, '').replace(COUNT_WORD, '').trim()
