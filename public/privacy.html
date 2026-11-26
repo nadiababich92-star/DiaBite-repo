@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Privacy · DiaBite</title>
+<meta name="description" content="What DiaBite keeps about you, why, where, for how long, and how to export or delete it." />
+<link rel="canonical" href="https://diabite.pro/privacy.html" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,600&family=IBM+Plex+Sans:wght@400;600&display=swap" />
+<style>
+  /* The Paper look's own values (src/styles.css, :root[data-theme='paper']); this page stands outside the app. */
+  :root { --bg: #f1ece0; --surface: #fffcf5; --border: #dcd3bf; --text: #14201a; --text-dim: #4f5a53; --accent: #0e5a3c; --accent-soft: #e3f0e7;
+          --serif: 'Literata', Georgia, serif; --sans: 'IBM Plex Sans', system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--sans); }
+  main { max-width: 720px; margin: 0 auto; padding: 32px 20px 64px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 22px; }
+  h1 { font-family: var(--serif); font-size: 28px; line-height: 1.2; margin: 0 0 6px; letter-spacing: -0.01em; }
+  h2 { font-family: var(--serif); font-size: 19px; margin: 28px 0 8px; letter-spacing: -0.01em; }
+  p, li { margin: 0 0 10px; }
+  ul { padding-left: 20px; margin: 0 0 10px; }
+  .muted { color: var(--text-dim); font-size: 14px; }
+  .draft { background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; font-size: 14px; margin: 14px 0 4px; }
+  a { color: var(--accent); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  .home { display: inline-block; margin-bottom: 16px; font-weight: 600; text-decoration: none; min-height: 44px; line-height: 44px; }
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="/">← DiaBite</a>
+  <div class="card">
+    <h1>Privacy at DiaBite</h1>
+    <p class="muted">Last changed 26 November 2026</p>
+    <p class="draft">This is a draft in plain language. It says what DiaBite does today, exactly. A lawyer has not reviewed it yet; when one has, this page will say so.</p>
+
+    <h2>Who we are</h2>
+    <p>DiaBite is a nutrition tool for adults with type 2 diabetes, prediabetes or insulin resistance. It is run by its founder, Nadia Babich. For anything about your data, write to <a href="mailto:nadia@diabite.pro">nadia@diabite.pro</a>.</p>
+
+    <h2>What DiaBite keeps about you</h2>
+    <ul>
+      <li><strong>Your email address</strong>, to sign you in. If you sign in with Google, Google gives us your email address and nothing else.</li>
+      <li><strong>Your answers about yourself</strong>: age, sex, height, weight, activity, diagnosis, the classes of medicine you take, kidney status, other conditions, allergies and how you eat. Some of this is health information. We use it only to work out your daily targets and to answer your questions.</li>
+      <li><strong>Your diary</strong>: what you log and the meals you plan.</li>
+      <li><strong>What you type into Ask</strong>, kept for 30 days to find and fix mistakes, and not tied to your name or email. What you type can itself contain personal details, so please leave out anything you would not want stored.</li>
+      <li><strong>Food preferences you mention</strong> in a general question (for example, that you are vegetarian or dislike mushrooms), so later answers can respect them. They are kept under a random identifier of your browser, not under your name, email or account.</li>
+      <li><strong>Feedback you send</strong> through the form: your rating, your words, and your email address if you give it.</li>
+    </ul>
+    <p>DiaBite never asks for a medicine dose. We do not sell your data, we show no advertising, and we do not share your data with insurers, employers or data brokers.</p>
+
+    <h2>On your device</h2>
+    <p>Your browser keeps a copy of your answers, your diary, your sign-in and your chosen look, so the app opens quickly. We use no advertising cookies and no analytics trackers. Signing out of DiaBite clears its data from that browser.</p>
+
+    <h2>How your answers are made</h2>
+    <p>When you describe a meal, the sentence is sent to an AI model hosted on Microsoft Azure, which works out which foods you mean. Every number you see is computed by DiaBite's own engine from a food database and checked before it is shown; the AI model never produces a nutrition number.</p>
+
+    <h2>Who handles it for us</h2>
+    <ul>
+      <li><strong>Supabase</strong>: our database and sign-in. Your account, answers and diary are stored in Ireland.</li>
+      <li><strong>Microsoft Azure</strong>: the servers that run DiaBite, the AI model that reads your meal sentences, the sign-in emails, and our service logs, in Sweden.</li>
+      <li><strong>Google</strong>: only if you choose to sign in with Google, and our email, if you write to us.</li>
+    </ul>
+    <p>They process your data to run DiaBite for us, under their own terms, and not for their own purposes.</p>
+
+    <h2>How long we keep it</h2>
+    <ul>
+      <li>Your account, answers and diary: until you delete them.</li>
+      <li>What you type into Ask, and our service logs: 30 days.</li>
+      <li>Feedback: until you ask us to delete it.</li>
+    </ul>
+
+    <h2>Your choices</h2>
+    <ul>
+      <li><strong>See and take your data:</strong> Settings → export downloads your email address, your answers and your diary.</li>
+      <li><strong>Delete it:</strong> Settings → delete removes your account, your answers and your diary, at once. Feedback you sent stays, no longer linked to you; write to us and we will delete it.</li>
+      <li>Food preferences are kept under your browser's identifier, not your account, so deleting your account does not remove them yet. Write to us and we will remove them; we are changing this so that deleting your account removes them too.</li>
+      <li>For anything else, including a question about what we hold, write to <a href="mailto:nadia@diabite.pro">nadia@diabite.pro</a>.</li>
+    </ul>
+
+    <h2>Not for children, not medical advice</h2>
+    <p>DiaBite is for adults (18 and over). It is a reference tool, not medical advice, and it does not replace your doctor, dietitian or diabetes educator.</p>
+
+    <h2>Changes</h2>
+    <p>If this page changes, the date at the top changes with it.</p>
+  </div>
+</main>
+</body>
+</html>

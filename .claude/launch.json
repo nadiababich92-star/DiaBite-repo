@@ -36,6 +36,15 @@
         "export PATH=/opt/homebrew/bin:$PATH && (GOOGLE_SIGN_IN=on REQUIRE_SIGN_IN=on PORT=8787 npx tsx server/engine.ts &) && AGENT_WEBHOOK=http://localhost:8787/agent/ask exec npx vite --port 5175"
       ],
       "port": 5175
+    },
+    {
+      "name": "diabite-google-5173",
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": [
+        "-c",
+        "export PATH=/opt/homebrew/bin:$PATH && (GOOGLE_SIGN_IN=on REQUIRE_SIGN_IN=on PORT=8787 npx tsx server/engine.ts &) && AGENT_WEBHOOK=http://localhost:8787/agent/ask exec npx vite --port 5173 --strictPort"
+      ],
+      "port": 5173
     }
   ]
 }
