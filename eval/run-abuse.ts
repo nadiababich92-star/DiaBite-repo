@@ -255,6 +255,23 @@ async function httpSuite() {
     check('D4', 'nothing could be counted: assumed true, an error to read, nothing costed, and the dish stays unknown for the session',
       d3.status === 200 && d3.json.assumed === true && typeof d3.json.error === 'string' && d3.json.items === undefined
         && (after3.json.afterMeal?.partial?.unknownFoods ?? []).some((f: string) => /zzzqx/.test(f)), JSON.stringify([d3.json.error, after3.json.afterMeal?.partial]))
+    // NM (tracker #130, CLAUDE.md rule 3): a candidate offered only as a near match for a phrase the database lacks is refused by
+    // compute_meal; the same id offered under a phrase that was found is a food like any other. The Subway case of 26 November.
+    await park('nm-1')
+    const sub = await post('/tools/resolve_foods', { phrases: ['Subway 6-inch turkey sub on Italian bread with provolone and veggies'], sessionId: 'nm-1' })
+    const nearId = sub.json.results?.[0]?.unknown === true ? sub.json.results[0].candidates?.[0]?.id : undefined
+    const refused = nearId ? await post('/tools/compute_meal', { sessionId: 'nm-1', items: [{ foodId: nearId }] }) : undefined
+    const other = await post('/tools/compute_meal', { sessionId: 'nm-1', items: [{ foodId: 'seed:rice-white', grams: 100 }] })
+    check('NM1', 'a near match for a food the database lacks is refused, with what to do instead; another food is costed',
+      !!nearId && typeof refused?.json.error === 'string' && /near match/.test(refused.json.error) && /notCounted/.test(refused.json.error) && refused.json.totals === undefined
+        && other.json.totals !== undefined, JSON.stringify([nearId, refused?.json.error?.slice(0, 90), !!other.json.totals]))
+    await park('nm-2')
+    await post('/tools/resolve_foods', { phrases: ['Subway 6-inch turkey sub on Italian bread with provolone and veggies'], sessionId: 'nm-2' })
+    const found = await post('/tools/resolve_foods', { phrases: ['turkey sub'], sessionId: 'nm-2' })
+    const foundIds: string[] = (found.json.results?.[0]?.candidates ?? []).map((c: any) => c.id)
+    const allowed = nearId && foundIds.includes(nearId) ? await post('/tools/compute_meal', { sessionId: 'nm-2', items: [{ foodId: nearId }] }) : undefined
+    check('NM2', 'the same id offered under a phrase that was found is costed (the refusal is about the unknown phrase, not the record)',
+      !foundIds.includes(nearId ?? '') || (allowed?.json.totals !== undefined && allowed.json.error === undefined), JSON.stringify([foundIds.slice(0, 3), allowed?.json.error]))
     await park('cd-3')
     const d4 = await post('/tools/cost_dish', { dish: 'cholent', sessionId: 'cd-3', ingredients: [...cholent, { phrase: 'zzzqx', grams: 20 }] })
     check('D5', 'an ingredient that cannot be found is named, left out, and makes the meal partial: fits is not true',

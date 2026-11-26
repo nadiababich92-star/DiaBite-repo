@@ -461,6 +461,15 @@ async function main() {
     if (twice) {
       return res.json({ error: `"${twice.dish}" is a whole dish that already holds ${twice.part.toLowerCase()}, so it cannot be counted beside the ${twice.part.toLowerCase()} the person named. The person listed the parts of their meal, so do not ask them about this: call compute_meal again now with the main food on its own (the meat or the main part, by its own record, from resolve_foods) together with each part they named, and leave "${twice.dish}" out. (Had they named only the dish, "${twice.dish}" alone would be right.)` })
     }
+    // A food the database lacks never enters the arithmetic under a neighbour's name (CLAUDE.md rule 3, tracker #130): an id resolve_foods
+    // offered only as a near match for a phrase it could not find is refused, and the agent is told what to do instead.
+    const near = body.sessionId ? getSession(body.sessionId)?.nearMisses : undefined
+    const miss = near ? body.items.find((it) => near[it.foodId]) : undefined
+    if (miss && near) {
+      const name = loadFoods().byId.get(miss.foodId)?.name ?? miss.foodId
+      const phrase = near[miss.foodId]
+      return res.json({ error: `"${name}" was only a near match for "${phrase}", which the database does not have, so it cannot be counted as that food. Leave it out of the items and name "${phrase}" in notCounted; or, if "${phrase}" is a prepared dish, count it with cost_dish from its own ingredients, as an assumed recipe.` })
+    }
     // "Two beef tacos" sent as 2 servings of a taco recipe that holds two tacos a serving: the person's count, read from their own message, is of
     // pieces (tracker #116, finding S). Only where the recipe's own shell says how many pieces a serving holds.
     countedAsPieces(body.items, body.sessionId ? getSession(body.sessionId)?.countsSaid : undefined, (id) => loadFoods().byId.get(id))

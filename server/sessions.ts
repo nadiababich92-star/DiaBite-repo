@@ -41,6 +41,13 @@ export interface SessionState {
    * keeps that from being called "fits". Reset whenever a turn parks its day.
    */
   unknownFoods: string[]
+  /**
+   * Candidates resolve_foods offered only under a phrase it could not find, by id, with that phrase (tracker #130). "Subway 6-inch turkey
+   * sub on Italian bread…" was unknown, its first candidate "Turkey Meatball Sub (Open-Faced)" was costed anyway, and the receipt counted a
+   * meatball sub beside "Not counted: Subway 6-inch turkey sub" (diary test, 26 November 2026): CLAUDE.md rule 3. An id also offered under a
+   * phrase that was found is not here. Reset with the rest of the turn.
+   */
+  nearMisses?: Record<string, string>
   /** The weight of the whole dish the person said in this turn's message (server/dishWeight.ts); memory only, cleared by the next turn. */
   dishWeight?: { grams: number; said: string }
   /** The counts the person said in this turn's message ("two beef tacos" → 2, taco: server/pieces.ts); memory only, cleared by the next turn. */
@@ -86,12 +93,22 @@ export function putSession(
  * Record what resolve_foods found and did not find. A phrase that was unknown
  * and later resolves (the model retried with another name) stops counting.
  */
-export function noteResolution(id: string, results: { phrase: string; unknown: boolean }[]): void {
+export function noteResolution(id: string, results: { phrase: string; unknown: boolean; candidates?: { id: string }[] }[]): void {
   const s = store.get(id)
   if (!s) return
   const unknown = new Set(s.unknownFoods)
   for (const r of results) { if (r.unknown) unknown.add(r.phrase); else unknown.delete(r.phrase) }
   s.unknownFoods = [...unknown]
+  s.nearMisses = nearMissesAfter(s.nearMisses ?? {}, results)
+}
+
+/** Ids offered under an unknown phrase and under no found one, after these results (pure: the check reads it without a session). */
+export function nearMissesAfter(near: Record<string, string>, results: { phrase: string; unknown: boolean; candidates?: { id: string }[] }[]): Record<string, string> {
+  const out = { ...near }
+  const found = new Set(results.filter((r) => !r.unknown).flatMap((r) => (r.candidates ?? []).map((c) => c.id)))
+  for (const r of results) if (r.unknown) for (const c of r.candidates ?? []) if (!found.has(c.id)) out[c.id] = r.phrase
+  for (const fid of found) delete out[fid]
+  return out
 }
 
 /**
