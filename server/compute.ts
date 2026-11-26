@@ -600,7 +600,7 @@ export function doubledStaple(ingredients: { name: string; assumedGrams: boolean
  * stopping the meal for it would ask a question about nothing. The burrito bowl and sandwich rules above are the same idea for two records
  * that have no ingredient list.
  */
-export function recipeWithItsPart(ids: string[]): { dish: string; part: string } | null {
+export function recipeWithItsPart(ids: string[]): { dish: string; part: string; dishId: string; partId: string } | null {
   const by = loadFoods().byId
   const words = (n: string) => n.toLowerCase().split(/[^a-z]+/).filter((w) => w && !['bread', 'plain', 'nfs', 'raw', 'cooked'].includes(w)).sort().join(' ')
   const carbs = (id: string) => { const r = by.get(id); return r?.per100 ? Math.max(0, r.per100.carbs - (r.per100.fiber ?? 0)) : 0 }
@@ -612,10 +612,39 @@ export function recipeWithItsPart(ids: string[]): { dish: string; part: string }
       const other = by.get(otherId)
       if (!other) continue
       const part = dish.parts.find((p) => p.id === otherId || (words(p.name) !== '' && words(p.name) === words(other.name)))
-      if (part && carbs(part.id) >= 5) return { dish: dish.name, part: part.name }
+      if (part && carbs(part.id) >= 5) return { dish: dish.name, part: part.name, dishId, partId: part.id }
     }
   }
   return null
+}
+
+/**
+ * #116 Q, the owner's decision of 26 November 2026: a dish that already holds a part the person named on its own ("chicken souvlaki, two
+ * skewers, with a whole wheat pita" found as a Chicken Souvlaki Plate, pita and all) is counted as its own ingredients, from the recipe's
+ * list in the database, without that part, and the part is counted once, as the person said it. The refusal it replaces left the agent to
+ * repair the call, and in 4 to 5 of 12 samples it dropped the pita or counted bare chicken. Each ingredient is its own line, so every weight
+ * shows, can be changed, and goes to the diary as what it is; no ingredient outside the database enters, because the recipe's own parts are
+ * database records. Runs on the settled plan, so a serving count multiplies the parts.
+ */
+export function withoutNamedPart(plan: QuantityPlan): { plan: QuantityPlan; without?: { dish: string; part: string } } {
+  const twice = recipeWithItsPart(plan.items.map((it) => it.foodId))
+  if (!twice) return { plan }
+  const by = loadFoods().byId
+  const k = plan.items.findIndex((it) => it.foodId === twice.dishId)
+  const dish = by.get(twice.dishId)
+  if (k < 0 || !dish?.parts) return { plan }
+  const servings = plan.items[k].servings ?? 1
+  const parts = dish.parts.filter((p) => p.id !== twice.partId && by.has(p.id) && p.grams * servings >= 0.5)
+  if (!parts.length) return { plan }
+  const expanded: MealItemInput[] = parts.map((p) => ({ foodId: p.id, grams: Math.round(p.grams * servings * 10) / 10 }))
+  return {
+    plan: {
+      ...plan,
+      items: [...plan.items.slice(0, k), ...expanded, ...plan.items.slice(k + 1)],
+      meta: [...plan.meta.slice(0, k), ...expanded.map(() => undefined), ...plan.meta.slice(k + 1)],
+    },
+    without: { dish: twice.dish, part: twice.part },
+  }
 }
 
 /**

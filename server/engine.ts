@@ -29,7 +29,7 @@ import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { phraseNames, resolvePhrases, withoutQuantity } from './resolve'
-import { afterMealFor, carbLeaderOf, doubledStaple, recipeWithItsPart, sandwichWithItsBread, scaleToDishWeight, alternativesForMeal, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, dayOnlyUnscored, stillUnknown, withSaid } from './compute'
+import { afterMealFor, carbLeaderOf, doubledStaple, withoutNamedPart, sandwichWithItsBread, scaleToDishWeight, alternativesForMeal, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, dayOnlyUnscored, stillUnknown, withSaid } from './compute'
 import { amountQuestion, GRAMS_PER_OUNCE, GRAMS_PER_POUND, NEEDS_WEIGHT_INSTRUCTION, quantityError, RECIPE_WEIGHED, settleAmount, weightQuestion } from './quantity'
 import { countedAsPieces } from './pieces'
 import { withGramsSaid } from './gramsSaid'
@@ -469,11 +469,8 @@ async function main() {
     if (sandwichWithItsBread(body.items.map((it) => loadFoods().byId.get(it.foodId)?.name ?? ''))) {
       return res.json({ error: 'A sandwich record is the whole sandwich, with its bread already in it, so it cannot be counted beside slices of bread. When the person said what is in the sandwich and on what bread, cost those foods (the filling and the bread) and leave the sandwich record out; when they did not, cost the sandwich record alone.' })
     }
-    // A plate that already holds a pita, counted beside the pita the person named (tracker #116, finding Q).
-    const twice = recipeWithItsPart(body.items.map((it) => it.foodId))
-    if (twice) {
-      return res.json({ error: `"${twice.dish}" is a whole dish that already holds ${twice.part.toLowerCase()}, so it cannot be counted beside the ${twice.part.toLowerCase()} the person named. The person listed the parts of their meal, so do not ask them about this: call compute_meal again now with the main food on its own (the meat or the main part, by its own record, from resolve_foods) together with each part they named, and leave "${twice.dish}" out. (Had they named only the dish, "${twice.dish}" alone would be right.)` })
-    }
+    // A plate that already holds a pita, counted beside the pita the person named (tracker #116, finding Q): counted below, after the amounts
+    // are settled, as the dish's own ingredients without that part (withoutNamedPart).
     // A food the database lacks never enters the arithmetic under a neighbour's name (CLAUDE.md rule 3, tracker #130): an id resolve_foods
     // offered only as a near match for a phrase it could not find is refused, and the agent is told what to do instead.
     const near = body.sessionId ? getSession(body.sessionId)?.nearMisses : undefined
@@ -502,6 +499,9 @@ async function main() {
       const dish = body.sessionId ? getSession(body.sessionId)?.dishWeight : undefined
       const fit = dish ? scaleToDishWeight(body.items, plan, dish.grams) : undefined
       if (fit && 'plan' in fit) plan = fit.plan
+      // After the amounts and the dish's weight are settled: the plan's items line up with the call's until here.
+      const split = withoutNamedPart(plan)
+      plan = split.plan
       const costed = computeMeal(plan.items)
       const meal = { ...costed, items: fit && 'plan' in fit && dish
         ? costed.items.map((it) => ({ ...it, basis: 'typical' as const, said: `${Math.round(it.grams)} g (scaled to the ${dish.said} you said)` }))
@@ -514,6 +514,7 @@ async function main() {
         ...(carbLeaderOf(meal.items, top) ? { carbLeader: carbLeaderOf(meal.items, top) } : {}),
         ...(day ? { dayState: day } : {}),
         ...(fit && 'plan' in fit && dish ? { scaled: { by: 'totalGrams', from: 'message', factor: fit.factor, totalG: dish.grams } } : {}),
+        ...(split.without ? { withoutPart: { ...split.without, note: `"${split.without.dish}" already holds ${split.without.part.toLowerCase()}, and the person named ${split.without.part.toLowerCase()} themselves, so the dish is counted as its own ingredients without it, and ${split.without.part.toLowerCase()} once, as they said it.` } } : {}),
         ...(fit && 'notApplied' in fit && fit.notApplied !== 'already' && dish ? { dishWeight: { grams: dish.grams, notApplied: fit.notApplied } } : {}),
       }
 

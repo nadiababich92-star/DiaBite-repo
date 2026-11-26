@@ -243,10 +243,12 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
   // #116 (diary test, 25 November 2026), each read from tool results. Q: a dish costed beside a part it already holds. S: "two tacos" costed as
   // more than one serving of a recipe that holds two a serving. N: a recipe the engine could not weigh is asked about in servings, never grams.
   if (e.noDoubleCount === true) {
-    const ids = (((lastCallOf(r, 'compute_meal')?.input as { items?: { foodId: string }[] } | undefined)?.items) ?? []).map((x) => x.foodId)
-    const costed = !!(lastCallOf(r, 'compute_meal')?.result as { totals?: unknown } | undefined)?.totals
-    const twice = costed ? recipeWithItsPart(ids) : null
-    say('no dish costed beside a part it already holds', twice === null, JSON.stringify({ ids, twice }))
+    // Read from what the engine costed, not what the agent sent: since 26 November the engine itself counts such a dish as its own
+    // ingredients without the part (withoutPart), so a call that names both is right and its result holds the part once.
+    const res = lastCallOf(r, 'compute_meal')?.result as { totals?: unknown; items?: { foodId: string }[]; withoutPart?: unknown } | undefined
+    const ids = (res?.items ?? []).map((x) => x.foodId)
+    const twice = res?.totals ? recipeWithItsPart(ids) : null
+    say('no dish costed beside a part it already holds', !!res?.totals && twice === null, JSON.stringify({ ids, twice, withoutPart: res?.withoutPart }))
   }
   if (e.recipeServingsAtMost && typeof e.recipeServingsAtMost === 'object') {
     const { name, max } = e.recipeServingsAtMost as { name: string; max: number }

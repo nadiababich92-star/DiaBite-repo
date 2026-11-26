@@ -31,7 +31,7 @@ import { resolvePhrases, withoutQuantity } from '../server/resolve'
 import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { AGENT_WEIGHTS_LINE, parseMeal, tailLines, WEIGHTS_WHY } from '../src/lib/answer'
-import { afterMealFor, carbLeaderOf, dayOnlyUnscored, doubledStaple, recipeWithItsPart, stillUnknown, sandwichWithItsBread, scaleToDishWeight, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withSaid } from '../server/compute'
+import { afterMealFor, carbLeaderOf, dayOnlyUnscored, doubledStaple, recipeWithItsPart, withoutNamedPart, stillUnknown, sandwichWithItsBread, scaleToDishWeight, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withSaid } from '../server/compute'
 import { alternativesForMeal, findAlternatives, SWAP_ENERGY_BAND, SWAP_MIN_GAIN, SWAP_MIN_GAIN_SHARE } from '../server/compute'
 import { ALLOWED, mayReplace, potatoKind, standInsFor, swapClass } from '../server/roles'
 import { validateAsk } from '../server/guard'
@@ -1190,6 +1190,27 @@ recorrectMisses.forEach((m) => console.log(m))
   if (recipeWithItsPart([plate, 'usda:2707730'])?.part !== 'Whole wheat pita') bits.push('the plate beside "Bread, pita, whole wheat" (the same food in other words) is allowed')
   if (recipeWithItsPart([plate, 'ing:cucumber', salad])) bits.push('two dishes that share cucumber and tomato (no carbohydrate to count twice) are refused')
   if (recipeWithItsPart([tacos, 'ing:white_rice']) || recipeWithItsPart(['ing:chicken_breast', 'ing:whole_wheat_pita'])) bits.push('a dish beside a food it does not hold is refused')
+  // Q, the owner's decision of 26 November: the plate is counted as its own ingredients without its pita, and the pita once, as the person said it.
+  {
+    const plan = planQuantities([{ foodId: plate, servings: 2 }, { foodId: 'ing:whole_wheat_pita', grams: 64 }, { foodId: salad, servings: 1 }])
+    const split = withoutNamedPart(plan)
+    const ids = split.plan.items.map((i) => i.foodId)
+    if (!split.without || split.without.dish !== 'Chicken Souvlaki Plate') bits.push(`the plate and its pita are not split: ${JSON.stringify(split.without)}`)
+    if (ids.includes(plate)) bits.push('the plate is still costed whole beside the pita')
+    if (ids.filter((i) => i === 'ing:whole_wheat_pita').length !== 1 || split.plan.items.find((i) => i.foodId === 'ing:whole_wheat_pita')?.grams !== 64) bits.push(`the pita is not counted once at the person's 64 g: ${JSON.stringify(split.plan.items.filter((i) => i.foodId === 'ing:whole_wheat_pita'))}`)
+    if (split.plan.items.find((i) => i.foodId === 'ing:chicken_breast')?.grams !== 300) bits.push('two servings of the plate do not hold 300 g of chicken')
+    if (!ids.includes(salad) || split.plan.meta.length !== split.plan.items.length) bits.push('the rest of the meal moved, or the plan is out of line')
+    // The arithmetic: the split meal is the whole plates, less their pita, plus the person's pita (load is additive; rounding aside).
+    const whole = computeMeal([{ foodId: plate, servings: 2 }]).totals.gl
+    const platePita = computeMeal([{ foodId: 'ing:whole_wheat_pita', grams: 60 }]).totals.gl
+    const theirs = computeMeal([{ foodId: 'ing:whole_wheat_pita', grams: 64 }]).totals.gl
+    const saladGl = computeMeal([{ foodId: salad, servings: 1 }]).totals.gl
+    const got = computeMeal(split.plan.items).totals.gl
+    if (Math.abs(got - (whole - platePita + theirs + saladGl)) > 1.5) bits.push(`the split meal's load ${got} is not the plates less their pita plus theirs (${(whole - platePita + theirs + saladGl).toFixed(1)})`)
+    // Nothing to split, nothing changes.
+    const plain = planQuantities([{ foodId: plate, servings: 1 }, { foodId: salad, servings: 1 }])
+    if (withoutNamedPart(plain).without || withoutNamedPart(plain).plan !== plain) bits.push('a plate with no pita beside it is split')
+  }
   // S
   const per = piecesPerServing(by.get(tacos)!, lookup)
   if (per?.per !== 2 || per.shell !== 'tortilla') bits.push(`pieces in a serving of beef tacos: ${JSON.stringify(per)} (60 g of 28 g corn tortillas is 2)`)
