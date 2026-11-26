@@ -380,7 +380,8 @@ export async function findAlternatives(
   const anchorClass = swapClass(anchor)
   // The vegetable stand-ins for this food go first, so the pool of twelve cannot cut them off; they are judged by the same rules below.
   const standIns = new Set(standInsFor(anchor))
-  for (const id of [...standIns].reverse()) if (byId.has(id) && filter(id) && !hits.some((h) => h.id === id)) hits.unshift({ id, score: 0 })
+  // Scored as the likest, so that at an equal gain the pair wins (sparkling water, not a latte, for a cola).
+  for (const id of [...standIns].reverse()) { const at = hits.findIndex((h) => h.id === id); if (at >= 0) hits.splice(at, 1); if (byId.has(id) && filter(id)) hits.unshift({ id, score: 1 }) }
   const survivors: Alternative[] = []
   for (const h of hits) {
     // Same reason as in resolve: the store may know an id this build does not.
@@ -391,7 +392,8 @@ export async function findAlternatives(
     // are other white rices — and the product offered "swap the white rice for
     // rice, white, with vegetables and gravy", which is the same food with
     // gravy on it. Suggesting a swap means suggesting a different food.
-    if (sameFood(rec.name, anchor.name) || sameFamily(anchor.name, rec.name)) continue
+    // A hand-picked stand-in may share the name ("Soft drink, cola, diet" for a cola): it is the point of the pair, not a variation.
+    if (!standIns.has(rec.id) && (sameFood(rec.name, anchor.name) || sameFamily(anchor.name, rec.name))) continue
     // The quantity a candidate is compared at: the anchor's grams for an ingredient; for a recipe, one serving, or as many as the anchor if the anchor is a recipe.
     const q = rec.kind === 'ingredient' ? { grams: anchor.kind === 'ingredient' ? anchorQ.grams : (req.grams ?? rec.defaultPortion) } : { servings: anchor.kind === 'recipe' ? anchorQ.servings : 1 }
     const c = costAt(rec.id, q)
@@ -456,8 +458,13 @@ function portionOption(
 
 /**
  * Swaps for a meal, when it needs them: over what is left of the day, or heavy on its own. Asking on a meal that fits would spend a search to print nothing.
- * Only a scored item can be "the heaviest": a branded or unrated one has no load to swap on. The route calls it; so do the evals.
+ * Only a scored item can be swapped on: a branded or unrated one has no load to save.
+ *
+ * One swap per answer (#67), for the food whose swap does the most (#118 U, the owner's decision of 26 November): in "a burger and a cola" the
+ * cola's diet twin saves more than any bun, though the bun drives the load. The three heaviest foods are asked; a swap that makes the meal
+ * fit wins, then the larger gain, then the heavier food. The route calls it; so do the evals.
  */
+export const SWAP_ANCHORS = 3
 export async function alternativesForMeal(store: VectorStore, a: {
   meal: { items: MealItemResult[]; totals: MealTotals }
   remaining: number | undefined
@@ -467,14 +474,23 @@ export async function alternativesForMeal(store: VectorStore, a: {
   const { meal, remaining } = a
   const needsHelp = meal.totals.glLevel === 'high' || (remaining !== undefined && meal.totals.gl > remaining)
   if (!needsHelp) return {}
-  const heaviest = meal.items.filter((it) => it.gl !== null).sort((x, y) => (y.gl ?? 0) - (x.gl ?? 0))[0]
-  if (!heaviest || heaviest.gl === null) return {}
-  const alternatives = await findAlternatives(store, {
-    foodId: heaviest.foodId, grams: heaviest.grams, servings: heaviest.servings,
-    maxGL: remaining !== undefined ? Math.max(0, remaining) : heaviest.gl,
+  const scored = meal.items.filter((it) => it.gl !== null && (it.gl as number) > 0).sort((x, y) => (y.gl ?? 0) - (x.gl ?? 0))
+  if (!scored.length) return {}
+  const anchors = scored.filter((it, i) => scored.findIndex((o) => o.foodId === it.foodId) === i).slice(0, SWAP_ANCHORS)
+  const offers = await Promise.all(anchors.map((it) => findAlternatives(store, {
+    foodId: it.foodId, grams: it.grams, servings: it.servings,
+    maxGL: remaining !== undefined ? Math.max(0, remaining) : (it.gl as number),
     mealGL: meal.totals.gl, remainingGL: remaining, topK: 3,
-  }, a.avoid, { allowPortion: a.allowPortion })
-  return { alternatives, alternativesFor: { foodId: heaviest.foodId, name: heaviest.name, grams: heaviest.grams, ...(heaviest.servings ? { servings: heaviest.servings } : {}) } }
+  }, a.avoid, { allowPortion: a.allowPortion })))
+  // The heaviest food keeps the swap unless another food's best swap fits the meal where its own does not, or saves more.
+  let pick = 0
+  const rank = (i: number) => { const b = offers[i][0]; return b ? [b.fitsMeal === true ? 1 : 0, b.gain] : [-1, 0] }
+  for (let i = 1; i < anchors.length; i++) {
+    const [fi, gi] = rank(i), [fp, gp] = rank(pick)
+    if (fi > fp || (fi === fp && gi > gp)) pick = i
+  }
+  const it = anchors[pick]
+  return { alternatives: offers[pick], alternativesFor: { foodId: it.foodId, name: it.name, grams: it.grams, ...(it.servings ? { servings: it.servings } : {}) } }
 }
 
 /**

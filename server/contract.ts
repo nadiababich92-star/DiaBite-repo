@@ -192,7 +192,7 @@ export interface ComputeMealResponse {
    * when no item has a load, as in a meal of branded products.
    */
   driver?: { foodId: string; name: string; gl: number }
-  /** Swaps for the heaviest item, when the meal needed them. */
+  /** Swaps for the one food whose swap does the most (of the three heaviest), when the meal needed them; `alternativesFor` names it. */
   alternatives?: Alternative[]
   /** Foods of this meal that the person left out by hand; the meal is still counted as described. Absent when none. */
   excluded?: { foodId: string; name: string }[]

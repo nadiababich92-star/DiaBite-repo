@@ -115,9 +115,12 @@ const STAND_INS: { anchor: RegExp; not?: RegExp; ids: string[] }[] = [
   // #102: mashed potato's vegetable stand-in is the menu's own Cauliflower Mash, a recipe of catalogue ingredients (one serving, 227 g).
   // Only the mash: a baked or boiled potato has no stand-in, and a sweet potato is a vegetable of its own.
   { anchor: /\bmash(ed)?\b.*\bpotato(es)?\b|\bpotato(es)?\b.*\bmash(ed)?\b/i, not: /sweet/i, ids: ['rec:DB-0727'] },
+  // #118 U: a sugary soda's swap is its diet twin or sparkling water; the energy band kept them out (2 kcal against 105), and the
+  // nearest drink inside the band was a latte.
+  { anchor: /\b(cola|soft drink|soda|pop)\b/i, not: /\bdiet\b|zero|ice cream|baking|sugar.?free/i, ids: ['usda:2710542', 'ing:sparkling_water'] },
 ]
 /** Hand-picked, so a stand-in may come from another swap class (a recipe for a mashed potato): it is still judged on load and energy. */
 export const standInsFor = (rec: Pick<FoodRecord, 'kind' | 'name' | 'category' | 'wweia'>): string[] => {
   const cls = swapClass(rec)
-  return cls === 'cooked-grain' || cls === 'starch' ? STAND_INS.filter((p) => p.anchor.test(rec.name) && !(p.not && p.not.test(rec.name))).flatMap((p) => p.ids) : []
+  return cls === 'cooked-grain' || cls === 'starch' || cls === 'drink' ? STAND_INS.filter((p) => p.anchor.test(rec.name) && !(p.not && p.not.test(rec.name))).flatMap((p) => p.ids) : []
 }

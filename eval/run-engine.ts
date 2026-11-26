@@ -3563,6 +3563,29 @@ filterMisses.forEach((m) => console.log(m))
     const over = await alternativesForMeal(store, { meal: computeMeal([{ foodId: 'seed:oats', grams: 234 }]), remaining: 8, allowPortion: true })
     if (!over.alternatives || !over.alternativesFor) miss('SW11 a meal over the day has none to offer, even a smaller portion')
   }
+  // SW18 (#118 U, the owner's decision of 26 November): the one swap goes to the food whose swap does the most, not always to the heaviest.
+  {
+    const ids = await Promise.all(['a cheeseburger', 'a cola', 'french fries'].map(idOf))
+    if (ids.some((x) => !x)) miss(`SW18 the burger meal did not resolve: ${ids.join(', ')}`)
+    else {
+      const meal = computeMeal(ids.map((foodId) => ({ foodId: foodId! })))
+      const out = await alternativesForMeal(store, { meal, remaining: 10, allowPortion: true })
+      const heaviest = meal.items.filter((i) => i.gl !== null).sort((x, y) => (y.gl ?? 0) - (x.gl ?? 0))[0]
+      // The rule itself, over the three heaviest foods: no other food's best swap fits where the chosen one does not, or saves more.
+      const anchors = meal.items.filter((i) => (i.gl ?? 0) > 0).sort((x, y) => (y.gl ?? 0) - (x.gl ?? 0)).slice(0, 3)
+      const best = await Promise.all(anchors.map(async (i) => (await findAlternatives(store, { foodId: i.foodId, grams: i.grams, servings: i.servings, maxGL: 10, mealGL: meal.totals.gl, remainingGL: 10, topK: 3 }, undefined, { allowPortion: true }))[0]))
+      const chosen = out.alternatives?.[0]
+      if (!chosen || !out.alternativesFor) miss('SW18 a burger, a cola and fries over the day get no swap')
+      else {
+        const beat = best.find((b) => b && ((b.fitsMeal === true && chosen.fitsMeal !== true) || ((b.fitsMeal === true) === (chosen.fitsMeal === true) && b.gain > chosen.gain)))
+        if (beat) miss(`SW18 the swap for ${out.alternativesFor.name} (gain ${chosen.gain}) is not the best: ${beat.label} saves ${beat.gain}`)
+        if (out.alternativesFor.foodId === heaviest.foodId && best.some((b, i) => i > 0 && b && b.gain > chosen.gain)) miss('SW18 the heaviest food kept the swap though another saves more')
+        console.log(`  SW18 swap for ${out.alternativesFor.name} (heaviest: ${heaviest.name}): ${chosen.label}, gain ${chosen.gain}`)
+        // A sugary soda's swap is its diet twin or water, never the nearest drink in the energy band (it was a nonfat latte).
+        if (/cola/i.test(out.alternativesFor.name) && !['usda:2710542', 'ing:sparkling_water'].includes(chosen.id)) miss(`SW18 the cola's swap is ${chosen.label}, not a diet cola or sparkling water`)
+      }
+    }
+  }
   // SW12: the Next line names a smaller portion, and the button is offered for it.
   {
     const pear = { id: 'ing:pear', name: 'Pear', unit: 'g' as const, portion: 118, change: 'swap' as const, label: 'pear (118 g)' }
