@@ -398,7 +398,7 @@ export async function findAlternatives(
     if (!c || c.gl > req.maxGL) continue
     // The same kind of food, and about the same amount of it.
     const recClass = swapClass(rec)
-    if (!mayReplace(anchorClass, recClass)) continue
+    if (!standIns.has(rec.id) && !mayReplace(anchorClass, recClass)) continue
     // A potato is not swapped for another way of cooking the same potato (canned, mashed, baked), and a survey vegetable nobody orders in place of
     // a starch (burdock, parsnips) is not offered for one: the vegetable that replaces a potato or rice is one of our own.
     const ap = potatoKind(anchor.name)

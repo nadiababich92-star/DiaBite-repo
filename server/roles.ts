@@ -112,6 +112,12 @@ export function potatoKind(name: string): 'white' | 'sweet' | null {
 const STAND_INS: { anchor: RegExp; not?: RegExp; ids: string[] }[] = [
   { anchor: /\brice\b/i, not: /noodle|pudding|cake|cracker|vermicelli|cereal|paper|milk/i, ids: ['ing:cauliflower_rice'] },
   { anchor: /\b(pasta|spaghetti|macaroni|noodles?|linguine|fettuccine|penne)\b/i, not: /salad|soup/i, ids: ['ing:zucchini_noodles', 'ing:spaghetti_squash', 'ing:shirataki'] },
+  // #102: mashed potato's vegetable stand-in is the menu's own Cauliflower Mash, a recipe of catalogue ingredients (one serving, 227 g).
+  // Only the mash: a baked or boiled potato has no stand-in, and a sweet potato is a vegetable of its own.
+  { anchor: /\bmash(ed)?\b.*\bpotato(es)?\b|\bpotato(es)?\b.*\bmash(ed)?\b/i, not: /sweet/i, ids: ['rec:DB-0727'] },
 ]
-export const standInsFor = (rec: Pick<FoodRecord, 'kind' | 'name' | 'category' | 'wweia'>): string[] =>
-  swapClass(rec) === 'cooked-grain' ? STAND_INS.filter((p) => p.anchor.test(rec.name) && !(p.not && p.not.test(rec.name))).flatMap((p) => p.ids) : []
+/** Hand-picked, so a stand-in may come from another swap class (a recipe for a mashed potato): it is still judged on load and energy. */
+export const standInsFor = (rec: Pick<FoodRecord, 'kind' | 'name' | 'category' | 'wweia'>): string[] => {
+  const cls = swapClass(rec)
+  return cls === 'cooked-grain' || cls === 'starch' ? STAND_INS.filter((p) => p.anchor.test(rec.name) && !(p.not && p.not.test(rec.name))).flatMap((p) => p.ids) : []
+}

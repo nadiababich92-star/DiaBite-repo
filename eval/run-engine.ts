@@ -3474,7 +3474,8 @@ filterMisses.forEach((m) => console.log(m))
       if (a.change === 'portion' && Math.abs(a.kcal - it.kcal * (a.fraction ?? 1)) > 0.2) miss(`SW3 "${phrase}": the portion ${a.label} is ${a.kcal} kcal, not ${(it.kcal * (a.fraction ?? 1)).toFixed(1)}`)
       if (a.change === 'swap') {
         const cls = swapClass(getRecord(a.id)), from = swapClass(rec)
-        if (!mayReplace(from, cls)) miss(`SW4 "${phrase}" (${from}): ${a.label} is ${cls}`)
+        // A hand-picked stand-in (#102: the Cauliflower Mash recipe for a mashed potato) is the one exception to the class rule.
+        if (!mayReplace(from, cls) && !standInsFor(rec).includes(a.id)) miss(`SW4 "${phrase}" (${from}): ${a.label} is ${cls}`)
         if ((cls === 'baked' || cls === 'sweet') && from !== 'baked' && from !== 'sweet') miss(`SW4 "${phrase}" (${from}): a ${cls} thing is offered`)
       }
     }
@@ -3646,8 +3647,28 @@ filterMisses.forEach((m) => console.log(m))
       const without = await findAlternatives(store, { foodId: pasta.id, grams: pasta.it.grams, maxGL: 1000, mealGL: pasta.gl, remainingGL: 0.05, topK: 12 }, { words: ['zucchini', 'squash', 'shirataki'] }, { allowPortion: false })
       if (without.some((a) => ['ing:zucchini_noodles', 'ing:spaghetti_squash', 'ing:shirataki'].includes(a.id))) miss('SW17 a stand-in the person left out is offered')
     }
-    // Only a cooked grain has stand-ins: a potato, rice pudding and rice noodles' pairs are the table's own.
-    for (const phrase of ['baked potato', 'oatmeal', 'white bread']) {
+    // #102: mashed potato's stand-in is the menu's Cauliflower Mash, a recipe, offered past the class rule and judged on load and energy.
+    const mash = await find('mashed potatoes', 1000)
+    if (mash) {
+      const all = await findAlternatives(store, { foodId: mash.id, grams: mash.it.grams, maxGL: 1000, mealGL: mash.gl, remainingGL: 0.05, topK: 12 }, undefined, { allowPortion: false })
+      const cm = all.find((a) => a.id === 'rec:DB-0727')
+      if (!cm) miss(`SW17 cauliflower mash is not offered for "mashed potatoes" (${mash.id})`)
+      else {
+        if (cm.kcal > (mash.it.kcal as number)) miss(`SW17 the cauliflower mash holds ${cm.kcal} kcal against ${mash.it.kcal}`)
+        if (cm.change !== 'swap' || !(cm.gain > 0)) miss('SW17 the cauliflower mash is not a swap with a gain')
+      }
+      // Left out by hand (or by a dairy allergy, through its ingredients), it is not offered.
+      const without = await findAlternatives(store, { foodId: mash.id, grams: mash.it.grams, maxGL: 1000, mealGL: mash.gl, remainingGL: 0.05, topK: 12 }, { words: ['cauliflower'] }, { allowPortion: false })
+      if (without.some((a) => a.id === 'rec:DB-0727')) miss('SW17 a cauliflower mash the person left out is offered')
+    }
+    // A recipe stand-in does not open the class rule for other recipes: nothing else offered for the mash is a mixed dish.
+    if (mash) {
+      const all = await findAlternatives(store, { foodId: mash.id, grams: mash.it.grams, maxGL: 1000, mealGL: mash.gl, remainingGL: 0.05, topK: 12 }, undefined, { allowPortion: false })
+      const odd = all.filter((a) => a.id !== 'rec:DB-0727' && !mayReplace(swapClass(getRecord(mash.id)), swapClass(getRecord(a.id))))
+      if (odd.length) miss(`SW17 offered for mashed potatoes outside its class: ${odd.map((a) => a.label).join(', ')}`)
+    }
+    // Only a cooked grain and a mashed potato have stand-ins: a baked potato, rice pudding and rice noodles' pairs are the table's own.
+    for (const phrase of ['baked potato', 'boiled potato', 'sweet potato', 'oatmeal', 'white bread']) {
       const id = await idOf(phrase)
       if (id && standInsFor(getRecord(id)).length) miss(`SW17 "${phrase}" has stand-ins`)
     }
