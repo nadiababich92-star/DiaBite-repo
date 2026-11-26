@@ -180,6 +180,12 @@ export function gramsFor(rec: FoodRecord, q: Quantity): Resolved {
   // 4. A part: a slice (the usual size first) or a piece.
   if (unit === 'slice') {
     const slices = rows.filter((r) => r.unit === 'slice')
+    // A table with a small and a large slice and nothing between (restaurant garlic bread: 37 g and 111 g) means the small one by "a slice"
+    // (the owner's decision, 26 November 2026, #131): the large one had counted 43 g of carbohydrate for one slice.
+    if (!slices.some((r) => r.size === 'medium' || r.size === undefined)) {
+      const small = slices.find((r) => r.size === 'small'), big = slices.find((r) => r.size === 'large')
+      if (small && big) return { grams: r1(count * small.grams), basis: 'usda_measure', row: small }
+    }
     // The usual slice first. A table that lists only a small or thin slice (whole-wheat bread: 24 g) is not "a slice": that would understate it.
     for (const size of ['medium', undefined, 'large'] as const) {
       const row = slices.find((r) => r.size === size)

@@ -60,6 +60,16 @@ interface RecipeRow {
  * set as the sessions show which ones are asked about.
  */
 const INGREDIENT_PORTION_G: Record<string, number> = {
+  // The owner's decisions, 26 November 2026 (tracker #131): a cheese named without an amount is 1 oz; a dressing, a sauce put on food or a
+  // spread is its label serving, 2 tablespoons (ketchup 1); pasta sauces stay near half a cup. Gruyère on a salad was 132 g, Italian dressing 100 g.
+  mozzarella: 28,
+  american_cheese_reduced_fat: 28,
+  italian_dressing: 30,
+  bbq_sauce: 30,
+  pesto: 30,
+  salsa_verde: 30,
+  peanut_butter_reduced_fat: 32,
+  ketchup: 17,
   // White bread was 100 g, three and a half slices: "a slice of bread" was costed as 3 1/2 (a glycemic load of 33.8 for one). A slice is 29 g in the record's own table.
   white_bread: 29,
   rye_bread: 35,
@@ -359,6 +369,16 @@ export function householdPortion(rows: { label: string; grams: number }[] | unde
     const named = (rows ?? []).find((p) => p.label.toLowerCase().includes(own))
     if (named) return Math.round(named.grams)
   }
+  // Garlic bread is said by the slice, and "garlic bread" alone is the same slice "a slice of garlic bread" is (quantity.ts): the medium one, or the
+  // small one where USDA lists only a small and a large (#131). USDA lists a large slice (111 g) first for several.
+  if (/^garlic bread/i.test(name)) {
+    const slice = (rows ?? []).find((p) => /^1 medium slice$/i.test(p.label)) ?? (rows ?? []).find((p) => /^1 small slice$/i.test(p.label))
+      ?? (rows ?? []).find((p) => /^1 large slice$/i.test(p.label))
+    if (slice) return Math.round(slice.grams)
+  }
+  // A cheese named without an amount is 1 oz (the owner's decision, 26 November 2026, #131): USDA lists a cup first for most (gruyère 132 g, Brie
+  // 144 g, Camembert 246 g), which counted a topping as a bowl. Cottage cheese and ricotta are eaten by the spoon or the bowl and keep their rule.
+  if (/^cheese, /i.test(name) && !/cottage|ricotta/i.test(name)) return 28
   // A sandwich or sub is one sandwich: USDA lists a slider first for some (65 g turkey, 60 g steak on wheat), a large one for others. Its own
   // "1 regular or 6\" submarine" row is the same thing for all seventeen, and a 6-inch sub is what "a turkey sub" means (#130, 26 November 2026).
   if (/sandwich or sub/i.test(name)) {

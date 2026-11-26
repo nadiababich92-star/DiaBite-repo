@@ -2689,7 +2689,17 @@ filterMisses.forEach((m) => console.log(m))
   const subOff = Object.keys(baseline).filter((id) => sub(id) && subRow(id) && getRecord(id).defaultPortion !== Math.round(subRow(id)!.grams))
   if (subOff.length) dMisses.push(`    ${subOff.length} sandwiches or subs do not default to their 6-inch row, e.g. ${subOff[0]} ${getRecord(subOff[0]).defaultPortion} g`)
   if (getRecord('usda:2706985').defaultPortion !== 195 || getRecord('usda:2706986').defaultPortion !== 240) dMisses.push('    a turkey sub is not a 6-inch one (195 g, 240 g with cheese)')
-  const drifted = Object.entries(baseline).filter(([id, g]) => !listed.has(id) && getRecord(id).defaultPortion !== g && !spoon(id) && !sub(id))
+  // The third, decided on 26 November (#131): a cheese named without an amount is 1 oz (28 g), cottage cheese and ricotta apart; garlic bread
+  // alone is the same slice as "a slice of garlic bread"; and these curated dressings, sauces, spreads and cheeses are their label serving.
+  const cheese = (id: string) => id.startsWith('usda:') && /^cheese(, |$)/i.test(getRecord(id).name) && !/cottage|ricotta/i.test(getRecord(id).name)
+  const garlic = (id: string) => id.startsWith('usda:') && /^garlic bread/i.test(getRecord(id).name)
+  const decided: Record<string, number> = { 'ing:mozzarella': 28, 'ing:american_cheese_reduced_fat': 28, 'ing:italian_dressing': 30, 'ing:bbq_sauce': 30, 'ing:pesto': 30, 'ing:salsa_verde': 30, 'ing:peanut_butter_reduced_fat': 32, 'ing:ketchup': 17 }
+  const cheeseOff = Object.keys(baseline).filter((id) => cheese(id) && getRecord(id).defaultPortion !== 28)
+  if (cheeseOff.length) dMisses.push(`    ${cheeseOff.length} cheeses do not default to 1 oz, e.g. ${cheeseOff[0]} ${getRecord(cheeseOff[0]).defaultPortion} g`)
+  for (const id of Object.keys(baseline).filter(garlic)) { const s = gramsFor(getRecord(id), { count: 1, unit: 'slice' } as never) as { grams?: number }; if (s.grams !== undefined && s.grams !== getRecord(id).defaultPortion) dMisses.push(`    ${id}: garlic bread alone is ${getRecord(id).defaultPortion} g, a slice of it ${s.grams} g`) }
+  if ((gramsFor(getRecord('usda:2707627'), { count: 1, unit: 'slice' } as never) as { grams?: number }).grams !== 37) dMisses.push('    a slice of restaurant garlic bread is not the small one (37 g)')
+  for (const [id, g] of Object.entries(decided)) if (getRecord(id).defaultPortion !== g) dMisses.push(`    ${id} defaults to ${getRecord(id).defaultPortion} g, decided ${g} g`)
+  const drifted = Object.entries(baseline).filter(([id, g]) => !listed.has(id) && getRecord(id).defaultPortion !== g && !spoon(id) && !sub(id) && !cheese(id) && !garlic(id) && !(id in decided))
   if (drifted.length) dMisses.push(`    ${drifted.length} records off the list changed their default, e.g. ${drifted.slice(0, 3).map(([id, g]) => `${id} ${g} -> ${getRecord(id).defaultPortion}`).join(', ')}`)
   console.log(`\ndefaults  ${dMisses.length === 0 ? 'ok' : 'WRONG'}  (${cases.engine.defaults.length} foods on the list)`)
   dMisses.forEach((m) => console.log(m))
