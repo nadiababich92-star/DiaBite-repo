@@ -43,7 +43,7 @@ import { bindSession } from './bind'
 import { chargeAnon, chargeTurn, countFreeAnswer, SignInNeeded, type AnonKey } from './guard'
 import { verify, verdictConflict } from './verify'
 import type { AvoidList } from './avoid'
-import { claimSession, dropCarbLimit, lastTurnOf, previousResponseFor, putSession, rememberResponse, rememberTurn } from './sessions'
+import { claimSession, dropCarbLimit, forgetMealPhrases, lastTurnOf, mealPhrasesOf, previousResponseFor, putSession, rememberMealPhrases, rememberResponse, rememberTurn, type MealPhrase } from './sessions'
 import type { DayBudget, MealItemInput } from './contract'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -869,7 +869,16 @@ export function askedSomething(trace: ToolCallTrace[], answer: string): boolean 
  * breast") is the same food asked twice, not a food left out. When one is left out the browser shows "Part of the meal", never
  * "Fits": a false alarm costs a green stamp, never a wrong one.
  */
-export function uncountedFoods(trace: ToolCallTrace[]): string[] {
+/** The foods this turn's resolve_foods recognised: a phrase and its candidate ids (#129). Unknown phrases are not here: they are named elsewhere. */
+export function resolvedPhrases(trace: ToolCallTrace[]): MealPhrase[] {
+  return trace.filter((t) => t.tool.endsWith('resolve_foods'))
+    .flatMap((t) => ((t.result as { results?: { phrase?: string; unknown?: boolean; candidates?: { id: string }[] }[] } | undefined)?.results ?? []))
+    .filter((r) => !r.unknown && typeof r.phrase === 'string' && (r.candidates ?? []).length > 0)
+    .map((r) => ({ phrase: r.phrase!.trim(), ids: (r.candidates ?? []).map((c) => c.id) }))
+}
+
+/** `earlier`: the foods the same meal's previous turn recognised before it asked its question (#129). */
+export function uncountedFoods(trace: ToolCallTrace[], earlier: MealPhrase[] = []): string[] {
   const meal = [...trace].reverse().find((t) => (t.tool.endsWith('compute_meal') || t.tool.endsWith('cost_dish')) && typeof (t.result as { totals?: unknown } | undefined)?.totals === 'object')
   if (!meal) return []
   const costed = new Set(((meal.result as { items?: { foodId?: string }[] }).items ?? []).map((it) => it.foodId).filter(Boolean) as string[])
@@ -878,9 +887,8 @@ export function uncountedFoods(trace: ToolCallTrace[]): string[] {
   const dish = meal.tool.endsWith('cost_dish') ? String((meal.input as { dish?: unknown } | undefined)?.dish ?? '').toLowerCase().trim() : ''
   if (dish) named.push(dish)
   const words = (p: string) => p.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2)
-  const resolved = trace.filter((t) => t.tool.endsWith('resolve_foods'))
-    .flatMap((t) => ((t.result as { results?: { phrase?: string; unknown?: boolean; candidates?: { id: string }[] }[] } | undefined)?.results ?? []))
-    .filter((r) => !r.unknown && typeof r.phrase === 'string' && (r.candidates ?? []).length > 0)
+  const resolved: { phrase?: string; candidates?: { id: string }[] }[] = [...earlier, ...resolvedPhrases(trace)]
+    .map((p) => ({ phrase: p.phrase, candidates: p.ids.map((id) => ({ id })) }))
   const isCosted = (r: { candidates?: { id: string }[] }) => (r.candidates ?? []).some((c) => costed.has(c.id))
   const out: string[] = []
   for (const r of resolved) {
@@ -893,6 +901,12 @@ export function uncountedFoods(trace: ToolCallTrace[]): string[] {
     if (!out.some((x) => x.toLowerCase() === p)) out.push(phrase)
   }
   return out
+}
+
+/** One list of a meal's phrases, the later turn's winning for the same words. */
+function mergePhrases(a: MealPhrase[], b: MealPhrase[]): MealPhrase[] {
+  const out = [...a.filter((x) => !b.some((y) => y.phrase.toLowerCase() === x.phrase.toLowerCase())), ...b]
+  return out.slice(-30)
 }
 
 /** The response a turn continues: none for a new topic (docs/engineering/agent-session-batch3.md, A), the session's last one otherwise. */
@@ -1164,7 +1178,14 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   }
 
   if (responseId) rememberResponse(req.sessionId, responseId)
-  rememberTurn(req.sessionId, role, askedSomething(trace, answer))
+  const asked = askedSomething(trace, answer)
+  rememberTurn(req.sessionId, role, asked)
+  // The same meal across a question and its answer (#129): the foods the asking turn recognised are checked again when the answer is
+  // costed, and kept while the meal still ends on a question.
+  const earlier = role === 'meal' && prior?.asked && prior.role === 'meal' ? mealPhrasesOf(req.sessionId) : []
+  const uncounted = role === 'meal' ? uncountedFoods(trace, earlier) : []
+  if (role === 'meal' && asked) rememberMealPhrases(req.sessionId, mergePhrases(earlier, resolvedPhrases(trace)))
+  else forgetMealPhrases(req.sessionId)
   // Food preferences only, and only from advisory turns — the ones without a
   // diary, a budget or a number in them.
   if (role === 'advisor' && !anonymous && answer && !withheld) rememberPreferences(req.sessionId, req.message, answer)
@@ -1175,7 +1196,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
     toolCalls: trace.length, trace, responseId, attempts, templated, withheld, stripped,
     timing: { routeMs: clock.route, parkMs: clock.park, agentMs: clock.agent },
     route: role, routedBy: by,
-    ...(role === 'meal' && uncountedFoods(trace).length ? { uncounted: uncountedFoods(trace) } : {}),
+    ...(uncounted.length ? { uncounted } : {}),
     ...(role === 'meal' && !withheld && asksPerson(answer) ? { asks: true } : {}),
   }
 }

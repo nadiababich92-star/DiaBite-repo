@@ -109,7 +109,7 @@ export function getSession(id: string): SessionState | undefined {
 }
 
 /** Sizes of the maps, for the abuse suite. */
-export const _sizes = () => ({ store: store.size, lastResponse: lastResponse.size, conversations: conversations.size, owners: owners.size, lastTurn: lastTurn.size })
+export const _sizes = () => ({ store: store.size, lastResponse: lastResponse.size, conversations: conversations.size, owners: owners.size, lastTurn: lastTurn.size, mealPhrases: mealPhrases.size })
 
 export function sessionCount(): number {
   sweep()
@@ -151,6 +151,32 @@ export function lastTurnOf(sessionId: string): { role: string; asked: boolean } 
   if (!t) return undefined
   if (Date.now() - t.storedAt > TTL_MS) { lastTurn.delete(sessionId); return undefined }
   return { role: t.role, asked: t.asked }
+}
+
+/**
+ * The foods a meal turn recognised when it ended on a question (tracker #129). The answer to the question is the next turn, and the
+ * agent then costed only the food it had asked about: Lay's chips, two cups of spaghetti and garlic bread, a baked potato with sour cream
+ * and corn left the meal without a word (diary test, 26 November 2026), because the check that every named food is counted read only
+ * the answering turn. Phrases and candidate ids only, memory only, an hour at most, one meal per session; cleared by a turn that ends
+ * without a question or starts a new topic.
+ */
+export interface MealPhrase { phrase: string; ids: string[] }
+const mealPhrases = new Map<string, { list: MealPhrase[]; storedAt: number }>()
+
+export function mealPhrasesOf(sessionId: string): MealPhrase[] {
+  const m = mealPhrases.get(sessionId)
+  if (!m) return []
+  if (Date.now() - m.storedAt > TTL_MS) { mealPhrases.delete(sessionId); return [] }
+  return m.list
+}
+
+export function rememberMealPhrases(sessionId: string, list: MealPhrase[]): void {
+  if (list.length === 0) { mealPhrases.delete(sessionId); return }
+  setBounded(mealPhrases, sessionId, { list: list.slice(0, 30), storedAt: Date.now() })
+}
+
+export function forgetMealPhrases(sessionId: string): void {
+  mealPhrases.delete(sessionId)
 }
 
 export function rememberTurn(sessionId: string, role: string, asked: boolean): void {

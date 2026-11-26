@@ -19,7 +19,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chargeTurn, addressKey, _reset, _state, RateLimited, MAX_KEYS } from '../server/guard'
 import { newSessionId, sessionId } from '../src/lib/session'
-import { putSession, rememberResponse, _sizes, MAX_SESSIONS } from '../server/sessions'
+import { putSession, rememberMealPhrases, rememberResponse, _sizes, MAX_SESSIONS } from '../server/sessions'
 import { bindSession } from '../server/bind'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -603,9 +603,10 @@ function memorySuite() {
     putSession(`p${i}`, { glBudget: 1, carbsG: 1, kcal: 1 } as never, [])
     rememberResponse(`p${i}`, `r${i}`)
   }
+  for (let i = 0; i < MAX_SESSIONS + 500; i++) rememberMealPhrases(`m${i}`, [{ phrase: 'apple', ids: ['ing:apple'] }])
   const sz = _sizes()
-  check('A9b', `session maps stay at or under ${MAX_SESSIONS} entries`,
-    sz.store <= MAX_SESSIONS && sz.lastResponse <= MAX_SESSIONS, JSON.stringify(sz))
+  check('A9b', `session maps stay at or under ${MAX_SESSIONS} entries, the meal phrases of #129 included`,
+    sz.store <= MAX_SESSIONS && sz.lastResponse <= MAX_SESSIONS && sz.mealPhrases <= MAX_SESSIONS, JSON.stringify(sz))
 
   // One person, one /64: rotating through your own IPv6 block must not dodge a limit.
   const same = addressKey('2001:db8:1:2:aaaa:bbbb:cccc:dddd') === addressKey('2001:db8:1:2::1')

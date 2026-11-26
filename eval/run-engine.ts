@@ -37,7 +37,8 @@ import { ALLOWED, mayReplace, potatoKind, standInsFor, swapClass } from '../serv
 import { validateAsk } from '../server/guard'
 import { getSession, putSession } from '../server/sessions'
 import { amountQuestion, gramsFor, householdUnitsFor, needsServingsHint, needsWeightHint, quantityError, RECIPE_BY_SERVING, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
-import { continuationFor, uncountedFoods } from '../server/agent'
+import { continuationFor, resolvedPhrases, uncountedFoods } from '../server/agent'
+import { forgetMealPhrases, mealPhrasesOf, rememberMealPhrases } from '../server/sessions'
 import { wholeDishWeight } from '../server/dishWeight'
 import { countedAsPieces, countsSaid, piecesOf, piecesPerServing } from '../server/pieces'
 import { sourceForPerson } from '../src/lib/agent'
@@ -1341,6 +1342,40 @@ recorrectMisses.forEach((m) => console.log(m))
   if (!readFileSync(join(ROOT, 'src', 'components', 'Landing.tsx'), 'utf8').includes('href="/privacy.html"')) bits.push('no Privacy link in the landing footer')
   if (!existsSync(join(ROOT, 'public', 'privacy.html'))) bits.push('the privacy page is missing')
   console.log(`\ngoogle    ${bits.length === 0 ? 'ok' : 'WRONG'}  (the return path, in-app browsers, the flag, the screen with and without the key)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// ── #129: the foods of a meal survive its clarifying question (diary test, 26 November 2026, maya and james) ─────────
+{
+  const bits: string[] = []
+  const rf = (rows: [string, string[], boolean?][]) => ({ tool: 'diabite_engine_resolve_foods', input: {}, result: { results: rows.map(([phrase, ids, unknown]) => ({ phrase, unknown: !!unknown, candidates: ids.map((id) => ({ id })) })) } })
+  const cm = (ids: string[], notCounted?: string[]) => ({ tool: 'diabite_engine_compute_meal', input: { items: ids.map((foodId) => ({ foodId })), ...(notCounted ? { notCounted } : {}) }, result: { totals: { gl: 3 }, items: ids.map((foodId) => ({ foodId })), afterMeal: { fits: true } } })
+  // The asking turn: steak, a baked potato, sour cream and corn recognised; the steak asked about, nothing costed.
+  const asking = [rf([['steak', ['seed:beef']], ['baked potato', ['usda:potato-baked']], ['sour cream', ['ing:sour_cream']], ['corn', ['ing:corn']], ['grandma thing', [], true]])]
+  const earlier = resolvedPhrases(asking as never)
+  if (earlier.map((p) => p.phrase).join() !== 'steak,baked potato,sour cream,corn') bits.push(`the asking turn's foods: ${JSON.stringify(earlier)}`)
+  // The answering turn costs the steak alone: the other three are named as left out.
+  const answering = [rf([['sirloin steak', ['ing:beef_sirloin']]]), cm(['ing:beef_sirloin'])]
+  const left = uncountedFoods(answering as never, earlier)
+  if (left.join() !== 'baked potato,sour cream,corn') bits.push(`left out after the answer: ${JSON.stringify(left)}, wanted the potato, sour cream and corn (steak is costed as sirloin steak)`)
+  if (uncountedFoods(answering as never).length) bits.push('without the earlier turn nothing is found, which is what the check did before; this case must change only with it')
+  // Costed in full, or named as not counted: nothing to report.
+  if (uncountedFoods([rf([['sirloin steak', ['ing:beef_sirloin']]]), cm(['ing:beef_sirloin', 'usda:potato-baked', 'ing:sour_cream', 'ing:corn'])] as never, earlier).length) bits.push('a meal costed in full after its question is reported as missing foods')
+  if (uncountedFoods([rf([['sirloin steak', ['ing:beef_sirloin']]]), cm(['ing:beef_sirloin'], ['baked potato', 'sour cream', 'corn'])] as never, earlier).length) bits.push('foods the agent named in notCounted are reported again')
+  // The session keeps the meal's phrases only while it ends on a question, bounded and forgotten.
+  rememberMealPhrases('m129', earlier)
+  if (mealPhrasesOf('m129').length !== 4) bits.push('the meal\'s phrases were not kept')
+  rememberMealPhrases('m129', Array.from({ length: 50 }, (_, i) => ({ phrase: `f${i}`, ids: [`x${i}`] })))
+  if (mealPhrasesOf('m129').length !== 30) bits.push('more than 30 phrases kept for one meal')
+  forgetMealPhrases('m129')
+  if (mealPhrasesOf('m129').length) bits.push('the meal\'s phrases outlive a finished meal')
+  // The screen: the receipt says what was left out, the figures say "so far", and the button logs only what was counted.
+  const page = readFileSync(join(ROOT, 'src', 'components', 'AskPage.tsx'), 'utf8')
+  if (!page.includes("{r.uncounted && <div className=\"receipt-line muted\"><span>Not counted: {r.uncounted.join(', ')}</span><span>left out of this answer</span></div>}")) bits.push('the receipt does not name the foods left out')
+  if (!page.includes("active?.partial || active?.unscored || active?.uncounted ? 'Log what was counted'")) bits.push('the log button logs a meal with foods left out as whole')
+  if (!page.includes('|| !!reply.uncounted?.length')) bits.push('the figures of a meal with foods left out are not "so far"')
+  console.log(`\nmeal kept ${bits.length === 0 ? 'ok' : 'WRONG'}  (the foods of a meal survive its clarifying question)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }

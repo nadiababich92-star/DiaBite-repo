@@ -137,7 +137,8 @@ function Figures({ reply, countBy }: { reply: AgentResponse; countBy: CountBy })
   // missing from the sum, so the figure is shown as "so far", not as a verdict.
   // A whole meal on a day that holds a food with no load (#117): the meal's load is whole, only what is left is "so far".
   const dayOnly = dayOnlyOf(meal?.afterMeal as Parameters<typeof dayOnlyOf>[0])
-  const partial = meal?.afterMeal?.fits === null && !dayOnly
+  // A food the server found left out of the count (#129) makes the figures partial too: what is shown is only what was counted.
+  const partial = (meal?.afterMeal?.fits === null && !dayOnly) || !!reply.uncounted?.length
   const fits = meal?.afterMeal?.fits !== false
   return (
     <>
@@ -296,13 +297,14 @@ function ReceiptView({ r, units, mineFlags }: { r: Receipt; units?: 'imperial' |
           <span>{l.availableCarbs.toFixed(1)} · {l.gi ?? '—'} · <b>{l.gl === null ? '—' : l.gl.toFixed(1)}</b></span>
         </div>
       ))}
-      <div className="receipt-total"><span>{r.carbsOnly ? 'Glycemic load' : r.partial || r.unscored ? 'Glycemic load so far' : 'Meal glycemic load'}</span><span>{r.carbsOnly ? 'not available' : r.total.toFixed(1)}</span></div>
+      <div className="receipt-total"><span>{r.carbsOnly ? 'Glycemic load' : r.partial || r.unscored || r.uncounted ? 'Glycemic load so far' : 'Meal glycemic load'}</span><span>{r.carbsOnly ? 'not available' : r.total.toFixed(1)}</span></div>
       {r.unscored && !r.carbsOnly && <div className="receipt-line muted"><span>Not scored: {r.unscored.join(', ')}</span><span>no glycemic index</span></div>}
       {r.partial && <div className="receipt-line muted"><span>Not counted: {r.partial.join(', ')}</span><span>not in the database</span></div>}
+      {r.uncounted && <div className="receipt-line muted"><span>Not counted: {r.uncounted.join(', ')}</span><span>left out of this answer</span></div>}
       {r.leftBefore !== null && (
         <>
           <div className="receipt-line muted"><span>GL left before this meal</span><span>{r.leftBefore.toFixed(1)}</span></div>
-          <div className={`receipt-line ${r.partial || r.unscored || r.dayUnscored ? '' : (r.leftAfter ?? 0) < 0 ? 'over' : 'ok'}`}><span>{r.partial || r.unscored || r.dayUnscored ? 'GL left so far' : 'GL left after'}</span><span>{r.leftAfter?.toFixed(1)}</span></div>
+          <div className={`receipt-line ${r.partial || r.unscored || r.dayUnscored || r.uncounted ? '' : (r.leftAfter ?? 0) < 0 ? 'over' : 'ok'}`}><span>{r.partial || r.unscored || r.dayUnscored || r.uncounted ? 'GL left so far' : 'GL left after'}</span><span>{r.leftAfter?.toFixed(1)}</span></div>
         </>
       )}
       <div className="receipt-foot">
@@ -427,7 +429,9 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   // "Change day" under an answer opens the day chip's picker and focuses its first button.
   const [daySignal, setDaySignal] = useState(0)
 
-  const receipt = useMemo(() => receiptFrom(reply?.trace), [reply])
+  // Foods the server found named and left out of the count (#129) belong to every receipt of this answer, recalculated or not.
+  const withUncounted = (r: Receipt | null): Receipt | null => (r && reply?.uncounted?.length ? { ...r, uncounted: reply.uncounted } : r)
+  const receipt = useMemo(() => withUncounted(receiptFrom(reply?.trace)), [reply])
 
   // "How is it going?": after the third meal and on a later day, once each, and only when nothing else is going on.
   const [card, setCard] = useState<Milestone | null>(visitCard)
@@ -446,7 +450,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
   const cardAsked = (m: Milestone) => saveNudge(markAsked(sanitizeAsked(loadNudge()), m))
   const cardClosed = () => { visitCard = null; setCard(null) }
   // What is logged and shown as the calculation: the portions the person chose, once they have chosen.
-  const active = recalc?.receipt ?? receipt
+  const active = recalc ? withUncounted(recalc.receipt) : receipt
   // The meal's lines as the person has them now: the line a swap replaced shows the new food at the weight the engine costed it.
   const baseLines = useMemo(() => {
     if (!receipt) return []
@@ -664,7 +668,7 @@ export default function AskPage({ profile, targets, diary, onLog, onOpenDiary, l
       <div className="row act-bar">
         {anonymous
           ? <button className="primary" data-tour="log" onClick={anonymous.onSignIn}>Sign in to log this</button>
-          : <button className="primary" data-tour="log" onClick={logIt} disabled={logged}>{logged ? (logDay && logDay > today ? 'Planned' : 'Logged') : logDay && logDay > today ? 'Plan it' : active?.partial || active?.unscored ? 'Log what was counted' : 'Log it'}</button>}
+          : <button className="primary" data-tour="log" onClick={logIt} disabled={logged}>{logged ? (logDay && logDay > today ? 'Planned' : 'Logged') : logDay && logDay > today ? 'Plan it' : active?.partial || active?.unscored || active?.uncounted ? 'Log what was counted' : 'Log it'}</button>}
         {/* No label changes with state: the open state is aria-expanded, and the panel itself being on screen. */}
         {/* Log it is the one key; the two that open a panel are quiet links with a caret (docs/design.md, Buttons). */}
         <button type="button" className="act-link" data-tour="calc" aria-expanded={showReceipt} aria-controls={showReceipt ? receiptId : undefined} onClick={() => setShowReceipt((v) => !v)}>{BUTTONS.calculation}<span className="act-link-caret" aria-hidden="true" /></button>

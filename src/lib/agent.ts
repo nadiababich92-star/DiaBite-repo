@@ -231,6 +231,8 @@ export interface Receipt {
   unscored?: string[]
   /** Foods eaten earlier today with no load in our data (not in this meal): what is left of the day may be less (tracker #117). */
   dayUnscored?: string[]
+  /** Foods the person named that the answer left out of its count, found by the server (`uncounted`, tracker #129): the total is only part of the meal. */
+  uncounted?: string[]
   /** Every item is branded: the card shows carbohydrate, not a load. */
   carbsOnly?: boolean
   /**
