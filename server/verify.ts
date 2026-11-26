@@ -120,7 +120,12 @@ const withoutPersonalNumber = (text: string) => PERSONAL_NUMBER.reduce((t, re) =
 /** Models write ’ where the patterns above write '. */
 const plain = (text: string) => text.replace(/[\u2018\u2019\u02bc]/g, "'")
 
-export function verdictConflict(answer: string, fits: boolean | null | undefined, estimate = false): string | null {
+/**
+ * `remainingGl` is the engine's `afterMeal.remaining.gl`: what is left of the day after this meal. On a partial meal (`fits: null`) the
+ * engine cannot say it fits, but when even the counted part leaves room it cannot say it goes over either: "This one goes over what is left
+ * today" under a lunch of 53.3 with 79.5 left passed every check (diary test, 26 November 2026, tracker #128).
+ */
+export function verdictConflict(answer: string, fits: boolean | null | undefined, estimate = false, remainingGl?: number): string | null {
   const sentences = plain(answer).split(/(?<=[.!?\n])/).map((x) => x.trim()).filter(Boolean)
   if (fits !== true || estimate) {
     // Anything but a plain, fully scored "fits": no sentence may say the meal fits.
@@ -130,7 +135,9 @@ export function verdictConflict(answer: string, fits: boolean | null | undefined
     })
     if (s) return s
   }
-  if (fits === true && !estimate) {
+  // A plain fit, or a partial meal whose counted part still leaves room: no sentence may say it goes over.
+  const roomLeft = fits === true || (fits === null && typeof remainingGl === 'number' && remainingGl >= 0)
+  if (roomLeft && !estimate) {
     const s = sentences.find((x) => NO_FIT_CLAIM.test(withoutPersonalNumber(x)) && !CONDITIONAL.test(x))
     if (s) return s
   }

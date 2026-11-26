@@ -3620,10 +3620,18 @@ filterMisses.forEach((m) => console.log(m))
 // engine's afterMeal.fits: a meal that could only be partly scored, or an assumed recipe, is never said to fit.
 {
   const verdictMisses: string[] = []
-  const expectConflict = (label: string, text: string, fits: boolean | null, estimate: boolean, want: boolean) => {
-    const got = verdictConflict(text, fits, estimate) !== null
-    if (got !== want) verdictMisses.push(`    ${label}: ${JSON.stringify(text)} with fits=${fits} estimate=${estimate} -> ${got ? 'conflict' : 'no conflict'}`)
+  const expectConflict = (label: string, text: string, fits: boolean | null, estimate: boolean, want: boolean, remainingGl?: number) => {
+    const got = verdictConflict(text, fits, estimate, remainingGl) !== null
+    if (got !== want) verdictMisses.push(`    ${label}: ${JSON.stringify(text)} with fits=${fits} estimate=${estimate} left=${remainingGl} -> ${got ? 'conflict' : 'no conflict'}`)
   }
+  // #128 (nadia+james, 26 November): a partial meal whose counted part leaves 26.2 of the day was called "over". With room left, "over" is
+  // false whatever the uncounted food holds; with no figure, or none left, it is not ours to forbid.
+  expectConflict('partial with room left called over', 'This one goes over what is left today.', null, false, true, 26.2)
+  expectConflict('partial with room left called over budget', "This puts you over today's budget.", null, false, true, 0)
+  expectConflict('partial with room left, cannot judge', "I can't judge the day on this partial total.", null, false, false, 26.2)
+  expectConflict('partial with room left, over the grams the person set', "I can't judge the day, and this meal is above the 45 g you set.", null, false, false, 26.2)
+  expectConflict('partial with room left, a bigger portion would go over', 'A second plate would go over what is left today.', null, false, false, 26.2)
+  expectConflict('partial with no figure called over', 'This one goes over what is left today.', null, false, false)
   expectConflict('partial called fit', "Verdict: it fits what is left of today's budget.", null, false, true)
   expectConflict('partial called within budget', 'This is within your budget.', null, false, true)
   expectConflict('over called fit', 'The meal fits your day.', false, false, true)
@@ -3666,7 +3674,7 @@ filterMisses.forEach((m) => console.log(m))
       const v = engineVerdict(trace)
       const text = templatedAnswer(trace) ?? ''
       if (!v) { verdictMisses.push(`    no engine verdict for ${JSON.stringify(trace[0].result)}`); continue }
-      const c = verdictConflict(text, v.fits, v.estimate)
+      const c = verdictConflict(text, v.fits, v.estimate, v.remainingGl)
       if (c) verdictMisses.push(`    the templated answer contradicts its own verdict (${fits}, assumed ${assumed}): ${c}`)
     }
   }
@@ -3687,6 +3695,7 @@ filterMisses.forEach((m) => console.log(m))
     if (!r.ok) verdictMisses.push(`    the limit line carries a number the engine did not give: ${JSON.stringify(r.unmatched)}`)
   }
   if (engineVerdict([]) !== null) verdictMisses.push('    an empty trace has a verdict')
+  { const v = engineVerdict([{ tool: 'diabite_engine_compute_meal', input: {}, result: { afterMeal: { fits: null, remaining: { gl: 26.2 } } } }] as never); if (v?.remainingGl !== 26.2) verdictMisses.push(`    the engine's verdict does not carry what is left: ${JSON.stringify(v)}`) }
   // A short reply to a question the meal specialist asked goes back to it (it went to the advisor, which cannot ask again).
   const asked = { role: 'meal', asked: true }
   for (const [label, prior, text, want] of [

@@ -482,12 +482,13 @@ function lastCall(trace: ToolCallTrace[], operation: string): ToolCallTrace | un
  * `estimate` is a dish counted from an assumed recipe: never a plain "fits". Null when no meal was
  * costed, so there is nothing for the words to contradict.
  */
-export function engineVerdict(trace: ToolCallTrace[]): { fits: boolean | null; estimate: boolean } | null {
+export function engineVerdict(trace: ToolCallTrace[]): { fits: boolean | null; estimate: boolean; remainingGl?: number } | null {
   const lastIndex = (op: string) => trace.map((t) => t.tool === op || t.tool.endsWith(`_${op}`)).lastIndexOf(true)
   const call = lastIndex('cost_dish') > lastIndex('compute_meal') ? lastCall(trace, 'cost_dish') : lastCall(trace, 'compute_meal')
-  const res = call?.result as { assumed?: boolean; afterMeal?: { fits?: boolean | null } } | undefined
+  const res = call?.result as { assumed?: boolean; afterMeal?: { fits?: boolean | null; remaining?: { gl?: number } } } | undefined
   if (!res?.afterMeal) return null
-  return { fits: res.afterMeal.fits ?? null, estimate: res.assumed === true }
+  const left = res.afterMeal.remaining?.gl
+  return { fits: res.afterMeal.fits ?? null, estimate: res.assumed === true, ...(typeof left === 'number' ? { remainingGl: left } : {}) }
 }
 
 /**
@@ -1100,7 +1101,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
     v = verify({ answer, toolResults: trace.map((t) => t.result), userText: req.message })
     // The numbers can all be right and the verdict wrong ("it fits" on a meal the engine could only partly score).
     const verdict = role === 'meal' ? engineVerdict(trace) : null
-    conflict = verdict ? verdictConflict(answer, verdict.fits, verdict.estimate) : null
+    conflict = verdict ? verdictConflict(answer, verdict.fits, verdict.estimate, verdict.remainingGl) : null
     if (v.ok && !conflict) break
 
     if (conflict) console.warn(`verdict rejected attempt ${attempts}: engine said ${JSON.stringify(verdict)}, answer said "${conflict.slice(0, 120)}"`)
