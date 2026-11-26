@@ -272,6 +272,9 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
     const head = (res?.carbLeader?.name ?? '').toLowerCase().split(/[ ,(]/)[0].replace(/s$/, '')
     style('the answer names that food', !!head && answer.toLowerCase().includes(head), answer.slice(0, 160))
   }
+  // Read from tool results only: the meal that was costed last, and its items' names.
+  const lastMeal = () => (lastCallOf(r, 'compute_meal') ?? lastCallOf(r, 'cost_dish'))
+  const mealNames = () => (((lastMeal()?.result as { items?: { name?: string }[] } | undefined)?.items ?? []).map((x) => (x.name ?? '').toLowerCase()))
   // #124: at most one item of a family (one rice) in the meal that was costed, by the costed items' names (a tool result).
   if (typeof e.atMostOne === 'string') {
     const n = mealNames().filter((x) => new RegExp(e.atMostOne as string, 'i').test(x)).length
@@ -282,9 +285,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
     const wrong = asks.filter((x) => x!.needsWeight![0]?.why === RECIPE_BY_SERVING && !/^About how many servings of /.test(x!.hint ?? ''))
     say('a recipe is asked about in servings, never in grams', wrong.length === 0, JSON.stringify(asks.map((x) => x!.hint)))
   }
-  // Batch 3 (docs/engineering/agent-session-batch3.md): read from tool results only.
-  const lastMeal = () => (lastCallOf(r, 'compute_meal') ?? lastCallOf(r, 'cost_dish'))
-  const mealNames = () => (((lastMeal()?.result as { items?: { name?: string }[] } | undefined)?.items ?? []).map((x) => (x.name ?? '').toLowerCase()))
+  // Batch 3 (docs/engineering/agent-session-batch3.md): read from tool results only (lastMeal and mealNames are declared above, before #124 uses them).
   if (Array.isArray(e.toolsNotCalled)) for (const op of e.toolsNotCalled as string[]) say(`does not call ${op}`, !called(r, op))
   if (e.noNeedsWeight === true) say('no question about grams', !(r.trace ?? []).some((t) => !!(t.result as { needsWeight?: unknown } | undefined)?.needsWeight) && !!lastMeal())
   if (Array.isArray(e.itemsNamed)) for (const rx of e.itemsNamed as string[]) say(`an item matching /${rx}/ costed`, mealNames().some((n) => new RegExp(rx, 'i').test(n)), mealNames().join('; '))
