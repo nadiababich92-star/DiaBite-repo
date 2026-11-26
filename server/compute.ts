@@ -536,6 +536,30 @@ export function driverOf(items: MealItemResult[]): { foodId: string; name: strin
 }
 
 /**
+ * An assumed recipe that holds the same starch twice (tracker #124, nadia+james, 25 November 2026): "beef and broccoli takeout with a cup of
+ * pork fried rice" was costed as a recipe with a cup of white rice the agent assumed, and the fried rice the person named beside it, two rices
+ * and a load of 74.7. Two ingredients of one family (rice, pasta, bread, potato), at least one of them with an assumed amount: the assumed one
+ * goes. Two the person both named stand.
+ */
+const STAPLES: [string, RegExp][] = [
+  ['rice', /\brice\b/i],
+  ['pasta', /\b(pasta|spaghetti|penne|noodles?|macaroni|linguine|fettuccine|lasagna)\b/i],
+  ['bread', /\b(bread|bun|roll|bagel|pita|naan|tortilla|baguette|toast)\b/i],
+  ['potato', /\b(potato(es)?|fries)\b/i],
+]
+export function doubledStaple(ingredients: { name: string; assumedGrams: boolean }[]): { family: string; drop: string; keep: string } | null {
+  for (const [family, re] of STAPLES) {
+    const same = ingredients.filter((i) => re.test(i.name))
+    if (same.length < 2) continue
+    const assumed = same.find((i) => i.assumedGrams)
+    if (!assumed) continue
+    const keep = same.find((i) => i !== assumed && !i.assumedGrams) ?? same.find((i) => i !== assumed)!
+    return { family, drop: assumed.name, keep: keep.name }
+  }
+  return null
+}
+
+/**
  * A recipe that already holds a food the person named beside it (tracker #116, finding Q). "Chicken souvlaki, two skewers, with a whole wheat
  * pita, a quarter cup of tzatziki and a cucumber tomato salad" was costed as two servings of "Chicken Souvlaki Plate" (a plate that already
  * holds a pita, yogurt, cucumber and tomato) and the pita, the tzatziki and a salad beside it (25 November 2026): the pita counted twice.

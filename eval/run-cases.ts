@@ -262,6 +262,11 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
     say('the meal is not called a fit', am?.fits !== true, JSON.stringify(am?.fits))
     style('the answer does not say the earlier food was left out of this meal', !/wasn't counted|was not counted|were not counted|left out|not counted/i.test(answer), answer.slice(0, 160))
   }
+  // #124: at most one item of a family (one rice) in the meal that was costed, by the costed items' names (a tool result).
+  if (typeof e.atMostOne === 'string') {
+    const n = mealNames().filter((x) => new RegExp(e.atMostOne as string, 'i').test(x)).length
+    say(`at most one item matching /${e.atMostOne}/ costed`, n <= 1, mealNames().join('; '))
+  }
   if (e.noGramsQuestionForRecipe === true) {
     const asks = (r.trace ?? []).map((t) => t.result as { needsWeight?: { why?: string }[]; hint?: string } | undefined).filter((x) => x?.needsWeight)
     const wrong = asks.filter((x) => x!.needsWeight![0]?.why === RECIPE_BY_SERVING && !/^About how many servings of /.test(x!.hint ?? ''))

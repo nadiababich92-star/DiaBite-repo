@@ -282,6 +282,13 @@ async function httpSuite() {
     const badGs = await fetch(`${BASE}/session/gs-2`, { method: 'PUT', headers: { 'content-type': 'application/json', 'x-api-key': KEY },
       body: JSON.stringify({ budget: { glBudget: 49, carbsG: 108, kcal: 1660 }, entries: [], gramsSaid: [{ grams: 90000, phrase: 'x' }] }) })
     check('GS0', 'a malformed gramsSaid is refused with 400', badGs.status === 400, String(badGs.status))
+    // ONE (#124): the dinner of 25 November, as the agent sent it: an assumed cup of white rice beside the cup of pork fried rice the person named.
+    await park('one-1')
+    const takeout = await post('/tools/cost_dish', { dish: 'beef and broccoli takeout', sessionId: 'one-1', ingredients: [{ phrase: 'lean beef', grams: 113 }, { phrase: 'broccoli', grams: 80 }, { phrase: 'cooked white rice', grams: 158 }, { phrase: 'pork fried rice', grams: 198, gramsStated: true }] })
+    check('ONE', 'an assumed recipe with an assumed white rice beside the fried rice the person named is refused, naming the one to leave out',
+      typeof takeout.json.error === 'string' && /twice/.test(takeout.json.error) && /White rice/i.test(takeout.json.error) && takeout.json.totals === undefined, JSON.stringify(takeout.json.error?.slice(0, 160) ?? takeout.json.totals))
+    const fixed = await post('/tools/cost_dish', { dish: 'beef and broccoli takeout', sessionId: 'one-1', ingredients: [{ phrase: 'lean beef', grams: 113 }, { phrase: 'broccoli', grams: 80 }, { phrase: 'pork fried rice', grams: 198, gramsStated: true }] })
+    check('ONE2', 'the same dish without the assumed rice is counted', fixed.json.error === undefined && fixed.json.totals !== undefined, JSON.stringify(fixed.json.error))
     // DW1 (26 November): a recipe given a weight is not asked back for servings; the agent is told to count the dish at that weight.
     await park('dw-1')
     const lasagna = await post('/tools/compute_meal', { sessionId: 'dw-1', items: [{ foodId: 'rec:DB-1542', quantity: { count: 16, unit: 'oz' } }] })

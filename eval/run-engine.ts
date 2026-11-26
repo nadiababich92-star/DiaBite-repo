@@ -31,7 +31,7 @@ import { resolvePhrases, withoutQuantity } from '../server/resolve'
 import { verify, verdictConflict } from '../server/verify'
 import { safetyGate } from '../server/safety'
 import { AGENT_WEIGHTS_LINE, parseMeal, tailLines, WEIGHTS_WHY } from '../src/lib/answer'
-import { afterMealFor, dayOnlyUnscored, recipeWithItsPart, stillUnknown, sandwichWithItsBread, scaleToDishWeight, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withSaid } from '../server/compute'
+import { afterMealFor, dayOnlyUnscored, doubledStaple, recipeWithItsPart, stillUnknown, sandwichWithItsBread, scaleToDishWeight, excludedIn, computeItem, computeMeal, dayState, driverOf, planDish, planQuantities, recountMeal, scaleDish, uninvertPhrase, withSaid } from '../server/compute'
 import { alternativesForMeal, findAlternatives, SWAP_ENERGY_BAND, SWAP_MIN_GAIN, SWAP_MIN_GAIN_SHARE } from '../server/compute'
 import { ALLOWED, mayReplace, potatoKind, standInsFor, swapClass } from '../server/roles'
 import { validateAsk } from '../server/guard'
@@ -1362,6 +1362,19 @@ recorrectMisses.forEach((m) => console.log(m))
   const r = (await resolvePhrases(store, ['a slice of baguette'], 3))[0] as { unknown?: boolean; candidates: { id: string }[] }
   if (r.unknown || r.candidates[0]?.id !== 'usda:2707610') bits.push(`"a slice of baguette": unknown ${!!r.unknown}, first ${r.candidates[0]?.id}`)
   console.log(`\nZ again   ${bits.length === 0 ? 'ok' : 'WRONG'}  (a request is a question; a missing food stays named across the question)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// ── #124: an assumed recipe never holds the same starch twice (nadia+james, 25 November 2026) ──────────────────────────
+{
+  const bits: string[] = []
+  const d = doubledStaple([{ name: 'Beef, lean', assumedGrams: true }, { name: 'White rice, cooked', assumedGrams: true }, { name: 'Rice, fried, with pork', assumedGrams: false }])
+  if (d?.family !== 'rice' || d.drop !== 'White rice, cooked' || d.keep !== 'Rice, fried, with pork') bits.push(`beef and broccoli with fried rice: ${JSON.stringify(d)}`)
+  if (doubledStaple([{ name: 'Spaghetti, cooked', assumedGrams: false }, { name: 'Garlic bread', assumedGrams: false }, { name: 'White rice, cooked', assumedGrams: true }])) bits.push('pasta, bread and rice (three families) were refused')
+  if (doubledStaple([{ name: 'White rice, cooked', assumedGrams: false }, { name: 'Brown rice, cooked', assumedGrams: false }])) bits.push('two rices the person both named were refused')
+  if (doubledStaple([{ name: 'Whole wheat bread', assumedGrams: true }, { name: 'Turkey breast', assumedGrams: true }])) bits.push('one bread was refused')
+  console.log(`\none rice  ${bits.length === 0 ? 'ok' : 'WRONG'}  (an assumed recipe never holds the same starch twice)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }

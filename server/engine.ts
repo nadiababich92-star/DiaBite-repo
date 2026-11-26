@@ -29,7 +29,7 @@ import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { phraseNames, resolvePhrases, withoutQuantity } from './resolve'
-import { afterMealFor, recipeWithItsPart, sandwichWithItsBread, scaleToDishWeight, alternativesForMeal, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, dayOnlyUnscored, stillUnknown, withSaid } from './compute'
+import { afterMealFor, doubledStaple, recipeWithItsPart, sandwichWithItsBread, scaleToDishWeight, alternativesForMeal, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, dayOnlyUnscored, stillUnknown, withSaid } from './compute'
 import { amountQuestion, GRAMS_PER_OUNCE, GRAMS_PER_POUND, NEEDS_WEIGHT_INSTRUCTION, quantityError, RECIPE_WEIGHED, settleAmount, weightQuestion } from './quantity'
 import { countedAsPieces } from './pieces'
 import { withGramsSaid } from './gramsSaid'
@@ -567,6 +567,9 @@ async function main() {
       else if (fromMessage && sc.scaled) sc.scaled.from = 'message'
       if ('error' in sc) return res.json({ error: sc.error })
       const plan = await planDish(store, sc.req)
+      // One dish, one rice (#124): an ingredient the agent assumed may not duplicate a starch the person named.
+      const twice = doubledStaple(plan.ingredients)
+      if (twice) return res.json({ error: `This assumed recipe for "${body.dish}" holds the same ${twice.family} twice: "${twice.drop}" and "${twice.keep}". Leave out "${twice.drop}" (an amount you assumed) and call cost_dish again; a person who named "${twice.keep}" beside the dish ate that one.` })
       if (plan.costed.length === 0) {
         return res.json({
           assumed: true, dish: body.dish, ingredients: [], unresolved: plan.unresolved,

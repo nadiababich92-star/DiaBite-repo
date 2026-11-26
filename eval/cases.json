@@ -7861,6 +7861,29 @@
         "recipe-amounts",
         "follow-up"
       ]
+    },
+    {
+      "id": "RA8",
+      "dimension": "honest",
+      "query": "beef and broccoli takeout with a cup of pork fried rice",
+      "ground_truth": "One rice: the fried rice the person named, never an assumed white rice beside it (#124).",
+      "context": {
+        "budget": {
+          "glBudget": 79.5,
+          "carbsG": 150,
+          "kcal": 2000
+        },
+        "entries": []
+      },
+      "expect": {
+        "atMostOne": "\\brice\\b",
+        "verified": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "recipe-amounts",
+        "double-count"
+      ]
     }
   ]
 }
