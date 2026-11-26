@@ -7,6 +7,8 @@ export interface RawRecipe {
   id: string; name: string; cat: string; cuisine: string; meals: string[]
   kcal: number; protein: number; fat: number; carbs: number; fiber: number; gl: number; gi: number | null
   min: number; ing: [string, number, string][]; steps: string[]; tags: string[]
+  /** Set by scripts/build-menu-recipes.py with the engine's rule (#99). */
+  giEst?: true
 }
 
 /** The menu's own shape for them. The numbers are copied, never recomputed: they are the engine's. */
@@ -16,6 +18,7 @@ export function toDishes(raw: RawRecipe[]): Dish[] {
     recipe: r.steps.join('\n'), cuisine: r.cuisine, minutes: r.min,
     serving: { kcal: r.kcal, protein: r.protein, fat: r.fat, carbs: r.carbs, fiber: r.fiber, gl: r.gl, gi: r.gi },
     ingredients: r.ing.map(([name, grams, category]) => ({ name, grams, category: category as FoodCategory })),
+    ...(r.giEst ? { giEstimated: true as const } : {}),
   }))
 }
 

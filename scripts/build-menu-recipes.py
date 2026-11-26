@@ -40,6 +40,18 @@ GROUP_TO_CATEGORY = {
 }
 
 ingredients = {i['id']: i for i in json.loads((DATA / 'ingredients.json').read_text())}
+# #99: the engine's rule (server/foods.ts, giEstimated): a recipe with at least 10 g of available carbohydrate a serving, half or more of it
+# from ingredients whose GI is an estimate (gi_estimates.json, from gi_sources.py), says "GI estimated".
+ESTIMATED = set(json.loads((DATA / 'gi_estimates.json').read_text())['ids'])
+def gi_estimated(r, servings):
+    total = est = 0.0
+    for i in r['ingredients']:
+        x = ingredients.get(i['ingredient_id'])
+        if not x: continue
+        a = max(0.0, x['per100']['carbs'] - x['per100']['fiber']) * float(i['grams']) / servings / 100
+        total += a
+        if i['ingredient_id'] in ESTIMATED: est += a
+    return total >= 10 and est >= 0.5 * total
 raw = json.loads((DATA / 'recipes_db.json').read_text())
 rows = raw if isinstance(raw, list) else raw['recipes']
 
@@ -63,6 +75,7 @@ for r in rows:
         'gl': r['glycemic_load'], 'gi': r['glycemic_index'] if (r['carbs_g'] - r['fiber_g']) >= 0.5 else None,
         'min': r['total_min'], 'ing': ing, 'steps': steps if isinstance(steps, list) else [str(steps)],
         'tags': [t.strip() for t in (r.get('diet_tags') or '').split(',') if t.strip()],
+        **({'giEst': True} if gi_estimated(r, servings) else {}),
     })
 
 (ROOT / 'src' / 'data' / 'menu-recipes.json').write_text(json.dumps(out, separators=(',', ':'), ensure_ascii=False))

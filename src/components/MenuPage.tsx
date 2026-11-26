@@ -311,7 +311,7 @@ function DayCard({ day, dayIndex, budget, added, slotKey, today, planning, onPla
               </span>
             </div>
             {describeDish(m.dish) && <p className="menu-desc">{describeDish(m.dish)}</p>}
-            <p className="ingredients"><GIPill gi={m.gi} /> {ingredients}</p>
+            <p className="ingredients"><GIPill gi={m.gi} />{m.dish.giEstimated && <> <span className="pill none" title="Most of this dish's carbohydrate comes from foods whose GI is the closest tested food's, not a measurement.">GI estimated</span></>} {ingredients}</p>
             {m.dish.serving && (
               <p className="muted menu-serving">{m.scale === 1 ? '1 serving' : `${m.scale} servings`}{m.dish.minutes ? ` · ${m.dish.minutes} min` : ''}{m.dish.cuisine ? ` · ${m.dish.cuisine}` : ''}</p>
             )}

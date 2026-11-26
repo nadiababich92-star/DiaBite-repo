@@ -48,6 +48,7 @@ import { rememberResponse } from '../server/sessions'
 import { sanitizeProfile } from '../src/lib/storage'
 import { askedSomething, asksPerson, continuesMealQuestion, engineVerdict, looksLikeMeal, templatedAnswer, withContentFilterRetry, contentFilterCategories, withHangRetry, withoutNumbers, withoutSessionTag } from '../server/agent'
 import { bindSession, unbindSession } from '../server/bind'
+import { estimatedGiIds, giEstimated } from '../server/foods'
 import { GI_CROSSCHECKED_ON, recordFromRow, getRecord, hasNoLoad, householdMeasure, householdPortion, readPortion, restaurantFaults, restaurantRecordsFrom, stepUnit, summary, type RestaurantRow } from '../server/foods'
 import { legacyHouseholdMeasure, legacyStepUnit } from './legacy-measure'
 import { countOf, countText, gramsShown, measureLabel, nudgeMeasure } from '../src/lib/measure'
@@ -1325,6 +1326,33 @@ recorrectMisses.forEach((m) => console.log(m))
   if ((recipe[0] as { servings?: number }).servings !== 1) bits.push('a recipe was given grams')
   console.log(`\ngrams said ${bits.length === 0 ? 'ok' : 'WRONG'}  (the person's weight for one food)`)
   for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// ── #99: an estimated GI says so, where it carries carbohydrate (the owner's decision, 26 November 2026) ──
+{
+  const bits: string[] = []
+  const est = estimatedGiIds()
+  if (est.size < 50) bits.push(`only ${est.size} ingredients read as estimated: gi_estimates.json is missing or stale`)
+  // A food line: the mark at 10 g of available carbohydrate and over, never on a food whose estimate decides nothing.
+  const carby = [...est].map((id) => loadFoods().byId.get(id)).find((r) => r?.per100 && r.per100.carbs - r.per100.fiber >= 20)
+  if (!carby) bits.push('no estimated ingredient with real carbohydrate to test')
+  else {
+    const it = computeItem({ foodId: carby.id, grams: 100 })
+    if (it.giEstimated !== true) bits.push(`${carby.id} at 100 g (${it.availableCarbs} g available) is not marked`)
+    const small = computeItem({ foodId: carby.id, grams: Math.floor(500 / (carby.per100!.carbs - carby.per100!.fiber)) })
+    if (small.giEstimated) bits.push(`${carby.id} at ${small.grams} g (${small.availableCarbs} g available) is marked under the 10 g line`)
+  }
+  if (est.has('ing:egg') && computeItem({ foodId: 'ing:egg', grams: 100 }).giEstimated) bits.push('an egg is marked "GI estimated"')
+  if (computeItem({ foodId: 'seed:oats', grams: 234 }).giEstimated) bits.push('a measured GI (oats) is marked estimated')
+  // The menu file is built by scripts/build-menu-recipes.py with the same rule: the two agree on every recipe.
+  const menu = JSON.parse(readFileSync(join(ROOT, 'src', 'data', 'menu-recipes.json'), 'utf8')) as { id: string; giEst?: boolean }[]
+  const disagree = menu.filter((r) => { const rec = loadFoods().byId.get(`rec:${r.id}`); return !!rec && giEstimated(rec.id, rec.perServing?.availableCarbs ?? 0) !== !!r.giEst })
+  if (disagree.length) bits.push(`the menu and the engine disagree on ${disagree.length} recipes, e.g. ${disagree.slice(0, 3).map((r) => r.id).join(', ')}: rerun scripts/build-menu-recipes.py`)
+  const marked = menu.filter((r) => r.giEst).length
+  if (marked === 0 || marked > menu.length / 4) bits.push(`${marked} of ${menu.length} menu recipes are marked`)
+  console.log(`\nGI est.   ${bits.length === 0 ? 'ok' : 'WRONG'}  (${est.size} estimated ingredients, ${marked} menu recipes marked)`)
+  bits.forEach((b) => console.log(`    ${b}`))
   if (bits.length) process.exitCode = 1
 }
 

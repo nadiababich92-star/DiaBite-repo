@@ -218,6 +218,8 @@ export interface ReceiptLine {
   fat: number
   grams: number
   servings?: number
+  /** #99: the engine says this food's GI is an estimate that carries real carbohydrate; the receipt marks it quietly. */
+  giEstimated?: true
 }
 
 export interface Receipt {
@@ -265,7 +267,7 @@ interface MealResult {
   items: {
     foodId: string; name: string; grams: number; servings?: number
     kcal: number; carbs: number; fiber: number; protein: number; fat: number
-    availableCarbs: number; gi: number | null; gl: number | null
+    availableCarbs: number; gi: number | null; gl: number | null; giEstimated?: true
     /** The grams said as a household measure the engine found in the food's own USDA table; absent when none fits. */
     measure?: { count: number; unit: string; text: string }
     stepUnit?: { unit: string; unitGrams: number }
@@ -364,6 +366,7 @@ export function buildReceipt(m: MealResult, leftBefore: number | null, sources: 
     ...(it.stepUnit ? { measureUnit: it.stepUnit } : {}),
     ...(it.said ? { said: it.said } : {}), ...(it.basis ? { basis: it.basis } : {}),
     ...(it.quantity ? { quantity: it.quantity } : {}), ...(it.units?.length ? { units: it.units } : {}),
+    ...(it.giEstimated ? { giEstimated: true as const } : {}),
   }))
   return {
     lines, total: m.totals.gl, leftBefore,

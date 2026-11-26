@@ -118,6 +118,8 @@ export interface MealItemResult extends Nutrients {
   gl: number | null
   glLevel: Level | null
   loadAvailable: boolean
+  /** #99: this food's GI is an estimate (the closest tested food's), and it carries enough carbohydrate for that to matter. Absent otherwise. */
+  giEstimated?: true
   /** The grams said as a household measure the record's own USDA table lists ("1 cup"), when they match one; absent otherwise. */
   measure?: { count: number; unit: string; text: string }
   /** For an item the person gave as a measure: what they said, the words to say its weight, and how the weight was got. */

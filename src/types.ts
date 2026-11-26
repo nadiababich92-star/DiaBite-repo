@@ -67,6 +67,8 @@ export interface Dish {
   recipeId?: string
   cuisine?: string
   minutes?: number
+  /** #99: half or more of a serving's carbohydrate comes from ingredients whose GI is an estimate; the menu says "GI estimated". */
+  giEstimated?: true
 }
 
 /** A single diary entry. */

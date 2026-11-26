@@ -280,6 +280,43 @@ export async function adoptCatalogue(rows: unknown[], log = console.log): Promis
  * the ones that were checked. Before 17 November the files in the image carried no source for these records at all, so a
  * meal of curated foods printed a receipt with no source line (worklist 16).
  */
+/**
+ * #99 (the owner's decision of 26 November): a glycemic index that is an estimate says so, quietly. The ingredients are those with
+ * confidence "low" in gi_sources.py (the GI of the closest tested food), exported to gi_estimates.json. The mark only matters where the
+ * estimate carries carbohydrate: a food line with at least 10 g available, a recipe with at least 10 g a serving of which half or more comes
+ * from such ingredients. A GI 20 points out on 10 g moves the load by 2; on an egg or an egg-white omelet it moves nothing. scripts/build-menu-recipes.py applies the same rule to the menu.
+ */
+export const GI_ESTIMATE_MIN_CARBS = 10
+export const GI_ESTIMATE_RECIPE_SHARE = 0.5
+let estimatedGi: Set<string> | null = null
+export function estimatedGiIds(): Set<string> {
+  if (estimatedGi) return estimatedGi
+  estimatedGi = new Set()
+  const path = join(DATA, 'gi_estimates.json')
+  if (existsSync(path)) for (const id of (JSON.parse(readFileSync(path, 'utf8')) as { ids: string[] }).ids) estimatedGi.add(`ing:${id}`)
+  return estimatedGi
+}
+const recipeEstimate = new Map<string, boolean>()
+/** Whether this food's GI, at this much available carbohydrate, is an estimate worth saying. A recipe decides by its own serving. */
+export function giEstimated(id: string, availableCarbs: number): boolean {
+  if (id.startsWith('ing:')) return availableCarbs >= GI_ESTIMATE_MIN_CARBS && estimatedGiIds().has(id)
+  if (!id.startsWith('rec:')) return false
+  const known = recipeEstimate.get(id)
+  if (known !== undefined) return known
+  const rec = loadFoods().byId.get(id)
+  let total = 0, est = 0
+  for (const part of rec?.parts ?? []) {
+    const p = loadFoods().byId.get(part.id)?.per100
+    if (!p) continue
+    const a = Math.max(0, p.carbs - p.fiber) * part.grams / 100
+    total += a
+    if (estimatedGiIds().has(part.id)) est += a
+  }
+  const out = total >= GI_ESTIMATE_MIN_CARBS && est >= GI_ESTIMATE_RECIPE_SHARE * total
+  recipeEstimate.set(id, out)
+  return out
+}
+
 export const GI_CROSSCHECKED_ON = '2026-09-30'
 let crossChecked: Set<string> | null = null
 function checkedIds(): Set<string> {

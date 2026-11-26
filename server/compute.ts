@@ -4,7 +4,7 @@
  */
 import { availableCarbs, dayGlLevel, glLevel, glycemicLoad, nutrientsFor } from '../src/lib/glycemic'
 import { isAvoided, type AvoidList } from './avoid'
-import { asFood, getRecord, hasNoLoad, householdMeasure, loadFoods, stepUnit, summary, type PortionRow } from './foods'
+import { asFood, getRecord, giEstimated, hasNoLoad, householdMeasure, loadFoods, stepUnit, summary, type PortionRow } from './foods'
 import { mayReplace, potatoKind, standInsFor, swapClass } from './roles'
 import { gramsFor, householdUnitsFor, saidText, unitsFor } from './quantity'
 import { embed, type VectorStore } from './embeddings'
@@ -46,6 +46,7 @@ export function computeItem(input: MealItemInput): MealItemResult {
       foodId: rec.id, name: rec.name, kind: 'ingredient', grams,
       kcal: r1(n.kcal), carbs: r1(n.carbs), fiber: r1(n.fiber), protein: r1(n.protein), fat: r1(n.fat),
       availableCarbs: r1(avail), gi: rec.gi, gl: r1(gl), glLevel: glLevel(gl), loadAvailable: true,
+      ...(giEstimated(rec.id, avail) ? { giEstimated: true as const } : {}),
     }
   }
   const ps = rec.perServing!
@@ -57,6 +58,7 @@ export function computeItem(input: MealItemInput): MealItemResult {
     protein: r1(ps.protein * servings), fat: r1(ps.fat * servings),
     availableCarbs: r1(ps.availableCarbs * servings), gi: rec.gi,
     gl: r1(ps.gl * servings), glLevel: glLevel(ps.gl * servings), loadAvailable: true,
+    ...(giEstimated(rec.id, ps.availableCarbs) ? { giEstimated: true as const } : {}),
   }
 }
 

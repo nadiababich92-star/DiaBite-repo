@@ -293,7 +293,7 @@ function ReceiptView({ r, units, mineFlags }: { r: Receipt; units?: 'imperial' |
       <div className="receipt-head"><span>food · portion</span><span>available carbs (g) · GI · GL</span></div>
       {r.lines.map((l, k) => (
         <div className="receipt-line" key={l.foodId + l.portion}>
-          <span>{l.name} <em>{l.said ?? portionText(l.portion, l.measure, units, l.servings ? undefined : l.grams)}</em>{l.basis === 'typical' && <> <span className="pill none typical">typical size</span></>}{l.basis === 'stated' && mineFlags?.[k] && <> <span className="pill none mine">your weight</span></>}{r.assumed?.assumedFoodIds.includes(l.foodId) && <> <span className="pill none assumed">assumed</span></>}</span>
+          <span>{l.name} <em>{l.said ?? portionText(l.portion, l.measure, units, l.servings ? undefined : l.grams)}</em>{l.basis === 'typical' && <> <span className="pill none typical">typical size</span></>}{l.basis === 'stated' && mineFlags?.[k] && <> <span className="pill none mine">your weight</span></>}{r.assumed?.assumedFoodIds.includes(l.foodId) && <> <span className="pill none assumed">assumed</span></>}{l.giEstimated && <> <span className="pill none estimated" title="This GI is the closest tested food's, not a measurement of this one.">GI estimated</span></>}</span>
           <span>{l.availableCarbs.toFixed(1)} · {l.gi ?? '—'} · <b>{l.gl === null ? '—' : l.gl.toFixed(1)}</b></span>
         </div>
       ))}
