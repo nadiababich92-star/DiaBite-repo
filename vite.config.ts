@@ -16,6 +16,9 @@ export default defineConfig({
     proxy: {
       '/agent': { target: new URL(AGENT_WEBHOOK).origin, changeOrigin: true, rewrite: () => new URL(AGENT_WEBHOOK).pathname },
       '/meal': { target: new URL(AGENT_WEBHOOK).origin, changeOrigin: true },
+      // What the engine says about access (sign-in, free answers, the Google key). Unproxied, Vite answered index.html, the JSON read failed
+      // and the app fell back to "sign-in required, no free answers, no Google" whatever the engine said (26 November 2026).
+      '/health': { target: new URL(AGENT_WEBHOOK).origin, changeOrigin: true },
       // Not proxied: in development the app talks to the deployed engine, and "Delete my account" must not delete a real
       // account from a laptop. Unanswered, Vite returned index.html with 200 and the app reported the deletion done.
       '/account': {

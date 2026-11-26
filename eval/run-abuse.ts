@@ -217,6 +217,7 @@ async function httpSuite() {
     const health = await (await fetch(`${BASE}/health`)).json() as Record<string, unknown>
     check('A14', '/health says it is up and how many foods, and nothing about live sessions',
       health.ok === true && typeof health.records === 'number' && !('sessions' in health), JSON.stringify(health))
+    check('GSI0', '/health says googleSignIn false while GOOGLE_SIGN_IN is unset', health.googleSignIn === false, JSON.stringify(health))
     const badPut = await fetch(`${BASE}/session/${'x'.repeat(65)}`, {
       method: 'PUT', headers: { 'content-type': 'application/json', 'x-api-key': KEY }, body: JSON.stringify({ budget: { glBudget: 1 }, entries: [] }),
     })
@@ -512,13 +513,15 @@ const deviceUuid = () => crypto.randomUUID()
  */
 async function anonSuite() {
   const child = start({
-    REQUIRE_SIGN_IN: 'on', ANON_FREE_ANSWERS: '2', ANON_MODEL_CALLS_DAY: '3', ANON_ADDRESS_ANSWERS_DAY: '5', ASK_ANON_DAILY_CEILING: '50', RECOMPUTE_ANON_MIN: '3',
+    REQUIRE_SIGN_IN: 'on', GOOGLE_SIGN_IN: 'on', ANON_FREE_ANSWERS: '2', ANON_MODEL_CALLS_DAY: '3', ANON_ADDRESS_ANSWERS_DAY: '5', ASK_ANON_DAILY_CEILING: '50', RECOMPUTE_ANON_MIN: '3',
     ASK_IP_10MIN: '1000', ASK_IP_DAY: '1000', ASK_SESSION_HOUR: '1000', ASK_DAILY_CEILING: '1000', RECOMPUTE_MIN: '1000',
   })
   try {
     await waitReady()
     const h = await (await fetch(`${BASE}/health`)).json() as Record<string, unknown>
-    check('AND', '/health has freeAnswers 2 and signIn true, and nothing else new', h.freeAnswers === 2 && h.signIn === true && Object.keys(h).sort().join() === 'freeAnswers,ok,records,signIn', JSON.stringify(h))
+    check('AND', '/health has freeAnswers 2 and signIn true, and nothing else new', h.freeAnswers === 2 && h.signIn === true && Object.keys(h).sort().join() === 'freeAnswers,googleSignIn,ok,records,signIn', JSON.stringify(h))
+    // GSI (docs/specs/first-session-google-signin.md calls it ANF; that id was taken): GOOGLE_SIGN_IN=on, and only "on", offers the Google key.
+    check('GSI', '/health says googleSignIn true with GOOGLE_SIGN_IN=on', h.googleSignIn === true, JSON.stringify(h))
 
     const dev = deviceUuid()
     const withDev = { 'x-diabite-device': dev }

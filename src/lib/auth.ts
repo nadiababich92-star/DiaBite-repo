@@ -36,15 +36,15 @@ export function useAuth(): AuthState {
  * REQUIRE_SIGN_IN on or off is one revision and no new build. `null` while unknown.
  */
 export function useAccess(): Access {
-  const [access, setAccess] = useState<Access>({ required: supabase ? null : false, freeAnswers: 0 })
+  const [access, setAccess] = useState<Access>({ required: supabase ? null : false, freeAnswers: 0, googleSignIn: false })
   useEffect(() => {
     if (!supabase) return
     let live = true
     fetch(healthUrl())
-      .then((r) => r.json() as Promise<{ signIn?: boolean; freeAnswers?: number }>)
+      .then((r) => r.json() as Promise<{ signIn?: boolean; freeAnswers?: number; googleSignIn?: boolean }>)
       .then((h) => { if (live) setAccess(accessOf(h)) })
       // If the engine cannot be reached nothing else works either; the wall is the safe side, with no free answers.
-      .catch(() => { if (live) setAccess({ required: true, freeAnswers: 0 }) })
+      .catch(() => { if (live) setAccess({ required: true, freeAnswers: 0, googleSignIn: false }) })
     return () => { live = false }
   }, [])
   return access
@@ -61,7 +61,7 @@ export function engineUrl(path: '/health' | '/account'): string {
 }
 const healthUrl = () => engineUrl('/health')
 
-export { accessOf, looksLikeCode, looksLikeEmail, problemOf, signInReasonOf } from './authCore'
+export { accessOf, inAppBrowser, looksLikeCode, looksLikeEmail, problemOf, signInReasonOf } from './authCore'
 export type { Access, SignInProblem, SignInReason } from './authCore'
 import { accessOf, looksLikeCode, looksLikeEmail, problemOf, type Access, type SignInProblem } from './authCore'
 
@@ -74,6 +74,19 @@ export async function sendLink(email: string): Promise<SignInProblem | null> {
       options: { emailRedirectTo: window.location.origin, shouldCreateUser: true },
     })
     return error ? problemOf(error) : null
+  } catch { return 'network' }
+}
+
+/**
+ * Starts Google's sign-in (docs/specs/first-session-google-signin.md). On success the browser leaves for Google and comes back to this
+ * page's own address with a session, which useAuth picks up like an email link's. Email only: the consent card says DiaBite keeps your
+ * email address, and nothing else from Google is asked for.
+ */
+export async function signInWithGoogle(): Promise<'redirecting' | SignInProblem> {
+  if (!supabase) return 'unavailable'
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin, scopes: 'email' } })
+    return error ? problemOf(error) : 'redirecting'
   } catch { return 'network' }
 }
 

@@ -68,7 +68,9 @@ import { weekSummary, weeksSummary } from '../src/lib/history'
 import { boldSegments } from '../src/lib/answer'
 import { applyTheme, lookOf, pinThemeColor } from '../src/lib/theme'
 import { LANDING } from '../src/data/landing'
-import { authInUrl, showLanding, skipLanding } from '../src/lib/landingRule'
+import { authError, authInUrl, showLanding, skipLanding } from '../src/lib/landingRule'
+import SignInScreen, { DATA_LINE, DATA_LINE_GOOGLE, GOOGLE_COPY } from '../src/components/SignIn'
+import { accessOf, inAppBrowser } from '../src/lib/authCore'
 import { allCopy, allSteps, copyFor, initialSeen, markSeen, nextStep, sanitizeSeen, STEP_ORDER, type TourContext } from '../src/lib/tour'
 import { generateWeek, menuHidden, regenerateSlot, replayWeek, setRecipes, shoppingList, shoppingText, MEAL_ORDER } from '../src/lib/menu'
 import { toDishes } from '../src/lib/recipes'
@@ -781,7 +783,7 @@ recorrectMisses.forEach((m) => console.log(m))
   if (id === 'anon') bits.push('the device id is the old constant')
   // The access words from /health: an engine that does not say it offers no free answers.
   const acc = (h: object | null) => JSON.stringify(accessOf(h))
-  if (acc({ signIn: true, freeAnswers: 3 }) !== '{"required":true,"freeAnswers":3}') bits.push(`access of a full /health: ${acc({ signIn: true, freeAnswers: 3 })}`)
+  if (acc({ signIn: true, freeAnswers: 3 }) !== '{"required":true,"freeAnswers":3,"googleSignIn":false}') bits.push(`access of a full /health: ${acc({ signIn: true, freeAnswers: 3 })}`)
   for (const bad of [undefined, null, 0, -1, 2.5, '3', NaN]) if (accessOf({ signIn: true, freeAnswers: bad }).freeAnswers !== 0) bits.push(`access took ${String(bad)} as free answers`)
   if (accessOf({ freeAnswers: 3 }).required !== false || accessOf(null).required !== false) bits.push('access said sign-in is required when /health did not say so')
   // The 401 reason: only the two known words, and only a positive wait.
@@ -1291,6 +1293,50 @@ recorrectMisses.forEach((m) => console.log(m))
   const page = readFileSync(join(ROOT, 'src', 'components', 'AskPage.tsx'), 'utf8')
   if (!page.includes("{(tone === 'ask' || reply.asks) && !reply.blocked && reply.route !== 'advisor' && (")) bits.push('the answer field is not shown when the reply asks')
   console.log(`\nasks      ${bits.length === 0 ? 'ok' : 'WRONG'}  (a question under a costed meal)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// ── #127: sign in with Google (docs/specs/first-session-google-signin.md: OB5, OB9, and the screen) ──────────────────
+{
+  const bits: string[] = []
+  const at = (hash = '', search = '') => ({ hash, search })
+  // OB5: a Google return is a sign-in in the address (the landing page never covers it); a refused one is an error, a good one is not.
+  const good = at('#access_token=x&expires_in=3600&provider_token=y&refresh_token=z&token_type=bearer')
+  const refused = at('', '?error=access_denied&error_code=422&error_description=Unable+to+exchange+external+code')
+  if (!authInUrl(good) || !authInUrl(refused)) bits.push('a Google return is not read as a sign-in in the address')
+  if (authError(good) || !authError(refused) || !authError(at('#error=server_error')) || authError(at('', '?utm_source=x'))) bits.push('authError misreads a Google return')
+  const base = { signInRequired: true as boolean | null, signedOut: true, notice: '', entering: false }
+  if (showLanding({ ...base, location: good }) || showLanding({ ...base, location: refused })) bits.push('the landing page covers a Google return')
+  // OB9: the in-app browsers of social apps get no key; a phone's or a laptop's own browser does.
+  const uas: [string, boolean][] = [
+    ['Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 350.0.0.0', true],
+    ['Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 [LinkedInApp]', true],
+    ['Mozilla/5.0 (Linux; Android 14; Pixel 8; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/131.0 Mobile Safari/537.36 Reddit/Version 2025.01', true],
+    ['Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1', false],
+    ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36', false],
+    ['Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36', false],
+  ]
+  for (const [ua, want] of uas) if (inAppBrowser(ua) !== want) bits.push(`inAppBrowser(${ua.slice(-30)}) is ${!want}`)
+  // The flag: only an explicit true from /health.
+  if (accessOf({ googleSignIn: true }).googleSignIn !== true || accessOf({}).googleSignIn !== false || accessOf({ googleSignIn: 'true' }).googleSignIn !== false || accessOf(null).googleSignIn !== false) bits.push('accessOf reads googleSignIn wrongly')
+  // The screen, rendered: off is today's screen; on shows the key, "or use your email" and the longer data line; an in-app browser gets
+  // the line instead of the key; a failed return says so above the key.
+  const desktop = uas[4][0], insta = uas[0][0]
+  const render = (p: object) => renderToStaticMarkup(createElement(SignInScreen, p as never))
+  const off = render({ googleSignIn: false, ua: desktop, failedReturn: false })
+  const on = render({ googleSignIn: true, ua: desktop, failedReturn: false })
+  const inApp = render({ googleSignIn: true, ua: insta, failedReturn: false })
+  const failed = render({ googleSignIn: true, ua: desktop, failedReturn: true })
+  const esc = (t: string) => t.replace(/'/g, '&#x27;')
+  if (off.includes(GOOGLE_COPY.key) || off.includes(GOOGLE_COPY.or) || !off.includes(esc(DATA_LINE)) || off.includes('with Google or by email')) bits.push('with the setting off the screen is not today\'s')
+  if (!on.includes(GOOGLE_COPY.key) || !on.includes(GOOGLE_COPY.or) || !on.includes(esc(DATA_LINE_GOOGLE)) || !/class="ghost signin-google-key"/.test(on)) bits.push('with the setting on the key, the "or" line or the longer data line is missing')
+  if (on.indexOf(GOOGLE_COPY.key) > on.indexOf('Sign in with your email')) bits.push('the Google key is not above the email form')
+  if (inApp.includes(GOOGLE_COPY.key) || !inApp.includes(esc(GOOGLE_COPY.inApp)) || inApp.includes('with Google or by email')) bits.push('an in-app browser is offered the Google key')
+  if (!failed.includes(esc(GOOGLE_COPY.failed)) || on.includes(esc(GOOGLE_COPY.failed))) bits.push('the failed-return line is wrong')
+  if (/#[0-9a-f]{3,8}\b/i.test(readFileSync(join(ROOT, 'src', 'components', 'SignIn.tsx'), 'utf8'))) bits.push('the sign-in screen holds a colour of its own')
+  for (const t of Object.values(GOOGLE_COPY)) if (/\d/.test(t)) bits.push(`a Google line holds a digit: ${t}`)
+  console.log(`\ngoogle    ${bits.length === 0 ? 'ok' : 'WRONG'}  (the return path, in-app browsers, the flag, the screen with and without the key)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }

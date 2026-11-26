@@ -18,12 +18,21 @@ export function problemOf(e: { status?: number; code?: string; name?: string; me
 
 /** The length is Supabase's setting (6 to 10 digits), not ours: accept what it can send. */
 /** What the engine says about access, from GET /health: whether sign-in is required and how many free answers a signed-out visitor may have. */
-export interface Access { required: boolean | null; freeAnswers: number }
+export interface Access { required: boolean | null; freeAnswers: number; /** The "Continue with Google" key is offered (GOOGLE_SIGN_IN=on on the engine). */ googleSignIn: boolean }
 
-/** Anything but a whole number above zero is no free answers: the engine that does not say it does not offer it. */
-export function accessOf(health: { signIn?: unknown; freeAnswers?: unknown } | null | undefined): Access {
+/** Anything but a whole number above zero is no free answers: the engine that does not say it does not offer it. Google only on an explicit true. */
+export function accessOf(health: { signIn?: unknown; freeAnswers?: unknown; googleSignIn?: unknown } | null | undefined): Access {
   const n = health?.freeAnswers
-  return { required: health?.signIn === true, freeAnswers: typeof n === 'number' && Number.isInteger(n) && n > 0 ? n : 0 }
+  return { required: health?.signIn === true, freeAnswers: typeof n === 'number' && Number.isInteger(n) && n > 0 ? n : 0, googleSignIn: health?.googleSignIn === true }
+}
+
+/**
+ * Google refuses its sign-in inside the in-app browsers of social apps: the person would meet Google's error page, not ours
+ * (docs/specs/first-session-google-signin.md). Best effort, from the user agent, and unverified until tried on a phone from
+ * Reddit, Threads and LinkedIn. A false negative costs one person a Google error page and the email form; a false positive the key.
+ */
+export function inAppBrowser(ua: string): boolean {
+  return /FBAN|FBAV|FB_IAB|Instagram|LinkedInApp|Snapchat|MicroMessenger|Twitter|Reddit|Threads|; wv\)/i.test(ua)
 }
 
 /** The 401 body of an anonymous request: why the person is asked to sign in, and when another free answer comes. Unknown words are no reason. */

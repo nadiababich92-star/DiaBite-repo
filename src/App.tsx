@@ -207,17 +207,17 @@ export default function App() {
   if (signInRequired && auth.status === 'signedOut') {
     if (anonMode) {
       // "Make it yours" and every Sign in key: the sign-in screen, with a way back to the visitor's Ask screen.
-      if (signingIn) return <SignIn notice={notice} onCancel={() => setSigningIn(false)} />
+      if (signingIn) return <SignIn notice={notice} onCancel={() => setSigningIn(false)} googleSignIn={access.googleSignIn} />
     } else {
       // A stranger sees the page about the product first. Never over an email link, a session that just ended, or /?signin.
       if (showLanding({ signInRequired, signedOut: true, notice, entering, location: window.location })) {
         return <Landing onEnter={() => setEntering(true)} freeAnswers={access.freeAnswers} onAsk={access.freeAnswers > 0 ? startAnon : undefined} />
       }
-      return <SignIn notice={notice} onCancel={entering ? () => setEntering(false) : undefined} />
+      return <SignIn notice={notice} onCancel={entering ? () => setEntering(false) : undefined} googleSignIn={access.googleSignIn} />
     }
   }
   // Not required, but wanted: someone signing in from the Settings tab to keep their diary across devices.
-  if (!signInRequired && auth.status === 'signedOut' && signingIn) return <SignIn notice={notice} onCancel={() => setSigningIn(false)} />
+  if (!signInRequired && auth.status === 'signedOut' && signingIn) return <SignIn notice={notice} onCancel={() => setSigningIn(false)} googleSignIn={access.googleSignIn} />
   if (auth.status === 'signedIn' && account === 'failed') {
     return (
       <div className="app">

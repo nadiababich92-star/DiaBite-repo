@@ -16,6 +16,11 @@ export function authInUrl(loc: Where): boolean {
   return parts(loc).some((p) => AUTH_KEYS.some((k) => p.has(k)) || AUTH_TYPES.includes(p.get('type') ?? ''))
 }
 
+/** True when the address carries a failed sign-in: a refused or cancelled Google consent screen, or a link that did not work. */
+export function authError(loc: Where): boolean {
+  return parts(loc).some((p) => p.has('error') || p.has('error_description') || p.has('error_code'))
+}
+
 /** True for /?signin: the address the owner sends for a moderated session goes straight to sign-in. */
 export function skipLanding(loc: Pick<Where, 'search'>): boolean {
   return new URLSearchParams(loc.search).has('signin')

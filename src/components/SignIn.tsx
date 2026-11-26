@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { looksLikeEmail, sendLink, verifyCode, type SignInProblem } from '../lib/auth'
+import { inAppBrowser, looksLikeEmail, sendLink, signInWithGoogle, verifyCode, type SignInProblem } from '../lib/auth'
+import { authError } from '../lib/landingRule'
 import Logo, { Wordmark } from './Logo'
 
 /** The product's own words for each thing that can go wrong; a raw error string is never shown. */
@@ -13,7 +14,28 @@ const PROBLEM: Record<SignInProblem, string> = {
 
 const RESEND_SECONDS = 60
 
-export default function SignIn({ notice, onCancel }: { notice?: string; onCancel?: () => void }) {
+/** The data statement under the form: the second clause names both ways in only when the Google key is shown. */
+export const DATA_LINE = 'By continuing you agree to how DiaBite keeps your data: your email address, your answers about yourself and your diary, stored in Ireland, which you can export or delete at any time.'
+export const DATA_LINE_GOOGLE = 'By continuing, with Google or by email, you agree to how DiaBite keeps your data: your email address, your answers about yourself and your diary, stored in Ireland, which you can export or delete at any time.'
+export const GOOGLE_COPY = {
+  key: 'Continue with Google',
+  opening: 'Opening Google…',
+  or: 'or use your email',
+  inApp: 'To use Google, open DiaBite in your browser. Your email works here.',
+  failed: 'Google did not sign you in. Try again, or use your email.',
+} as const
+
+/**
+ * The sign-in screen. `googleSignIn` comes from the engine's /health (GOOGLE_SIGN_IN=on): without it the screen is exactly the email
+ * form. `ua` and `failedReturn` are read from the browser unless given (the checks render the screen without one).
+ */
+export default function SignIn({ notice, onCancel, googleSignIn = false, ua, failedReturn }: { notice?: string; onCancel?: () => void; googleSignIn?: boolean; ua?: string; failedReturn?: boolean }) {
+  const inApp = inAppBrowser(ua ?? (typeof navigator !== 'undefined' ? navigator.userAgent : ''))
+  const [googleFailed] = useState(() => failedReturn ?? (typeof window !== 'undefined' && authError(window.location)))
+  const [opening, setOpening] = useState(false)
+  const [googleProblem, setGoogleProblem] = useState<SignInProblem | null>(null)
+  // A failed return from Google leaves its error in the address: said once above the key, then the address is cleaned.
+  useEffect(() => { if (googleSignIn && googleFailed && typeof window !== 'undefined' && failedReturn === undefined) window.history.replaceState(null, '', window.location.pathname) }, [googleSignIn, googleFailed, failedReturn])
   const [step, setStep] = useState<'address' | 'code'>('address')
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
@@ -38,6 +60,14 @@ export default function SignIn({ notice, onCancel }: { notice?: string; onCancel
     setBusy(false)
     if (p) { setProblem(p); return }
     setStep('code'); setCode(''); setWait(RESEND_SECONDS)
+  }
+
+  async function google() {
+    if (opening) return
+    setOpening(true); setGoogleProblem(null)
+    const r = await signInWithGoogle()
+    // On success the page is already leaving for Google; anything else is said in the product's own words, under the key.
+    if (r !== 'redirecting') { setOpening(false); setGoogleProblem(r) }
   }
 
   async function verify(e?: React.FormEvent) {
@@ -65,6 +95,21 @@ export default function SignIn({ notice, onCancel }: { notice?: string; onCancel
         </p>
         {notice && <p className="muted" role="status">{notice}</p>}
 
+        {step === 'address' && googleSignIn && (
+          <div className="signin-google">
+            {googleFailed && <p className="muted" role="status">{GOOGLE_COPY.failed}</p>}
+            {inApp ? (
+              <p className="muted">{GOOGLE_COPY.inApp}</p>
+            ) : (
+              <>
+                <button className="ghost signin-google-key" type="button" onClick={google} disabled={opening}>{opening ? GOOGLE_COPY.opening : GOOGLE_COPY.key}</button>
+                {opening && <p className="sr-only" role="status">Opening Google</p>}
+                {googleProblem && <p className="signin-problem" role="alert">{PROBLEM[googleProblem]}</p>}
+                <p className="muted signin-or">{GOOGLE_COPY.or}</p>
+              </>
+            )}
+          </div>
+        )}
         {step === 'address' ? (
           <form onSubmit={send} noValidate>
             <h2>Sign in with your email</h2>
@@ -77,7 +122,7 @@ export default function SignIn({ notice, onCancel }: { notice?: string; onCancel
             {problem && <p id="signin-problem" className="signin-problem" role="alert">{PROBLEM[problem]}</p>}
             <button className="primary" type="submit" disabled={busy}>{busy ? 'Sending…' : 'Email me a link'}</button>
             <p className="muted">We send a link and a code. There is no password.</p>
-            <p className="muted">By continuing you agree to how DiaBite keeps your data: your email address, your answers about yourself and your diary, stored in Ireland, which you can export or delete at any time.</p>
+            <p className="muted">{googleSignIn && !inApp ? DATA_LINE_GOOGLE : DATA_LINE}</p>
           </form>
         ) : (
           <form onSubmit={verify} noValidate>

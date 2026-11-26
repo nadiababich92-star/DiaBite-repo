@@ -664,6 +664,12 @@ body.modal-open { overflow: hidden; }
 .signin-problem { margin: 0; color: var(--high); font-size: 14px; }
 .signin-code { font-family: var(--mono); font-size: 20px; letter-spacing: 0.4em; text-align: center; font-variant-numeric: tabular-nums; }
 .signin button.primary { width: 100%; min-height: 46px; }
+/* "Continue with Google" (docs/specs/first-session-google-signin.md): the ghost key in DiaBite's own colours, full width, the word and no
+   logo (owner's choice, 26 November 2026, over Google's branded key). "or use your email" under it, muted and centred. Tokens only. */
+.signin-google { display: flex; flex-direction: column; gap: 8px; }
+.signin-google p { margin: 0; }
+.signin button.signin-google-key { width: 100%; min-height: 46px; }
+.signin-or { text-align: center; font-size: 14px; }
 @media (min-width: 560px) { .signin { max-width: 440px; } }
 
 .consent { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px dashed var(--border); }
