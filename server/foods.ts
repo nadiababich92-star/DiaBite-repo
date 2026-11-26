@@ -70,6 +70,8 @@ const INGREDIENT_PORTION_G: Record<string, number> = {
   salsa_verde: 30,
   peanut_butter_reduced_fat: 32,
   ketchup: 17,
+  // A pita named without an amount is one medium pita, from USDA's own whole wheat pita (57 g; PORTIONS_FROM), not 100 g (26 November, #116 Q).
+  whole_wheat_pita: 57,
   // White bread was 100 g, three and a half slices: "a slice of bread" was costed as 3 1/2 (a glycemic load of 33.8 for one). A slice is 29 g in the record's own table.
   white_bread: 29,
   rye_bread: 35,
@@ -562,7 +564,11 @@ export function readPortion(label: string, grams: number, recordName: string): P
     const w = m[1]
     const unit = (w === 'tablespoon' ? 'tbsp' : w === 'teaspoon' ? 'tsp' : w) as PortionRow['unit']
     // "1 cup, cooked" on a record that is cooked ("Pasta, cooked", "Durum wheat pasta, al dente") is just the cup; on a dry, raw or mix record it would be another food's weight.
-    const q = qualifierOf(m[2])
+    const q0 = qualifierOf(m[2])
+    // "1 small pita" on a pita: the word after the size is the food's own name, not another food's ("1 medium pita" was a qualified row, so
+    // "one whole wheat pita" was asked back in grams, 26 November). Only a single word that is in the record's name, and only after a size.
+    const own = (unit === 'small' || unit === 'medium' || unit === 'large') && /^[a-z]+$/.test(q0) && recordName.toLowerCase().split(/[^a-z]+/).filter(Boolean).map(stemWord).includes(stemWord(q0))
+    const q = own ? '' : q0
     return row(unit, w, q === 'cooked' && unit === 'cup' && !/\b(dry|raw|uncooked|mix)\b/i.test(recordName) ? '' : q, w === 'tablespoon' ? 'tbsp' : w === 'teaspoon' ? 'tsp' : w)
   }
   // "One of it": a "regular", a "fruit", or the food's own word ("1 banana"). Not a whole turkey breast (1,769 g) or a whole pineapple:
@@ -992,7 +998,21 @@ export function loadFoods() {
   }
 
   cache = { records, byId: new Map(records.map((x) => [x.id, x])) }
+  // A curated ingredient with no household measures of its own takes them from the same food in USDA's survey table (PORTIONS_FROM).
+  for (const [id, from] of Object.entries(PORTIONS_FROM)) {
+    const rec = cache.byId.get(id), twin = cache.byId.get(from)
+    if (rec && !rec.portions?.length && twin?.portions?.length) rec.portions = twin.portions
+  }
   return cache
+}
+
+/**
+ * Curated ingredients that borrow the household measures of the same food in USDA's survey table, where the portion mapping found none
+ * (its matcher offered a raisin bagel for the pita). "One whole wheat pita" was asked back in grams beside a souvlaki plate (#116 Q, 26
+ * November): USDA's "Bread, pita, whole wheat" lists a small (28 g), medium (57 g) and large (85 g) pita, and its nutrients are ours within 2%.
+ */
+const PORTIONS_FROM: Record<string, string> = {
+  'ing:whole_wheat_pita': 'usda:2707730',
 }
 
 export function getRecord(id: string): FoodRecord {

@@ -612,7 +612,8 @@ export function recipeWithItsPart(ids: string[]): { dish: string; part: string; 
       const other = by.get(otherId)
       if (!other) continue
       const part = dish.parts.find((p) => p.id === otherId || (words(p.name) !== '' && words(p.name) === words(other.name)))
-      if (part && carbs(part.id) >= 5) return { dish: dish.name, part: part.name, dishId, partId: part.id }
+      // The part must carry carbohydrate in the dish itself (2 g a serving): 15 g of red onion in a plate is not a second red onion.
+      if (part && carbs(part.id) >= 5 && carbs(part.id) * part.grams / 100 >= 2) return { dish: dish.name, part: part.name, dishId, partId: part.id }
     }
   }
   return null
@@ -624,27 +625,29 @@ export function recipeWithItsPart(ids: string[]): { dish: string; part: string; 
  * list in the database, without that part, and the part is counted once, as the person said it. The refusal it replaces left the agent to
  * repair the call, and in 4 to 5 of 12 samples it dropped the pita or counted bare chicken. Each ingredient is its own line, so every weight
  * shows, can be changed, and goes to the diary as what it is; no ingredient outside the database enters, because the recipe's own parts are
- * database records. Runs on the settled plan, so a serving count multiplies the parts.
+ * database records. Runs on the call's items before the amounts are settled, so the dish itself is never asked about.
  */
-export function withoutNamedPart(plan: QuantityPlan): { plan: QuantityPlan; without?: { dish: string; part: string } } {
-  const twice = recipeWithItsPart(plan.items.map((it) => it.foodId))
-  if (!twice) return { plan }
+export function withoutNamedPart(items: MealItemInput[]): { items: MealItemInput[]; without?: { dish: string; part: string } } {
+  const twice = recipeWithItsPart(items.map((it) => it.foodId))
+  if (!twice) return { items }
   const by = loadFoods().byId
-  const k = plan.items.findIndex((it) => it.foodId === twice.dishId)
+  const k = items.findIndex((it) => it.foodId === twice.dishId)
   const dish = by.get(twice.dishId)
-  if (k < 0 || !dish?.parts) return { plan }
-  const servings = plan.items[k].servings ?? 1
+  if (k < 0 || !dish?.parts) return { items }
+  // Before the amounts are settled, so the dish is never asked about as a dish: a count of anything (servings, "two skewers", "a plate") is
+  // that many of the recipe's servings, a weight is that share of a serving's weight, and nothing said is one serving.
+  const it = items[k]
+  const q = it.quantity
+  const perServing = dish.servingGrams ?? dish.parts.reduce((t, p) => t + p.grams, 0)
+  const servings = it.servings
+    ?? (it.grams !== undefined ? it.grams / perServing
+      : q && ['g', 'oz', 'lb'].includes(q.unit) ? (q.unit === 'g' ? q.count : q.count * (q.unit === 'oz' ? 28.3495 : 453.592)) / perServing
+      : q && q.unit !== 'default' ? q.count
+      : 1)
   const parts = dish.parts.filter((p) => p.id !== twice.partId && by.has(p.id) && p.grams * servings >= 0.5)
-  if (!parts.length) return { plan }
+  if (!parts.length || !(servings > 0)) return { items }
   const expanded: MealItemInput[] = parts.map((p) => ({ foodId: p.id, grams: Math.round(p.grams * servings * 10) / 10 }))
-  return {
-    plan: {
-      ...plan,
-      items: [...plan.items.slice(0, k), ...expanded, ...plan.items.slice(k + 1)],
-      meta: [...plan.meta.slice(0, k), ...expanded.map(() => undefined), ...plan.meta.slice(k + 1)],
-    },
-    without: { dish: twice.dish, part: twice.part },
-  }
+  return { items: [...items.slice(0, k), ...expanded, ...items.slice(k + 1)], without: { dish: twice.dish, part: twice.part } }
 }
 
 /**

@@ -469,8 +469,10 @@ async function main() {
     if (sandwichWithItsBread(body.items.map((it) => loadFoods().byId.get(it.foodId)?.name ?? ''))) {
       return res.json({ error: 'A sandwich record is the whole sandwich, with its bread already in it, so it cannot be counted beside slices of bread. When the person said what is in the sandwich and on what bread, cost those foods (the filling and the bread) and leave the sandwich record out; when they did not, cost the sandwich record alone.' })
     }
-    // A plate that already holds a pita, counted beside the pita the person named (tracker #116, finding Q): counted below, after the amounts
-    // are settled, as the dish's own ingredients without that part (withoutNamedPart).
+    // A plate that already holds a pita, counted beside the pita the person named (tracker #116, finding Q): the dish becomes its own
+    // ingredients without that part, here, before the amounts are settled, so nobody is asked how many servings of a plate they ate.
+    const split = withoutNamedPart(body.items)
+    body.items = split.items
     // A food the database lacks never enters the arithmetic under a neighbour's name (CLAUDE.md rule 3, tracker #130): an id resolve_foods
     // offered only as a near match for a phrase it could not find is refused, and the agent is told what to do instead.
     const near = body.sessionId ? getSession(body.sessionId)?.nearMisses : undefined
@@ -499,9 +501,6 @@ async function main() {
       const dish = body.sessionId ? getSession(body.sessionId)?.dishWeight : undefined
       const fit = dish ? scaleToDishWeight(body.items, plan, dish.grams) : undefined
       if (fit && 'plan' in fit) plan = fit.plan
-      // After the amounts and the dish's weight are settled: the plan's items line up with the call's until here.
-      const split = withoutNamedPart(plan)
-      plan = split.plan
       const costed = computeMeal(plan.items)
       const meal = { ...costed, items: fit && 'plan' in fit && dish
         ? costed.items.map((it) => ({ ...it, basis: 'typical' as const, said: `${Math.round(it.grams)} g (scaled to the ${dish.said} you said)` }))

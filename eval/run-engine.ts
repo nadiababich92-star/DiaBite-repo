@@ -1192,24 +1192,36 @@ recorrectMisses.forEach((m) => console.log(m))
   if (recipeWithItsPart([tacos, 'ing:white_rice']) || recipeWithItsPart(['ing:chicken_breast', 'ing:whole_wheat_pita'])) bits.push('a dish beside a food it does not hold is refused')
   // Q, the owner's decision of 26 November: the plate is counted as its own ingredients without its pita, and the pita once, as the person said it.
   {
-    const plan = planQuantities([{ foodId: plate, servings: 2 }, { foodId: 'ing:whole_wheat_pita', grams: 64 }, { foodId: salad, servings: 1 }])
-    const split = withoutNamedPart(plan)
-    const ids = split.plan.items.map((i) => i.foodId)
+    const split = withoutNamedPart([{ foodId: plate, servings: 2 }, { foodId: 'ing:whole_wheat_pita', grams: 64 }, { foodId: salad, servings: 1 }])
+    const ids = split.items.map((i) => i.foodId)
     if (!split.without || split.without.dish !== 'Chicken Souvlaki Plate') bits.push(`the plate and its pita are not split: ${JSON.stringify(split.without)}`)
     if (ids.includes(plate)) bits.push('the plate is still costed whole beside the pita')
-    if (ids.filter((i) => i === 'ing:whole_wheat_pita').length !== 1 || split.plan.items.find((i) => i.foodId === 'ing:whole_wheat_pita')?.grams !== 64) bits.push(`the pita is not counted once at the person's 64 g: ${JSON.stringify(split.plan.items.filter((i) => i.foodId === 'ing:whole_wheat_pita'))}`)
-    if (split.plan.items.find((i) => i.foodId === 'ing:chicken_breast')?.grams !== 300) bits.push('two servings of the plate do not hold 300 g of chicken')
-    if (!ids.includes(salad) || split.plan.meta.length !== split.plan.items.length) bits.push('the rest of the meal moved, or the plan is out of line')
+    if (ids.filter((i) => i === 'ing:whole_wheat_pita').length !== 1 || split.items.find((i) => i.foodId === 'ing:whole_wheat_pita')?.grams !== 64) bits.push(`the pita is not counted once at the person's 64 g: ${JSON.stringify(split.items.filter((i) => i.foodId === 'ing:whole_wheat_pita'))}`)
+    if (split.items.find((i) => i.foodId === 'ing:chicken_breast')?.grams !== 300) bits.push('two servings of the plate do not hold 300 g of chicken')
+    if (!ids.includes(salad)) bits.push('the rest of the meal moved')
+    // Before the amounts are settled: "two skewers" (2 pieces of a recipe, which would be asked back as servings) is two servings'
+    // worth of the plate's parts, and the meal plans with no question (0 of 12 live samples on 26 November, every one asked).
+    const skewers = withoutNamedPart([{ foodId: plate, quantity: { count: 2, unit: 'piece' } }, { foodId: 'ing:whole_wheat_pita', quantity: { count: 1, unit: 'whole' } }])
+    if (skewers.items.find((i) => i.foodId === 'ing:chicken_breast')?.grams !== 300) bits.push(`"two skewers" of the plate: ${JSON.stringify(skewers.items.slice(0, 2))}`)
+    if (planQuantities(skewers.items).needs.length) bits.push(`the split plate still asks: ${JSON.stringify(planQuantities(skewers.items).needs)}`)
+    // "One whole wheat pita" is a medium pita from USDA's own table (57 g), and "a pita" with no amount is one, not 100 g.
+    const onePita = planQuantities([{ foodId: 'ing:whole_wheat_pita', quantity: { count: 1, unit: 'whole' } }])
+    if (onePita.needs.length || onePita.items[0].grams !== 57) bits.push(`one whole wheat pita: ${JSON.stringify(onePita)}`)
+    if (loadFoods().byId.get('ing:whole_wheat_pita')?.defaultPortion !== 57) bits.push(`a pita with no amount is ${loadFoods().byId.get('ing:whole_wheat_pita')?.defaultPortion} g`)
+    // The same reading on USDA's own pita: "1 small pita" is a small, not a qualified row.
+    if (planQuantities([{ foodId: 'usda:2707730', quantity: { count: 1, unit: 'small' } }]).items[0].grams !== 28) bits.push('USDA\'s "1 small pita" is not read on its own record')
+    // A part with no carbohydrate to speak of in the dish (15 g of red onion) does not make a second dish split or a check fail.
+    if (recipeWithItsPart(['rec:DB-0316', 'ing:red_onion'])) bits.push('a skewer recipe beside red onion is called a double count')
     // The arithmetic: the split meal is the whole plates, less their pita, plus the person's pita (load is additive; rounding aside).
     const whole = computeMeal([{ foodId: plate, servings: 2 }]).totals.gl
     const platePita = computeMeal([{ foodId: 'ing:whole_wheat_pita', grams: 60 }]).totals.gl
     const theirs = computeMeal([{ foodId: 'ing:whole_wheat_pita', grams: 64 }]).totals.gl
     const saladGl = computeMeal([{ foodId: salad, servings: 1 }]).totals.gl
-    const got = computeMeal(split.plan.items).totals.gl
+    const got = computeMeal(split.items).totals.gl
     if (Math.abs(got - (whole - platePita + theirs + saladGl)) > 1.5) bits.push(`the split meal's load ${got} is not the plates less their pita plus theirs (${(whole - platePita + theirs + saladGl).toFixed(1)})`)
     // Nothing to split, nothing changes.
-    const plain = planQuantities([{ foodId: plate, servings: 1 }, { foodId: salad, servings: 1 }])
-    if (withoutNamedPart(plain).without || withoutNamedPart(plain).plan !== plain) bits.push('a plate with no pita beside it is split')
+    const plain = [{ foodId: plate, servings: 1 }, { foodId: salad, servings: 1 }]
+    if (withoutNamedPart(plain).without || withoutNamedPart(plain).items !== plain) bits.push('a plate with no pita beside it is split')
   }
   // S
   const per = piecesPerServing(by.get(tacos)!, lookup)
@@ -2823,7 +2835,9 @@ filterMisses.forEach((m) => console.log(m))
   // alone is the same slice as "a slice of garlic bread"; and these curated dressings, sauces, spreads and cheeses are their label serving.
   const cheese = (id: string) => id.startsWith('usda:') && /^cheese(, |$)/i.test(getRecord(id).name) && !/cottage|ricotta/i.test(getRecord(id).name)
   const garlic = (id: string) => id.startsWith('usda:') && /^garlic bread/i.test(getRecord(id).name)
-  const decided: Record<string, number> = { 'ing:mozzarella': 28, 'ing:american_cheese_reduced_fat': 28, 'ing:italian_dressing': 30, 'ing:bbq_sauce': 30, 'ing:pesto': 30, 'ing:salsa_verde': 30, 'ing:peanut_butter_reduced_fat': 32, 'ing:ketchup': 17 }
+  const decided: Record<string, number> = { 'ing:mozzarella': 28, 'ing:american_cheese_reduced_fat': 28, 'ing:italian_dressing': 30, 'ing:bbq_sauce': 30, 'ing:pesto': 30, 'ing:salsa_verde': 30, 'ing:peanut_butter_reduced_fat': 32, 'ing:ketchup': 17,
+    // 26 November, with #116 Q (reported to the owner, hers to reverse): a pita with no amount is one medium pita from USDA's own table, not 100 g.
+    'ing:whole_wheat_pita': 57 }
   const cheeseOff = Object.keys(baseline).filter((id) => cheese(id) && getRecord(id).defaultPortion !== 28)
   if (cheeseOff.length) dMisses.push(`    ${cheeseOff.length} cheeses do not default to 1 oz, e.g. ${cheeseOff[0]} ${getRecord(cheeseOff[0]).defaultPortion} g`)
   for (const id of Object.keys(baseline).filter(garlic)) { const s = gramsFor(getRecord(id), { count: 1, unit: 'slice' } as never) as { grams?: number }; if (s.grams !== undefined && s.grams !== getRecord(id).defaultPortion) dMisses.push(`    ${id}: garlic bread alone is ${getRecord(id).defaultPortion} g, a slice of it ${s.grams} g`) }
