@@ -127,7 +127,7 @@ export interface MealItemResult extends Nutrients {
   /** The unit the portion editor steps this food in, and what one weighs ("cup", 158): the record's own table, a unit that is at least half of this weight. Absent when no unit fits; the editor then steps in grams. */
   stepUnit?: { unit: string; unitGrams: number }
   /** The household units this food can be said in beyond weights and its usual portion (`whole`, `medium`, `cup`, `slice`…); absent when it has none. */
-  units?: NonNullable<MealItemInput['quantity']>['unit'][]
+  units?: QuantityUnit[]
 }
 
 export interface MealTotals extends Nutrients {

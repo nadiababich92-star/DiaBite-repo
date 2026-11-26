@@ -565,7 +565,7 @@ async function main() {
       let sc = scaleDish(body)
       // The person's weight cannot hold what they stated for single ingredients: the call stands as the agent made it.
       if (fromMessage && 'error' in sc) { body.totalGrams = undefined; sc = scaleDish(body) }
-      else if (fromMessage && sc.scaled) sc.scaled.from = 'message'
+      else if (fromMessage && !('error' in sc) && sc.scaled) sc.scaled.from = 'message'
       if ('error' in sc) return res.json({ error: sc.error })
       const plan = await planDish(store, sc.req)
       // One dish, one rice (#124): an ingredient the agent assumed may not duplicate a starch the person named.
