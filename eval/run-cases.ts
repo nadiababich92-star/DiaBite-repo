@@ -209,7 +209,10 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
     for (const q of e.quantityGrams as { foodId?: string; foodIds?: string[]; min: number; max: number; typed?: boolean }[]) {
       const ids = q.foodIds ?? [q.foodId as string]
       const it = items.find((i) => ids.includes(i.foodId))
-      say(`${ids[0]} weighed by the engine from what the person said, ${q.min} to ${q.max} g`, !!it && (it.quantity !== undefined || q.typed === true) && it.grams >= q.min && it.grams <= q.max,
+      // No amount said ("oatmeal with brown sugar", US20): an item sent with neither grams nor a quantity is the engine's own default, weighed by it too.
+      const sent = ((lastCallOf(r, 'compute_meal')?.input as { items?: { foodId?: string; grams?: unknown; quantity?: unknown }[] } | undefined)?.items ?? []).find((i) => i.foodId && ids.includes(i.foodId))
+      const engineDefault = !!sent && sent.grams === undefined && sent.quantity === undefined
+      say(`${ids[0]} weighed by the engine from what the person said, ${q.min} to ${q.max} g`, !!it && (it.quantity !== undefined || q.typed === true || engineDefault) && it.grams >= q.min && it.grams <= q.max,
         it ? `${it.foodId} ${it.grams} g, quantity ${JSON.stringify(it.quantity)}` : `no item for ${ids.join('/')} among ${items.map((i) => i.foodId).join(',')}`)
     }
   }
@@ -578,7 +581,7 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
   if (called(r, 'compute_meal')) {
     const day = dayStateOf(r)
     const meal = callOf(r, 'compute_meal')?.result as
-      { totals?: { gl?: number }; afterMeal?: { remaining?: { gl?: number } } } | undefined
+      { totals?: { gl?: number }; afterMeal?: { remaining?: { gl?: number; carbsG?: number; kcal?: number } } } | undefined
     const before = day?.remaining?.gl
     const mealGl = meal?.totals?.gl
     // The engine returns the after-figure now; subtracting is the fallback for
@@ -602,8 +605,11 @@ function check(c: Case, r: Reply): { name: string; ok: boolean; note?: string; s
         for (const num of window.matchAll(/-?\d+(?:\.\d+)?/g)) near.push(Number(num[0]))
       }
       if (near.length) {
-        const ok = near.some((n) => Math.abs(n - after) < 0.15)
-        say('"after" figure matches the engine', ok, `saw ${near.join(' / ')}, should be ${after}`)
+        // The engine's other after-figures are after-figures too: a drink counted for carbohydrate only (F49, Red Bull, 25 November)
+        // is rightly told as "66.9 g of carbohydrate left after it". What this check exists to catch is the figure from before the meal.
+        const others = [meal?.afterMeal?.remaining?.carbsG, meal?.afterMeal?.remaining?.kcal].filter((n): n is number => typeof n === 'number')
+        const ok = near.some((n) => [after, ...others].some((a) => Math.abs(n - a) < 0.15))
+        say('"after" figure matches the engine', ok, `saw ${near.join(' / ')}, should be ${after}${others.length ? ` (or ${others.join(' / ')})` : ''}`)
       }
     }
   }
