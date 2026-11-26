@@ -1340,7 +1340,9 @@ recorrectMisses.forEach((m) => console.log(m))
   const del = engineSrc.slice(engineSrc.indexOf("app.delete('/account'"), engineSrc.indexOf("app.delete('/account'") + 2500)
   if ((del.match(/await forgetPreferencesLogged\(person\.sub\)/g) ?? []).length !== 2) bits.push('deleting an account (or finding it gone) does not delete its remembered likes')
   const agentSrc = readFileSync(join(ROOT, 'server', 'agent.ts'), 'utf8')
-  if (!agentSrc.includes('recallPreferences(preferenceScope(req.sessionId, ctx.person)') || !agentSrc.includes('rememberPreferences(preferenceScope(req.sessionId, ctx.person)')) bits.push('the advisor reads or writes memory under the browser, not the account')
+  // The scope is worked out once per turn (the search starts beside the router), and every read and write uses it.
+  const memCalls = agentSrc.match(/(?<!function )\b(?:recall|remember)Preferences\(([^,]+),/g) ?? []
+  if (!agentSrc.includes('const scope = preferenceScope(req.sessionId, ctx.person)') || memCalls.length < 3 || memCalls.some((c) => !/\((?:scope),$/.test(c))) bits.push('the advisor reads or writes memory under the browser, not the account')
   console.log(`\nlikes     ${bits.length === 0 ? 'ok' : 'WRONG'}  (the advisor's memory is the account's)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
