@@ -28,10 +28,11 @@ import express from 'express'
 import cors from 'cors'
 import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
-import { resolvePhrases } from './resolve'
+import { phraseNames, resolvePhrases, withoutQuantity } from './resolve'
 import { afterMealFor, recipeWithItsPart, sandwichWithItsBread, scaleToDishWeight, alternativesForMeal, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, dayOnlyUnscored, stillUnknown, withSaid } from './compute'
 import { amountQuestion, NEEDS_WEIGHT_INSTRUCTION, quantityError, settleAmount, weightQuestion } from './quantity'
 import { countedAsPieces } from './pieces'
+import { withGramsSaid } from './gramsSaid'
 import { verify } from './verify'
 import { claimSession, getSession, noteResolution, putSession } from './sessions'
 import { bindSession, unbindSession } from './bind'
@@ -207,7 +208,7 @@ async function main() {
 
   /** The client parks the day's budget and log here, then hands the agent only the id. */
   app.put('/session/:id', (req, res) => {
-    const { budget, entries, avoid, carbLimit, units, portionSwaps, dishWeight, countsSaid } = req.body ?? {}
+    const { budget, entries, avoid, carbLimit, units, portionSwaps, dishWeight, countsSaid, gramsSaid } = req.body ?? {}
     if (!validSessionId(req.params.id)) return res.status(400).json({ error: 'invalid session id' })
     if (!budget || !Array.isArray(entries) || entries.length > 100) return res.status(400).json({ error: 'budget and at most 100 entries required' })
     if (carbLimit !== undefined && !validCarbLimit(carbLimit)) return res.status(400).json({ error: 'invalid carbLimit' })
@@ -215,7 +216,8 @@ async function main() {
     if (portionSwaps !== undefined && portionSwaps !== false) return res.status(400).json({ error: 'invalid portionSwaps' })
     if (dishWeight !== undefined && !(dishWeight && typeof dishWeight.grams === 'number' && dishWeight.grams >= 30 && dishWeight.grams <= 3000 && typeof dishWeight.said === 'string' && dishWeight.said.length <= 20)) return res.status(400).json({ error: 'invalid dishWeight' })
     if (countsSaid !== undefined && !(Array.isArray(countsSaid) && countsSaid.length <= 8 && countsSaid.every((c: unknown) => !!c && typeof c === 'object' && Number.isInteger((c as { count: number }).count) && (c as { count: number }).count >= 1 && (c as { count: number }).count <= 20 && typeof (c as { head: string }).head === 'string' && /^[a-z'-]{3,30}$/.test((c as { head: string }).head)))) return res.status(400).json({ error: 'invalid countsSaid' })
-    putSession(req.params.id, budget, entries, avoid, carbLimit, units, portionSwaps, dishWeight, countsSaid)
+    if (gramsSaid !== undefined && !(Array.isArray(gramsSaid) && gramsSaid.length <= 8 && gramsSaid.every((g: unknown) => !!g && typeof g === 'object' && typeof (g as { grams: number }).grams === 'number' && (g as { grams: number }).grams >= 1 && (g as { grams: number }).grams <= 3000 && typeof (g as { phrase: string }).phrase === 'string' && (g as { phrase: string }).phrase.length >= 3 && (g as { phrase: string }).phrase.length <= 120))) return res.status(400).json({ error: 'invalid gramsSaid' })
+    putSession(req.params.id, budget, entries, avoid, carbLimit, units, portionSwaps, dishWeight, countsSaid, gramsSaid)
     res.json({ ok: true, sessionId: req.params.id, entries: entries.length })
   })
 
@@ -473,6 +475,8 @@ async function main() {
     // "Two beef tacos" sent as 2 servings of a taco recipe that holds two tacos a serving: the person's count, read from their own message, is of
     // pieces (tracker #116, finding S). Only where the recipe's own shell says how many pieces a serving holds.
     countedAsPieces(body.items, body.sessionId ? getSession(body.sessionId)?.countsSaid : undefined, (id) => loadFoods().byId.get(id))
+    // A weight the person gave for one food beats the measure the agent sent for it (#131): "a medium baked potato (about 175 g)" is 175 g.
+    withGramsSaid(body.items, body.sessionId ? getSession(body.sessionId)?.gramsSaid : undefined, (id) => loadFoods().byId.get(id), (p, n) => phraseNames(withoutQuantity(p), n))
     try {
       const units = body.sessionId ? getSession(body.sessionId)?.units : undefined
       let plan = planQuantities(body.items)

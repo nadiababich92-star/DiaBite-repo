@@ -31,6 +31,7 @@
  */
 import { wholeDishWeight } from './dishWeight'
 import { countsSaid as readCounts } from './pieces'
+import { gramsSaid as readGrams } from './gramsSaid'
 import { createReadStream, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
@@ -612,11 +613,13 @@ async function parkDayState(req: AskRequest): Promise<void> {
   const dishWeight = wholeDishWeight(req.message) ?? undefined
   // The counts the person said ("two beef tacos"), read by a rule for the same reason: a count of a dish's pieces is not its servings (server/pieces.ts).
   const countsSaid = readCounts(req.message)
-  if (!ENGINE_URL) { putSession(req.sessionId, req.budget, req.entries, req.avoid, req.carbLimit, req.units, req.portionSwaps, dishWeight, countsSaid); return }
+  // A weight given for one food ("a baked potato (about 175 g)"), read by a rule too, unless the message's weight is the whole dish's (#131).
+  const gramsSaid = dishWeight ? [] : readGrams(req.message)
+  if (!ENGINE_URL) { putSession(req.sessionId, req.budget, req.entries, req.avoid, req.carbLimit, req.units, req.portionSwaps, dishWeight, countsSaid, gramsSaid); return }
   const r = await fetch(`${ENGINE_URL}/session/${encodeURIComponent(req.sessionId)}`, {
     method: 'PUT',
     headers: { 'content-type': 'application/json', ...(ENGINE_KEY ? { 'x-api-key': ENGINE_KEY } : {}) },
-    body: JSON.stringify({ budget: req.budget, entries: req.entries, avoid: req.avoid, carbLimit: req.carbLimit, units: req.units, portionSwaps: req.portionSwaps, dishWeight, countsSaid }),
+    body: JSON.stringify({ budget: req.budget, entries: req.entries, avoid: req.avoid, carbLimit: req.carbLimit, units: req.units, portionSwaps: req.portionSwaps, dishWeight, countsSaid, gramsSaid }),
   })
   if (!r.ok) throw new Error(`could not park the day state: ${r.status} ${await r.text()}`)
 }

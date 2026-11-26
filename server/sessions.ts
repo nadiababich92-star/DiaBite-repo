@@ -52,6 +52,8 @@ export interface SessionState {
   dishWeight?: { grams: number; said: string }
   /** The counts the person said in this turn's message ("two beef tacos" → 2, taco: server/pieces.ts); memory only, cleared by the next turn. */
   countsSaid?: { count: number; head: string }[]
+  /** A weight the person gave for one food in this turn's message ("a baked potato (about 175 g)": server/gramsSaid.ts); memory only. */
+  gramsSaid?: { grams: number; phrase: string }[]
   storedAt: number
 }
 
@@ -82,9 +84,10 @@ export function putSession(
   id: string, budget: DayBudget, entries: MealItemInput[], avoid?: AvoidList, carbLimit?: CarbLimit, units?: 'imperial' | 'metric', portionSwaps?: false,
   dishWeight?: { grams: number; said: string },
   countsSaid?: { count: number; head: string }[],
+  gramsSaid?: { grams: number; phrase: string }[],
 ): SessionState {
   sweep()
-  const state: SessionState = { budget, entries, avoid, carbLimit, ...(units ? { units } : {}), ...(portionSwaps === false ? { portionSwaps: false as const } : {}), ...(dishWeight ? { dishWeight } : {}), ...(countsSaid?.length ? { countsSaid } : {}), unknownFoods: [], storedAt: Date.now() }
+  const state: SessionState = { budget, entries, avoid, carbLimit, ...(units ? { units } : {}), ...(portionSwaps === false ? { portionSwaps: false as const } : {}), ...(dishWeight ? { dishWeight } : {}), ...(countsSaid?.length ? { countsSaid } : {}), ...(gramsSaid?.length ? { gramsSaid } : {}), unknownFoods: [], storedAt: Date.now() }
   setBounded(store, id, state)
   return state
 }

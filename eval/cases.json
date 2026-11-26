@@ -7798,6 +7798,40 @@
         "recipe-amounts",
         "rule-3"
       ]
+    },
+    {
+      "id": "RA6",
+      "dimension": "honest",
+      "query": "a 6 oz sirloin steak with a medium baked potato (about 175 g)",
+      "ground_truth": "The person's 175 g for the potato is what is costed, not USDA's medium (285 g) (#131 AE).",
+      "context": {
+        "budget": {
+          "glBudget": 79.5,
+          "carbsG": 150,
+          "kcal": 2000
+        },
+        "entries": []
+      },
+      "expect": {
+        "quantityGrams": [
+          {
+            "foodIds": [
+              "usda:2709383",
+              "usda:2709382",
+              "ing:potato_baked",
+              "seed:potato-baked"
+            ],
+            "min": 170,
+            "max": 180
+          }
+        ],
+        "verified": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "recipe-amounts",
+        "grams-said"
+      ]
     }
   ]
 }

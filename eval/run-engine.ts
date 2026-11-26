@@ -41,6 +41,8 @@ import { continuationFor, resolvedPhrases, uncountedFoods } from '../server/agen
 import { forgetMealPhrases, mealPhrasesOf, rememberMealPhrases } from '../server/sessions'
 import { wholeDishWeight } from '../server/dishWeight'
 import { countedAsPieces, countsSaid, piecesOf, piecesPerServing } from '../server/pieces'
+import { gramsSaid, withGramsSaid } from '../server/gramsSaid'
+import { phraseNames } from '../server/resolve'
 import { sourceForPerson } from '../src/lib/agent'
 import { rememberResponse } from '../server/sessions'
 import { sanitizeProfile } from '../src/lib/storage'
@@ -1294,6 +1296,32 @@ recorrectMisses.forEach((m) => console.log(m))
   if (withoutQuantity('Chipotle chicken burrito bowl') !== 'Chipotle chicken burrito bowl') bits.push('a chain with its own records (Chipotle) was stripped')
   if (withoutQuantity('a turkey footlong') !== 'turkey footlong') bits.push('a footlong was read as a 6-inch sub')
   console.log(`\nsub       ${bits.length === 0 ? 'ok' : 'WRONG'}  (a turkey sub, from Subway or not)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// ── #131 AE: a weight the person gave for one food wins over the measure the agent sent (nadia+james, 26 November 2026) ──
+{
+  const bits: string[] = []
+  const g = gramsSaid('a 6 oz sirloin steak with a medium baked potato (about 175 g), sour cream and corn')
+  if (g.length !== 1 || g[0].grams !== 175 || g[0].phrase !== 'a medium baked potato') bits.push(`read: ${JSON.stringify(g)}`)
+  const of = gramsSaid('about 120 g of cooked white rice and a chicken breast')
+  if (of.length !== 1 || of[0].grams !== 120 || of[0].phrase !== 'cooked white rice') bits.push(`"120 g of …": ${JSON.stringify(of)}`)
+  const oz = gramsSaid('grilled salmon (6 oz) with asparagus')
+  if (oz.length !== 1 || Math.abs(oz[0].grams - 170.1) > 0.2) bits.push(`"(6 oz)": ${JSON.stringify(oz)}`)
+  for (const m of ['A chicken burrito bowl with white rice and black beans, 450 g', 'a cup of rice', 'two eggs (fried) and toast']) if (gramsSaid(m).length) bits.push(`"${m}" read as a food's weight: ${JSON.stringify(gramsSaid(m))}`)
+  const names = (p: string, n: string) => phraseNames(withoutQuantity(p), n)
+  const lookup = (id: string) => loadFoods().byId.get(id)
+  const items: { foodId: string; grams?: number; quantity?: { count: number; unit: string } }[] = [{ foodId: 'usda:2709383', quantity: { count: 1, unit: 'medium' } }, { foodId: 'ing:sour_cream', quantity: { count: 1, unit: 'tbsp' } }]
+  withGramsSaid(items, g, lookup, names)
+  if (items[0].quantity?.unit !== 'g' || items[0].quantity.count !== 175 || items[1].quantity?.unit !== 'tbsp') bits.push(`items after the person's 175 g: ${JSON.stringify(items)}`)
+  const plan = planQuantities(items as never)
+  const costed = withSaid(computeMeal(plan.items).items, plan, 'imperial')
+  if (costed[0].grams !== 175 || costed[0].basis !== 'stated') bits.push(`the potato costed at ${costed[0].grams} g, basis ${costed[0].basis}`)
+  const recipe = [{ foodId: 'rec:DB-1162', servings: 1 }]
+  withGramsSaid(recipe, [{ grams: 300, phrase: 'beef tacos' }], lookup, names)
+  if ((recipe[0] as { servings?: number }).servings !== 1) bits.push('a recipe was given grams')
+  console.log(`\ngrams said ${bits.length === 0 ? 'ok' : 'WRONG'}  (the person's weight for one food)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }

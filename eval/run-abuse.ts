@@ -272,6 +272,16 @@ async function httpSuite() {
     const allowed = nearId && foundIds.includes(nearId) ? await post('/tools/compute_meal', { sessionId: 'nm-2', items: [{ foodId: nearId }] }) : undefined
     check('NM2', 'the same id offered under a phrase that was found is costed (the refusal is about the unknown phrase, not the record)',
       !foundIds.includes(nearId ?? '') || (allowed?.json.totals !== undefined && allowed.json.error === undefined), JSON.stringify([foundIds.slice(0, 3), allowed?.json.error]))
+    // GS (tracker #131): a weight the person gave for one food, parked with the session, beats the measure the agent sends for it.
+    await fetch(`${BASE}/session/gs-1`, { method: 'PUT', headers: { 'content-type': 'application/json', 'x-api-key': KEY },
+      body: JSON.stringify({ budget: { glBudget: 49, carbsG: 108, kcal: 1660 }, entries: [], gramsSaid: [{ grams: 175, phrase: 'a medium baked potato' }] }) })
+    const gs = await post('/tools/compute_meal', { sessionId: 'gs-1', items: [{ foodId: 'usda:2709383', quantity: { count: 1, unit: 'medium' } }] })
+    const potato = gs.json.items?.[0]
+    check('GS1', 'the person\'s 175 g for the baked potato is costed, as their own weight, not the medium (285 g) the agent sent',
+      potato?.grams === 175 && potato?.basis === 'stated', JSON.stringify([potato?.grams, potato?.basis, potato?.said, gs.json.error]))
+    const badGs = await fetch(`${BASE}/session/gs-2`, { method: 'PUT', headers: { 'content-type': 'application/json', 'x-api-key': KEY },
+      body: JSON.stringify({ budget: { glBudget: 49, carbsG: 108, kcal: 1660 }, entries: [], gramsSaid: [{ grams: 90000, phrase: 'x' }] }) })
+    check('GS0', 'a malformed gramsSaid is refused with 400', badGs.status === 400, String(badGs.status))
     await park('cd-3')
     const d4 = await post('/tools/cost_dish', { dish: 'cholent', sessionId: 'cd-3', ingredients: [...cholent, { phrase: 'zzzqx', grams: 20 }] })
     check('D5', 'an ingredient that cannot be found is named, left out, and makes the meal partial: fits is not true',
