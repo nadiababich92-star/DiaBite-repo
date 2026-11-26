@@ -207,11 +207,12 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
         // A food with no glycemic load in our data adds nothing to the meal's load, so the meal's load is not known: "GL 0.0 · low" over two
         // slices of pizza was the mislabel rule 4 warns about (24 November 2026). Some foods unscored: the load so far, with no level word.
         const unscored = entries.filter((e) => !viewEntry(e).loadAvailable).length
+        // ...and when what can be counted comes to nothing (an egg beside the soup), "GL 0.0 so far" read as a zero load: it says "GL —" too (H, 26 November).
         return (
           <section className="card" key={m}>
             <div className="row" style={{ justifyContent: 'space-between', marginBottom: 6 }}>
               <h2 style={{ margin: 0 }}>{MEAL_LABELS[m]}</h2>
-              <span className="row" style={{ gap: 10, alignItems: 'center' }}><span className="muted">{mealCarbs} g carbs</span>{unscored === 0 ? <GLPill gl={mealGL} /> : <span className="pill none meal-gl-partial">{unscored === entries.length ? 'GL —' : `GL ${mealGL.toFixed(1)} so far`}</span>}</span>
+              <span className="row" style={{ gap: 10, alignItems: 'center' }}><span className="muted">{mealCarbs} g carbs</span>{unscored === 0 ? <GLPill gl={mealGL} /> : <span className="pill none meal-gl-partial">{unscored === entries.length || mealGL < 0.05 ? 'GL —' : `GL ${mealGL.toFixed(1)} so far`}</span>}</span>
             </div>
             <ul className="entries">
               {entries.map((e) => {
@@ -221,7 +222,7 @@ export default function DiaryPage({ targets, diary, onChange, onAsk, showBreadUn
                     <div className="entry-main">
                       <span className="entry-name">{v.name}</span>
                       <span className="muted entry-sub">
-                        <GIPill gi={v.gi} carbs={v.availableCarbs} />{' '}
+                        <GIPill gi={v.gi} carbs={v.availableCarbs} loadAvailable={v.loadAvailable} />{' '}
                         {e.snapshot && <span className="pill none">{e.foodId.startsWith('rec:') ? 'recipe' : 'from Ask'}</span>}
                         {e.snapshot?.assumed && <span className="pill none assumed">from an assumed recipe</span>}
                         {' '}{v.availableCarbs.toFixed(1)} g carbs · GL {v.loadAvailable ? v.gl.toFixed(1) : '—'}

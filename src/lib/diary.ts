@@ -67,10 +67,14 @@ export function viewEntry(e: DiaryEntry): EntryView {
  * `left` is the day still to come (what is left may be less); `used` is a day that is over (the load may be higher).
  */
 export function noLoadNote(entries: DiaryEntry[], kind: 'left' | 'used' = 'left'): string | null {
-  const n = entries.filter((e) => !viewEntry(e).loadAvailable).length
+  const none = entries.map(viewEntry).filter((v) => !v.loadAvailable)
+  const n = none.length
   if (n === 0) return null
-  const lead = `${n} ${n === 1 ? 'food has' : 'foods have'} no glycemic load in our data and ${n === 1 ? 'is' : 'are'} not counted`
-  return kind === 'left' ? `${lead}, so what is left may be less.` : `${lead}, so the real load may be higher.`
+  // How much carbohydrate those foods hold, from the logged entries like every Diary total (the owner's wording, 26 November 2026, finding H):
+  // two foods with 71.7 g of the day's 140 g stood under "98.8 left", and "may be less" did not say how much.
+  const carbs = Math.round(none.reduce((s, v) => s + v.availableCarbs, 0) * 10) / 10
+  const lead = `${n} ${n === 1 ? 'food' : 'foods'}, with ${carbs.toFixed(1)} g of carbohydrate, ${n === 1 ? 'has' : 'have'} no glycemic load in our data and ${n === 1 ? 'is' : 'are'} not counted`
+  return kind === 'left' ? `${lead}, so what is left may be much less.` : `${lead}, so the real load may be much higher.`
 }
 
 /**

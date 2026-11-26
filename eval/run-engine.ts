@@ -2406,10 +2406,18 @@ filterMisses.forEach((m) => console.log(m))
   const pizza2 = at('c', { name: 'Pizza', loadAvailable: false })
   if (noLoadNote([scored]) !== null) noLoadMisses.push('    a day with a load for every entry gets a note')
   if (noLoadNote([]) !== null) noLoadMisses.push('    an empty day gets a note')
+  // The owner's wording, 26 November 2026 (finding H): the note says how much carbohydrate those foods hold.
   const one = noLoadNote([scored, pizza]) ?? ''
-  if (!/^1 food has no glycemic load in our data and is not counted, so what is left may be less\.$/.test(one)) noLoadMisses.push(`    one unscored entry: ${JSON.stringify(one)}`)
-  const two = noLoadNote([pizza, pizza2, scored], 'used') ?? ''
-  if (!/^2 foods have no glycemic load in our data and are not counted, so the real load may be higher\.$/.test(two)) noLoadMisses.push(`    two unscored entries on a past day: ${JSON.stringify(two)}`)
+  if (one !== '1 food, with 19.0 g of carbohydrate, has no glycemic load in our data and is not counted, so what is left may be much less.') noLoadMisses.push(`    one unscored entry: ${JSON.stringify(one)}`)
+  const two = noLoadNote([pizza, at('c', { name: 'Lasagna', loadAvailable: false, availableCarbs: 34.1 }), scored], 'used') ?? ''
+  if (two !== '2 foods, with 53.1 g of carbohydrate, have no glycemic load in our data and are not counted, so the real load may be much higher.') noLoadMisses.push(`    two unscored entries on a past day: ${JSON.stringify(two)}`)
+  if (pizza2.id !== 'c') noLoadMisses.push('    fixture changed')
+  // A row: "carbs only" is for a food whose load is not counted; a food with no GI and so little carbohydrate that its load is counted as 0 says
+  // "little carbs"; under 1 g, "no carbs". The meal header of a partial meal whose counted part comes to 0 says "GL —", not "GL 0.0 so far".
+  const pill = (p: object) => renderToStaticMarkup(createElement(GIPill, p as never))
+  if (!/carbs only/.test(pill({ gi: null, carbs: 34, loadAvailable: false })) || !/little carbs/.test(pill({ gi: null, carbs: 1.2, loadAvailable: true })) || !/no carbs/.test(pill({ gi: null, carbs: 0.4, loadAvailable: true })) || !/carbs only/.test(pill({ gi: null, carbs: 5 }))) noLoadMisses.push('    the GI pill of a food with no GI is wrong')
+  const diarySrc = readFileSync(join(ROOT, 'src', 'components', 'DiaryPage.tsx'), 'utf8')
+  if (!diarySrc.includes("unscored === entries.length || mealGL < 0.05 ? 'GL —'") || !diarySrc.includes('loadAvailable={v.loadAvailable}')) noLoadMisses.push('    the Diary meal header or row does not use the load the engine counted')
   console.log(`\nnoload    ${noLoadMisses.length === 0 ? 'ok' : 'WRONG'}`)
   noLoadMisses.forEach((m) => console.log(m))
   if (noLoadMisses.length) process.exitCode = 1

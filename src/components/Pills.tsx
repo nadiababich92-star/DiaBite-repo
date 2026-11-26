@@ -2,9 +2,14 @@ import { GI_LEVEL_LABELS, LEVEL_LABELS, dayGlLevel, giLevel, glLevel } from '../
 
 /** `carbs`: the food's available carbohydrate as eaten. A food with no GI and real carbohydrate (pizza, a branded bar) is "carbs only", never
  *  "no carbs": two slices of pizza were labelled "no carbs" beside "65.3 g carbs" in the Diary (24 November 2026, CLAUDE.md rule 4). */
-export function GIPill({ gi, carbs }: { gi: number | null; carbs?: number }) {
+/**
+ * `loadAvailable` false: the engine counts this food's carbohydrate and no load (pizza, chips): "carbs only". True with no GI: the food has so
+ * little carbohydrate that its load is counted as 0 (CLAUDE.md rule 4's threshold: an egg, lettuce, cream cheese): "little carbs", because
+ * "carbs only · GL 0.0" contradicted itself (finding H, 26 November 2026, the owner's wording). Under 1 g, either way, "no carbs".
+ */
+export function GIPill({ gi, carbs, loadAvailable }: { gi: number | null; carbs?: number; loadAvailable?: boolean }) {
   const level = giLevel(gi)
-  if (level === null) return <span className="pill none">{typeof carbs === 'number' && carbs >= 1 ? 'carbs only' : 'no carbs'}</span>
+  if (level === null) return <span className="pill none">{typeof carbs === 'number' && carbs >= 1 ? (loadAvailable === true ? 'little carbs' : 'carbs only') : 'no carbs'}</span>
   return (
     <span className={`pill ${level}`}>
       GI {gi} · {GI_LEVEL_LABELS[level]}
