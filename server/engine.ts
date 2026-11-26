@@ -30,7 +30,7 @@ import { loadFoods, getRecord, summary } from './foods'
 import { openStore, type VectorStore } from './embeddings'
 import { phraseNames, resolvePhrases, withoutQuantity } from './resolve'
 import { afterMealFor, recipeWithItsPart, sandwichWithItsBread, scaleToDishWeight, alternativesForMeal, excludedIn, computeMeal, dayState, driverOf, findAlternatives, planDish, planQuantities, recountMeal, scaleDish, dayOnlyUnscored, stillUnknown, withSaid } from './compute'
-import { amountQuestion, NEEDS_WEIGHT_INSTRUCTION, quantityError, settleAmount, weightQuestion } from './quantity'
+import { amountQuestion, GRAMS_PER_OUNCE, GRAMS_PER_POUND, NEEDS_WEIGHT_INSTRUCTION, quantityError, RECIPE_WEIGHED, settleAmount, weightQuestion } from './quantity'
 import { countedAsPieces } from './pieces'
 import { withGramsSaid } from './gramsSaid'
 import { verify } from './verify'
@@ -492,6 +492,11 @@ async function main() {
       const units = body.sessionId ? getSession(body.sessionId)?.units : undefined
       let plan = planQuantities(body.items)
       // A measure that cannot honestly be turned into grams: nothing is costed and no number comes back, so the agent asks.
+      const weighed = plan.needs.find((n) => n.why === RECIPE_WEIGHED)
+      if (weighed) {
+        const g = weighed.quantity.unit === 'g' ? weighed.quantity.count : Math.round(weighed.quantity.count * (weighed.quantity.unit === 'oz' ? GRAMS_PER_OUNCE : GRAMS_PER_POUND))
+        return res.json({ error: `"${weighed.name}" is counted by serving, and the person gave a weight (${weighed.quantity.count} ${weighed.quantity.unit}, ${g} g), so do not ask them how much. Count the dish with cost_dish, as the dish they named, with totalGrams ${g}; or, if one of the resolve_foods candidates is the food itself weighed (not a recipe), use that with this quantity.` })
+      }
       if (plan.needs.length > 0) return res.json({ needsWeight: plan.needs, hint: amountQuestion(plan.needs[0], units), instruction: NEEDS_WEIGHT_INSTRUCTION })
       // The weight of the whole dish the person said (parked from their message, never the model's): the assumed amounts are scaled to it.
       const dish = body.sessionId ? getSession(body.sessionId)?.dishWeight : undefined

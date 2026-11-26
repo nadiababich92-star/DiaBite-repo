@@ -126,6 +126,9 @@ export function gramsFor(rec: FoodRecord, q: Quantity): Resolved {
     const p = piecesPerServing(rec, (id) => loadFoods().byId.get(id))
     return p ? { servings: r1(count / p.per), basis: 'typical' } : { needs: RECIPE_BY_SERVING }
   }
+  // A weight the person gave for a dish is not a question to ask back (DW1, 26 November 2026: "My beef lasagna, 16 oz" was asked "About how
+  // many servings of Classic Meat Lasagna?"). The engine tells the agent how to count it instead (engine.ts, RECIPE_WEIGHED).
+  if (rec.kind === 'recipe' && (unit === 'g' || unit === 'oz' || unit === 'lb')) return { needs: RECIPE_WEIGHED }
   if (rec.kind === 'recipe' && unit !== 'default') return { needs: RECIPE_BY_SERVING }
   // 1. Weights: exact, for any food that has a weight.
   if (unit === 'g') return { grams: r1(count), basis: 'stated' }
@@ -280,6 +283,8 @@ export function saidText(i: SaidInput): string {
 
 /** Why a recipe's amount came back as a question: a recipe is costed by the serving, so the question asks for servings. */
 export const RECIPE_BY_SERVING = 'a recipe is counted by serving'
+/** Why a recipe given a weight came back: not a question for the person, who already said how much, but an instruction for the agent. */
+export const RECIPE_WEIGHED = 'a recipe is counted by serving, and the person gave a weight'
 
 /**
  * The question for a recipe (tracker #116, finding N): servings, never grams. "A cup of miso soup" matched to a soup recipe was asked "About how

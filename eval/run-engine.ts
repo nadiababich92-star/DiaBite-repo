@@ -36,7 +36,7 @@ import { alternativesForMeal, findAlternatives, SWAP_ENERGY_BAND, SWAP_MIN_GAIN,
 import { ALLOWED, mayReplace, potatoKind, standInsFor, swapClass } from '../server/roles'
 import { validateAsk } from '../server/guard'
 import { getSession, putSession } from '../server/sessions'
-import { amountQuestion, gramsFor, householdUnitsFor, needsServingsHint, needsWeightHint, quantityError, RECIPE_BY_SERVING, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
+import { amountQuestion, gramsFor, householdUnitsFor, needsServingsHint, needsWeightHint, quantityError, RECIPE_BY_SERVING, RECIPE_WEIGHED, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
 import { continuationFor, preferenceScope, resolvedPhrases, uncountedFoods, unknownPhrases } from '../server/agent'
 import { forgetMealPhrases, mealPhrasesOf, rememberMealPhrases } from '../server/sessions'
 import { wholeDishWeight } from '../server/dishWeight'
@@ -1213,7 +1213,9 @@ recorrectMisses.forEach((m) => console.log(m))
   if (souv[0].servings !== 2) bits.push('a count of something the dish is not named for was turned into pieces')
   // N
   const cup = gramsFor(by.get(miso)!, { count: 1, unit: 'cup' }), grams = gramsFor(by.get(miso)!, { count: 240, unit: 'g' }), piece = gramsFor(by.get(miso)!, { count: 1, unit: 'piece' })
-  if (!('needs' in cup) || cup.needs !== RECIPE_BY_SERVING || !('needs' in grams) || grams.needs !== RECIPE_BY_SERVING || !('needs' in piece) || piece.needs !== RECIPE_BY_SERVING) bits.push(`a recipe by cup, grams or piece: ${JSON.stringify([cup, grams, piece])}`)
+  if (!('needs' in cup) || cup.needs !== RECIPE_BY_SERVING || !('needs' in grams) || grams.needs !== RECIPE_WEIGHED || !('needs' in piece) || piece.needs !== RECIPE_BY_SERVING) bits.push(`a recipe by cup, grams or piece: ${JSON.stringify([cup, grams, piece])}`)
+  // A weight is not asked back (DW1): the reason differs, so the question for servings is never chosen for it.
+  if (amountQuestion({ name: 'Classic Meat Lasagna', why: RECIPE_WEIGHED }, 'imperial') === 'About how many servings of Classic Meat Lasagna?') bits.push('a recipe given a weight is asked for servings')
   if (needsServingsHint('Shrimp & Vegetable Miso Soup') !== 'About how many servings of Shrimp & Vegetable Miso Soup?') bits.push('the servings question is not the wording')
   const plan = planQuantities([{ foodId: miso, quantity: { count: 1, unit: 'cup' } }])
   if (plan.needs[0]?.why !== RECIPE_BY_SERVING) bits.push(`a cup of a soup recipe: ${JSON.stringify(plan.needs)}`)
@@ -2603,7 +2605,8 @@ filterMisses.forEach((m) => console.log(m))
     if (!('servings' in two) || two.servings !== 2) miss(`a recipe at 2 default gave ${JSON.stringify(two)}, wanted servings 2`)
     if (!('needs' in cup) || cup.needs !== 'a recipe is counted by serving') miss(`a recipe in cups gave ${JSON.stringify(cup)}`)
     const oz4 = gramsFor(recipe, { count: 4, unit: 'oz' })
-    if (!('needs' in oz4) || oz4.needs !== 'a recipe is counted by serving') miss(`a recipe at 4 oz gave ${JSON.stringify(oz4)}, wanted needs (it has no weight to convert)`)
+    // DW1, 26 November: a weight is not a question to ask back; the engine tells the agent to count the dish with cost_dish at that weight.
+    if (!('needs' in oz4) || oz4.needs !== 'a recipe is counted by serving, and the person gave a weight') miss(`a recipe at 4 oz gave ${JSON.stringify(oz4)}, wanted needs (it has no weight to convert)`)
   }
   if (branded) {
     const cup = gramsFor(branded, { count: 1, unit: 'cup' }); const oz = gramsFor(branded, { count: 2, unit: 'oz' }); const def = gramsFor(branded, { count: 1, unit: 'default' })

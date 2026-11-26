@@ -282,6 +282,11 @@ async function httpSuite() {
     const badGs = await fetch(`${BASE}/session/gs-2`, { method: 'PUT', headers: { 'content-type': 'application/json', 'x-api-key': KEY },
       body: JSON.stringify({ budget: { glBudget: 49, carbsG: 108, kcal: 1660 }, entries: [], gramsSaid: [{ grams: 90000, phrase: 'x' }] }) })
     check('GS0', 'a malformed gramsSaid is refused with 400', badGs.status === 400, String(badGs.status))
+    // DW1 (26 November): a recipe given a weight is not asked back for servings; the agent is told to count the dish at that weight.
+    await park('dw-1')
+    const lasagna = await post('/tools/compute_meal', { sessionId: 'dw-1', items: [{ foodId: 'rec:DB-1542', quantity: { count: 16, unit: 'oz' } }] })
+    check('DW', 'a recipe given 16 oz: no question for the person, an instruction to count the dish with cost_dish at 454 g',
+      lasagna.json.needsWeight === undefined && typeof lasagna.json.error === 'string' && /cost_dish/.test(lasagna.json.error) && /totalGrams 454\b/.test(lasagna.json.error), JSON.stringify([lasagna.json.error?.slice(0, 120), !!lasagna.json.needsWeight]))
     await park('cd-3')
     const d4 = await post('/tools/cost_dish', { dish: 'cholent', sessionId: 'cd-3', ingredients: [...cholent, { phrase: 'zzzqx', grams: 20 }] })
     check('D5', 'an ingredient that cannot be found is named, left out, and makes the meal partial: fits is not true',
