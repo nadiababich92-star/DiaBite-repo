@@ -152,6 +152,7 @@ export default function Onboarding({ initial, onDone, askConsent, onCancel, only
             <li>Your answers about yourself: age, sex, height, weight, activity, diagnosis, the classes of medicine you take, kidney status, other conditions, allergies and how you eat.</li>
             <li>What you log in your diary, and the meals you plan.</li>
             <li>What you type into Ask, kept for 30 days to improve DiaBite, and not tied to your name or email.</li>
+            <li>Food likes and dislikes you mention in a general question, so later answers can respect them.</li>
           </ul>
           <p className="muted">
             It is stored in Ireland. You can export it or delete it all, at any time, from Settings.

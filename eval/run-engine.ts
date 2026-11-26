@@ -37,7 +37,7 @@ import { ALLOWED, mayReplace, potatoKind, standInsFor, swapClass } from '../serv
 import { validateAsk } from '../server/guard'
 import { getSession, putSession } from '../server/sessions'
 import { amountQuestion, gramsFor, householdUnitsFor, needsServingsHint, needsWeightHint, quantityError, RECIPE_BY_SERVING, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
-import { continuationFor, resolvedPhrases, uncountedFoods } from '../server/agent'
+import { continuationFor, preferenceScope, resolvedPhrases, uncountedFoods } from '../server/agent'
 import { forgetMealPhrases, mealPhrasesOf, rememberMealPhrases } from '../server/sessions'
 import { wholeDishWeight } from '../server/dishWeight'
 import { countedAsPieces, countsSaid, piecesOf, piecesPerServing } from '../server/pieces'
@@ -1326,6 +1326,24 @@ recorrectMisses.forEach((m) => console.log(m))
   if (bits.length) process.exitCode = 1
 }
 
+// ── #132: the advisor's memory of food likes is the account's, and goes with it (the owner's decision, 26 November 2026) ──
+{
+  const bits: string[] = []
+  const a = preferenceScope('browser-1', { sub: '11111111-1111-4111-8111-111111111111' })
+  if (!/^acct-[0-9a-f]{32}$/.test(a) || a.includes('1111')) bits.push(`the account scope is not a one-way tag: ${a}`)
+  if (preferenceScope('browser-2', { sub: '11111111-1111-4111-8111-111111111111' }) !== a) bits.push('the same account on another browser gets another memory')
+  if (preferenceScope('browser-1', { sub: '22222222-2222-4222-8222-222222222222' }) === a) bits.push('two accounts on the same browser share a memory')
+  if (preferenceScope('eval-H1-1', null) !== 'eval-H1-1') bits.push('a caller with no account is not kept under its session')
+  const engineSrc = readFileSync(join(ROOT, 'server', 'engine.ts'), 'utf8')
+  const del = engineSrc.slice(engineSrc.indexOf("app.delete('/account'"), engineSrc.indexOf("app.delete('/account'") + 2500)
+  if ((del.match(/await forgetPreferencesLogged\(person\.sub\)/g) ?? []).length !== 2) bits.push('deleting an account (or finding it gone) does not delete its remembered likes')
+  const agentSrc = readFileSync(join(ROOT, 'server', 'agent.ts'), 'utf8')
+  if (!agentSrc.includes('recallPreferences(preferenceScope(req.sessionId, ctx.person)') || !agentSrc.includes('rememberPreferences(preferenceScope(req.sessionId, ctx.person)')) bits.push('the advisor reads or writes memory under the browser, not the account')
+  console.log(`\nlikes     ${bits.length === 0 ? 'ok' : 'WRONG'}  (the advisor's memory is the account's)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
 // ── #122: a question under a costed meal gets a field to answer in (diary test, 25 November 2026, nadia+ruth) ────
 {
   const bits: string[] = []
@@ -1669,7 +1687,9 @@ recorrectMisses.forEach((m) => console.log(m))
   const source = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../src/components/Onboarding.tsx'), 'utf8')
   if (!source.includes('What you type into Ask, kept for 30 days to improve DiaBite, and not tied to your name or email.')) bits.push('the consent card lacks the line about typed questions')
   if (RATING_ONLY !== '(rating only)') bits.push('a rating without words is not sent as "(rating only)"')
-  if (CONSENT_VERSION !== '2026-10-b') bits.push(`consent version ${CONSENT_VERSION}`)
+  // 2026-11-26 (#132): the card names the remembered food likes; a new version for new sign-ups only.
+  if (!source.includes('Food likes and dislikes you mention in a general question, so later answers can respect them.')) bits.push('the consent card lacks the line about remembered food likes')
+  if (CONSENT_VERSION !== '2026-11-26') bits.push(`consent version ${CONSENT_VERSION}`)
   console.log(`\nmonitor   ${bits.length === 0 ? 'ok' : 'WRONG'}`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) { console.log('the feedback card rules or the weekly report misbehave: see monitor above'); process.exit(1) }

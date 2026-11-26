@@ -37,7 +37,7 @@ import { verify } from './verify'
 import { claimSession, getSession, noteResolution, putSession } from './sessions'
 import { bindSession, unbindSession } from './bind'
 import { openApiSpec } from './openapi'
-import { ask, SessionNotYours, SignInRequired, type AskRequest } from './agent'
+import { ask, forgetPreferences, SessionNotYours, SignInRequired, type AskRequest } from './agent'
 import { personOf, signInRequired } from './auth'
 import { createHash, timingSafeEqual } from 'node:crypto'
 import { RateLimited, addressKey, chargeDelete, chargeRecompute, chargeRecomputeAnon, deviceKeyOf, freeAnswers, originAllowed, sourceTag, validCarbLimit, validSessionId, validUnits, validateAsk, validateDish, validateRecompute } from './guard'
@@ -181,6 +181,14 @@ async function main() {
    * diary. The browser cannot remove an auth user; this can, with the service key, which is a
    * Container App secret and never leaves this function. Only the token's own `sub` is deleted.
    */
+  const forgetPreferencesLogged = async (sub: string) => {
+    try {
+      await Promise.race([forgetPreferences(sub), new Promise((_, reject) => setTimeout(() => reject(new Error('timed out')), 10_000))])
+      console.warn(JSON.stringify({ evt: 'preferences_deleted', who: sourceTag(sub) }))
+    } catch (e) {
+      console.error(JSON.stringify({ evt: 'preferences_delete_failed', who: sourceTag(sub), why: (e as Error).message.slice(0, 120) }))
+    }
+  }
   app.delete('/account', async (req, res) => {
     const person = await personOf(req)
     if (!person) return res.status(401).json({ error: 'sign_in_required' })
@@ -196,9 +204,12 @@ async function main() {
       // A token outlives the account it names, so a second press (or a retry after a lost
       // reply) reaches Supabase for a person who is already gone. That is the answer the
       // person wanted, not a failure.
-      if (r.status === 404) { console.warn(JSON.stringify({ evt: 'account_already_gone', who: sourceTag(person.sub) })); return res.json({ ok: true }) }
+      if (r.status === 404) { console.warn(JSON.stringify({ evt: 'account_already_gone', who: sourceTag(person.sub) })); await forgetPreferencesLogged(person.sub); return res.json({ ok: true }) }
       if (!r.ok) { console.error(`DELETE /account: Supabase answered ${r.status}`); return res.status(502).json({ error: 'delete_failed' }) }
       console.warn(JSON.stringify({ evt: 'account_deleted', who: sourceTag(person.sub) }))
+      // The advisor's memory of this person's food likes goes with the account (#132). Bounded: a slow memory store must not hold the reply,
+      // and a failure is logged for the owner to repeat by hand; the account itself is already gone.
+      await forgetPreferencesLogged(person.sub)
       res.json({ ok: true })
     } catch (e) {
       console.error('DELETE /account failed:', (e as Error).message)

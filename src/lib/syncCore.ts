@@ -5,7 +5,8 @@
  */
 import type { DiaryEntry, MealType, Profile } from '../types'
 
-export const CONSENT_VERSION = '2026-10-b'
+// 2026-11-26: the card names the food likes and dislikes the advisor remembers (tracker #132). People who agreed to 2026-10-b are not asked again.
+export const CONSENT_VERSION = '2026-11-26'
 export const PENDING_KEY = 'diabite.pending.v1'
 export const LEGACY_DIARY_KEY = 'diabite.legacy.diary.v1'
 

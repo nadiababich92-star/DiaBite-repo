@@ -29,6 +29,7 @@
  * the turn is regenerated once, and failing that the answer is assembled from
  * the tool results directly.
  */
+import { createHash } from 'node:crypto'
 import { wholeDishWeight } from './dishWeight'
 import { countsSaid as readCounts } from './pieces'
 import { gramsSaid as readGrams } from './gramsSaid'
@@ -638,12 +639,28 @@ interface Turn { id?: string; output_text?: string; output?: unknown[] }
  */
 const memoryScope = (sessionId: string) => sessionId.replace(/[^A-Za-z0-9_\-.%+@/]/g, '-').slice(0, 256)
 
+/**
+ * Whose memory: a signed-in person's account, by a fixed one-way hash of its id (never the email), or else the browser's session (a trusted
+ * caller such as an eval). The owner's decision, 26 November 2026 (tracker #132): keyed to the browser, the memory survived sign-out (the
+ * session id is a device key since #114), so a second person signing in on the same browser inherited the first one's likes, and deleting an
+ * account left them. Keyed to the account, it follows the person to any device and is deleted with the account (`forgetPreferences`).
+ */
+export function preferenceScope(sessionId: string, person?: { sub: string } | null): string {
+  return person?.sub ? `acct-${createHash('sha256').update(`diabite-preferences:${person.sub}`).digest('hex').slice(0, 32)}` : memoryScope(sessionId)
+}
+
+/** Delete everything the advisor remembers about this account (DELETE /account). Resolves when the store has deleted the scope. */
+export async function forgetPreferences(sub: string): Promise<void> {
+  await memoryStores().deleteScope(MEMORY_STORE, preferenceScope('', { sub }))
+}
+
 function memoryStores() {
   return (projectClient() as unknown as {
     beta: {
       memoryStores: {
         searchMemories(name: string, scope: string, options?: unknown): Promise<{ memories?: { content?: string }[] }>
         updateMemories(name: string, scope: string, options?: unknown): { pollUntilDone(): Promise<unknown> }
+        deleteScope(name: string, scope: string): Promise<unknown>
       }
     }
   }).beta.memoryStores
@@ -658,14 +675,14 @@ function memoryStores() {
  * the better bargain anyway — we choose what goes in, what comes out and when
  * it is deleted, which is what a health product should be able to say.
  */
-async function recallPreferences(sessionId: string, message: string): Promise<string> {
+async function recallPreferences(scope: string, message: string): Promise<string> {
   try {
     // Bounded, because this is a nicety. The memory store is reached with the
     // managed identity, and when that path is unhealthy the call does not fail
     // fast — it hangs, and an advisory turn hangs with it. Three seconds of
     // waiting for a preference is already more than a preference is worth.
     const res = await Promise.race([
-      memoryStores().searchMemories(MEMORY_STORE, memoryScope(sessionId), {
+      memoryStores().searchMemories(MEMORY_STORE, scope, {
         items: [{ role: 'user', type: 'message', content: message }],
         options: { max_memories: 5 },
       }),
@@ -686,13 +703,13 @@ async function recallPreferences(sessionId: string, message: string): Promise<st
  * answer. The store keeps profile items only — chat summaries are off — and
  * everything expires after 90 days.
  */
-function rememberPreferences(sessionId: string, message: string, answer: string): void {
+function rememberPreferences(scope: string, message: string, answer: string): void {
   // `updateDelayInSecs: 0` writes now instead of five minutes from now. The
   // default exists so a chatty conversation is summarised once rather than per
   // turn; here a turn is the whole conversation, and a delayed operation is one
   // the poller cannot find yet ("DoesNotExist").
   try {
-    const poller = memoryStores().updateMemories(MEMORY_STORE, memoryScope(sessionId), {
+    const poller = memoryStores().updateMemories(MEMORY_STORE, scope, {
       items: [
         { role: 'user', type: 'message', content: message },
         { role: 'assistant', type: 'message', content: answer },
@@ -1091,7 +1108,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   // Advisory turns carry what this person has said they like; meal turns do
   // not, because their answer is arithmetic and a preference cannot change a
   // number.
-  const recalled = role === 'advisor' && !anonymous ? await recallPreferences(req.sessionId, req.message) : ''
+  const recalled = role === 'advisor' && !anonymous ? await recallPreferences(preferenceScope(req.sessionId, ctx.person), req.message) : ''
   let input = role === 'meal' ? mealInput : `${mealInput}${recalled}`
 
   const trace: ToolCallTrace[] = []
@@ -1191,7 +1208,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   else forgetMealPhrases(req.sessionId)
   // Food preferences only, and only from advisory turns — the ones without a
   // diary, a budget or a number in them.
-  if (role === 'advisor' && !anonymous && answer && !withheld) rememberPreferences(req.sessionId, req.message, answer)
+  if (role === 'advisor' && !anonymous && answer && !withheld) rememberPreferences(preferenceScope(req.sessionId, ctx.person), req.message, answer)
 
   return {
     answer, blocked: false,
