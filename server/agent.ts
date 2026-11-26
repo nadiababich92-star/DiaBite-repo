@@ -1117,7 +1117,14 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   // A short reply to a question the meal specialist just asked goes back to it: the router sees one message and would
   // read "i don't know" as a general question, and the advisor cannot ask again or cost anything.
   const prior = req.newTopic ? undefined : lastTurnOf(req.sessionId)
-  const { role, by } = continuesMealQuestion(prior, req.message)
+  const followup = continuesMealQuestion(prior, req.message)
+  // A message that may be advice starts its memory search beside the router, not after it: the
+  // search is bounded at three seconds, and every skip in a week of logs was that bound, so the
+  // router's second and a half is given to it rather than added to the turn. A plain meal or a
+  // reply to a meal question will not reach the advisor, so it searches nothing.
+  const scope = preferenceScope(req.sessionId, ctx.person)
+  const earlyRecall = !plainMeal && !followup && !anonymous ? recallPreferences(scope, req.message) : null
+  const { role, by } = followup
     ? { role: 'meal' as Role, by: 'followup' as const }
     : await route(req.message)
   clock.route = Date.now() - clock.t0
@@ -1129,7 +1136,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   // Advisory turns carry what this person has said they like; meal turns do
   // not, because their answer is arithmetic and a preference cannot change a
   // number.
-  const recalled = role === 'advisor' && !anonymous ? await recallPreferences(preferenceScope(req.sessionId, ctx.person), req.message) : ''
+  const recalled = role === 'advisor' && !anonymous ? await (earlyRecall ?? recallPreferences(scope, req.message)) : ''
   let input = role === 'meal' ? mealInput : `${mealInput}${recalled}`
 
   const trace: ToolCallTrace[] = []
@@ -1229,7 +1236,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   else forgetMealPhrases(req.sessionId)
   // Food preferences only, and only from advisory turns — the ones without a
   // diary, a budget or a number in them.
-  if (role === 'advisor' && !anonymous && answer && !withheld) rememberPreferences(preferenceScope(req.sessionId, ctx.person), req.message, answer)
+  if (role === 'advisor' && !anonymous && answer && !withheld) rememberPreferences(scope, req.message, answer)
 
   return {
     answer, blocked: false,
