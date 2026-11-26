@@ -7832,6 +7832,35 @@
         "recipe-amounts",
         "grams-said"
       ]
+    },
+    {
+      "id": "RA7",
+      "dimension": "honest",
+      "query": "about 1 oz",
+      "before": [
+        "A handful of pretzels and a medium apple"
+      ],
+      "ground_truth": "The answer to the question about the pretzels costs the whole meal, the apple included, not the pretzels alone (#129).",
+      "context": {
+        "budget": {
+          "glBudget": 64,
+          "carbsG": 128,
+          "kcal": 1800
+        },
+        "entries": []
+      },
+      "expect": {
+        "itemsNamed": [
+          "pretzel",
+          "apple"
+        ],
+        "verified": true
+      },
+      "judge": "mechanical",
+      "tags": [
+        "recipe-amounts",
+        "follow-up"
+      ]
     }
   ]
 }
