@@ -96,6 +96,10 @@ const FIT_CLAIM = /\bfits\b|within (your |the |today'?s )?(budget|limit)/i
 const NO_FIT_CLAIM = /\b(does not|doesn'?t|do not|won'?t|will not) fit\b|\bover (your |the |today'?s )?budget\b|\bover (your |the )?(limit|target)\b|\bgoes over\b|\bover what(?: is|'s) left\b/i
 // "…, but I can't judge the day": the clause is the honest part, and what stands before it is still a claim.
 const CANNOT_JUDGE = /\b(?:i )?(?:can'?t|cannot)\s+(?:say|tell|judge)\b[^.!?\n]*/gi
+// "This fits your day, though its load could not be counted" (H18, Kraft): the clause about what was not counted is
+// honest, and its "could" and "not" must not excuse the claim before it. Taken out, like CANNOT_JUDGE, before the
+// sentence is read for a fit claim, so "could" and "not" are only read where the claim is.
+const UNCOUNTED_HEDGE = /,?\s*\b(?:though|although|even though|but|while)\b(?=[^.!?\n]*\b(?:counted|scored|rated|measured|known|included|available|no (?:glycemic )?(?:load|gi|index))\b)(?![^.!?\n]*\b(?:if|swap|instead)\b)[^.!?\n]*/gi
 const CONDITIONAL = /\bif\b|\bwould\b|\bcould\b|\bswap|\binstead\b|\balternative|\bbetter\b|\bthan\b|\?/i
 const NEGATED = /\bnot\b|n'?t\b/i
 
@@ -130,7 +134,7 @@ export function verdictConflict(answer: string, fits: boolean | null | undefined
   if (fits !== true || estimate) {
     // Anything but a plain, fully scored "fits": no sentence may say the meal fits.
     const s = sentences.find((x) => {
-      const claim = withoutPersonalNumber(x.replace(CANNOT_JUDGE, ' '))
+      const claim = withoutPersonalNumber(x.replace(CANNOT_JUDGE, ' ').replace(UNCOUNTED_HEDGE, ' '))
       return FIT_CLAIM.test(claim) && !CONDITIONAL.test(claim) && !NEGATED.test(claim)
     })
     if (s) return s

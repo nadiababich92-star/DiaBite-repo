@@ -3808,6 +3808,13 @@ filterMisses.forEach((m) => console.log(m))
   expectConflict('partial called fit', "Verdict: it fits what is left of today's budget.", null, false, true)
   expectConflict('partial called within budget', 'This is within your budget.', null, false, true)
   expectConflict('over called fit', 'The meal fits your day.', false, false, true)
+  // H18 (#86): a hedge about what was not counted does not excuse the claim before it; its "could" and "not" belong to the hedge.
+  expectConflict('no-load meal called fit, with a hedge', 'Kraft mac and cheese fits your day, though its load could not be counted.', null, false, true, 40)
+  expectConflict('no-load meal called fit, "has no glycemic load"', 'This fits, but the pizza has no glycemic load, so it could be higher.', null, false, true, 40)
+  expectConflict('partial: "the counted part fits"', "The counted part fits, but the pizza wasn't counted.", null, false, true, 20)
+  expectConflict('over, a swap would fit, with a hedge', 'This would fit if you skip the soda, though the soda could not be counted.', false, false, false, -3)
+  expectConflict('over, "if you swap" first, with a hedge', 'If you swap the rice, this fits, though the sauce could not be counted.', false, false, false, -3)
+  expectConflict('over, said so, with a hedge', "This doesn't fit, though the bun could not be counted.", false, false, false, -5)
   // The person's own carbohydrate number is a second statement, never the verdict (the review of 13 November, finding 3): the prompt asks for both in
   // one sentence when `carbLimit.over` is true and the day still fits, and the engine says fits, so that sentence is true and must not be cut.
   expectConflict('fits, and says so beside the number the person set', 'This fits your day, though it goes over the 45 g you set for a meal.', true, false, false)
