@@ -190,7 +190,7 @@ export default function Landing({ onEnter, freeAnswers = 0, onAsk }: Props) {
 
       <footer className="lp-in lp-footer">
         <p>Built by Nadia Babich, an AI product manager who wants to make our lives easier. <a href={L.links.linkedin} rel="noopener">LinkedIn</a> · <a href={L.links.mail}>Write to me</a></p>
-        <p>What DiaBite keeps about you: your email address, your answers about yourself and your diary, stored in Ireland. You can export or delete them at any time.</p>
+        <p>What DiaBite keeps about you: your email address, your answers about yourself and your diary, stored in Ireland. You can export or delete them at any time. <a href="/privacy.html">Privacy</a></p>
       </footer>
     </div>
   )

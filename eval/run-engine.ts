@@ -1336,6 +1336,10 @@ recorrectMisses.forEach((m) => console.log(m))
   if (!failed.includes(esc(GOOGLE_COPY.failed)) || on.includes(esc(GOOGLE_COPY.failed))) bits.push('the failed-return line is wrong')
   if (/#[0-9a-f]{3,8}\b/i.test(readFileSync(join(ROOT, 'src', 'components', 'SignIn.tsx'), 'utf8'))) bits.push('the sign-in screen holds a colour of its own')
   for (const t of Object.values(GOOGLE_COPY)) if (/\d/.test(t)) bits.push(`a Google line holds a digit: ${t}`)
+  // The privacy page is one tap away from the sign-in screen, with or without the key, and from the landing page's footer.
+  for (const [name, html] of [['off', off], ['on', on], ['in-app', inApp]] as const) if (!html.includes('href="/privacy.html"')) bits.push(`no Privacy link on the sign-in screen (${name})`)
+  if (!readFileSync(join(ROOT, 'src', 'components', 'Landing.tsx'), 'utf8').includes('href="/privacy.html"')) bits.push('no Privacy link in the landing footer')
+  if (!existsSync(join(ROOT, 'public', 'privacy.html'))) bits.push('the privacy page is missing')
   console.log(`\ngoogle    ${bits.length === 0 ? 'ok' : 'WRONG'}  (the return path, in-app browsers, the flag, the screen with and without the key)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1

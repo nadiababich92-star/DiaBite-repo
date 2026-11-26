@@ -122,7 +122,7 @@ export default function SignIn({ notice, onCancel, googleSignIn = false, ua, fai
             {problem && <p id="signin-problem" className="signin-problem" role="alert">{PROBLEM[problem]}</p>}
             <button className="primary" type="submit" disabled={busy}>{busy ? 'Sending…' : 'Email me a link'}</button>
             <p className="muted">We send a link and a code. There is no password.</p>
-            <p className="muted">{googleSignIn && !inApp ? DATA_LINE_GOOGLE : DATA_LINE}</p>
+            <p className="muted">{googleSignIn && !inApp ? DATA_LINE_GOOGLE : DATA_LINE} <a href="/privacy.html">Privacy</a></p>
           </form>
         ) : (
           <form onSubmit={verify} noValidate>
