@@ -619,6 +619,8 @@ const readableName = (name: string) =>
 const USDA_ALIASES: Record<string, string[]> = {
   // 26 November 2026, the owner's choice (tracker #130): a turkey sub is USDA's restaurant turkey sandwich or sub, not "Turkey Meatball Sub
   // (Open-Faced)", which the search put first for plain "turkey sub". "Subway" before it is dropped by the resolver (resolve.ts, withoutChain).
+  // A baguette is French bread: "baguette" and "a slice of baguette" were not found, and the bread left the meal (sofia, 26 November, finding Z).
+  'usda:2707610': ['baguette', 'french baguette', 'baguette bread'],
   'usda:2706985': ['turkey sub', 'turkey sub sandwich', 'turkey hoagie'],
   'usda:2706986': ['turkey and cheese sub', 'turkey cheese sub', 'turkey sub with cheese'],
   // 24 November 2026, the owner's choice: fries as people buy them are USDA's restaurant / fast-food fries (37.2 and 41.4 g carbohydrate per

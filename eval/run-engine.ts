@@ -37,7 +37,7 @@ import { ALLOWED, mayReplace, potatoKind, standInsFor, swapClass } from '../serv
 import { validateAsk } from '../server/guard'
 import { getSession, putSession } from '../server/sessions'
 import { amountQuestion, gramsFor, householdUnitsFor, needsServingsHint, needsWeightHint, quantityError, RECIPE_BY_SERVING, saidText, settleAmount, weightQuestion, type Quantity } from '../server/quantity'
-import { continuationFor, preferenceScope, resolvedPhrases, uncountedFoods } from '../server/agent'
+import { continuationFor, preferenceScope, resolvedPhrases, uncountedFoods, unknownPhrases } from '../server/agent'
 import { forgetMealPhrases, mealPhrasesOf, rememberMealPhrases } from '../server/sessions'
 import { wholeDishWeight } from '../server/dishWeight'
 import { countedAsPieces, countsSaid, piecesOf, piecesPerServing } from '../server/pieces'
@@ -1340,6 +1340,26 @@ recorrectMisses.forEach((m) => console.log(m))
   const agentSrc = readFileSync(join(ROOT, 'server', 'agent.ts'), 'utf8')
   if (!agentSrc.includes('recallPreferences(preferenceScope(req.sessionId, ctx.person)') || !agentSrc.includes('rememberPreferences(preferenceScope(req.sessionId, ctx.person)')) bits.push('the advisor reads or writes memory under the browser, not the account')
   console.log(`\nlikes     ${bits.length === 0 ? 'ok' : 'WRONG'}  (the advisor's memory is the account's)`)
+  for (const b of bits) console.log(`    ${b}`)
+  if (bits.length) process.exitCode = 1
+}
+
+// ── Z, again (nadia+sofia, 26 November 2026): a request is a question, and a food named missing before the question stays named after it ──
+{
+  const bits: string[] = []
+  for (const a of ['Soup counted.\n\nNEXT: Please tell me what the baguette was.', 'Counted the soup.\n\nLet me know how much milk was in the coffee.', '**Question:** tell me what is in the stew.', 'Could you tell me the size of the bowl.']) if (!asksPerson(a)) bits.push(`not read as a question: ${JSON.stringify(a.slice(-50))}`)
+  for (const a of ['This fits your day.\n\nNext: tell-tale signs aside, brown rice keeps the load lower.', 'This fits your day.\n\nWhy: the bread drives it.\n\nNext: swap the bread for rye.']) if (asksPerson(a)) bits.push(`read as a question: ${JSON.stringify(a.slice(-50))}`)
+  const rf = (rows: [string, string[], boolean?][]) => ({ tool: 'diabite_engine_resolve_foods', input: {}, result: { results: rows.map(([phrase, ids, unknown]) => ({ phrase, unknown: !!unknown, candidates: ids.map((id) => ({ id })) })) } })
+  const cm = (ids: string[], unknownFoods: string[] = []) => ({ tool: 'diabite_engine_compute_meal', input: { items: ids.map((foodId) => ({ foodId })) }, result: { totals: { gl: 3 }, items: ids.map((foodId) => ({ foodId })), afterMeal: { fits: null, ...(unknownFoods.length ? { partial: { unknownFoods } } : {}) } } })
+  const asking = [rf([['French onion soup', ['usda:soup']], ['baguette', [], true], ['Gruyere', ['usda:2705718']]])]
+  const earlier = [...resolvedPhrases(asking as never), ...unknownPhrases(asking as never)]
+  const after = uncountedFoods([cm(['usda:soup', 'usda:2705718'])] as never, earlier)
+  if (after.join() !== 'baguette') bits.push(`after the answer about the soup, missing: ${JSON.stringify(after)}, wanted the baguette`)
+  if (uncountedFoods([cm(['usda:soup', 'usda:2705718'], ['baguette'])] as never, earlier).length) bits.push('a food the engine already names as missing is named twice')
+  if (uncountedFoods([rf([['baguette', ['usda:2707610']]]), cm(['usda:soup', 'usda:2705718', 'usda:2707610'])] as never, earlier).length) bits.push('a food found and costed after the question is still named as missing')
+  const r = (await resolvePhrases(store, ['a slice of baguette'], 3))[0] as { unknown?: boolean; candidates: { id: string }[] }
+  if (r.unknown || r.candidates[0]?.id !== 'usda:2707610') bits.push(`"a slice of baguette": unknown ${!!r.unknown}, first ${r.candidates[0]?.id}`)
+  console.log(`\nZ again   ${bits.length === 0 ? 'ok' : 'WRONG'}  (a request is a question; a missing food stays named across the question)`)
   for (const b of bits) console.log(`    ${b}`)
   if (bits.length) process.exitCode = 1
 }

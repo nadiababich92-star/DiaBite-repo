@@ -180,7 +180,7 @@ export function lastTurnOf(sessionId: string): { role: string; asked: boolean } 
  * the answering turn. Phrases and candidate ids only, memory only, an hour at most, one meal per session; cleared by a turn that ends
  * without a question or starts a new topic.
  */
-export interface MealPhrase { phrase: string; ids: string[] }
+export interface MealPhrase { phrase: string; ids: string[]; /** resolve_foods could not find it (Z). */ unknown?: boolean }
 const mealPhrases = new Map<string, { list: MealPhrase[]; storedAt: number }>()
 
 export function mealPhrasesOf(sessionId: string): MealPhrase[] {

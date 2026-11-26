@@ -172,11 +172,14 @@ export function withoutChain(phrase: string): string {
   return out || phrase.trim()
 }
 
+/** "slice of baguette" after "a" is gone: the measure names how much, not what (Z, 26 November 2026: "a slice of baguette" was not found). */
+const MEASURE_OF = /^(?:slices?|pieces?|cups?|bowls?|plates?|servings?|portions?|handfuls?|scoops?|bites?|wedges?|squares?)\s+of\s+(?=\S)/i
+
 export function withoutQuantity(phrase: string): string {
   let out = withoutChain(phrase.trim())
   for (let i = 0; i < 3; i++) {
     // A size word that is part of an everyday name stays: "Big Mac" lost its "big" and found macadamia nuts (24 November 2026).
-    const stripped = out.replace(AMOUNT, '').replace(COUNT_WORD, '').trim()
+    const stripped = out.replace(AMOUNT, '').replace(COUNT_WORD, '').trim().replace(MEASURE_OF, '').trim()
     const next = (aliasesOf().has(norm(stripped)) ? stripped : stripped.replace(SIZE_WORD, '')).trim()
     if (next === out || next === '') break
     out = next

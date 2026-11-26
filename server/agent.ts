@@ -872,7 +872,9 @@ export function continuesMealQuestion(prior: { role: string; asked: boolean } | 
  * question first", was not there (diary test, 25 November 2026, nadia+ruth). The screen shows the field when this is true as well.
  */
 export function asksPerson(answer: string): boolean {
-  return answer.trim().split(/\n+/).slice(-4).some((l) => /\?\s*\**\s*$/.test(l.trim()))
+  // A request is a question too: "Please tell me what the baguette was." had no question mark, and no field to answer in (sofia, 26 November).
+  const ASKS = /^(?:\*{0,2}[a-z ]{0,20}:\*{0,2}\s*|next(?: action)?\s*[·:-]\s*)?(?:please\s+)?(?:tell me|let me know|can you tell me|could you tell me|describe)\b/i
+  return answer.trim().split(/\n+/).slice(-4).some((l) => /\?\s*\**\s*$/.test(l.trim()) || ASKS.test(l.trim()) || /\bplease (?:tell|let) me\b/i.test(l))
 }
 
 export function askedSomething(trace: ToolCallTrace[], answer: string): boolean {
@@ -897,6 +899,15 @@ export function resolvedPhrases(trace: ToolCallTrace[]): MealPhrase[] {
     .map((r) => ({ phrase: r.phrase!.trim(), ids: (r.candidates ?? []).map((c) => c.id) }))
 }
 
+/** The phrases this turn's resolve_foods could not find (Z, 26 November): carried across a question like the found ones, so a food the asking
+ * turn named as missing is still named after the answer, when the session that held it has been parked again. */
+export function unknownPhrases(trace: ToolCallTrace[]): MealPhrase[] {
+  return trace.filter((t) => t.tool.endsWith('resolve_foods'))
+    .flatMap((t) => ((t.result as { results?: { phrase?: string; unknown?: boolean }[] } | undefined)?.results ?? []))
+    .filter((r) => r.unknown === true && typeof r.phrase === 'string')
+    .map((r) => ({ phrase: r.phrase!.trim(), ids: [], unknown: true }))
+}
+
 /** `earlier`: the foods the same meal's previous turn recognised before it asked its question (#129). */
 export function uncountedFoods(trace: ToolCallTrace[], earlier: MealPhrase[] = []): string[] {
   const meal = [...trace].reverse().find((t) => (t.tool.endsWith('compute_meal') || t.tool.endsWith('cost_dish')) && typeof (t.result as { totals?: unknown } | undefined)?.totals === 'object')
@@ -907,7 +918,7 @@ export function uncountedFoods(trace: ToolCallTrace[], earlier: MealPhrase[] = [
   const dish = meal.tool.endsWith('cost_dish') ? String((meal.input as { dish?: unknown } | undefined)?.dish ?? '').toLowerCase().trim() : ''
   if (dish) named.push(dish)
   const words = (p: string) => p.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2)
-  const resolved: { phrase?: string; candidates?: { id: string }[] }[] = [...earlier, ...resolvedPhrases(trace)]
+  const resolved: { phrase?: string; candidates?: { id: string }[] }[] = [...earlier.filter((p) => !p.unknown), ...resolvedPhrases(trace)]
     .map((p) => ({ phrase: p.phrase, candidates: p.ids.map((id) => ({ id })) }))
   const isCosted = (r: { candidates?: { id: string }[] }) => (r.candidates ?? []).some((c) => costed.has(c.id))
   const out: string[] = []
@@ -919,6 +930,16 @@ export function uncountedFoods(trace: ToolCallTrace[], earlier: MealPhrase[] = [
     const w = words(phrase)
     if (resolved.some((o) => o !== r && isCosted(o) && w.every((x) => words(o.phrase!).includes(x)))) continue
     if (!out.some((x) => x.toLowerCase() === p)) out.push(phrase)
+  }
+  // A food the asking turn could not find, not found or named again in this turn and not already on the engine's own list of missing foods.
+  const thisTurn = [...resolvedPhrases(trace), ...unknownPhrases(trace)].map((x) => x.phrase.toLowerCase())
+  const engineMissing = (((meal.result as { afterMeal?: { partial?: { unknownFoods?: string[] } } }).afterMeal?.partial?.unknownFoods) ?? []).map((x) => x.toLowerCase())
+  for (const u of earlier.filter((x) => x.unknown)) {
+    const p = u.phrase.toLowerCase()
+    if (thisTurn.includes(p) || engineMissing.includes(p) || named.some((n) => n.includes(p) || p.includes(n))) continue
+    const w = words(u.phrase)
+    if (resolved.some((o) => isCosted(o) && w.length > 0 && w.every((x) => words(o.phrase ?? '').includes(x)))) continue
+    if (!out.some((x) => x.toLowerCase() === p)) out.push(u.phrase)
   }
   return out
 }
@@ -1204,7 +1225,7 @@ async function answer(req: AskRequest, ctx: AskContext): Promise<AskResponse> {
   // costed, and kept while the meal still ends on a question.
   const earlier = role === 'meal' && prior?.asked && prior.role === 'meal' ? mealPhrasesOf(req.sessionId) : []
   const uncounted = role === 'meal' ? uncountedFoods(trace, earlier) : []
-  if (role === 'meal' && asked) rememberMealPhrases(req.sessionId, mergePhrases(earlier, resolvedPhrases(trace)))
+  if (role === 'meal' && asked) rememberMealPhrases(req.sessionId, mergePhrases(earlier, [...resolvedPhrases(trace), ...unknownPhrases(trace)]))
   else forgetMealPhrases(req.sessionId)
   // Food preferences only, and only from advisory turns — the ones without a
   // diary, a budget or a number in them.
